@@ -10,7 +10,10 @@
     "check:ci": "biome ci .",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "bun test",
+    "test:ui": "bun test --ui",
+    "test:coverage": "bun test --coverage"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -34,6 +37,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.0",
+    "@vitest/ui": "^4.1.0",
+    "fake-indexeddb": "^6.2.5",
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
     "postcss": "^8.5.8",
