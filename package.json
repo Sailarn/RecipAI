@@ -13,20 +13,33 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "next": "^16.1.6",
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "dexie": "^4.3.0",
+    "next": "^15.1.6",
+    "next-intl": "^4.8.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwindcss": "3"
+    "tailwindcss": "^3.4",
+    "zod": "^3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.0",
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
+    "@sentry/nextjs": "^10.45.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "husky": "^9.1.7",
-    "typescript": "^5"
+    "jsdom": "^29.0.1",
+    "postcss": "^8.5.8",
+    "react-hook-form": "^7.71.2",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   },
   "ignoreScripts": [
     "sharp",
