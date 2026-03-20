@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "RecipAI",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "confirm": "Confirm"
+  },
+  "navigation": {
+    "home": "Home",
+    "recipes": "Recipes",
+    "settings": "Settings"
+  },
+  "recipes": {
+    "title": "Recipes",
+    "noRecipes": "No recipes yet",
+    "createFirst": "Create your first recipe",
+    "deleteConfirm": "Are you sure you want to delete this recipe?"
+  },
+  "form": {
+    "title": "Title",
+    "description": "Description",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "servings": "Servings",
+    "prepTime": "Prep Time (minutes)",
+    "cookTime": "Cook Time (minutes)",
+    "required": "This field is required"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "english": "English",
+    "ukrainian": "Українська",
+    "switch": "Switch language"
+  }
+}

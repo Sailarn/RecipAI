@@ -1,0 +1,44 @@
+{
+  "common": {
+    "appName": "RecipAI",
+    "loading": "Завантаження...",
+    "error": "Щось пішло не так",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "edit": "Редагувати",
+    "create": "Створити",
+    "confirm": "Підтвердити"
+  },
+  "navigation": {
+    "home": "Головна",
+    "recipes": "Рецепти",
+    "settings": "Налаштування"
+  },
+  "recipes": {
+    "title": "Рецепти",
+    "noRecipes": "Рецептів ще немає",
+    "createFirst": "Створіть свій перший рецепт",
+    "deleteConfirm": "Ви впевнені, що хочете видалити цей рецепт?"
+  },
+  "form": {
+    "title": "Назва",
+    "description": "Опис",
+    "ingredients": "Інгредієнти",
+    "instructions": "Інструкції",
+    "servings": "Порцій",
+    "prepTime": "Час підготовки (хвилини)",
+    "cookTime": "Час приготування (хвилини)",
+    "required": "Це поле обов'язкове"
+  },
+  "theme": {
+    "light": "Світла",
+    "dark": "Темна",
+    "toggle": "Змінити тему"
+  },
+  "language": {
+    "english": "English",
+    "ukrainian": "Українська",
+    "switch": "Змінити мову"
+  }
+}
