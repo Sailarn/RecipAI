@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍳 Recipe App
 
-## Getting Started
+A mobile-first, offline-capable Progressive Web App for saving and managing your favorite recipes with AI-powered URL parsing.
 
-First, run the development server:
+> **Status:** ✅ Iteration 1 Complete - Full CRUD MVP | 35 tests passing | 89% coverage
+
+## ✨ Features
+
+### Current (Iteration 1 - MVP)
+- ✅ Full recipe CRUD (Create, Read, Update, Delete)
+- ✅ Offline-first with IndexedDB storage
+- ✅ PWA installable on mobile devices
+- ✅ Dark/Light theme
+- ✅ Bilingual: Ukrainian 🇺🇦 / English 🇬🇧
+- ✅ Mobile-optimized UI (iPhone-first)
+- ✅ Image preview support (URL/gallery upload)
+
+### Planned (Iteration 2)
+- 🔮 AI-powered recipe extraction from URLs
+- 🔮 Smart servings calculator
+- 🔮 Camera photo capture
+- 🔮 Recipe sorting & search
+- 🔮 Multi-provider AI support (Claude, OpenAI, Gemini)
+
+## 🛠 Tech Stack
+
+**Frontend:**
+- [Next.js 15](https://nextjs.org/) with App Router (stable)
+- [TypeScript 5.9](https://www.typescriptlang.org/)
+- [Tailwind CSS 3.4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) (iteration 2)
+- [Dexie.js 4.x](https://dexie.org/) (IndexedDB wrapper)
+- [React Hook Form 7.x](https://react-hook-form.com/) + [Zod 3.x](https://zod.dev/)
+- [Bun 1.3+](https://bun.sh/) (package manager)
+- [Biome 2.4](https://biomejs.dev/) (linting + formatting)
+
+**Infrastructure:**
+- [Vercel](https://vercel.com/) (deployment)
+- [Sentry](https://sentry.io/) (error tracking)
+- [ImageKit.io](https://imagekit.io/) (future: image hosting)
+
+**Testing:**
+- [Vitest](https://vitest.dev/) (unit tests)
+- [React Testing Library](https://testing-library.com/react) (component tests)
+- [Playwright](https://playwright.dev/) (future: E2E tests)
+
+## 🚀 Getting Started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+# Install dependencies
+bun install
+
+# Run development server
 bun dev
+
+# Run tests
+bun test
+
+# Run tests with UI
+bun run test:ui
+
+# Generate coverage report
+bun run test:coverage
+
+# Lint and format code
+bun run check
+
+# Build for production
+bun run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Installation (PWA)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### iOS (Safari)
+1. Open the app in Safari
+2. Tap the Share button
+3. Select "Add to Home Screen"
+4. Tap "Add"
 
-## Learn More
+### Android (Chrome)
+1. Open the app in Chrome
+2. Tap the menu (three dots)
+3. Select "Add to Home Screen"
+4. Tap "Add"
 
-To learn more about Next.js, take a look at the following resources:
+## 📚 Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **[Full Specification](./docs/SPECIFICATION.md)** - Complete project requirements and roadmap
+- **Architecture** (coming soon)
+- **API Documentation** (coming soon)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🗺️ Roadmap
 
-## Deploy on Vercel
+- [x] Project setup and architecture
+- [x] **Iteration 1:** CRUD MVP with offline support ← *✅ COMPLETE (35 tests, 89% coverage)*
+- [ ] **Iteration 2:** AI parsing & servings calculator ← *next*
+- [ ] **Iteration 3:** Accessibility improvements
+- [ ] **Future:** Cloud sync, user accounts, recipe sharing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧪 Testing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Current Status:** ✅ 35 tests passing | 89% coverage
+
+```bash
+# Run all tests
+bun test
+
+# Run specific test file
+bun test recipe-form
+
+# Open test UI
+bun run test:ui
+
+# Coverage report
+bun run test:coverage
+```
+
+**Coverage Breakdown:**
+- Database layer: 100%
+- Recipe detail: 100%
+- Recipe list: 100%
+- Delete modal: 100%
+- Recipe form: 75%
+
+**Test Strategy:**
+- Unit tests for business logic (Vitest)
+- Component tests for UI (React Testing Library)
+- E2E tests for critical flows (Playwright - iteration 2)
+- Target: 80%+ code coverage
+
+## 🌍 Internationalization
+
+Currently supports:
+- 🇺🇦 Ukrainian (default)
+- 🇬🇧 English
+
+Translation contributions welcome!
+
+## 📝 License
+
+This is a personal learning project. License TBD.
+
+## 🤝 Contributing
+
+This is primarily a personal learning project, but feedback and suggestions are welcome!
+
+---
+
+**Built with ❤️ for personal use and skill development**
