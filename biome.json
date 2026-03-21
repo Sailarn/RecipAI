@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -28,6 +28,9 @@
         "noBannedTypes": "error",
         "noExtraBooleanCast": "error",
         "noUselessFragments": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn"
       }
     }
   },
@@ -40,6 +43,9 @@
     "parser": {
       "cssModules": true,
       "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": false
     }
   },
   "assist": {
