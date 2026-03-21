@@ -11,9 +11,9 @@
     "lint": "biome lint .",
     "format": "biome format --write .",
     "prepare": "husky",
-    "test": "bun test",
-    "test:ui": "bun test --ui",
-    "test:coverage": "bun test --coverage"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -41,6 +41,7 @@
     "@vitest/ui": "^4.1.0",
     "autoprefixer": "^10.4.27",
     "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.8.4",
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
     "postcss": "^8.5.8",

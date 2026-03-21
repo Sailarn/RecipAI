@@ -1,4 +1,3 @@
-// components/recipe-form/index.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createRecipe } from "@/lib/db/recipes";
+import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { BasicInfo } from "./basic-info";
 import { FormActions } from "./form-actions";
@@ -66,38 +65,56 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     resolver: zodResolver(recipeSchema),
     defaultValues: recipe
       ? {
-          title: recipe.title,
-          description: recipe.description || "",
-          imageUrl: recipe.imageUrl || "",
-          prepTime: recipe.prepTime,
-          cookTime: recipe.cookTime,
-          servings: recipe.servings,
-          ingredients: recipe.ingredients,
-          instructions: recipe.instructions,
-        }
+        title: recipe.title,
+        description: recipe.description || "",
+        imageUrl: recipe.imageUrl || "",
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        servings: recipe.servings,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+      }
       : {
-          servings: 4,
-          ingredients: [{ item: "", amount: undefined, unit: "" }],
-          instructions: [{ instruction: "" }],
-        },
+        servings: 4,
+        ingredients: [{ item: "", amount: undefined, unit: "" }],
+        instructions: [{ instruction: "" }],
+      },
   });
 
   const onSubmit = async (data: RecipeFormData) => {
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
 
-    await createRecipe({
-      ...data,
-      totalTime,
-      ingredients: data.ingredients.map((ing) => ({
-        id: crypto.randomUUID(),
-        ...ing,
-      })),
-      instructions: data.instructions.map((inst, idx) => ({
-        id: crypto.randomUUID(),
-        order: idx + 1,
-        instruction: inst.instruction,
-      })),
-    });
+    if (recipe) {
+      // Update existing recipe
+      await updateRecipe(recipe.id, {
+        ...data,
+        totalTime,
+        ingredients: data.ingredients.map((ing) => ({
+          id: crypto.randomUUID(),
+          ...ing,
+        })),
+        instructions: data.instructions.map((inst, idx) => ({
+          id: crypto.randomUUID(),
+          order: idx + 1,
+          instruction: inst.instruction,
+        })),
+      });
+    } else {
+      // Create new recipe
+      await createRecipe({
+        ...data,
+        totalTime,
+        ingredients: data.ingredients.map((ing) => ({
+          id: crypto.randomUUID(),
+          ...ing,
+        })),
+        instructions: data.instructions.map((inst, idx) => ({
+          id: crypto.randomUUID(),
+          order: idx + 1,
+          instruction: inst.instruction,
+        })),
+      });
+    }
 
     router.push(`/${locale}/recipes`);
   };

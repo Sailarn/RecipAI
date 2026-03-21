@@ -9,7 +9,8 @@
     "edit": "Редагувати",
     "create": "Створити",
     "confirm": "Підтвердити",
-    "saving": "Збереження..."
+    "saving": "Збереження...",
+    "recipeNotFound": "Рецепт не знайдено"
   },
   "navigation": {
     "home": "Головна",
@@ -23,7 +24,14 @@
     "deleteConfirm": "Ви впевнені, що хочете видалити цей рецепт?",
     "createRecipe": "Створити рецепт",
     "updateRecipe": "Оновити рецепт",
-    "servings": "порцій"
+    "servings": "порцій",
+    "recipeNotFound": "Рецепт не знайдено",
+    "backToRecipes": "Назад до рецептів",
+    "ingredients": "Інгредієнти",
+    "instructions": "Інструкції",
+    "prepTime": "Підготовка",
+    "cookTime": "Приготування",
+    "totalTime": "Загалом"
   },
   "recipeForm": {
     "createTitle": "Створити рецепт",

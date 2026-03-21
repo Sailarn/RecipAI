@@ -9,7 +9,8 @@
     "edit": "Edit",
     "create": "Create",
     "confirm": "Confirm",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "recipeNotFound": "Recipe not found"
   },
   "navigation": {
     "home": "Home",
@@ -23,7 +24,14 @@
     "deleteConfirm": "Are you sure you want to delete this recipe?",
     "createRecipe": "Create Recipe",
     "updateRecipe": "Update Recipe",
-    "servings": "servings"
+    "servings": "servings",
+    "recipeNotFound": "Recipe not found",
+    "backToRecipes": "Back to recipes",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "prepTime": "Prep",
+    "cookTime": "Cook",
+    "totalTime": "Total"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
