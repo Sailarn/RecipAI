@@ -8,7 +8,8 @@
     "delete": "Видалити",
     "edit": "Редагувати",
     "create": "Створити",
-    "confirm": "Підтвердити"
+    "confirm": "Підтвердити",
+    "saving": "Збереження..."
   },
   "navigation": {
     "home": "Головна",
@@ -19,16 +20,39 @@
     "title": "Рецепти",
     "noRecipes": "Рецептів ще немає",
     "createFirst": "Створіть свій перший рецепт",
-    "deleteConfirm": "Ви впевнені, що хочете видалити цей рецепт?"
+    "deleteConfirm": "Ви впевнені, що хочете видалити цей рецепт?",
+    "createRecipe": "Створити рецепт",
+    "updateRecipe": "Оновити рецепт",
+    "servings": "порцій"
+  },
+  "recipeForm": {
+    "createTitle": "Створити рецепт",
+    "editTitle": "Редагувати рецепт",
+    "basicInfo": "Основна інформація",
+    "title": "Назва",
+    "titleRequired": "Назва обов'язкова",
+    "description": "Опис",
+    "imageUrl": "URL зображення",
+    "imageUrlInvalid": "Має бути дійсний URL",
+    "prepTime": "Підготовка (хв)",
+    "cookTime": "Приготування (хв)",
+    "servings": "Порцій",
+    "servingsRequired": "Порцій має бути принаймні 1",
+    "ingredients": "Інгредієнти",
+    "ingredientsRequired": "Потрібен принаймні один інгредієнт",
+    "ingredientName": "Інгредієнт",
+    "ingredientNameRequired": "Назва інгредієнта обов'язкова",
+    "amount": "Кількість",
+    "unit": "Одиниця",
+    "addIngredient": "+ Додати інгредієнт",
+    "instructions": "Інструкції",
+    "instructionsRequired": "Потрібна принаймні одна інструкція",
+    "instructionStep": "Крок інструкції",
+    "instructionRequired": "Інструкція обов'язкова",
+    "addStep": "+ Додати крок",
+    "remove": "Видалити"
   },
   "form": {
-    "title": "Назва",
-    "description": "Опис",
-    "ingredients": "Інгредієнти",
-    "instructions": "Інструкції",
-    "servings": "Порцій",
-    "prepTime": "Час підготовки (хвилини)",
-    "cookTime": "Час приготування (хвилини)",
     "required": "Це поле обов'язкове"
   },
   "theme": {
