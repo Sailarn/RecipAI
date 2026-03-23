@@ -46,9 +46,10 @@ export type RecipeFormData = z.infer<typeof dummySchema>;
 
 interface RecipeFormProps {
   recipe?: Recipe;
+  initialData?: any;
 }
 
-export function RecipeForm({ recipe }: RecipeFormProps) {
+export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
@@ -65,6 +66,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     resolver: zodResolver(recipeSchema),
     defaultValues: recipe
       ? {
+          // Edit mode: existing recipe
           title: recipe.title,
           description: recipe.description || "",
           imageUrl: recipe.imageUrl || "",
@@ -74,11 +76,37 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           ingredients: recipe.ingredients,
           instructions: recipe.instructions,
         }
-      : {
-          servings: 4,
-          ingredients: [{ item: "", amount: undefined, unit: "" }],
-          instructions: [{ instruction: "" }],
-        },
+      : initialData
+        ? {
+            // Parsed mode: AI-generated recipe
+            title: initialData.title || "",
+            description: initialData.description || "",
+            imageUrl: initialData.imageUrl || "",
+            prepTime: initialData.prepTime,
+            cookTime: initialData.cookTime,
+            servings: initialData.servings || 4,
+            ingredients: initialData.ingredients?.length
+              ? initialData.ingredients.map((ing: any) => ({
+                  item: ing.item || "",
+                  amount: ing.amount,
+                  unit: ing.unit || "",
+                }))
+              : [{ item: "", amount: undefined, unit: "" }],
+            instructions: initialData.instructions?.length
+              ? initialData.instructions.map((inst: any) => ({
+                  instruction: inst.instruction || "",
+                }))
+              : [{ instruction: "" }],
+          }
+        : {
+            // Create mode: empty form
+            title: "",
+            description: "",
+            imageUrl: "",
+            servings: 4,
+            ingredients: [{ item: "", amount: undefined, unit: "" }],
+            instructions: [{ instruction: "" }],
+          },
   });
 
   const onSubmit = async (data: RecipeFormData) => {

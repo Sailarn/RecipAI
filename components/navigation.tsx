@@ -41,6 +41,15 @@ export function Navigation() {
             >
               {tNav("recipes")}
             </Link>
+            <Link
+              href={`/${locale}/recipes/parse`}
+              className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--hover)]"
+              style={{
+                color: "var(--foreground)",
+              }}
+            >
+              {tNav("setupParser")}
+            </Link>
             <ThemeToggle />
             <LanguageSwitcher />
           </div>
