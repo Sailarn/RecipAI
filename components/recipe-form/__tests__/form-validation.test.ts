@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 // Test just the schema validation logic
@@ -7,11 +7,13 @@ describe("Recipe Form Validation", () => {
     return z.object({
       title: z.string().min(1, t("titleRequired")),
       servings: z.number().int().positive(t("servingsRequired")),
-      ingredients: z.array(
-        z.object({
-          item: z.string().min(1, t("ingredientNameRequired")),
-        })
-      ).min(1, t("ingredientsRequired")),
+      ingredients: z
+        .array(
+          z.object({
+            item: z.string().min(1, t("ingredientNameRequired")),
+          }),
+        )
+        .min(1, t("ingredientsRequired")),
     });
   };
 

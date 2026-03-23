@@ -65,20 +65,20 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     resolver: zodResolver(recipeSchema),
     defaultValues: recipe
       ? {
-        title: recipe.title,
-        description: recipe.description || "",
-        imageUrl: recipe.imageUrl || "",
-        prepTime: recipe.prepTime,
-        cookTime: recipe.cookTime,
-        servings: recipe.servings,
-        ingredients: recipe.ingredients,
-        instructions: recipe.instructions,
-      }
+          title: recipe.title,
+          description: recipe.description || "",
+          imageUrl: recipe.imageUrl || "",
+          prepTime: recipe.prepTime,
+          cookTime: recipe.cookTime,
+          servings: recipe.servings,
+          ingredients: recipe.ingredients,
+          instructions: recipe.instructions,
+        }
       : {
-        servings: 4,
-        ingredients: [{ item: "", amount: undefined, unit: "" }],
-        instructions: [{ instruction: "" }],
-      },
+          servings: 4,
+          ingredients: [{ item: "", amount: undefined, unit: "" }],
+          instructions: [{ instruction: "" }],
+        },
   });
 
   const onSubmit = async (data: RecipeFormData) => {

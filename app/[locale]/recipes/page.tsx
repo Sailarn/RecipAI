@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-import { useTranslations } from "next-intl";
 
 export default function RecipesPage() {
   const params = useParams();
@@ -74,7 +74,9 @@ export default function RecipesPage() {
                 </p>
               )}
               <div className="mt-4 flex gap-4 text-sm text-gray-500 dark:text-gray-400">
-                <span>{recipe.servings} {t("servings")}</span>
+                <span>
+                  {recipe.servings} {t("servings")}
+                </span>
                 {recipe.totalTime && <span>{recipe.totalTime} min</span>}
               </div>
             </Link>
