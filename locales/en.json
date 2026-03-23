@@ -10,7 +10,12 @@
     "create": "Create",
     "confirm": "Confirm",
     "saving": "Saving...",
-    "recipeNotFound": "Recipe not found"
+    "recipeNotFound": "Recipe not found",
+    "closeModal": "Close modal",
+    "minutes": "min"
+  },
+  "home": {
+    "tagline": "Your personal recipe management app"
   },
   "navigation": {
     "home": "Home",
@@ -18,6 +23,7 @@
     "settings": "Settings"
   },
   "recipes": {
+    "loading": "Loading...",
     "title": "Recipes",
     "noRecipes": "No recipes yet",
     "createFirst": "Create your first recipe",
@@ -58,7 +64,8 @@
     "instructionStep": "Instruction step",
     "instructionRequired": "Instruction required",
     "addStep": "+ Add Step",
-    "remove": "Remove"
+    "remove": "Remove",
+    "instructionPlaceholder": "Enter step instructions..."
   },
   "form": {
     "required": "This field is required"
@@ -66,7 +73,9 @@
   "theme": {
     "light": "Light",
     "dark": "Dark",
-    "toggle": "Toggle theme"
+    "toggle": "Toggle theme",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
   },
   "language": {
     "english": "English",

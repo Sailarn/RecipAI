@@ -1,28 +1,32 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export function LanguageSwitcher() {
-  const locale = useLocale();
+  const t = useTranslations("language");
   const router = useRouter();
-  const pathname = usePathname();
+  const params = useParams();
+  const currentLocale = params.locale as string;
 
   const toggleLocale = () => {
-    const newLocale = locale === "ua" ? "en" : "ua";
-    // Replace current locale in pathname
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-    router.push(newPathname);
+    const newLocale = currentLocale === "ua" ? "en" : "ua";
+    const currentPath = window.location.pathname;
+    const newPath = currentPath.replace(`/${currentLocale}`, `/${newLocale}`);
+    router.push(newPath);
   };
 
   return (
     <button
-      type="button"
       onClick={toggleLocale}
-      className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-      aria-label="Switch language"
+      className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--hover)]"
+      style={{
+        color: "var(--foreground)",
+      }}
+      type="button"
+      aria-label={t("switch")}
     >
-      {locale === "ua" ? "EN" : "UA"}
+      {currentLocale === "ua" ? t("english") : t("ukrainian")}
     </button>
   );
 }

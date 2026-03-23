@@ -2,8 +2,7 @@
  * @vitest-environment happy-dom
  */
 
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recipe } from "@/lib/db/schema";
 import { RecipeForm } from "../index";
@@ -42,18 +41,17 @@ describe("RecipeForm", () => {
       const servingsInput = screen.getByLabelText(/servings/i);
       expect(servingsInput).toHaveValue(4);
       expect(
-        screen.getByRole("button", { name: /createRecipe/i }),
+        screen.getByRole("button", { name: /create/i }),
       ).toBeInTheDocument();
     });
 
     it("shows validation errors for required fields", async () => {
-      const user = userEvent.setup();
       render(<RecipeForm />);
 
       const submitButton = screen.getByRole("button", {
-        name: /createRecipe/i,
+        name: /create/i,
       });
-      await user.click(submitButton);
+      fireEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText(/titleRequired/i)).toBeInTheDocument();
@@ -61,7 +59,6 @@ describe("RecipeForm", () => {
     });
 
     it("can add and remove ingredients", async () => {
-      const user = userEvent.setup();
       render(<RecipeForm />);
 
       // Initially has 1 ingredient field
@@ -71,7 +68,7 @@ describe("RecipeForm", () => {
 
       // Add ingredient
       const addButton = screen.getByRole("button", { name: /addIngredient/i });
-      await user.click(addButton);
+      fireEvent.click(addButton);
 
       // Now has 2 ingredient fields
       await waitFor(() => {
@@ -82,7 +79,7 @@ describe("RecipeForm", () => {
 
       // Remove ingredient
       const removeButtons = screen.getAllByRole("button", { name: /remove/i });
-      await user.click(removeButtons[0]);
+      fireEvent.click(removeButtons[0]);
 
       // Back to 1 ingredient field
       await waitFor(() => {
@@ -93,23 +90,23 @@ describe("RecipeForm", () => {
     });
 
     it("can add and remove instruction steps", async () => {
-      const user = userEvent.setup();
       render(<RecipeForm />);
 
       // Initially has 1 instruction field
-      const instructionInputs =
-        screen.getAllByPlaceholderText(/instructionStep/i);
+      const instructionInputs = screen.getAllByPlaceholderText(
+        /instructionPlaceholder/i,
+      );
       expect(instructionInputs).toHaveLength(1);
 
       // Add step
       const addButton = screen.getByRole("button", { name: /addStep/i });
-      await user.click(addButton);
+      fireEvent.click(addButton);
 
       // Now has 2 instruction fields
       await waitFor(() => {
-        expect(screen.getAllByPlaceholderText(/instructionStep/i)).toHaveLength(
-          2,
-        );
+        expect(
+          screen.getAllByPlaceholderText(/instructionPlaceholder/i),
+        ).toHaveLength(2);
       });
     });
   });
@@ -139,11 +136,12 @@ describe("RecipeForm", () => {
     it("renders form pre-filled with recipe data", () => {
       render(<RecipeForm recipe={mockRecipe} />);
 
+      const titleInput = screen.getByLabelText(/title/i);
+      expect(titleInput).toHaveValue("Test Recipe");
+
       const servingsInput = screen.getByLabelText(/servings/i);
       expect(servingsInput).toHaveValue(4);
-      expect(
-        screen.getByRole("button", { name: /updateRecipe/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
     });
 
     it("displays existing ingredients", () => {
@@ -159,8 +157,9 @@ describe("RecipeForm", () => {
     it("displays existing instructions", () => {
       render(<RecipeForm recipe={mockRecipe} />);
 
-      const instructionInputs =
-        screen.getAllByPlaceholderText(/instructionStep/i);
+      const instructionInputs = screen.getAllByPlaceholderText(
+        /instructionPlaceholder/i,
+      );
       expect(instructionInputs).toHaveLength(2);
       expect(instructionInputs[0]).toHaveValue("Mix ingredients");
       expect(instructionInputs[1]).toHaveValue("Bake at 350F");

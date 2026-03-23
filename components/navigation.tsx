@@ -1,28 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "./language-switcher";
 import { ThemeToggle } from "./theme-toggle";
 
 export function Navigation() {
   const t = useTranslations("common");
-  const locale = useLocale();
+  const tNav = useTranslations("navigation");
+  const params = useParams();
+  const locale = params.locale as string;
 
   return (
-    <nav className="border-b border-gray-200 dark:border-gray-800">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo/Brand */}
+    <nav
+      className="border-b"
+      style={{
+        borderColor: "var(--nav-border)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           <Link
             href={`/${locale}`}
-            className="text-xl font-bold hover:opacity-80 transition-opacity"
+            className="text-xl font-bold"
+            style={{
+              color: "var(--foreground)",
+            }}
           >
             {t("appName")}
           </Link>
 
-          {/* Right side controls */}
           <div className="flex items-center gap-2">
+            <Link
+              href={`/${locale}/recipes`}
+              className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--hover)]"
+              style={{
+                color: "var(--foreground)",
+              }}
+            >
+              {tNav("recipes")}
+            </Link>
             <ThemeToggle />
             <LanguageSwitcher />
           </div>

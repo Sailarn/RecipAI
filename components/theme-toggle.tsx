@@ -1,51 +1,78 @@
 "use client";
 
-import { useTheme } from "./providers/theme-provider";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const t = useTranslations("theme");
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    const shouldBeDark = theme === "dark" || (!theme && prefersDark);
+
+    setIsDark(shouldBeDark);
+    if (shouldBeDark) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+
+    if (newIsDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   return (
     <button
-      type="button"
       onClick={toggleTheme}
-      className="rounded-md p-2 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-      aria-label="Toggle theme"
+      className="rounded-md p-2 transition-colors hover:bg-[var(--hover)]"
+      style={{
+        color: "var(--foreground)",
+      }}
+      type="button"
+      aria-label={t("toggle")}
     >
-      {theme === "dark" ? (
-        // Sun icon for light mode
+      {isDark ? (
         <svg
-          role="img"
-          aria-label="Sun icon"
-          className="h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          strokeWidth={1.5}
           stroke="currentColor"
+          className="w-5 h-5"
         >
-          <title>Sun icon</title>
+          <title>{t("lightMode")}</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
           />
         </svg>
       ) : (
-        // Moon icon for dark mode
         <svg
-          role="img"
-          aria-label="Moon icon"
-          className="h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          strokeWidth={1.5}
           stroke="currentColor"
+          className="w-5 h-5"
         >
-          <title>Moon icon</title>
+          <title>{t("darkMode")}</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
           />
         </svg>
       )}

@@ -10,7 +10,12 @@
     "create": "Створити",
     "confirm": "Підтвердити",
     "saving": "Збереження...",
-    "recipeNotFound": "Рецепт не знайдено"
+    "recipeNotFound": "Рецепт не знайдено",
+    "closeModal": "Закрити модальне вікно",
+    "minutes": "хв"
+  },
+  "home": {
+    "tagline": "Ваш персональний додаток для керування рецептами"
   },
   "navigation": {
     "home": "Головна",
@@ -18,6 +23,7 @@
     "settings": "Налаштування"
   },
   "recipes": {
+    "loading": "Завантаження...",
     "title": "Рецепти",
     "noRecipes": "Рецептів ще немає",
     "createFirst": "Створіть свій перший рецепт",
@@ -58,7 +64,8 @@
     "instructionStep": "Крок інструкції",
     "instructionRequired": "Інструкція обов'язкова",
     "addStep": "+ Додати крок",
-    "remove": "Видалити"
+    "remove": "Видалити",
+    "instructionPlaceholder": "Введіть інструкції кроку..."
   },
   "form": {
     "required": "Це поле обов'язкове"
@@ -66,7 +73,9 @@
   "theme": {
     "light": "Світла",
     "dark": "Темна",
-    "toggle": "Змінити тему"
+    "toggle": "Змінити тему",
+    "lightMode": "Світла тема",
+    "darkMode": "Темна тема"
   },
   "language": {
     "english": "English",

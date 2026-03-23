@@ -1,8 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { useFieldArray } from "react-hook-form";
+import {
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+  useFieldArray,
+} from "react-hook-form";
+import { Button, Input, Label } from "@/components/ui";
 import type { RecipeFormData } from "./index";
 
 interface IngredientsSectionProps {
@@ -17,7 +22,6 @@ export function IngredientsSection({
   errors,
 }: IngredientsSectionProps) {
   const t = useTranslations("recipeForm");
-
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
@@ -25,52 +29,55 @@ export function IngredientsSection({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{t("ingredients")} *</h2>
+      <Label required>{t("ingredients")}</Label>
 
       {fields.map((field, index) => (
-        <div key={field.id} className="flex gap-2 items-start">
-          <input
-            {...register(`ingredients.${index}.amount`, {
-              valueAsNumber: true,
-            })}
-            type="number"
-            step="0.01"
-            placeholder={t("amount")}
-            className="w-24 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-          />
-          <input
-            {...register(`ingredients.${index}.unit`)}
-            placeholder={t("unit")}
-            className="w-24 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-          />
-          <input
-            {...register(`ingredients.${index}.item`)}
-            placeholder={`${t("ingredientName")} *`}
-            className="flex-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-          />
+        <div key={field.id} className="flex gap-2">
+          <div className="w-20">
+            <Input
+              {...register(`ingredients.${index}.amount`, {
+                valueAsNumber: true,
+              })}
+              type="number"
+              placeholder={t("amount")}
+            />
+          </div>
+          <div className="w-24">
+            <Input
+              {...register(`ingredients.${index}.unit`)}
+              placeholder={t("unit")}
+            />
+          </div>
+          <div className="flex-1">
+            <Input
+              {...register(`ingredients.${index}.item`)}
+              placeholder={t("ingredientName")}
+              error={!!errors.ingredients?.[index]?.item}
+            />
+          </div>
           {fields.length > 1 && (
-            <button
+            <Button
               type="button"
+              variant="destructive"
               onClick={() => remove(index)}
-              className="px-3 py-2 text-red-600 hover:text-red-700"
             >
               {t("remove")}
-            </button>
+            </Button>
           )}
         </div>
       ))}
 
-      <button
-        type="button"
-        onClick={() => append({ item: "", amount: undefined, unit: "" })}
-        className="text-blue-600 dark:text-blue-400 hover:underline"
-      >
-        {t("addIngredient")}
-      </button>
-
-      {errors.ingredients?.message && (
+      {errors.ingredients && (
         <p className="text-red-500 text-sm">{errors.ingredients.message}</p>
       )}
+
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => append({ item: "", amount: undefined, unit: "" })}
+      >
+        + {t("addIngredient")}
+      </Button>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { Input, Label, Textarea } from "@/components/ui";
 import type { RecipeFormData } from "./index";
 
 interface BasicInfoProps {
@@ -15,40 +16,27 @@ export function BasicInfo({ register, errors }: BasicInfoProps) {
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium mb-1">
-          {t("title")} *
-        </label>
-        <input
-          id="title"
-          {...register("title")}
-          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-        />
+        <Label htmlFor="title" required>
+          {t("title")}
+        </Label>
+        <Input id="title" {...register("title")} error={!!errors.title} />
         {errors.title && (
           <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
-          {t("description")}
-        </label>
-        <textarea
-          id="description"
-          {...register("description")}
-          rows={3}
-          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-        />
+        <Label htmlFor="description">{t("description")}</Label>
+        <Textarea id="description" {...register("description")} rows={3} />
       </div>
 
       <div>
-        <label htmlFor="imageUrl" className="block text-sm font-medium mb-1">
-          {t("imageUrl")}
-        </label>
-        <input
+        <Label htmlFor="imageUrl">{t("imageUrl")}</Label>
+        <Input
           id="imageUrl"
           {...register("imageUrl")}
           type="url"
-          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
+          error={!!errors.imageUrl}
         />
         {errors.imageUrl && (
           <p className="text-red-500 text-sm mt-1">{errors.imageUrl.message}</p>
@@ -57,36 +45,30 @@ export function BasicInfo({ register, errors }: BasicInfoProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label htmlFor="prepTime" className="block text-sm font-medium mb-1">
-            {t("prepTime")}
-          </label>
-          <input
+          <Label htmlFor="prepTime">{t("prepTime")}</Label>
+          <Input
             id="prepTime"
             {...register("prepTime", { valueAsNumber: true })}
             type="number"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
           />
         </div>
         <div>
-          <label htmlFor="cookTime" className="block text-sm font-medium mb-1">
-            {t("cookTime")}
-          </label>
-          <input
+          <Label htmlFor="cookTime">{t("cookTime")}</Label>
+          <Input
             id="cookTime"
             {...register("cookTime", { valueAsNumber: true })}
             type="number"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
           />
         </div>
         <div>
-          <label htmlFor="servings" className="block text-sm font-medium mb-1">
-            {t("servings")} *
-          </label>
-          <input
+          <Label htmlFor="servings" required>
+            {t("servings")}
+          </Label>
+          <Input
             id="servings"
             {...register("servings", { valueAsNumber: true })}
             type="number"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
+            error={!!errors.servings}
           />
           {errors.servings && (
             <p className="text-red-500 text-sm mt-1">

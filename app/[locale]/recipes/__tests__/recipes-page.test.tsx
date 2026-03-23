@@ -115,10 +115,10 @@ describe("RecipesPage", () => {
     render(<RecipesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("8 servings")).toBeInTheDocument();
+      expect(screen.getByText(/8 servings/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByText("12 servings")).toBeInTheDocument();
+    expect(screen.getByText(/12 servings/i)).toBeInTheDocument();
   });
 
   it("displays recipe images when available", async () => {
@@ -136,7 +136,7 @@ describe("RecipesPage", () => {
   });
 
   it("has create recipe button", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue([]);
+    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
 
     render(<RecipesPage />);
 

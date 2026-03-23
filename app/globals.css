@@ -1,16 +1,98 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Light mode colors */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #737373;
+
+  /* Form elements */
+  --color-input-bg: #ffffff;
+  --color-input-border: #e5e5e5;
+  --color-input-border-hover: #d4d4d4;
+  --color-input-border-focus: #737373;
+
+  /* Buttons */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-destructive: #dc2626;
+  --color-destructive-hover: #b91c1c;
+
+  /* Dark mode colors */
+  --color-background-dark: #0a0a0a;
+  --color-foreground-dark: #ededed;
+  --color-muted-dark: #1a1a1a;
+  --color-muted-foreground-dark: #a3a3a3;
+
+  /* Form elements dark */
+  --color-input-bg-dark: #1a1a1a;
+  --color-input-border-dark: #404040;
+  --color-input-border-hover-dark: #525252;
+  --color-input-border-focus-dark: #737373;
+
+  /* Buttons dark (same as light for consistency) */
+  --color-primary-dark: #3b82f6;
+  --color-primary-hover-dark: #2563eb;
+  --color-destructive-dark: #ef4444;
+  --color-destructive-hover-dark: #dc2626;
+
+  /* Cards */
+  --color-card: #ffffff;
+  --color-card-border: #e5e5e5;
+  --color-card-hover: #f5f5f5;
+
+  /* Navigation */
+  --color-nav-border: #e5e5e5;
+
+  /* Hover states */
+  --color-hover: #f5f5f5;
+
+  /* Modal */
+  --color-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* Dark mode versions */
+  --color-card-dark: #1a1a1a;
+  --color-card-border-dark: #404040;
+  --color-card-hover-dark: #262626;
+  --color-nav-border-dark: #404040;
+  --color-hover-dark: #262626;
+  --color-modal-backdrop-dark: rgba(0, 0, 0, 0.75);
+}
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #171717;
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+
+    --input-bg: var(--color-input-bg);
+    --input-border: var(--color-input-border);
+    --input-border-hover: var(--color-input-border-hover);
+    --input-border-focus: var(--color-input-border-focus);
+
+    --primary: var(--color-primary);
+    --primary-hover: var(--color-primary-hover);
+    --destructive: var(--color-destructive);
+    --destructive-hover: var(--color-destructive-hover);
   }
 
   .dark {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-background-dark);
+    --foreground: var(--color-foreground-dark);
+    --muted: var(--color-muted-dark);
+    --muted-foreground: var(--color-muted-foreground-dark);
+
+    --input-bg: var(--color-input-bg-dark);
+    --input-border: var(--color-input-border-dark);
+    --input-border-hover: var(--color-input-border-hover-dark);
+    --input-border-focus: var(--color-input-border-focus-dark);
+
+    --primary: var(--color-primary-dark);
+    --primary-hover: var(--color-primary-hover-dark);
+    --destructive: var(--color-destructive-dark);
+    --destructive-hover: var(--color-destructive-hover-dark);
   }
 
   body {
