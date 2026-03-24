@@ -48,7 +48,8 @@ export function Navigation() {
                 color: "var(--foreground)",
               }}
             >
-              {tNav("setupParser")}
+              {/* {tNav("setupParser")} */}
+              Parser
             </Link>
             <ThemeToggle />
             <LanguageSwitcher />

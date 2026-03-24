@@ -1,18 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as cheerio from "cheerio";
 import { type NextRequest, NextResponse } from "next/server";
+import { extractSchemaRecipe } from "./schema-parser"; // ← NEW
 
 export async function POST(request: NextRequest) {
   try {
     const { url, userComment } = await request.json();
 
     if (!url) {
-      return NextResponse.json(
-        {
-          error: "URL is required",
-        },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
     const token = process.env.SCRAPE_DO_TOKEN;
@@ -27,9 +23,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use scrape.do to fetch the page
+    // Fetch HTML
     const scrapeUrl = `http://api.scrape.do/?token=${token}&url=${encodeURIComponent(url)}`;
-
     console.log("Fetching with scrape.do:", url);
 
     const response = await fetch(scrapeUrl, {
@@ -52,8 +47,30 @@ export async function POST(request: NextRequest) {
     }
 
     const html = await response.text();
-
     console.log("HTML fetched, length:", html.length);
+
+    // ========== NEW: TRY SCHEMA.ORG FIRST ==========
+    console.log("Attempting schema.org extraction...");
+    const schemaRecipe = extractSchemaRecipe(html);
+
+    if (schemaRecipe && schemaRecipe.ingredients.length > 0) {
+      console.log("✅ Schema.org extraction successful:", schemaRecipe.title);
+
+      // Add sourceUrl
+      schemaRecipe.sourceUrl = url;
+
+      return NextResponse.json({
+        success: true,
+        provider: "schema.org",
+        scraper: "scrape.do",
+        recipe: schemaRecipe,
+      });
+    }
+
+    console.log("❌ Schema.org not found or incomplete, falling back to AI...");
+    // ========== END NEW SECTION ==========
+
+    // ========== FALLBACK: USE GEMINI AI ==========
 
     // Use Cheerio to clean HTML
     const $ = cheerio.load(html);
@@ -77,7 +94,6 @@ export async function POST(request: NextRequest) {
 
     // Clean whitespace
     textContent = textContent.replace(/\s+/g, " ").trim().slice(0, 15000);
-
     console.log("Extracted text length:", textContent.length);
 
     if (textContent.length < 100) {

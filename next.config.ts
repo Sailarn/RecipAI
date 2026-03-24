@@ -14,7 +14,18 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  // Your existing Next.js config here
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Allow all domains
+      },
+      {
+        protocol: "http",
+        hostname: "**", // Allow all domains
+      },
+    ],
+  },
 };
 
 // Chain plugins: intl → PWA → Sentry (inside out)
