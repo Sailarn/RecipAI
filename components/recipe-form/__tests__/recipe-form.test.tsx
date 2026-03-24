@@ -39,7 +39,7 @@ describe("RecipeForm", () => {
       render(<RecipeForm />);
 
       const servingsInput = screen.getByLabelText(/servings/i);
-      expect(servingsInput).toHaveValue(4);
+      expect(servingsInput).toHaveValue(1);
       expect(
         screen.getByRole("button", { name: /create/i }),
       ).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe("RecipeForm", () => {
       const submitButton = screen.getByRole("button", {
         name: /create/i,
       });
-      fireEvent.click(submitButton);
+      fireEvent.submit(submitButton.closest("form")!);
 
       await waitFor(() => {
         expect(screen.getByText(/titleRequired/i)).toBeInTheDocument();

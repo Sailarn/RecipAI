@@ -51,21 +51,22 @@
     "prepTime": "Підготовка (хв)",
     "cookTime": "Приготування (хв)",
     "servings": "Порцій",
-    "servingsRequired": "Порцій має бути принаймні 1",
     "ingredients": "Інгредієнти",
     "ingredientsRequired": "Потрібен принаймні один інгредієнт",
     "ingredientName": "Інгредієнт",
     "ingredientNameRequired": "Назва інгредієнта обов'язкова",
     "amount": "Кількість",
     "unit": "Одиниця",
-    "addIngredient": "+ Додати інгредієнт",
+    "addIngredient": "Додати інгредієнт",
     "instructions": "Інструкції",
     "instructionsRequired": "Потрібна принаймні одна інструкція",
     "instructionStep": "Крок інструкції",
     "instructionRequired": "Інструкція обов'язкова",
-    "addStep": "+ Додати крок",
+    "addStep": "Додати крок",
     "remove": "Видалити",
-    "instructionPlaceholder": "Введіть інструкції кроку..."
+    "instructionPlaceholder": "Введіть інструкції кроку...",
+    "amountRequired": "Обов'язково",
+    "servingsRequired": "Порцій має бути принаймні 1"
   },
   "form": {
     "required": "Це поле обов'язкове"

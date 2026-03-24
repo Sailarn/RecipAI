@@ -48,16 +48,22 @@ export function BasicInfo({ register, errors }: BasicInfoProps) {
           <Label htmlFor="prepTime">{t("prepTime")}</Label>
           <Input
             id="prepTime"
-            {...register("prepTime", { valueAsNumber: true })}
+            {...register("prepTime", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
             type="number"
+            step="0.01"
           />
         </div>
         <div>
           <Label htmlFor="cookTime">{t("cookTime")}</Label>
           <Input
             id="cookTime"
-            {...register("cookTime", { valueAsNumber: true })}
+            {...register("cookTime", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
             type="number"
+            step="0.01"
           />
         </div>
         <div>
@@ -66,7 +72,7 @@ export function BasicInfo({ register, errors }: BasicInfoProps) {
           </Label>
           <Input
             id="servings"
-            {...register("servings", { valueAsNumber: true })}
+            {...register("servings")}
             type="number"
             error={!!errors.servings}
           />

@@ -51,21 +51,22 @@
     "prepTime": "Prep (min)",
     "cookTime": "Cook (min)",
     "servings": "Servings",
-    "servingsRequired": "Servings must be at least 1",
     "ingredients": "Ingredients",
     "ingredientsRequired": "At least one ingredient required",
     "ingredientName": "Ingredient",
     "ingredientNameRequired": "Ingredient name required",
     "amount": "Amount",
     "unit": "Unit",
-    "addIngredient": "+ Add Ingredient",
+    "addIngredient": "Add Ingredient",
     "instructions": "Instructions",
     "instructionsRequired": "At least one instruction required",
     "instructionStep": "Instruction step",
     "instructionRequired": "Instruction required",
-    "addStep": "+ Add Step",
+    "addStep": "Add Step",
     "remove": "Remove",
-    "instructionPlaceholder": "Enter step instructions..."
+    "instructionPlaceholder": "Enter step instructions...",
+    "amountRequired": "Required",
+    "servingsRequired": "Servings must be at least 1"
   },
   "form": {
     "required": "This field is required"

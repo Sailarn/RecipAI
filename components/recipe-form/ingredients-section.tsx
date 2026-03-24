@@ -35,12 +35,17 @@ export function IngredientsSection({
         <div key={field.id} className="flex gap-2">
           <div className="w-20">
             <Input
-              {...register(`ingredients.${index}.amount`, {
-                valueAsNumber: true,
-              })}
               type="number"
+              {...register(`ingredients.${index}.amount`)}
               placeholder={t("amount")}
+              step="0.01"
+              error={!!errors.ingredients?.[index]?.amount}
             />
+            {errors.ingredients?.[index]?.amount && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.ingredients[index]?.amount?.message}
+              </p>
+            )}
           </div>
           <div className="w-24">
             <Input
@@ -54,6 +59,11 @@ export function IngredientsSection({
               placeholder={t("ingredientName")}
               error={!!errors.ingredients?.[index]?.item}
             />
+            {errors.ingredients?.[index]?.item && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.ingredients[index]?.item?.message}
+              </p>
+            )}
           </div>
           {fields.length > 1 && (
             <Button
@@ -74,7 +84,7 @@ export function IngredientsSection({
       <Button
         type="button"
         variant="secondary"
-        onClick={() => append({ item: "", amount: undefined, unit: "" })}
+        onClick={() => append({ item: "", amount: "1", unit: "" })}
       >
         + {t("addIngredient")}
       </Button>
