@@ -57,7 +57,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       </div>
     );
   }
-
+  console.log(recipe);
   return (
     <div className="max-w-3xl mx-auto">
       <RecipeHeader
@@ -66,15 +66,16 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         onDeleteClick={() => setShowDeleteConfirm(true)}
       />
 
-      {recipe.imageUrl && (
-        <Image
-          src={recipe.imageUrl}
-          alt={recipe.title}
-          width={800}
-          height={400}
-          className="w-full h-64 object-cover rounded-lg mb-6"
-        />
-      )}
+      <Image
+        src={recipe.imageUrl || "/images/recipe-placeholder.png"}
+        alt={recipe.title}
+        width={800}
+        height={400}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+        onError={(e) => {
+          e.currentTarget.src = "/images/recipe-placeholder.png";
+        }}
+      />
 
       <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
       {recipe.description && (

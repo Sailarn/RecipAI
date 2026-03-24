@@ -62,39 +62,41 @@ export default function RecipesPage() {
           {recipes.map((recipe) => (
             <Link key={recipe.id} href={`/${locale}/recipes/${recipe.id}`}>
               <Card hover>
-                {recipe.imageUrl && (
-                  <div className="relative w-full h-48 mb-3">
+                <div className="flex flex-col h-full">
+                  <div className="relative w-full h-48 mb-3 flex-shrink-0">
                     <Image
-                      src={recipe.imageUrl}
+                      src={recipe.imageUrl || "/images/recipe-placeholder.png"}
                       alt={recipe.title}
                       fill
                       className="object-cover rounded-md"
                     />
                   </div>
-                )}
-                <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
-                {recipe.description && (
-                  <p
-                    className="text-sm line-clamp-2"
+                  <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
+                  <div className="flex-1">
+                    {recipe.description && (
+                      <p
+                        className="text-sm line-clamp-2"
+                        style={{ color: "var(--muted-foreground)" }}
+                      >
+                        {recipe.description}
+                      </p>
+                    )}
+                  </div>
+                  <div
+                    className="flex gap-4 mt-3 text-sm"
                     style={{ color: "var(--muted-foreground)" }}
                   >
-                    {recipe.description}
-                  </p>
-                )}
-                <div
-                  className="flex gap-4 mt-3 text-sm"
-                  style={{ color: "var(--muted-foreground)" }}
-                >
-                  {recipe.prepTime && (
-                    <span>
-                      ⏱️ {recipe.prepTime} {tCommon("minutes")}
-                    </span>
-                  )}
-                  {recipe.servings && (
-                    <span>
-                      🍽️ {recipe.servings} {t("servings")}
-                    </span>
-                  )}
+                    {recipe.prepTime && (
+                      <span>
+                        ⏱️ {recipe.prepTime} {tCommon("minutes")}
+                      </span>
+                    )}
+                    {recipe.servings && (
+                      <span>
+                        🍽️ {recipe.servings} {t("servings")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </Card>
             </Link>
