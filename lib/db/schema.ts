@@ -25,13 +25,14 @@ export interface Recipe {
   title: string;
   description?: string;
   imageUrl?: string;
-  prepTime?: number; // minutes
-  cookTime?: number; // minutes
-  totalTime?: number; // minutes
+  imageFileId?: string;
+  prepTime?: number;
+  cookTime?: number;
+  totalTime?: number;
   servings: number;
   ingredients: Ingredient[];
   instructions: Step[];
-  sourceUrl?: string; // Original URL if parsed from web
+  sourceUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -65,8 +65,15 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         recipeId={recipeId}
         onDeleteClick={() => setShowDeleteConfirm(true)}
       />
-
-      <RecipeImage imageUrl={recipe.imageUrl} title={recipe.title} />
+      <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg mb-6">
+        <RecipeImage
+          imageUrl={recipe.imageUrl}
+          title={recipe.title}
+          sizes="100vw"
+          width={800}
+          height={320}
+        />
+      </div>
 
       <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
       {recipe.description && (

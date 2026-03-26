@@ -1,3 +1,4 @@
+import { deleteImage } from "../images";
 import { db } from "./db";
 import type { Recipe } from "./schema";
 
@@ -52,5 +53,11 @@ export async function updateRecipe(
  * Delete a recipe
  */
 export async function deleteRecipe(id: string): Promise<void> {
+  const recipe = await db.recipes.get(id);
+
+  if (recipe?.imageFileId) {
+    await deleteImage(recipe.imageFileId);
+  }
+
   await db.recipes.delete(id);
 }

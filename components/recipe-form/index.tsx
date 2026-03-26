@@ -3,10 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
 import { BasicInfo } from "./basic-info";
 import { FormActions } from "./form-actions";
 import { IngredientsSection } from "./ingredients-section";
@@ -75,6 +77,7 @@ interface RecipeFormProps {
 export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const router = useRouter();
   const params = useParams();
+  const [imageError, setImageError] = useState<string | null>(null);
   const locale = params.locale as string;
   const t = useTranslations("recipeForm");
 
@@ -140,36 +143,51 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   });
 
   const onSubmit = async (data: RecipeOutput) => {
+    setImageError(null);
+
+    let imageUrl = data.imageUrl || "";
+    let imageFileId = recipe?.imageFileId;
+
+    // Upload gate — if image URL exists and is not already on ImageKit
+    if (imageUrl && !isImageKitUrl(imageUrl)) {
+      try {
+        // If editing and had a previous ImageKit image, delete it first
+        if (recipe?.imageFileId) {
+          await deleteImage(recipe.imageFileId);
+        }
+        const uploaded = await uploadImage(imageUrl);
+        imageUrl = uploaded.url;
+        imageFileId = uploaded.fileId;
+      } catch (err) {
+        setImageError(
+          err instanceof Error ? err.message : t("imageUploadFailed"),
+        );
+        return; // Block save
+      }
+    }
+
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
 
+    const recipeData = {
+      ...data,
+      imageUrl,
+      imageFileId,
+      totalTime,
+      ingredients: data.ingredients.map((ing) => ({
+        id: crypto.randomUUID(),
+        ...ing,
+      })),
+      instructions: (data.instructions || []).map((inst, idx) => ({
+        id: crypto.randomUUID(),
+        order: idx + 1,
+        instruction: inst.instruction,
+      })),
+    };
+
     if (recipe) {
-      await updateRecipe(recipe.id, {
-        ...data,
-        totalTime,
-        ingredients: data.ingredients.map((ing) => ({
-          id: crypto.randomUUID(),
-          ...ing,
-        })),
-        instructions: (data.instructions || []).map((inst, idx) => ({
-          id: crypto.randomUUID(),
-          order: idx + 1,
-          instruction: inst.instruction,
-        })),
-      });
+      await updateRecipe(recipe.id, recipeData);
     } else {
-      await createRecipe({
-        ...data,
-        totalTime,
-        ingredients: data.ingredients.map((ing) => ({
-          id: crypto.randomUUID(),
-          ...ing,
-        })),
-        instructions: (data.instructions || []).map((inst, idx) => ({
-          id: crypto.randomUUID(),
-          order: idx + 1,
-          instruction: inst.instruction,
-        })),
-      });
+      await createRecipe(recipeData);
     }
 
     router.push(`/${locale}/recipes`);
@@ -188,6 +206,11 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         control={control}
         errors={errors}
       />
+      {imageError && (
+        <p className="text-sm" style={{ color: "var(--destructive)" }}>
+          {imageError}
+        </p>
+      )}
       <FormActions isSubmitting={isSubmitting} isEdit={!!recipe} />
     </form>
   );

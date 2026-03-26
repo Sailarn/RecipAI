@@ -67,7 +67,8 @@
     "remove": "Видалити",
     "instructionPlaceholder": "Введіть інструкції кроку...",
     "amountRequired": "Обов'язково",
-    "servingsRequired": "Порцій має бути принаймні 1"
+    "servingsRequired": "Порцій має бути принаймні 1",
+    "imageUploadFailed": "Не вдалося завантажити зображення. Спробуйте ще раз або видаліть зображення."
   },
   "form": {
     "required": "Це поле обов'язкове"

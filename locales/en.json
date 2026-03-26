@@ -67,7 +67,8 @@
     "remove": "Remove",
     "instructionPlaceholder": "Enter step instructions...",
     "amountRequired": "Required",
-    "servingsRequired": "Servings must be at least 1"
+    "servingsRequired": "Servings must be at least 1",
+    "imageUploadFailed": "Image upload failed. Please try again or remove the image."
   },
   "form": {
     "required": "This field is required"

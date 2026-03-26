@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -64,12 +63,13 @@ export default function RecipesPage() {
             <Link key={recipe.id} href={`/${locale}/recipes/${recipe.id}`}>
               <Card hover>
                 <div className="flex flex-col h-full">
-                  <div className="relative w-full h-48 mb-3 flex-shrink-0">
+                  <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
                     <RecipeImage
                       imageUrl={recipe.imageUrl}
                       title={recipe.title}
-                      fill
-                      className="object-cover rounded-md"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      width={600}
+                      height={192}
                     />
                   </div>
                   <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
