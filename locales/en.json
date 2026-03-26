@@ -38,7 +38,13 @@
     "instructions": "Instructions",
     "prepTime": "Prep",
     "cookTime": "Cook",
-    "totalTime": "Total"
+    "totalTime": "Total",
+    "searchPlaceholder": "Search recipes...",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortAZ": "A → Z",
+    "sortZA": "Z → A",
+    "noResults": "No recipes found"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",

@@ -38,7 +38,13 @@
     "instructions": "Інструкції",
     "prepTime": "Підготовка",
     "cookTime": "Приготування",
-    "totalTime": "Загалом"
+    "totalTime": "Загалом",
+    "searchPlaceholder": "Пошук рецептів...",
+    "sortNewest": "Спочатку нові",
+    "sortOldest": "Спочатку старі",
+    "sortAZ": "А → Я",
+    "sortZA": "Я → А",
+    "noResults": "Рецепти не знайдено"
   },
   "recipeForm": {
     "createTitle": "Створити рецепт",

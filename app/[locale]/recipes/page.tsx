@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeImage } from "@/components/recipe-image";
 import { Button, Card } from "@/components/ui";
+import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 
@@ -16,6 +18,8 @@ export default function RecipesPage() {
   const tCommon = useTranslations("common");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const { search, setSearch, sort, setSort, filtered } =
+    useRecipeFilter(recipes);
 
   useEffect(() => {
     getAllRecipes()
@@ -58,51 +62,69 @@ export default function RecipesPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recipes.map((recipe) => (
-            <Link key={recipe.id} href={`/${locale}/recipes/${recipe.id}`}>
-              <Card hover>
-                <div className="flex flex-col h-full">
-                  <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
-                    <RecipeImage
-                      imageUrl={recipe.imageUrl}
-                      title={recipe.title}
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      width={600}
-                      height={192}
-                    />
+        <RecipeFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          sort={sort}
+          onSortChange={setSort}
+        />
+
+        {filtered.length === 0 && search ? (
+          <p
+            className="text-center py-12 text-sm"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            {t("noResults")}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((recipe) => (
+              <Link key={recipe.id} href={`/${locale}/recipes/${recipe.id}`}>
+                <Card hover>
+                  <div className="flex flex-col h-full">
+                    <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
+                      <RecipeImage
+                        imageUrl={recipe.imageUrl}
+                        title={recipe.title}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        width={600}
+                        height={192}
+                      />
+                    </div>
+                    <h2 className="text-xl font-semibold mb-2">
+                      {recipe.title}
+                    </h2>
+                    <div className="flex-1">
+                      {recipe.description && (
+                        <p
+                          className="text-sm line-clamp-2"
+                          style={{ color: "var(--muted-foreground)" }}
+                        >
+                          {recipe.description}
+                        </p>
+                      )}
+                    </div>
+                    <div
+                      className="flex gap-4 mt-3 text-sm"
+                      style={{ color: "var(--muted-foreground)" }}
+                    >
+                      {recipe.prepTime && (
+                        <span>
+                          ⏱️ {recipe.prepTime} {tCommon("minutes")}
+                        </span>
+                      )}
+                      {recipe.servings && (
+                        <span>
+                          🍽️ {recipe.servings} {t("servings")}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
-                  <div className="flex-1">
-                    {recipe.description && (
-                      <p
-                        className="text-sm line-clamp-2"
-                        style={{ color: "var(--muted-foreground)" }}
-                      >
-                        {recipe.description}
-                      </p>
-                    )}
-                  </div>
-                  <div
-                    className="flex gap-4 mt-3 text-sm"
-                    style={{ color: "var(--muted-foreground)" }}
-                  >
-                    {recipe.prepTime && (
-                      <span>
-                        ⏱️ {recipe.prepTime} {tCommon("minutes")}
-                      </span>
-                    )}
-                    {recipe.servings && (
-                      <span>
-                        🍽️ {recipe.servings} {t("servings")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
