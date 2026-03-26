@@ -59,7 +59,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   }
   console.log(recipe);
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto p-4">
       <RecipeHeader
         locale={locale}
         recipeId={recipeId}
