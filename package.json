@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "check:all": "./scripts/check.sh",
     "check": "biome check --write .",
@@ -18,9 +18,9 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
+    "@serwist/next": "^9.5.7",
     "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/vite": "^4.2.2",
     "cheerio": "^1.2.0",
@@ -53,6 +53,7 @@
     "jsdom": "^29.0.1",
     "postcss": "^8.5.8",
     "react-hook-form": "^7.71.2",
+    "serwist": "^9.5.7",
     "tailwindcss": "^4.2.2",
     "typescript": "^5",
     "vitest": "^4.1.0"

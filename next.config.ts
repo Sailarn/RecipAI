@@ -1,43 +1,33 @@
-// next.config.ts
-
-import withPWAInit from "@ducanh2912/next-pwa";
+import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
-const withPWA = withPWAInit({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: false, // temporarily force enable to test
+  reloadOnOnline: false,
 });
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**", // Allow all domains
-      },
-      {
-        protocol: "http",
-        hostname: "**", // Allow all domains
-      },
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
     ],
   },
 };
 
-// Chain plugins: intl → PWA → Sentry (inside out)
-export default withSentryConfig(withPWA(withNextIntl(nextConfig)), {
+export default withSentryConfig(withSerwist(withNextIntl(nextConfig)), {
   org: "sailarn",
   project: "recipai-app",
   silent: !process.env.CI,
   widenClientFileUpload: true,
   webpack: {
     automaticVercelMonitors: true,
-    treeshake: {
-      removeDebugLogging: true,
-    },
+    treeshake: { removeDebugLogging: true },
   },
 });
