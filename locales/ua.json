@@ -20,7 +20,8 @@
   "navigation": {
     "home": "Головна",
     "recipes": "Рецепти",
-    "settings": "Налаштування"
+    "settings": "Налаштування",
+    "profile": "Профіль"
   },
   "recipes": {
     "loading": "Завантаження...",
@@ -82,5 +83,12 @@
     "english": "English",
     "ukrainian": "Українська",
     "switch": "Змінити мову"
+  },
+  "profile": {
+    "title": "Профіль",
+    "loginPrompt": "Увійдіть, щоб синхронізувати рецепти між пристроями",
+    "login": "Увійти (незабаром)",
+    "theme": "Тема",
+    "language": "Мова"
   }
 }

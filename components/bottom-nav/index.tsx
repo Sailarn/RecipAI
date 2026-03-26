@@ -2,8 +2,6 @@
 
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { BookIcon, GridIcon, ScanIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
@@ -29,10 +27,10 @@ export function BottomNav() {
       isActive: pathname.includes("/parse"),
     },
     {
-      href: `/${locale}`,
-      label: "More",
+      href: `/${locale}/profile`,
+      label: tNav("profile"),
       icon: GridIcon,
-      isActive: false,
+      isActive: pathname.includes("/profile"),
     },
   ];
 
@@ -52,16 +50,6 @@ export function BottomNav() {
             {items.map((item) => (
               <NavItem key={item.href} {...item} />
             ))}
-          </div>
-
-          <div
-            className="w-px h-8 mx-1 flex-shrink-0"
-            style={{ background: "rgba(128,128,128,0.2)" }}
-          />
-
-          <div className="flex items-center gap-0.5 px-1 flex-shrink-0">
-            <ThemeToggle />
-            <LanguageSwitcher />
           </div>
         </nav>
       </div>

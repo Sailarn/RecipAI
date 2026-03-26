@@ -20,7 +20,8 @@
   "navigation": {
     "home": "Home",
     "recipes": "Recipes",
-    "settings": "Settings"
+    "settings": "Settings",
+    "profile": "Profile"
   },
   "recipes": {
     "loading": "Loading...",
@@ -82,5 +83,12 @@
     "english": "English",
     "ukrainian": "Українська",
     "switch": "Switch language"
+  },
+  "profile": {
+    "title": "Profile",
+    "loginPrompt": "Sign in to sync your recipes across devices",
+    "login": "Sign in (coming soon)",
+    "theme": "Theme",
+    "language": "Language"
   }
 }

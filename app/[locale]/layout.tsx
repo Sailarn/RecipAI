@@ -27,7 +27,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <div className="min-h-screen flex flex-col">
-              <main className="flex-1 mx-auto max-w-7xl pb-24">{children}</main>
+              <main className="flex-1 mx-auto max-w-7xl pb-24 w-full">
+                {children}
+              </main>
               <BottomNav />
             </div>
           </ThemeProvider>
