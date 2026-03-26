@@ -93,7 +93,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
           // Edit mode: existing recipe (convert numbers to strings)
           title: recipe.title,
           description: recipe.description || "",
-          imageUrl: recipe.imageUrl || "",
+          imageUrl: recipe.imageUrl || "/images/recipe-placeholder.png",
           prepTime: recipe.prepTime,
           cookTime: recipe.cookTime,
           servings: String(recipe.servings),

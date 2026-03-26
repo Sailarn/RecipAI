@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { RecipeImage } from "@/components/recipe-image";
 import { Button, Card } from "@/components/ui";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
@@ -64,9 +65,9 @@ export default function RecipesPage() {
               <Card hover>
                 <div className="flex flex-col h-full">
                   <div className="relative w-full h-48 mb-3 flex-shrink-0">
-                    <Image
-                      src={recipe.imageUrl || "/images/recipe-placeholder.png"}
-                      alt={recipe.title}
+                    <RecipeImage
+                      imageUrl={recipe.imageUrl}
+                      title={recipe.title}
                       fill
                       className="object-cover rounded-md"
                     />

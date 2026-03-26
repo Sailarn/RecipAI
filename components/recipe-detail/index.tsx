@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { RecipeImage } from "../recipe-image";
 import { DeleteModal } from "./delete-modal";
 import { IngredientsList } from "./ingredients-list";
 import { InstructionsList } from "./instructions-list";
@@ -66,16 +66,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         onDeleteClick={() => setShowDeleteConfirm(true)}
       />
 
-      <Image
-        src={recipe.imageUrl || "/images/recipe-placeholder.png"}
-        alt={recipe.title}
-        width={800}
-        height={400}
-        className="w-full h-64 object-cover rounded-lg mb-6"
-        onError={(e) => {
-          e.currentTarget.src = "/images/recipe-placeholder.png";
-        }}
-      />
+      <RecipeImage imageUrl={recipe.imageUrl} title={recipe.title} />
 
       <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
       {recipe.description && (
