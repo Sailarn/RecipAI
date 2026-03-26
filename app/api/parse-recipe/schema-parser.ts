@@ -29,8 +29,8 @@ function parseDuration(duration?: string): number | undefined {
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
   if (!match) return undefined;
 
-  const hours = parseInt(match[1] || "0");
-  const minutes = parseInt(match[2] || "0");
+  const hours = parseInt(match[1] || "0", 10);
+  const minutes = parseInt(match[2] || "0", 10);
 
   return hours * 60 + minutes;
 }
@@ -64,7 +64,7 @@ function parseIngredient(ingredientString: string): {
     }
 
     return {
-      amount: isNaN(amount) ? undefined : amount,
+      amount: Number.isNaN(amount) ? undefined : amount,
       unit: unit.trim(),
       item: item.trim(),
     };
@@ -120,7 +120,7 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
           servings = recipe.recipeYield;
         } else if (typeof recipe.recipeYield === "string") {
           const match = recipe.recipeYield.match(/\d+/);
-          if (match) servings = parseInt(match[0]);
+          if (match) servings = parseInt(match[0], 10);
         }
       }
 

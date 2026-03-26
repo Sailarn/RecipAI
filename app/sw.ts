@@ -1,7 +1,6 @@
-import { CacheFirst } from "serwist";
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist, ExpirationPlugin } from "serwist";
+import { CacheFirst, ExpirationPlugin, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -20,7 +19,8 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     {
-      matcher: ({ url }) => IMAGEKIT_URL !== "" && url.href.startsWith(IMAGEKIT_URL),
+      matcher: ({ url }) =>
+        IMAGEKIT_URL !== "" && url.href.startsWith(IMAGEKIT_URL),
       handler: new CacheFirst({
         cacheName: "recipe-images",
         plugins: [

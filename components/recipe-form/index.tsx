@@ -26,8 +26,8 @@ function createRecipeSchema(t: (key: string) => string) {
     servings: z
       .string()
       .min(1, t("servingsRequired"))
-      .transform((val) => parseInt(val))
-      .refine((val) => !isNaN(val) && val > 0 && Number.isInteger(val), {
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => !Number.isNaN(val) && val > 0 && Number.isInteger(val), {
         message: t("servingsRequired"),
       }),
 
@@ -39,7 +39,7 @@ function createRecipeSchema(t: (key: string) => string) {
             .string()
             .min(1, t("amountRequired"))
             .transform((val) => parseFloat(val))
-            .refine((val) => !isNaN(val) && val > 0, {
+            .refine((val) => !Number.isNaN(val) && val > 0, {
               message: t("amountRequired"),
             }),
           unit: z.string().optional(),
