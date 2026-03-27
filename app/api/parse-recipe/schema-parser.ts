@@ -23,16 +23,19 @@ interface SchemaRecipe {
  * Parse ISO 8601 duration to minutes
  * Examples: "PT30M" = 30, "PT1H30M" = 90, "P1DT2H" = 1560
  */
-function parseDuration(duration?: string): number | undefined {
+function parseDuration(duration?: string | number): number | undefined {
   if (!duration) return undefined;
+  if (typeof duration === "number") return duration;
 
-  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  // PT1H30M, PT30M, P0DT1H
+  const match = duration.match(/(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?/);
   if (!match) return undefined;
 
-  const hours = parseInt(match[1] || "0", 10);
-  const minutes = parseInt(match[2] || "0", 10);
+  const days = parseInt(match[1] || "0", 10);
+  const hours = parseInt(match[2] || "0", 10);
+  const minutes = parseInt(match[3] || "0", 10);
 
-  return hours * 60 + minutes;
+  return days * 24 * 60 + hours * 60 + minutes || undefined;
 }
 
 /**
@@ -46,15 +49,21 @@ function parseIngredient(ingredientString: string): {
   unit?: string;
   item: string;
 } {
-  // Try to match: "number unit item" pattern
-  const match = ingredientString.match(
-    /^([\d./]+)\s+([a-zA-Zа-яА-ЯіІїЇєЄ.]+)\s+(.+)$/,
+  // Normalize unicode fractions and comma decimals
+  const normalized = ingredientString
+    .replace(/½/g, "0.5")
+    .replace(/¼/g, "0.25")
+    .replace(/¾/g, "0.75")
+    .replace(/⅓/g, "0.33")
+    .replace(/⅔/g, "0.67")
+    .replace(/(\d),(\d)/g, "$1.$2");
+
+  // Pattern 1: "item — amount unit" (Ukrainian style e.g. "Фетучині — 250 г")
+  const ukrainianMatch = normalized.match(
+    /^(.+?)\s*[—–-]+\s*([\d./]+)\s*([а-яА-ЯіІїЇєЄa-zA-Z.]+)?$/,
   );
-
-  if (match) {
-    const [, amountStr, unit, item] = match;
-
-    // Handle fractions like "1/2"
+  if (ukrainianMatch) {
+    const [, item, amountStr, unit] = ukrainianMatch;
     let amount: number | undefined;
     if (amountStr.includes("/")) {
       const [num, den] = amountStr.split("/").map(Number);
@@ -62,7 +71,26 @@ function parseIngredient(ingredientString: string): {
     } else {
       amount = parseFloat(amountStr);
     }
+    return {
+      amount: Number.isNaN(amount) ? undefined : amount,
+      unit: unit?.trim() || undefined,
+      item: item.trim(),
+    };
+  }
 
+  // Pattern 2: standard "amount unit item"
+  const standardMatch = normalized.match(
+    /^([\d./]+)\s+([a-zA-Zа-яА-ЯіІїЇєЄ.]+\.?)\s+(.+)$/,
+  );
+  if (standardMatch) {
+    const [, amountStr, unit, item] = standardMatch;
+    let amount: number | undefined;
+    if (amountStr.includes("/")) {
+      const [num, den] = amountStr.split("/").map(Number);
+      amount = num / den;
+    } else {
+      amount = parseFloat(amountStr);
+    }
     return {
       amount: Number.isNaN(amount) ? undefined : amount,
       unit: unit.trim(),
@@ -70,12 +98,7 @@ function parseIngredient(ingredientString: string): {
     };
   }
 
-  // No pattern match - return as-is
-  return {
-    amount: undefined,
-    unit: undefined,
-    item: ingredientString.trim(),
-  };
+  return { amount: undefined, unit: undefined, item: ingredientString.trim() };
 }
 
 /**
@@ -113,13 +136,18 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
 
       if (!recipe) continue;
 
+      console.log("Raw schema recipe:", JSON.stringify(recipe, null, 2));
+
       // Extract servings (handle different formats)
-      let servings = 4; // default
+      let servings = 4;
       if (recipe.recipeYield) {
-        if (typeof recipe.recipeYield === "number") {
-          servings = recipe.recipeYield;
-        } else if (typeof recipe.recipeYield === "string") {
-          const match = recipe.recipeYield.match(/\d+/);
+        const raw = Array.isArray(recipe.recipeYield)
+          ? recipe.recipeYield[0]
+          : recipe.recipeYield;
+        if (typeof raw === "number") {
+          servings = raw;
+        } else if (typeof raw === "string") {
+          const match = raw.match(/\d+/);
           if (match) servings = parseInt(match[0], 10);
         }
       }
