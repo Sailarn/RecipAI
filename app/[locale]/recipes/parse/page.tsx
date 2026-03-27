@@ -39,8 +39,20 @@ export default function ParseRecipePage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ParsedRecipe | null>(null);
 
+  function isValidUrl(value: string): boolean {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" || url.protocol === "http:";
+    } catch {
+      return false;
+    }
+  }
+
   const handleParse = async () => {
-    if (!url) return;
+    if (!isValidUrl(url)) {
+      setError("Please enter a valid URL including https://");
+      return;
+    }
 
     setLoading(true);
     setError(null);
