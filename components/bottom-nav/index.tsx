@@ -2,6 +2,7 @@
 
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { BookIcon, GridIcon, ScanIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
@@ -37,17 +38,26 @@ export function BottomNav() {
 
   const activeIndex = items.findIndex((item) => item.isActive);
 
+  // Delayed active index — updates after transition completes
+  const [displayIndex, setDisplayIndex] = useState(activeIndex);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayIndex(activeIndex);
+    }, 260); // slightly longer than transition duration (250ms)
+    return () => clearTimeout(timer);
+  }, [activeIndex]);
+
   return (
     <>
       <NavStyles />
-
       <div
         className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <nav className="glass-nav flex items-center rounded-2xl px-2 py-1.5">
           <div className="relative flex items-center flex-1">
-            <NavPill activeIndex={activeIndex} itemCount={items.length} />
+            <NavPill activeIndex={displayIndex} itemCount={items.length} />
             {items.map((item) => (
               <NavItem key={item.href} {...item} />
             ))}
