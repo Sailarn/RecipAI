@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { TransitionLink } from "@/components/transition-link";
 
 export default function HomePage() {
   const params = useParams();
@@ -30,7 +30,7 @@ export default function HomePage() {
           <p className="text-lg" style={{ color: "var(--muted-foreground)" }}>
             {tHome("tagline")}
           </p>
-          <Link
+          <TransitionLink
             href={`/${locale}/recipes`}
             className="flex h-12 w-full items-center justify-center rounded-full border border-solid px-5 transition-colors hover:bg-[var(--hover)] md:w-[158px]"
             style={{
@@ -39,7 +39,7 @@ export default function HomePage() {
             }}
           >
             {tNav("recipes")}
-          </Link>
+          </TransitionLink>
         </div>
       </main>
     </div>

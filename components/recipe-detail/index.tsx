@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { useNavigate } from "@/lib/transitions";
 import { RecipeImage } from "../recipe-image";
+import { TransitionLink } from "../transition-link";
 import { DeleteModal } from "./delete-modal";
 import { IngredientsList } from "./ingredients-list";
 import { InstructionsList } from "./instructions-list";
@@ -19,7 +19,7 @@ interface RecipeDetailProps {
 }
 
 export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("common");
   const tRecipes = useTranslations("recipes");
 
@@ -35,7 +35,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
 
   const handleDelete = async () => {
     await deleteRecipe(recipeId);
-    router.push(`/${locale}/recipes`);
+    navigate.push(`/${locale}/recipes`);
   };
 
   if (loading) {
@@ -48,16 +48,16 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         <p className="text-gray-500 dark:text-gray-400 mb-4">
           {tRecipes("recipeNotFound")}
         </p>
-        <Link
+        <TransitionLink
           href={`/${locale}/recipes`}
           className="text-blue-600 dark:text-blue-400 hover:underline"
         >
           {tRecipes("backToRecipes")}
-        </Link>
+        </TransitionLink>
       </div>
     );
   }
-  console.log(recipe);
+
   return (
     <div className="max-w-3xl mx-auto p-4">
       <RecipeHeader

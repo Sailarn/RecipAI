@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { z } from "zod";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
+import { useNavigate } from "@/lib/transitions";
 import { BasicInfo } from "./basic-info";
 import { FormActions } from "./form-actions";
 import { IngredientsSection } from "./ingredients-section";
@@ -75,7 +76,7 @@ interface RecipeFormProps {
 }
 
 export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const params = useParams();
   const [imageError, setImageError] = useState<string | null>(null);
   const locale = params.locale as string;
@@ -93,53 +94,53 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     mode: "onSubmit",
     defaultValues: recipe
       ? {
-        // Edit mode: existing recipe (convert numbers to strings)
-        title: recipe.title,
-        description: recipe.description || "",
-        imageUrl: recipe.imageUrl || "/images/recipe-placeholder.png",
-        prepTime: recipe.prepTime,
-        cookTime: recipe.cookTime,
-        servings: String(recipe.servings),
-        ingredients: recipe.ingredients.map((ing) => ({
-          item: ing.item,
-          amount: String(ing.amount),
-          unit: ing.unit || "",
-        })),
-        instructions: recipe.instructions.map((inst) => ({
-          instruction: inst.instruction,
-        })),
-      }
+          // Edit mode: existing recipe (convert numbers to strings)
+          title: recipe.title,
+          description: recipe.description || "",
+          imageUrl: recipe.imageUrl || "/images/recipe-placeholder.png",
+          prepTime: recipe.prepTime,
+          cookTime: recipe.cookTime,
+          servings: String(recipe.servings),
+          ingredients: recipe.ingredients.map((ing) => ({
+            item: ing.item,
+            amount: String(ing.amount),
+            unit: ing.unit || "",
+          })),
+          instructions: recipe.instructions.map((inst) => ({
+            instruction: inst.instruction,
+          })),
+        }
       : initialData
         ? {
-          // Parsed mode: AI-generated recipe
-          title: initialData.title || "",
-          description: initialData.description || "",
-          imageUrl: initialData.imageUrl || "",
-          prepTime: initialData.prepTime ?? undefined,
-          cookTime: initialData.cookTime ?? undefined,
-          servings: String(initialData.servings || 1),
-          ingredients: initialData.ingredients?.length
-            ? initialData.ingredients.map((ing: any) => ({
-              item: ing.item || "",
-              amount: String(ing.amount || 1),
-              unit: ing.unit || "",
-            }))
-            : [{ item: "", amount: "1", unit: "" }],
-          instructions: initialData.instructions?.length
-            ? initialData.instructions.map((inst: any) => ({
-              instruction: inst.instruction || "",
-            }))
-            : [{ instruction: "" }],
-        }
+            // Parsed mode: AI-generated recipe
+            title: initialData.title || "",
+            description: initialData.description || "",
+            imageUrl: initialData.imageUrl || "",
+            prepTime: initialData.prepTime ?? undefined,
+            cookTime: initialData.cookTime ?? undefined,
+            servings: String(initialData.servings || 1),
+            ingredients: initialData.ingredients?.length
+              ? initialData.ingredients.map((ing: any) => ({
+                  item: ing.item || "",
+                  amount: String(ing.amount || 1),
+                  unit: ing.unit || "",
+                }))
+              : [{ item: "", amount: "1", unit: "" }],
+            instructions: initialData.instructions?.length
+              ? initialData.instructions.map((inst: any) => ({
+                  instruction: inst.instruction || "",
+                }))
+              : [{ instruction: "" }],
+          }
         : {
-          // Create mode: empty form
-          title: "",
-          description: "",
-          imageUrl: "",
-          servings: "1",
-          ingredients: [{ item: "", amount: "1", unit: "" }],
-          instructions: [{ instruction: "" }],
-        },
+            // Create mode: empty form
+            title: "",
+            description: "",
+            imageUrl: "",
+            servings: "1",
+            ingredients: [{ item: "", amount: "1", unit: "" }],
+            instructions: [{ instruction: "" }],
+          },
   });
 
   const onSubmit = async (data: RecipeOutput) => {
@@ -190,7 +191,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       await createRecipe(recipeData);
     }
 
-    router.push(`/${locale}/recipes`);
+    navigate.push(`/${locale}/recipes`);
   };
 
   return (

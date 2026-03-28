@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -10,9 +9,11 @@ import { Button, Card } from "@/components/ui";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { useNavigate } from "@/lib/transitions";
 
 export default function RecipesPage() {
   const params = useParams();
+  const navigate = useNavigate();
   const locale = params.locale as string;
   const t = useTranslations("recipes");
   const tCommon = useTranslations("common");
@@ -40,9 +41,9 @@ export default function RecipesPage() {
         >
           {t("noRecipes")}
         </p>
-        <Link href={`/${locale}/recipes/new`}>
-          <Button>{t("createFirst")}</Button>
-        </Link>
+        <Button onClick={() => navigate.push(`/${locale}/recipes/new`)}>
+          {t("createFirst")}
+        </Button>
       </div>
     );
   }
@@ -57,9 +58,9 @@ export default function RecipesPage() {
           >
             {t("title")}
           </h1>
-          <Link href={`/${locale}/recipes/new`}>
-            <Button>{t("createRecipe")}</Button>
-          </Link>
+          <Button onClick={() => navigate.push(`/${locale}/recipes/new`)}>
+            {t("createRecipe")}
+          </Button>
         </div>
 
         <RecipeFilterBar
@@ -79,49 +80,49 @@ export default function RecipesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((recipe) => (
-              <Link key={recipe.id} href={`/${locale}/recipes/${recipe.id}`}>
-                <Card hover>
-                  <div className="flex flex-col h-full">
-                    <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
-                      <RecipeImage
-                        imageUrl={recipe.imageUrl}
-                        title={recipe.title}
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        width={600}
-                        height={192}
-                      />
-                    </div>
-                    <h2 className="text-xl font-semibold mb-2">
-                      {recipe.title}
-                    </h2>
-                    <div className="flex-1">
-                      {recipe.description && (
-                        <p
-                          className="text-sm line-clamp-2"
-                          style={{ color: "var(--muted-foreground)" }}
-                        >
-                          {recipe.description}
-                        </p>
-                      )}
-                    </div>
-                    <div
-                      className="flex gap-4 mt-3 text-sm"
-                      style={{ color: "var(--muted-foreground)" }}
-                    >
-                      {recipe.prepTime && (
-                        <span>
-                          ⏱️ {recipe.prepTime} {tCommon("minutes")}
-                        </span>
-                      )}
-                      {recipe.servings && (
-                        <span>
-                          🍽️ {recipe.servings} {t("servings")}
-                        </span>
-                      )}
-                    </div>
+              <Card
+                key={recipe.id}
+                onClick={() => navigate.push(`/${locale}/recipes/${recipe.id}`)}
+                hover
+              >
+                <div className="flex flex-col h-full">
+                  <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
+                    <RecipeImage
+                      imageUrl={recipe.imageUrl}
+                      title={recipe.title}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      width={600}
+                      height={192}
+                    />
                   </div>
-                </Card>
-              </Link>
+                  <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
+                  <div className="flex-1">
+                    {recipe.description && (
+                      <p
+                        className="text-sm line-clamp-2"
+                        style={{ color: "var(--muted-foreground)" }}
+                      >
+                        {recipe.description}
+                      </p>
+                    )}
+                  </div>
+                  <div
+                    className="flex gap-4 mt-3 text-sm"
+                    style={{ color: "var(--muted-foreground)" }}
+                  >
+                    {recipe.prepTime && (
+                      <span>
+                        ⏱️ {recipe.prepTime} {tCommon("minutes")}
+                      </span>
+                    )}
+                    {recipe.servings && (
+                      <span>
+                        🍽️ {recipe.servings} {t("servings")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
         )}

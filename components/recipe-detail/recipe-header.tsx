@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { TransitionLink } from "../transition-link";
 
 interface RecipeHeaderProps {
   locale: string;
@@ -19,19 +19,19 @@ export function RecipeHeader({
 
   return (
     <div className="flex items-center justify-between mb-6">
-      <Link
+      <TransitionLink
         href={`/${locale}/recipes`}
         className="text-blue-600 dark:text-blue-400 hover:underline"
       >
         {tRecipes("backToRecipes")}
-      </Link>
+      </TransitionLink>
       <div className="flex gap-2">
-        <Link
+        <TransitionLink
           href={`/${locale}/recipes/${recipeId}/edit`}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition-colors"
         >
           {t("edit")}
-        </Link>
+        </TransitionLink>
         <button
           type="button"
           onClick={onDeleteClick}

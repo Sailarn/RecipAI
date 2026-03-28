@@ -102,28 +102,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract first meaningful image URL
-let heroImage = "";
-$('img').each((_, el) => {
-  const src = $(el).attr('src') || $(el).attr('data-src') || '';
-  const width = parseInt($(el).attr('width') || '0');
-  const height = parseInt($(el).attr('height') || '0');
-  const alt = $(el).attr('alt') || '';
-  const cls = $(el).attr('class') || '';
+    let heroImage = "";
+    $("img").each((_, el) => {
+      const src = $(el).attr("src") || $(el).attr("data-src") || "";
+      const width = parseInt($(el).attr("width") || "0");
+      const height = parseInt($(el).attr("height") || "0");
+      const alt = $(el).attr("alt") || "";
+      const cls = $(el).attr("class") || "";
 
-  // Skip logos, icons, sprites
-  if (!src.startsWith('http')) return;
-  if (src.includes('logo') || src.includes('icon') || src.includes('sprite')) return;
-  if (cls.includes('logo') || cls.includes('icon')) return;
-  if (alt.toLowerCase().includes('logo')) return;
-  // Skip small images
-  if ((width > 0 && width < 200) || (height > 0 && height < 200)) return;
+      // Skip logos, icons, sprites
+      if (!src.startsWith("http")) return;
+      if (
+        src.includes("logo") ||
+        src.includes("icon") ||
+        src.includes("sprite")
+      )
+        return;
+      if (cls.includes("logo") || cls.includes("icon")) return;
+      if (alt.toLowerCase().includes("logo")) return;
+      // Skip small images
+      if ((width > 0 && width < 200) || (height > 0 && height < 200)) return;
 
-  heroImage = src;
-  return false; // take first match
-});
-if (heroImage) {
-  textContent = `Hero image URL: ${heroImage}\n\n${textContent}`;
-}
+      heroImage = src;
+      return false; // take first match
+    });
+    if (heroImage) {
+      textContent = `Hero image URL: ${heroImage}\n\n${textContent}`;
+    }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",

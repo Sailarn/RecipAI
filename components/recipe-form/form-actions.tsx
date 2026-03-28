@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui";
+import { useNavigate } from "@/lib/transitions";
 
 interface FormActionsProps {
   isSubmitting: boolean;
@@ -11,7 +11,7 @@ interface FormActionsProps {
 
 export function FormActions({ isSubmitting, isEdit }: FormActionsProps) {
   const t = useTranslations("common");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div className="flex gap-4">
@@ -21,7 +21,7 @@ export function FormActions({ isSubmitting, isEdit }: FormActionsProps) {
       <Button
         type="button"
         variant="secondary"
-        onClick={() => router.back()}
+        onClick={() => navigate.back()}
         disabled={isSubmitting}
       >
         {t("cancel")}

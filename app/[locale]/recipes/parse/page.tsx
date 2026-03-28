@@ -1,12 +1,13 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "@/lib/transitions";
 
 export interface ParsedRecipe {
   title: string;
@@ -29,7 +30,7 @@ export interface ParsedRecipe {
 
 export default function ParseRecipePage() {
   const t = useTranslations();
-  const router = useRouter();
+  const navigate = useNavigate();
   const params = useParams();
   const locale = params.locale as string;
 
@@ -86,7 +87,7 @@ export default function ParseRecipePage() {
     if (result) {
       // Store in localStorage
       localStorage.setItem("parsedRecipe", JSON.stringify(result));
-      router.push(`/${locale}/recipes/new`);
+      navigate.push(`/${locale}/recipes/new`);
     }
   };
 

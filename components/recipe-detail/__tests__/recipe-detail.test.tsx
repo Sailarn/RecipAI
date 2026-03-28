@@ -62,7 +62,7 @@ describe("RecipeDetail", () => {
   });
 
   it("shows loading state while fetching recipe", () => {
-    vi.mocked(recipesModule.getRecipe).mockReturnValue(new Promise(() => {}));
+    vi.mocked(recipesModule.getRecipe).mockReturnValue(new Promise(() => { }));
 
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
