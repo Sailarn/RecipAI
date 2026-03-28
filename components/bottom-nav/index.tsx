@@ -6,6 +6,7 @@ import { BookIcon, GridIcon, ScanIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
 import { NavStyles } from "./nav-styles";
+import { routes } from "@/lib/routes";
 
 export function BottomNav() {
   const params = useParams();
@@ -15,19 +16,19 @@ export function BottomNav() {
 
   const items = [
     {
-      href: `/${locale}/recipes`,
+      href: routes.recipes.list(locale),
       label: tNav("recipes"),
       icon: BookIcon,
       isActive: pathname.endsWith("/recipes"),
     },
     {
-      href: `/${locale}/recipes/parse`,
+      href: routes.recipes.parse(locale),
       label: "Parser",
       icon: ScanIcon,
       isActive: pathname.includes("/parse"),
     },
     {
-      href: `/${locale}/profile`,
+      href: routes.profile(locale),
       label: tNav("profile"),
       icon: GridIcon,
       isActive: pathname.includes("/profile"),

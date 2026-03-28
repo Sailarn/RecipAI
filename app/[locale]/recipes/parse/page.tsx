@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@/lib/transitions";
+import { api, routes } from "@/lib/routes";
 
 export interface ParsedRecipe {
   title: string;
@@ -60,7 +61,7 @@ export default function ParseRecipePage() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/parse-recipe", {
+      const response = await fetch(api.parseRecipe, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -87,7 +88,7 @@ export default function ParseRecipePage() {
     if (result) {
       // Store in localStorage
       localStorage.setItem("parsedRecipe", JSON.stringify(result));
-      navigate.push(`/${locale}/recipes/new`);
+      navigate.push(routes.recipes.new(locale));
     }
   };
 

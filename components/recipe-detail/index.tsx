@@ -12,6 +12,7 @@ import { IngredientsList } from "./ingredients-list";
 import { InstructionsList } from "./instructions-list";
 import { RecipeHeader } from "./recipe-header";
 import { RecipeMeta } from "./recipe-meta";
+import { routes } from "@/lib/routes";
 
 interface RecipeDetailProps {
   recipeId: string;
@@ -35,7 +36,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
 
   const handleDelete = async () => {
     await deleteRecipe(recipeId);
-    navigate.push(`/${locale}/recipes`);
+    navigate.push(routes.recipes.list(locale));
   };
 
   if (loading) {
@@ -49,7 +50,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           {tRecipes("recipeNotFound")}
         </p>
         <TransitionLink
-          href={`/${locale}/recipes`}
+          href={routes.recipes.list(locale)}
           className="text-blue-600 dark:text-blue-400 hover:underline"
         >
           {tRecipes("backToRecipes")}

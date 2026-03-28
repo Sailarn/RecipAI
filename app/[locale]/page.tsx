@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { TransitionLink } from "@/components/transition-link";
+import { routes } from "@/lib/routes";
 
 export default function HomePage() {
   const params = useParams();
@@ -31,7 +32,7 @@ export default function HomePage() {
             {tHome("tagline")}
           </p>
           <TransitionLink
-            href={`/${locale}/recipes`}
+            href={routes.recipes.list(locale)}
             className="flex h-12 w-full items-center justify-center rounded-full border border-solid px-5 transition-colors hover:bg-[var(--hover)] md:w-[158px]"
             style={{
               borderColor: "var(--input-border)",

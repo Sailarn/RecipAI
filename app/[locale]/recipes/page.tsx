@@ -10,6 +10,7 @@ import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { useNavigate } from "@/lib/transitions";
+import { routes } from "@/lib/routes";
 
 export default function RecipesPage() {
   const params = useParams();
@@ -41,7 +42,7 @@ export default function RecipesPage() {
         >
           {t("noRecipes")}
         </p>
-        <Button onClick={() => navigate.push(`/${locale}/recipes/new`)}>
+        <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
           {t("createFirst")}
         </Button>
       </div>
@@ -58,7 +59,7 @@ export default function RecipesPage() {
           >
             {t("title")}
           </h1>
-          <Button onClick={() => navigate.push(`/${locale}/recipes/new`)}>
+          <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
             {t("createRecipe")}
           </Button>
         </div>
@@ -82,7 +83,7 @@ export default function RecipesPage() {
             {filtered.map((recipe) => (
               <Card
                 key={recipe.id}
-                onClick={() => navigate.push(`/${locale}/recipes/${recipe.id}`)}
+                onClick={() => navigate.push(routes.recipes.detail(locale, recipe.id))}
                 hover
               >
                 <div className="flex flex-col h-full">

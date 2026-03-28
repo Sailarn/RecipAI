@@ -14,6 +14,7 @@ import { BasicInfo } from "./basic-info";
 import { FormActions } from "./form-actions";
 import { IngredientsSection } from "./ingredients-section";
 import { InstructionsSection } from "./instructions-section";
+import { routes } from "@/lib/routes";
 
 // Create a function that returns schema with translations
 function createRecipeSchema(t: (key: string) => string) {
@@ -94,53 +95,53 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     mode: "onSubmit",
     defaultValues: recipe
       ? {
-          // Edit mode: existing recipe (convert numbers to strings)
-          title: recipe.title,
-          description: recipe.description || "",
-          imageUrl: recipe.imageUrl || "/images/recipe-placeholder.png",
-          prepTime: recipe.prepTime,
-          cookTime: recipe.cookTime,
-          servings: String(recipe.servings),
-          ingredients: recipe.ingredients.map((ing) => ({
-            item: ing.item,
-            amount: String(ing.amount),
-            unit: ing.unit || "",
-          })),
-          instructions: recipe.instructions.map((inst) => ({
-            instruction: inst.instruction,
-          })),
-        }
+        // Edit mode: existing recipe (convert numbers to strings)
+        title: recipe.title,
+        description: recipe.description || "",
+        imageUrl: recipe.imageUrl || "/images/recipe-placeholder.png",
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        servings: String(recipe.servings),
+        ingredients: recipe.ingredients.map((ing) => ({
+          item: ing.item,
+          amount: String(ing.amount),
+          unit: ing.unit || "",
+        })),
+        instructions: recipe.instructions.map((inst) => ({
+          instruction: inst.instruction,
+        })),
+      }
       : initialData
         ? {
-            // Parsed mode: AI-generated recipe
-            title: initialData.title || "",
-            description: initialData.description || "",
-            imageUrl: initialData.imageUrl || "",
-            prepTime: initialData.prepTime ?? undefined,
-            cookTime: initialData.cookTime ?? undefined,
-            servings: String(initialData.servings || 1),
-            ingredients: initialData.ingredients?.length
-              ? initialData.ingredients.map((ing: any) => ({
-                  item: ing.item || "",
-                  amount: String(ing.amount || 1),
-                  unit: ing.unit || "",
-                }))
-              : [{ item: "", amount: "1", unit: "" }],
-            instructions: initialData.instructions?.length
-              ? initialData.instructions.map((inst: any) => ({
-                  instruction: inst.instruction || "",
-                }))
-              : [{ instruction: "" }],
-          }
+          // Parsed mode: AI-generated recipe
+          title: initialData.title || "",
+          description: initialData.description || "",
+          imageUrl: initialData.imageUrl || "",
+          prepTime: initialData.prepTime ?? undefined,
+          cookTime: initialData.cookTime ?? undefined,
+          servings: String(initialData.servings || 1),
+          ingredients: initialData.ingredients?.length
+            ? initialData.ingredients.map((ing: any) => ({
+              item: ing.item || "",
+              amount: String(ing.amount || 1),
+              unit: ing.unit || "",
+            }))
+            : [{ item: "", amount: "1", unit: "" }],
+          instructions: initialData.instructions?.length
+            ? initialData.instructions.map((inst: any) => ({
+              instruction: inst.instruction || "",
+            }))
+            : [{ instruction: "" }],
+        }
         : {
-            // Create mode: empty form
-            title: "",
-            description: "",
-            imageUrl: "",
-            servings: "1",
-            ingredients: [{ item: "", amount: "1", unit: "" }],
-            instructions: [{ instruction: "" }],
-          },
+          // Create mode: empty form
+          title: "",
+          description: "",
+          imageUrl: "",
+          servings: "1",
+          ingredients: [{ item: "", amount: "1", unit: "" }],
+          instructions: [{ instruction: "" }],
+        },
   });
 
   const onSubmit = async (data: RecipeOutput) => {
@@ -191,7 +192,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       await createRecipe(recipeData);
     }
 
-    navigate.push(`/${locale}/recipes`);
+    navigate.push(routes.recipes.list(locale));
   };
 
   return (
