@@ -3,11 +3,11 @@
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { routes } from "@/lib/routes";
 import { BookIcon, GridIcon, ScanIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
 import { NavStyles } from "./nav-styles";
-import { routes } from "@/lib/routes";
 
 export function BottomNav() {
   const params = useParams();

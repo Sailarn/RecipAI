@@ -8,7 +8,7 @@ import {
   useFieldArray,
 } from "react-hook-form";
 import { Button, Label, Textarea } from "@/components/ui";
-import type { RecipeFormData } from "./index";
+import type { RecipeFormData } from "./schema";
 
 interface InstructionsSectionProps {
   register: UseFormRegister<RecipeFormData>;

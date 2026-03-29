@@ -1,12 +1,11 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useNavigate } from "@/lib/transitions";
 
 export function LanguageSwitcher() {
   const t = useTranslations("language");
-  const navigate = useNavigate();
+  const router = useRouter();
   const params = useParams();
   const currentLocale = params.locale as string;
 
@@ -14,7 +13,7 @@ export function LanguageSwitcher() {
     const newLocale = currentLocale === "ua" ? "en" : "ua";
     const currentPath = window.location.pathname;
     const newPath = currentPath.replace(`/${currentLocale}`, `/${newLocale}`);
-    navigate.push(newPath);
+    router.push(newPath);
   };
 
   return (

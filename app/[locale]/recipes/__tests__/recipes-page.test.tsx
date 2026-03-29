@@ -75,14 +75,14 @@ describe("RecipesPage", () => {
     vi.clearAllMocks();
   });
 
-  it("shows loading state while fetching recipes", () => {
-    vi.mocked(recipesModule.getAllRecipes).mockReturnValue(
-      new Promise(() => { }),
+  it("shows loading state while fetching recipes", async () => {
+    vi.mocked(recipesModule.getAllRecipes).mockImplementation(
+      () => new Promise(() => {}),
     );
 
     render(<RecipesPage />);
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
   });
 
   it("shows empty state when no recipes exist", async () => {

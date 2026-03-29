@@ -14,8 +14,15 @@ vi.mock("@/lib/transitions", () => ({
 }));
 
 vi.mock("next-view-transitions", () => ({
-  Link: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) =>
-    createElement("a", { href, ...props }, children),
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }) => createElement("a", { href, ...props }, children),
   useTransitionRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),

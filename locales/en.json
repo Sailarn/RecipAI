@@ -28,7 +28,6 @@
     "title": "Recipes",
     "noRecipes": "No recipes yet",
     "createFirst": "Create your first recipe",
-    "deleteConfirm": "Are you sure you want to delete this recipe?",
     "createRecipe": "Create Recipe",
     "updateRecipe": "Update Recipe",
     "servings": "servings",
@@ -44,7 +43,9 @@
     "sortOldest": "Oldest first",
     "sortAZ": "A → Z",
     "sortZA": "Z → A",
-    "noResults": "No recipes found"
+    "noResults": "No recipes found",
+    "deleteConfirmTitle": "Delete Recipe",
+    "deleteConfirmMessage": "Are you sure you want to delete this recipe? This action cannot be undone."
   },
   "recipeForm": {
     "createTitle": "Create Recipe",

@@ -1,3 +1,4 @@
+import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -6,6 +7,8 @@ import { BottomNav } from "@/components/bottom-nav/index";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { locales } from "@/i18n/request";
 import "../globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export default async function LocaleLayout({
   children,
@@ -24,7 +27,7 @@ export default async function LocaleLayout({
 
   return (
     <ViewTransitions>
-      <html lang={locale} suppressHydrationWarning>
+      <html lang={locale} suppressHydrationWarning className={inter.variable}>
         <body suppressHydrationWarning>
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider>

@@ -28,7 +28,6 @@
     "title": "Рецепти",
     "noRecipes": "Рецептів ще немає",
     "createFirst": "Створіть свій перший рецепт",
-    "deleteConfirm": "Ви впевнені, що хочете видалити цей рецепт?",
     "createRecipe": "Створити рецепт",
     "updateRecipe": "Оновити рецепт",
     "servings": "порцій",
@@ -44,7 +43,9 @@
     "sortOldest": "Спочатку старі",
     "sortAZ": "А → Я",
     "sortZA": "Я → А",
-    "noResults": "Рецепти не знайдено"
+    "noResults": "Рецепти не знайдено",
+    "deleteConfirmTitle": "Видалити рецепт",
+    "deleteConfirmMessage": "Ви впевнені, що хочете видалити цей рецепт? Цю дію не можна скасувати."
   },
   "recipeForm": {
     "createTitle": "Створити рецепт",

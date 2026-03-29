@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { Input, Label, Textarea } from "@/components/ui";
-import type { RecipeFormData } from "./index";
+import type { RecipeFormData } from "./schema";
 
 interface BasicInfoProps {
   register: UseFormRegister<RecipeFormData>;

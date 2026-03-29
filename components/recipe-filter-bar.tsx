@@ -1,6 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 
 interface RecipeFilterBarProps {
@@ -20,33 +28,24 @@ export function RecipeFilterBar({
 
   return (
     <div className="flex gap-2 mb-6">
-      <input
+      <Input
         type="search"
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder={t("searchPlaceholder")}
-        className="flex-1 rounded-lg px-3 py-2 text-sm transition-colors"
-        style={{
-          background: "var(--input-bg)",
-          border: "1px solid var(--input-border)",
-          color: "var(--foreground)",
-        }}
+        className="flex-1"
       />
-      <select
-        value={sort}
-        onChange={(e) => onSortChange(e.target.value as SortOption)}
-        className="rounded-lg px-3 py-2 text-sm"
-        style={{
-          background: "var(--input-bg)",
-          border: "1px solid var(--input-border)",
-          color: "var(--foreground)",
-        }}
-      >
-        <option value="newest">{t("sortNewest")}</option>
-        <option value="oldest">{t("sortOldest")}</option>
-        <option value="az">{t("sortAZ")}</option>
-        <option value="za">{t("sortZA")}</option>
-      </select>
+      <Select value={sort} onValueChange={(v) => onSortChange(v as SortOption)}>
+        <SelectTrigger className="w-40 !h-11">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="newest">{t("sortNewest")}</SelectItem>
+          <SelectItem value="oldest">{t("sortOldest")}</SelectItem>
+          <SelectItem value="az">{t("sortAZ")}</SelectItem>
+          <SelectItem value="za">{t("sortZA")}</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

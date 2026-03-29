@@ -1,5 +1,7 @@
 "use client";
+
 import { useTranslations } from "next-intl";
+import { Separator } from "@/components/ui/separator";
 import type { Step } from "@/lib/db/schema";
 
 interface InstructionsListProps {
@@ -12,12 +14,13 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold mb-4">{t("instructions")}</h2>
+      <Separator className="mb-4" />
       <ol className="space-y-4">
         {instructions
           .sort((a, b) => a.order - b.order)
           .map((step) => (
             <li key={step.id} className="flex gap-3">
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
+              <span className="font-semibold text-primary min-w-[20px]">
                 {step.order}.
               </span>
               <span>{step.instruction}</span>
