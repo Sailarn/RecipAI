@@ -3,11 +3,18 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RecipeForm } from "@/components/recipe-form";
+import { useParams } from "next/navigation";
+import { AIImportButton } from "@/components/ai-import-button";
+import { TransitionLink } from "@/components/transition-link";
+import { routes } from "@/lib/routes";
 
 export default function NewRecipePage() {
   const t = useTranslations("recipeForm");
   const [initialData, setInitialData] = useState<any>(undefined);
+  const tRecipes = useTranslations("recipes");
   const [isReady, setIsReady] = useState(false);
+  const params = useParams();
+  const locale = params.locale as string;
 
   useEffect(() => {
     // Check for parsed recipe data in localStorage
@@ -46,6 +53,17 @@ export default function NewRecipePage() {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">{t("createTitle")}</h1>
+      <div className="flex items-center justify-between mb-6">
+        <TransitionLink
+          href={routes.recipes.list(locale)}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← {tRecipes("backToRecipes")}
+        </TransitionLink>
+      </div>
+      <div className="mb-6">
+        <AIImportButton />
+      </div>
       <RecipeForm initialData={initialData} />
     </div>
   );

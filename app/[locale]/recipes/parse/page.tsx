@@ -7,6 +7,7 @@ import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
 import { ParseResult } from "./components/parse-result";
+import { TransitionLink } from "@/components/transition-link";
 
 export interface ParsedRecipe {
   title: string;
@@ -84,6 +85,14 @@ export default function ParseRecipePage() {
   return (
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Parse Recipe from URL</h1>
+      <div className="flex items-center justify-between mb-6">
+        <TransitionLink
+          href={routes.recipes.new(locale)}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← Back to create recipe form
+        </TransitionLink>
+      </div>
       <ParseInfoBanner />
       <ParseForm
         url={url}

@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { routes } from "@/lib/routes";
-import { BookIcon, GridIcon, ScanIcon } from "./nav-icons";
+import { RecipesIcon, ProfileIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
 import { NavStyles } from "./nav-styles";
@@ -15,23 +15,20 @@ export function BottomNav() {
   const locale = params.locale as string;
   const tNav = useTranslations("navigation");
 
+  const hideOn = ["/recipes/new", "/recipes/parse", "/edit"];
+  const shouldHide = hideOn.some(path => pathname.includes(path));
+
   const items = [
     {
       href: routes.recipes.list(locale),
       label: tNav("recipes"),
-      icon: BookIcon,
+      icon: RecipesIcon,
       isActive: pathname.endsWith("/recipes"),
-    },
-    {
-      href: routes.recipes.parse(locale),
-      label: "Parser",
-      icon: ScanIcon,
-      isActive: pathname.includes("/parse"),
     },
     {
       href: routes.profile(locale),
       label: tNav("profile"),
-      icon: GridIcon,
+      icon: ProfileIcon,
       isActive: pathname.includes("/profile"),
     },
   ];
@@ -47,6 +44,8 @@ export function BottomNav() {
     }, 260); // slightly longer than transition duration (250ms)
     return () => clearTimeout(timer);
   }, [activeIndex]);
+
+  if (shouldHide) return null;
 
   return (
     <>

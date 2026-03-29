@@ -1,6 +1,4 @@
 export const routes = {
-  home: (locale: string) => `/${locale}`,
-
   recipes: {
     list: (locale: string) => `/${locale}/recipes`,
     detail: (locale: string, id: string) => `/${locale}/recipes/${id}`,
