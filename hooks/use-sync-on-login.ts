@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
@@ -12,13 +12,11 @@ export function useSyncOnLogin() {
   const localRecipes = useLiveQuery(() => db.recipes.toArray());
   const hasSynced = useRef(false);
 
-  useEffect(() => {
-    if (!session || localRecipes === undefined || hasSynced.current) return;
+  const sync = useCallback(async () => {
+    if (!session || localRecipes === undefined) return;
 
-    hasSynced.current = true;
-
-    const sync = async () => {
-      try {
+    try {
+      if (localRecipes.length > 0) {
         const pushRes = await fetch(api.recipesSync, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -28,25 +26,36 @@ export function useSyncOnLogin() {
         if (synced > 0) {
           toast.success(`${synced} recipe${synced !== 1 ? "s" : ""} synced`);
         }
-
-        // always pull remote
-        const pullRes = await fetch(api.recipesSync);
-        const { recipes: remote } = await pullRes.json();
-        if (remote?.length) {
-          await db.recipes.bulkPut(
-            remote.map((r: any) => ({
-              ...r,
-              createdAt: new Date(r.createdAt),
-              updatedAt: new Date(r.updatedAt),
-            })),
-          );
-        }
-      } catch {
-        toast.error("Sync failed, will retry next time");
-        hasSynced.current = false;
       }
-    };
 
-    sync();
+      const pullRes = await fetch(api.recipesSync);
+      const { recipes: remote } = await pullRes.json();
+      if (remote?.length) {
+        await db.recipes.bulkPut(
+          remote.map((r: any) => ({
+            ...r,
+            createdAt: new Date(r.createdAt),
+            updatedAt: new Date(r.updatedAt),
+          })),
+        );
+      }
+    } catch {
+      toast.error("Sync failed, will retry next time");
+      hasSynced.current = false;
+    }
   }, [session, localRecipes]);
+
+  useEffect(() => {
+    if (!session || localRecipes === undefined || hasSynced.current) return;
+    hasSynced.current = true;
+    sync();
+  }, [session, localRecipes, sync]);
+
+  const triggerSync = useCallback(async () => {
+    hasSynced.current = false;
+    await sync();
+    hasSynced.current = true;
+  }, [sync]);
+
+  return { triggerSync };
 }

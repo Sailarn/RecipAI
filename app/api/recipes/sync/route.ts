@@ -7,7 +7,8 @@ import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { recipes: localRecipes } = await req.json();
   if (!localRecipes?.length) return NextResponse.json({ synced: 0 });
