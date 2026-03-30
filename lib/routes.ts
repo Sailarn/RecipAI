@@ -8,10 +8,14 @@ export const routes = {
   },
 
   profile: (locale: string) => `/${locale}/profile`,
+  login: (locale: string) => `/${locale}/login`,
 } as const;
 
 export const api = {
   parseRecipe: "/api/parse-recipe",
+  recipesSync: "/api/recipes/sync",
+  recipes: "/api/recipes",
+  recipe: (id: string) => `/api/recipes/${id}`,
   images: {
     upload: "/api/images/upload",
     delete: "/api/images/delete",

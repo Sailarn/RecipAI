@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ProfileAuth } from "@/components/profile-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button, Card, CardContent, Separator } from "@/components/ui";
+import { Card, CardContent, Separator } from "@/components/ui";
 
 export default function ProfilePage() {
   const t = useTranslations("profile");
@@ -12,14 +13,8 @@ export default function ProfilePage() {
 
       {/* Login placeholder */}
       <Card className="mb-6 shadow-md border-0">
-        <CardContent className="flex flex-col items-center gap-3 text-center pt-6">
-          <div className="text-4xl">👤</div>
-          <p className="text-sm w-full break-words text-muted-foreground min-h-[40px]">
-            {t("loginPrompt")}
-          </p>
-          <Button disabled className="w-full opacity-60 cursor-not-allowed">
-            {t("login")}
-          </Button>
+        <CardContent className="pb-6">
+          <ProfileAuth />
         </CardContent>
       </Card>
 

@@ -9,6 +9,7 @@ import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
 import { Button } from "@/components/ui/button";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
+import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
@@ -23,6 +24,8 @@ export default function RecipesPage() {
   const [loading, setLoading] = useState(true);
   const { search, setSearch, sort, setSort, filtered } =
     useRecipeFilter(recipes);
+
+  useSyncOnLogin();
 
   useEffect(() => {
     getAllRecipes()

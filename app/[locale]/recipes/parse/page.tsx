@@ -2,12 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { TransitionLink } from "@/components/transition-link";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
 import { ParseResult } from "./components/parse-result";
-import { TransitionLink } from "@/components/transition-link";
 
 export interface ParsedRecipe {
   title: string;

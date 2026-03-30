@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { routes } from "@/lib/routes";
-import { RecipesIcon, ProfileIcon } from "./nav-icons";
+import { ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
 import { NavStyles } from "./nav-styles";
@@ -16,7 +16,7 @@ export function BottomNav() {
   const tNav = useTranslations("navigation");
 
   const hideOn = ["/recipes/new", "/recipes/parse", "/edit"];
-  const shouldHide = hideOn.some(path => pathname.includes(path));
+  const shouldHide = hideOn.some((path) => pathname.includes(path));
 
   const items = [
     {

@@ -1,6 +1,7 @@
 import { deleteImage } from "../images";
 import { db } from "./db";
 import type { Recipe } from "./schema";
+import { syncCreate, syncDelete, syncUpdate } from "./supabase-sync";
 
 /**
  * Create a new recipe
@@ -19,6 +20,7 @@ export async function createRecipe(
   };
 
   await db.recipes.add(newRecipe);
+  syncCreate(newRecipe); // fire-and-forget
   return id;
 }
 
@@ -47,6 +49,7 @@ export async function updateRecipe(
     ...updates,
     updatedAt: new Date(),
   });
+  syncUpdate(id, updates);
 }
 
 /**
@@ -60,4 +63,5 @@ export async function deleteRecipe(id: string): Promise<void> {
   }
 
   await db.recipes.delete(id);
+  syncDelete(id);
 }
