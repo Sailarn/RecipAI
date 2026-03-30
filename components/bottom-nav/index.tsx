@@ -16,7 +16,9 @@ export function BottomNav() {
   const tNav = useTranslations("navigation");
 
   const hideOn = ["/recipes/new", "/recipes/parse", "/edit"];
-  const shouldHide = hideOn.some((path) => pathname.includes(path));
+  const isDetailPage = /\/recipes\/[^/]+$/.test(pathname);
+  const shouldHide =
+    hideOn.some((path) => pathname.includes(path)) || isDetailPage;
 
   const items = [
     {
@@ -39,10 +41,8 @@ export function BottomNav() {
   const [displayIndex, setDisplayIndex] = useState(activeIndex);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDisplayIndex(activeIndex);
-    }, 260); // slightly longer than transition duration (250ms)
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDisplayIndex(activeIndex), 150);
+    return () => clearTimeout(t);
   }, [activeIndex]);
 
   if (shouldHide) return null;
@@ -52,7 +52,10 @@ export function BottomNav() {
       <NavStyles />
       <div
         className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          viewTransitionName: "bottom-nav",
+        }}
       >
         <nav className="glass-nav flex items-center rounded-2xl px-2 py-1.5">
           <div className="relative flex items-center flex-1">

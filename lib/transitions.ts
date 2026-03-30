@@ -7,7 +7,7 @@ export function slideTransition() {
       { opacity: 0, transform: "translateY(-8px)" },
     ],
     {
-      duration: 250,
+      duration: 150,
       easing: "ease",
       fill: "forwards",
       pseudoElement: "::view-transition-old(root)",
@@ -19,7 +19,7 @@ export function slideTransition() {
       { opacity: 1, transform: "translateY(0)" },
     ],
     {
-      duration: 250,
+      duration: 150,
       easing: "ease",
       fill: "forwards",
       pseudoElement: "::view-transition-new(root)",

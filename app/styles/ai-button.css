@@ -1,0 +1,85 @@
+.ai-import-btn {
+  background: linear-gradient(
+    135deg,
+    #f8fafc 0%,
+    #e2e8f0 40%,
+    #ede9fe 70%,
+    #f8fafc 100%
+  );
+  background-size: 200% 200%;
+  animation: ai-gradient 4s ease infinite;
+  color: #1e1b4b;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow:
+    0 0 16px rgba(139, 92, 246, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .ai-import-btn {
+  background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 40%, #1e1b4b 100%);
+  background-size: 200% 200%;
+  color: #ede9fe;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.ai-import-btn:hover {
+  box-shadow:
+    0 0 24px rgba(139, 92, 246, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.dark .ai-import-btn:hover {
+  box-shadow:
+    0 0 32px rgba(139, 92, 246, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.ai-import-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.15),
+    rgba(255, 255, 255, 0.4),
+    rgba(139, 92, 246, 0.15),
+    transparent
+  );
+  animation: ai-shimmer 3s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes ai-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ai-shimmer {
+  0% {
+    left: -100%;
+  }
+
+  60% {
+    left: 150%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
