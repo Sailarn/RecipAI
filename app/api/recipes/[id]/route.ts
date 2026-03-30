@@ -16,7 +16,8 @@ export async function PATCH(
   const { id } = await params;
   const updates = await req.json();
 
-  await db.update(recipes)
+  await db
+    .update(recipes)
     .set({
       ...updates,
       updatedAt: new Date(),

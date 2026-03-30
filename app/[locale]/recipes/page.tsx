@@ -1,5 +1,6 @@
 "use client";
 
+import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -20,18 +21,12 @@ export default function RecipesPage() {
   const navigate = useNavigate();
   const locale = params.locale as string;
   const t = useTranslations("recipes");
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
+  const recipes = useLiveQuery(() => getAllRecipes(), []) ?? [];
+  const loading = recipes === undefined;
   const { search, setSearch, sort, setSort, filtered } =
     useRecipeFilter(recipes);
 
   useSyncOnLogin();
-
-  useEffect(() => {
-    getAllRecipes()
-      .then((recipes) => setRecipes(recipes))
-      .finally(() => setLoading(false));
-  }, []);
 
   if (loading) return <RecipeListSkeleton />;
   if (recipes.length === 0) return <RecipeEmptyState />;

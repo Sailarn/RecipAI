@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
@@ -7,43 +7,31 @@ import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { recipes: localRecipes } = await req.json();
+  if (!localRecipes?.length) return NextResponse.json({ synced: 0 });
 
-  if (!localRecipes?.length) {
-    return NextResponse.json({ synced: 0 });
+  const ids = localRecipes.map((r: any) => r.id);
+  const existing = await db
+    .select({ id: recipes.id })
+    .from(recipes)
+    .where(inArray(recipes.id, ids));
+
+  const existingIds = new Set(existing.map((r) => r.id));
+  const newRecipes = localRecipes.filter((r: any) => !existingIds.has(r.id));
+
+  if (newRecipes.length > 0) {
+    const rows = newRecipes.map((r: any) => ({
+      ...r,
+      userId: session.user.id,
+      createdAt: new Date(r.createdAt),
+      updatedAt: new Date(r.updatedAt),
+    }));
+    await db.insert(recipes).values(rows).onConflictDoNothing();
   }
 
-  const rows = localRecipes.map((r: any) => ({
-  ...r,
-  userId: session.user.id,
-  createdAt: new Date(r.createdAt),
-  updatedAt: new Date(r.updatedAt),
-}));
-
-  await db.insert(recipes)
-  .values(rows)
-  .onConflictDoUpdate({
-    target: recipes.id,
-    set: {
-      title: sql`excluded.title`,
-      description: sql`excluded.description`,
-      imageUrl: sql`excluded.image_url`,
-      imageFileId: sql`excluded.image_file_id`,
-      prepTime: sql`excluded.prep_time`,
-      cookTime: sql`excluded.cook_time`,
-      totalTime: sql`excluded.total_time`,
-      servings: sql`excluded.servings`,
-      ingredients: sql`excluded.ingredients`,
-      instructions: sql`excluded.instructions`,
-      sourceUrl: sql`excluded.source_url`,
-      updatedAt: sql`excluded.updated_at`,
-    },
-  });
-
-  return NextResponse.json({ synced: rows.length });
+  return NextResponse.json({ synced: newRecipes.length });
 }
 
 export async function GET(req: NextRequest) {
