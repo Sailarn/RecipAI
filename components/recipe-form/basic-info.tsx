@@ -87,7 +87,11 @@ export function BasicInfo({ register, errors, control }: BasicInfoProps) {
           <Input
             id="prepTime"
             {...register("prepTime", {
-              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              setValueAs: (v) => {
+                if (v === "" || v === null || v === undefined) return undefined;
+                const n = Number(v);
+                return isNaN(n) ? undefined : n;
+              },
             })}
             type="number"
             step="0.01"
@@ -98,7 +102,11 @@ export function BasicInfo({ register, errors, control }: BasicInfoProps) {
           <Input
             id="cookTime"
             {...register("cookTime", {
-              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              setValueAs: (v) => {
+                if (v === "" || v === null || v === undefined) return undefined;
+                const n = Number(v);
+                return isNaN(n) ? undefined : n;
+              },
             })}
             type="number"
             step="0.01"

@@ -6,6 +6,7 @@ import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/lib/db/db";
 import { createRecipe } from "@/lib/db/recipes";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
+import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api } from "@/lib/routes";
 
@@ -31,7 +32,20 @@ export function useParseJobWatcher() {
       createdAt: new Date(),
     };
 
-    await db.parsedRecipes.add(entry);
+    let imageUrl = entry.imageUrl;
+    let imageFileId: string | undefined;
+
+    if (imageUrl && !isImageKitUrl(imageUrl)) {
+      try {
+        const uploaded = await uploadImage(imageUrl);
+        imageUrl = uploaded.url;
+        imageFileId = uploaded.fileId;
+      } catch {
+        // continue without image upload
+      }
+    }
+
+    await db.parsedRecipes.add({ ...entry, imageUrl, imageFileId });
 
     toast(result.title, {
       description: "Recipe parsed — tap to review",
@@ -43,7 +57,8 @@ export function useParseJobWatcher() {
           await createRecipe({
             title: entry.title,
             description: entry.description,
-            imageUrl: entry.imageUrl,
+            imageUrl,
+            imageFileId,
             prepTime: entry.prepTime,
             cookTime: entry.cookTime,
             totalTime:

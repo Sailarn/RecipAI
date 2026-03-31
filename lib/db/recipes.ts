@@ -59,7 +59,11 @@ export async function deleteRecipe(id: string): Promise<void> {
   const recipe = await db.recipes.get(id);
 
   if (recipe?.imageFileId) {
-    await deleteImage(recipe.imageFileId);
+    try {
+      await deleteImage(recipe.imageFileId);
+    } catch {
+      // image already gone or failed — continue with recipe deletion
+    }
   }
 
   await db.recipes.delete(id);

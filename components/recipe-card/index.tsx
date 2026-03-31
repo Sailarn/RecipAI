@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { RecipeImage } from "@/components/recipe-image";
 import { Card } from "@/components/ui/card";
+import { CATEGORY_COLORS } from "@/lib/categories";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -17,50 +18,41 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
   const locale = params.locale as string;
   const navigate = useNavigate();
   const t = useTranslations("recipes");
-  const tCommon = useTranslations("common");
 
   return (
     <Card
       onClick={() => navigate.push(routes.recipes.detail(locale, recipe.id))}
-      className="cursor-pointer transition-all h-full flex flex-col gap-0 p-4 rounded-lg border-0 ring-0 shadow-md hover:shadow-xl"
+      className="cursor-pointer transition-all h-full flex flex-col gap-0 p-0 rounded-xl border-0 shadow-md hover:shadow-xl overflow-hidden"
       style={{ backgroundColor: "var(--card)", color: "var(--foreground)" }}
     >
-      <div className="flex flex-col h-full">
-        <div className="relative w-full h-48 mb-3 overflow-hidden rounded-md">
-          <RecipeImage
-            imageUrl={recipe.imageUrl}
-            title={recipe.title}
-            sizes="(max-width: 768px) 100vw, 33vw"
-            width={600}
-            height={192}
-          />
-        </div>
-        <h2 className="text-xl font-semibold mb-2">{recipe.title}</h2>
-        <div className="flex-1">
-          {recipe.description && (
-            <p
-              className="text-sm line-clamp-2"
-              style={{ color: "var(--muted-foreground)" }}
-            >
-              {recipe.description}
-            </p>
-          )}
-        </div>
-        <div
-          className="flex gap-4 mt-3 text-sm"
-          style={{ color: "var(--muted-foreground)" }}
-        >
-          {recipe.prepTime && (
-            <span>
-              ⏱️ {recipe.prepTime} {tCommon("minutes")}
-            </span>
-          )}
-          {recipe.servings && (
-            <span>
-              🍽️ {recipe.servings} {t("servings")}
-            </span>
-          )}
-        </div>
+      <div className="relative w-full h-32 overflow-hidden">
+        <RecipeImage
+          imageUrl={recipe.imageUrl}
+          title={recipe.title}
+          sizes="(max-width: 768px) 50vw, 33vw"
+          width={300}
+          height={128}
+        />
+        {recipe.category && (
+          <span
+            className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[recipe.category] ?? "bg-gray-400 text-gray-950"}`}
+          >
+            {recipe.category}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-col flex-1 p-2 gap-1">
+        <h2 className="text-sm font-semibold line-clamp-2 leading-tight">
+          {recipe.title}
+        </h2>
+        {recipe.servings && (
+          <p
+            className="text-xs mt-auto"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            🍽️ {recipe.servings} {t("servings")}
+          </p>
+        )}
       </div>
     </Card>
   );

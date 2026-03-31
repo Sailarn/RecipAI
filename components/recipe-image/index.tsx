@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 
 const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
 const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL!;
@@ -25,7 +26,9 @@ export const RecipeImage = ({
   width = 800,
   height = 400,
 }: RecipeImageProps) => {
-  const src = imageUrl || PLACEHOLDER_URL;
+  const [errored, setErrored] = useState(false);
+
+  const src = errored || !imageUrl ? PLACEHOLDER_URL : imageUrl;
   const optimizedSrc = getOptimizedUrl(src, width, height);
 
   return (
@@ -36,9 +39,7 @@ export const RecipeImage = ({
         fill
         className="object-cover transition-opacity duration-300"
         sizes={sizes}
-        onError={(e) => {
-          e.currentTarget.src = PLACEHOLDER_URL;
-        }}
+        onError={() => setErrored(true)}
       />
     </div>
   );
