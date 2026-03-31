@@ -27,6 +27,7 @@ export const recipes = pgTable("recipes", {
   sourceUrl: text("source_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  category: text("category"),
 });
 
 export const recipesRelations = relations(recipes, ({ one }) => ({

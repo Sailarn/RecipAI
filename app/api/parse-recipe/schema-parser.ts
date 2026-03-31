@@ -17,6 +17,7 @@ interface SchemaRecipe {
   }>;
   imageUrl?: string;
   sourceUrl?: string;
+  category?: string;
 }
 
 /**
@@ -207,6 +208,14 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
         }
       }
 
+      let category: string | undefined;
+      if (recipe.recipeCategory) {
+        const raw = Array.isArray(recipe.recipeCategory)
+          ? recipe.recipeCategory[0]
+          : recipe.recipeCategory;
+        category = typeof raw === "string" ? raw : undefined;
+      }
+
       // Return parsed recipe
       return {
         title: recipe.name || "",
@@ -217,6 +226,7 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
         ingredients,
         instructions,
         imageUrl,
+        category,
       };
     } catch (error) {
       console.error("Error parsing JSON-LD:", error);

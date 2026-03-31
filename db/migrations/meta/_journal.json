@@ -15,6 +15,13 @@
       "when": 1774891440517,
       "tag": "0001_yielding_stellaris",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774954786548,
+      "tag": "0002_first_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

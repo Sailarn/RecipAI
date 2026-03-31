@@ -14,6 +14,8 @@ interface ParsedRecipeData {
     unit?: string | null;
   }>;
   instructions?: Array<{ instruction: string; order?: number }>;
+  sourceUrl?: string;
+  category?: string;
 }
 
 export function getDefaultValues(
@@ -36,6 +38,8 @@ export function getDefaultValues(
       instructions: recipe.instructions.map((inst) => ({
         instruction: inst.instruction,
       })),
+      sourceUrl: recipe.sourceUrl || "",
+      category: recipe.category || "",
     };
   }
 
@@ -59,6 +63,8 @@ export function getDefaultValues(
             instruction: inst.instruction || "",
           }))
         : [{ instruction: "" }],
+      sourceUrl: initialData.sourceUrl || "",
+      category: initialData.category || "",
     };
   }
 
@@ -69,6 +75,8 @@ export function getDefaultValues(
     servings: "1",
     ingredients: [{ item: "", amount: "1", unit: "" }],
     instructions: [{ instruction: "" }],
+    sourceUrl: "",
+    category: "",
   };
 }
 

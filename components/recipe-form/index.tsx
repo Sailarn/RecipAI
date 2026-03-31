@@ -96,7 +96,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
-      <BasicInfo register={register} errors={errors} />
+      <BasicInfo register={register} control={control} errors={errors} />
       <IngredientsSection
         register={register}
         control={control}

@@ -148,6 +148,7 @@ RULES:
 - imageUrl: ONLY the primary hero image URL.
 - If an ingredient appears without an amount in the text, set amount to null and unit to null — do not invent "1" as the amount
 - cookTime: look for patterns like "35 хв", "1 год 30 хв", "45 minutes" near the recipe title. Convert to minutes (e.g., "1 год 30 хв" -> 90, "35 хв" -> 35).
+- category: pick the single best fit from this list: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. If unclear, pick the closest match — never return null.
 ${userComment ? `\nUSER OVERRIDE (CRITICAL): ${userComment}\n` : ""}
 OUTPUT this exact JSON structure:
 {
@@ -156,6 +157,7 @@ OUTPUT this exact JSON structure:
   "prepTime": "number | null",
   "cookTime": "number | null",
   "servings": "number | null",
+  "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
   "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
   "instructions": [{ "order": "number", "instruction": "string" }],
   "imageUrl": "string | null"

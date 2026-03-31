@@ -22,7 +22,7 @@ export default function RecipesPage() {
   const t = useTranslations("recipes");
   const recipes = useLiveQuery(() => getAllRecipes(), []) ?? [];
   const loading = recipes === undefined;
-  const { search, setSearch, sort, setSort, filtered } =
+  const { search, setSearch, sort, setSort, category, setCategory, filtered } =
     useRecipeFilter(recipes);
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
@@ -62,6 +62,8 @@ export default function RecipesPage() {
             onSearchChange={setSearch}
             sort={sort}
             onSortChange={setSort}
+            category={category}
+            onCategoryChange={setCategory}
           />
           {filtered.length === 0 && search ? (
             <p

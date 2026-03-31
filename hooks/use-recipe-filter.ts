@@ -6,6 +6,7 @@ export type SortOption = "newest" | "oldest" | "az" | "za";
 export function useRecipeFilter(recipes: Recipe[]) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
+  const [category, setCategory] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     let result = [...recipes];
@@ -17,6 +18,10 @@ export function useRecipeFilter(recipes: Recipe[]) {
           r.title.toLowerCase().includes(query) ||
           r.description?.toLowerCase().includes(query),
       );
+    }
+
+    if (category) {
+      result = result.filter((r) => r.category === category);
     }
 
     result.sort((a, b) => {
@@ -39,7 +44,7 @@ export function useRecipeFilter(recipes: Recipe[]) {
     });
 
     return result;
-  }, [recipes, search, sort]);
+  }, [recipes, search, sort, category]);
 
-  return { search, setSearch, sort, setSort, filtered };
+  return { search, setSearch, sort, setSort, category, setCategory, filtered };
 }

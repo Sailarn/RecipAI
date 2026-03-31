@@ -45,7 +45,8 @@
     "sortZA": "Z → A",
     "noResults": "No recipes found",
     "deleteConfirmTitle": "Delete Recipe",
-    "deleteConfirmMessage": "Are you sure you want to delete this recipe? This action cannot be undone."
+    "deleteConfirmMessage": "Are you sure you want to delete this recipe? This action cannot be undone.",
+    "all": "All"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -75,7 +76,9 @@
     "instructionPlaceholder": "Enter step instructions...",
     "amountRequired": "Required",
     "servingsRequired": "Servings must be at least 1",
-    "imageUploadFailed": "Image upload failed. Please try again or remove the image."
+    "imageUploadFailed": "Image upload failed. Please try again or remove the image.",
+    "category": "Category",
+    "categoryPlaceholder": "Select category"
   },
   "form": {
     "required": "This field is required"

@@ -19,6 +19,7 @@ export interface ParsedRecipe {
   instructions: Array<{ order: number; instruction: string }>;
   imageUrl?: string;
   sourceUrl: string;
+  category?: string;
 }
 
 function isValidUrl(value: string): boolean {

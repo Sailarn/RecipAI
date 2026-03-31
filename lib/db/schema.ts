@@ -33,6 +33,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: Step[];
   sourceUrl?: string;
+  category?: string;
   createdAt: Date;
   updatedAt: Date;
 }

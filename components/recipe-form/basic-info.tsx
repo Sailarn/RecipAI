@@ -1,16 +1,32 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { Input, Label, Textarea } from "@/components/ui";
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type UseFormRegister,
+} from "react-hook-form";
+import {
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "@/components/ui";
+import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { RecipeFormData } from "./schema";
 
 interface BasicInfoProps {
   register: UseFormRegister<RecipeFormData>;
   errors: FieldErrors<RecipeFormData>;
+  control: Control<RecipeFormData>;
 }
 
-export function BasicInfo({ register, errors }: BasicInfoProps) {
+export function BasicInfo({ register, errors, control }: BasicInfoProps) {
   const t = useTranslations("recipeForm");
 
   return (
@@ -28,6 +44,28 @@ export function BasicInfo({ register, errors }: BasicInfoProps) {
       <div>
         <Label htmlFor="description">{t("description")}</Label>
         <Textarea id="description" {...register("description")} rows={3} />
+      </div>
+
+      <div>
+        <Label htmlFor="category">{t("category")}</Label>
+        <Controller
+          name="category"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value || ""}>
+              <SelectTrigger>
+                <SelectValue placeholder={t("categoryPlaceholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                {RECIPE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div>

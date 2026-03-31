@@ -39,6 +39,8 @@ export function createRecipeSchema(t: (key: string) => string) {
         val.filter((inst) => inst.instruction.trim().length > 0),
       )
       .optional(),
+    sourceUrl: z.string().url().or(z.literal("")).optional(),
+    category: z.string().optional(),
   });
 }
 
