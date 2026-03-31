@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TransitionLink } from "@/components/transition-link";
+import { Button } from "@/components/ui";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
@@ -35,12 +36,59 @@ export default function ParseRecipePage() {
   const navigate = useNavigate();
   const params = useParams();
   const locale = params.locale as string;
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [url, setUrl] = useState("");
   const [userComment, setUserComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ParsedRecipe | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+
+  const poll = useCallback((id: string) => {
+    const run = async () => {
+      try {
+        const statusRes = await fetch(api.parseQueueJob(id));
+        const { status, result, error } = await statusRes.json();
+
+        if (status === "done") {
+          setResult(result as ParsedRecipe);
+          setLoading(false);
+          setJobId(null);
+          localStorage.removeItem("parseJobId");
+        } else if (status === "failed") {
+          setError(error || "Failed to parse recipe");
+          setLoading(false);
+          setJobId(null);
+          localStorage.removeItem("parseJobId");
+        } else {
+          pollRef.current = setTimeout(run, 3000);
+        }
+      } catch {
+        setError("Network error while checking status");
+        setLoading(false);
+        setJobId(null);
+        localStorage.removeItem("parseJobId");
+      }
+    };
+    run();
+  }, []);
+
+  // resume polling on mount if job was in progress
+  useEffect(() => {
+    const savedJobId = localStorage.getItem("parseJobId");
+    if (!savedJobId) return;
+    setJobId(savedJobId);
+    setLoading(true);
+    poll(savedJobId);
+  }, [poll]);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearTimeout(pollRef.current);
+    };
+  }, []);
 
   const handleParse = async () => {
     if (!isValidUrl(url)) {
@@ -50,21 +98,35 @@ export default function ParseRecipePage() {
     setLoading(true);
     setError(null);
     setResult(null);
+
     try {
-      const response = await fetch(api.parseRecipe, {
+      // create job
+      const res = await fetch(api.parseQueue, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, userComment: userComment || undefined }),
       });
-      const data = await response.json();
-      if (data.success) {
-        setResult(data.recipe);
-      } else {
-        setError(data.error || "Failed to parse recipe");
-      }
+
+      const { jobId: newJobId } = await res.json();
+      localStorage.setItem("parseJobId", newJobId);
+      setJobId(newJobId);
+      setLoading(false);
+
+      window.dispatchEvent(
+        new CustomEvent("parse-job-created", { detail: { jobId: newJobId } }),
+      );
+
+      // client triggers processing — fire and forget
+      fetch(api.parseQueueProcess, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId: newJobId }),
+      })
+        .then((r) => r.json())
+        .then((data) => console.log("process response:", data))
+        .catch((err) => console.error("process error:", err));
     } catch {
       setError("Network error. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -81,6 +143,8 @@ export default function ParseRecipePage() {
     setUrl("");
     setUserComment("");
     setError(null);
+    setJobId(null);
+    localStorage.removeItem("parseJobId");
   };
 
   return (
@@ -110,6 +174,23 @@ export default function ParseRecipePage() {
           onSave={handleSave}
           onReset={handleReset}
         />
+      )}
+      {jobId && !result && (
+        <div className="mt-4 p-4 rounded-xl bg-muted text-sm text-muted-foreground text-center space-y-3">
+          <p>⏳ Parsing in background...</p>
+          <p className="text-xs">You'll get a notification when it's ready.</p>
+          <div className="flex gap-2 justify-center">
+            <Button variant="outline" size="sm" onClick={handleReset}>
+              Parse another
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => navigate.push(routes.recipes.list(locale))}
+            >
+              Go to recipes
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,23 +1,22 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Recipe } from "./schema";
+import type { ParsedRecipeEntry, Recipe } from "./schema";
 
-/**
- * Database class extending Dexie
- * Defines the structure of our IndexedDB database
- */
 class RecipeDatabase extends Dexie {
-  // Define table with Recipe type
   recipes!: EntityTable<Recipe, "id">;
+  parsedRecipes!: EntityTable<ParsedRecipeEntry, "id">;
 
   constructor() {
-    super("RecipeAppDB"); // Database name
+    super("RecipeAppDB");
 
-    // Schema version 1
     this.version(1).stores({
-      recipes: "id, title, createdAt, updatedAt", // Indexed fields
+      recipes: "id, title, createdAt, updatedAt",
+    });
+
+    this.version(2).stores({
+      recipes: "id, title, createdAt, updatedAt",
+      parsedRecipes: "id, createdAt",
     });
   }
 }
 
-// Export single instance (singleton pattern)
 export const db = new RecipeDatabase();

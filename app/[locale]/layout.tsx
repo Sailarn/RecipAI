@@ -5,6 +5,7 @@ import { getMessages } from "next-intl/server";
 import { ViewTransitions } from "next-view-transitions";
 import { Toaster } from "sonner";
 import { BottomNav } from "@/components/bottom-nav/index";
+import { ParseJobWatcher } from "@/components/parse-job-watcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { locales } from "@/i18n/request";
 import "../globals.css";
@@ -37,6 +38,7 @@ export default async function LocaleLayout({
                   {children}
                 </main>
                 <Toaster position="bottom-center" />
+                <ParseJobWatcher />
                 <BottomNav />
               </div>
             </ThemeProvider>

@@ -46,3 +46,13 @@ export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
 // Textarea
 export { Textarea } from "./textarea";
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./sheet";

@@ -20,4 +20,7 @@ export const api = {
     upload: "/api/images/upload",
     delete: "/api/images/delete",
   },
+  parseQueue: "/api/parse-queue",
+  parseQueueJob: (id: string) => `/api/parse-queue/${id}`,
+  parseQueueProcess: "/api/parse-queue/process",
 } as const;

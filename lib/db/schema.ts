@@ -37,3 +37,18 @@ export interface Recipe {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ParsedRecipeEntry {
+  id: string;
+  title: string;
+  description?: string;
+  prepTime?: number;
+  cookTime?: number;
+  servings: number;
+  ingredients: Array<{ amount?: number; unit?: string; item: string }>;
+  instructions: Array<{ order: number; instruction: string }>;
+  imageUrl?: string;
+  sourceUrl?: string;
+  category?: string;
+  createdAt: Date;
+}

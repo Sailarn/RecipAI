@@ -14,6 +14,7 @@ import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getAllRecipes } from "@/lib/db/recipes";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { ParsedRecipesSheet } from "@/components/parsed-recipes-sheet";
 
 export default function RecipesPage() {
   const params = useParams();
@@ -28,8 +29,6 @@ export default function RecipesPage() {
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
   });
-
-  useSyncOnLogin();
 
   if (loading) return <RecipeListSkeleton />;
   if (recipes.length === 0) return <RecipeEmptyState />;
@@ -53,9 +52,12 @@ export default function RecipesPage() {
             >
               {t("title")}
             </h1>
-            <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
-              {t("createRecipe")}
-            </Button>
+            <div className="flex items-center gap-2">
+              <ParsedRecipesSheet />
+              <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
+                {t("createRecipe")}
+              </Button>
+            </div>
           </div>
           <RecipeFilterBar
             search={search}
