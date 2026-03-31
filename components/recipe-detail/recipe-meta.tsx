@@ -33,7 +33,7 @@ export function RecipeMeta({
 
   return (
     <div className="flex gap-6 mb-8 text-sm text-muted-foreground">
-      {items.map((item, i) => (
+      {items.map((item) => (
         <div key={item.label}>
           <span className="font-medium text-foreground">{item.label}:</span>{" "}
           {item.value}

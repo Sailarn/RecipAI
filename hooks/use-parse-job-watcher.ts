@@ -6,15 +6,14 @@ import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/lib/db/db";
 import { createRecipe } from "@/lib/db/recipes";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
+import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api } from "@/lib/routes";
-
-const JOB_KEY = "parseJobId";
 
 export function useParseJobWatcher() {
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleDone = useCallback(async (result: ParsedRecipe) => {
-    localStorage.removeItem(JOB_KEY);
+  const handleDone = useCallback(async (id: string, result: ParsedRecipe) => {
+    removeJobId(id);
 
     // save to parsedRecipes table
     const entry: ParsedRecipeEntry = {
@@ -36,7 +35,8 @@ export function useParseJobWatcher() {
 
     toast(result.title, {
       description: "Recipe parsed — tap to review",
-      duration: Number.POSITIVE_INFINITY,
+      duration: 5000,
+      closeButton: true,
       action: {
         label: "Save",
         onClick: async () => {
@@ -86,9 +86,9 @@ export function useParseJobWatcher() {
           const { status, result, error } = await res.json();
 
           if (status === "done") {
-            await handleDone(result as ParsedRecipe);
+            await handleDone(id, result as ParsedRecipe);
           } else if (status === "failed") {
-            localStorage.removeItem(JOB_KEY);
+            removeJobId(id);
             toast.error(error || "Failed to parse recipe");
           } else {
             pollRef.current = setTimeout(run, 3000);
@@ -104,8 +104,10 @@ export function useParseJobWatcher() {
 
   useEffect(() => {
     // check on mount
-    const savedJobId = localStorage.getItem(JOB_KEY);
-    if (savedJobId) poll(savedJobId);
+    const savedJobIds = getJobIds();
+    savedJobIds.forEach((jobId) => {
+      poll(jobId);
+    });
 
     // listen for new jobs created after mount
     const handler = (e: Event) => {

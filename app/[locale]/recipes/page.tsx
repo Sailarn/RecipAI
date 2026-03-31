@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ParsedRecipesSheet } from "@/components/parsed-recipes-sheet";
 import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
@@ -14,7 +15,6 @@ import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getAllRecipes } from "@/lib/db/recipes";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { ParsedRecipesSheet } from "@/components/parsed-recipes-sheet";
 
 export default function RecipesPage() {
   const params = useParams();

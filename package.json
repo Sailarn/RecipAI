@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "check:all": "./scripts/check.sh",
-    "check": "biome check --write .",
+    "check": "biome check --write . --max-diagnostics=50",
     "check:ci": "biome ci .",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint .",

@@ -11,7 +11,7 @@ import type { Recipe } from "@/lib/db/schema";
 import { RecipeDetail } from "../index";
 
 vi.mock("@/components/ui/alert-dialog", () => ({
-  AlertDialog: ({ children, open, onOpenChange }: any) =>
+  AlertDialog: ({ children, open }: any) =>
     open ? <div>{children}</div> : null,
   AlertDialogContent: ({ children }: any) => <div>{children}</div>,
   AlertDialogHeader: ({ children }: any) => <div>{children}</div>,

@@ -43,9 +43,6 @@ export {
   SelectValue,
 } from "./select";
 export { Separator } from "./separator";
-export { Skeleton } from "./skeleton";
-// Textarea
-export { Textarea } from "./textarea";
 export {
   Sheet,
   SheetClose,
@@ -56,3 +53,6 @@ export {
   SheetTitle,
   SheetTrigger,
 } from "./sheet";
+export { Skeleton } from "./skeleton";
+// Textarea
+export { Textarea } from "./textarea";

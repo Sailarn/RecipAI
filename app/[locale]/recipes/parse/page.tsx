@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TransitionLink } from "@/components/transition-link";
 import { Button } from "@/components/ui";
+import { addJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
@@ -108,7 +109,7 @@ export default function ParseRecipePage() {
       });
 
       const { jobId: newJobId } = await res.json();
-      localStorage.setItem("parseJobId", newJobId);
+      addJobId(newJobId);
       setJobId(newJobId);
       setLoading(false);
 
