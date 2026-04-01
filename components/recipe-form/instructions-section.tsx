@@ -1,13 +1,15 @@
 "use client";
 
+import { ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import {
   type Control,
   type FieldErrors,
   type UseFormRegister,
   useFieldArray,
 } from "react-hook-form";
-import { Button, Label, Textarea } from "@/components/ui";
+import { Button, Input, Label, Textarea } from "@/components/ui";
 import type { RecipeFormData } from "./schema";
 
 interface InstructionsSectionProps {
@@ -26,6 +28,13 @@ export function InstructionsSection({
     control,
     name: "instructions",
   });
+  const [expandedImages, setExpandedImages] = useState<Record<number, boolean>>(
+    {},
+  );
+
+  const toggleImage = (index: number) => {
+    setExpandedImages((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   return (
     <div className="space-y-4">
@@ -36,13 +45,28 @@ export function InstructionsSection({
           <span className="text-sm font-medium mt-2 min-w-[2rem]">
             {index + 1}.
           </span>
-          <div className="flex-1">
+          <div className="flex-1 space-y-2">
             <Textarea
               {...register(`instructions.${index}.instruction`)}
               rows={2}
               placeholder={t("instructionPlaceholder")}
               error={!!errors.instructions?.[index]?.instruction}
             />
+            {expandedImages[index] && (
+              <Input
+                {...register(`instructions.${index}.imageUrl`)}
+                placeholder="Image URL"
+                type="url"
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => toggleImage(index)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ImageIcon className="w-3 h-3" />
+              {expandedImages[index] ? "Remove image" : "Add image"}
+            </button>
           </div>
           {fields.length > 1 && (
             <Button
@@ -63,7 +87,7 @@ export function InstructionsSection({
       <Button
         type="button"
         variant="secondary"
-        onClick={() => append({ instruction: "" })}
+        onClick={() => append({ instruction: "", imageUrl: "" })}
       >
         + {t("addStep")}
       </Button>

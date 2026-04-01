@@ -78,11 +78,27 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         id: crypto.randomUUID(),
         ...ing,
       })),
-      instructions: (data.instructions || []).map((inst, idx) => ({
-        id: crypto.randomUUID(),
-        order: idx + 1,
-        instruction: inst.instruction,
-      })),
+      instructions: await Promise.all(
+        (data.instructions || []).map(async (inst, idx) => {
+          let stepImageUrl = inst.imageUrl || "";
+
+          if (stepImageUrl && !isImageKitUrl(stepImageUrl)) {
+            try {
+              const uploaded = await uploadImage(stepImageUrl);
+              stepImageUrl = uploaded.url;
+            } catch {
+              // keep original url if upload fails
+            }
+          }
+
+          return {
+            id: crypto.randomUUID(),
+            order: idx + 1,
+            instruction: inst.instruction,
+            imageUrl: stepImageUrl || undefined,
+          };
+        }),
+      ),
     };
 
     if (recipe) {

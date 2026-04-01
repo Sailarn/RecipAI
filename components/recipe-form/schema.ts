@@ -34,7 +34,12 @@ export function createRecipeSchema(t: (key: string) => string) {
         { message: t("ingredientsRequired") },
       ),
     instructions: z
-      .array(z.object({ instruction: z.string() }))
+      .array(
+        z.object({
+          instruction: z.string(),
+          imageUrl: z.string().optional(),
+        }),
+      )
       .transform((val) =>
         val.filter((inst) => inst.instruction.trim().length > 0),
       )

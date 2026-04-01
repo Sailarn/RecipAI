@@ -3,23 +3,16 @@
 import { useTranslations } from "next-intl";
 
 interface RecipeMetaProps {
-  servings: number;
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;
 }
 
-export function RecipeMeta({
-  servings,
-  prepTime,
-  cookTime,
-  totalTime,
-}: RecipeMetaProps) {
-  const t = useTranslations("recipes");
+export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
   const tCommon = useTranslations("common");
+  const t = useTranslations("recipes");
 
   const items = [
-    { label: t("servings"), value: String(servings) },
     prepTime
       ? { label: t("prepTime"), value: `${prepTime} ${tCommon("minutes")}` }
       : null,
@@ -31,8 +24,10 @@ export function RecipeMeta({
       : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
+  if (items.length === 0) return null;
+
   return (
-    <div className="flex gap-6 mb-8 text-sm text-muted-foreground">
+    <div className="flex gap-6 mb-4 text-sm text-muted-foreground">
       {items.map((item) => (
         <div key={item.label}>
           <span className="font-medium text-foreground">{item.label}:</span>{" "}

@@ -85,6 +85,7 @@ RULES:
 - If an ingredient appears without an amount in the text, set amount to null and unit to null — do not invent "1" as the amount.
 - cookTime: look for patterns like "35 хв", "1 год 30 хв", "45 minutes" near the recipe title. Convert to minutes.
 - category: pick the single best fit from this list: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never return null.
+- For instructions: if a step has an associated image URL, include it as imageUrl. Otherwise null.
 ${userComment ? `\nUSER OVERRIDE (CRITICAL): ${userComment}\n` : ""}
 OUTPUT this exact JSON structure:
 {
@@ -95,7 +96,7 @@ OUTPUT this exact JSON structure:
   "servings": "number | null",
   "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
   "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
-  "instructions": [{ "order": "number", "instruction": "string" }],
+  "instructions": [{ "order": "number", "instruction": "string", "imageUrl": "string | null" }],
   "imageUrl": "string | null"
 }
 

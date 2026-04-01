@@ -14,6 +14,7 @@ interface SchemaRecipe {
   instructions: Array<{
     order: number;
     instruction: string;
+    imageUrl?: string;
   }>;
   imageUrl?: string;
   sourceUrl?: string;
@@ -170,11 +171,17 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
         if (Array.isArray(instructionData)) {
           instructions = instructionData.map((inst: any, idx: number) => {
             let text = "";
+            let stepImage: string | undefined;
 
             if (typeof inst === "string") {
               text = inst;
             } else if (inst["@type"] === "HowToStep") {
               text = inst.text || inst.name || "";
+              if (inst.image) {
+                if (typeof inst.image === "string") stepImage = inst.image;
+                else if (Array.isArray(inst.image)) stepImage = inst.image[0];
+                else if (inst.image.url) stepImage = inst.image.url;
+              }
             } else if (inst.text) {
               text = inst.text;
             }
@@ -182,6 +189,7 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
             return {
               order: idx + 1,
               instruction: text.trim(),
+              imageUrl: stepImage,
             };
           });
         } else if (typeof instructionData === "string") {

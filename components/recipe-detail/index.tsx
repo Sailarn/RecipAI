@@ -17,9 +17,10 @@ import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { CookingCarousel } from "../cooking-carousel";
 import { RecipeImage } from "../recipe-image";
+import { ServingsCalculator } from "../servings-calculator";
 import { TransitionLink } from "../transition-link";
-import { IngredientsList } from "./ingredients-list";
 import { InstructionsList } from "./instructions-list";
 import { RecipeHeader } from "./recipe-header";
 import { RecipeMeta } from "./recipe-meta";
@@ -37,6 +38,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [cookingMode, setCookingMode] = useState(false);
 
   useEffect(() => {
     getRecipe(recipeId)
@@ -115,15 +117,28 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       )}
 
       <RecipeMeta
-        servings={recipe.servings}
         prepTime={recipe.prepTime}
         cookTime={recipe.cookTime}
         totalTime={recipe.totalTime}
       />
-
-      <IngredientsList ingredients={recipe.ingredients} />
+      <button
+        type="button"
+        onClick={() => setCookingMode(true)}
+        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-6 hover:bg-primary/90 transition-colors"
+      >
+        Start Cooking
+      </button>
+      <ServingsCalculator
+        originalServings={recipe.servings}
+        ingredients={recipe.ingredients}
+      />
       <InstructionsList instructions={recipe.instructions} />
-
+      {cookingMode && (
+        <CookingCarousel
+          recipe={recipe}
+          onClose={() => setCookingMode(false)}
+        />
+      )}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>

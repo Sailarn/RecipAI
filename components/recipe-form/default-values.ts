@@ -13,7 +13,11 @@ interface ParsedRecipeData {
     amount?: number | null;
     unit?: string | null;
   }>;
-  instructions?: Array<{ instruction: string; order?: number }>;
+  instructions?: Array<{
+    instruction: string;
+    order?: number;
+    imageUrl?: string;
+  }>;
   sourceUrl?: string;
   category?: string;
 }
@@ -37,6 +41,7 @@ export function getDefaultValues(
       })),
       instructions: recipe.instructions.map((inst) => ({
         instruction: inst.instruction,
+        imageUrl: inst.imageUrl || "",
       })),
       sourceUrl: recipe.sourceUrl || "",
       category: recipe.category || "",
@@ -61,8 +66,9 @@ export function getDefaultValues(
       instructions: initialData.instructions?.length
         ? initialData.instructions.map((inst) => ({
             instruction: inst.instruction || "",
+            imageUrl: inst.imageUrl || "",
           }))
-        : [{ instruction: "" }],
+        : [{ instruction: "", imageUrl: "" }],
       sourceUrl: initialData.sourceUrl || "",
       category: initialData.category || "",
     };

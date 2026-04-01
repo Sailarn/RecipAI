@@ -15,6 +15,7 @@ export interface Step {
   id: string; // Unique ID for this step
   order: number; // Step number: 1, 2, 3...
   instruction: string; // The actual instruction text
+  imageUrl?: string;
 }
 
 /**
