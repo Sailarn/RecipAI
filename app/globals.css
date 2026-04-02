@@ -8,7 +8,7 @@
 @custom-variant dark (&:is(.dark *));
 
 main>* {
-    animation: scale-up 0.2s ease-out;
+    animation: scale-up 0.5s ease-out;
 }
 
 
