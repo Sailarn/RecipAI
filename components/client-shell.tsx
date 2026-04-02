@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Toaster } from "sonner";
+import { useSwipeBack } from "@/hooks/use-swipe-back";
 
 const BottomNav = dynamic(
   () =>
@@ -18,6 +19,7 @@ const ParseJobWatcher = dynamic(
 );
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
+  useSwipeBack();
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 mx-auto max-w-7xl pb-24 w-full">{children}</main>
