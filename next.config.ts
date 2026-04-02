@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+
 // import bundleAnalyzer from "@next/bundle-analyzer";
 
 // const withBundleAnalyzer = bundleAnalyzer({
@@ -34,7 +35,6 @@ export default withSentryConfig(withSerwist(withNextIntl(nextConfig)), {
   project: "recipai-app",
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  disableLogger: true,
   sourcemaps: {
     disable: false,
   },

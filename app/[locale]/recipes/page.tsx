@@ -1,9 +1,9 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
+import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ParsedRecipesSheet } from "@/components/parsed-recipes-sheet";
 import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
@@ -15,6 +15,14 @@ import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getAllRecipes } from "@/lib/db/recipes";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+
+const ParsedRecipesSheet = dynamic(
+  () =>
+    import("@/components/parsed-recipes-sheet").then((m) => ({
+      default: m.ParsedRecipesSheet,
+    })),
+  { ssr: false },
+);
 
 export default function RecipesPage() {
   const params = useParams();
@@ -77,7 +85,11 @@ export default function RecipesPage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {filtered.map((recipe, index) => (
-                <RecipeCard key={recipe.id} recipe={recipe} priority={index < 2} />
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  priority={index < 2}
+                />
               ))}
             </div>
           )}

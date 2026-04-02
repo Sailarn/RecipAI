@@ -4,14 +4,16 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ViewTransitions } from "next-view-transitions";
-import { Toaster } from "sonner";
-import { BottomNav } from "@/components/bottom-nav/index";
-import { ParseJobWatcher } from "@/components/parse-job-watcher";
+import { ClientShell } from "@/components/client-shell";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { locales } from "@/i18n/request";
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export default async function LocaleLayout({
   children,
@@ -31,20 +33,16 @@ export default async function LocaleLayout({
   return (
     <ViewTransitions>
       <html lang={locale} suppressHydrationWarning className={inter.variable}>
+        <head>
+          <link rel="preconnect" href="https://ik.imagekit.io" />
+        </head>
         <body suppressHydrationWarning>
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider>
-              <div className="min-h-screen flex flex-col">
-                <main className="flex-1 mx-auto max-w-7xl pb-24 w-full">
-                  {children}
-                </main>
-                <Toaster position="bottom-center" />
-                <ParseJobWatcher />
-                <BottomNav />
-                <SpeedInsights />
-              </div>
+              <ClientShell>{children}</ClientShell>
             </ThemeProvider>
           </NextIntlClientProvider>
+          <SpeedInsights />
         </body>
       </html>
     </ViewTransitions>
