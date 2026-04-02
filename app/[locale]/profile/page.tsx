@@ -32,6 +32,12 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className="text-sm font-medium">Version</span>
+        <span className="text-sm text-muted-foreground">
+          v{process.env.NEXT_PUBLIC_APP_VERSION}
+        </span>
+      </div>
     </div>
   );
 }
