@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { nav } from "@/lib/transitions";
 
 export function TransitionLink({
   href,
@@ -12,7 +13,14 @@ export function TransitionLink({
   style?: React.CSSProperties;
 }) {
   return (
-    <Link href={href} className={className} style={style}>
+    <Link
+      href={href}
+      className={className}
+      style={style}
+      onClick={() => {
+        nav.direction = "forward";
+      }}
+    >
       {children}
     </Link>
   );

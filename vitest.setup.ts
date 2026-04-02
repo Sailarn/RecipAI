@@ -2,7 +2,6 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 import "fake-indexeddb/auto";
-import { createElement } from "react";
 
 vi.mock("@/lib/transitions", () => ({
   slideTransition: vi.fn(),
