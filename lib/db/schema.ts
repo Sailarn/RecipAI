@@ -47,7 +47,11 @@ export interface ParsedRecipeEntry {
   cookTime?: number;
   servings: number;
   ingredients: Array<{ amount?: number; unit?: string; item: string }>;
-  instructions: Array<{ order: number; instruction: string, imageUrl?: string }>;
+  instructions: Array<{
+    order: number;
+    instruction: string;
+    imageUrl?: string;
+  }>;
   imageUrl?: string;
   imageFileId?: string;
   sourceUrl?: string;

@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/lib/db/db";
+import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api } from "@/lib/routes";
-import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 
 export function useParseJobWatcher() {
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,9 +54,9 @@ export function useParseJobWatcher() {
       action: {
         label: "Save",
         onClick: async () => {
-         await saveParsedRecipe(entry);
-await db.parsedRecipes.delete(entry.id);
-toast.success("Recipe saved!");
+          await saveParsedRecipe(entry);
+          await db.parsedRecipes.delete(entry.id);
+          toast.success("Recipe saved!");
         },
       },
       cancel: {

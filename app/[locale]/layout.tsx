@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
                 <Toaster position="bottom-center" />
                 <ParseJobWatcher />
                 <BottomNav />
+                <SpeedInsights />
               </div>
             </ThemeProvider>
           </NextIntlClientProvider>

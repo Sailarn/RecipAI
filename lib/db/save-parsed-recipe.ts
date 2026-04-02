@@ -1,8 +1,10 @@
-import { createRecipe } from "./recipes";
 import { isImageKitUrl, uploadImage } from "../images";
+import { createRecipe } from "./recipes";
 import type { ParsedRecipeEntry } from "./schema";
 
-export async function saveParsedRecipe(entry: ParsedRecipeEntry): Promise<void> {
+export async function saveParsedRecipe(
+  entry: ParsedRecipeEntry,
+): Promise<void> {
   // save immediately with original URLs
   const id = await createRecipe({
     title: entry.title,
@@ -65,7 +67,7 @@ export async function saveParsedRecipe(entry: ParsedRecipeEntry): Promise<void> 
           instruction: inst.instruction,
           imageUrl,
         };
-      })
+      }),
     );
 
     if (hasUpdates) {
