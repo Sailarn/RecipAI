@@ -17,6 +17,7 @@ interface RecipeImageProps {
   sizes?: string;
   width?: number;
   height?: number;
+  priority?: boolean;
 }
 
 export const RecipeImage = ({
@@ -25,9 +26,9 @@ export const RecipeImage = ({
   sizes = "100vw",
   width = 800,
   height = 400,
+  priority = false,
 }: RecipeImageProps) => {
   const [errored, setErrored] = useState(false);
-
   const src = errored || !imageUrl ? PLACEHOLDER_URL : imageUrl;
   const optimizedSrc = getOptimizedUrl(src, width, height);
 
@@ -37,8 +38,10 @@ export const RecipeImage = ({
         src={optimizedSrc}
         alt={title}
         fill
+        priority={priority}
         className="object-cover transition-opacity duration-300"
         sizes={sizes}
+        loading={priority ? "eager" : "lazy"}
         onError={() => setErrored(true)}
       />
     </div>

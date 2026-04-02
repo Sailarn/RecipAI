@@ -11,9 +11,10 @@ import { useNavigate } from "@/lib/transitions";
 
 interface RecipeCardProps {
   recipe: Recipe;
+  priority?: boolean;
 }
 
-export function RecipeCard({ recipe }: RecipeCardProps) {
+export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           sizes="(max-width: 768px) 50vw, 33vw"
           width={300}
           height={128}
+          priority={priority}
         />
         {recipe.category && (
           <span
