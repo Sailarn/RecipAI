@@ -50,64 +50,76 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const onSubmit = async (data: RecipeOutput) => {
     setImageError(null);
 
-    let imageUrl = data.imageUrl || "";
-    let imageFileId = recipe?.imageFileId;
-
-    if (imageUrl && !isImageKitUrl(imageUrl)) {
-      try {
-        if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
-        const uploaded = await uploadImage(imageUrl);
-        imageUrl = uploaded.url;
-        imageFileId = uploaded.fileId;
-      } catch (err) {
-        setImageError(
-          err instanceof Error ? err.message : t("imageUploadFailed"),
-        );
-        return;
-      }
-    }
-
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
+
+    // build instructions without waiting for uploads
+    const instructions = (data.instructions || []).map((inst, idx) => ({
+      id: crypto.randomUUID(),
+      order: idx + 1,
+      instruction: inst.instruction,
+      imageUrl: inst.imageUrl || undefined,
+    }));
 
     const recipeData = {
       ...data,
-      imageUrl,
-      imageFileId,
+      imageUrl: data.imageUrl || "",
+      imageFileId: recipe?.imageFileId,
       totalTime,
       ingredients: data.ingredients.map((ing) => ({
         id: crypto.randomUUID(),
         ...ing,
       })),
-      instructions: await Promise.all(
-        (data.instructions || []).map(async (inst, idx) => {
-          let stepImageUrl = inst.imageUrl || "";
-
-          if (stepImageUrl && !isImageKitUrl(stepImageUrl)) {
-            try {
-              const uploaded = await uploadImage(stepImageUrl);
-              stepImageUrl = uploaded.url;
-            } catch {
-              // keep original url if upload fails
-            }
-          }
-
-          return {
-            id: crypto.randomUUID(),
-            order: idx + 1,
-            instruction: inst.instruction,
-            imageUrl: stepImageUrl || undefined,
-          };
-        }),
-      ),
+      instructions,
     };
 
+    let savedId: string;
     if (recipe) {
       await updateRecipe(recipe.id, recipeData);
+      savedId = recipe.id;
     } else {
-      await createRecipe(recipeData);
+      savedId = await createRecipe(recipeData);
     }
 
+    // navigate immediately
     navigate.push(routes.recipes.list(locale));
+
+    // upload images in background after navigation
+    (async () => {
+      const updates: Partial<typeof recipeData> = {};
+      let hasUpdates = false;
+
+      // main image
+      if (recipeData.imageUrl && !isImageKitUrl(recipeData.imageUrl)) {
+        try {
+          if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
+          const uploaded = await uploadImage(recipeData.imageUrl);
+          updates.imageUrl = uploaded.url;
+          updates.imageFileId = uploaded.fileId;
+          hasUpdates = true;
+        } catch {}
+      }
+
+      // step images
+      const updatedInstructions = await Promise.all(
+        instructions.map(async (inst) => {
+          if (inst.imageUrl && !isImageKitUrl(inst.imageUrl)) {
+            try {
+              const uploaded = await uploadImage(inst.imageUrl);
+              hasUpdates = true;
+              return { ...inst, imageUrl: uploaded.url };
+            } catch {
+              return inst;
+            }
+          }
+          return inst;
+        }),
+      );
+
+      if (hasUpdates) {
+        updates.instructions = updatedInstructions;
+        await updateRecipe(savedId, updates);
+      }
+    })();
   };
 
   return (

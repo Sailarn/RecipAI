@@ -13,8 +13,8 @@ import {
 } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db/db";
-import { createRecipe } from "@/lib/db/recipes";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
+import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 
 export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
@@ -38,29 +38,7 @@ export function ParsedRecipesSheet() {
       }
     }
 
-    await createRecipe({
-      title: entry.title,
-      description: entry.description,
-      prepTime: entry.prepTime,
-      cookTime: entry.cookTime,
-      totalTime: (entry.prepTime || 0) + (entry.cookTime || 0) || undefined,
-      servings: entry.servings,
-      ingredients: entry.ingredients.map((ing) => ({
-        id: crypto.randomUUID(),
-        item: ing.item,
-        amount: ing.amount,
-        unit: ing.unit,
-      })),
-      instructions: entry.instructions.map((inst, idx) => ({
-        id: crypto.randomUUID(),
-        order: idx + 1,
-        instruction: inst.instruction,
-      })),
-      sourceUrl: entry.sourceUrl,
-      category: entry.category,
-      imageFileId,
-      imageUrl,
-    });
+    await saveParsedRecipe(entry);
 
     await db.parsedRecipes.delete(id);
     toast.success("Recipe saved!");

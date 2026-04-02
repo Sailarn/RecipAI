@@ -29,7 +29,14 @@ export function InstructionsSection({
     name: "instructions",
   });
   const [expandedImages, setExpandedImages] = useState<Record<number, boolean>>(
-    {},
+    () => {
+      // pre-expand any steps that already have images
+      const initial: Record<number, boolean> = {};
+      fields.forEach((field, idx) => {
+        if ((field as any).imageUrl) initial[idx] = true;
+      });
+      return initial;
+    },
   );
 
   const toggleImage = (index: number) => {
@@ -53,11 +60,23 @@ export function InstructionsSection({
               error={!!errors.instructions?.[index]?.instruction}
             />
             {expandedImages[index] && (
-              <Input
-                {...register(`instructions.${index}.imageUrl`)}
-                placeholder="Image URL"
-                type="url"
-              />
+              <div className="space-y-1">
+                <Input
+                  {...register(`instructions.${index}.imageUrl`)}
+                  placeholder="Image URL"
+                  type="url"
+                />
+                {/* preview */}
+                {(fields[index] as any).imageUrl && (
+                  <div className="relative h-20 w-32 rounded overflow-hidden">
+                    <img
+                      src={(fields[index] as any).imageUrl}
+                      alt={`Step ${index + 1}`}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+              </div>
             )}
             <button
               type="button"

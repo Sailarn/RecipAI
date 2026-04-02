@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/lib/db/db";
-import { createRecipe } from "@/lib/db/recipes";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api } from "@/lib/routes";
+import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 
 export function useParseJobWatcher() {
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,32 +54,9 @@ export function useParseJobWatcher() {
       action: {
         label: "Save",
         onClick: async () => {
-          await createRecipe({
-            title: entry.title,
-            description: entry.description,
-            imageUrl,
-            imageFileId,
-            prepTime: entry.prepTime,
-            cookTime: entry.cookTime,
-            totalTime:
-              (entry.prepTime || 0) + (entry.cookTime || 0) || undefined,
-            servings: entry.servings,
-            ingredients: entry.ingredients.map((ing) => ({
-              id: crypto.randomUUID(),
-              item: ing.item,
-              amount: ing.amount,
-              unit: ing.unit,
-            })),
-            instructions: entry.instructions.map((inst, idx) => ({
-              id: crypto.randomUUID(),
-              order: idx + 1,
-              instruction: inst.instruction,
-            })),
-            sourceUrl: entry.sourceUrl,
-            category: entry.category,
-          });
-          await db.parsedRecipes.delete(entry.id);
-          toast.success("Recipe saved!");
+         await saveParsedRecipe(entry);
+await db.parsedRecipes.delete(entry.id);
+toast.success("Recipe saved!");
         },
       },
       cancel: {
