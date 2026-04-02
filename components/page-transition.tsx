@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 function getDepth(pathname: string): number {
   if (pathname.includes("/edit")) return 4;
@@ -21,7 +21,6 @@ export default function PageTransition({
 }) {
   const pathname = usePathname();
   const currentDepth = getDepth(pathname);
-  const isForward = useRef(currentDepth >= prevDepth);
 
   useEffect(() => {
     prevDepth = currentDepth;
@@ -29,13 +28,9 @@ export default function PageTransition({
 
   return (
     <motion.div
-      initial={{
-        x: isForward.current ? 60 : -60,
-        opacity: 0,
-        filter: "blur(4px)",
-      }}
-      animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
-      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       style={{ width: "100%", overflow: "hidden" }}
     >
       {children}
