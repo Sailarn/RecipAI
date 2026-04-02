@@ -1,5 +1,4 @@
-"use client";
-import { useNavigate } from "@/lib/transitions";
+import Link from "next/link";
 
 export function TransitionLink({
   href,
@@ -12,19 +11,9 @@ export function TransitionLink({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const { push } = useNavigate();
-
   return (
-    <a
-      href={href}
-      onClick={(e) => {
-        e.preventDefault();
-        push(href);
-      }}
-      className={className}
-      style={style}
-    >
+    <Link href={href} className={className} style={style}>
       {children}
-    </a>
+    </Link>
   );
 }

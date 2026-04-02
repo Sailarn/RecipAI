@@ -105,6 +105,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           sizes="100vw"
           width={800}
           height={320}
+          priority
         />
       </div>
 

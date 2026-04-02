@@ -1,4 +1,4 @@
-import { useTransitionRouter } from "next-view-transitions";
+import { useRouter } from "next/navigation";
 
 export function slideTransition() {
   document.documentElement.animate(
@@ -28,22 +28,10 @@ export function slideTransition() {
 }
 
 export function useNavigate() {
-  const router = useTransitionRouter();
+  const router = useRouter();
   return {
-    push: (href: string) => {
-      try {
-        router.push(href, { onTransitionReady: slideTransition });
-      } catch {
-        router.push(href);
-      }
-    },
+    push: (href: string) => router.push(href),
     back: () => router.back(),
-    replace: (href: string) => {
-      try {
-        router.replace(href, { onTransitionReady: slideTransition });
-      } catch {
-        router.replace(href);
-      }
-    },
+    replace: (href: string) => router.replace(href),
   };
 }
