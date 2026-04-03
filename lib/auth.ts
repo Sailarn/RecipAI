@@ -21,6 +21,11 @@ export const auth = betterAuth({
     telegram({
       botToken: process.env.TELEGRAM_BOT_TOKEN!,
       botUsername: process.env.TELEGRAM_BOT_USERNAME!,
+      loginWidget: false,
+      oidc: {
+        enabled: true,
+        clientSecret: process.env.TELEGRAM_OIDC_CLIENT_SECRET!,
+      },
     }),
   ],
 });

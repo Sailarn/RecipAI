@@ -1,73 +1,77 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 interface LinkedAccountsProps {
-    linkedProviders: string[];
-    telegramLinked: boolean;
-    onTelegramLinked: () => void;
-    onLinkGoogle: () => void;
-    onAddPasskey: () => void;
+  linkedProviders: string[];
+  telegramLinked: boolean;
+  onLinkGoogle: () => void;
+  onAddPasskey: () => void;
 }
 
 export function LinkedAccounts({
-    linkedProviders,
-    telegramLinked,
-    onTelegramLinked,
-    onLinkGoogle,
-    onAddPasskey,
+  linkedProviders,
+  telegramLinked,
+  onLinkGoogle,
+  onAddPasskey,
 }: LinkedAccountsProps) {
-    const googleLinked = linkedProviders.includes("google");
-    const passkeyLinked = linkedProviders.includes("passkey");
+  const googleLinked = linkedProviders.includes("google");
+  const passkeyLinked = linkedProviders.includes("passkey");
 
-    useEffect(() => {
-        if (telegramLinked) return;
-        authClient.initTelegramWidget(
-            "telegram-link-container",
-            { size: "medium", cornerRadius: 8 },
-            async (authData) => {
-                const result = await authClient.linkTelegram(authData);
-                if (!result.error) onTelegramLinked();
-            }
-        );
-    }, [telegramLinked]);
+  const handleLinkTelegramOIDC = async () => {
+    await authClient.linkSocial({
+      provider: "telegram-oidc",
+      callbackURL: window.location.href,
+    });
+  };
 
-    return (
-        <div className="w-full flex flex-col gap-3">
-            {linkedProviders.length > 0 && (
-                <div className="text-left">
-                    <p className="text-xs text-muted-foreground mb-2">Connected accounts</p>
-                    <div className="flex flex-wrap gap-2">
-                        {googleLinked && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-muted">Google</span>
-                        )}
-                        {telegramLinked && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-muted">Telegram</span>
-                        )}
-                        {passkeyLinked && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-muted">Passkey</span>
-                        )}
-                    </div>
-                </div>
+  return (
+    <div className="w-full flex flex-col gap-3">
+      {linkedProviders.length > 0 && (
+        <div className="text-left">
+          <p className="text-xs text-muted-foreground mb-2">
+            Connected accounts
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {googleLinked && (
+              <span className="text-xs px-2 py-1 rounded-full bg-muted">
+                Google
+              </span>
             )}
-
-            {!googleLinked && (
-                <Button variant="outline" className="w-full" onClick={onLinkGoogle}>
-                    Link Google
-                </Button>
+            {telegramLinked && (
+              <span className="text-xs px-2 py-1 rounded-full bg-muted">
+                Telegram
+              </span>
             )}
-            {!passkeyLinked && (
-                <Button variant="outline" className="w-full" onClick={onAddPasskey}>
-                    Add Passkey
-                </Button>
+            {passkeyLinked && (
+              <span className="text-xs px-2 py-1 rounded-full bg-muted">
+                Passkey
+              </span>
             )}
-            {!telegramLinked && (
-                <div className="flex justify-center">
-                    <div id="telegram-link-container" />
-                </div>
-            )}
+          </div>
         </div>
-    );
+      )}
+
+      {!googleLinked && (
+        <Button variant="outline" className="w-full" onClick={onLinkGoogle}>
+          Link Google
+        </Button>
+      )}
+      {!passkeyLinked && (
+        <Button variant="outline" className="w-full" onClick={onAddPasskey}>
+          Add Passkey
+        </Button>
+      )}
+      {!telegramLinked && (
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleLinkTelegramOIDC}
+        >
+          Link Telegram
+        </Button>
+      )}
+    </div>
+  );
 }

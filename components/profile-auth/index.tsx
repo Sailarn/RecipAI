@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui";
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 import { LinkedAccounts } from "./linked-accounts";
@@ -12,8 +12,7 @@ export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
-  const { linkedProviders, telegramLinked, setTelegramLinked } =
-    useLinkedAccounts(!!session);
+  const { linkedProviders, telegramLinked } = useLinkedAccounts(!!session);
 
   const handleSignIn = () => router.push(routes.login(locale));
 
@@ -59,7 +58,6 @@ export function ProfileAuth() {
         <LinkedAccounts
           linkedProviders={linkedProviders}
           telegramLinked={telegramLinked}
-          onTelegramLinked={() => setTelegramLinked(true)}
           onLinkGoogle={handleLinkGoogle}
           onAddPasskey={handleAddPasskey}
         />

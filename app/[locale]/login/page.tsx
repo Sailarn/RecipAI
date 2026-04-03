@@ -24,6 +24,12 @@ export default function LoginPage() {
     await authClient.signIn.passkey();
   };
 
+  const handleTelegramSignIn = async () => {
+    await authClient.signInWithTelegramOIDC({
+      callbackURL: routes.recipes.list(locale),
+    });
+  };
+
   useEffect(() => {
     authClient.initTelegramWidget(
       "telegram-login-container",
@@ -58,7 +64,13 @@ export default function LoginPage() {
           >
             Continue with Passkey
           </Button>
-          <div id="telegram-login-container" />
+          <Button
+            onClick={handleTelegramSignIn}
+            variant="outline"
+            className="w-full"
+          >
+            Continue with Telegram
+          </Button>
         </CardContent>
       </Card>
     </div>
