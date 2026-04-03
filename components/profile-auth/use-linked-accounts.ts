@@ -8,8 +8,9 @@ export function useLinkedAccounts(hasSession: boolean) {
   useEffect(() => {
     if (!hasSession) return;
     authClient.listAccounts().then((res) => {
-      const providers = (res.data ?? []).map((a: any) => a.provider);
-      console.log("linked providers:", providers); // add this
+      console.log("raw accounts:", JSON.stringify(res.data));
+      const providers = (res.data ?? []).map((a: any) => a.providerId);
+      console.log("linked providers:", providers);
       setLinkedProviders(providers);
       setTelegramLinked(
         providers.includes("telegram") || providers.includes("telegram-oidc"),
