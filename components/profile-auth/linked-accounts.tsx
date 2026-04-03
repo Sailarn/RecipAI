@@ -1,7 +1,9 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { routes } from "@/lib/routes";
 
 interface LinkedAccountsProps {
   linkedProviders: string[];
@@ -16,13 +18,15 @@ export function LinkedAccounts({
   onLinkGoogle,
   onAddPasskey,
 }: LinkedAccountsProps) {
+  const params = useParams();
+  const locale = params.locale as string;
   const googleLinked = linkedProviders.includes("google");
   const passkeyLinked = linkedProviders.includes("passkey");
 
   const handleLinkTelegramOIDC = async () => {
     await authClient.linkSocial({
       provider: "telegram-oidc",
-      callbackURL: window.location.href,
+      callbackURL: routes.profile(locale),
     });
   };
 
