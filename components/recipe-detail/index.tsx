@@ -17,6 +17,7 @@ import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { isVideoUrl } from "@/lib/video-url";
 import { CookingCarousel } from "../cooking-carousel";
 import { RecipeImage } from "../recipe-image";
 import { ServingsCalculator } from "../servings-calculator";
@@ -24,7 +25,6 @@ import { TransitionLink } from "../transition-link";
 import { InstructionsList } from "./instructions-list";
 import { RecipeHeader } from "./recipe-header";
 import { RecipeMeta } from "./recipe-meta";
-import { isVideoUrl } from "@/lib/video-url";
 
 interface RecipeDetailProps {
   recipeId: string;

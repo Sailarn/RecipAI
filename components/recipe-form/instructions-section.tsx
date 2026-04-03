@@ -1,8 +1,8 @@
 "use client";
 
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   type Control,
   type FieldErrors,
@@ -16,12 +16,14 @@ interface InstructionsSectionProps {
   register: UseFormRegister<RecipeFormData>;
   control: Control<RecipeFormData>;
   errors: FieldErrors<RecipeFormData>;
+  onStepFileSelect: (index: number, file: File | null) => void;
 }
 
 export function InstructionsSection({
   register,
   control,
   errors,
+  onStepFileSelect,
 }: InstructionsSectionProps) {
   const t = useTranslations("recipeForm");
   const { fields, append, remove } = useFieldArray({
@@ -30,7 +32,6 @@ export function InstructionsSection({
   });
   const [expandedImages, setExpandedImages] = useState<Record<number, boolean>>(
     () => {
-      // pre-expand any steps that already have images
       const initial: Record<number, boolean> = {};
       fields.forEach((field, idx) => {
         if ((field as any).imageUrl) initial[idx] = true;
@@ -38,10 +39,36 @@ export function InstructionsSection({
       return initial;
     },
   );
+  const [stepPreviews, setStepPreviews] = useState<Record<number, string>>({});
+  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const toggleImage = (index: number) => {
     setExpandedImages((prev) => ({ ...prev, [index]: !prev[index] }));
   };
+
+  function handleStepFileChange(
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) return;
+    onStepFileSelect(index, file);
+    setStepPreviews((prev) => ({
+      ...prev,
+      [index]: URL.createObjectURL(file),
+    }));
+  }
+
+  function handleClearStepFile(index: number) {
+    onStepFileSelect(index, null);
+    setStepPreviews((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+    const input = fileInputRefs.current[index];
+    if (input) input.value = "";
+  }
 
   return (
     <div className="space-y-4">
@@ -61,16 +88,51 @@ export function InstructionsSection({
             />
             {expandedImages[index] && (
               <div className="space-y-1">
-                <Input
-                  {...register(`instructions.${index}.imageUrl`)}
-                  placeholder="Image URL"
-                  type="url"
-                />
-                {/* preview */}
-                {(fields[index] as any).imageUrl && (
+                <div className="flex gap-2 items-center">
+                  <Input
+                    {...register(`instructions.${index}.imageUrl`)}
+                    placeholder="Image URL"
+                    type="url"
+                    className="flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRefs.current[index]?.click()}
+                    className="shrink-0 p-2 rounded-md border border-input hover:bg-accent transition-colors"
+                    title="Upload from device"
+                  >
+                    <ImagePlus className="w-4 h-4" />
+                  </button>
+                  <input
+                    ref={(el) => {
+                      fileInputRefs.current[index] = el;
+                    }}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleStepFileChange(index, e)}
+                  />
+                </div>
+                {stepPreviews[index] && (
+                  <div className="relative h-20 w-32 rounded overflow-hidden border border-input">
+                    <img
+                      src={stepPreviews[index]}
+                      alt={`Step ${index + 1}`}
+                      className="object-cover w-full h-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleClearStepFile(index)}
+                      className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                )}
+                {!stepPreviews[index] && (field as any).imageUrl && (
                   <div className="relative h-20 w-32 rounded overflow-hidden">
                     <img
-                      src={(fields[index] as any).imageUrl}
+                      src={(field as any).imageUrl}
                       alt={`Step ${index + 1}`}
                       className="object-cover w-full h-full"
                     />

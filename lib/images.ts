@@ -5,13 +5,24 @@ const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
 export const isImageKitUrl = (url: string) => url.startsWith(IMAGEKIT_URL);
 
 export async function uploadImage(
-  imageUrl: string,
+  source: string | File,
 ): Promise<{ url: string; fileId: string }> {
-  const response = await fetch(api.images.upload, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: imageUrl }),
-  });
+  let response: Response;
+
+  if (source instanceof File) {
+    const form = new FormData();
+    form.append("file", source);
+    response = await fetch(api.images.upload, {
+      method: "POST",
+      body: form,
+    });
+  } else {
+    response = await fetch(api.images.upload, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: source }),
+    });
+  }
 
   if (!response.ok) {
     const data = await response.json();

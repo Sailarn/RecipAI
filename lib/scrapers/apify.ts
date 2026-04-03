@@ -31,10 +31,14 @@ async function runApifyActor(url: string): Promise<Response> {
       }
 
       if (attempt === RETRY_ATTEMPTS) {
-        throw new Error(`Apify error after ${RETRY_ATTEMPTS} attempts: ${res.status} — ${errorBody}`);
+        throw new Error(
+          `Apify error after ${RETRY_ATTEMPTS} attempts: ${res.status} — ${errorBody}`,
+        );
       }
 
-      console.log(`Apify attempt ${attempt} failed (${res.status}), retrying...`);
+      console.log(
+        `Apify attempt ${attempt} failed (${res.status}), retrying...`,
+      );
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
     } catch (err) {
       if (attempt === RETRY_ATTEMPTS) throw err;
@@ -47,7 +51,7 @@ async function runApifyActor(url: string): Promise<Response> {
 }
 
 export async function fetchInstagramReel(
-  url: string
+  url: string,
 ): Promise<{ videoUrl: string; thumbnailUrl?: string; caption?: string }> {
   if (!process.env.APIFY_TOKEN) throw new Error("APIFY_TOKEN not configured");
 

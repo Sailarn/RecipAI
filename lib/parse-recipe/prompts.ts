@@ -39,7 +39,7 @@ ${textContent}
 export function buildTranscriptPrompt(
   transcript: string,
   caption?: string,
-  userComment?: string
+  userComment?: string,
 ): string {
   const override = userComment
     ? `USER OVERRIDE (CRITICAL — highest priority): ${userComment}\n\n`
@@ -61,11 +61,12 @@ ${transcript}
 `
     : "";
 
-  const sourceNote = !transcript && caption
-    ? "Note: No speech was detected in this video. Extract the recipe entirely from the caption.\n\n"
-    : transcript && caption
-    ? "IMPORTANT: Caption often contains exact ingredient amounts — prioritize it for ingredients. Use transcript for cooking steps.\n\n"
-    : "";
+  const sourceNote =
+    !transcript && caption
+      ? "Note: No speech was detected in this video. Extract the recipe entirely from the caption.\n\n"
+      : transcript && caption
+        ? "IMPORTANT: Caption often contains exact ingredient amounts — prioritize it for ingredients. Use transcript for cooking steps.\n\n"
+        : "";
 
   return `${override}Extract a recipe from this Instagram Reel.
 

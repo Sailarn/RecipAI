@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
@@ -31,6 +31,8 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const navigate = useNavigate();
   const params = useParams();
   const [imageError, setImageError] = useState<string | null>(null);
+  const pendingImageFile = useRef<File | null>(null);
+  const pendingStepFiles = useRef<Record<number, File>>({});
   const locale = params.locale as string;
   const t = useTranslations("recipeForm");
   const recipeSchema = createRecipeSchema(t);
@@ -89,7 +91,16 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       let hasUpdates = false;
 
       // main image
-      if (recipeData.imageUrl && !isImageKitUrl(recipeData.imageUrl)) {
+      const file = pendingImageFile.current;
+      if (file) {
+        try {
+          if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
+          const uploaded = await uploadImage(file);
+          updates.imageUrl = uploaded.url;
+          updates.imageFileId = uploaded.fileId;
+          hasUpdates = true;
+        } catch {}
+      } else if (recipeData.imageUrl && !isImageKitUrl(recipeData.imageUrl)) {
         try {
           if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
           const uploaded = await uploadImage(recipeData.imageUrl);
@@ -100,20 +111,30 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       }
 
       // step images
-      const updatedInstructions = await Promise.all(
-        instructions.map(async (inst) => {
-          if (inst.imageUrl && !isImageKitUrl(inst.imageUrl)) {
-            try {
-              const uploaded = await uploadImage(inst.imageUrl);
-              hasUpdates = true;
-              return { ...inst, imageUrl: uploaded.url };
-            } catch {
-              return inst;
-            }
+      const updatedInstructions = [];
+      for (const inst of instructions) {
+        const idx = inst.order - 1;
+        const stepFile = pendingStepFiles.current[idx];
+        if (stepFile) {
+          try {
+            const uploaded = await uploadImage(stepFile);
+            hasUpdates = true;
+            updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
+          } catch {
+            updatedInstructions.push(inst);
           }
-          return inst;
-        }),
-      );
+        } else if (inst.imageUrl && !isImageKitUrl(inst.imageUrl)) {
+          try {
+            const uploaded = await uploadImage(inst.imageUrl);
+            hasUpdates = true;
+            updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
+          } catch {
+            updatedInstructions.push(inst);
+          }
+        } else {
+          updatedInstructions.push(inst);
+        }
+      }
 
       if (hasUpdates) {
         updates.instructions = updatedInstructions;
@@ -124,7 +145,14 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
-      <BasicInfo register={register} control={control} errors={errors} />
+      <BasicInfo
+        register={register}
+        control={control}
+        errors={errors}
+        onFileSelect={(file) => {
+          pendingImageFile.current = file;
+        }}
+      />
       <IngredientsSection
         register={register}
         control={control}
@@ -134,6 +162,10 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         register={register}
         control={control}
         errors={errors}
+        onStepFileSelect={(index, file) => {
+          if (file) pendingStepFiles.current[index] = file;
+          else delete pendingStepFiles.current[index];
+        }}
       />
       {imageError && (
         <Alert variant="destructive">

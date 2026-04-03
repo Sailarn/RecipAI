@@ -1,19 +1,19 @@
 import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
+import { callGeminiForRecipe } from "@/lib/gemini";
 import { fetchInstagramReel } from "@/lib/scrapers/apify";
 import { transcribeWithGroq } from "@/lib/transcribe/groq";
 import { isInstagramUrl } from "@/lib/video-url";
-import { callGeminiForRecipe } from "@/lib/gemini";
 import { buildTranscriptPrompt } from "./prompts";
 
 const MIN_TRANSCRIPT_LENGTH = 30;
 
 export async function parseVideoRecipe(
   url: string,
-  userComment?: string
+  userComment?: string,
 ): Promise<ParsedRecipe> {
   if (!isInstagramUrl(url)) {
     throw new Error(
-      "Unsupported video platform. Currently only Instagram Reels are supported."
+      "Unsupported video platform. Currently only Instagram Reels are supported.",
     );
   }
 
@@ -30,7 +30,7 @@ export async function parseVideoRecipe(
     console.log("Transcript too short, falling back to caption only");
     if (!caption) {
       throw new Error(
-        "No speech detected in video and no caption available. Cannot extract recipe."
+        "No speech detected in video and no caption available. Cannot extract recipe.",
       );
     }
     transcript = "";
