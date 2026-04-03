@@ -10,6 +10,10 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  accountLinking: {
+    enabled: true,
+    trustedProviders: ["google", "telegram-oidc"],
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
