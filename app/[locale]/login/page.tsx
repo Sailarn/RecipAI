@@ -1,10 +1,18 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
+import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const params = useParams();
+  const locale = params.locale as string;
+
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: "google",
@@ -15,6 +23,19 @@ export default function LoginPage() {
   const handlePasskeySignIn = async () => {
     await authClient.signIn.passkey();
   };
+
+  useEffect(() => {
+    authClient.initTelegramWidget(
+      "telegram-login-container",
+      { size: "large", cornerRadius: 8 },
+      async (authData) => {
+        const result = await authClient.signInWithTelegram(authData);
+        if (!result.error) {
+          navigate.push(routes.recipes.list(locale));
+        }
+      },
+    );
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -37,6 +58,7 @@ export default function LoginPage() {
           >
             Continue with Passkey
           </Button>
+          <div id="telegram-login-container" />
         </CardContent>
       </Card>
     </div>

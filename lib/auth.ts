@@ -1,6 +1,7 @@
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { telegram } from "better-auth-telegram";
 import { db } from "@/db";
 import * as schema from "@/db/schema/auth";
 
@@ -15,5 +16,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  plugins: [passkey()],
+  plugins: [
+    passkey(),
+    telegram({
+      botToken: process.env.TELEGRAM_BOT_TOKEN!,
+      botUsername: process.env.TELEGRAM_BOT_USERNAME!,
+    }),
+  ],
 });

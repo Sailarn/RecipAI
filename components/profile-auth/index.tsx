@@ -2,22 +2,35 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
-import { Skeleton } from "../ui";
+import { LinkedAccounts } from "./linked-accounts";
+import { useLinkedAccounts } from "./use-linked-accounts";
 
 export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
+  const { linkedProviders, telegramLinked, setTelegramLinked } =
+    useLinkedAccounts(!!session);
 
-  const handleSignIn = () => {
-    router.push(routes.login(locale));
-  };
+  const handleSignIn = () => router.push(routes.login(locale));
 
   const handleSignOut = async () => {
     await authClient.signOut();
     router.refresh();
+  };
+
+  const handleLinkGoogle = async () => {
+    await authClient.linkSocial({
+      provider: "google",
+      callbackURL: routes.profile(locale),
+    });
+  };
+
+  const handleAddPasskey = async () => {
+    await authClient.passkey.addPasskey();
   };
 
   if (isPending) {
@@ -43,6 +56,13 @@ export function ProfileAuth() {
         )}
         <p className="text-sm font-medium">{session.user.name}</p>
         <p className="text-xs text-muted-foreground">{session.user.email}</p>
+        <LinkedAccounts
+          linkedProviders={linkedProviders}
+          telegramLinked={telegramLinked}
+          onTelegramLinked={() => setTelegramLinked(true)}
+          onLinkGoogle={handleLinkGoogle}
+          onAddPasskey={handleAddPasskey}
+        />
         <Button variant="outline" className="w-full" onClick={handleSignOut}>
           Sign out
         </Button>
