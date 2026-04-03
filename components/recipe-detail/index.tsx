@@ -24,6 +24,7 @@ import { TransitionLink } from "../transition-link";
 import { InstructionsList } from "./instructions-list";
 import { RecipeHeader } from "./recipe-header";
 import { RecipeMeta } from "./recipe-meta";
+import { isVideoUrl } from "@/lib/video-url";
 
 interface RecipeDetailProps {
   recipeId: string;
@@ -129,6 +130,15 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       >
         Start Cooking
       </button>
+      {recipe.sourceUrl && (
+        <button
+          type="button"
+          onClick={() => window.open(recipe.sourceUrl, "_blank")}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-6 hover:bg-primary/90 transition-colors"
+        >
+          {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
+        </button>
+      )}
       <ServingsCalculator
         originalServings={recipe.servings}
         ingredients={recipe.ingredients}

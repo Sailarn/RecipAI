@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "image-resizer.silpo.ua" },
       { protocol: "https", hostname: "staticv2.silpo.ua" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      {
+  protocol: "https",
+  hostname: "*.cdninstagram.com",
+},
     ],
   },
 };
