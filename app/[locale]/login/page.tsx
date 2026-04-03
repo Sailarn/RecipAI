@@ -1,15 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
-import { useNavigate } from "@/lib/transitions";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
   const params = useParams();
   const locale = params.locale as string;
 
@@ -29,19 +26,6 @@ export default function LoginPage() {
       callbackURL: routes.recipes.list(locale),
     });
   };
-
-  useEffect(() => {
-    authClient.initTelegramWidget(
-      "telegram-login-container",
-      { size: "large", cornerRadius: 8 },
-      async (authData) => {
-        const result = await authClient.signInWithTelegram(authData);
-        if (!result.error) {
-          navigate.push(routes.recipes.list(locale));
-        }
-      },
-    );
-  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

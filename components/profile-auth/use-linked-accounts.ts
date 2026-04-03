@@ -10,7 +10,9 @@ export function useLinkedAccounts(hasSession: boolean) {
     authClient.listAccounts().then((res) => {
       const providers = (res.data ?? []).map((a: any) => a.provider);
       setLinkedProviders(providers);
-      setTelegramLinked(providers.includes("telegram"));
+      setTelegramLinked(
+        providers.includes("telegram") || providers.includes("telegram-oidc"),
+      );
     });
   }, [hasSession]);
 
