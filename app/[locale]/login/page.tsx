@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const params = useParams();
   const locale = params.locale as string;
 
@@ -18,7 +20,10 @@ export default function LoginPage() {
   };
 
   const handlePasskeySignIn = async () => {
-    await authClient.signIn.passkey();
+    const result = await authClient.signIn.passkey();
+    if (!result?.error) {
+      navigate.push(routes.recipes.list(locale));
+    }
   };
 
   const handleTelegramSignIn = async () => {

@@ -12,7 +12,7 @@ export const auth = betterAuth({
   }),
   accountLinking: {
     enabled: true,
-    trustedProviders: ["google", "telegram-oidc"],
+    trustedProviders: ["google", "telegram-oidc", "telegram"],
   },
   socialProviders: {
     google: {
