@@ -14,7 +14,12 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       allowDifferentEmails: true,
-      trustedProviders: ["google", "telegram-oidc", "telegram", "telegram_oidc"],
+      trustedProviders: [
+        "google",
+        "telegram-oidc",
+        "telegram",
+        "telegram_oidc",
+      ],
     },
   },
   socialProviders: {
@@ -26,6 +31,9 @@ export const auth = betterAuth({
   plugins: [
     passkey(),
     telegram({
+      miniApp: {
+        enabled: false,
+      },
       botToken: process.env.TELEGRAM_BOT_TOKEN!,
       botUsername: process.env.TELEGRAM_BOT_USERNAME!,
       loginWidget: false,

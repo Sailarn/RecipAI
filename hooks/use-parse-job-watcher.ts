@@ -8,7 +8,7 @@ import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
-import { api } from "@/lib/routes";
+import { api, routes } from "@/lib/routes";
 
 export function useParseJobWatcher() {
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -45,26 +45,27 @@ export function useParseJobWatcher() {
       }
     }
 
-    await db.parsedRecipes.add({ ...entry, imageUrl, imageFileId });
+    const updatedEntry = { ...entry, imageUrl, imageFileId };
+    await db.parsedRecipes.add(updatedEntry);
 
     toast(result.title, {
       description: "Recipe parsed — tap to review",
-      duration: 5000,
+      duration: 10000,
       closeButton: true,
       action: {
         label: "Save",
         onClick: async () => {
-          await saveParsedRecipe(entry);
-          await db.parsedRecipes.delete(entry.id);
+          await saveParsedRecipe(updatedEntry);
+          await db.parsedRecipes.delete(updatedEntry.id);
           toast.success("Recipe saved!");
         },
       },
       cancel: {
         label: "Edit",
         onClick: () => {
-          localStorage.setItem("parsedRecipe", JSON.stringify(entry));
+          localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
           const locale = window.location.pathname.split("/")[1];
-          window.location.href = `/${locale}/recipes/new`;
+          window.location.href = routes.recipes.new(locale);
         },
       },
     });

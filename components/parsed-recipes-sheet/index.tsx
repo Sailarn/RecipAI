@@ -33,13 +33,10 @@ export function ParsedRecipesSheet() {
         const uploaded = await uploadImage(imageUrl);
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
-      } catch {
-        // continue without image upload
-      }
+      } catch { }
     }
 
-    await saveParsedRecipe(entry);
-
+    await saveParsedRecipe({ ...entry, imageUrl, imageFileId });
     await db.parsedRecipes.delete(id);
     toast.success("Recipe saved!");
   };
