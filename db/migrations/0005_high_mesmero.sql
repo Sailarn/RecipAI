@@ -1,0 +1,1 @@
+ALTER TABLE "parse_jobs" ADD COLUMN "telegram_chat_id" text;

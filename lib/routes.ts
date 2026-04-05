@@ -23,4 +23,5 @@ export const api = {
   parseQueue: "/api/parse-queue",
   parseQueueJob: (id: string) => `/api/parse-queue/${id}`,
   parseQueueProcess: "/api/parse-queue/process",
+  telegramBot: "/api/telegram-bot",
 } as const;

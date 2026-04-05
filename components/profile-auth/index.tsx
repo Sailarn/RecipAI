@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { Skeleton } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -13,6 +14,7 @@ export function ProfileAuth() {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
   const { linkedProviders, telegramLinked } = useLinkedAccounts(!!session);
+  const [passkeyAdded, setPasskeyAdded] = useState(false);
 
   const handleSignIn = () => router.push(routes.login(locale));
 
@@ -29,7 +31,8 @@ export function ProfileAuth() {
   };
 
   const handleAddPasskey = async () => {
-    await authClient.passkey.addPasskey();
+    const result = await authClient.passkey.addPasskey();
+    if (!result?.error) setPasskeyAdded(true);
   };
 
   if (isPending) {
@@ -58,6 +61,7 @@ export function ProfileAuth() {
         <LinkedAccounts
           linkedProviders={linkedProviders}
           telegramLinked={telegramLinked}
+          passkeyAdded={passkeyAdded}
           onLinkGoogle={handleLinkGoogle}
           onAddPasskey={handleAddPasskey}
         />

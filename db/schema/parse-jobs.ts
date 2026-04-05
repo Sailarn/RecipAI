@@ -7,7 +7,8 @@ export const parseJobs = pgTable("parse_jobs", {
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   url: text("url").notNull(),
   userComment: text("user_comment"),
-  status: text("status").notNull().default("pending"), // pending | processing | done | failed
+  telegramChatId: text("telegram_chat_id"),
+  status: text("status").notNull().default("pending"),
   result: jsonb("result"),
   error: text("error"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

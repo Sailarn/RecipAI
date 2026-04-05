@@ -33,7 +33,7 @@ export function ParsedRecipesSheet() {
         const uploaded = await uploadImage(imageUrl);
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
-      } catch { }
+      } catch {}
     }
 
     await saveParsedRecipe({ ...entry, imageUrl, imageFileId });

@@ -8,6 +8,7 @@ import { routes } from "@/lib/routes";
 interface LinkedAccountsProps {
   linkedProviders: string[];
   telegramLinked: boolean;
+  passkeyAdded: boolean;
   onLinkGoogle: () => void;
   onAddPasskey: () => void;
 }
@@ -17,11 +18,12 @@ export function LinkedAccounts({
   telegramLinked,
   onLinkGoogle,
   onAddPasskey,
+  passkeyAdded,
 }: LinkedAccountsProps) {
   const params = useParams();
   const locale = params.locale as string;
   const googleLinked = linkedProviders.includes("google");
-  const passkeyLinked = linkedProviders.includes("passkey");
+  const passkeyLinked = linkedProviders.includes("passkey") || passkeyAdded;
 
   const handleLinkTelegramOIDC = async () => {
     await authClient.linkSocial({
