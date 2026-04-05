@@ -3,57 +3,59 @@
  * @vitest-environment happy-dom
  */
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { RecipeDetail } from "../index";
 
-vi.mock("@/components/ui/alert-dialog", () => ({
-  AlertDialog: ({ children, open }: any) =>
-    open ? <div>{children}</div> : null,
-  AlertDialogContent: ({ children }: any) => <div>{children}</div>,
-  AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
-  AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
-  AlertDialogTitle: ({ children }: any) => <div>{children}</div>,
-  AlertDialogDescription: ({ children }: any) => <div>{children}</div>,
-  AlertDialogAction: ({ children, onClick }: any) => (
-    <button onClick={onClick} type="button">
-      {children}
-    </button>
-  ),
-  AlertDialogCancel: ({ children, onClick }: any) => (
-    <button
-      onClick={() => {
-        onClick?.();
-      }}
-      type="button"
-    >
-      {children}
-    </button>
-  ),
-}));
-// Mock next/navigation
+// Wire onOpenChange through cancel so closing can be tested
+vi.mock("@/components/ui/alert-dialog", () => {
+  let _onOpenChange: ((v: boolean) => void) | undefined;
+  return {
+    AlertDialog: ({ children, open, onOpenChange }: any) => {
+      _onOpenChange = onOpenChange;
+      return open ? <div data-testid="alert-dialog">{children}</div> : null;
+    },
+    AlertDialogContent: ({ children }: any) => <div>{children}</div>,
+    AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
+    AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
+    AlertDialogTitle: ({ children }: any) => <div>{children}</div>,
+    AlertDialogDescription: ({ children }: any) => <div>{children}</div>,
+    AlertDialogAction: ({ children, onClick }: any) => (
+      <button onClick={onClick} type="button">
+        {children}
+      </button>
+    ),
+    AlertDialogCancel: ({ children }: any) => (
+      <button type="button" onClick={() => _onOpenChange?.(false)}>
+        {children}
+      </button>
+    ),
+  };
+});
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
-// Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// Mock next/image
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
     <img src={src} alt={alt} />
   ),
 }));
 
-// Mock database functions
 vi.mock("@/lib/db/recipes", () => ({
   getRecipe: vi.fn(),
   deleteRecipe: vi.fn(),
@@ -83,6 +85,9 @@ const mockRecipe: Recipe = {
 describe("RecipeDetail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: recipe loads successfully
+    vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
+    vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);
   });
 
   it("shows loading state while fetching recipe", async () => {
@@ -106,8 +111,6 @@ describe("RecipeDetail", () => {
   });
 
   it("displays recipe data when loaded", async () => {
-    vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
-
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => {
@@ -119,8 +122,6 @@ describe("RecipeDetail", () => {
   });
 
   it("displays ingredients list", async () => {
-    vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
-
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => {
@@ -131,8 +132,6 @@ describe("RecipeDetail", () => {
   });
 
   it("displays instructions in order", async () => {
-    vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
-
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => {
@@ -142,50 +141,54 @@ describe("RecipeDetail", () => {
     expect(screen.getByText(/Mix ingredients/i)).toBeInTheDocument();
   });
 
-  it("opens delete modal on delete button click", async () => {
+  it("opens delete dialog on delete button click", async () => {
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => screen.getByText("Chocolate Cake"));
 
-    const deleteButton = screen.getByRole("button", { name: /delete/i });
+    const deleteButton = screen.getByRole("button", { name: /^delete$/i });
     await userEvent.click(deleteButton);
 
+    expect(screen.getByTestId("alert-dialog")).toBeInTheDocument();
     expect(screen.getByText(/deleteConfirmTitle/i)).toBeInTheDocument();
   });
 
-  it("closes delete modal on cancel", async () => {
+  it("closes delete dialog on cancel", async () => {
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
     await waitFor(() => screen.getByText("Chocolate Cake"));
 
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
-    expect(screen.getByText(/deleteConfirmTitle/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    expect(screen.getByTestId("alert-dialog")).toBeInTheDocument();
 
-    // cancel closes via onOpenChange — simulate by checking state resets
-    // AlertDialog open state is controlled by RecipeDetail's showDeleteConfirm
-    // clicking cancel should call onOpenChange(false) which maps to setShowDeleteConfirm(false)
-    // Since our mock doesn't wire this up, just verify the cancel button exists
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("alert-dialog")).not.toBeInTheDocument();
+    });
   });
 
   it("deletes recipe and navigates on confirm", async () => {
-    vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => screen.getByText("Chocolate Cake"));
 
-    const deleteButton = screen.getByRole("button", { name: /delete/i });
-    fireEvent.click(deleteButton);
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-    await waitFor(() => {
-      const buttons = screen.getAllByRole("button", { name: /delete/i });
-      expect(buttons.length).toBeGreaterThan(1);
-    });
-
-    const confirmButton = screen.getAllByRole("button", { name: /delete/i })[1];
-    fireEvent.click(confirmButton);
+    const dialog = await screen.findByTestId("alert-dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /^delete$/i }));
 
     await waitFor(() => {
       expect(recipesModule.deleteRecipe).toHaveBeenCalledWith("recipe-1");
     });
+  });
+
+  it("does not delete when cancel is clicked", async () => {
+    render(<RecipeDetail recipeId="recipe-1" locale="en" />);
+    await waitFor(() => screen.getByText("Chocolate Cake"));
+
+    fireEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(recipesModule.deleteRecipe).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,7 @@ const mockRecipes: Recipe[] = [
     id: "1",
     title: "Borsch",
     description: "Classic Ukrainian soup",
+    category: "soup",
     servings: 4,
     ingredients: [],
     instructions: [],
@@ -18,6 +19,7 @@ const mockRecipes: Recipe[] = [
     id: "2",
     title: "Apple Pie",
     description: "Sweet dessert",
+    category: "dessert",
     servings: 8,
     ingredients: [],
     instructions: [],
@@ -28,6 +30,7 @@ const mockRecipes: Recipe[] = [
     id: "3",
     title: "Zucchini Pasta",
     description: "Light summer dish",
+    category: "main",
     servings: 2,
     ingredients: [],
     instructions: [],
@@ -103,5 +106,45 @@ describe("useRecipeFilter", () => {
     });
     // matches "Apple Pie" and "Zucchini Pasta" (has 'a' in title)
     expect(result.current.filtered[0].title).toBe("Apple Pie");
+  });
+
+  it("filters by category", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setCategory("soup"));
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0].title).toBe("Borsch");
+  });
+
+  it("returns empty when no recipes match category", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setCategory("breakfast"));
+    expect(result.current.filtered).toHaveLength(0);
+  });
+
+  it("resets category filter when set to null", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setCategory("dessert"));
+    expect(result.current.filtered).toHaveLength(1);
+    act(() => result.current.setCategory(null));
+    expect(result.current.filtered).toHaveLength(3);
+  });
+
+  it("combines category and search filters", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => {
+      result.current.setCategory("main");
+      result.current.setSearch("zucchini");
+    });
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0].title).toBe("Zucchini Pasta");
+  });
+
+  it("category and search with no overlap returns empty", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => {
+      result.current.setCategory("soup");
+      result.current.setSearch("pie");
+    });
+    expect(result.current.filtered).toHaveLength(0);
   });
 });

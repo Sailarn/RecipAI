@@ -2,32 +2,26 @@
  * @vitest-environment happy-dom
  */
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import RecipesPage from "../page";
 
-// Mock next/navigation
 vi.mock("next/navigation", () => ({
-  useParams: () => ({
-    locale: "en",
-  }),
+  useParams: () => ({ locale: "en" }),
 }));
 
-// Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// Mock next/image
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
     <img src={src} alt={alt} />
   ),
 }));
 
-// Mock next/link
 vi.mock("next/link", () => ({
   default: ({
     children,
@@ -38,9 +32,13 @@ vi.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
-// Mock database functions
 vi.mock("@/lib/db/recipes", () => ({
   getAllRecipes: vi.fn(),
+}));
+
+// Prevents real auth HTTP calls during page render
+vi.mock("@/hooks/use-sync-on-login", () => ({
+  useSyncOnLogin: () => ({ triggerSync: vi.fn() }),
 }));
 
 const mockRecipes: Recipe[] = [
@@ -73,6 +71,7 @@ const mockRecipes: Recipe[] = [
 describe("RecipesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
   });
 
   it("shows loading state while fetching recipes", async () => {
@@ -98,8 +97,6 @@ describe("RecipesPage", () => {
   });
 
   it("displays recipe cards when recipes exist", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
-
     render(<RecipesPage />);
 
     await waitFor(() => {
@@ -110,8 +107,6 @@ describe("RecipesPage", () => {
   });
 
   it("displays recipe metadata", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
-
     render(<RecipesPage />);
 
     await waitFor(() => {
@@ -121,9 +116,7 @@ describe("RecipesPage", () => {
     expect(screen.getByText(/12 servings/i)).toBeInTheDocument();
   });
 
-  it("displays recipe images when available", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
-
+  it("displays recipe images with ImageKit transform URL", async () => {
     render(<RecipesPage />);
 
     await waitFor(() => {
@@ -139,8 +132,6 @@ describe("RecipesPage", () => {
   });
 
   it("has create recipe button", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
-
     render(<RecipesPage />);
 
     await waitFor(() => {
@@ -148,16 +139,37 @@ describe("RecipesPage", () => {
     });
   });
 
-  it("renders recipe cards that are clickable", async () => {
-    vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
-
+  it("shows noResults message when search has no matches", async () => {
     render(<RecipesPage />);
 
     await waitFor(() => {
-      expect(screen.getAllByText(/Chocolate Cake/i).length).toBeGreaterThan(0);
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
     });
 
-    const cards = screen.getAllByRole("button");
-    expect(cards.length).toBeGreaterThan(0);
+    const searchInput = screen.getByPlaceholderText(/searchPlaceholder/i);
+    fireEvent.change(searchInput, { target: { value: "xyz-no-match" } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/noResults/i)).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
+  });
+
+  it("filters recipes when searching", async () => {
+    render(<RecipesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/searchPlaceholder/i);
+    fireEvent.change(searchInput, { target: { value: "banana" } });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Banana Bread")).toBeInTheDocument();
   });
 });

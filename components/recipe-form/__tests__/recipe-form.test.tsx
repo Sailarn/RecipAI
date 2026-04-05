@@ -4,29 +4,28 @@
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { RecipeForm } from "../index";
 
-// Mock next/navigation
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    back: vi.fn(),
-  }),
-  useParams: () => ({
-    locale: "en",
-  }),
+  useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
+  useParams: () => ({ locale: "en" }),
 }));
 
-// Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// Mock database functions - use vi.fn() directly in factory
 vi.mock("@/lib/db/recipes", () => ({
-  createRecipe: vi.fn(),
-  updateRecipe: vi.fn(),
+  createRecipe: vi.fn().mockResolvedValue("new-recipe-id"),
+  updateRecipe: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/images", () => ({
+  uploadImage: vi.fn(),
+  deleteImage: vi.fn(),
+  isImageKitUrl: vi.fn().mockReturnValue(false),
 }));
 
 describe("RecipeForm", () => {
@@ -163,6 +162,77 @@ describe("RecipeForm", () => {
       expect(instructionInputs).toHaveLength(2);
       expect(instructionInputs[0]).toHaveValue("Mix ingredients");
       expect(instructionInputs[1]).toHaveValue("Bake at 350F");
+    });
+  });
+
+  describe("Form Submission", () => {
+    it("calls createRecipe when create form is submitted with valid data", async () => {
+      render(<RecipeForm />);
+
+      fireEvent.change(screen.getByLabelText(/^title/i), {
+        target: { value: "My New Recipe" },
+      });
+      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
+        target: { value: "flour" },
+      });
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: /create/i }).closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(createRecipe).toHaveBeenCalledOnce();
+      });
+
+      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0][0];
+      expect(callArg.title).toBe("My New Recipe");
+      expect(callArg.ingredients[0].item).toBe("flour");
+    });
+
+    it("calls updateRecipe when edit form is submitted", async () => {
+      const mockRecipe: Recipe = {
+        id: "existing-id",
+        title: "Old Title",
+        servings: 2,
+        ingredients: [{ id: "i1", item: "eggs", amount: 2, unit: "" }],
+        instructions: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      render(<RecipeForm recipe={mockRecipe} />);
+
+      fireEvent.change(screen.getByLabelText(/^title/i), {
+        target: { value: "Updated Title" },
+      });
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: /save/i }).closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledOnce();
+      });
+
+      const [calledId, calledData] = (updateRecipe as ReturnType<typeof vi.fn>)
+        .mock.calls[0];
+      expect(calledId).toBe("existing-id");
+      expect(calledData.title).toBe("Updated Title");
+    });
+
+    it("does not submit when required fields are missing", async () => {
+      render(<RecipeForm />);
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: /create/i }).closest("form")!,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/titleRequired/i)).toBeInTheDocument();
+      });
+
+      expect(createRecipe).not.toHaveBeenCalled();
     });
   });
 });
