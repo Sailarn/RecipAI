@@ -27,7 +27,7 @@ jobs:
         run: bun tsc --noEmit
 
       - name: Lint
-        run: bun biome check .
+        run: bun biome ci .
 
       - name: Test
         run: bun run test -- --run

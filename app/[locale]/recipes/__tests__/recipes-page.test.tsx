@@ -77,7 +77,7 @@ describe("RecipesPage", () => {
 
   it("shows loading state while fetching recipes", async () => {
     vi.mocked(recipesModule.getAllRecipes).mockImplementation(
-      () => new Promise(() => { }),
+      () => new Promise(() => {}),
     );
 
     render(<RecipesPage />);
@@ -132,7 +132,10 @@ describe("RecipesPage", () => {
     });
 
     const cakeImage = screen.getByAltText("Chocolate Cake");
-    expect(cakeImage).toHaveAttribute("src", "https://example.com/cake.jpg?tr=w-300,h-128,fo-auto,f-webp,q-80");
+    expect(cakeImage).toHaveAttribute(
+      "src",
+      "https://example.com/cake.jpg?tr=w-300,h-128,fo-auto,f-webp,q-80",
+    );
   });
 
   it("has create recipe button", async () => {
