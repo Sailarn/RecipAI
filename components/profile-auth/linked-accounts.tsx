@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
+import { Skeleton } from "../ui";
 
 interface LinkedAccountsProps {
   linkedProviders: string[];
@@ -11,6 +12,7 @@ interface LinkedAccountsProps {
   passkeyAdded: boolean;
   onLinkGoogle: () => void;
   onAddPasskey: () => void;
+  isLoading: boolean;
 }
 
 export function LinkedAccounts({
@@ -19,6 +21,7 @@ export function LinkedAccounts({
   onLinkGoogle,
   onAddPasskey,
   passkeyAdded,
+  isLoading,
 }: LinkedAccountsProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -31,6 +34,16 @@ export function LinkedAccounts({
       callbackURL: routes.profile(locale),
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex flex-col gap-2">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col gap-3">

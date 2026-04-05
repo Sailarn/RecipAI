@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
+import { recipes } from "@/db/schema/recipes";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 
@@ -38,14 +39,26 @@ export async function POST(req: NextRequest) {
       .where(eq(parseJobs.id, jobId));
 
     // notify via Telegram if triggered from bot
-    if (job.telegramChatId) {
-      const name = recipe.title ?? "Recipe";
-      const ingredients = recipe.ingredients?.length ?? 0;
-      const steps = recipe.instructions?.length ?? 0;
-      await sendTelegramMessage(
-        job.telegramChatId,
-        `✅ <b>${name}</b> saved to RecipAI!\n\n📦 ${ingredients} ingredients · 👨‍🍳 ${steps} steps`,
-      );
+    if (job.telegramChatId && job.userId) {
+      const r = recipe as any;
+      await db.insert(recipes).values({
+        id: crypto.randomUUID(),
+        userId: job.userId,
+        title: r.title,
+        description: r.description ?? null,
+        imageUrl: r.imageUrl ?? null,
+        imageFileId: null,
+        prepTime: r.prepTime ?? null,
+        cookTime: r.cookTime ?? null,
+        totalTime: r.prepTime && r.cookTime ? r.prepTime + r.cookTime : null,
+        servings: r.servings ?? 1,
+        ingredients: r.ingredients ?? [],
+        instructions: r.instructions ?? [],
+        sourceUrl: job.url,
+        category: r.category ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     }
 
     return NextResponse.json({ ok: true });
