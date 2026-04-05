@@ -12,9 +12,8 @@ export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
-  const { linkedProviders, telegramLinked, passkeyAdded } = useLinkedAccounts(
-    !!session,
-  );
+  const { linkedProviders, telegramLinked, passkeyAdded, isLoading } =
+    useLinkedAccounts(!!session);
 
   const handleSignIn = () => router.push(routes.login(locale));
 
@@ -58,6 +57,7 @@ export function ProfileAuth() {
         <p className="text-sm font-medium">{session.user.name}</p>
         <p className="text-xs text-muted-foreground">{session.user.email}</p>
         <LinkedAccounts
+          isLoading={isLoading}
           linkedProviders={linkedProviders}
           telegramLinked={telegramLinked}
           passkeyAdded={passkeyAdded}
