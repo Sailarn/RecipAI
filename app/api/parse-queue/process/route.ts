@@ -59,6 +59,14 @@ export async function POST(req: NextRequest) {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+
+      // send success message
+      const ingredients = r.ingredients?.length ?? 0;
+      const steps = r.instructions?.length ?? 0;
+      await sendTelegramMessage(
+        job.telegramChatId,
+        `✅ <b>${r.title}</b> saved to RecipAI!\n\n📦 ${ingredients} ingredients · 👨‍🍳 ${steps} steps`,
+      );
     }
 
     return NextResponse.json({ ok: true });
