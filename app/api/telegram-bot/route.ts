@@ -16,6 +16,13 @@ export async function POST(req: NextRequest) {
   const telegramId = String(message.from.id);
   const text = message.text ?? "";
 
+  console.log("Looking for telegramId:", telegramId);
+  const allTelegramAccounts = await db
+    .select()
+    .from(account)
+    .where(eq(account.providerId, "telegram-oidc"));
+  console.log("All telegram accounts:", JSON.stringify(allTelegramAccounts));
+
   // find user by telegramId
   const [foundAccount] = await db
     .select()

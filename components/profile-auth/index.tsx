@@ -32,8 +32,12 @@ export function ProfileAuth() {
 
   const handleAddPasskey = async () => {
     const result = await authClient.passkey.addPasskey();
-    console.log("passkey", result);
-    if (!result?.error) setPasskeyAdded(true);
+    if (
+      !result?.error ||
+      (result.error as any).code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED"
+    ) {
+      setPasskeyAdded(true);
+    }
   };
 
   if (isPending) {

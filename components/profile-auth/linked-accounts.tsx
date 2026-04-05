@@ -78,6 +78,24 @@ export function LinkedAccounts({
           Link Telegram
         </Button>
       )}
+      {telegramLinked && (
+        <a
+          href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full"
+        >
+          <Button variant="outline" className="w-full">
+            Open Recipe Bot
+          </Button>
+        </a>
+      )}
+      {telegramLinked && (
+        <p className="text-xs text-muted-foreground text-center">
+          Send any recipe URL or Instagram Reel to your bot — it'll save it to
+          your account automatically.
+        </p>
+      )}
     </div>
   );
 }
