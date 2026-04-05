@@ -86,6 +86,17 @@
     "typescript": "^5",
     "vitest": "^4.1.0"
   },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release v${version} [skip ci]"
+    },
+    "github": {
+      "release": false
+    },
+    "npm": {
+      "publish": false
+    }
+  },
   "ignoreScripts": [
     "sharp",
     "unrs-resolver"

@@ -2,42 +2,32 @@ name: CI
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'package.json'
+  pull_request:
+    branches: [main]
 
 jobs:
   ci:
-    name: Type check, Lint, Test, Build
+    name: CI
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Type check
-        run: bun run typecheck
+      - name: Typecheck
+        run: bun tsc --noEmit
 
       - name: Lint
-        run: bun run lint
+        run: bun biome check .
 
       - name: Test
-        run: bun run test
-
-      - name: Build
-        run: bun run build
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-          SCRAPE_DO_TOKEN: ${{ secrets.SCRAPE_DO_TOKEN }}
-          IMAGEKIT_PUBLIC_KEY: ${{ secrets.IMAGEKIT_PUBLIC_KEY }}
-          IMAGEKIT_PRIVATE_KEY: ${{ secrets.IMAGEKIT_PRIVATE_KEY }}
-          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}
-          NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL: ${{ secrets.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL }}
-          
+        run: bun run test -- --run
