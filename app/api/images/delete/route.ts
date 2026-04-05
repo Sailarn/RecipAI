@@ -15,9 +15,8 @@ export async function DELETE(request: Request) {
     await imagekit.deleteFile(fileId);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    // file already gone — treat as success
-    if (error?.message?.includes("does not exist")) {
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("does not exist")) {
       return NextResponse.json({ success: true });
     }
     console.error("ImageKit delete error:", error);

@@ -24,8 +24,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     },
   },
   plugins: [
@@ -34,12 +34,12 @@ export const auth = betterAuth({
       miniApp: {
         enabled: false,
       },
-      botToken: process.env.TELEGRAM_BOT_TOKEN!,
-      botUsername: process.env.TELEGRAM_BOT_USERNAME!,
+      botToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
+      botUsername: process.env.TELEGRAM_BOT_USERNAME ?? "",
       loginWidget: false,
       oidc: {
         enabled: true,
-        clientSecret: process.env.TELEGRAM_OIDC_CLIENT_SECRET!,
+        clientSecret: process.env.TELEGRAM_OIDC_CLIENT_SECRET ?? "",
       },
     }),
   ],

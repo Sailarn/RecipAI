@@ -132,8 +132,9 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
 
       // Find Recipe type
       const recipe = items.find(
-        (item: any) =>
-          item["@type"] === "Recipe" || item["@type"]?.includes("Recipe"),
+        (item: Record<string, unknown>) =>
+          item["@type"] === "Recipe" ||
+          (item["@type"] as string[])?.includes("Recipe"),
       );
 
       if (!recipe) continue;
@@ -169,29 +170,43 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
         const instructionData = recipe.recipeInstructions;
 
         if (Array.isArray(instructionData)) {
-          instructions = instructionData.map((inst: any, idx: number) => {
-            let text = "";
-            let stepImage: string | undefined;
+          instructions = instructionData.map(
+            (inst: Record<string, unknown>, idx: number) => {
+              let text = "";
+              let stepImage: string | undefined;
 
-            if (typeof inst === "string") {
-              text = inst;
-            } else if (inst["@type"] === "HowToStep") {
-              text = inst.text || inst.name || "";
-              if (inst.image) {
-                if (typeof inst.image === "string") stepImage = inst.image;
-                else if (Array.isArray(inst.image)) stepImage = inst.image[0];
-                else if (inst.image.url) stepImage = inst.image.url;
+              if (typeof inst === "string") {
+                text = inst;
+              } else if (inst["@type"] === "HowToStep") {
+                text =
+                  typeof inst.text === "string"
+                    ? inst.text
+                    : typeof inst.name === "string"
+                      ? inst.name
+                      : "";
+                if (inst.image) {
+                  if (typeof inst.image === "string") stepImage = inst.image;
+                  else if (Array.isArray(inst.image))
+                    stepImage = inst.image[0] as string;
+                  else if (
+                    typeof inst.image === "object" &&
+                    inst.image !== null
+                  ) {
+                    const img = inst.image as Record<string, unknown>;
+                    if (typeof img.url === "string") stepImage = img.url;
+                  }
+                }
+              } else if (typeof inst.text === "string") {
+                text = inst.text;
               }
-            } else if (inst.text) {
-              text = inst.text;
-            }
 
-            return {
-              order: idx + 1,
-              instruction: text.trim(),
-              imageUrl: stepImage,
-            };
-          });
+              return {
+                order: idx + 1,
+                instruction: text.trim(),
+                imageUrl: stepImage,
+              };
+            },
+          );
         } else if (typeof instructionData === "string") {
           // Single string - split by newlines or periods
           instructions = instructionData

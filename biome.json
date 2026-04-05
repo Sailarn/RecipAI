@@ -64,6 +64,12 @@
       "includes": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
       "linter": {
         "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
+          },
           "performance": {
             "noImgElement": "off"
           }

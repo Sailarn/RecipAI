@@ -1,6 +1,6 @@
 import { api } from "./routes";
 
-const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
+const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
 
 export const isImageKitUrl = (url: string) => url.startsWith(IMAGEKIT_URL);
 

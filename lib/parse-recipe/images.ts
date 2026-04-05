@@ -25,8 +25,8 @@ export function extractHeroImage($: CheerioAPI): string {
   let hero = "";
   $("img").each((_, el) => {
     const src = $(el).attr("src") || $(el).attr("data-src") || "";
-    const width = parseInt($(el).attr("width") || "0");
-    const height = parseInt($(el).attr("height") || "0");
+    const width = parseInt($(el).attr("width") || "0", 10);
+    const height = parseInt($(el).attr("height") || "0", 10);
     const alt = $(el).attr("alt") || "";
     const cls = $(el).attr("class") || "";
     if (!src.startsWith("http")) return;

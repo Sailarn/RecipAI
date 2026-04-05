@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
-const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
-const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL!;
+const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
+const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL ?? "";
 
 function getOptimizedUrl(url: string, width: number, height: number): string {
   if (!url || !url.startsWith(IMAGEKIT_URL)) return url;

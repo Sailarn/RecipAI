@@ -1,12 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  integer,
-  jsonb,
-  pgTable,
-  real,
-  text,
-  timestamp,
-} from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const recipes = pgTable("recipes", {

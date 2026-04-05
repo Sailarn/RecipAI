@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
+import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
@@ -35,12 +36,16 @@ export async function POST(req: NextRequest) {
 
     await db
       .update(parseJobs)
-      .set({ status: "done", result: recipe as any, updatedAt: new Date() })
+      .set({
+        status: "done",
+        result: recipe as unknown as Record<string, unknown>,
+        updatedAt: new Date(),
+      })
       .where(eq(parseJobs.id, jobId));
 
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
-      const r = recipe as any;
+      const r = recipe as ParsedRecipe;
       await db.insert(recipes).values({
         id: crypto.randomUUID(),
         userId: job.userId,

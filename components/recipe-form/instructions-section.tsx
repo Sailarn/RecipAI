@@ -34,6 +34,7 @@ export function InstructionsSection({
     () => {
       const initial: Record<number, boolean> = {};
       fields.forEach((field, idx) => {
+        // biome-ignore lint/suspicious/noExplicitAny: useFieldArray field type doesn't expose imageUrl
         if ((field as any).imageUrl) initial[idx] = true;
       });
       return initial;
@@ -115,6 +116,7 @@ export function InstructionsSection({
                 </div>
                 {stepPreviews[index] && (
                   <div className="relative h-20 w-32 rounded overflow-hidden border border-input">
+                    {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
                     <img
                       src={stepPreviews[index]}
                       alt={`Step ${index + 1}`}
@@ -129,15 +131,17 @@ export function InstructionsSection({
                     </button>
                   </div>
                 )}
-                {!stepPreviews[index] && (field as any).imageUrl && (
-                  <div className="relative h-20 w-32 rounded overflow-hidden">
-                    <img
-                      src={(field as any).imageUrl}
-                      alt={`Step ${index + 1}`}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                )}
+                {!stepPreviews[index] &&
+                  (field as { imageUrl?: string }).imageUrl && (
+                    <div className="relative h-20 w-32 rounded overflow-hidden">
+                      {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
+                      <img
+                        src={(field as { imageUrl?: string }).imageUrl}
+                        alt={`Step ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
               </div>
             )}
             <button

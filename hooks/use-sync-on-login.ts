@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
+import type { Recipe } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 
 export function useSyncOnLogin() {
@@ -32,7 +33,7 @@ export function useSyncOnLogin() {
       const { recipes: remote } = await pullRes.json();
       if (remote?.length) {
         await db.recipes.bulkPut(
-          remote.map((r: any) => ({
+          remote.map((r: Recipe) => ({
             ...r,
             createdAt: new Date(r.createdAt),
             updatedAt: new Date(r.updatedAt),

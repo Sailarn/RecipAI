@@ -1,6 +1,6 @@
 import { isImageKitUrl, uploadImage } from "../images";
 import { createRecipe } from "./recipes";
-import type { ParsedRecipeEntry } from "./schema";
+import type { ParsedRecipeEntry, Recipe } from "./schema";
 
 export async function saveParsedRecipe(
   entry: ParsedRecipeEntry,
@@ -34,7 +34,7 @@ export async function saveParsedRecipe(
   // upload images in background
   (async () => {
     const { updateRecipe } = await import("./recipes");
-    const updates: Record<string, any> = {};
+    const updates: Partial<Recipe> = {};
     let hasUpdates = false;
 
     if (entry.imageUrl && !isImageKitUrl(entry.imageUrl)) {

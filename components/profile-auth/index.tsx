@@ -48,11 +48,14 @@ export function ProfileAuth() {
     return (
       <div className="flex flex-col items-center gap-3 text-center pt-6">
         {session.user.image && (
-          <img
-            src={session.user.image}
-            alt={session.user.name}
-            className="w-12 h-12 rounded-full"
-          />
+          <>
+            {/* biome-ignore lint/performance/noImgElement: external avatar URL from OAuth provider */}
+            <img
+              src={session.user.image}
+              alt={session.user.name}
+              className="w-12 h-12 rounded-full"
+            />
+          </>
         )}
         <p className="text-sm font-medium">{session.user.name}</p>
         <p className="text-xs text-muted-foreground">{session.user.email}</p>

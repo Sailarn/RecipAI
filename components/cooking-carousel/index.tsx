@@ -97,7 +97,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
             </CarouselItem>
 
             {/* Step slides */}
-            {recipe.instructions.map((step, idx) => (
+            {recipe.instructions.map((step, _idx) => (
               <CarouselItem key={step.id} className="h-full overflow-y-auto">
                 <div className="p-4 space-y-4">
                   <div className="relative w-full h-48 rounded-xl overflow-hidden">

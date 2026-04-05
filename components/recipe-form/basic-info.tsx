@@ -122,6 +122,7 @@ export function BasicInfo({
         )}
         {preview && (
           <div className="relative mt-2 w-24 h-24 rounded-md overflow-hidden border border-input">
+            {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
             <img
               src={preview}
               alt="Preview"
@@ -147,7 +148,7 @@ export function BasicInfo({
               setValueAs: (v) => {
                 if (v === "" || v === null || v === undefined) return undefined;
                 const n = Number(v);
-                return isNaN(n) ? undefined : n;
+                return Number.isNaN(n) ? undefined : n;
               },
             })}
             type="number"
@@ -162,7 +163,7 @@ export function BasicInfo({
               setValueAs: (v) => {
                 if (v === "" || v === null || v === undefined) return undefined;
                 const n = Number(v);
-                return isNaN(n) ? undefined : n;
+                return Number.isNaN(n) ? undefined : n;
               },
             })}
             type="number"

@@ -5,12 +5,15 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AIImportButton } from "@/components/ai-import-button";
 import { RecipeForm } from "@/components/recipe-form";
+import type { ParsedRecipeData } from "@/components/recipe-form/default-values";
 import { TransitionLink } from "@/components/transition-link";
 import { routes } from "@/lib/routes";
 
 export default function NewRecipePage() {
   const t = useTranslations("recipeForm");
-  const [initialData, setInitialData] = useState<any>(undefined);
+  const [initialData, setInitialData] = useState<ParsedRecipeData | undefined>(
+    undefined,
+  );
   const tRecipes = useTranslations("recipes");
   const [isReady, setIsReady] = useState(false);
   const params = useParams();

@@ -144,35 +144,38 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
-      <BasicInfo
-        register={register}
-        control={control}
-        errors={errors}
-        onFileSelect={(file) => {
-          pendingImageFile.current = file;
-        }}
-      />
-      <IngredientsSection
-        register={register}
-        control={control}
-        errors={errors}
-      />
-      <InstructionsSection
-        register={register}
-        control={control}
-        errors={errors}
-        onStepFileSelect={(index, file) => {
-          if (file) pendingStepFiles.current[index] = file;
-          else delete pendingStepFiles.current[index];
-        }}
-      />
-      {imageError && (
-        <Alert variant="destructive">
-          <AlertDescription>{imageError}</AlertDescription>
-        </Alert>
-      )}
-      <FormActions isSubmitting={isSubmitting} isEdit={!!recipe} />
-    </form>
+    <>
+      {/* biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms */}
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+        <BasicInfo
+          register={register}
+          control={control}
+          errors={errors}
+          onFileSelect={(file) => {
+            pendingImageFile.current = file;
+          }}
+        />
+        <IngredientsSection
+          register={register}
+          control={control}
+          errors={errors}
+        />
+        <InstructionsSection
+          register={register}
+          control={control}
+          errors={errors}
+          onStepFileSelect={(index, file) => {
+            if (file) pendingStepFiles.current[index] = file;
+            else delete pendingStepFiles.current[index];
+          }}
+        />
+        {imageError && (
+          <Alert variant="destructive">
+            <AlertDescription>{imageError}</AlertDescription>
+          </Alert>
+        )}
+        <FormActions isSubmitting={isSubmitting} isEdit={!!recipe} />
+      </form>
+    </>
   );
 }

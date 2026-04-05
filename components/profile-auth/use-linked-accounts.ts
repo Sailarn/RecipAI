@@ -16,7 +16,9 @@ export function useLinkedAccounts(hasSession: boolean) {
       authClient.listAccounts(),
       authClient.passkey.listUserPasskeys(),
     ]).then(([accountsRes, passkeysRes]) => {
-      const providers = (accountsRes.data ?? []).map((a: any) => a.providerId);
+      const providers = (accountsRes.data ?? []).map(
+        (a: { providerId: string }) => a.providerId,
+      );
       setLinkedProviders(providers);
       setTelegramLinked(
         providers.includes("telegram") || providers.includes("telegram-oidc"),

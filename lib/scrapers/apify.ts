@@ -65,7 +65,7 @@ export async function fetchInstagramReel(url: string): Promise<{
   const item = items[0];
 
   if (!item?.videoUrl) {
-    const reason = (item as any)?.error;
+    const reason = item?.error;
     if (reason === "restricted_page") {
       throw new Error(
         "This reel is restricted and cannot be accessed. Try a different video.",

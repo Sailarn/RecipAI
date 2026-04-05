@@ -12,7 +12,7 @@ function getDepth(pathname: string): number {
   return 0;
 }
 
-let prevDepth = 0;
+let _prevDepth = 0;
 
 export default function PageTransition({
   children,
@@ -23,8 +23,8 @@ export default function PageTransition({
   const currentDepth = getDepth(pathname);
 
   useEffect(() => {
-    prevDepth = currentDepth;
-  }, [pathname, currentDepth]);
+    _prevDepth = currentDepth;
+  }, [currentDepth]);
 
   return (
     <motion.div
