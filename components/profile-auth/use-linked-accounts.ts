@@ -4,6 +4,13 @@ import { authClient } from "@/lib/auth-client";
 export function useLinkedAccounts(hasSession: boolean) {
   const [linkedProviders, setLinkedProviders] = useState<string[]>([]);
   const [telegramLinked, setTelegramLinked] = useState(false);
+  const [passkeyAdded, setPasskeyAdded] = useState(false);
+
+  const checkPasskey = async () => {
+    const passkeyResult = await authClient.passkey.listUserPasskeys();
+    const hasPasskey = (passkeyResult.data?.length ?? 0) > 0;
+    setPasskeyAdded(hasPasskey);
+  };
 
   useEffect(() => {
     if (!hasSession) return;
@@ -16,7 +23,8 @@ export function useLinkedAccounts(hasSession: boolean) {
         providers.includes("telegram") || providers.includes("telegram-oidc"),
       );
     });
+    checkPasskey();
   }, [hasSession]);
 
-  return { linkedProviders, telegramLinked, setTelegramLinked };
+  return { linkedProviders, telegramLinked, passkeyAdded, setTelegramLinked };
 }

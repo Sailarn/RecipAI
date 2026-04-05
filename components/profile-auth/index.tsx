@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { Skeleton } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -13,8 +12,9 @@ export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
-  const { linkedProviders, telegramLinked } = useLinkedAccounts(!!session);
-  const [passkeyAdded, setPasskeyAdded] = useState(false);
+  const { linkedProviders, telegramLinked, passkeyAdded } = useLinkedAccounts(
+    !!session,
+  );
 
   const handleSignIn = () => router.push(routes.login(locale));
 
@@ -31,13 +31,7 @@ export function ProfileAuth() {
   };
 
   const handleAddPasskey = async () => {
-    const result = await authClient.passkey.addPasskey();
-    if (
-      !result?.error ||
-      (result.error as any).code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED"
-    ) {
-      setPasskeyAdded(true);
-    }
+    await authClient.passkey.addPasskey();
   };
 
   if (isPending) {
