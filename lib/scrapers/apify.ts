@@ -3,8 +3,10 @@ const RETRY_DELAY_MS = 2000;
 
 interface ApifyReelResult {
   videoUrl?: string;
+  audioUrl?: string;
   displayUrl?: string;
   caption?: string;
+  error?: string;
 }
 
 function cleanCaption(caption: string): string {
@@ -50,9 +52,12 @@ async function runApifyActor(url: string): Promise<Response> {
   throw new Error("Apify: all retry attempts exhausted");
 }
 
-export async function fetchInstagramReel(
-  url: string,
-): Promise<{ videoUrl: string; thumbnailUrl?: string; caption?: string }> {
+export async function fetchInstagramReel(url: string): Promise<{
+  videoUrl: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  isAudio?: boolean;
+}> {
   if (!process.env.APIFY_TOKEN) throw new Error("APIFY_TOKEN not configured");
 
   const res = await runApifyActor(url);
@@ -60,11 +65,18 @@ export async function fetchInstagramReel(
   const item = items[0];
 
   if (!item?.videoUrl) {
+    const reason = (item as any)?.error;
+    if (reason === "restricted_page") {
+      throw new Error(
+        "This reel is restricted and cannot be accessed. Try a different video.",
+      );
+    }
     throw new Error("Apify returned no video URL for this reel");
   }
 
   return {
-    videoUrl: item.videoUrl,
+    videoUrl: item.audioUrl ?? item.videoUrl,
+    isAudio: !!item.audioUrl,
     thumbnailUrl: item.displayUrl,
     caption: item.caption ? cleanCaption(item.caption) : undefined,
   };

@@ -17,13 +17,14 @@ export async function parseVideoRecipe(
     );
   }
 
-  const { videoUrl, thumbnailUrl, caption } = await fetchInstagramReel(url);
+  const { videoUrl, thumbnailUrl, caption, isAudio } =
+    await fetchInstagramReel(url);
 
   const videoRes = await fetch(videoUrl);
   if (!videoRes.ok) throw new Error(`Video fetch failed: ${videoRes.status}`);
   const videoBuffer = await videoRes.arrayBuffer();
 
-  let transcript = await transcribeWithGroq(videoBuffer);
+  let transcript = await transcribeWithGroq(videoBuffer, isAudio);
 
   // if transcript is empty or too short, fall back to caption only
   if (transcript.length < MIN_TRANSCRIPT_LENGTH) {
