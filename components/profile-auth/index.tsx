@@ -32,6 +32,7 @@ export function ProfileAuth() {
 
   const handleAddPasskey = async () => {
     const result = await authClient.passkey.addPasskey();
+    console.log("passkey", result);
     if (!result?.error) setPasskeyAdded(true);
   };
 

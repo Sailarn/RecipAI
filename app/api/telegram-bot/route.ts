@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { user } from "@/db/schema/auth";
+import { account } from "@/db/schema/auth";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { api } from "@/lib/routes";
 import { extractUrl, sendTelegramMessage } from "@/lib/telegram-bot";
@@ -17,12 +17,17 @@ export async function POST(req: NextRequest) {
   const text = message.text ?? "";
 
   // find user by telegramId
-  const [foundUser] = await db
+  const [foundAccount] = await db
     .select()
-    .from(user)
-    .where(eq(user.telegramId, telegramId));
+    .from(account)
+    .where(
+      and(
+        eq(account.accountId, telegramId),
+        eq(account.providerId, "telegram-oidc"),
+      ),
+    );
 
-  if (!foundUser) {
+  if (!foundAccount) {
     await sendTelegramMessage(
       chatId,
       "👋 Link your Telegram account in RecipAI first, then send me any recipe URL.",
@@ -34,7 +39,7 @@ export async function POST(req: NextRequest) {
   if (text.startsWith("/start")) {
     await sendTelegramMessage(
       chatId,
-      `👋 Hi ${foundUser.name}! Send me any recipe URL or Instagram Reel and I'll save it to your RecipAI account.`,
+      `👋 Hi ${foundAccount.userId}! Send me any recipe URL or Instagram Reel and I'll save it to your RecipAI account.`,
     );
     return NextResponse.json({ ok: true });
   }
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
   const jobId = crypto.randomUUID();
   await db.insert(parseJobs).values({
     id: jobId,
-    userId: foundUser.id,
+    userId: foundAccount.userId,
     url,
     telegramChatId: String(chatId),
     status: "pending",
