@@ -33,13 +33,13 @@ export const RecipeImage = ({
   const optimizedSrc = getOptimizedUrl(src, width, height);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-muted">
       <Image
         src={optimizedSrc}
         alt={title}
         fill
         priority={priority}
-        className="object-cover transition-opacity duration-300"
+        className="object-cover"
         sizes={sizes}
         loading={priority ? "eager" : "lazy"}
         onError={() => setErrored(true)}
