@@ -30,7 +30,7 @@ function parseDuration(duration?: string | number): number | undefined {
   if (typeof duration === "number") return duration;
 
   // PT1H30M, PT30M, P0DT1H
-  const match = duration.match(/(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?/);
+  const match = duration.match(/P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/);
   if (!match) return undefined;
 
   const days = parseInt(match[1] || "0", 10);
