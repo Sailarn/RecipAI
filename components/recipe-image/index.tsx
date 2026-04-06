@@ -41,7 +41,7 @@ export const RecipeImage = ({
         priority={priority}
         className="object-cover"
         sizes={sizes}
-        loading={priority ? "eager" : "lazy"}
+        loading="eager"
         onError={() => setErrored(true)}
       />
     </div>
