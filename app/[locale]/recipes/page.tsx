@@ -13,8 +13,14 @@ import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getAllRecipes } from "@/lib/db/recipes";
+import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+
+// Persists across remounts so native back navigation renders the previous
+// recipe list immediately — prevents the empty-state flash between the iOS
+// swipe animation snapshot and the IndexedDB response.
+let _recipesCache: Recipe[] | undefined;
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -29,10 +35,12 @@ export default function RecipesPage() {
   const navigate = useNavigate();
   const locale = params.locale as string;
   const t = useTranslations("recipes");
-  const recipes = useLiveQuery(() => getAllRecipes(), []) ?? [];
+  const recipesFromDB = useLiveQuery(() => getAllRecipes(), []);
+  if (recipesFromDB !== undefined) _recipesCache = recipesFromDB;
+  const recipes = recipesFromDB ?? _recipesCache;
   const loading = recipes === undefined;
   const { search, setSearch, sort, setSort, category, setCategory, filtered } =
-    useRecipeFilter(recipes);
+    useRecipeFilter(recipes ?? []);
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
