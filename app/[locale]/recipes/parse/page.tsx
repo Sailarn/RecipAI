@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TransitionLink } from "@/components/transition-link";
 import { Button } from "@/components/ui";
-import { addJobId } from "@/lib/parse-job-storage";
+import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
@@ -56,12 +56,12 @@ export default function ParseRecipePage() {
           setResult(result as ParsedRecipe);
           setLoading(false);
           setJobId(null);
-          localStorage.removeItem("parseJobId");
+          removeJobId(id);
         } else if (status === "failed") {
           setError(error || "Failed to parse recipe");
           setLoading(false);
           setJobId(null);
-          localStorage.removeItem("parseJobId");
+          removeJobId(id);
         } else {
           pollRef.current = setTimeout(run, 3000);
         }
@@ -69,7 +69,7 @@ export default function ParseRecipePage() {
         setError("Network error while checking status");
         setLoading(false);
         setJobId(null);
-        localStorage.removeItem("parseJobId");
+        removeJobId(id);
       }
     };
     run();
@@ -77,7 +77,7 @@ export default function ParseRecipePage() {
 
   // resume polling on mount if job was in progress
   useEffect(() => {
-    const savedJobId = localStorage.getItem("parseJobId");
+    const savedJobId = getJobIds()[0] ?? null;
     if (!savedJobId) return;
     setJobId(savedJobId);
     setLoading(true);
@@ -144,8 +144,8 @@ export default function ParseRecipePage() {
     setUrl("");
     setUserComment("");
     setError(null);
+    if (jobId) removeJobId(jobId);
     setJobId(null);
-    localStorage.removeItem("parseJobId");
   };
 
   return (

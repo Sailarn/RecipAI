@@ -6,7 +6,7 @@ import { ParseInfoBanner } from "@/app/[locale]/recipes/parse/components/parse-i
 import { ParseResult } from "@/app/[locale]/recipes/parse/components/parse-result";
 import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { Button } from "@/components/ui";
-import { addJobId } from "@/lib/parse-job-storage";
+import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -47,12 +47,12 @@ export function RecipeParseView({ locale, onSuccess }: RecipeParseViewProps) {
           setResult(result as ParsedRecipe);
           setLoading(false);
           setJobId(null);
-          localStorage.removeItem("parseJobId");
+          removeJobId(id);
         } else if (status === "failed") {
           setError(error || "Failed to parse recipe");
           setLoading(false);
           setJobId(null);
-          localStorage.removeItem("parseJobId");
+          removeJobId(id);
         } else {
           pollRef.current = setTimeout(run, 3000);
         }
@@ -60,14 +60,14 @@ export function RecipeParseView({ locale, onSuccess }: RecipeParseViewProps) {
         setError("Network error while checking status");
         setLoading(false);
         setJobId(null);
-        localStorage.removeItem("parseJobId");
+        removeJobId(id);
       }
     };
     run();
   }, []);
 
   useEffect(() => {
-    const savedJobId = localStorage.getItem("parseJobId");
+    const savedJobId = getJobIds()[0] ?? null;
     if (!savedJobId) return;
     setJobId(savedJobId);
     setLoading(true);
@@ -136,8 +136,8 @@ export function RecipeParseView({ locale, onSuccess }: RecipeParseViewProps) {
     setUrl("");
     setUserComment("");
     setError(null);
+    if (jobId) removeJobId(jobId);
     setJobId(null);
-    localStorage.removeItem("parseJobId");
   };
 
   return (
