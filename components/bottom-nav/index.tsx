@@ -1,8 +1,9 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
 import { ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
@@ -11,27 +12,31 @@ import { NavStyles } from "./nav-styles";
 
 export function BottomNav() {
   const params = useParams();
-  const pathname = usePathname();
   const locale = params.locale as string;
   const tNav = useTranslations("navigation");
 
+  // Use the stack's current href — usePathname() doesn't update on our
+  // history.pushState calls, so it can't tell when we've pushed a detail page.
+  const { entries } = useNavigationStack();
+  const currentHref = entries[entries.length - 1]?.href ?? "";
+
   const hideOn = ["/recipes/new", "/recipes/parse", "/edit"];
-  const isDetailPage = /\/recipes\/[^/]+$/.test(pathname);
+  const isDetailPage = /\/recipes\/[^/]+$/.test(currentHref);
   const shouldHide =
-    hideOn.some((path) => pathname.includes(path)) || isDetailPage;
+    hideOn.some((path) => currentHref.includes(path)) || isDetailPage;
 
   const items = [
     {
       href: routes.recipes.list(locale),
       label: tNav("recipes"),
       icon: RecipesIcon,
-      isActive: pathname.endsWith("/recipes"),
+      isActive: currentHref.endsWith("/recipes"),
     },
     {
       href: routes.profile(locale),
       label: tNav("profile"),
       icon: ProfileIcon,
-      isActive: pathname.includes("/profile"),
+      isActive: currentHref.includes("/profile"),
     },
   ];
 
@@ -51,7 +56,7 @@ export function BottomNav() {
     <>
       <NavStyles />
       <div
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-sm"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
           viewTransitionName: "bottom-nav",
