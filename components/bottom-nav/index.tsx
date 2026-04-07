@@ -2,28 +2,35 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
+import { DRAG_EXPAND, PILL_H } from "./nav-constants";
 import { ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
 import { NavStyles } from "./nav-styles";
+import { useBottomNav } from "./use-bottom-nav";
+
+// ─── Nav items ────────────────────────────────────────────────────────────────
+// Add or remove items here.
+// After changing item count, update PILL_W and the w-[Xpx] wrapper class below.
+// See nav-constants.ts for the sizing formula and examples.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function BottomNav() {
   const params = useParams();
   const locale = params.locale as string;
   const tNav = useTranslations("navigation");
+  const navigate = useNavigate();
 
-  // Use the stack's current href — usePathname() doesn't update on our
-  // history.pushState calls, so it can't tell when we've pushed a detail page.
   const { entries } = useNavigationStack();
   const currentHref = entries[entries.length - 1]?.href ?? "";
 
-  const hideOn = ["/recipes/new", "/recipes/parse", "/edit"];
+  const hideOn = ["/recipes/parse", "/edit"];
   const isDetailPage = /\/recipes\/[^/]+$/.test(currentHref);
   const shouldHide =
-    hideOn.some((path) => currentHref.includes(path)) || isDetailPage;
+    hideOn.some((p) => currentHref.includes(p)) || isDetailPage;
 
   const items = [
     {
@@ -40,35 +47,82 @@ export function BottomNav() {
     },
   ];
 
-  const activeIndex = items.findIndex((item) => item.isActive);
+  const staticActiveIndex = Math.max(
+    0,
+    items.findIndex((it) => it.isActive),
+  );
 
-  // Delayed active index — updates after transition completes
-  const [displayIndex, setDisplayIndex] = useState(activeIndex);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDisplayIndex(activeIndex), 150);
-    return () => clearTimeout(t);
-  }, [activeIndex]);
+  const {
+    navRef,
+    itemRefs,
+    ready,
+    leftMv,
+    measure,
+    isDragging,
+    pendingIndex,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+  } = useBottomNav({
+    staticActiveIndex,
+    onNavigate: (i) => navigate.push(items[i].href),
+  });
 
   if (shouldHide) return null;
+
+  const displayActiveIndex = isDragging ? pendingIndex : staticActiveIndex;
+  const navH = measure?.innerHeight ?? 48;
+  const yNormal = (navH - PILL_H) / 2;
+  const yDrag = yNormal - DRAG_EXPAND;
 
   return (
     <>
       <NavStyles />
+      {/* w-[200px] — update this alongside PILL_W in nav-constants.ts when changing item count */}
       <div
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-sm"
-        style={{
-          paddingBottom: "env(safe-area-inset-bottom)",
-          viewTransitionName: "bottom-nav",
-        }}
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] w-[200px]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <nav className="glass-nav flex items-center rounded-2xl px-2 py-1.5">
-          <div className="relative flex items-center flex-1">
-            <NavPill activeIndex={displayIndex} itemCount={items.length} />
-            {items.map((item) => (
-              <NavItem key={item.href} {...item} />
-            ))}
-          </div>
+        <nav
+          ref={navRef}
+          className="glass-nav flex items-center rounded-[26px] px-0 py-px relative select-none touch-none"
+          style={{ overflow: "visible" }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+        >
+          {ready && (
+            <NavPill
+              leftMv={leftMv}
+              isDragging={isDragging}
+              yNormal={yNormal}
+              yDrag={yDrag}
+            />
+          )}
+
+          {items.map((item, i) => (
+            <div
+              key={item.href}
+              ref={(el) => {
+                itemRefs.current[i] = el;
+              }}
+              style={{
+                zIndex: 4,
+                position: "relative",
+                flex: 1,
+                display: "flex",
+              }}
+            >
+              <NavItem
+                label={item.label}
+                icon={item.icon}
+                isActive={i === displayActiveIndex}
+                onClick={() => {
+                  if (!isDragging) navigate.push(item.href);
+                }}
+              />
+            </div>
+          ))}
         </nav>
       </div>
     </>

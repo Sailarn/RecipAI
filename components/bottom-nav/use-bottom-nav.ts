@@ -1,0 +1,130 @@
+import { animate, useMotionValue } from "motion/react";
+import type { PointerEvent } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import {
+  DRAG_EXPAND,
+  type Measure,
+  PILL_W,
+  pillLeft,
+  SPRING,
+} from "./nav-constants";
+
+interface UseBottomNavOptions {
+  staticActiveIndex: number;
+  /** Called with the snapped-to index when the user releases a drag. */
+  onNavigate: (index: number) => void;
+}
+
+export function useBottomNav({
+  staticActiveIndex,
+  onNavigate,
+}: UseBottomNavOptions) {
+  const navRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
+  const [measure, setMeasure] = useState<Measure | null>(null);
+
+  // Single source of truth for the pill's horizontal position.
+  // Set directly during drag (no React re-renders) and spring-animated on snap.
+  const leftMv = useMotionValue(0);
+
+  // Gates pill rendering — pill only appears after the first measurement so it
+  // never flashes at position 0.
+  const [ready, setReady] = useState(false);
+
+  // ─── Initial measurement ───────────────────────────────────────────────────
+  useLayoutEffect(() => {
+    if (!navRef.current) return;
+    const navRect = navRef.current.getBoundingClientRect();
+    const itemWidths: number[] = [];
+    const itemLefts: number[] = [];
+    itemRefs.current.forEach((el) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      itemWidths.push(r.width);
+      itemLefts.push(r.left - navRect.left);
+    });
+    const m: Measure = { itemWidths, itemLefts, innerHeight: navRect.height };
+    // Seed position BEFORE setReady so the pill never renders at the wrong spot.
+    leftMv.set(pillLeft(staticActiveIndex, m));
+    setMeasure(m);
+    setReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ─── Route-change spring ───────────────────────────────────────────────────
+  const [isDragging, setIsDragging] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!measure || isDragging) return;
+    animate(leftMv, pillLeft(staticActiveIndex, measure), SPRING);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staticActiveIndex, measure]);
+
+  // ─── Drag ──────────────────────────────────────────────────────────────────
+  const [pendingIndex, setPendingIndex] = useState(staticActiveIndex);
+  const dragRef = useRef({ startX: 0, moved: false });
+
+  function findNearest(clientX: number): number {
+    if (!navRef.current || !measure) return staticActiveIndex;
+    const rect = navRef.current.getBoundingClientRect();
+    const relX = clientX - rect.left;
+    let cumulative = 0;
+    for (let i = 0; i < measure.itemWidths.length; i++) {
+      cumulative += measure.itemWidths[i];
+      if (relX <= cumulative) return i;
+    }
+    return measure.itemWidths.length - 1;
+  }
+
+  function onPointerDown(e: PointerEvent<HTMLElement>) {
+    dragRef.current = { startX: e.clientX, moved: false };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e: PointerEvent<HTMLElement>) {
+    const dx = Math.abs(e.clientX - dragRef.current.startX);
+    if (!dragRef.current.moved && dx > 8) {
+      dragRef.current.moved = true;
+      setIsDragging(true);
+      setPendingIndex(staticActiveIndex);
+    }
+    if (dragRef.current.moved && measure && navRef.current) {
+      const rect = navRef.current.getBoundingClientRect();
+      const dragW = PILL_W + DRAG_EXPAND * 2;
+      const relX = e.clientX - rect.left;
+      // Clamp so the expanded pill stays within nav bounds
+      const center = Math.max(
+        dragW / 2,
+        Math.min(rect.width - dragW / 2, relX),
+      );
+      // Direct set — instant finger-following, bypasses React
+      leftMv.set(center - dragW / 2 - DRAG_EXPAND);
+      const nearest = findNearest(e.clientX);
+      if (nearest !== pendingIndex) setPendingIndex(nearest);
+    }
+  }
+
+  function onPointerUp(e: PointerEvent<HTMLElement>) {
+    if (dragRef.current.moved && measure) {
+      const nearest = findNearest(e.clientX);
+      animate(leftMv, pillLeft(nearest, measure), SPRING);
+      setPendingIndex(nearest);
+      setIsDragging(false);
+      onNavigate(nearest);
+    }
+    dragRef.current.moved = false;
+  }
+
+  return {
+    navRef,
+    itemRefs,
+    ready,
+    leftMv,
+    measure,
+    isDragging,
+    pendingIndex,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+  };
+}

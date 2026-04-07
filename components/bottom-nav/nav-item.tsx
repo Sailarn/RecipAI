@@ -1,32 +1,38 @@
 import type { ComponentType } from "react";
-import { TransitionLink } from "../transition-link";
 
 interface NavItemProps {
-  href: string;
   label: string;
   icon: ComponentType;
   isActive: boolean;
+  onClick: () => void;
 }
 
-export function NavItem({ href, label, icon: Icon, isActive }: NavItemProps) {
+export function NavItem({
+  label,
+  icon: Icon,
+  isActive,
+  onClick,
+}: NavItemProps) {
   return (
-    <TransitionLink
-      href={href}
-      className="relative flex flex-col items-center gap-0.5 py-1.5 rounded-xl flex-1 active:scale-90"
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative flex flex-col items-center gap-0.5 py-1.5 flex-1"
       style={{
         color: isActive ? "var(--primary)" : "var(--muted-foreground)",
-        transition: "color 0.2s ease, transform 0.1s ease",
+        transition: "color 0.2s ease",
+        zIndex: 1,
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
       }}
     >
-      <span
-        style={{
-          filter: isActive ? "drop-shadow(0 0 5px var(--primary))" : "none",
-          transition: "filter 0.3s ease",
-        }}
-      >
+      <span>
         <Icon />
       </span>
       <span className="text-[10px] font-medium leading-none">{label}</span>
-    </TransitionLink>
+    </button>
   );
 }
