@@ -4,13 +4,14 @@ export const metadata: Metadata = {
   title: "RecipAI",
   description: "Save and manage your favorite recipes offline",
   manifest: "/manifest.json",
+  themeColor: "#ffffff",
   icons: {
     icon: "/icon-192x192.png",
     apple: "/icon-192x192.png",
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "RecipAI",
   },
 };
