@@ -126,7 +126,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       <button
         type="button"
         onClick={() => setCookingMode(true)}
-        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-6 hover:bg-primary/90 transition-colors"
+        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-2 hover:bg-primary/90 transition-colors"
       >
         Start Cooking
       </button>

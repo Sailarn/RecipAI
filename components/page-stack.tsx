@@ -116,6 +116,7 @@ export function PageStack() {
               bottom: 0,
               overflowY: "auto",
               WebkitOverflowScrolling: "touch" as never,
+              paddingTop: "env(safe-area-inset-top)",
               paddingBottom: "6rem",
               backgroundColor: "var(--background)",
               zIndex: isAnimating ? 100 + index : index + 1,

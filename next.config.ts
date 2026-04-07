@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import packageJson from "./package.json";
 
 // import bundleAnalyzer from "@next/bundle-analyzer";
 
@@ -20,7 +21,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version,
+    NEXT_PUBLIC_APP_VERSION: packageJson.version,
   },
   images: {
     remotePatterns: [
