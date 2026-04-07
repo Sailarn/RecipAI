@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { RecipeNewView } from "@/components/recipe-new-view";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -17,7 +18,14 @@ export function RecipeEmptyState() {
       <p className="text-lg mb-4" style={{ color: "var(--muted-foreground)" }}>
         {t("noRecipes")}
       </p>
-      <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
+      <Button
+        onClick={() =>
+          navigate.push(
+            routes.recipes.new(locale),
+            <RecipeNewView locale={locale} />,
+          )
+        }
+      >
         {t("createFirst")}
       </Button>
     </div>

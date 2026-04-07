@@ -1,25 +1,33 @@
 import { useRouter } from "next/navigation";
-
-export const nav = { direction: "forward" as "forward" | "back" };
-
-export function getNavigationDirection() {
-  return nav.direction;
-}
+import type { ReactNode } from "react";
+import { useNavigationStack } from "@/lib/navigation-stack";
 
 export function useNavigate() {
   const router = useRouter();
+  const stack = useNavigationStack();
+
   return {
-    push: (href: string) => {
-      nav.direction = "forward";
-      router.push(href);
+    push: (href: string, element?: ReactNode) => {
+      if (element !== undefined) {
+        stack.push(href, element);
+      } else {
+        router.push(href);
+      }
     },
     back: () => {
-      nav.direction = "back";
-      router.back();
+      if (stack.canPop) {
+        stack.pop();
+      } else {
+        router.back();
+      }
     },
-    replace: (href: string) => {
-      nav.direction = "forward";
-      router.replace(href);
+    reset: (href: string, element?: ReactNode) => {
+      if (element !== undefined) {
+        stack.reset(href, element);
+      } else {
+        router.push(href);
+      }
     },
+    replace: (href: string) => router.replace(href),
   };
 }

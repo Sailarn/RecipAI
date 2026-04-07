@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RecipeEditView } from "@/components/recipe-edit-view";
 import { Button } from "@/components/ui";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { TransitionLink } from "../transition-link";
 
 interface RecipeHeaderProps {
   locale: string;
@@ -23,17 +23,23 @@ export function RecipeHeader({
 
   return (
     <div className="flex items-center justify-between mb-6">
-      <TransitionLink
-        href={routes.recipes.list(locale)}
+      <button
+        type="button"
+        onClick={() => navigate.back()}
         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         ← {tRecipes("backToRecipes")}
-      </TransitionLink>
+      </button>
       <div className="flex gap-2">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate.push(routes.recipes.edit(locale, recipeId))}
+          onClick={() =>
+            navigate.push(
+              routes.recipes.edit(locale, recipeId),
+              <RecipeEditView recipeId={recipeId} locale={locale} />,
+            )
+          }
         >
           {t("edit")}
         </Button>

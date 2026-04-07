@@ -8,6 +8,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
+import { RecipeNewView } from "@/components/recipe-new-view";
 import { Button } from "@/components/ui/button";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
@@ -70,7 +71,14 @@ export default function RecipesPage() {
             </h1>
             <div className="flex items-center gap-2">
               <ParsedRecipesSheet />
-              <Button onClick={() => navigate.push(routes.recipes.new(locale))}>
+              <Button
+                onClick={() =>
+                  navigate.push(
+                    routes.recipes.new(locale),
+                    <RecipeNewView locale={locale} />,
+                  )
+                }
+              >
                 {t("createRecipe")}
               </Button>
             </div>

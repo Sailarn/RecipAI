@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { RecipeDetail } from "@/components/recipe-detail";
 import { RecipeImage } from "@/components/recipe-image";
 import { Card } from "@/components/ui/card";
 import { CATEGORY_COLORS } from "@/lib/categories";
@@ -22,7 +23,12 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
 
   return (
     <Card
-      onClick={() => navigate.push(routes.recipes.detail(locale, recipe.id))}
+      onClick={() =>
+        navigate.push(
+          routes.recipes.detail(locale, recipe.id),
+          <RecipeDetail recipeId={recipe.id} locale={locale} />,
+        )
+      }
       className="cursor-pointer transition-all h-full flex flex-col gap-0 p-0 rounded-xl border-0 shadow-md hover:shadow-xl overflow-hidden"
       style={{ backgroundColor: "var(--card)", color: "var(--foreground)" }}
     >

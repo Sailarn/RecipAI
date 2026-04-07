@@ -1,27 +1,20 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TransitionLink } from "@/components/transition-link";
+import { ParseForm } from "@/app/[locale]/recipes/parse/components/parse-form";
+import { ParseInfoBanner } from "@/app/[locale]/recipes/parse/components/parse-info-banner";
+import { ParseResult } from "@/app/[locale]/recipes/parse/components/parse-result";
+import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { Button } from "@/components/ui";
 import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { ParseForm } from "./components/parse-form";
-import { ParseInfoBanner } from "./components/parse-info-banner";
-import { ParseResult } from "./components/parse-result";
 
-export interface ParsedRecipe {
-  title: string;
-  description?: string;
-  prepTime?: number;
-  cookTime?: number;
-  servings: number;
-  ingredients: Array<{ amount?: number; unit?: string; item: string }>;
-  instructions: Array<{ order: number; instruction: string }>;
-  imageUrl?: string;
-  sourceUrl: string;
-  category?: string;
+interface RecipeParseViewProps {
+  locale: string;
+  // When provided, called with parsed data and the view navigates back instead
+  // of pushing to the new-recipe page. Used when on the navigation stack.
+  onSuccess?: (data: ParsedRecipe) => void;
 }
 
 function isValidUrl(value: string): boolean {
@@ -33,10 +26,8 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-export default function ParseRecipePage() {
+export function RecipeParseView({ locale, onSuccess }: RecipeParseViewProps) {
   const navigate = useNavigate();
-  const params = useParams();
-  const locale = params.locale as string;
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [url, setUrl] = useState("");
@@ -73,7 +64,6 @@ export default function ParseRecipePage() {
     run();
   }, []);
 
-  // resume polling on mount if job was in progress
   useEffect(() => {
     const savedJobId = getJobIds().at(-1) ?? null;
     if (!savedJobId) return;
@@ -82,7 +72,6 @@ export default function ParseRecipePage() {
     poll(savedJobId);
   }, [poll]);
 
-  // cleanup on unmount
   useEffect(() => {
     return () => {
       if (pollRef.current) clearTimeout(pollRef.current);
@@ -99,7 +88,6 @@ export default function ParseRecipePage() {
     setResult(null);
 
     try {
-      // create job
       const res = await fetch(api.parseQueue, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -115,14 +103,12 @@ export default function ParseRecipePage() {
         new CustomEvent("parse-job-created", { detail: { jobId: newJobId } }),
       );
 
-      // client triggers processing — fire and forget
       fetch(api.parseQueueProcess, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: newJobId }),
       })
         .then((r) => r.json())
-        .then((data) => console.log("process response:", data))
         .catch((err) => console.error("process error:", err));
     } catch {
       setError("Network error. Please try again.");
@@ -131,7 +117,13 @@ export default function ParseRecipePage() {
   };
 
   const handleSave = () => {
-    if (result) {
+    if (!result) return;
+    if (onSuccess) {
+      // Stack context: pass data back to the caller and go back
+      onSuccess(result);
+      navigate.back();
+    } else {
+      // Standalone: use localStorage and navigate normally
       localStorage.setItem("parsedRecipe", JSON.stringify(result));
       navigate.push(routes.recipes.new(locale));
     }
@@ -150,12 +142,13 @@ export default function ParseRecipePage() {
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Parse Recipe from URL</h1>
       <div className="flex items-center justify-between mb-6">
-        <TransitionLink
-          href={routes.recipes.new(locale)}
+        <button
+          type="button"
+          onClick={() => navigate.back()}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back to create recipe form
-        </TransitionLink>
+        </button>
       </div>
       <ParseInfoBanner />
       <ParseForm

@@ -9,6 +9,7 @@ vi.mock("@/lib/transitions", () => ({
     push: vi.fn(),
     back: vi.fn(),
     replace: vi.fn(),
+    reset: vi.fn(),
   }),
 }));
 
