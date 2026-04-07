@@ -68,8 +68,6 @@ export default function ParseRecipePage() {
       } catch {
         setError("Network error while checking status");
         setLoading(false);
-        setJobId(null);
-        removeJobId(id);
       }
     };
     run();
@@ -77,7 +75,7 @@ export default function ParseRecipePage() {
 
   // resume polling on mount if job was in progress
   useEffect(() => {
-    const savedJobId = getJobIds()[0] ?? null;
+    const savedJobId = getJobIds().at(-1) ?? null;
     if (!savedJobId) return;
     setJobId(savedJobId);
     setLoading(true);

@@ -59,15 +59,13 @@ export function RecipeParseView({ locale, onSuccess }: RecipeParseViewProps) {
       } catch {
         setError("Network error while checking status");
         setLoading(false);
-        setJobId(null);
-        removeJobId(id);
       }
     };
     run();
   }, []);
 
   useEffect(() => {
-    const savedJobId = getJobIds()[0] ?? null;
+    const savedJobId = getJobIds().at(-1) ?? null;
     if (!savedJobId) return;
     setJobId(savedJobId);
     setLoading(true);
