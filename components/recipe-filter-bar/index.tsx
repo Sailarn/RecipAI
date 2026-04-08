@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui";
+} from "../ui";
 
 interface RecipeFilterBarProps {
   search: string;
