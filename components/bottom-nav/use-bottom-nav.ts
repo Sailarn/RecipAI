@@ -32,6 +32,7 @@ export function useBottomNav({
   const [ready, setReady] = useState(false);
 
   // ─── Initial measurement ───────────────────────────────────────────────────
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally runs once on mount to seed initial position
   useLayoutEffect(() => {
     if (!navRef.current) return;
     const navRect = navRef.current.getBoundingClientRect();
@@ -48,16 +49,15 @@ export function useBottomNav({
     leftMv.set(pillLeft(staticActiveIndex, m));
     setMeasure(m);
     setReady(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── Route-change spring ───────────────────────────────────────────────────
   const [isDragging, setIsDragging] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: isDragging and leftMv intentionally omitted — isDragging would retrigger the spring on drag end, leftMv is a stable MotionValue ref
   useLayoutEffect(() => {
     if (!measure || isDragging) return;
     animate(leftMv, pillLeft(staticActiveIndex, measure), SPRING);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staticActiveIndex, measure]);
 
   // ─── Drag ──────────────────────────────────────────────────────────────────

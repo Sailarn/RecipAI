@@ -37,7 +37,7 @@ export function RecipeHeader({
           onClick={() =>
             navigate.push(
               routes.recipes.edit(locale, recipeId),
-              <RecipeEditView recipeId={recipeId} locale={locale} />,
+              <RecipeEditView recipeId={recipeId} />,
             )
           }
         >
