@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
-  // Dark is the app default. ThemeColorSync updates this at runtime.
-  // The anti-FOUC script in [locale]/layout.tsx ensures html/body are dark
-  // before first paint, so the status bar area never flashes white.
   themeColor: "#0a0a0a",
 };
 

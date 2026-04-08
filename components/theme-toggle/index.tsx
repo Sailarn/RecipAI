@@ -12,25 +12,12 @@ export function ThemeToggle() {
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
-    const shouldBeDark = theme === "dark" || (!theme && prefersDark);
-
-    setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add("dark");
-    }
+    setIsDark(theme === "dark" || (!theme && prefersDark));
   }, []);
 
   const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-
-    if (newIsDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+    window.location.reload();
   };
 
   return (
