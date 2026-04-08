@@ -15,7 +15,15 @@ export function ThemeColorSync() {
       const meta = document.querySelector<HTMLMetaElement>(
         'meta[name="theme-color"]',
       );
-      if (meta) meta.content = color;
+      if (!meta) return;
+      meta.content = color;
+      // iOS PWA doesn't re-render the status bar when theme-color content changes
+      // while the app is running. Briefly adding a second meta triggers a repaint.
+      const ping = document.createElement("meta");
+      ping.name = "theme-color";
+      ping.content = color;
+      document.head.appendChild(ping);
+      requestAnimationFrame(() => ping.remove());
     };
 
     update();

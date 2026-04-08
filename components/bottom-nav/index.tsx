@@ -80,8 +80,8 @@ export function BottomNav() {
       <NavStyles />
       {/* w-[200px] — update this alongside PILL_W in nav-constants.ts when changing item count */}
       <div
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] w-[200px]"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="fixed left-1/2 -translate-x-1/2 z-[200] w-[200px]"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
       >
         <nav
           ref={navRef}
