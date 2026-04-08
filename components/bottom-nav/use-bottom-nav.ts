@@ -78,7 +78,9 @@ export function useBottomNav({
 
   function onPointerDown(e: PointerEvent<HTMLElement>) {
     dragRef.current = { startX: e.clientX, moved: false, isDown: true };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // Do NOT call setPointerCapture here — capturing on every pointerdown
+    // redirects the subsequent click event to <nav>, killing NavItem onClick.
+    // Capture is set only once drag is confirmed (8px movement threshold).
   }
 
   function onPointerMove(e: PointerEvent<HTMLElement>) {
@@ -86,6 +88,8 @@ export function useBottomNav({
     const dx = Math.abs(e.clientX - dragRef.current.startX);
     if (!dragRef.current.moved && dx > 8) {
       dragRef.current.moved = true;
+      // Capture pointer now that we're sure it's a drag, not a tap.
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       setIsDragging(true);
       setPendingIndex(staticActiveIndex);
     }

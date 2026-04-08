@@ -45,6 +45,9 @@
 
   html {
     @apply font-sans;
+    /* Ensures iOS overscroll bounce area and safe-area-inset regions
+       show the correct theme background instead of the browser default white. */
+    background-color: var(--background);
   }
 
   .scrollbar-hide {

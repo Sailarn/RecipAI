@@ -6,14 +6,18 @@ import { useEffect } from "react";
 // iOS PWA status bar background matches the app background in both modes.
 export function ThemeColorSync() {
   useEffect(() => {
-    const meta = document.querySelector<HTMLMetaElement>(
-      'meta[name="theme-color"]',
-    );
-    if (!meta) return;
-
     const update = () => {
       const isDark = document.documentElement.classList.contains("dark");
-      meta.content = isDark ? "#0a0a0a" : "#ffffff";
+      const color = isDark ? "#0a0a0a" : "#ffffff";
+      // Replace all theme-color metas (there may be multiple from the viewport
+      // media-query export) with a single authoritative one without a media attr.
+      for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
+        m.remove();
+      }
+      const fresh = document.createElement("meta");
+      fresh.name = "theme-color";
+      fresh.content = color;
+      document.head.appendChild(fresh);
     };
 
     update();

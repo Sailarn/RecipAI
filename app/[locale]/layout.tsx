@@ -35,6 +35,15 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning className={inter.variable}>
       <head>
         <link rel="preconnect" href="https://ik.imagekit.io" />
+        {/* Apply theme class synchronously before first paint to prevent FOUC.
+            Without this, ThemeProvider's useEffect runs after paint, causing a
+            white flash on the body/html background (visible in iOS status bar area). */}
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional anti-FOUC inline script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.classList.add(t);}catch(e){}})();`,
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
