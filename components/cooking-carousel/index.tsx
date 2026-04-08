@@ -2,6 +2,7 @@
 
 import { BookOpenIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { RecipeImage } from "@/components/recipe-image";
 import { ServingsCalculator } from "@/components/servings-calculator";
 import {
@@ -43,8 +44,10 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
     };
   }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
+  // Portal to document.body so fixed positioning is relative to the viewport,
+  // not the PageStack entry which has willChange:transform as a containing block.
+  return createPortal(
+    <div className="fixed inset-0 z-[300] bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b">
         <span className="text-sm text-muted-foreground">
@@ -169,6 +172,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </div>,
+    document.body,
   );
 }

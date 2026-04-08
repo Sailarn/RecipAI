@@ -1,7 +1,13 @@
 import type { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  // Two entries so the initial HTML matches system preference before JS runs.
+  // ThemeColorSync in [locale]/layout.tsx takes over once JS is hydrated to
+  // handle user-overridden themes (app dark when system is light, etc.).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export const metadata: Metadata = {

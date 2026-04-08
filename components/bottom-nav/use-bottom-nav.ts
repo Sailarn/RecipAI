@@ -62,7 +62,7 @@ export function useBottomNav({
 
   // ─── Drag ──────────────────────────────────────────────────────────────────
   const [pendingIndex, setPendingIndex] = useState(staticActiveIndex);
-  const dragRef = useRef({ startX: 0, moved: false });
+  const dragRef = useRef({ startX: 0, moved: false, isDown: false });
 
   function findNearest(clientX: number): number {
     if (!navRef.current || !measure) return staticActiveIndex;
@@ -77,11 +77,12 @@ export function useBottomNav({
   }
 
   function onPointerDown(e: PointerEvent<HTMLElement>) {
-    dragRef.current = { startX: e.clientX, moved: false };
+    dragRef.current = { startX: e.clientX, moved: false, isDown: true };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: PointerEvent<HTMLElement>) {
+    if (!dragRef.current.isDown) return;
     const dx = Math.abs(e.clientX - dragRef.current.startX);
     if (!dragRef.current.moved && dx > 8) {
       dragRef.current.moved = true;
@@ -113,6 +114,7 @@ export function useBottomNav({
       onNavigate(nearest);
     }
     dragRef.current.moved = false;
+    dragRef.current.isDown = false;
   }
 
   return {
