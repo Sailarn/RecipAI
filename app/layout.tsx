@@ -1,13 +1,10 @@
 import type { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
-  // Two entries so the initial HTML matches system preference before JS runs.
-  // ThemeColorSync in [locale]/layout.tsx takes over once JS is hydrated to
-  // handle user-overridden themes (app dark when system is light, etc.).
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  // Dark is the app default. ThemeColorSync updates this at runtime.
+  // The anti-FOUC script in [locale]/layout.tsx ensures html/body are dark
+  // before first paint, so the status bar area never flashes white.
+  themeColor: "#0a0a0a",
 };
 
 export const metadata: Metadata = {

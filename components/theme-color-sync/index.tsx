@@ -9,15 +9,13 @@ export function ThemeColorSync() {
     const update = () => {
       const isDark = document.documentElement.classList.contains("dark");
       const color = isDark ? "#0a0a0a" : "#ffffff";
-      // Replace all theme-color metas (there may be multiple from the viewport
-      // media-query export) with a single authoritative one without a media attr.
-      for (const m of document.querySelectorAll('meta[name="theme-color"]')) {
-        m.remove();
-      }
-      const fresh = document.createElement("meta");
-      fresh.name = "theme-color";
-      fresh.content = color;
-      document.head.appendChild(fresh);
+      // Only update .content — never remove/recreate the meta element.
+      // Next.js owns the element (from the viewport export); removing it
+      // causes a removeChild error when Next.js tries to reconcile on navigation.
+      const meta = document.querySelector<HTMLMetaElement>(
+        'meta[name="theme-color"]',
+      );
+      if (meta) meta.content = color;
     };
 
     update();
