@@ -36,6 +36,39 @@ ${textContent}
 </webpage_content>`;
 }
 
+export function buildPhotoPrompt(userComment?: string): string {
+  const override = userComment
+    ? `USER OVERRIDE (CRITICAL — highest priority): ${userComment}\n\n`
+    : "";
+
+  return `${override}You are a recipe extraction expert. Extract a structured recipe from this photo of a handwritten or printed recipe card.
+
+RULES:
+- The recipe may be in any language including Ukrainian, Russian, or English — extract text as-is, do NOT translate.
+- If handwriting is unclear, make your best-effort guess — never return empty ingredients.
+- times (prepTime, cookTime): extract as integers in minutes (e.g. "1 год 30 хв" → 90). null if not found.
+- servings: integer. Default to 4 if not stated.
+- category: pick the single best fit from: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
+- ingredients: isolate amount, unit, and item. Convert fractions to decimals (e.g. "1½" → 1.5, "¼" → 0.25). If no amount, set amount and unit to null.
+- instructions: extract steps in correct order. Keep original wording.
+- imageUrl: always null (we do not store the photo itself).
+- sourceUrl: always null.
+
+Return ONLY valid JSON matching this exact schema:
+{
+  "title": "string",
+  "description": "string | null",
+  "prepTime": "integer | null",
+  "cookTime": "integer | null",
+  "servings": "integer",
+  "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
+  "instructions": [{ "order": "integer", "instruction": "string", "imageUrl": null }],
+  "imageUrl": null,
+  "sourceUrl": null
+}`;
+}
+
 export function buildTranscriptPrompt(
   transcript: string,
   caption?: string,

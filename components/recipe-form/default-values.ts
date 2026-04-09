@@ -36,7 +36,7 @@ export function getDefaultValues(
       servings: String(recipe.servings),
       ingredients: recipe.ingredients.map((ing) => ({
         item: ing.item,
-        amount: String(ing.amount),
+        amount: ing.amount != null ? String(ing.amount) : "",
         unit: ing.unit || "",
       })),
       instructions: recipe.instructions.map((inst) => ({

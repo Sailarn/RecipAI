@@ -62,14 +62,35 @@ export function NavigationStackProvider({
   // history.pushState ourselves (Next.js intercepts it and updates usePathname).
   const stackPushing = useRef(false);
 
+  // Tracks the last currentPage value that was written into the sync entry.
+  // Used to detect when currentPage catches up after a router.push race condition.
+  const lastSyncedPage = useRef<React.ReactNode>(undefined);
+
   // Sync with real Next.js navigations (Link, router.push, etc.).
   useEffect(() => {
     if (stackPushing.current) {
       stackPushing.current = false;
+      lastSyncedPage.current = currentPage;
       return;
     }
-    const top = entriesRef.current[entriesRef.current.length - 1];
-    if (top?.href === pathname) return;
+    const prev = entriesRef.current;
+    const top = prev[prev.length - 1];
+
+    if (top?.href === pathname) {
+      // Race condition fix: router.push updates pathname before currentPage
+      // re-renders. If the top entry was created by this sync effect (id prefix
+      // "nextjs-") and currentPage has since changed, update it in-place.
+      if (
+        top.id.startsWith("nextjs-") &&
+        currentPage !== lastSyncedPage.current
+      ) {
+        lastSyncedPage.current = currentPage;
+        updateEntries([...prev.slice(0, -1), { ...top, element: currentPage }]);
+      }
+      return;
+    }
+
+    lastSyncedPage.current = currentPage;
     updateEntries([
       { id: `nextjs-${Date.now()}`, href: pathname, element: currentPage },
     ]);
