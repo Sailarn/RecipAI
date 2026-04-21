@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -159,10 +160,13 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
       <Sheet open={ingredientsOpen} onOpenChange={setIngredientsOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[70vh] overflow-y-auto rounded-t-2xl"
+          className="z-[400] max-h-[70vh] overflow-y-auto rounded-t-2xl"
         >
           <SheetHeader className="px-4 pt-4 pb-0">
             <SheetTitle>Ingredients</SheetTitle>
+            <SheetDescription>
+              View and adjust the ingredients for this recipe.
+            </SheetDescription>
           </SheetHeader>
           <div className="px-4 pb-6">
             <ServingsCalculator
