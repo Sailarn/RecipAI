@@ -47,3 +47,6 @@ next-env.d.ts
 # biome
 /public/sw.js
 /public/workbox-*.js
+
+# claude
+.claude/settings.local.json
