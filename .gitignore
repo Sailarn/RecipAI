@@ -47,6 +47,12 @@ next-env.d.ts
 # biome
 /public/sw.js
 /public/workbox-*.js
+/public/sw.js.map
 
-# claude
-.claude/settings.local.json
+# design system
+/RecipAI Design System
+/design-spec
+
+# markdown — ignore all .md files except README.md
+*.md
+!README.md

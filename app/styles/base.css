@@ -33,9 +33,15 @@
     --destructive-hover: var(--color-destructive-hover-dark);
   }
 
+  html {
+    @apply font-sans;
+    background: var(--app-mesh);
+    background-attachment: fixed;
+  }
+
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background: transparent;
+    color: var(--fg-1);
     @apply bg-background text-foreground;
   }
 
@@ -43,19 +49,128 @@
     @apply border-border outline-ring/50;
   }
 
-  html {
-    @apply font-sans;
-    /* Ensures iOS overscroll bounce area and safe-area-inset regions
-       show the correct theme background instead of the browser default white. */
-    background-color: var(--background);
-  }
-
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-light-bg);
+    backdrop-filter: var(--glass-light-blur);
+    -webkit-backdrop-filter: var(--glass-light-blur);
+    border: 1px solid var(--glass-light-border);
+    box-shadow: var(--glass-light-shadow);
+  }
+
+  .glass-card {
+    background: var(--glass-card-bg);
+    backdrop-filter: var(--glass-card-blur);
+    -webkit-backdrop-filter: var(--glass-card-blur);
+    border: 1px solid var(--glass-card-border);
+    box-shadow: var(--glass-card-shadow);
+  }
+
+  .glass-nav {
+    background: var(--glass-nav-bg);
+    backdrop-filter: var(--glass-nav-blur);
+    -webkit-backdrop-filter: var(--glass-nav-blur);
+    border: 1px solid var(--glass-nav-border);
+    box-shadow: var(--glass-nav-shadow);
+  }
+
+  .signin-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: 13px 16px;
+    background: oklch(1 0 0 / 4%);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    color: var(--fg-1);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    line-height: 1;
+    cursor: pointer;
+    text-align: left;
+    transition: var(--transition-colors), box-shadow var(--duration-fast) var(--ease-default);
+  }
+  .signin-btn:hover {
+    background: oklch(1 0 0 / 8%);
+    border-color: var(--border-default);
+    box-shadow: var(--shadow-sm);
+  }
+  .dark .signin-btn {
+    background: rgba(255, 170, 50, 0.08);
+    border-color: rgba(255, 200, 100, 0.18);
+  }
+  .dark .signin-btn:hover {
+    background: rgba(255, 180, 60, 0.15);
+    border-color: rgba(255, 210, 120, 0.35);
+  }
+  .signin-btn:active {
+    transform: scale(0.98);
+    transition: var(--transition-scale);
+  }
+
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background: rgba(255, 170, 50, 0.07);
+    border-color: rgba(255, 200, 100, 0.15);
+    color: var(--fg-1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .dark input:hover,
+  .dark textarea:hover,
+  .dark select:hover {
+    border-color: rgba(255, 200, 100, 0.28);
+  }
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    border-color: rgba(255, 210, 120, 0.45);
+    outline: none;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: var(--fg-3);
+  }
+
+  .photo-drop-zone {
+    background: var(--glass-card-bg);
+    backdrop-filter: var(--glass-card-blur);
+    -webkit-backdrop-filter: var(--glass-card-blur);
+    border: 2px dashed var(--glass-card-border);
+    color: var(--fg-2);
+    transition: var(--transition-colors), border-color var(--duration-fast) var(--ease-default);
+  }
+  .photo-drop-zone:hover {
+    border-color: var(--glass-nav-border);
+    color: var(--fg-1);
+  }
+
+  /* Sheet / bottom drawer — glass surface */
+  .dark [data-slot="sheet-content"] {
+    background: rgba(18, 14, 6, 0.88);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border-color: rgba(255, 200, 100, 0.18);
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 220, 130, 0.10);
+  }
+  .dark [data-slot="sheet-content"][data-side="bottom"] {
+    border-radius: 28px 28px 0 0;
+  }
+  .dark [data-slot="sheet-overlay"] {
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 }
