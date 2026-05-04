@@ -75,12 +75,35 @@
     box-shadow: var(--glass-card-shadow);
   }
 
+  /* Light mode: use light glass tokens */
   .glass-nav {
+    background: var(--glass-light-bg);
+    backdrop-filter: var(--glass-light-blur);
+    -webkit-backdrop-filter: var(--glass-light-blur);
+    border: 1px solid var(--glass-light-border);
+    box-shadow: var(--glass-light-shadow);
+  }
+  .dark .glass-nav {
     background: var(--glass-nav-bg);
     backdrop-filter: var(--glass-nav-blur);
     -webkit-backdrop-filter: var(--glass-nav-blur);
     border: 1px solid var(--glass-nav-border);
     box-shadow: var(--glass-nav-shadow);
+  }
+
+  /* Nav pill — active indicator */
+  .nav-pill {
+    backdrop-filter: var(--glass-pill-blur);
+    -webkit-backdrop-filter: var(--glass-pill-blur);
+    background: var(--glass-pill-bg);
+    border: 1px solid var(--glass-pill-border);
+    box-shadow: var(--glass-pill-shadow);
+    transition:
+      backdrop-filter 0.3s ease,
+      -webkit-backdrop-filter 0.3s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .signin-btn {

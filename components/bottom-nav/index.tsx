@@ -5,17 +5,17 @@ import { useTranslations } from "next-intl";
 import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { DRAG_EXPAND, PILL_H } from "./nav-constants";
-import { ProfileIcon, RecipesIcon } from "./nav-icons";
+import { PILL_H } from "./use-bottom-nav";
+import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
-import { NavStyles } from "./nav-styles";
 import { useBottomNav } from "./use-bottom-nav";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
-// Add or remove items here.
-// After changing item count, update PILL_W and the w-[Xpx] wrapper class below.
-// See nav-constants.ts for the sizing formula and examples.
+// 3 items: Recipes | AI Import | Profile
+// PILL_W = 74, PILL_H = 45
+// NAV_W ≈ (74 + 6.5) × 3 = 241.5 → 260px wrapper
+// See use-bottom-nav.ts for the sizing constants.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function BottomNav() {
@@ -27,8 +27,9 @@ export function BottomNav() {
   const { entries } = useNavigationStack();
   const currentHref = entries[entries.length - 1]?.href ?? "";
 
-  const hideOn = ["/recipes/parse", "/edit"];
-  const isDetailPage = /\/recipes\/[^/]+$/.test(currentHref);
+  const hideOn = ["/edit", "/login"];
+  const isDetailPage =
+    /\/recipes\/[^/]+$/.test(currentHref) && !currentHref.endsWith("/parse");
   const shouldHide =
     hideOn.some((p) => currentHref.includes(p)) || isDetailPage;
 
@@ -38,6 +39,11 @@ export function BottomNav() {
       label: tNav("recipes"),
       icon: RecipesIcon,
       isActive: currentHref.endsWith("/recipes"),
+    },
+    {
+      href: routes.recipes.parse(locale),
+      label: "AI Import",
+      isActive: currentHref.includes("/parse"),
     },
     {
       href: routes.profile(locale),
@@ -52,51 +58,36 @@ export function BottomNav() {
     items.findIndex((it) => it.isActive),
   );
 
-  const {
-    navRef,
-    itemRefs,
-    ready,
-    leftMv,
-    measure,
-    isDragging,
-    pendingIndex,
-    onPointerDown,
-    onPointerMove,
-    onPointerUp,
-  } = useBottomNav({
-    staticActiveIndex,
-    onNavigate: (i) => navigate.push(items[i].href),
-  });
+  const { navRef, itemRefs, ready, leftMv, measure } =
+    useBottomNav({
+      staticActiveIndex,
+    });
 
   if (shouldHide) return null;
 
-  const displayActiveIndex = isDragging ? pendingIndex : staticActiveIndex;
+  // Subtract 2px for the nav's 1px top/bottom border so the pill
+  // is centered within the content area, not the border-box.
   const navH = measure?.innerHeight ?? 48;
-  const yNormal = (navH - PILL_H) / 2;
-  const yDrag = yNormal - DRAG_EXPAND;
+  const yNormal = (navH - 2 - PILL_H) / 2;
+  const isAiActive = staticActiveIndex === 1;
 
   return (
     <>
-      <NavStyles />
-      {/* w-[200px] — update this alongside PILL_W in nav-constants.ts when changing item count */}
+      {/* w-[260px] — 3 items × ~87px, pill 74px → ~6.5px gap each side */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-[200] w-[200px]"
+        className="fixed left-1/2 -translate-x-1/2 z-[200] w-[260px]"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
       >
         <nav
           ref={navRef}
-          className="glass-nav flex items-center rounded-[26px] px-0 py-px relative select-none touch-none"
+          className="glass-nav flex items-center rounded-[28px] px-0 py-0 relative select-none touch-none"
           style={{ overflow: "visible" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
         >
           {ready && (
             <NavPill
               leftMv={leftMv}
-              isDragging={isDragging}
               yNormal={yNormal}
-              yDrag={yDrag}
+              hidden={isAiActive}
             />
           )}
 
@@ -116,10 +107,14 @@ export function BottomNav() {
               <NavItem
                 label={item.label}
                 icon={item.icon}
-                isActive={i === displayActiveIndex}
-                onClick={() => {
-                  if (!isDragging) navigate.push(item.href);
-                }}
+                renderIcon={
+                  item.label === "AI Import"
+                    ? (active) => <AINavIcon isActive={active} />
+                    : undefined
+                }
+                isActive={i === staticActiveIndex}
+                onClick={() => navigate.push(item.href)}
+                hideLabelWhenActive={item.label === "AI Import"}
               />
             </div>
           ))}
