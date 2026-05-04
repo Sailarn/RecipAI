@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRef } from "react";
 import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -33,6 +34,15 @@ export function BottomNav() {
   const shouldHide =
     hideOn.some((p) => currentHref.includes(p)) || isDetailPage;
 
+  // Increment on each hide→show transition to force re-mount of the nav,
+  // which re-runs the initial measurement and seeds the pill at the correct
+  // position — avoiding stale measurements from when the nav was hidden.
+  const wasHiddenRef = useRef(shouldHide);
+  const showKeyRef = useRef(0);
+  if (wasHiddenRef.current && !shouldHide) showKeyRef.current += 1;
+  wasHiddenRef.current = shouldHide;
+  const showKey = showKeyRef.current;
+
   const items = [
     {
       href: routes.recipes.list(locale),
@@ -61,6 +71,7 @@ export function BottomNav() {
   const { navRef, itemRefs, ready, leftMv, measure } =
     useBottomNav({
       staticActiveIndex,
+      measureKey: showKey,
     });
 
   if (shouldHide) return null;

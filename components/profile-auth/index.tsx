@@ -3,19 +3,23 @@
 import { Bot, LogOut, User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui";
+import { LoginView } from "@/components/login-view";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 import { LinkedAccounts } from "./linked-accounts";
 import { useLinkedAccounts } from "./use-linked-accounts";
 
 export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
+  const navigate = useNavigate();
   const { locale } = useParams<{ locale: string }>();
   const { linkedProviders, telegramLinked, passkeyAdded, isLoading } =
     useLinkedAccounts(!!session);
 
-  const handleSignIn = () => router.push(routes.login(locale));
+  const handleSignIn = () =>
+    navigate.push(routes.login(locale), <LoginView locale={locale} />);
 
   const handleSignOut = async () => {
     await authClient.signOut();

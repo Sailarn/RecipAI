@@ -29,9 +29,11 @@ export function pillLeft(index: number, m: Measure): number {
 
 interface UseBottomNavOptions {
   staticActiveIndex: number;
+  /** Incremented on each hide→show transition to force re-measurement. */
+  measureKey?: number;
 }
 
-export function useBottomNav({ staticActiveIndex }: UseBottomNavOptions) {
+export function useBottomNav({ staticActiveIndex, measureKey }: UseBottomNavOptions) {
   const navRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const [measure, setMeasure] = useState<Measure | null>(null);
@@ -44,7 +46,7 @@ export function useBottomNav({ staticActiveIndex }: UseBottomNavOptions) {
   const [ready, setReady] = useState(false);
 
   // ─── Initial measurement ───────────────────────────────────────────────────
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally runs once on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv is a stable MotionValue ref
   useLayoutEffect(() => {
     if (!navRef.current) return;
     const navRect = navRef.current.getBoundingClientRect();
@@ -61,13 +63,14 @@ export function useBottomNav({ staticActiveIndex }: UseBottomNavOptions) {
     leftMv.set(pillLeft(staticActiveIndex, m));
     setMeasure(m);
     setReady(true);
-  }, []);
+  }, [measureKey]);
 
   // ─── Route-change spring ───────────────────────────────────────────────────
   // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv is a stable MotionValue ref
   useLayoutEffect(() => {
     if (!measure) return;
-    animate(leftMv, pillLeft(staticActiveIndex, measure), SPRING);
+    const target = pillLeft(staticActiveIndex, measure);
+    animate(leftMv, target, SPRING);
   }, [staticActiveIndex, measure]);
 
   return {
