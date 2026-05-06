@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { RecipeImage } from "@/components/recipe-image";
+import { Badge } from "@/components/ui/badge";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -40,7 +40,8 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
           ? "0 8px 36px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,220,130,0.18)"
           : undefined,
         borderColor: hovered ? "rgba(255,210,130,0.28)" : undefined,
-        transition: "box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease",
+        transition:
+          "box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease",
       }}
     >
       <div className="relative w-full overflow-hidden" style={{ height: 96 }}>
@@ -54,7 +55,18 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
         />
         {recipe.category && (
           <div style={{ position: "absolute", top: 7, left: 7 }}>
-            <Badge category={recipe.category} />
+            <div
+              style={{
+                background: "rgba(0,0,0,0.45)",
+                borderRadius: 99,
+                padding: "2px 0",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                display: "inline-flex",
+              }}
+            >
+              <Badge category={recipe.category} />
+            </div>
           </div>
         )}
       </div>
@@ -71,10 +83,7 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
           {recipe.title}
         </h2>
         {recipe.servings && (
-          <p
-            className="text-[11px] mt-auto"
-            style={{ color: "var(--fg-2)" }}
-          >
+          <p className="text-[11px] mt-auto" style={{ color: "var(--fg-2)" }}>
             🍽️ {recipe.servings} {t("servings")}
           </p>
         )}
