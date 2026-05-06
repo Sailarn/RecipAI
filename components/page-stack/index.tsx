@@ -116,7 +116,7 @@ export function PageStack() {
               bottom: 0,
               overflowY: "auto",
               WebkitOverflowScrolling: "touch" as never,
-              paddingBottom: "6rem",
+              paddingBottom: 0,
               background: "var(--app-mesh)",
               zIndex: isAnimating ? 100 + index : index + 1,
               visibility: visible ? "visible" : "hidden",

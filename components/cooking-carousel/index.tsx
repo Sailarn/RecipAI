@@ -106,7 +106,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
         <Carousel className="h-full" setApi={setApi}>
           <CarouselContent
             className="-ml-4"
-            style={{ height: "calc(100vh - 76px - 52px)" }}
+            style={{ height: "calc(100vh - 100px - 52px)" }}
           >
             {/* Slide 0 — Overview */}
             <CarouselItem className="pl-4 h-full">
@@ -179,7 +179,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
               <CarouselItem key={step.id} className="pl-4 h-full">
                 <div
                   style={{
-                    padding: "0 14px 100px",
+                    padding: "0 14px 20px",
                     overflowY: "auto",
                     height: "100%",
                   }}
@@ -446,7 +446,6 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
                 originalServings={recipe.servings}
                 ingredients={recipe.ingredients}
               />
-              <IngredientsList ingredients={recipe.ingredients} />
             </div>
           </>,
           document.body,

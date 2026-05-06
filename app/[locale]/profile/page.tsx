@@ -111,12 +111,12 @@ export default function ProfilePage() {
   const targetLanguageName = locale === "ua" ? "English" : "Українська";
 
   return (
-    <div style={{ minHeight: "100dvh" }}>
+    <div>
       <div
         className="px-4 max-w-md mx-auto"
         style={{
-          paddingTop: "max(64px, calc(env(safe-area-inset-top) + 24px))",
-          paddingBottom: 40,
+          paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))",
+          paddingBottom: 100,
         }}
       >
         <h1
