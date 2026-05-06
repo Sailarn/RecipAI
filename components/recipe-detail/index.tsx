@@ -102,7 +102,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       </div>
 
       {/* Scrollable content area - pulls up under nav for hero bleed */}
-      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", marginTop: "-72px", padding: "0 14px 100px" }}>
+      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", marginTop: "-72px", padding: "0 14px 40px" }}>
         {/* Hero gradient + emoji fallback */}
         <div style={{
           height: 210,
