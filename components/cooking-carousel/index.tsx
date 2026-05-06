@@ -65,7 +65,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "56px 14px 8px",
+          padding: "max(20px, calc(env(safe-area-inset-top) + 8px)) 14px 8px",
         }}
       >
         <span
@@ -102,11 +102,11 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
       </div>
 
       {/* Carousel */}
-      <div style={{ flex: 1, overflow: "hidden", paddingTop: 100 }}>
+      <div style={{ flex: 1, overflow: "hidden", paddingTop: 55 }}>
         <Carousel className="h-full" setApi={setApi}>
           <CarouselContent
             className="-ml-4"
-            style={{ height: "calc(100vh - 100px - 52px)" }}
+            style={{ height: "calc(100vh - 76px - 52px)" }}
           >
             {/* Slide 0 — Overview */}
             <CarouselItem className="pl-4 h-full">
@@ -150,7 +150,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
                       height: 190,
                       borderRadius: 16,
                       overflow: "hidden",
-                      marginBottom: 16,
+                      marginBottom: 12,
                     }}
                   >
                     <RecipeImage

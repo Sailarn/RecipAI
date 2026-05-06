@@ -40,7 +40,7 @@ export function IngredientsList({ ingredients }: IngredientsListProps) {
       <ul>
         {ingredients.map((ingredient, index) => (
           <li
-            key={ingredient.id}
+            key={ingredient.id || `ing-${index}`}
             style={{
               display: "flex",
               alignItems: "center",
