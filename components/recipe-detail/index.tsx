@@ -19,7 +19,6 @@ import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { isVideoUrl } from "@/lib/video-url";
 import { CookingCarousel } from "../cooking-carousel";
-import { RecipeImage } from "../recipe-image";
 import { ServingsCalculator } from "../servings-calculator";
 import { TransitionLink } from "../transition-link";
 import { InstructionsList } from "./instructions-list";
@@ -92,85 +91,179 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <RecipeHeader
-        locale={locale}
-        recipeId={recipeId}
-        onDeleteClick={() => setShowDeleteConfirm(true)}
-      />
-
-      <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg mb-6">
-        <RecipeImage
-          imageUrl={recipe.imageUrl}
-          title={recipe.title}
-          sizes="100vw"
-          width={800}
-          height={320}
-          priority
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "var(--bg-base)" }}>
+      {/* Nav row - rendered by RecipeHeader which now has its own padding */}
+      <div style={{ position: "relative", zIndex: 20, flexShrink: 0 }}>
+        <RecipeHeader
+          locale={locale}
+          recipeId={recipeId}
+          onDeleteClick={() => setShowDeleteConfirm(true)}
         />
       </div>
 
-      <h1 className="text-4xl font-bold mb-4">{recipe.title}</h1>
+      {/* Scrollable content area - pulls up under nav for hero bleed */}
+      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", marginTop: "-72px", padding: "0 14px 100px" }}>
+        {/* Hero gradient + emoji fallback */}
+        <div style={{
+          height: 210,
+          flexShrink: 0,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 72,
+          paddingTop: 72,
+          borderRadius: 0,
+          overflow: "hidden",
+        }}>
+          {recipe.imageUrl ? (
+            <img
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              style={{
+                position: "absolute", inset: 0,
+                width: "100%", height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <span>{"🍽️"}</span>
+          )}
+          {/* Bottom fade overlay */}
+          <div style={{
+            position: "absolute",
+            bottom: 0, left: 0, right: 0,
+            height: 60,
+            background: "linear-gradient(to bottom, transparent, var(--bg-base))",
+            pointerEvents: "none",
+          }} />
+        </div>
 
-      {recipe.description && (
-        <p className="mb-6" style={{ color: "var(--muted-foreground)" }}>
-          {recipe.description}
-        </p>
-      )}
+        <div className="flex items-start justify-between gap-2 mb-4">
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-2xl)",
+              fontWeight: "var(--font-extrabold)",
+              lineHeight: "var(--leading-tight)",
+              color: "var(--fg-1)",
+              flex: 1,
+            }}
+          >
+            {recipe.title}
+          </h1>
+          {recipe.category && (() => {
+            const BADGE: Record<string, { bg: string; color: string }> = {
+              Breakfast: { bg: "rgba(232,89,12,0.22)",   color: "#fdba74" },
+              Lunch:     { bg: "rgba(47,158,68,0.22)",   color: "#86efac" },
+              Dinner:    { bg: "rgba(59,91,219,0.22)",   color: "#93c5fd" },
+              Soup:      { bg: "rgba(234,88,12,0.22)",   color: "#fb923c" },
+              Salad:     { bg: "rgba(47,158,68,0.22)",   color: "#86efac" },
+              Snack:     { bg: "rgba(139,92,246,0.22)",  color: "#c4b5fd" },
+              Dessert:   { bg: "rgba(194,37,92,0.22)",   color: "#f9a8d4" },
+              Baking:    { bg: "rgba(234,179,8,0.22)",   color: "#fde047" },
+              Drink:     { bg: "rgba(6,182,212,0.22)",   color: "#67e8f9" },
+              Other:     { bg: "rgba(100,100,110,0.22)", color: "#d4d4d8" },
+            };
+            const b = BADGE[recipe.category] ?? BADGE.Other;
+            return (
+              <span style={{
+                fontSize: 9, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
+                background: b.bg, color: b.color, border: `1px solid ${b.color}30`,
+                marginTop: 4, flexShrink: 0,
+              }}>
+                {recipe.category}
+              </span>
+            );
+          })()}
+        </div>
 
-      <RecipeMeta
-        prepTime={recipe.prepTime}
-        cookTime={recipe.cookTime}
-        totalTime={recipe.totalTime}
-      />
-      <button
-        type="button"
-        onClick={() => setCookingMode(true)}
-        className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-2 hover:bg-primary/90 transition-colors"
-      >
-        Start Cooking
-      </button>
-      {recipe.sourceUrl && (
+        {recipe.description && (
+          <p className="mb-4 text-sm" style={{ color: "var(--fg-2)" }}>
+            {recipe.description}
+          </p>
+        )}
+
+        <RecipeMeta
+          prepTime={recipe.prepTime}
+          cookTime={recipe.cookTime}
+          totalTime={recipe.totalTime}
+        />
         <button
           type="button"
-          onClick={() => window.open(recipe.sourceUrl, "_blank")}
-          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium mb-6 hover:bg-primary/90 transition-colors"
+          onClick={() => setCookingMode(true)}
+          className="w-full mb-2"
+          style={{
+            padding: "13px",
+            borderRadius: 16,
+            background: "#3b82f6",
+            border: "none",
+            color: "#fff",
+            fontFamily: "var(--font-sans)",
+            fontSize: "14px",
+            fontWeight: 700,
+            cursor: "pointer",
+            boxShadow: "0 4px 20px rgba(59,130,246,0.45)",
+            letterSpacing: "0.2px",
+          }}
         >
-          {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
+          Start Cooking
         </button>
-      )}
-      <ServingsCalculator
-        originalServings={recipe.servings}
-        ingredients={recipe.ingredients}
-      />
-      <InstructionsList instructions={recipe.instructions} />
-      {cookingMode && (
-        <CookingCarousel
-          recipe={recipe}
-          onClose={() => setCookingMode(false)}
+        {recipe.sourceUrl && (
+          <button
+            type="button"
+            onClick={() => window.open(recipe.sourceUrl, "_blank")}
+            className="w-full mb-6"
+            style={{
+              padding: "13px",
+              borderRadius: 14,
+              background: "rgba(255,170,50,0.08)",
+              border: "1px solid rgba(255,200,100,0.18)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              color: "var(--fg-1)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "var(--text-sm)",
+              fontWeight: "var(--font-medium)",
+              cursor: "pointer",
+            }}
+          >
+            {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
+          </button>
+        )}
+        <ServingsCalculator
+          originalServings={recipe.servings}
+          ingredients={recipe.ingredients}
         />
-      )}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {tRecipes("deleteConfirmTitle")}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {tRecipes("deleteConfirmMessage")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <InstructionsList instructions={recipe.instructions} />
+        {cookingMode && (
+          <CookingCarousel
+            recipe={recipe}
+            onClose={() => setCookingMode(false)}
+          />
+        )}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {tRecipes("deleteConfirmTitle")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {tRecipes("deleteConfirmMessage")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {t("delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
