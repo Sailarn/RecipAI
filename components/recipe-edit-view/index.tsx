@@ -14,7 +14,6 @@ interface RecipeEditViewProps {
 // Accepts recipeId as a prop instead of useParams() so it works correctly
 // after a history.pushState navigation where Next.js params are not updated.
 export function RecipeEditView({ recipeId }: RecipeEditViewProps) {
-  const t = useTranslations("recipeForm");
   const tCommon = useTranslations("common");
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,16 +25,23 @@ export function RecipeEditView({ recipeId }: RecipeEditViewProps) {
   }, [recipeId]);
 
   if (loading) {
-    return <div className="text-center py-12">{tCommon("loading")}</div>;
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-[var(--fg-3)]">{tCommon("loading")}</p>
+      </div>
+    );
   }
 
   if (!recipe) {
-    return <div className="text-center py-12">{tCommon("recipeNotFound")}</div>;
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-[var(--fg-3)]">{tCommon("recipeNotFound")}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">{t("editTitle")}</h1>
+    <div className="h-full">
       <RecipeForm key={recipe.id} recipe={recipe} />
     </div>
   );
