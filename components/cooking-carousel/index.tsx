@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { RecipeImage } from "@/components/recipe-image";
 import { IngredientsList } from "@/components/recipe-detail/ingredients-list";
+import { ServingsCalculator } from "@/components/servings-calculator";
 import {
   Carousel,
   type CarouselApi,
@@ -101,13 +102,13 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
       </div>
 
       {/* Carousel */}
-      <div style={{ flex: 1, overflow: "hidden", paddingTop: 76 }}>
+      <div style={{ flex: 1, overflow: "hidden", paddingTop: 100 }}>
         <Carousel className="h-full" setApi={setApi}>
           <CarouselContent
             className="-ml-4"
             style={{ height: "calc(100vh - 76px - 52px)" }}
           >
-            {/* Slide 0 — Overview (no hero image) */}
+            {/* Slide 0 — Overview */}
             <CarouselItem className="pl-4 h-full">
               <div
                 style={{
@@ -139,6 +140,35 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
                   >
                     {recipe.description}
                   </p>
+                )}
+                {/* Hero image */}
+                {recipe.imageUrl && (
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: 190,
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      marginBottom: 16,
+                    }}
+                  >
+                    <RecipeImage
+                      imageUrl={recipe.imageUrl}
+                      title={recipe.title}
+                      width={800}
+                      height={190}
+                    />
+                    {/* Gradient overlay */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(to top, rgba(6,4,2,0.97) 0%, transparent 60%)",
+                      }}
+                    />
+                  </div>
                 )}
                 <IngredientsList ingredients={recipe.ingredients} />
               </div>
@@ -412,6 +442,10 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
                 <XIcon style={{ width: 12, height: 12 }} />
               </button>
               {/* Content */}
+              <ServingsCalculator
+                originalServings={recipe.servings}
+                ingredients={recipe.ingredients}
+              />
               <IngredientsList ingredients={recipe.ingredients} />
             </div>
           </>,

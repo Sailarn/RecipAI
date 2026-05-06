@@ -16,9 +16,17 @@ export function PhotoParsingBanner({
   const navigate = useNavigate();
 
   return (
-    <div className="mt-4 p-4 rounded-xl bg-muted text-sm text-muted-foreground text-center space-y-3">
-      <p>⏳ Parsing photo...</p>
-      <p className="text-xs">
+    <div
+      className="mt-4 p-4 rounded-2xl text-center space-y-3"
+      style={{
+        background: "var(--glass-subtle-bg)",
+        backdropFilter: "var(--glass-subtle-blur)",
+        WebkitBackdropFilter: "var(--glass-subtle-blur)",
+        border: "1px solid var(--glass-subtle-border)",
+      }}
+    >
+      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>⏳ Parsing photo...</p>
+      <p style={{ font: "var(--type-caption)", color: "var(--fg-2)" }}>
         You can navigate away — you'll be notified when done.
       </p>
       <div className="flex gap-2 justify-center">

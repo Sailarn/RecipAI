@@ -20,6 +20,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.50.71"],
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
   },
@@ -33,6 +34,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "*.cdninstagram.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.fbcdn.net",
       },
     ],
   },

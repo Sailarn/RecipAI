@@ -1,7 +1,8 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";
@@ -13,6 +14,13 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export default async function LocaleLayout({
@@ -30,19 +38,17 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value === "light" ? "light" : "dark";
+
   return (
-    <html lang={locale} suppressHydrationWarning className={inter.variable}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${inter.variable} ${fraunces.variable} ${theme}`}
+    >
       <head>
         <link rel="preconnect" href="https://ik.imagekit.io" />
-        {/* Apply theme class synchronously before first paint to prevent FOUC.
-            Without this, ThemeProvider's useEffect runs after paint, causing a
-            white flash on the body/html background (visible in iOS status bar area). */}
-        <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional anti-FOUC inline script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.classList.add(t);}catch(e){}})();`,
-          }}
-        />
       </head>
       <body suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>

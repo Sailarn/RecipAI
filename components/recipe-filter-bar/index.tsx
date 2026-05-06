@@ -1,8 +1,8 @@
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import {
-  Input,
   Select,
   SelectContent,
   SelectItem,
@@ -30,20 +30,46 @@ export function RecipeFilterBar({
   const t = useTranslations("recipes");
 
   return (
-    <div className="flex flex-col gap-3 mb-6">
-      <div className="flex gap-2">
-        <Input
-          type="search"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          className="flex-1"
-        />
-        <Select
-          value={sort}
-          onValueChange={(v) => onSortChange(v as SortOption)}
-        >
-          <SelectTrigger className="w-40 !h-11">
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 14 }}>
+      {/* Search row */}
+      <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ position: "relative", flex: 1 }}>
+          <Search
+            size={14}
+            strokeWidth={2}
+            style={{
+              position: "absolute",
+              left: 11,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--fg-3)",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="transition-colors"
+            style={{
+              width: "100%",
+              fontFamily: "var(--font-sans)",
+              background: "rgba(255,170,50,0.07)",
+              border: "1px solid rgba(255,200,100,0.15)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: 14,
+              padding: "9px 12px 9px 32px",
+              fontSize: 13,
+              color: "var(--fg-1)",
+              outline: "none",
+            }}
+          />
+        </div>
+        <Select value={sort} onValueChange={(v) => onSortChange(v as SortOption)}>
+          <SelectTrigger className="w-36 !h-[38px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -55,32 +81,34 @@ export function RecipeFilterBar({
         </Select>
       </div>
 
+      {/* Category chips */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        <button
-          type="button"
-          onClick={() => onCategoryChange(null)}
-          className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-            category === null
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
-          }`}
-        >
-          {t("all")}
-        </button>
-        {RECIPE_CATEGORIES.map((cat) => (
-          <button
-            type="button"
-            key={cat}
-            onClick={() => onCategoryChange(category === cat ? null : cat)}
-            className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              category === cat
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {[null, ...RECIPE_CATEGORIES].map((cat) => {
+          const isActive = category === cat;
+          return (
+            <button
+              type="button"
+              key={cat ?? "__all__"}
+              onClick={() => onCategoryChange(cat)}
+              className="shrink-0 transition-all"
+              style={{
+                padding: "5px 12px",
+                borderRadius: 99,
+                fontSize: 11,
+                fontWeight: isActive ? 600 : 500,
+                fontFamily: "var(--font-sans)",
+                cursor: "pointer",
+                border: `1px solid ${isActive ? "rgba(255,210,120,0.50)" : "rgba(255,200,100,0.12)"}`,
+                background: isActive ? "rgba(255,160,40,0.18)" : "transparent",
+                color: isActive ? "var(--fg-1)" : "var(--fg-3)",
+                backdropFilter: isActive ? "blur(12px)" : undefined,
+                WebkitBackdropFilter: isActive ? "blur(12px)" : undefined,
+              }}
+            >
+              {cat ?? t("all")}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

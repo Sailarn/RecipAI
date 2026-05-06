@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
@@ -9,7 +10,6 @@ import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
 import { RecipeNewView } from "@/components/recipe-new-view";
-import { Button } from "@/components/ui/button";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
@@ -18,9 +18,6 @@ import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
-// Persists across remounts so native back navigation renders the previous
-// recipe list immediately — prevents the empty-state flash between the iOS
-// swipe animation snapshot and the IndexedDB response.
 let _recipesCache: Recipe[] | undefined;
 
 const ParsedRecipesSheet = dynamic(
@@ -30,6 +27,13 @@ const ParsedRecipesSheet = dynamic(
     })),
   { ssr: false },
 );
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function RecipesPage() {
   const params = useParams();
@@ -51,66 +55,128 @@ export default function RecipesPage() {
   if (recipes.length === 0) return <RecipeEmptyState />;
 
   return (
-    <div className="p-4">
+    <div
+      style={{
+        paddingTop: "max(64px, calc(env(safe-area-inset-top) + 24px))",
+        paddingBottom: 110,
+        paddingLeft: 14,
+        paddingRight: 14,
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
       {(pullDistance > 0 || isRefreshing) && (
         <div
-          className="flex justify-center text-muted-foreground text-sm pb-2 transition-all"
-          style={{ height: pullDistance || 32 }}
+          className="flex justify-center text-sm pb-2 transition-all"
+          style={{ height: pullDistance || 32, color: "var(--fg-3)" }}
         >
-          {isRefreshing ? "Refreshing..." : "↓ Release to refresh"}
+          {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
         </div>
       )}
-      <div className="p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1
-              className="text-3xl font-bold"
-              style={{ color: "var(--foreground)" }}
-            >
-              {t("title")}
-            </h1>
-            <div className="flex items-center gap-2">
-              <ParsedRecipesSheet />
-              <Button
-                onClick={() =>
-                  navigate.push(
-                    routes.recipes.new(locale),
-                    <RecipeNewView locale={locale} />,
-                  )
-                }
-              >
-                {t("createRecipe")}
-              </Button>
-            </div>
-          </div>
-          <RecipeFilterBar
-            search={search}
-            onSearchChange={setSearch}
-            sort={sort}
-            onSortChange={setSort}
-            category={category}
-            onCategoryChange={setCategory}
-          />
-          {filtered.length === 0 && search ? (
-            <p
-              className="text-center py-12 text-sm"
-              style={{ color: "var(--muted-foreground)" }}
-            >
-              {t("noResults")}
-            </p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {filtered.map((recipe, index) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  priority={index < 2}
-                />
-              ))}
-            </div>
-          )}
+
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          marginBottom: 16,
+        }}
+      >
+        <div>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--fg-3)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              marginBottom: 3,
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            {getGreeting()}
+          </p>
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 26,
+              fontWeight: 800,
+              color: "var(--fg-1)",
+              lineHeight: 1.1,
+            }}
+          >
+            {t("title")}
+          </h1>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <ParsedRecipesSheet />
+          <button
+            type="button"
+            onClick={() =>
+              navigate.push(
+                routes.recipes.new(locale),
+                <RecipeNewView locale={locale} />,
+              )
+            }
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              background: "var(--action-primary)",
+              color: "#fff",
+              borderRadius: 14,
+              padding: "8px 14px",
+              border: "none",
+              fontFamily: "var(--font-sans)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 16px rgba(59,130,246,0.4)",
+            }}
+          >
+            <Plus size={13} strokeWidth={2.5} color="#fff" />
+            {t("createRecipe")}
+          </button>
         </div>
       </div>
+
+      <RecipeFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        sort={sort}
+        onSortChange={setSort}
+        category={category}
+        onCategoryChange={setCategory}
+      />
+
+      {filtered.length === 0 && search ? (
+        <p
+          style={{
+            textAlign: "center",
+            padding: "40px 0",
+            fontSize: 13,
+            color: "var(--fg-2)",
+            lineHeight: 1.8,
+          }}
+        >
+          {t("noResults")}
+        </p>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginTop: 12,
+          }}
+        >
+          {filtered.map((recipe, index) => (
+            <RecipeCard key={recipe.id} recipe={recipe} priority={index < 2} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

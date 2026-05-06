@@ -5,9 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
-import { TransitionLink } from "@/components/transition-link";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
-import { routes } from "@/lib/routes";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
 import { ParseResult } from "./components/parse-result";
@@ -50,40 +48,62 @@ export default function ParseRecipePage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Parse Recipe</h1>
-      <div className="flex items-center justify-between mb-6">
-        <TransitionLink
-          href={routes.recipes.new(locale)}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to create recipe form
-        </TransitionLink>
-      </div>
+      <h1
+        className="mb-6"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 22,
+          fontWeight: 800,
+          color: "var(--fg-1)",
+        }}
+      >
+        Import Recipe
+      </h1>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 p-1 rounded-xl bg-muted mb-6 w-fit">
-        <button
-          type="button"
-          onClick={() => setTab("url")}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-            tab === "url"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabs.url")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("photo")}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-            tab === "photo"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabs.photo")}
-        </button>
+      <div
+        className="flex p-[3px] mb-5 w-fit"
+        style={{
+          background: "var(--glass-card-bg)",
+          backdropFilter: "var(--glass-card-blur)",
+          WebkitBackdropFilter: "var(--glass-card-blur)",
+          border: "1px solid var(--glass-card-border)",
+          boxShadow: "var(--glass-card-shadow)",
+          borderRadius: 14,
+        }}
+      >
+        {(["url", "photo"] as const).map((tabKey) => (
+          <button
+            key={tabKey}
+            type="button"
+            onClick={() => setTab(tabKey)}
+            style={{
+              padding: "7px 20px",
+              borderRadius: 11,
+              fontFamily: "var(--font-sans)",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              ...(tab === tabKey
+                ? {
+                    background: "rgba(255,180,60,0.18)",
+                    border: "1px solid rgba(255,200,100,0.25)",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                    backdropFilter: "blur(12px)",
+                    WebkitBackdropFilter: "blur(12px)",
+                    color: "var(--fg-1)",
+                  }
+                : {
+                    background: "transparent",
+                    border: "1px solid transparent",
+                    color: "var(--fg-2)",
+                  }),
+            }}
+          >
+            {tabKey === "url" ? "🔗 URL" : "📷 Photo"}
+          </button>
+        ))}
       </div>
 
       {tab === "url" && (

@@ -1,41 +1,44 @@
 .ai-import-btn {
   background: linear-gradient(
     135deg,
-    #f8fafc 0%,
-    #e2e8f0 40%,
-    #ede9fe 70%,
-    #f8fafc 100%
+    var(--ai-bg-light) 0%,
+    var(--neutral-200) 40%,
+    var(--ai-bg-mid) 70%,
+    var(--ai-bg-light) 100%
   );
   background-size: 200% 200%;
-  animation: ai-gradient 4s ease infinite;
-  color: #1e1b4b;
+  animation: ai-gradient var(--duration-ai) var(--ease-default) infinite;
+  color: var(--ai-text);
   border: 1px solid rgba(139, 92, 246, 0.3);
-  box-shadow:
-    0 0 16px rgba(139, 92, 246, 0.15),
-    0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-ai);
 }
 
 .dark .ai-import-btn {
-  background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 40%, #1e1b4b 100%);
+  background: linear-gradient(
+    135deg,
+    var(--ai-bg-light) 0%,
+    var(--ai-bg-mid) 40%,
+    var(--ai-bg-light) 100%
+  );
   background-size: 200% 200%;
-  color: #ede9fe;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow:
-    0 0 20px rgba(139, 92, 246, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.3);
+  color: var(--ai-text);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: var(--shadow-ai);
 }
 
 .ai-import-btn:hover {
-  box-shadow:
-    0 0 24px rgba(139, 92, 246, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-ai-hover);
   border-color: rgba(139, 92, 246, 0.5);
+  transform: scale(1.02);
+  transition: var(--transition-shadow), var(--transition-scale);
 }
 
 .dark .ai-import-btn:hover {
-  box-shadow:
-    0 0 32px rgba(139, 92, 246, 0.35),
-    0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-ai-hover);
+}
+
+.ai-import-btn:active {
+  transform: scale(0.98);
 }
 
 .ai-import-shimmer {
@@ -52,34 +55,32 @@
     rgba(139, 92, 246, 0.15),
     transparent
   );
-  animation: ai-shimmer 3s ease-in-out infinite;
+  animation: ai-shimmer var(--duration-ai) var(--ease-in-out) infinite;
   z-index: 1;
 }
 
 @keyframes ai-gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes ai-shimmer {
-  0% {
-    left: -100%;
-  }
+  0%   { left: -100%; }
+  60%  { left: 150%; }
+  100% { left: 150%; }
+}
 
-  60% {
-    left: 150%;
-  }
+@keyframes aiGrad {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
 
-  100% {
-    left: 150%;
-  }
+@keyframes aiShimmer {
+  0%        { left: -100%; }
+  60%, 100% { left: 160%; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

@@ -62,10 +62,34 @@ export function ParsedRecipesSheet() {
       <SheetTrigger asChild>
         <button
           type="button"
-          className="relative p-2 rounded-full hover:bg-muted transition-colors"
+          className="relative"
+          style={{
+            padding: 8,
+            borderRadius: 99,
+            background: "rgba(255,170,50,0.08)",
+            border: "1px solid rgba(255,200,100,0.18)",
+            cursor: "pointer",
+            transition: "background 0.15s ease",
+          }}
         >
-          <BellIcon className="w-5 h-5" />
-          <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+          <BellIcon size={18} style={{ color: "var(--fg-1)" }} />
+          <span
+            style={{
+              position: "absolute",
+              top: -2,
+              right: -2,
+              background: "var(--action-primary)",
+              color: "#fff",
+              fontSize: 10,
+              fontWeight: 700,
+              borderRadius: 99,
+              width: 16,
+              height: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             {count}
           </span>
         </button>

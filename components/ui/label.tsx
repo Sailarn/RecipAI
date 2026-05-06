@@ -12,11 +12,14 @@ export function Label({
 }: LabelProps) {
   return (
     <label
-      className={`block text-sm font-medium mb-1 text-[var(--foreground)] ${className}`}
+      className={`block mb-1.5 ${className}`}
+      style={{ font: "var(--type-label)", color: "var(--fg-1)" }}
       {...props}
     >
       {children}
-      {required && <span className="text-red-500 ml-1">*</span>}
+      {required && (
+        <span style={{ color: "var(--action-destructive)" }} className="ml-1">*</span>
+      )}
     </label>
   );
 }

@@ -2,10 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { AIImportButton } from "@/components/ai-import-button";
 import { RecipeForm } from "@/components/recipe-form";
 import type { ParsedRecipeData } from "@/components/recipe-form/default-values";
-import { RecipeParseView } from "@/components/recipe-parse-view";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -36,19 +34,6 @@ export function RecipeNewView({ locale }: RecipeNewViewProps) {
     setIsReady(true);
   }, []);
 
-  const handleAIImport = () => {
-    navigate.push(
-      routes.recipes.parse(locale),
-      <RecipeParseView
-        locale={locale}
-        onSuccess={(data) => {
-          setInitialData(data as unknown as ParsedRecipeData);
-          // navigate.back() is called inside RecipeParseView after onSuccess
-        }}
-      />,
-    );
-  };
-
   if (!isReady) {
     return (
       <div className="max-w-3xl mx-auto p-4">
@@ -71,9 +56,6 @@ export function RecipeNewView({ locale }: RecipeNewViewProps) {
         >
           ← {tRecipes("backToRecipes")}
         </button>
-      </div>
-      <div className="mb-6">
-        <AIImportButton onNavigate={handleAIImport} />
       </div>
       <RecipeForm initialData={initialData} />
     </div>

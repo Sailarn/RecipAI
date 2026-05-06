@@ -127,7 +127,8 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           <img
             src={previewUrl}
             alt="Recipe preview"
-            className="w-full max-h-64 object-contain rounded-xl border border-border cursor-pointer"
+            className="w-full max-h-64 object-contain rounded-2xl cursor-pointer"
+            style={{ border: "1px solid var(--glass-card-border)" }}
             onClick={() => inputRef.current?.click()}
           />
           <button
@@ -142,11 +143,12 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-full h-36 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-foreground transition-colors"
+          className="photo-drop-zone w-full h-40 rounded-2xl flex flex-col items-center justify-center gap-2"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-8 h-8"
+            style={{ color: "var(--food-accent)" }}
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -164,15 +166,15 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
               d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
             />
           </svg>
-          <span className="text-sm font-medium">{t("photo.cta")}</span>
-          <span className="text-xs">{t("photo.hint")}</span>
+          <span style={{ font: "var(--type-button)", color: "inherit" }}>{t("photo.cta")}</span>
+          <span style={{ font: "var(--type-caption)", color: "inherit" }}>{t("photo.hint")}</span>
         </button>
       )}
 
       <div className="space-y-1.5">
         <Label htmlFor="photo-comment">
           Hints for AI
-          <span className="text-muted-foreground font-normal ml-2 text-xs">
+          <span className="ml-2 text-xs" style={{ color: "var(--fg-3)", fontWeight: "var(--font-regular)" }}>
             optional
           </span>
         </Label>
@@ -191,7 +193,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
         </Alert>
       )}
 
-      <Button onClick={handleSubmit} disabled={!file} className="w-full">
+      <Button onClick={handleSubmit} disabled={!file} className="w-full" size="xl">
         {t("photo.submit")}
       </Button>
     </div>
