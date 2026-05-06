@@ -1,24 +1,14 @@
 "use client";
 
-import { ImagePlus, X } from "lucide-react";
+import { ImageIcon, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import {
   type Control,
-  Controller,
   type FieldErrors,
   type UseFormRegister,
 } from "react-hook-form";
-import {
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from "@/components/ui";
+import { Input, Label, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { RecipeFormData } from "./schema";
 
@@ -29,6 +19,18 @@ interface BasicInfoProps {
   onFileSelect: (file: File | null) => void;
 }
 
+const LABEL_STYLE: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: "var(--fg-2)",
+  marginBottom: 5,
+};
+
+const REQUIRED_STAR: React.CSSProperties = {
+  color: "rgba(239,68,68,0.8)",
+};
+
 export function BasicInfo({
   register,
   errors,
@@ -38,6 +40,7 @@ export function BasicInfo({
   const t = useTranslations("recipeForm");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -54,60 +57,121 @@ export function BasicInfo({
 
   return (
     <div className="space-y-4">
+      {/* Title */}
       <div>
-        <Label htmlFor="title" required>
+        <label htmlFor="title" style={LABEL_STYLE}>
           {t("title")}
-        </Label>
+          <span style={REQUIRED_STAR}> *</span>
+        </label>
         <Input id="title" {...register("title")} error={!!errors.title} />
         {errors.title && (
-          <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+          <p
+            style={{
+              fontSize: 11,
+              color: "rgba(239,68,68,0.85)",
+              marginTop: 4,
+              paddingLeft: 2,
+            }}
+          >
+            {errors.title.message}
+          </p>
         )}
       </div>
 
+      {/* Description */}
       <div>
-        <Label htmlFor="description">{t("description")}</Label>
+        <label htmlFor="description" style={LABEL_STYLE}>
+          {t("description")}
+        </label>
         <Textarea id="description" {...register("description")} rows={3} />
       </div>
 
+      {/* Category Picker */}
       <div>
-        <Label htmlFor="category">{t("category")}</Label>
-        <Controller
-          name="category"
-          control={control}
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value || ""}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("categoryPlaceholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {RECIPE_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+        <label style={LABEL_STYLE}>{t("category")}</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+          {RECIPE_CATEGORIES.map((cat) => {
+            const isActive = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setSelectedCategory(isActive ? "" : cat);
+                  // We use a hidden input to store the category value
+                  const input = document.getElementById(
+                    "category-input",
+                  ) as HTMLInputElement;
+                  if (input) input.value = isActive ? "" : cat;
+                }}
+                style={{
+                  padding: "6px 13px",
+                  borderRadius: 99,
+                  font: "12px / var(--font-sans)",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  ...(isActive
+                    ? {
+                        background: "rgba(255,180,60,0.20)",
+                        border: "1px solid rgba(255,210,120,0.45)",
+                        color: "var(--fg-1)",
+                        fontWeight: 600,
+                        boxShadow: "0 0 10px rgba(255,180,60,0.18)",
+                      }
+                    : {
+                        background: "rgba(255,170,50,0.07)",
+                        border: "1px solid rgba(255,200,100,0.14)",
+                        color: "var(--fg-2)",
+                        fontWeight: 500,
+                      }),
+                }}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+        {/* Hidden input to store category value for react-hook-form */}
+        <input
+          id="category-input"
+          type="hidden"
+          {...register("category")}
+          value={selectedCategory}
         />
       </div>
 
+      {/* Image URL Row */}
       <div>
-        <Label htmlFor="imageUrl">{t("imageUrl")}</Label>
-        <div className="flex gap-2 items-center">
-          <Input
-            id="imageUrl"
-            {...register("imageUrl")}
-            type="url"
-            error={!!errors.imageUrl}
-            className="flex-1"
-          />
+        <label htmlFor="imageUrl" style={LABEL_STYLE}>
+          {t("imageUrl")}
+        </label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <Input
+              id="imageUrl"
+              {...register("imageUrl")}
+              type="url"
+              error={!!errors.imageUrl}
+            />
+          </div>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="shrink-0 p-2 rounded-md border border-input hover:bg-accent transition-colors"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: "rgba(255,170,50,0.09)",
+              border: "1px solid rgba(255,200,100,0.18)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
             title="Upload from device"
           >
-            <ImagePlus className="w-4 h-4" />
+            <ImageIcon size={16} style={{ color: "var(--fg-2)" }} />
           </button>
           <input
             ref={fileInputRef}
@@ -118,30 +182,70 @@ export function BasicInfo({
           />
         </div>
         {errors.imageUrl && (
-          <p className="text-red-500 text-sm mt-1">{errors.imageUrl.message}</p>
+          <p
+            style={{
+              fontSize: 11,
+              color: "rgba(239,68,68,0.85)",
+              marginTop: 4,
+              paddingLeft: 2,
+            }}
+          >
+            {errors.imageUrl.message}
+          </p>
         )}
         {preview && (
-          <div className="relative mt-2 w-24 h-24 rounded-md overflow-hidden border border-input">
+          <div
+            style={{
+              position: "relative",
+              marginTop: 8,
+              width: 96,
+              height: 96,
+              borderRadius: 12,
+              overflow: "hidden",
+              border: "1px solid rgba(255,200,100,0.18)",
+            }}
+          >
             {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
             <button
               type="button"
               onClick={handleClearFile}
-              className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5"
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                background: "rgba(0,0,0,0.6)",
+                borderRadius: "50%",
+                padding: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "none",
+                cursor: "pointer",
+              }}
             >
-              <X className="w-3 h-3 text-white" />
+              <X size={12} color="white" />
             </button>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Number Grid: Prep / Cook / Servings */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 10,
+        }}
+      >
         <div>
-          <Label htmlFor="prepTime">{t("prepTime")}</Label>
+          <label htmlFor="prepTime" style={{ ...LABEL_STYLE, fontSize: 11 }}>
+            {t("prepTime")}
+          </label>
           <Input
             id="prepTime"
             {...register("prepTime", {
@@ -153,10 +257,13 @@ export function BasicInfo({
             })}
             type="number"
             step="0.01"
+            style={{ textAlign: "center" }}
           />
         </div>
         <div>
-          <Label htmlFor="cookTime">{t("cookTime")}</Label>
+          <label htmlFor="cookTime" style={{ ...LABEL_STYLE, fontSize: 11 }}>
+            {t("cookTime")}
+          </label>
           <Input
             id="cookTime"
             {...register("cookTime", {
@@ -168,20 +275,30 @@ export function BasicInfo({
             })}
             type="number"
             step="0.01"
+            style={{ textAlign: "center" }}
           />
         </div>
         <div>
-          <Label htmlFor="servings" required>
+          <label htmlFor="servings" style={{ ...LABEL_STYLE, fontSize: 11 }}>
             {t("servings")}
-          </Label>
+            <span style={REQUIRED_STAR}> *</span>
+          </label>
           <Input
             id="servings"
             {...register("servings")}
             type="number"
             error={!!errors.servings}
+            style={{ textAlign: "center" }}
           />
           {errors.servings && (
-            <p className="text-red-500 text-sm mt-1">
+            <p
+              style={{
+                fontSize: 11,
+                color: "rgba(239,68,68,0.85)",
+                marginTop: 4,
+                paddingLeft: 2,
+              }}
+            >
               {errors.servings.message}
             </p>
           )}
