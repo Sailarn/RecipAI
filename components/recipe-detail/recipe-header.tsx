@@ -59,35 +59,37 @@ export function RecipeHeader({
         <ChevronLeft size={13} color="rgba(255,255,255,0.75)" />
         {tRecipes("backToRecipes")}
       </button>
-      <button
-        type="button"
-        onClick={() =>
-          navigate.push(
-            routes.recipes.edit(locale, recipeId),
-            <RecipeEditView recipeId={recipeId} />,
-          )
-        }
-        style={{
-          ...glassPillStyle,
-          padding: "7px 16px",
-        }}
-      >
-        {t("edit")}
-      </button>
-      <button
-        type="button"
-        onClick={onDeleteClick}
-        aria-label="Delete"
-        style={{
-          ...glassPillStyle,
-          padding: "7px 10px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Trash2 size={13} />
-      </button>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <button
+          type="button"
+          onClick={() =>
+            navigate.push(
+              routes.recipes.edit(locale, recipeId),
+              <RecipeEditView recipeId={recipeId} />,
+            )
+          }
+          style={{
+            ...glassPillStyle,
+            padding: "7px 16px",
+          }}
+        >
+          {t("edit")}
+        </button>
+        <button
+          type="button"
+          onClick={onDeleteClick}
+          aria-label="Delete"
+          style={{
+            ...glassPillStyle,
+            padding: "7px 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
     </div>
   );
 }
