@@ -197,3 +197,21 @@
     -webkit-backdrop-filter: blur(4px);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   ANIMATION KEYFRAMES
+   ───────────────────────────────────────────────────────────── */
+
+@keyframes aiGrad {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes aiShimmer {
+  0%        { left: -100%; }
+  60%, 100% { left: 160%; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
