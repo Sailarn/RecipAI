@@ -59,7 +59,7 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
               style={{
                 background: "rgba(0,0,0,0.45)",
                 borderRadius: 99,
-                padding: "2px 0",
+                padding: 0,
                 backdropFilter: "blur(8px)",
                 WebkitBackdropFilter: "blur(8px)",
                 display: "inline-flex",
