@@ -51,6 +51,12 @@
   "recipeForm": {
     "createTitle": "Create Recipe",
     "editTitle": "Edit Recipe",
+    "tabInfo": "Info",
+    "tabIngredients": "Ingredients",
+    "tabSteps": "Steps",
+    "next": "Next",
+    "back": "Back",
+    "saved": "Saved!",
     "basicInfo": "Basic Information",
     "title": "Title",
     "titleRequired": "Title is required",
@@ -78,7 +84,12 @@
     "servingsRequired": "Servings must be at least 1",
     "imageUploadFailed": "Image upload failed. Please try again or remove the image.",
     "category": "Category",
-    "categoryPlaceholder": "Select category"
+    "categoryPlaceholder": "Select category",
+    "hintText": "Enter each ingredient with its amount and unit",
+    "hintExample": "e.g. 2 cups flour, 1 tbsp olive oil",
+    "stepHintText": "Describe each step clearly",
+    "addImage": "Add image",
+    "removeImage": "Remove image"
   },
   "form": {
     "required": "This field is required"
