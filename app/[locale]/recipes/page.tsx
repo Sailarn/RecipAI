@@ -1,7 +1,7 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -57,7 +57,7 @@ export default function RecipesPage() {
   return (
     <div
       style={{
-        paddingTop: "max(64px, calc(env(safe-area-inset-top) + 24px))",
+        paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))",
         paddingBottom: 110,
         paddingLeft: 14,
         paddingRight: 14,
