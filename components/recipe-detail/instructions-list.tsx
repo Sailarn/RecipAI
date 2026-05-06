@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { RecipeImage } from "@/components/recipe-image";
-import { Separator } from "@/components/ui/separator";
 import type { Step } from "@/lib/db/schema";
 
 interface InstructionsListProps {
@@ -14,19 +13,55 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold mb-4">{t("instructions")}</h2>
-      <Separator className="mb-4" />
-      <ol className="space-y-6">
+      <h2
+        className="mb-3"
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 15,
+          fontWeight: 700,
+          color: "var(--fg-1)",
+        }}
+      >
+        {t("instructions")}
+      </h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {instructions
           .sort((a, b) => a.order - b.order)
           .map((step) => (
-            <li key={step.id} className="flex gap-3">
-              <span className="font-semibold text-primary min-w-[20px] mt-1">
-                {step.order}.
-              </span>
-              <div className="flex-1 space-y-2">
+            <div
+              key={step.id || `step-${step.order}`}
+              className="glass-card"
+              style={{
+                borderRadius: 16,
+                padding: "12px 14px",
+                display: "flex",
+                gap: 12,
+                alignItems: "flex-start",
+              }}
+            >
+              <div
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 11,
+                  flexShrink: 0,
+                  background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {step.order}
+              </div>
+              <div style={{ flex: 1 }}>
                 {step.imageUrl && (
-                  <div className="relative w-full h-40 rounded-lg overflow-hidden">
+                  <div
+                    className="relative w-full overflow-hidden mb-2"
+                    style={{ height: 160, borderRadius: 10 }}
+                  >
                     <RecipeImage
                       imageUrl={step.imageUrl}
                       title={`Step ${step.order}`}
@@ -36,11 +71,19 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
                     />
                   </div>
                 )}
-                <span>{step.instruction}</span>
+                <p
+                  style={{
+                    fontSize: 13,
+                    color: "var(--fg-1)",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {step.instruction}
+                </p>
               </div>
-            </li>
+            </div>
           ))}
-      </ol>
+      </div>
     </div>
   );
 }

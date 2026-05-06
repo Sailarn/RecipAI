@@ -14,7 +14,6 @@ export function ServingsCalculator({
   ingredients,
 }: ServingsCalculatorProps) {
   const [servings, setServings] = useState(originalServings);
-
   const ratio = servings / originalServings;
 
   const formatAmount = (amount?: number) => {
@@ -25,37 +24,109 @@ export function ServingsCalculator({
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-sm font-medium">Servings</span>
-        <div className="flex items-center gap-2">
+    <div className="glass-card mb-4" style={{ borderRadius: 20 }}>
+      <div
+        style={{
+          padding: "12px 14px",
+          borderBottom: "1px solid var(--border-subtle)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--fg-2)",
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            marginBottom: 9,
+          }}
+        >
+          Servings
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <button
             type="button"
             onClick={() => setServings((s) => Math.max(1, s - 1))}
-            className="w-7 h-7 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              background: "var(--glass-card-bg)",
+              border: "1px solid var(--glass-card-border)",
+              backdropFilter: "blur(12px)",
+              color: "var(--fg-1)",
+              cursor: "pointer",
+              fontSize: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <MinusIcon className="w-3 h-3" />
+            <MinusIcon style={{ width: 14, height: 14 }} />
           </button>
-          <span className="text-sm font-semibold w-6 text-center">
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "var(--fg-1)",
+              minWidth: 24,
+              textAlign: "center",
+            }}
+          >
             {servings}
           </span>
           <button
             type="button"
             onClick={() => setServings((s) => s + 1)}
-            className="w-7 h-7 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              background: "var(--glass-card-bg)",
+              border: "1px solid var(--glass-card-border)",
+              backdropFilter: "blur(12px)",
+              color: "var(--fg-1)",
+              cursor: "pointer",
+              fontSize: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <PlusIcon className="w-3 h-3" />
+            <PlusIcon style={{ width: 14, height: 14 }} />
           </button>
         </div>
       </div>
 
-      <ul className="space-y-1">
-        {ingredients.map((ing) => (
-          <li key={ing.id} className="flex gap-2 text-sm">
-            <span className="text-muted-foreground">•</span>
-            <span>
+      <ul>
+        {ingredients.map((ing, i) => (
+          <li
+            key={ing.id || `ing-${i}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 14px",
+              borderBottom:
+                i < ingredients.length - 1
+                  ? "1px solid var(--border-subtle)"
+                  : "none",
+            }}
+          >
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                background: "var(--food-accent)",
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ fontSize: 13, color: "var(--fg-1)" }}>
               {formatAmount(ing.amount) && (
-                <span className="font-medium">{formatAmount(ing.amount)} </span>
+                <span style={{ fontWeight: 600 }}>
+                  {formatAmount(ing.amount)}{" "}
+                </span>
               )}
               {ing.unit && <span>{ing.unit} </span>}
               {ing.item}
