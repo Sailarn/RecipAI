@@ -3,8 +3,8 @@
 import { BookOpenIcon, ChevronLeft, ChevronRight, XIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { RecipeImage } from "@/components/recipe-image";
 import { IngredientsList } from "@/components/recipe-detail/ingredients-list";
+import { RecipeImage } from "@/components/recipe-image";
 import { ServingsCalculator } from "@/components/servings-calculator";
 import {
   Carousel,
