@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
+import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
@@ -193,9 +193,12 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
         </Alert>
       )}
 
-      <Button onClick={handleSubmit} disabled={!file} className="w-full" size="xl">
-        {t("photo.submit")}
-      </Button>
+      <AiButton
+        onClick={handleSubmit}
+        disabled={!file}
+        label="Analyze with AI"
+        loadingLabel="Analyzing…"
+      />
     </div>
   );
 }
