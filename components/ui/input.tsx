@@ -4,7 +4,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
 }
 
-export function Input({ className = "", error, ...props }: InputProps) {
+export function Input({ className = "", error, style, ...props }: InputProps) {
   return (
     <input
       className={`
@@ -22,6 +22,7 @@ export function Input({ className = "", error, ...props }: InputProps) {
         color: "var(--fg-1)",
         fontFamily: "var(--font-sans)",
         fontSize: "var(--text-sm)",
+        ...style,
       }}
       {...props}
     />

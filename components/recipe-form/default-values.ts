@@ -79,7 +79,7 @@ export function getDefaultValues(
     description: "",
     imageUrl: "",
     servings: "1",
-    ingredients: [{ item: "", amount: "1", unit: "" }],
+    ingredients: [{ item: "", amount: "", unit: "" }],
     instructions: [{ instruction: "" }],
     sourceUrl: "",
     category: "",

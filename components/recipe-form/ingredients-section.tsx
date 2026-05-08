@@ -17,6 +17,22 @@ interface IngredientsSectionProps {
   errors: FieldErrors<RecipeFormData>;
 }
 
+const QTY_W = 56;
+const UNIT_W = 68;
+const REMOVE_W = 32;
+const COL_GAP = 6;
+const ERROR_H = 16;
+
+const colLabel: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  fontFamily: "var(--font-sans)",
+  color: "var(--fg-3)",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  paddingLeft: 3,
+};
+
 export function IngredientsSection({
   register,
   control,
@@ -30,86 +46,127 @@ export function IngredientsSection({
 
   return (
     <div>
-      {/* Hint text */}
-      <p
+      {/* Header: hint + count badge */}
+      <div
         style={{
-          fontSize: 12,
-          color: "var(--fg-2)",
-          lineHeight: 1.6,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
           marginBottom: 4,
         }}
       >
-        {t("hintText")}
-      </p>
+        <p style={{ fontSize: 12, color: "var(--fg-2)", lineHeight: 1.6 }}>
+          {t("hintText")}
+        </p>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: "var(--font-sans)",
+            color: "rgba(255,180,60,0.9)",
+            background: "rgba(255,180,60,0.12)",
+            border: "1px solid rgba(255,200,100,0.22)",
+            borderRadius: 99,
+            padding: "2px 8px",
+            flexShrink: 0,
+            marginLeft: 8,
+          }}
+        >
+          {fields.length}
+        </span>
+      </div>
       <p
         style={{
           fontSize: 12,
           color: "var(--fg-3)",
           lineHeight: 1.6,
-          marginBottom: 16,
+          marginBottom: 10,
         }}
       >
         {t("hintExample")}
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            style={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-            }}
-          >
-            {/* Number chip */}
-            <div
-              style={{
-                width: 22,
-                height: 22,
-                borderRadius: 8,
-                background: "rgba(255,180,60,0.15)",
-                border: "1px solid rgba(255,200,100,0.22)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                font: "10px / 700 var(--font-sans)",
-                color: "var(--fg-2)",
-                flexShrink: 0,
-              }}
-            >
-              {index + 1}
-            </div>
+      {/* Column labels — always visible, aligned to inputs below */}
+      <div style={{ display: "flex", gap: COL_GAP, marginBottom: 4 }}>
+        <div style={{ ...colLabel, width: QTY_W, flexShrink: 0 }}>Qty</div>
+        <div style={{ ...colLabel, width: UNIT_W, flexShrink: 0 }}>Unit</div>
+        <div style={{ ...colLabel, flex: 1, minWidth: 0 }}>Ingredient</div>
+        {/* spacer matches remove button — keeps labels aligned even when button hides */}
+        <div style={{ width: REMOVE_W, flexShrink: 0 }} />
+      </div>
 
-            {/* Ingredient input */}
-            <div style={{ flex: 1 }}>
-              <Input
-                {...register(`ingredients.${index}.item`)}
-                placeholder={t("ingredientName")}
-                error={!!errors.ingredients?.[index]?.item}
-              />
-              {errors.ingredients?.[index]?.item && (
+      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {fields.map((field, index) => {
+          const amountErr = errors.ingredients?.[index]?.amount;
+          const itemErr = errors.ingredients?.[index]?.item;
+
+          return (
+            <div
+              key={field.id}
+              style={{ display: "flex", gap: COL_GAP, alignItems: "flex-start" }}
+            >
+              {/* Amount — no placeholder: column header provides context */}
+              <div style={{ width: QTY_W, flexShrink: 0 }}>
+                <Input
+                  {...register(`ingredients.${index}.amount`)}
+                  type="text"
+                  inputMode="decimal"
+                  error={!!amountErr}
+                />
                 <p
                   style={{
-                    fontSize: 11,
+                    fontSize: 10,
                     color: "rgba(239,68,68,0.85)",
-                    marginTop: 4,
+                    marginTop: 3,
                     paddingLeft: 2,
+                    minHeight: ERROR_H,
+                    lineHeight: 1.3,
+                    visibility: amountErr ? "visible" : "hidden",
                   }}
                 >
-                  {errors.ingredients[index]?.item?.message}
+                  {amountErr?.message ?? " "}
                 </p>
-              )}
-            </div>
+              </div>
 
-            {/* Remove button */}
-            {fields.length > 1 && (
+              {/* Unit */}
+              <div style={{ width: UNIT_W, flexShrink: 0 }}>
+                <Input
+                  {...register(`ingredients.${index}.unit`)}
+                  placeholder={t("unit")}
+                />
+                {/* spacer keeps this column height in sync with error rows */}
+                <div style={{ minHeight: ERROR_H, marginTop: 3 }} />
+              </div>
+
+              {/* Ingredient name */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Input
+                  {...register(`ingredients.${index}.item`)}
+                  placeholder={t("ingredientName")}
+                  error={!!itemErr}
+                />
+                <p
+                  style={{
+                    fontSize: 10,
+                    color: "rgba(239,68,68,0.85)",
+                    marginTop: 3,
+                    paddingLeft: 2,
+                    minHeight: ERROR_H,
+                    lineHeight: 1.3,
+                    visibility: itemErr ? "visible" : "hidden",
+                  }}
+                >
+                  {itemErr?.message ?? " "}
+                </p>
+              </div>
+
+              {/* Remove — always takes space, invisible when only 1 row */}
               <button
                 type="button"
                 onClick={() => remove(index)}
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: REMOVE_W,
+                  height: 36,
                   borderRadius: 10,
                   flexShrink: 0,
                   background: "rgba(239,68,68,0.10)",
@@ -119,16 +176,17 @@ export function IngredientsSection({
                   justifyContent: "center",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
+                  visibility: fields.length > 1 ? "visible" : "hidden",
                 }}
               >
                 <X size={13} style={{ color: "var(--action-destructive)" }} />
               </button>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
-      {errors.ingredients && (
+      {errors.ingredients?.message && (
         <p
           style={{
             fontSize: 11,
@@ -141,12 +199,12 @@ export function IngredientsSection({
         </p>
       )}
 
-      {/* Add ingredient dashed button */}
+      {/* Add ingredient */}
       <button
         type="button"
-        onClick={() => append({ item: "", amount: "1", unit: "" })}
+        onClick={() => append({ item: "", amount: "", unit: "" })}
         style={{
-          marginTop: 4,
+          marginTop: 6,
           padding: 10,
           borderRadius: 14,
           maxHeight: 37.5,
