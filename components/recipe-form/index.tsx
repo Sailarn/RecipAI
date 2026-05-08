@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
@@ -52,6 +52,12 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     "idle",
   );
 
+  // Scroll content only when it actually overflows. Avoids iOS rubber-band
+  // and any height-chain rounding that would otherwise let the user "pull"
+  // a div that doesn't need scrolling.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [needsScroll, setNeedsScroll] = useState(false);
+
   const {
     register,
     control,
@@ -66,6 +72,44 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   });
 
   const activeTabIndex = TAB_KEYS.indexOf(activeTab);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const check = () => {
+      const form = el.firstElementChild as HTMLElement | null;
+      if (!form) return;
+      // scrollHeight is inflated by unknown overflow — use rendered height instead
+      const contentH = form.getBoundingClientRect().height;
+      const availableH = el.clientHeight - 32; // minus 16px top + 16px bottom padding
+      setNeedsScroll(contentH > availableH + 1);
+    };
+
+    check();
+
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    const inner = el.firstElementChild;
+    if (inner) ro.observe(inner);
+
+    return () => ro.disconnect();
+  }, [activeTab]);
+
+  // When content fits, swallow touchmove so the gesture can't bubble up
+  // to PageStack (which has overflowY: auto and would otherwise rubber-band
+  // the whole form, including the bottom action bar).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || needsScroll) return;
+
+    const swallow = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    el.addEventListener("touchmove", swallow, { passive: false });
+    return () => el.removeEventListener("touchmove", swallow);
+  }, [needsScroll]);
 
   const handleTabClick = async (tab: TabKey) => {
     // If moving forward, validate current tab first
@@ -306,11 +350,14 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   return (
     <div
       style={{
-        height: "100dvh",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        position: "relative",
       }}
     >
       {/* Header */}
@@ -318,8 +365,8 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         style={{
           position: "relative",
           zIndex: 2,
-          padding: "max(16px, env(safe-area-inset-top, 16px)) 16px 0",
           flexShrink: 0,
+          padding: "max(16px, env(safe-area-inset-top, 16px)) 16px 0",
         }}
       >
         <div
@@ -419,17 +466,20 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
 
       {/* Scrollable Tab Content */}
       <div
+        ref={scrollRef}
         style={{
           position: "relative",
           zIndex: 1,
           flex: 1,
           minHeight: 0,
-          overflowY: "auto",
-          padding: "16px 16px 80px",
+          overflowY: needsScroll ? "auto" : "hidden",
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+          padding: "16px",
         }}
       >
         {/* biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms */}
-        <form onSubmit={handleSubmit(onSubmit as any)}>
+        <form onSubmit={handleSubmit(onSubmit as any)} style={{ overflow: "hidden" }}>
           {activeTab === "info" && (
             <BasicInfo
               register={register}
@@ -472,18 +522,13 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       {/* Bottom Action Bar */}
       <div
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 80,
+          flexShrink: 0,
           padding: "12px 16px",
           paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
           background: "rgba(8,8,8,0.85)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderTop: "1px solid rgba(255,200,100,0.12)",
-          zIndex: 10,
           display: "flex",
           alignItems: "center",
         }}
