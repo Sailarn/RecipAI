@@ -21,7 +21,7 @@ export function Input({ className = "", error, style, ...props }: InputProps) {
         WebkitBackdropFilter: "blur(12px)",
         color: "var(--fg-1)",
         fontFamily: "var(--font-sans)",
-        fontSize: "var(--text-sm)",
+        fontSize: "var(--text-base)",
         ...style,
       }}
       {...props}
