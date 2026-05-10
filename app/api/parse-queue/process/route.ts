@@ -4,6 +4,8 @@ import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
+import { uploadImageServer } from "@/lib/imagekit";
+import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 
@@ -46,13 +48,26 @@ export async function POST(req: NextRequest) {
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
       const r = recipe as ParsedRecipe;
+
+      let finalImageUrl = r.imageUrl ?? null;
+      let finalImageFileId: string | null = null;
+      if (finalImageUrl && !isImageKitUrl(finalImageUrl)) {
+        try {
+          const uploaded = await uploadImageServer(finalImageUrl);
+          finalImageUrl = uploaded.url;
+          finalImageFileId = uploaded.fileId;
+        } catch {
+          // keep original URL on failure
+        }
+      }
+
       await db.insert(recipes).values({
         id: crypto.randomUUID(),
         userId: job.userId,
         title: r.title,
         description: r.description ?? null,
-        imageUrl: r.imageUrl ?? null,
-        imageFileId: null,
+        imageUrl: finalImageUrl,
+        imageFileId: finalImageFileId,
         prepTime: r.prepTime ?? null,
         cookTime: r.cookTime ?? null,
         totalTime: r.prepTime && r.cookTime ? r.prepTime + r.cookTime : null,
