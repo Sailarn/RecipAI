@@ -12,22 +12,74 @@ const CATEGORY_STYLE: Record<
   string,
   { grad: string; emoji: string; bg: string; color: string }
 > = {
-  Breakfast: { grad: "linear-gradient(160deg, #7c3a00, #3d1800)", emoji: "🍳", bg: "rgba(232,89,12,0.22)",  color: "#fdba74" },
-  Lunch:     { grad: "linear-gradient(160deg, #064e3b, #052e16)", emoji: "🥗", bg: "rgba(47,158,68,0.22)",  color: "#86efac" },
-  Dinner:    { grad: "linear-gradient(160deg, #1e1b4b, #0f172a)", emoji: "🍽️", bg: "rgba(59,91,219,0.22)",  color: "#93c5fd" },
-  Soup:      { grad: "linear-gradient(160deg, #7c2d12, #431407)", emoji: "🍲", bg: "rgba(234,88,12,0.22)",  color: "#fb923c" },
-  Salad:     { grad: "linear-gradient(160deg, #14532d, #0a2512)", emoji: "🥗", bg: "rgba(47,158,68,0.22)",  color: "#86efac" },
-  Snack:     { grad: "linear-gradient(160deg, #2e1065, #0f0a1e)", emoji: "🍿", bg: "rgba(139,92,246,0.22)", color: "#c4b5fd" },
-  Dessert:   { grad: "linear-gradient(160deg, #4a0020, #1e0010)", emoji: "🍰", bg: "rgba(194,37,92,0.22)",  color: "#f9a8d4" },
-  Baking:    { grad: "linear-gradient(160deg, #713f12, #3d2105)", emoji: "🍞", bg: "rgba(234,179,8,0.22)",  color: "#fde047" },
-  Drink:     { grad: "linear-gradient(160deg, #0c4a6e, #042f4b)", emoji: "🥤", bg: "rgba(6,182,212,0.22)",  color: "#67e8f9" },
-  Other:     { grad: "linear-gradient(160deg, #1c1c2e, #0f0f1a)", emoji: "🍴", bg: "rgba(100,100,110,0.22)",color: "#d4d4d8" },
+  Breakfast: {
+    grad: "linear-gradient(160deg, #7c3a00, #3d1800)",
+    emoji: "🍳",
+    bg: "rgba(232,89,12,0.22)",
+    color: "#fdba74",
+  },
+  Lunch: {
+    grad: "linear-gradient(160deg, #064e3b, #052e16)",
+    emoji: "🥗",
+    bg: "rgba(47,158,68,0.22)",
+    color: "#86efac",
+  },
+  Dinner: {
+    grad: "linear-gradient(160deg, #1e1b4b, #0f172a)",
+    emoji: "🍽️",
+    bg: "rgba(59,91,219,0.22)",
+    color: "#93c5fd",
+  },
+  Soup: {
+    grad: "linear-gradient(160deg, #7c2d12, #431407)",
+    emoji: "🍲",
+    bg: "rgba(234,88,12,0.22)",
+    color: "#fb923c",
+  },
+  Salad: {
+    grad: "linear-gradient(160deg, #14532d, #0a2512)",
+    emoji: "🥗",
+    bg: "rgba(47,158,68,0.22)",
+    color: "#86efac",
+  },
+  Snack: {
+    grad: "linear-gradient(160deg, #2e1065, #0f0a1e)",
+    emoji: "🍿",
+    bg: "rgba(139,92,246,0.22)",
+    color: "#c4b5fd",
+  },
+  Dessert: {
+    grad: "linear-gradient(160deg, #4a0020, #1e0010)",
+    emoji: "🍰",
+    bg: "rgba(194,37,92,0.22)",
+    color: "#f9a8d4",
+  },
+  Baking: {
+    grad: "linear-gradient(160deg, #713f12, #3d2105)",
+    emoji: "🍞",
+    bg: "rgba(234,179,8,0.22)",
+    color: "#fde047",
+  },
+  Drink: {
+    grad: "linear-gradient(160deg, #0c4a6e, #042f4b)",
+    emoji: "🥤",
+    bg: "rgba(6,182,212,0.22)",
+    color: "#67e8f9",
+  },
+  Other: {
+    grad: "linear-gradient(160deg, #1c1c2e, #0f0f1a)",
+    emoji: "🍴",
+    bg: "rgba(100,100,110,0.22)",
+    color: "#d4d4d8",
+  },
 };
 
 const DEFAULT_STYLE = CATEGORY_STYLE.Other;
 
 export function ParseResult({ result, onSave, onReset }: ParseResultProps) {
-  const cat = result.category ? (CATEGORY_STYLE[result.category] ?? DEFAULT_STYLE) : DEFAULT_STYLE;
+  const cat = result.category
+    ? (CATEGORY_STYLE[result.category] ?? DEFAULT_STYLE)
+    : DEFAULT_STYLE;
 
   const metaParts: string[] = [];
   if (result.servings) metaParts.push(`🍽️ ${result.servings} servings`);
@@ -139,7 +191,15 @@ export function ParseResult({ result, onSave, onReset }: ParseResultProps) {
                     color: "var(--fg-1)",
                   }}
                 >
-                  <span style={{ color: "var(--food-accent)", fontSize: 6, marginTop: 2 }}>●</span>
+                  <span
+                    style={{
+                      color: "var(--food-accent)",
+                      fontSize: 6,
+                      marginTop: 2,
+                    }}
+                  >
+                    ●
+                  </span>
                   <span>
                     {ing.amount && `${ing.amount} `}
                     {ing.unit && `${ing.unit} `}

@@ -25,7 +25,9 @@ export function PhotoParsingBanner({
         border: "1px solid var(--glass-subtle-border)",
       }}
     >
-      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>⏳ Parsing photo...</p>
+      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>
+        ⏳ Parsing photo...
+      </p>
       <p style={{ font: "var(--type-caption)", color: "var(--fg-2)" }}>
         You can navigate away — you'll be notified when done.
       </p>

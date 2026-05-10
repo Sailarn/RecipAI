@@ -23,7 +23,8 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() =>
         navigate.push(
           routes.recipes.detail(locale, recipe.id),
@@ -34,6 +35,10 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
       onMouseLeave={() => setHovered(false)}
       className="glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden"
       style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        textAlign: "left",
         borderRadius: 22,
         transform: hovered ? "translateY(-2px)" : "none",
         boxShadow: hovered
@@ -88,6 +93,6 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
           </p>
         )}
       </div>
-    </div>
+    </button>
   );
 }

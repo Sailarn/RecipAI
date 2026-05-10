@@ -2,8 +2,8 @@
 
 import { Bot, LogOut, User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { Skeleton } from "@/components/ui";
 import { LoginView } from "@/components/login-view";
+import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -56,7 +56,9 @@ export function ProfileAuth() {
   }
 
   if (session) {
-    const initial = (session.user.name || session.user.email || "?")[0].toUpperCase();
+    const initial = (session.user.name ||
+      session.user.email ||
+      "?")[0].toUpperCase();
 
     return (
       <>
@@ -156,7 +158,10 @@ export function ProfileAuth() {
                   cursor: "pointer",
                 }}
               >
-                <Bot size={15} style={{ color: "var(--food-accent)", flexShrink: 0 }} />
+                <Bot
+                  size={15}
+                  style={{ color: "var(--food-accent)", flexShrink: 0 }}
+                />
                 <span>Open Recipe Bot</span>
               </a>
               <p
@@ -170,8 +175,8 @@ export function ProfileAuth() {
                   padding: "0 4px",
                 }}
               >
-                Send any recipe URL or Instagram Reel to your bot — it'll save it
-                to your account automatically.
+                Send any recipe URL or Instagram Reel to your bot — it'll save
+                it to your account automatically.
               </p>
             </>
           )}
@@ -259,7 +264,8 @@ export function ProfileAuth() {
           padding: 14,
           borderRadius: 14,
           border: "1px solid rgba(255,220,120,0.35)",
-          background: "linear-gradient(135deg, rgba(255,180,60,0.85), rgba(255,150,30,0.90))",
+          background:
+            "linear-gradient(135deg, rgba(255,180,60,0.85), rgba(255,150,30,0.90))",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           color: "#1a0f00",

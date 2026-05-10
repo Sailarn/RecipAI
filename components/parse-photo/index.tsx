@@ -166,15 +166,22 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
               d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
             />
           </svg>
-          <span style={{ font: "var(--type-button)", color: "inherit" }}>{t("photo.cta")}</span>
-          <span style={{ font: "var(--type-caption)", color: "inherit" }}>{t("photo.hint")}</span>
+          <span style={{ font: "var(--type-button)", color: "inherit" }}>
+            {t("photo.cta")}
+          </span>
+          <span style={{ font: "var(--type-caption)", color: "inherit" }}>
+            {t("photo.hint")}
+          </span>
         </button>
       )}
 
       <div className="space-y-1.5">
         <Label htmlFor="photo-comment">
           Hints for AI
-          <span className="ml-2 text-xs" style={{ color: "var(--fg-3)", fontWeight: "var(--font-regular)" }}>
+          <span
+            className="ml-2 text-xs"
+            style={{ color: "var(--fg-3)", fontWeight: "var(--font-regular)" }}
+          >
             optional
           </span>
         </Label>

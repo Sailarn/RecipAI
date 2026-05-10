@@ -6,11 +6,10 @@ import { useRef } from "react";
 import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { PILL_H } from "./use-bottom-nav";
 import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
-import { useBottomNav } from "./use-bottom-nav";
+import { PILL_H, useBottomNav } from "./use-bottom-nav";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 // 3 items: Recipes | AI Import | Profile
@@ -68,11 +67,10 @@ export function BottomNav() {
     items.findIndex((it) => it.isActive),
   );
 
-  const { navRef, itemRefs, ready, leftMv, measure } =
-    useBottomNav({
-      staticActiveIndex,
-      measureKey: showKey,
-    });
+  const { navRef, itemRefs, ready, leftMv, measure } = useBottomNav({
+    staticActiveIndex,
+    measureKey: showKey,
+  });
 
   if (shouldHide) return null;
 
@@ -95,11 +93,7 @@ export function BottomNav() {
           style={{ overflow: "visible" }}
         >
           {ready && (
-            <NavPill
-              leftMv={leftMv}
-              yNormal={yNormal}
-              hidden={isAiActive}
-            />
+            <NavPill leftMv={leftMv} yNormal={yNormal} hidden={isAiActive} />
           )}
 
           {items.map((item, i) => (

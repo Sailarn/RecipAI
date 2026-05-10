@@ -3,11 +3,7 @@
 import { ImageIcon, ImagePlus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import {
-  type Control,
-  type FieldErrors,
-  type UseFormRegister,
-} from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Input, Label, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { RecipeFormData } from "./schema";
@@ -88,7 +84,7 @@ export function BasicInfo({
 
       {/* Category Picker */}
       <div>
-        <label style={LABEL_STYLE}>{t("category")}</label>
+        <div style={LABEL_STYLE}>{t("category")}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
           {RECIPE_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat;

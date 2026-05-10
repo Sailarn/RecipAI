@@ -103,7 +103,11 @@ export function IngredientsSection({
           return (
             <div
               key={field.id}
-              style={{ display: "flex", gap: COL_GAP, alignItems: "flex-start" }}
+              style={{
+                display: "flex",
+                gap: COL_GAP,
+                alignItems: "flex-start",
+              }}
             >
               {/* Amount — no placeholder: column header provides context */}
               <div style={{ width: QTY_W, flexShrink: 0 }}>

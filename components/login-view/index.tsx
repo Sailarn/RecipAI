@@ -136,19 +136,31 @@ export function LoginView({ locale }: { locale: string }) {
 
         {/* Auth buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <button type="button" onClick={handleGoogleSignIn} className="signin-btn">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="signin-btn"
+          >
             <div style={chipStyle}>
               <GoogleLogo />
             </div>
             <span>Continue with Google</span>
           </button>
-          <button type="button" onClick={handlePasskeySignIn} className="signin-btn">
+          <button
+            type="button"
+            onClick={handlePasskeySignIn}
+            className="signin-btn"
+          >
             <div style={{ ...chipStyle, color: "var(--food-accent)" }}>
               <KeyRound size={14} strokeWidth={2} />
             </div>
             <span>Continue with Passkey</span>
           </button>
-          <button type="button" onClick={handleTelegramSignIn} className="signin-btn">
+          <button
+            type="button"
+            onClick={handleTelegramSignIn}
+            className="signin-btn"
+          >
             <div style={{ ...chipStyle, color: "#229ED9" }}>
               <Send size={14} strokeWidth={2} />
             </div>

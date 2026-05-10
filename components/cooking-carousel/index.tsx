@@ -392,13 +392,18 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
         createPortal(
           <>
             {/* Overlay backdrop */}
-            <div
+            <button
+              type="button"
+              aria-label="Close ingredients"
               onClick={() => setIngredientsOpen(false)}
               style={{
                 position: "fixed",
                 inset: 0,
                 background: "rgba(6,4,2,0.6)",
                 zIndex: 400,
+                border: "none",
+                cursor: "default",
+                padding: 0,
               }}
             />
             {/* Sheet panel */}

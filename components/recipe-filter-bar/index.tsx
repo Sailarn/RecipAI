@@ -30,7 +30,14 @@ export function RecipeFilterBar({
   const t = useTranslations("recipes");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 14 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        marginBottom: 14,
+      }}
+    >
       {/* Search row */}
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ position: "relative", flex: 1 }}>
@@ -68,7 +75,10 @@ export function RecipeFilterBar({
             }}
           />
         </div>
-        <Select value={sort} onValueChange={(v) => onSortChange(v as SortOption)}>
+        <Select
+          value={sort}
+          onValueChange={(v) => onSortChange(v as SortOption)}
+        >
           <SelectTrigger className="w-36 !h-[38px]">
             <SelectValue />
           </SelectTrigger>

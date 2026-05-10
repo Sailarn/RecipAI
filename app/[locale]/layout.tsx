@@ -1,8 +1,8 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Fraunces, Inter } from "next/font/google";
-import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";

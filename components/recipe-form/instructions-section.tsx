@@ -155,10 +155,7 @@ export function InstructionsSection({
                     flexShrink: 0,
                   }}
                 >
-                  <X
-                    size={12}
-                    style={{ color: "var(--action-destructive)" }}
-                  />
+                  <X size={12} style={{ color: "var(--action-destructive)" }} />
                 </button>
               )}
             </div>

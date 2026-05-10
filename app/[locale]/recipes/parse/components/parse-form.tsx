@@ -36,7 +36,9 @@ export function ParseForm({
   return (
     <div className="space-y-4 mb-6">
       <div>
-        <label htmlFor="url" style={labelStyle}>Recipe URL</label>
+        <label htmlFor="url" style={labelStyle}>
+          Recipe URL
+        </label>
         <Input
           id="url"
           type="url"

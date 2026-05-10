@@ -33,7 +33,10 @@ interface UseBottomNavOptions {
   measureKey?: number;
 }
 
-export function useBottomNav({ staticActiveIndex, measureKey }: UseBottomNavOptions) {
+export function useBottomNav({
+  staticActiveIndex,
+  measureKey,
+}: UseBottomNavOptions) {
   const navRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const [measure, setMeasure] = useState<Measure | null>(null);

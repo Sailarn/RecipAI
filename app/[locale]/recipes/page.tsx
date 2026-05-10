@@ -192,7 +192,11 @@ export default function RecipesPage() {
             }}
           >
             {filtered.map((recipe, index) => (
-              <RecipeCard key={recipe.id} recipe={recipe} priority={index < 2} />
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                priority={index < 2}
+              />
             ))}
           </div>
         )}

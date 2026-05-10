@@ -25,8 +25,12 @@ export function ParseBackgroundBanner({
         border: "1px solid var(--glass-subtle-border)",
       }}
     >
-      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>⏳ Parsing in background...</p>
-      <p style={{ font: "var(--type-caption)", color: "var(--fg-2)" }}>You'll get a notification when it's ready.</p>
+      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>
+        ⏳ Parsing in background...
+      </p>
+      <p style={{ font: "var(--type-caption)", color: "var(--fg-2)" }}>
+        You'll get a notification when it's ready.
+      </p>
       <div className="flex gap-2 justify-center">
         <Button variant="outline" size="sm" onClick={onReset}>
           Parse another

@@ -91,7 +91,14 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "var(--bg-base)" }}>
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--bg-base)",
+      }}
+    >
       {/* Nav row - rendered by RecipeHeader which now has its own padding */}
       <div style={{ position: "relative", zIndex: 20, flexShrink: 0 }}>
         <RecipeHeader
@@ -102,27 +109,40 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
       </div>
 
       {/* Scrollable content area - pulls up under nav for hero bleed */}
-      <div style={{ position: "relative", zIndex: 1, flex: 1, overflowY: "auto", marginTop: "-72px", padding: "0 14px 40px" }}>
-        {/* Hero gradient + emoji fallback */}
-        <div style={{
-          height: 210,
-          flexShrink: 0,
+      <div
+        style={{
           position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 72,
-          paddingTop: 72,
-          borderRadius: 0,
-          overflow: "hidden",
-        }}>
+          zIndex: 1,
+          flex: 1,
+          overflowY: "auto",
+          marginTop: "-72px",
+          padding: "0 14px 40px",
+        }}
+      >
+        {/* Hero gradient + emoji fallback */}
+        <div
+          style={{
+            height: 210,
+            flexShrink: 0,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 72,
+            paddingTop: 72,
+            borderRadius: 0,
+            overflow: "hidden",
+          }}
+        >
           {recipe.imageUrl ? (
             <img
               src={recipe.imageUrl}
               alt={recipe.title}
               style={{
-                position: "absolute", inset: 0,
-                width: "100%", height: "100%",
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
                 objectFit: "cover",
               }}
             />
@@ -130,13 +150,18 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
             <span>{"🍽️"}</span>
           )}
           {/* Bottom fade overlay */}
-          <div style={{
-            position: "absolute",
-            bottom: 0, left: 0, right: 0,
-            height: 60,
-            background: "linear-gradient(to bottom, transparent, var(--bg-base))",
-            pointerEvents: "none",
-          }} />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 60,
+              background:
+                "linear-gradient(to bottom, transparent, var(--bg-base))",
+              pointerEvents: "none",
+            }}
+          />
         </div>
 
         <div className="flex items-start justify-between gap-2 mb-4">
@@ -152,30 +177,39 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           >
             {recipe.title}
           </h1>
-          {recipe.category && (() => {
-            const BADGE: Record<string, { bg: string; color: string }> = {
-              Breakfast: { bg: "rgba(232,89,12,0.22)",   color: "#fdba74" },
-              Lunch:     { bg: "rgba(47,158,68,0.22)",   color: "#86efac" },
-              Dinner:    { bg: "rgba(59,91,219,0.22)",   color: "#93c5fd" },
-              Soup:      { bg: "rgba(234,88,12,0.22)",   color: "#fb923c" },
-              Salad:     { bg: "rgba(47,158,68,0.22)",   color: "#86efac" },
-              Snack:     { bg: "rgba(139,92,246,0.22)",  color: "#c4b5fd" },
-              Dessert:   { bg: "rgba(194,37,92,0.22)",   color: "#f9a8d4" },
-              Baking:    { bg: "rgba(234,179,8,0.22)",   color: "#fde047" },
-              Drink:     { bg: "rgba(6,182,212,0.22)",   color: "#67e8f9" },
-              Other:     { bg: "rgba(100,100,110,0.22)", color: "#d4d4d8" },
-            };
-            const b = BADGE[recipe.category] ?? BADGE.Other;
-            return (
-              <span style={{
-                fontSize: 9, fontWeight: 700, padding: "3px 9px", borderRadius: 99,
-                background: b.bg, color: b.color, border: `1px solid ${b.color}30`,
-                marginTop: 4, flexShrink: 0,
-              }}>
-                {recipe.category}
-              </span>
-            );
-          })()}
+          {recipe.category &&
+            (() => {
+              const BADGE: Record<string, { bg: string; color: string }> = {
+                Breakfast: { bg: "rgba(232,89,12,0.22)", color: "#fdba74" },
+                Lunch: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
+                Dinner: { bg: "rgba(59,91,219,0.22)", color: "#93c5fd" },
+                Soup: { bg: "rgba(234,88,12,0.22)", color: "#fb923c" },
+                Salad: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
+                Snack: { bg: "rgba(139,92,246,0.22)", color: "#c4b5fd" },
+                Dessert: { bg: "rgba(194,37,92,0.22)", color: "#f9a8d4" },
+                Baking: { bg: "rgba(234,179,8,0.22)", color: "#fde047" },
+                Drink: { bg: "rgba(6,182,212,0.22)", color: "#67e8f9" },
+                Other: { bg: "rgba(100,100,110,0.22)", color: "#d4d4d8" },
+              };
+              const b = BADGE[recipe.category] ?? BADGE.Other;
+              return (
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: "3px 9px",
+                    borderRadius: 99,
+                    background: b.bg,
+                    color: b.color,
+                    border: `1px solid ${b.color}30`,
+                    marginTop: 4,
+                    flexShrink: 0,
+                  }}
+                >
+                  {recipe.category}
+                </span>
+              );
+            })()}
         </div>
 
         {recipe.description && (
@@ -242,7 +276,10 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
             onClose={() => setCookingMode(false)}
           />
         )}
-        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialog
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>

@@ -1,5 +1,5 @@
-import type { ComponentType, ReactNode } from "react";
 import { motion } from "motion/react";
+import type { ComponentType, ReactNode } from "react";
 
 interface NavItemProps {
   label: string;

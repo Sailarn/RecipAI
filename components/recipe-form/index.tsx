@@ -6,13 +6,17 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Recipe } from "@/lib/db/schema";
-import { FormActionBar } from "./form-action-bar";
-import { FormHeader } from "./form-header";
 import { BasicInfo } from "./basic-info";
 import { getDefaultValues, type ParsedRecipeData } from "./default-values";
+import { FormActionBar } from "./form-action-bar";
+import { FormHeader } from "./form-header";
 import { IngredientsSection } from "./ingredients-section";
 import { InstructionsSection } from "./instructions-section";
-import { createRecipeSchema, type RecipeFormData, type RecipeOutput } from "./schema";
+import {
+  createRecipeSchema,
+  type RecipeFormData,
+  type RecipeOutput,
+} from "./schema";
 import { useRecipeSave } from "./use-recipe-save";
 import { useScrollOverflow } from "./use-scroll-overflow";
 import { useTabNavigation } from "./use-tab-navigation";
@@ -53,8 +57,13 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
 
   const { scrollRef, needsScroll } = useScrollOverflow(activeTab);
 
-  const { imageError, saveState, pendingImageFile, pendingStepFiles, onSubmit } =
-    useRecipeSave(recipe, locale);
+  const {
+    imageError,
+    saveState,
+    pendingImageFile,
+    pendingStepFiles,
+    onSubmit,
+  } = useRecipeSave(recipe, locale);
 
   const tabLabels = {
     info: t("tabInfo"),
@@ -100,7 +109,10 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         }}
       >
         {/* biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms */}
-        <form onSubmit={handleSubmit(onSubmit as any)} style={{ overflow: "hidden" }}>
+        <form
+          onSubmit={handleSubmit(onSubmit as any)}
+          style={{ overflow: "hidden" }}
+        >
           {activeTab === "info" && (
             <BasicInfo
               register={register}

@@ -15,7 +15,9 @@ function Toggle({ checked }: { checked: boolean }) {
         borderRadius: 13,
         cursor: "pointer",
         position: "relative",
-        background: checked ? "rgba(255,160,40,0.30)" : "rgba(255,255,255,0.20)",
+        background: checked
+          ? "rgba(255,160,40,0.30)"
+          : "rgba(255,255,255,0.20)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
         border: `1px solid ${checked ? "rgba(255,200,100,0.45)" : "rgba(255,255,255,0.30)"}`,
@@ -32,7 +34,9 @@ function Toggle({ checked }: { checked: boolean }) {
           width: 18,
           height: 18,
           borderRadius: 9,
-          background: checked ? "rgba(251,191,36,0.95)" : "rgba(255,255,255,0.85)",
+          background: checked
+            ? "rgba(251,191,36,0.95)"
+            : "rgba(255,255,255,0.85)",
           boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
           display: "flex",
           alignItems: "center",
@@ -104,7 +108,10 @@ export default function ProfilePage() {
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
     const newLocale = locale === "ua" ? "en" : "ua";
-    const newPath = window.location.pathname.replace(`/${locale}`, `/${newLocale}`);
+    const newPath = window.location.pathname.replace(
+      `/${locale}`,
+      `/${newLocale}`,
+    );
     router.push(newPath);
   };
 
@@ -161,7 +168,11 @@ export default function ProfilePage() {
             >
               {targetLanguageName}
             </span>
-            <ChevronRight size={13} strokeWidth={2} style={{ color: "var(--fg-3)", flexShrink: 0 }} />
+            <ChevronRight
+              size={13}
+              strokeWidth={2}
+              style={{ color: "var(--fg-3)", flexShrink: 0 }}
+            />
           </button>
 
           <div style={DIVIDER} />

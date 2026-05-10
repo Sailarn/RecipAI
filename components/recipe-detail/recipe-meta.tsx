@@ -1,7 +1,7 @@
 "use client";
 
+import { Clock, Hourglass, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Clock, Timer, Hourglass } from "lucide-react";
 
 interface RecipeMetaProps {
   prepTime?: number;
@@ -10,9 +10,21 @@ interface RecipeMetaProps {
 }
 
 const iconMap: Record<string, React.ReactNode> = {
-  prepTime: <Clock style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }} />,
-  cookTime: <Timer style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }} />,
-  totalTime: <Hourglass style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }} />,
+  prepTime: (
+    <Clock
+      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
+    />
+  ),
+  cookTime: (
+    <Timer
+      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
+    />
+  ),
+  totalTime: (
+    <Hourglass
+      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
+    />
+  ),
 };
 
 export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
@@ -20,9 +32,27 @@ export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
   const t = useTranslations("recipes");
 
   const items = [
-    prepTime ? { key: "prepTime", label: t("prepTime"), value: `${prepTime} ${tCommon("minutes")}` } : null,
-    cookTime ? { key: "cookTime", label: t("cookTime"), value: `${cookTime} ${tCommon("minutes")}` } : null,
-    totalTime ? { key: "totalTime", label: t("totalTime"), value: `${totalTime} ${tCommon("minutes")}` } : null,
+    prepTime
+      ? {
+          key: "prepTime",
+          label: t("prepTime"),
+          value: `${prepTime} ${tCommon("minutes")}`,
+        }
+      : null,
+    cookTime
+      ? {
+          key: "cookTime",
+          label: t("cookTime"),
+          value: `${cookTime} ${tCommon("minutes")}`,
+        }
+      : null,
+    totalTime
+      ? {
+          key: "totalTime",
+          label: t("totalTime"),
+          value: `${totalTime} ${tCommon("minutes")}`,
+        }
+      : null,
   ].filter(Boolean) as { key: string; label: string; value: string }[];
 
   if (items.length === 0) return null;
@@ -47,7 +77,9 @@ export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
           }}
         >
           {iconMap[item.key]}
-          <span style={{ fontWeight: 600, color: "var(--fg-1)" }}>{item.label}</span>
+          <span style={{ fontWeight: 600, color: "var(--fg-1)" }}>
+            {item.label}
+          </span>
           <span>{item.value}</span>
         </div>
       ))}

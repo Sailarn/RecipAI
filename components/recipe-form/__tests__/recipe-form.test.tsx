@@ -2,7 +2,13 @@
  * @vitest-environment happy-dom
  */
 
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";

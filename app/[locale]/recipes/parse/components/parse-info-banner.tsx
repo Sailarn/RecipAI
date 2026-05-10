@@ -22,8 +22,16 @@ export function ParseInfoBanner() {
         <p style={{ fontSize: 12, color: "var(--fg-2)", lineHeight: 1.55 }}>
           Works with any recipe website — just paste the URL below.
         </p>
-        <p style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.55, marginTop: 2 }}>
-          Examples: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--fg-3)",
+            lineHeight: 1.55,
+            marginTop: 2,
+          }}
+        >
+          Examples: silpo.ua, allrecipes.com, bbcgoodfood.com,
+          cooking.nytimes.com
         </p>
       </div>
     </div>

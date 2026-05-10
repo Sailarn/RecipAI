@@ -88,7 +88,14 @@ export function LinkedAccounts({
         >
           Connected accounts
         </p>
-        <div style={{ padding: "0 16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div
+          style={{
+            padding: "0 16px 14px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
           <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
           <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
           <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
@@ -108,7 +115,13 @@ export function LinkedAccounts({
     {
       key: "passkey",
       name: "Passkey",
-      icon: <KeyRound size={15} strokeWidth={2} style={{ color: "var(--food-accent)" }} />,
+      icon: (
+        <KeyRound
+          size={15}
+          strokeWidth={2}
+          style={{ color: "var(--food-accent)" }}
+        />
+      ),
       isLinked: passkeyLinked,
       onConnect: onAddPasskey,
     },
