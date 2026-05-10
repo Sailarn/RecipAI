@@ -10,7 +10,8 @@ export async function uploadImageServer(
   url: string,
 ): Promise<{ url: string; fileId: string }> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Failed to fetch image: ${response.status}`);
   const buffer = await response.arrayBuffer();
   const base64 = Buffer.from(buffer).toString("base64");
   const result = await imagekit.upload({

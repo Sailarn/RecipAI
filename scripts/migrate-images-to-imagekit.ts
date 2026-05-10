@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
+
 dotenv.config({ path: ".env.local" });
+
 import { eq, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
@@ -32,7 +34,11 @@ async function main() {
       const uploaded = await uploadImageServer(row.imageUrl);
       await db
         .update(recipes)
-        .set({ imageUrl: uploaded.url, imageFileId: uploaded.fileId, updatedAt: new Date() })
+        .set({
+          imageUrl: uploaded.url,
+          imageFileId: uploaded.fileId,
+          updatedAt: new Date(),
+        })
         .where(eq(recipes.id, row.id));
       console.log(`✅ ${row.id}: ${row.imageUrl} → ${uploaded.url}`);
       updated++;

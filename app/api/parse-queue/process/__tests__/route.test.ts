@@ -67,10 +67,16 @@ function makeRequest(body: object) {
 }
 
 function setupDb(job: object | null) {
-  const updateChain = { set: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue(undefined) };
+  const updateChain = {
+    set: vi.fn().mockReturnThis(),
+    where: vi.fn().mockResolvedValue(undefined),
+  };
   vi.mocked(db.update).mockReturnValue(updateChain as any);
 
-  const selectChain = { from: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue(job ? [job] : []) };
+  const selectChain = {
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockResolvedValue(job ? [job] : []),
+  };
   vi.mocked(db.select).mockReturnValue(selectChain as any);
 
   const insertChain = { values: vi.fn().mockResolvedValue(undefined) };
@@ -100,12 +106,16 @@ describe("POST /api/parse-queue/process", () => {
     it("uploads non-ImageKit imageUrl to ImageKit before saving", async () => {
       setupDb(baseJob);
       vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
-      vi.mocked(uploadImageServer).mockResolvedValue({ url: IMAGEKIT_URL, fileId: "file-1" });
+      vi.mocked(uploadImageServer).mockResolvedValue({
+        url: IMAGEKIT_URL,
+        fileId: "file-1",
+      });
 
       await POST(makeRequest({ jobId: "job-1" }));
 
       expect(uploadImageServer).toHaveBeenCalledWith(CDN_URL);
-      const insertValues = vi.mocked(db.insert("" as any).values as any).mock.calls[0][0];
+      const insertValues = vi.mocked(db.insert("" as any).values as any).mock
+        .calls[0][0];
       expect(insertValues.imageUrl).toBe(IMAGEKIT_URL);
       expect(insertValues.imageFileId).toBe("file-1");
     });
@@ -113,24 +123,32 @@ describe("POST /api/parse-queue/process", () => {
     it("skips upload when imageUrl is already on ImageKit", async () => {
       vi.mocked(isImageKitUrl).mockReturnValue(true);
       setupDb(baseJob);
-      vi.mocked(parseRecipeFromUrl).mockResolvedValue({ ...baseRecipe, imageUrl: IMAGEKIT_URL } as any);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        ...baseRecipe,
+        imageUrl: IMAGEKIT_URL,
+      } as any);
 
       await POST(makeRequest({ jobId: "job-1" }));
 
       expect(uploadImageServer).not.toHaveBeenCalled();
-      const insertValues = vi.mocked(db.insert("" as any).values as any).mock.calls[0][0];
+      const insertValues = vi.mocked(db.insert("" as any).values as any).mock
+        .calls[0][0];
       expect(insertValues.imageUrl).toBe(IMAGEKIT_URL);
       expect(insertValues.imageFileId).toBeNull();
     });
 
     it("saves recipe with null imageFileId when imageUrl is null", async () => {
       setupDb(baseJob);
-      vi.mocked(parseRecipeFromUrl).mockResolvedValue({ ...baseRecipe, imageUrl: undefined } as any);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        ...baseRecipe,
+        imageUrl: undefined,
+      } as any);
 
       await POST(makeRequest({ jobId: "job-1" }));
 
       expect(uploadImageServer).not.toHaveBeenCalled();
-      const insertValues = vi.mocked(db.insert("" as any).values as any).mock.calls[0][0];
+      const insertValues = vi.mocked(db.insert("" as any).values as any).mock
+        .calls[0][0];
       expect(insertValues.imageUrl).toBeNull();
       expect(insertValues.imageFileId).toBeNull();
     });
@@ -138,11 +156,14 @@ describe("POST /api/parse-queue/process", () => {
     it("keeps original CDN URL when upload fails", async () => {
       setupDb(baseJob);
       vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
-      vi.mocked(uploadImageServer).mockRejectedValue(new Error("Upload failed"));
+      vi.mocked(uploadImageServer).mockRejectedValue(
+        new Error("Upload failed"),
+      );
 
       await POST(makeRequest({ jobId: "job-1" }));
 
-      const insertValues = vi.mocked(db.insert("" as any).values as any).mock.calls[0][0];
+      const insertValues = vi.mocked(db.insert("" as any).values as any).mock
+        .calls[0][0];
       expect(insertValues.imageUrl).toBe(CDN_URL);
       expect(insertValues.imageFileId).toBeNull();
     });
