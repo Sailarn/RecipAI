@@ -127,7 +127,7 @@ describe("RecipesPage", () => {
     const cakeImage = screen.getByAltText("Chocolate Cake");
     expect(cakeImage).toHaveAttribute(
       "src",
-      "https://example.com/cake.jpg?tr=w-300,h-128,fo-auto,f-webp,q-80",
+      "https://example.com/cake.jpg?tr=w-300,h-96,fo-auto,f-webp,q-80",
     );
   });
 

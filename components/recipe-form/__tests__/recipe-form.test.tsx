@@ -99,6 +99,8 @@ describe("RecipeForm", () => {
       // Fill in the default ingredient so we can navigate past this tab
       const ingredientInput = screen.getByPlaceholderText(/ingredientName/i);
       fireEvent.change(ingredientInput, { target: { value: "test" } });
+      const qtyInput = screen.getByLabelText(/qty/i);
+      fireEvent.change(qtyInput, { target: { value: "1" } });
 
       // Navigate to steps tab via "next" (triggers ingredients validation)
       await act(async () => {
@@ -302,6 +304,9 @@ describe("RecipeForm", () => {
       // Fill in ingredient
       fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
         target: { value: "flour" },
+      });
+      fireEvent.change(screen.getByLabelText(/qty/i), {
+        target: { value: "1" },
       });
 
       // Navigate to steps tab
