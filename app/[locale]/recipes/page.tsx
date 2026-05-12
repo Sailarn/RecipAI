@@ -5,6 +5,8 @@ import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { NewCollectionModal } from "@/components/new-collection-modal";
 import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
@@ -13,6 +15,7 @@ import { RecipeNewView } from "@/components/recipe-new-view";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
+import { createCollection, getAllCollections } from "@/lib/db/collections";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
@@ -53,8 +56,12 @@ export default function RecipesPage() {
     setCategory,
     status,
     setStatus,
+    collectionId,
+    setCollectionId,
     filtered,
   } = useRecipeFilter(recipes ?? []);
+  const collections = useLiveQuery(() => getAllCollections(), []) ?? [];
+  const [showNewCollection, setShowNewCollection] = useState(false);
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
@@ -168,6 +175,10 @@ export default function RecipesPage() {
           onCategoryChange={setCategory}
           status={status}
           onStatusChange={setStatus}
+          collections={collections}
+          activeCollectionId={collectionId}
+          onCollectionChange={setCollectionId}
+          onCreateCollection={() => setShowNewCollection(true)}
         />
       </div>
 
@@ -212,6 +223,15 @@ export default function RecipesPage() {
           </div>
         )}
       </div>
+      {showNewCollection && (
+        <NewCollectionModal
+          onClose={() => setShowNewCollection(false)}
+          onCreate={async ({ name, emoji }) => {
+            await createCollection({ name, emoji });
+            setShowNewCollection(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { CollectionsShelf } from "@/components/collections-shelf";
 import type { StatusFilter } from "@/components/status-chips";
 import { StatusChips } from "@/components/status-chips";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
+import type { Collection } from "@/lib/db/schema";
 import {
   Select,
   SelectContent,
@@ -21,6 +23,10 @@ interface RecipeFilterBarProps {
   onCategoryChange: (value: string | null) => void;
   status: StatusFilter;
   onStatusChange: (value: StatusFilter) => void;
+  collections: Collection[];
+  activeCollectionId: string | null;
+  onCollectionChange: (id: string | null) => void;
+  onCreateCollection: () => void;
 }
 
 export function RecipeFilterBar({
@@ -32,6 +38,10 @@ export function RecipeFilterBar({
   onCategoryChange,
   status,
   onStatusChange,
+  collections,
+  activeCollectionId,
+  onCollectionChange,
+  onCreateCollection,
 }: RecipeFilterBarProps) {
   const t = useTranslations("recipes");
 
@@ -44,6 +54,12 @@ export function RecipeFilterBar({
         marginBottom: 14,
       }}
     >
+      <CollectionsShelf
+        collections={collections}
+        activeId={activeCollectionId}
+        onSelect={onCollectionChange}
+        onCreateNew={onCreateCollection}
+      />
       {/* Search row */}
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ position: "relative", flex: 1 }}>
