@@ -135,6 +135,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           }}
         >
           {recipe.imageUrl ? (
+            // biome-ignore lint/performance/noImgElement: ImageKit URLs use on-the-fly transforms incompatible with next/image loader
             <img
               src={recipe.imageUrl}
               alt={recipe.title}

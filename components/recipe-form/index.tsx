@@ -12,11 +12,7 @@ import { FormActionBar } from "./form-action-bar";
 import { FormHeader } from "./form-header";
 import { IngredientsSection } from "./ingredients-section";
 import { InstructionsSection } from "./instructions-section";
-import {
-  createRecipeSchema,
-  type RecipeFormData,
-  type RecipeOutput,
-} from "./schema";
+import { createRecipeSchema, type RecipeFormData } from "./schema";
 import { useRecipeSave } from "./use-recipe-save";
 import { useScrollOverflow } from "./use-scroll-overflow";
 import { useTabNavigation } from "./use-tab-navigation";
@@ -108,8 +104,8 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
           padding: "16px",
         }}
       >
-        {/* biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms */}
         <form
+          // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
           onSubmit={handleSubmit(onSubmit as any)}
           style={{ overflow: "hidden" }}
         >

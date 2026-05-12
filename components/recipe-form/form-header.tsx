@@ -15,7 +15,7 @@ interface FormHeaderProps {
 
 export function FormHeader({
   backLabel,
-  activeTab,
+  activeTab: _activeTab,
   activeTabIndex,
   tabLabels,
   onTabClick,

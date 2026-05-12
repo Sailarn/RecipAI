@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
-import type { Recipe } from "@/lib/db/schema";
+import type { Collection, Recipe } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 
 export function useSyncOnLogin() {
@@ -48,7 +48,7 @@ export function useSyncOnLogin() {
         await db.collections.clear();
         if (serverCollections.length > 0) {
           await db.collections.bulkPut(
-            serverCollections.map((c: any) => ({
+            serverCollections.map((c: Collection) => ({
               ...c,
               createdAt: new Date(c.createdAt),
               updatedAt: new Date(c.updatedAt),

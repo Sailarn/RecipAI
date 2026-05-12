@@ -6,6 +6,7 @@ export function useScrollOverflow(activeTab: string) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [needsScroll, setNeedsScroll] = useState(false);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeTab triggers recheck when form tab changes
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;

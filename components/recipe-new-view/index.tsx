@@ -9,8 +9,8 @@ interface RecipeNewViewProps {
   locale: string;
 }
 
-export function RecipeNewView({ locale }: RecipeNewViewProps) {
-  const t = useTranslations("recipeForm");
+export function RecipeNewView({ locale: _locale }: RecipeNewViewProps) {
+  const _t = useTranslations("recipeForm");
   const [initialData, setInitialData] = useState<ParsedRecipeData | undefined>(
     undefined,
   );

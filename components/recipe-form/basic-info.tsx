@@ -1,10 +1,10 @@
 "use client";
 
-import { ImageIcon, ImagePlus, X } from "lucide-react";
+import { ImageIcon, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Input, Label, Textarea } from "@/components/ui";
+import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { RecipeFormData } from "./schema";
 
@@ -30,7 +30,7 @@ const REQUIRED_STAR: React.CSSProperties = {
 export function BasicInfo({
   register,
   errors,
-  control,
+  control: _control,
   onFileSelect,
 }: BasicInfoProps) {
   const t = useTranslations("recipeForm");

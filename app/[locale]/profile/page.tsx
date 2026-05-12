@@ -101,6 +101,7 @@ export default function ProfilePage() {
     setIsDark(next);
     const themeName = next ? "dark" : "light";
     localStorage.setItem("theme", themeName);
+    // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=31536000; SameSite=Lax`;
     window.location.reload();
   };

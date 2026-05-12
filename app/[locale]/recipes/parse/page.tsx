@@ -28,7 +28,7 @@ type Tab = "url" | "photo";
 export default function ParseRecipePage() {
   const params = useParams();
   const locale = params.locale as string;
-  const t = useTranslations("parse");
+  const _t = useTranslations("parse");
 
   const [tab, setTab] = useState<Tab>("url");
 
