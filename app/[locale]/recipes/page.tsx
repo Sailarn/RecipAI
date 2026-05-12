@@ -44,8 +44,17 @@ export default function RecipesPage() {
   if (recipesFromDB !== undefined) _recipesCache = recipesFromDB;
   const recipes = recipesFromDB ?? _recipesCache;
   const loading = recipes === undefined;
-  const { search, setSearch, sort, setSort, category, setCategory, filtered } =
-    useRecipeFilter(recipes ?? []);
+  const {
+    search,
+    setSearch,
+    sort,
+    setSort,
+    category,
+    setCategory,
+    status,
+    setStatus,
+    filtered,
+  } = useRecipeFilter(recipes ?? []);
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
@@ -157,6 +166,8 @@ export default function RecipesPage() {
           onSortChange={setSort}
           category={category}
           onCategoryChange={setCategory}
+          status={status}
+          onStatusChange={setStatus}
         />
       </div>
 

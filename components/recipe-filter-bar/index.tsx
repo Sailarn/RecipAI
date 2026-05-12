@@ -1,5 +1,7 @@
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { StatusFilter } from "@/components/status-chips";
+import { StatusChips } from "@/components/status-chips";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import {
@@ -17,6 +19,8 @@ interface RecipeFilterBarProps {
   onSortChange: (value: SortOption) => void;
   category: string | null;
   onCategoryChange: (value: string | null) => void;
+  status: StatusFilter;
+  onStatusChange: (value: StatusFilter) => void;
 }
 
 export function RecipeFilterBar({
@@ -26,6 +30,8 @@ export function RecipeFilterBar({
   onSortChange,
   category,
   onCategoryChange,
+  status,
+  onStatusChange,
 }: RecipeFilterBarProps) {
   const t = useTranslations("recipes");
 
@@ -120,6 +126,7 @@ export function RecipeFilterBar({
           );
         })}
       </div>
+      <StatusChips active={status} onChange={onStatusChange} />
     </div>
   );
 }
