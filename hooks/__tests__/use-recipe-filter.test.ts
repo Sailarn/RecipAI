@@ -15,6 +15,7 @@ const mockRecipes: Recipe[] = [
     instructions: [],
     createdAt: new Date("2024-01-01"),
     updatedAt: new Date("2024-01-01"),
+    collectionIds: ["c1"],
   },
   {
     id: "2",
@@ -27,6 +28,7 @@ const mockRecipes: Recipe[] = [
     instructions: [],
     createdAt: new Date("2024-03-01"),
     updatedAt: new Date("2024-03-01"),
+    collectionIds: ["c1", "c2"],
   },
   {
     id: "3",
@@ -39,6 +41,7 @@ const mockRecipes: Recipe[] = [
     instructions: [],
     createdAt: new Date("2024-02-01"),
     updatedAt: new Date("2024-02-01"),
+    collectionIds: [],
   },
 ];
 
@@ -179,5 +182,17 @@ describe("useRecipeFilter", () => {
     });
     expect(result.current.filtered).toHaveLength(1);
     expect(result.current.filtered[0].id).toBe("1");
+  });
+
+  it("filters by collectionId", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setCollectionId("c1"));
+    expect(result.current.filtered).toHaveLength(2); // recipes 1 and 2
+  });
+
+  it("shows all when collectionId is null", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setCollectionId(null));
+    expect(result.current.filtered).toHaveLength(3);
   });
 });
