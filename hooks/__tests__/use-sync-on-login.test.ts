@@ -221,9 +221,7 @@ describe("useSyncOnLogin", () => {
       };
 
       mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({ recipes: [remoteRecipe] }),
-        )
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [remoteRecipe] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       renderHook(() => useSyncOnLogin());

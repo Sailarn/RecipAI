@@ -15,12 +15,12 @@ vi.mock("../supabase-sync-collections", () => ({
   syncDeleteCollection: vi.fn(),
 }));
 
-import { db } from "../db";
 import {
   createCollection,
   deleteCollection,
   getAllCollections,
 } from "../collections";
+import { db } from "../db";
 
 beforeEach(() => vi.clearAllMocks());
 

@@ -1,5 +1,5 @@
-import type { Collection } from "./schema";
 import { db } from "./db";
+import type { Collection } from "./schema";
 import {
   syncCreateCollection,
   syncDeleteCollection,
