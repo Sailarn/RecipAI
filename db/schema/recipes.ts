@@ -22,6 +22,7 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   category: text("category"),
   status: text("status"),
+  collectionIds: jsonb("collection_ids").notNull().default([]),
 });
 
 export const recipesRelations = relations(recipes, ({ one }) => ({
