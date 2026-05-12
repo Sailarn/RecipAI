@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Recipe } from "@/lib/db/schema";
+import type { StatusFilter } from "@/components/status-chips";
 
 export type SortOption = "newest" | "oldest" | "az" | "za";
 
@@ -7,6 +8,7 @@ export function useRecipeFilter(recipes: Recipe[]) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
   const [category, setCategory] = useState<string | null>(null);
+  const [status, setStatus] = useState<StatusFilter>("all");
 
   const filtered = useMemo(() => {
     let result = [...recipes];
@@ -22,6 +24,12 @@ export function useRecipeFilter(recipes: Recipe[]) {
 
     if (category) {
       result = result.filter((r) => r.category === category);
+    }
+
+    if (status === "tried") {
+      result = result.filter((r) => r.status === "tried");
+    } else if (status === "want") {
+      result = result.filter((r) => r.status === "want");
     }
 
     result.sort((a, b) => {
@@ -44,7 +52,17 @@ export function useRecipeFilter(recipes: Recipe[]) {
     });
 
     return result;
-  }, [recipes, search, sort, category]);
+  }, [recipes, search, sort, category, status]);
 
-  return { search, setSearch, sort, setSort, category, setCategory, filtered };
+  return {
+    search,
+    setSearch,
+    sort,
+    setSort,
+    category,
+    setCategory,
+    status,
+    setStatus,
+    filtered,
+  };
 }

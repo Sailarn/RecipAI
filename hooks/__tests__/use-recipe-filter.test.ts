@@ -9,6 +9,7 @@ const mockRecipes: Recipe[] = [
     title: "Borsch",
     description: "Classic Ukrainian soup",
     category: "soup",
+    status: "tried",
     servings: 4,
     ingredients: [],
     instructions: [],
@@ -20,6 +21,7 @@ const mockRecipes: Recipe[] = [
     title: "Apple Pie",
     description: "Sweet dessert",
     category: "dessert",
+    status: "want",
     servings: 8,
     ingredients: [],
     instructions: [],
@@ -31,6 +33,7 @@ const mockRecipes: Recipe[] = [
     title: "Zucchini Pasta",
     description: "Light summer dish",
     category: "main",
+    status: null,
     servings: 2,
     ingredients: [],
     instructions: [],
@@ -146,5 +149,35 @@ describe("useRecipeFilter", () => {
       result.current.setSearch("pie");
     });
     expect(result.current.filtered).toHaveLength(0);
+  });
+
+  it("filters by status 'tried'", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setStatus("tried"));
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0].id).toBe("1");
+  });
+
+  it("filters by status 'want'", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setStatus("want"));
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0].id).toBe("2");
+  });
+
+  it("shows all recipes when status is 'all'", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => result.current.setStatus("all"));
+    expect(result.current.filtered).toHaveLength(3);
+  });
+
+  it("combines status and category filters", () => {
+    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
+    act(() => {
+      result.current.setStatus("tried");
+      result.current.setCategory("soup");
+    });
+    expect(result.current.filtered).toHaveLength(1);
+    expect(result.current.filtered[0].id).toBe("1");
   });
 });
