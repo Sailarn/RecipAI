@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const EMOJIS = [
   "⭐",
@@ -28,6 +29,11 @@ export function NewCollectionModal({
 }: NewCollectionModalProps) {
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("⭐");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function handleCreate() {
     if (!name.trim()) return;
@@ -35,7 +41,9 @@ export function NewCollectionModal({
     onClose();
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       style={{
         position: "fixed",
@@ -209,6 +217,7 @@ export function NewCollectionModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
