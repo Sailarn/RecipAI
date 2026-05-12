@@ -1,4 +1,15 @@
 /**
+ * Collection of recipes
+ */
+export interface Collection {
+  id: string;
+  name: string;
+  emoji: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Single ingredient in a recipe
  */
 export interface Ingredient {
@@ -36,6 +47,7 @@ export interface Recipe {
   sourceUrl?: string;
   category?: string;
   status?: "tried" | "want" | null;
+  collectionIds?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
