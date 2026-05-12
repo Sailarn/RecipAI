@@ -40,6 +40,22 @@ export function useSyncOnLogin() {
           })),
         );
       }
+
+      // Fetch and store collections
+      const colRes = await fetch(api.collections);
+      if (colRes.ok) {
+        const { collections: serverCollections } = await colRes.json();
+        await db.collections.clear();
+        if (serverCollections.length > 0) {
+          await db.collections.bulkPut(
+            serverCollections.map((c: any) => ({
+              ...c,
+              createdAt: new Date(c.createdAt),
+              updatedAt: new Date(c.updatedAt),
+            })),
+          );
+        }
+      }
     } catch {
       toast.error("Sync failed, will retry next time");
       hasSynced.current = false;

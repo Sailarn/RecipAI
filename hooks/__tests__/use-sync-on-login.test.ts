@@ -31,6 +31,10 @@ vi.mock("@/lib/db/db", () => ({
       toArray: vi.fn().mockResolvedValue([]),
       bulkPut: vi.fn().mockResolvedValue(undefined),
     },
+    collections: {
+      clear: vi.fn().mockResolvedValue(undefined),
+      bulkPut: vi.fn().mockResolvedValue(undefined),
+    },
   },
 }));
 
@@ -79,11 +83,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Default fetch: push returns synced=0, pull returns empty
+// Default fetch: push returns synced=0, pull returns empty recipes and collections
 function setupDefaultFetch(synced = 0, remoteRecipes: object[] = []) {
   mockFetch
     .mockResolvedValueOnce(makeJsonResponse({ synced })) // POST push
-    .mockResolvedValueOnce(makeJsonResponse({ recipes: remoteRecipes })); // GET pull
+    .mockResolvedValueOnce(makeJsonResponse({ recipes: remoteRecipes })) // GET pull recipes
+    .mockResolvedValueOnce(makeJsonResponse({ collections: [] })); // GET pull collections
 }
 
 // --- tests ---
@@ -120,13 +125,15 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([] as any);
 
-      mockFetch.mockResolvedValueOnce(makeJsonResponse({ recipes: [] }));
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
 
-      // Only the GET pull, no POST push
+      // Only GET pull recipes and collections, no POST push
       expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync");
       expect(mockFetch).not.toHaveBeenCalledWith(
         "/api/recipes/sync",
@@ -144,7 +151,7 @@ describe("useSyncOnLogin", () => {
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
 
       expect(mockFetch).toHaveBeenCalledWith(
         "/api/recipes/sync",
@@ -193,7 +200,7 @@ describe("useSyncOnLogin", () => {
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
       expect(toast.success).not.toHaveBeenCalled();
     });
 
@@ -213,9 +220,11 @@ describe("useSyncOnLogin", () => {
         updatedAt: "2024-01-02T00:00:00.000Z",
       };
 
-      mockFetch.mockResolvedValueOnce(
-        makeJsonResponse({ recipes: [remoteRecipe] }),
-      );
+      mockFetch
+        .mockResolvedValueOnce(
+          makeJsonResponse({ recipes: [remoteRecipe] }),
+        )
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       renderHook(() => useSyncOnLogin());
 
@@ -236,7 +245,9 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([] as any);
 
-      mockFetch.mockResolvedValueOnce(makeJsonResponse({ recipes: [] }));
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       renderHook(() => useSyncOnLogin());
 
@@ -251,7 +262,9 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([] as any);
 
-      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
+        .mockRejectedValueOnce(new Error("Network error"));
 
       renderHook(() => useSyncOnLogin());
 
@@ -270,20 +283,24 @@ describe("useSyncOnLogin", () => {
       vi.mocked(useLiveQuery).mockReturnValue([] as any);
 
       // First auto-sync
-      mockFetch.mockResolvedValueOnce(makeJsonResponse({ recipes: [] }));
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       const { result } = renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
 
       // Manual trigger
-      mockFetch.mockResolvedValueOnce(makeJsonResponse({ recipes: [] }));
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       await act(async () => {
         await result.current.triggerSync();
       });
 
-      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenCalledTimes(4);
     });
   });
 });
