@@ -35,6 +35,7 @@ export interface Recipe {
   instructions: Step[];
   sourceUrl?: string;
   category?: string;
+  status?: "tried" | "want" | null;
   createdAt: Date;
   updatedAt: Date;
 }
