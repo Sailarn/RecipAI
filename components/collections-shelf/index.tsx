@@ -20,9 +20,7 @@ function pillStyle(active: boolean) {
       ? "1px solid rgba(255,210,120,0.50)"
       : "1px solid rgba(255,200,100,0.14)",
     background: active ? "rgba(255,180,60,0.20)" : "rgba(255,170,50,0.07)",
-    boxShadow: active
-      ? "inset 0 1px 0 rgba(255,230,150,0.20)"
-      : "none",
+    boxShadow: active ? "inset 0 1px 0 rgba(255,230,150,0.20)" : "none",
     transform: "scale(1)",
     cursor: "pointer",
     fontSize: 12,

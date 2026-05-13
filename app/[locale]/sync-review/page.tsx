@@ -15,12 +15,20 @@ import { useNavigate } from "@/lib/transitions";
 
 function parseRecipeSnapshot(json: string): Recipe {
   const raw = JSON.parse(json);
-  return { ...raw, createdAt: new Date(raw.createdAt), updatedAt: new Date(raw.updatedAt) };
+  return {
+    ...raw,
+    createdAt: new Date(raw.createdAt),
+    updatedAt: new Date(raw.updatedAt),
+  };
 }
 
 function parseCollectionSnapshot(json: string): Collection {
   const raw = JSON.parse(json);
-  return { ...raw, createdAt: new Date(raw.createdAt), updatedAt: new Date(raw.updatedAt) };
+  return {
+    ...raw,
+    createdAt: new Date(raw.createdAt),
+    updatedAt: new Date(raw.updatedAt),
+  };
 }
 
 function getDisplayName(notif: SyncNotification): string {
@@ -45,9 +53,21 @@ function ActionButton({
   variant?: "default" | "danger" | "ghost";
 }) {
   const styles: Record<string, React.CSSProperties> = {
-    default: { background: "rgba(59,130,246,0.85)", color: "#fff", border: "none" },
-    danger: { background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" },
-    ghost: { background: "rgba(255,255,255,0.05)", color: "var(--fg-2)", border: "1px solid rgba(255,200,100,0.12)" },
+    default: {
+      background: "rgba(59,130,246,0.85)",
+      color: "#fff",
+      border: "none",
+    },
+    danger: {
+      background: "rgba(239,68,68,0.12)",
+      color: "#ef4444",
+      border: "1px solid rgba(239,68,68,0.25)",
+    },
+    ghost: {
+      background: "rgba(255,255,255,0.05)",
+      color: "var(--fg-2)",
+      border: "1px solid rgba(255,200,100,0.12)",
+    },
   };
   return (
     <button
@@ -68,7 +88,13 @@ function ActionButton({
   );
 }
 
-function ItemCard({ notif, children }: { notif: SyncNotification; children: React.ReactNode }) {
+function ItemCard({
+  notif,
+  children,
+}: {
+  notif: SyncNotification;
+  children: React.ReactNode;
+}) {
   return (
     <div
       style={{
@@ -79,11 +105,26 @@ function ItemCard({ notif, children }: { notif: SyncNotification; children: Reac
         marginBottom: 8,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: 4,
+        }}
+      >
         <span style={{ fontWeight: 600, fontSize: 14, color: "var(--fg-1)" }}>
           {getDisplayName(notif)}
         </span>
-        <span style={{ fontSize: 11, color: "var(--fg-3)", background: "rgba(255,200,100,0.1)", borderRadius: 99, padding: "2px 8px" }}>
+        <span
+          style={{
+            fontSize: 11,
+            color: "var(--fg-3)",
+            background: "rgba(255,200,100,0.1)",
+            borderRadius: 99,
+            padding: "2px 8px",
+          }}
+        >
           {notif.entityType}
         </span>
       </div>
@@ -102,8 +143,24 @@ function SectionHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, marginTop: 20 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: "var(--fg-3)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+        marginTop: 20,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: "var(--fg-3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+        }}
+      >
         {title} ({count})
       </span>
       {action}
@@ -115,11 +172,19 @@ export default function SyncReviewPage() {
   const navigate = useNavigate();
   const params = useParams();
   const _locale = (params.locale as string) ?? "en";
-  const notifications = useLiveQuery(() => getAllNotifications()) as SyncNotification[] | undefined;
+  const notifications = useLiveQuery(() => getAllNotifications()) as
+    | SyncNotification[]
+    | undefined;
 
-  const serverOnly = (notifications ?? []).filter((n) => n.type === "server_only");
-  const localOnly = (notifications ?? []).filter((n) => n.type === "local_only");
-  const conflicted = (notifications ?? []).filter((n) => n.type === "conflicted");
+  const serverOnly = (notifications ?? []).filter(
+    (n) => n.type === "server_only",
+  );
+  const localOnly = (notifications ?? []).filter(
+    (n) => n.type === "local_only",
+  );
+  const conflicted = (notifications ?? []).filter(
+    (n) => n.type === "conflicted",
+  );
   const total = (notifications ?? []).length;
 
   async function addToDevice(notif: SyncNotification) {
@@ -133,7 +198,8 @@ export default function SyncReviewPage() {
 
   async function uploadToServer(notif: SyncNotification) {
     const item = JSON.parse(notif.localSnapshot!);
-    const endpoint = notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
+    const endpoint =
+      notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
     const bodyKey = notif.entityType === "recipe" ? "recipes" : "collections";
     const res = await fetch(endpoint, {
       method: "POST",
@@ -171,7 +237,10 @@ export default function SyncReviewPage() {
       notif.entityType === "recipe"
         ? api.recipe(notif.entityId)
         : api.collection(notif.entityId);
-    const body = notif.entityType === "recipe" ? item : { name: item.name, emoji: item.emoji };
+    const body =
+      notif.entityType === "recipe"
+        ? item
+        : { name: item.name, emoji: item.emoji };
     const res = await fetch(endpoint, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -188,14 +257,17 @@ export default function SyncReviewPage() {
     for (const notif of serverOnly) {
       await addToDevice(notif);
     }
-    toast.success(`${serverOnly.length} item${serverOnly.length !== 1 ? "s" : ""} added to device`);
+    toast.success(
+      `${serverOnly.length} item${serverOnly.length !== 1 ? "s" : ""} added to device`,
+    );
   }
 
   async function uploadAll() {
     let failed = 0;
     for (const notif of localOnly) {
       const item = JSON.parse(notif.localSnapshot!);
-      const endpoint = notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
+      const endpoint =
+        notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
       const bodyKey = notif.entityType === "recipe" ? "recipes" : "collections";
       const res = await fetch(endpoint, {
         method: "POST",
@@ -223,31 +295,86 @@ export default function SyncReviewPage() {
   }
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))", paddingLeft: 14, paddingRight: 14, flexShrink: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))",
+          paddingLeft: 14,
+          paddingRight: 14,
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 16,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               type="button"
               onClick={() => navigate.back()}
               aria-label="Back"
-              style={{ background: "none", border: "none", color: "var(--fg-2)", cursor: "pointer", fontSize: 20, padding: 0, lineHeight: 1 }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--fg-2)",
+                cursor: "pointer",
+                fontSize: 20,
+                padding: 0,
+                lineHeight: 1,
+              }}
             >
               ←
             </button>
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 800, color: "var(--fg-1)" }}>
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: 22,
+                fontWeight: 800,
+                color: "var(--fg-1)",
+              }}
+            >
               Sync Review
             </h1>
           </div>
           {total > 0 && (
-            <ActionButton label="Dismiss all" onClick={dismissAll} variant="ghost" />
+            <ActionButton
+              label="Dismiss all"
+              onClick={dismissAll}
+              variant="ghost"
+            />
           )}
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", paddingLeft: 14, paddingRight: 14, paddingBottom: 110 }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          paddingLeft: 14,
+          paddingRight: 14,
+          paddingBottom: 110,
+        }}
+      >
         {total === 0 ? (
-          <div style={{ textAlign: "center", paddingTop: 80, color: "var(--fg-2)", fontSize: 15 }}>
+          <div
+            style={{
+              textAlign: "center",
+              paddingTop: 80,
+              color: "var(--fg-2)",
+              fontSize: 15,
+            }}
+          >
             <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
             Everything is in sync
           </div>
@@ -264,12 +391,32 @@ export default function SyncReviewPage() {
                   const raw = JSON.parse(notif.serverSnapshot!);
                   return (
                     <ItemCard key={notif.id} notif={notif}>
-                      <p style={{ fontSize: 12, color: "var(--fg-3)", marginBottom: 4 }}>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--fg-3)",
+                          marginBottom: 4,
+                        }}
+                      >
                         On server since {formatDate(raw.updatedAt)}
                       </p>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-                        <ActionButton label="Skip" onClick={() => resolveNotification(notif.id)} variant="ghost" />
-                        <ActionButton label="Add to device" onClick={() => addToDevice(notif)} />
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 6,
+                          flexWrap: "wrap",
+                          marginTop: 8,
+                        }}
+                      >
+                        <ActionButton
+                          label="Skip"
+                          onClick={() => resolveNotification(notif.id)}
+                          variant="ghost"
+                        />
+                        <ActionButton
+                          label="Add to device"
+                          onClick={() => addToDevice(notif)}
+                        />
                       </div>
                     </ItemCard>
                   );
@@ -282,18 +429,40 @@ export default function SyncReviewPage() {
                 <SectionHeader
                   title="Not on server"
                   count={localOnly.length}
-                  action={<ActionButton label="Upload all" onClick={uploadAll} />}
+                  action={
+                    <ActionButton label="Upload all" onClick={uploadAll} />
+                  }
                 />
                 {localOnly.map((notif) => {
                   const raw = JSON.parse(notif.localSnapshot!);
                   return (
                     <ItemCard key={notif.id} notif={notif}>
-                      <p style={{ fontSize: 12, color: "var(--fg-3)", marginBottom: 4 }}>
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--fg-3)",
+                          marginBottom: 4,
+                        }}
+                      >
                         On device since {formatDate(raw.updatedAt)}
                       </p>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-                        <ActionButton label="Delete from device" onClick={() => deleteFromDevice(notif)} variant="danger" />
-                        <ActionButton label="Upload to server" onClick={() => uploadToServer(notif)} />
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 6,
+                          flexWrap: "wrap",
+                          marginTop: 8,
+                        }}
+                      >
+                        <ActionButton
+                          label="Delete from device"
+                          onClick={() => deleteFromDevice(notif)}
+                          variant="danger"
+                        />
+                        <ActionButton
+                          label="Upload to server"
+                          onClick={() => uploadToServer(notif)}
+                        />
                       </div>
                     </ItemCard>
                   );
@@ -308,18 +477,45 @@ export default function SyncReviewPage() {
                   const localRaw = JSON.parse(notif.localSnapshot!);
                   const serverRaw = JSON.parse(notif.serverSnapshot!);
                   const serverNewer =
-                    new Date(serverRaw.updatedAt).getTime() > new Date(localRaw.updatedAt).getTime();
+                    new Date(serverRaw.updatedAt).getTime() >
+                    new Date(localRaw.updatedAt).getTime();
                   return (
                     <ItemCard key={notif.id} notif={notif}>
-                      <p style={{ fontSize: 12, color: "var(--fg-3)", marginBottom: 4 }}>
-                        Device: {formatDate(localRaw.updatedAt)}{serverNewer ? "" : " (newer)"}
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--fg-3)",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Device: {formatDate(localRaw.updatedAt)}
+                        {serverNewer ? "" : " (newer)"}
                         {" · "}
-                        Server: {formatDate(serverRaw.updatedAt)}{serverNewer ? " (newer)" : ""}
+                        Server: {formatDate(serverRaw.updatedAt)}
+                        {serverNewer ? " (newer)" : ""}
                       </p>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-                        <ActionButton label="Skip" onClick={() => resolveNotification(notif.id)} variant="ghost" />
-                        <ActionButton label="Keep mine" onClick={() => keepMine(notif)} variant="ghost" />
-                        <ActionButton label="Take server version" onClick={() => takeServerVersion(notif)} />
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 6,
+                          flexWrap: "wrap",
+                          marginTop: 8,
+                        }}
+                      >
+                        <ActionButton
+                          label="Skip"
+                          onClick={() => resolveNotification(notif.id)}
+                          variant="ghost"
+                        />
+                        <ActionButton
+                          label="Keep mine"
+                          onClick={() => keepMine(notif)}
+                          variant="ghost"
+                        />
+                        <ActionButton
+                          label="Take server version"
+                          onClick={() => takeServerVersion(notif)}
+                        />
                       </div>
                     </ItemCard>
                   );

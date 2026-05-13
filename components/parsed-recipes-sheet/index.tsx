@@ -23,8 +23,8 @@ export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
   const syncCount =
-    ((useLiveQuery(() => db.notifications.count(), []) as number | undefined) ??
-      0);
+    (useLiveQuery(() => db.notifications.count(), []) as number | undefined) ??
+    0;
   const parsedCount = parsed?.length ?? 0;
   const totalCount = parsedCount + syncCount;
 
@@ -147,7 +147,10 @@ export function ParsedRecipesSheet() {
                 </p>
               )}
               {parsed?.map((entry) => (
-                <div key={entry.id} className="p-4 rounded-xl bg-muted space-y-2">
+                <div
+                  key={entry.id}
+                  className="p-4 rounded-xl bg-muted space-y-2"
+                >
                   <div className="flex justify-between items-start gap-2">
                     <div>
                       <p className="font-medium text-sm">{entry.title}</p>

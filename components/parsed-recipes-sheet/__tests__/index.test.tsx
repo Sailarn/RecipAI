@@ -116,8 +116,6 @@ describe("ParsedRecipesSheet", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button"));
     });
-    expect(
-      screen.getByRole("button", { name: /review/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /review/i })).toBeInTheDocument();
   });
 });

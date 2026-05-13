@@ -1,5 +1,10 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { Collection, ParsedRecipeEntry, Recipe, SyncNotification } from "./schema";
+import type {
+  Collection,
+  ParsedRecipeEntry,
+  Recipe,
+  SyncNotification,
+} from "./schema";
 
 class RecipeDatabase extends Dexie {
   recipes!: EntityTable<Recipe, "id">;

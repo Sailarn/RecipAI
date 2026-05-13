@@ -44,7 +44,10 @@ vi.mock("@/lib/transitions", () => ({
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
-import { clearSyncNotifications, resolveNotification } from "@/lib/db/notifications";
+import {
+  clearSyncNotifications,
+  resolveNotification,
+} from "@/lib/db/notifications";
 import SyncReviewPage from "../page";
 
 const mockFetch = vi.fn();

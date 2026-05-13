@@ -25,7 +25,9 @@ export function computeDiff<T extends SyncItem>(
     const localItem = localMap.get(id);
     if (!localItem) {
       serverOnly.push(serverItem);
-    } else if (serverItem.updatedAt.getTime() === localItem.updatedAt.getTime()) {
+    } else if (
+      serverItem.updatedAt.getTime() === localItem.updatedAt.getTime()
+    ) {
       identical.push(localItem);
     } else {
       conflicted.push({ local: localItem, server: serverItem });

@@ -6,7 +6,12 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
-import type { Collection, Recipe, SyncEntityType, SyncNotification } from "@/lib/db/schema";
+import type {
+  Collection,
+  Recipe,
+  SyncEntityType,
+  SyncNotification,
+} from "@/lib/db/schema";
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -75,7 +80,9 @@ export function useSyncOnLogin() {
       const { collections: rawServerCollections } = await collectionsRes.json();
 
       const serverRecipes = parseServerRecipes(rawServerRecipes ?? []);
-      const serverCollections = parseServerCollections(rawServerCollections ?? []);
+      const serverCollections = parseServerCollections(
+        rawServerCollections ?? [],
+      );
 
       const [localRecipesFull, localCollections] = await Promise.all([
         db.recipes.toArray(),
@@ -83,7 +90,10 @@ export function useSyncOnLogin() {
       ]);
 
       const recipeDiff = computeDiff<Recipe>(localRecipesFull, serverRecipes);
-      const collectionDiff = computeDiff<Collection>(localCollections, serverCollections);
+      const collectionDiff = computeDiff<Collection>(
+        localCollections,
+        serverCollections,
+      );
 
       const allNotifications = [
         ...diffToNotifications(recipeDiff, "recipe"),

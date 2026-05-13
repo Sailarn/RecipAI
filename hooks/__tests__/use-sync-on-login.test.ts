@@ -78,7 +78,9 @@ describe("useSyncOnLogin", () => {
     });
 
     it("does not fetch when localRecipes is undefined (still loading)", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       vi.mocked(useLiveQuery).mockReturnValue(undefined as any);
       renderHook(() => useSyncOnLogin());
       await new Promise((r) => setTimeout(r, 10));
@@ -88,7 +90,9 @@ describe("useSyncOnLogin", () => {
 
   describe("diff-based sync flow", () => {
     it("fetches server recipes and server collections on login", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -101,7 +105,9 @@ describe("useSyncOnLogin", () => {
     });
 
     it("calls replaceSyncNotifications with empty array when no mismatches", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -113,17 +119,24 @@ describe("useSyncOnLogin", () => {
     });
 
     it("writes server_only notification when server has recipe local does not", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([]);
       mockFetch
         .mockResolvedValueOnce(
           makeJsonResponse({
-            recipes: [{
-              id: "srv-1", title: "Server Recipe", servings: 2,
-              ingredients: [], instructions: [],
-              createdAt: "2024-01-01T00:00:00.000Z",
-              updatedAt: "2024-01-01T00:00:00.000Z",
-            }],
+            recipes: [
+              {
+                id: "srv-1",
+                title: "Server Recipe",
+                servings: 2,
+                ingredients: [],
+                instructions: [],
+                createdAt: "2024-01-01T00:00:00.000Z",
+                updatedAt: "2024-01-01T00:00:00.000Z",
+              },
+            ],
           }),
         )
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -131,7 +144,8 @@ describe("useSyncOnLogin", () => {
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock.calls[0][0];
+      const notifications = vi.mocked(replaceSyncNotifications).mock
+        .calls[0][0];
       expect(notifications).toHaveLength(1);
       expect(notifications[0].type).toBe("server_only");
       expect(notifications[0].entityType).toBe("recipe");
@@ -142,12 +156,17 @@ describe("useSyncOnLogin", () => {
 
     it("writes local_only notification when device has recipe server does not", async () => {
       const localRecipe = {
-        id: "local-1", title: "Local Recipe", servings: 2,
-        ingredients: [], instructions: [],
+        id: "local-1",
+        title: "Local Recipe",
+        servings: 2,
+        ingredients: [],
+        instructions: [],
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
       };
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
       mockFetch
@@ -157,7 +176,8 @@ describe("useSyncOnLogin", () => {
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock.calls[0][0];
+      const notifications = vi.mocked(replaceSyncNotifications).mock
+        .calls[0][0];
       expect(notifications).toHaveLength(1);
       expect(notifications[0].type).toBe("local_only");
       expect(notifications[0].entityId).toBe("local-1");
@@ -167,22 +187,29 @@ describe("useSyncOnLogin", () => {
 
     it("writes conflicted notification when updatedAt differs", async () => {
       const localRecipe = {
-        id: "shared-1", title: "Shared Recipe", servings: 2,
-        ingredients: [], instructions: [],
+        id: "shared-1",
+        title: "Shared Recipe",
+        servings: 2,
+        ingredients: [],
+        instructions: [],
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
       };
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
       mockFetch
         .mockResolvedValueOnce(
           makeJsonResponse({
-            recipes: [{
-              ...localRecipe,
-              updatedAt: "2024-01-02T00:00:00.000Z",
-              createdAt: "2024-01-01T00:00:00.000Z",
-            }],
+            recipes: [
+              {
+                ...localRecipe,
+                updatedAt: "2024-01-02T00:00:00.000Z",
+                createdAt: "2024-01-01T00:00:00.000Z",
+              },
+            ],
           }),
         )
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -190,7 +217,8 @@ describe("useSyncOnLogin", () => {
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock.calls[0][0];
+      const notifications = vi.mocked(replaceSyncNotifications).mock
+        .calls[0][0];
       expect(notifications).toHaveLength(1);
       expect(notifications[0].type).toBe("conflicted");
       expect(notifications[0].serverSnapshot).toContain("shared-1");
@@ -199,22 +227,29 @@ describe("useSyncOnLogin", () => {
 
     it("does not write notification for identical items (same updatedAt)", async () => {
       const recipe = {
-        id: "same-1", title: "Same", servings: 2,
-        ingredients: [], instructions: [],
+        id: "same-1",
+        title: "Same",
+        servings: 2,
+        ingredients: [],
+        instructions: [],
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-01"),
       };
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       vi.mocked(useLiveQuery).mockReturnValue([recipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([recipe] as any);
       mockFetch
         .mockResolvedValueOnce(
           makeJsonResponse({
-            recipes: [{
-              ...recipe,
-              createdAt: recipe.createdAt.toISOString(),
-              updatedAt: recipe.updatedAt.toISOString(),
-            }],
+            recipes: [
+              {
+                ...recipe,
+                createdAt: recipe.createdAt.toISOString(),
+                updatedAt: recipe.updatedAt.toISOString(),
+              },
+            ],
           }),
         )
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -222,18 +257,29 @@ describe("useSyncOnLogin", () => {
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      expect(vi.mocked(replaceSyncNotifications).mock.calls[0][0]).toHaveLength(0);
+      expect(vi.mocked(replaceSyncNotifications).mock.calls[0][0]).toHaveLength(
+        0,
+      );
     });
 
     it("shows toast.info with singular wording when 1 notification", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch
         .mockResolvedValueOnce(
           makeJsonResponse({
-            recipes: [{
-              id: "srv-1", title: "T", servings: 1, ingredients: [], instructions: [],
-              createdAt: "2024-01-01T00:00:00.000Z", updatedAt: "2024-01-01T00:00:00.000Z",
-            }],
+            recipes: [
+              {
+                id: "srv-1",
+                title: "T",
+                servings: 1,
+                ingredients: [],
+                instructions: [],
+                createdAt: "2024-01-01T00:00:00.000Z",
+                updatedAt: "2024-01-01T00:00:00.000Z",
+              },
+            ],
           }),
         )
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -243,18 +289,29 @@ describe("useSyncOnLogin", () => {
       await waitFor(() => expect(toast.info).toHaveBeenCalled());
       expect(toast.info).toHaveBeenCalledWith(
         "1 item needs your review",
-        expect.objectContaining({ action: expect.objectContaining({ label: "Review" }) }),
+        expect.objectContaining({
+          action: expect.objectContaining({ label: "Review" }),
+        }),
       );
     });
 
     it("shows toast.info with plural wording when multiple notifications", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       const makeRecipe = (id: string) => ({
-        id, title: `Recipe ${id}`, servings: 1, ingredients: [], instructions: [],
-        createdAt: "2024-01-01T00:00:00.000Z", updatedAt: "2024-01-01T00:00:00.000Z",
+        id,
+        title: `Recipe ${id}`,
+        servings: 1,
+        ingredients: [],
+        instructions: [],
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
       });
       mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [makeRecipe("a"), makeRecipe("b")] }))
+        .mockResolvedValueOnce(
+          makeJsonResponse({ recipes: [makeRecipe("a"), makeRecipe("b")] }),
+        )
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
 
       renderHook(() => useSyncOnLogin());
@@ -267,7 +324,9 @@ describe("useSyncOnLogin", () => {
     });
 
     it("does not show any toast when there are no mismatches", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -280,20 +339,26 @@ describe("useSyncOnLogin", () => {
     });
 
     it("shows error toast and does not call replaceSyncNotifications on fetch failure", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(toast.error).toHaveBeenCalled());
-      expect(toast.error).toHaveBeenCalledWith("Sync failed — check your connection");
+      expect(toast.error).toHaveBeenCalledWith(
+        "Sync failed — check your connection",
+      );
       expect(replaceSyncNotifications).not.toHaveBeenCalled();
     });
   });
 
   describe("triggerSync", () => {
     it("re-runs sync when called manually after initial sync", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({ data: mockSession } as any);
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }))
