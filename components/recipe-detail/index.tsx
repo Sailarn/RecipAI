@@ -117,6 +117,8 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           overflowY: "auto",
           marginTop: "-72px",
           padding: "0 14px 40px",
+          userSelect: "text",
+          WebkitUserSelect: "text",
         }}
       >
         {/* Hero gradient + emoji fallback */}

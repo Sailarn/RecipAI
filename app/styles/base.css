@@ -42,6 +42,8 @@
   body {
     background: transparent;
     color: var(--fg-1);
+    user-select: none;
+    -webkit-user-select: none;
     @apply bg-background text-foreground;
   }
 
