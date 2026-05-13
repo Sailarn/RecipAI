@@ -38,6 +38,7 @@ export function AddToCollectionSheet({
       <button
         type="button"
         data-testid="sheet-backdrop"
+        aria-label="Close"
         onClick={onClose}
         style={{
           position: "absolute",
