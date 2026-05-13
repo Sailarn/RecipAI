@@ -157,7 +157,10 @@ describe("Recipe CRUD Operations", () => {
     expect(syncUpdate).toHaveBeenCalledOnce();
     expect(syncUpdate).toHaveBeenCalledWith(
       id,
-      expect.objectContaining({ title: "Updated", updatedAt: expect.any(Date) }),
+      expect.objectContaining({
+        title: "Updated",
+        updatedAt: expect.any(Date),
+      }),
     );
   });
 

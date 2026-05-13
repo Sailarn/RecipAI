@@ -46,18 +46,18 @@ function diffToNotifications<T extends Recipe | Collection>(
 }
 
 function parseServerRecipes(raw: unknown[]): Recipe[] {
-  return (raw as any[]).map((r) => ({
-    ...r,
-    createdAt: new Date(r.createdAt),
-    updatedAt: new Date(r.updatedAt),
+  return (raw as Record<string, unknown>[]).map((r) => ({
+    ...(r as Omit<Recipe, "createdAt" | "updatedAt">),
+    createdAt: new Date(r.createdAt as string),
+    updatedAt: new Date(r.updatedAt as string),
   }));
 }
 
 function parseServerCollections(raw: unknown[]): Collection[] {
-  return (raw as any[]).map((c) => ({
-    ...c,
-    createdAt: new Date(c.createdAt),
-    updatedAt: new Date(c.updatedAt),
+  return (raw as Record<string, unknown>[]).map((c) => ({
+    ...(c as Omit<Collection, "createdAt" | "updatedAt">),
+    createdAt: new Date(c.createdAt as string),
+    updatedAt: new Date(c.updatedAt as string),
   }));
 }
 

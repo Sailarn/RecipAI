@@ -189,15 +189,17 @@ export default function SyncReviewPage() {
 
   async function addToDevice(notif: SyncNotification) {
     if (notif.entityType === "recipe") {
-      await db.recipes.put(parseRecipeSnapshot(notif.serverSnapshot!));
+      await db.recipes.put(parseRecipeSnapshot(notif.serverSnapshot as string));
     } else {
-      await db.collections.put(parseCollectionSnapshot(notif.serverSnapshot!));
+      await db.collections.put(
+        parseCollectionSnapshot(notif.serverSnapshot as string),
+      );
     }
     await resolveNotification(notif.id);
   }
 
   async function uploadToServer(notif: SyncNotification) {
-    const item = JSON.parse(notif.localSnapshot!);
+    const item = JSON.parse(notif.localSnapshot as string);
     const endpoint =
       notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
     const bodyKey = notif.entityType === "recipe" ? "recipes" : "collections";
@@ -224,15 +226,17 @@ export default function SyncReviewPage() {
 
   async function takeServerVersion(notif: SyncNotification) {
     if (notif.entityType === "recipe") {
-      await db.recipes.put(parseRecipeSnapshot(notif.serverSnapshot!));
+      await db.recipes.put(parseRecipeSnapshot(notif.serverSnapshot as string));
     } else {
-      await db.collections.put(parseCollectionSnapshot(notif.serverSnapshot!));
+      await db.collections.put(
+        parseCollectionSnapshot(notif.serverSnapshot as string),
+      );
     }
     await resolveNotification(notif.id);
   }
 
   async function keepMine(notif: SyncNotification) {
-    const item = JSON.parse(notif.localSnapshot!);
+    const item = JSON.parse(notif.localSnapshot as string);
     const endpoint =
       notif.entityType === "recipe"
         ? api.recipe(notif.entityId)
@@ -265,7 +269,7 @@ export default function SyncReviewPage() {
   async function uploadAll() {
     let failed = 0;
     for (const notif of localOnly) {
-      const item = JSON.parse(notif.localSnapshot!);
+      const item = JSON.parse(notif.localSnapshot as string);
       const endpoint =
         notif.entityType === "recipe" ? api.recipesSync : api.collectionsSync;
       const bodyKey = notif.entityType === "recipe" ? "recipes" : "collections";
@@ -388,7 +392,7 @@ export default function SyncReviewPage() {
                   action={<ActionButton label="Add all" onClick={addAll} />}
                 />
                 {serverOnly.map((notif) => {
-                  const raw = JSON.parse(notif.serverSnapshot!);
+                  const raw = JSON.parse(notif.serverSnapshot as string);
                   return (
                     <ItemCard key={notif.id} notif={notif}>
                       <p
@@ -429,7 +433,7 @@ export default function SyncReviewPage() {
                   }
                 />
                 {localOnly.map((notif) => {
-                  const raw = JSON.parse(notif.localSnapshot!);
+                  const raw = JSON.parse(notif.localSnapshot as string);
                   return (
                     <ItemCard key={notif.id} notif={notif}>
                       <p
@@ -469,8 +473,8 @@ export default function SyncReviewPage() {
               <section>
                 <SectionHeader title="Out of sync" count={conflicted.length} />
                 {conflicted.map((notif) => {
-                  const localRaw = JSON.parse(notif.localSnapshot!);
-                  const serverRaw = JSON.parse(notif.serverSnapshot!);
+                  const localRaw = JSON.parse(notif.localSnapshot as string);
+                  const serverRaw = JSON.parse(notif.serverSnapshot as string);
                   const serverNewer =
                     new Date(serverRaw.updatedAt).getTime() >
                     new Date(localRaw.updatedAt).getTime();
