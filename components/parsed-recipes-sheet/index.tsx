@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { BellIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -15,11 +16,21 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
+import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 
 export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
-  const count = parsed?.length ?? 0;
+  const syncCount =
+    ((useLiveQuery(() => db.notifications.count(), []) as number | undefined) ??
+      0);
+  const parsedCount = parsed?.length ?? 0;
+  const totalCount = parsedCount + syncCount;
+
+  const navigate = useNavigate();
+  const params = useParams();
+  const locale = params.locale as string;
 
   const handleSave = async (id: string) => {
     const entry = await db.parsedRecipes.get(id);
@@ -46,8 +57,8 @@ export function ParsedRecipesSheet() {
       if (!entry) return;
       localStorage.setItem("parsedRecipe", JSON.stringify(entry));
       db.parsedRecipes.delete(id);
-      const locale = window.location.pathname.split("/")[1];
-      window.location.href = `/${locale}/recipes/new`;
+      const loc = window.location.pathname.split("/")[1];
+      window.location.href = `/${loc}/recipes/new`;
     });
   };
 
@@ -55,7 +66,7 @@ export function ParsedRecipesSheet() {
     await db.parsedRecipes.delete(id);
   };
 
-  if (count === 0) return null;
+  if (totalCount === 0) return null;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -90,7 +101,7 @@ export function ParsedRecipesSheet() {
               justifyContent: "center",
             }}
           >
-            {count}
+            {totalCount}
           </span>
         </button>
       </SheetTrigger>
@@ -99,47 +110,82 @@ export function ParsedRecipesSheet() {
         className="max-h-[80vh] overflow-y-auto rounded-b-2xl"
       >
         <SheetHeader className="mb-4">
-          <SheetTitle>Parsed Recipes</SheetTitle>
+          <SheetTitle>Notifications</SheetTitle>
         </SheetHeader>
         <div className="space-y-3 pb-6">
-          {parsed?.map((entry) => (
-            <div key={entry.id} className="p-4 rounded-xl bg-muted space-y-2">
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <p className="font-medium text-sm">{entry.title}</p>
-                  {entry.category && (
-                    <p className="text-xs text-muted-foreground">
-                      {entry.category}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDismiss(entry.id)}
-                  className="text-muted-foreground hover:text-foreground text-xs shrink-0"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="flex gap-2">
+          {syncCount > 0 && (
+            <div
+              className="p-4 rounded-xl space-y-2"
+              style={{
+                background: "rgba(255,170,50,0.08)",
+                border: "1px solid rgba(255,200,100,0.18)",
+              }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium text-sm">
+                  🔄 {syncCount} item{syncCount !== 1 ? "s" : ""} need sync
+                  review
+                </p>
                 <Button
                   size="sm"
-                  onClick={() => handleSave(entry.id)}
-                  className="flex-1"
+                  onClick={() => {
+                    navigate.push(routes.syncReview(locale));
+                    setOpen(false);
+                  }}
                 >
-                  Save
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEdit(entry.id)}
-                  className="flex-1"
-                >
-                  Edit
+                  Review →
                 </Button>
               </div>
             </div>
-          ))}
+          )}
+
+          {parsedCount > 0 && (
+            <>
+              {syncCount > 0 && (
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
+                  Parsed Recipes
+                </p>
+              )}
+              {parsed?.map((entry) => (
+                <div key={entry.id} className="p-4 rounded-xl bg-muted space-y-2">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <p className="font-medium text-sm">{entry.title}</p>
+                      {entry.category && (
+                        <p className="text-xs text-muted-foreground">
+                          {entry.category}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDismiss(entry.id)}
+                      className="text-muted-foreground hover:text-foreground text-xs shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleSave(entry.id)}
+                      className="flex-1"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(entry.id)}
+                      className="flex-1"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>
