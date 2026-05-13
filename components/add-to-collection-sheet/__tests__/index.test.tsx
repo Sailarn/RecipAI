@@ -34,7 +34,7 @@ describe("AddToCollectionSheet", () => {
     expect(screen.getByText("🥗 Light meals")).toBeInTheDocument();
   });
 
-  it("shows checkmark for already-added collections", () => {
+  it("shows checkmark svg for already-added collections", () => {
     render(
       <AddToCollectionSheet
         collections={collections}
