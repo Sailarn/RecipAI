@@ -15,6 +15,17 @@ export function syncCreateCollection(
   }).catch(() => {});
 }
 
+export function syncUpdateCollection(
+  id: string,
+  data: { name: string; emoji: string },
+): void {
+  fetch(api.collection(id), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  }).catch(() => {});
+}
+
 export function syncDeleteCollection(id: string): void {
   fetch(api.collection(id), {
     method: "DELETE",

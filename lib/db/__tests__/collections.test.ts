@@ -6,6 +6,7 @@ vi.mock("../db", () => ({
       add: vi.fn(),
       toArray: vi.fn(),
       delete: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
@@ -13,14 +14,17 @@ vi.mock("../db", () => ({
 vi.mock("../supabase-sync-collections", () => ({
   syncCreateCollection: vi.fn(),
   syncDeleteCollection: vi.fn(),
+  syncUpdateCollection: vi.fn(),
 }));
 
 import {
   createCollection,
   deleteCollection,
   getAllCollections,
+  renameCollection,
 } from "../collections";
 import { db } from "../db";
+import { syncUpdateCollection } from "../supabase-sync-collections";
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -51,5 +55,25 @@ describe("deleteCollection", () => {
     vi.mocked(db.collections.delete).mockResolvedValue(undefined);
     await deleteCollection("c1");
     expect(db.collections.delete).toHaveBeenCalledWith("c1");
+  });
+});
+
+describe("renameCollection", () => {
+  it("updates collection in dexie with new name and emoji", async () => {
+    vi.mocked(db.collections.update).mockResolvedValue(1 as any);
+    await renameCollection("c1", "New Name", "🔥");
+    expect(db.collections.update).toHaveBeenCalledWith(
+      "c1",
+      expect.objectContaining({ name: "New Name", emoji: "🔥" }),
+    );
+  });
+
+  it("fires syncUpdateCollection", async () => {
+    vi.mocked(db.collections.update).mockResolvedValue(1 as any);
+    await renameCollection("c1", "New Name", "🔥");
+    expect(syncUpdateCollection).toHaveBeenCalledWith("c1", {
+      name: "New Name",
+      emoji: "🔥",
+    });
   });
 });

@@ -4,6 +4,7 @@ import type { Collection } from "./schema";
 import {
   syncCreateCollection,
   syncDeleteCollection,
+  syncUpdateCollection,
 } from "./supabase-sync-collections";
 
 export async function createCollection(
@@ -24,6 +25,16 @@ export async function createCollection(
 
 export async function getAllCollections(): Promise<Collection[]> {
   return db.collections.toArray();
+}
+
+export async function renameCollection(
+  id: string,
+  name: string,
+  emoji: string,
+): Promise<void> {
+  const now = new Date();
+  await db.collections.update(id, { name, emoji, updatedAt: now });
+  syncUpdateCollection(id, { name, emoji });
 }
 
 export async function deleteCollection(id: string): Promise<void> {
