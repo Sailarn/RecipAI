@@ -130,6 +130,44 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
               </div>
             </div>
           )}
+          {recipe.status === "tried" && (
+            <div
+              key="tried-badge"
+              style={{
+                position: "absolute",
+                top: 7,
+                right: 7,
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                background: "rgba(34,197,94,0.90)",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                border: "1.5px solid rgba(134,239,172,0.60)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "tickIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both",
+              }}
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 6l3 3 5-5"
+                  stroke="#fff"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          )}
         </div>
         <div className="flex flex-col flex-1 p-2 gap-1">
           <h2
