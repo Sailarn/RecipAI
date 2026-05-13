@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { EditCollectionModal } from "@/components/edit-collection-modal";
 import { NewCollectionModal } from "@/components/new-collection-modal";
 import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
@@ -15,9 +16,14 @@ import { RecipeNewView } from "@/components/recipe-new-view";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
-import { createCollection, getAllCollections } from "@/lib/db/collections";
+import {
+  createCollection,
+  deleteCollection,
+  getAllCollections,
+  renameCollection,
+} from "@/lib/db/collections";
 import { getAllRecipes } from "@/lib/db/recipes";
-import type { Recipe } from "@/lib/db/schema";
+import type { Collection, Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -62,6 +68,9 @@ export default function RecipesPage() {
   } = useRecipeFilter(recipes ?? []);
   const collections = useLiveQuery(() => getAllCollections(), []) ?? [];
   const [showNewCollection, setShowNewCollection] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(
+    null,
+  );
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
@@ -179,6 +188,7 @@ export default function RecipesPage() {
           activeCollectionId={collectionId}
           onCollectionChange={setCollectionId}
           onCreateCollection={() => setShowNewCollection(true)}
+          onCollectionLongPress={setEditingCollection}
         />
       </div>
 
@@ -229,6 +239,19 @@ export default function RecipesPage() {
           onCreate={async ({ name, emoji }) => {
             await createCollection({ name, emoji });
             setShowNewCollection(false);
+          }}
+        />
+      )}
+      {editingCollection && (
+        <EditCollectionModal
+          collection={editingCollection}
+          onClose={() => setEditingCollection(null)}
+          onSave={async ({ name, emoji }) => {
+            await renameCollection(editingCollection.id, name, emoji);
+          }}
+          onDelete={async () => {
+            await deleteCollection(editingCollection.id);
+            if (collectionId === editingCollection.id) setCollectionId(null);
           }}
         />
       )}

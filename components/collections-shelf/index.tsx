@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useRef } from "react";
+import { useLongPress } from "@/hooks/use-long-press";
 import type { Collection } from "@/lib/db/schema";
 
 interface CollectionsShelfProps {
@@ -7,6 +9,7 @@ interface CollectionsShelfProps {
   activeId: string | null;
   onSelect: (id: string | null) => void;
   onCreateNew: () => void;
+  onLongPress?: (collection: Collection) => void;
 }
 
 function pillStyle(active: boolean) {
@@ -33,11 +36,58 @@ function pillStyle(active: boolean) {
   } as React.CSSProperties;
 }
 
+function CollectionPill({
+  collection,
+  active,
+  onSelect,
+  onLongPress,
+}: {
+  collection: Collection;
+  active: boolean;
+  onSelect: () => void;
+  onLongPress?: (collection: Collection) => void;
+}) {
+  const didLongPress = useRef(false);
+
+  const handleLongPress = useCallback(() => {
+    didLongPress.current = true;
+    onLongPress?.(collection);
+  }, [collection, onLongPress]);
+
+  const longPressHandlers = useLongPress(handleLongPress);
+
+  function handleClick() {
+    if (didLongPress.current) {
+      didLongPress.current = false;
+      return;
+    }
+    onSelect();
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      onMouseDown={longPressHandlers.onMouseDown}
+      onMouseUp={longPressHandlers.onMouseUp}
+      onMouseLeave={longPressHandlers.onMouseLeave}
+      onTouchStart={longPressHandlers.onTouchStart}
+      onTouchEnd={longPressHandlers.onTouchEnd}
+      onTouchMove={longPressHandlers.onTouchMove}
+      onContextMenu={longPressHandlers.onContextMenu}
+      style={pillStyle(active)}
+    >
+      {collection.emoji} {collection.name}
+    </button>
+  );
+}
+
 export function CollectionsShelf({
   collections,
   activeId,
   onSelect,
   onCreateNew,
+  onLongPress,
 }: CollectionsShelfProps) {
   return (
     <div
@@ -59,14 +109,13 @@ export function CollectionsShelf({
       </button>
 
       {collections.map((c) => (
-        <button
+        <CollectionPill
           key={c.id}
-          type="button"
-          onClick={() => onSelect(c.id)}
-          style={pillStyle(activeId === c.id)}
-        >
-          {c.emoji} {c.name}
-        </button>
+          collection={c}
+          active={activeId === c.id}
+          onSelect={() => onSelect(c.id)}
+          onLongPress={onLongPress}
+        />
       ))}
 
       <button

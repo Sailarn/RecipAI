@@ -76,4 +76,23 @@ describe("CollectionsShelf", () => {
     fireEvent.click(screen.getByRole("button", { name: "+" }));
     expect(onCreateNew).toHaveBeenCalled();
   });
+
+  it("calls onLongPress with the collection when a pill is long-pressed", () => {
+    const onLongPress = vi.fn();
+    render(
+      <CollectionsShelf
+        collections={mockCollections}
+        activeId={null}
+        onSelect={vi.fn()}
+        onCreateNew={vi.fn()}
+        onLongPress={onLongPress}
+      />,
+    );
+    // Simulate mouse down held for 500ms (longer than the 450ms threshold)
+    vi.useFakeTimers();
+    fireEvent.mouseDown(screen.getByText("⭐ Favourites"));
+    vi.advanceTimersByTime(500);
+    expect(onLongPress).toHaveBeenCalledWith(mockCollections[0]);
+    vi.useRealTimers();
+  });
 });

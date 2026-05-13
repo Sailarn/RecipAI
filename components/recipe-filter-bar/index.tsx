@@ -27,6 +27,7 @@ interface RecipeFilterBarProps {
   activeCollectionId: string | null;
   onCollectionChange: (id: string | null) => void;
   onCreateCollection: () => void;
+  onCollectionLongPress?: (collection: Collection) => void;
 }
 
 export function RecipeFilterBar({
@@ -42,6 +43,7 @@ export function RecipeFilterBar({
   activeCollectionId,
   onCollectionChange,
   onCreateCollection,
+  onCollectionLongPress,
 }: RecipeFilterBarProps) {
   const t = useTranslations("recipes");
 
@@ -59,6 +61,7 @@ export function RecipeFilterBar({
         activeId={activeCollectionId}
         onSelect={onCollectionChange}
         onCreateNew={onCreateCollection}
+        onLongPress={onCollectionLongPress}
       />
       {/* Search row */}
       <div style={{ display: "flex", gap: 8 }}>
