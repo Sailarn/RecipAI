@@ -85,6 +85,8 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
         onMouseUp={longPressHandlers.onMouseUp}
         onTouchStart={longPressHandlers.onTouchStart}
         onTouchEnd={longPressHandlers.onTouchEnd}
+        onTouchMove={longPressHandlers.onTouchMove}
+        onContextMenu={longPressHandlers.onContextMenu}
         className="glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden"
         style={{
           background: "none",
@@ -92,6 +94,8 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
           padding: 0,
           textAlign: "left",
           borderRadius: 22,
+          userSelect: "none",
+          WebkitTouchCallout: "none",
           transform: hovered ? "translateY(-2px)" : "none",
           boxShadow: hovered
             ? "0 8px 36px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,220,130,0.18)"

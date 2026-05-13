@@ -20,11 +20,17 @@ export function useLongPress(onLongPress: () => void, onCancel?: () => void) {
     }
   }, [onCancel]);
 
+  const preventContext = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+
   return {
     onMouseDown: start,
     onMouseUp: cancel,
     onMouseLeave: cancel,
     onTouchStart: start,
     onTouchEnd: cancel,
+    onTouchMove: cancel,
+    onContextMenu: preventContext,
   };
 }

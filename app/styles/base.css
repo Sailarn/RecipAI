@@ -56,6 +56,11 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  img {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
 }
 
 @layer components {
