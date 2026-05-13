@@ -9,6 +9,7 @@ import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
+import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -18,7 +19,7 @@ export function useParseJobWatcher() {
 
     // save to parsedRecipes table
     const entry: ParsedRecipeEntry = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       title: result.title,
       description: result.description,
       prepTime: result.prepTime,

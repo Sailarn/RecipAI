@@ -1,3 +1,4 @@
+import { generateId } from "../utils";
 import { db } from "./db";
 import type { Collection } from "./schema";
 import {
@@ -10,7 +11,7 @@ export async function createCollection(
 ): Promise<string> {
   const now = new Date();
   const collection: Collection = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     name: data.name,
     emoji: data.emoji,
     createdAt: now,

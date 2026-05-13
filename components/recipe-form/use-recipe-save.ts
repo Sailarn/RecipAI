@@ -6,6 +6,7 @@ import type { Recipe } from "@/lib/db/schema";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { generateId } from "@/lib/utils";
 import type { RecipeOutput } from "./schema";
 
 export type SaveState = "idle" | "saving" | "saved";
@@ -24,7 +25,7 @@ export function useRecipeSave(recipe: Recipe | undefined, locale: string) {
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
 
     const instructions = (data.instructions || []).map((inst, idx) => ({
-      id: crypto.randomUUID(),
+      id: generateId(),
       order: idx + 1,
       instruction: inst.instruction,
       imageUrl: inst.imageUrl || undefined,
@@ -36,7 +37,7 @@ export function useRecipeSave(recipe: Recipe | undefined, locale: string) {
       imageFileId: recipe?.imageFileId,
       totalTime,
       ingredients: data.ingredients.map((ing) => ({
-        id: crypto.randomUUID(),
+        id: generateId(),
         ...ing,
       })),
       instructions,

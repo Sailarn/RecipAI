@@ -4,13 +4,14 @@ import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { routes } from "@/lib/routes";
+import { generateId } from "@/lib/utils";
 
 export async function savePhotoParseResult(
   recipe: ParsedRecipe,
   locale: string,
 ): Promise<void> {
   const entry = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     title: recipe.title,
     description: recipe.description,
     prepTime: recipe.prepTime,

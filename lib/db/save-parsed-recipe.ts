@@ -1,4 +1,5 @@
 import { isImageKitUrl, uploadImage } from "../images";
+import { generateId } from "../utils";
 import { createRecipe } from "./recipes";
 import type { ParsedRecipeEntry, Recipe } from "./schema";
 
@@ -16,13 +17,13 @@ export async function saveParsedRecipe(
     totalTime: (entry.prepTime || 0) + (entry.cookTime || 0) || undefined,
     servings: entry.servings,
     ingredients: entry.ingredients.map((ing) => ({
-      id: crypto.randomUUID(),
+      id: generateId(),
       item: ing.item,
       amount: ing.amount,
       unit: ing.unit,
     })),
     instructions: entry.instructions.map((inst, idx) => ({
-      id: crypto.randomUUID(),
+      id: generateId(),
       order: idx + 1,
       instruction: inst.instruction,
       imageUrl: inst.imageUrl || undefined,
@@ -54,7 +55,7 @@ export async function saveParsedRecipe(
             const uploaded = await uploadImage(imageUrl);
             hasUpdates = true;
             return {
-              id: crypto.randomUUID(),
+              id: generateId(),
               order: idx + 1,
               instruction: inst.instruction,
               imageUrl: uploaded.url,
@@ -62,7 +63,7 @@ export async function saveParsedRecipe(
           } catch {}
         }
         return {
-          id: crypto.randomUUID(),
+          id: generateId(),
           order: idx + 1,
           instruction: inst.instruction,
           imageUrl,

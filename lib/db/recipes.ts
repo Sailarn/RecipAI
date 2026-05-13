@@ -1,4 +1,5 @@
 import { deleteImage } from "../images";
+import { generateId } from "../utils";
 import { db } from "./db";
 import type { Recipe } from "./schema";
 import { syncCreate, syncDelete, syncUpdate } from "./supabase-sync";
@@ -10,7 +11,7 @@ export async function createRecipe(
   recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
   const now = new Date();
-  const id = crypto.randomUUID(); // Generate unique ID
+  const id = generateId();
 
   const newRecipe: Recipe = {
     ...recipe,
