@@ -98,6 +98,7 @@ export function EditCollectionModal({
           paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
           boxShadow:
             "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
+          animation: "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         <div

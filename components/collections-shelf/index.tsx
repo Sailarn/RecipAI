@@ -98,6 +98,10 @@ export function CollectionsShelf({
         scrollbarWidth: "none",
         WebkitOverflowScrolling: "touch",
         marginBottom: 12,
+        marginLeft: -14,
+        marginRight: -14,
+        paddingLeft: 14,
+        paddingBottom: 4,
       }}
     >
       <button
@@ -139,6 +143,10 @@ export function CollectionsShelf({
       >
         +
       </button>
+
+      {/* Trailing spacer so the last pill has breathing room when scrolled to the end.
+          paddingRight on overflow:auto flex containers is unreliable in Safari. */}
+      <div style={{ minWidth: 14, flexShrink: 0 }} />
     </div>
   );
 }
