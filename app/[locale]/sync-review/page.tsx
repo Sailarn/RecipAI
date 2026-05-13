@@ -409,11 +409,6 @@ export default function SyncReviewPage() {
                         }}
                       >
                         <ActionButton
-                          label="Skip"
-                          onClick={() => resolveNotification(notif.id)}
-                          variant="ghost"
-                        />
-                        <ActionButton
                           label="Add to device"
                           onClick={() => addToDevice(notif)}
                         />

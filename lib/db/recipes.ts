@@ -46,11 +46,12 @@ export async function updateRecipe(
   id: string,
   updates: Partial<Omit<Recipe, "id" | "createdAt">>,
 ): Promise<void> {
+  const now = new Date();
   await db.recipes.update(id, {
     ...updates,
-    updatedAt: new Date(),
+    updatedAt: now,
   });
-  syncUpdate(id, updates);
+  syncUpdate(id, { ...updates, updatedAt: now });
 }
 
 /**

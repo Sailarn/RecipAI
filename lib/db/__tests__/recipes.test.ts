@@ -155,7 +155,10 @@ describe("Recipe CRUD Operations", () => {
 
     await updateRecipe(id, { title: "Updated" });
     expect(syncUpdate).toHaveBeenCalledOnce();
-    expect(syncUpdate).toHaveBeenCalledWith(id, { title: "Updated" });
+    expect(syncUpdate).toHaveBeenCalledWith(
+      id,
+      expect.objectContaining({ title: "Updated", updatedAt: expect.any(Date) }),
+    );
   });
 
   it("should delete a recipe", async () => {

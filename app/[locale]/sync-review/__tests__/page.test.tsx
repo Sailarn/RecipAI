@@ -155,16 +155,6 @@ describe("SyncReviewPage", () => {
       expect(resolveNotification).toHaveBeenCalledWith("n-srv-1");
     });
 
-    it("Skip resolves notification without writing to Dexie", async () => {
-      vi.mocked(useLiveQuery).mockReturnValue([serverOnlyRecipe]);
-      render(<SyncReviewPage />);
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: /^skip$/i }));
-      });
-      expect(db.recipes.put).not.toHaveBeenCalled();
-      expect(resolveNotification).toHaveBeenCalledWith("n-srv-1");
-    });
-
     it("Add all resolves all server_only notifications and shows toast", async () => {
       const second: SyncNotification = {
         ...serverOnlyRecipe,

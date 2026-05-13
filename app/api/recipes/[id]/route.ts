@@ -20,7 +20,7 @@ export async function PATCH(
     .update(recipes)
     .set({
       ...updates,
-      updatedAt: new Date(),
+      updatedAt: updates.updatedAt ? new Date(updates.updatedAt) : new Date(),
     })
     .where(and(eq(recipes.id, id), eq(recipes.userId, session.user.id)));
 
