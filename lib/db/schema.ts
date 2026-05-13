@@ -71,3 +71,16 @@ export interface ParsedRecipeEntry {
   category?: string;
   createdAt: Date;
 }
+
+export type SyncEntityType = "recipe" | "collection";
+export type SyncNotificationType = "server_only" | "local_only" | "conflicted";
+
+export interface SyncNotification {
+  id: string;
+  entityId: string;
+  entityType: SyncEntityType;
+  type: SyncNotificationType;
+  serverSnapshot: string | null;
+  localSnapshot: string | null;
+  createdAt: Date;
+}
