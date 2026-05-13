@@ -44,11 +44,12 @@ export function useSyncOnLogin() {
       // Push local-only collections to server (server ignores ids that already exist)
       const localCollections = await db.collections.toArray();
       if (localCollections.length > 0) {
-        await fetch(api.collectionsSync, {
+        const colPushRes = await fetch(api.collectionsSync, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ collections: localCollections }),
         });
+        if (!colPushRes.ok) throw new Error("Collections push failed");
       }
 
       // Pull server collections and merge — bulkPut upserts by id, no clear()
