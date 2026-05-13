@@ -9,6 +9,7 @@ export const routes = {
 
   profile: (locale: string) => `/${locale}/profile`,
   login: (locale: string) => `/${locale}/login`,
+  syncReview: (locale: string) => `/${locale}/sync-review`,
 } as const;
 
 export const api = {

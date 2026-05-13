@@ -5,72 +5,111 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
-import type { Collection, Recipe } from "@/lib/db/schema";
-import { api } from "@/lib/routes";
+import { replaceSyncNotifications } from "@/lib/db/notifications";
+import type { Collection, Recipe, SyncEntityType, SyncNotification } from "@/lib/db/schema";
+import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
+import { api, routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
+
+function diffToNotifications<T extends Recipe | Collection>(
+  diff: SyncDiff<T>,
+  entityType: SyncEntityType,
+): Omit<SyncNotification, "id" | "createdAt">[] {
+  return [
+    ...diff.serverOnly.map((item) => ({
+      entityId: item.id,
+      entityType,
+      type: "server_only" as const,
+      serverSnapshot: JSON.stringify(item),
+      localSnapshot: null,
+    })),
+    ...diff.localOnly.map((item) => ({
+      entityId: item.id,
+      entityType,
+      type: "local_only" as const,
+      serverSnapshot: null,
+      localSnapshot: JSON.stringify(item),
+    })),
+    ...diff.conflicted.map(({ local, server }) => ({
+      entityId: local.id,
+      entityType,
+      type: "conflicted" as const,
+      serverSnapshot: JSON.stringify(server),
+      localSnapshot: JSON.stringify(local),
+    })),
+  ];
+}
+
+function parseServerRecipes(raw: unknown[]): Recipe[] {
+  return (raw as any[]).map((r) => ({
+    ...r,
+    createdAt: new Date(r.createdAt),
+    updatedAt: new Date(r.updatedAt),
+  }));
+}
+
+function parseServerCollections(raw: unknown[]): Collection[] {
+  return (raw as any[]).map((c) => ({
+    ...c,
+    createdAt: new Date(c.createdAt),
+    updatedAt: new Date(c.updatedAt),
+  }));
+}
 
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const localRecipes = useLiveQuery(() => db.recipes.toArray());
   const hasSynced = useRef(false);
+  const navigate = useNavigate();
 
   const sync = useCallback(async () => {
     if (!session || localRecipes === undefined) return;
 
     try {
-      if (localRecipes.length > 0) {
-        const pushRes = await fetch(api.recipesSync, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recipes: localRecipes }),
-        });
-        const { synced } = await pushRes.json();
-        if (synced > 0) {
-          toast.success(`${synced} recipe${synced !== 1 ? "s" : ""} synced`);
-        }
-      }
+      const [recipesRes, collectionsRes] = await Promise.all([
+        fetch(api.recipesSync),
+        fetch(api.collections),
+      ]);
 
-      const pullRes = await fetch(api.recipesSync);
-      const { recipes: remote } = await pullRes.json();
-      if (remote?.length) {
-        await db.recipes.bulkPut(
-          remote.map((r: Recipe) => ({
-            ...r,
-            createdAt: new Date(r.createdAt),
-            updatedAt: new Date(r.updatedAt),
-          })),
+      const { recipes: rawServerRecipes } = await recipesRes.json();
+      const { collections: rawServerCollections } = await collectionsRes.json();
+
+      const serverRecipes = parseServerRecipes(rawServerRecipes ?? []);
+      const serverCollections = parseServerCollections(rawServerCollections ?? []);
+
+      const [localRecipesFull, localCollections] = await Promise.all([
+        db.recipes.toArray(),
+        db.collections.toArray(),
+      ]);
+
+      const recipeDiff = computeDiff<Recipe>(localRecipesFull, serverRecipes);
+      const collectionDiff = computeDiff<Collection>(localCollections, serverCollections);
+
+      const allNotifications = [
+        ...diffToNotifications(recipeDiff, "recipe"),
+        ...diffToNotifications(collectionDiff, "collection"),
+      ];
+
+      await replaceSyncNotifications(allNotifications);
+
+      const total = allNotifications.length;
+      if (total > 0) {
+        const locale = window.location.pathname.split("/")[1] ?? "en";
+        toast.info(
+          `${total} item${total !== 1 ? "s" : ""} need${total === 1 ? "s" : ""} your review`,
+          {
+            action: {
+              label: "Review",
+              onClick: () => navigate.push(routes.syncReview(locale)),
+            },
+          },
         );
       }
-
-      // Push local-only collections to server (server ignores ids that already exist)
-      const localCollections = await db.collections.toArray();
-      if (localCollections.length > 0) {
-        const colPushRes = await fetch(api.collectionsSync, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ collections: localCollections }),
-        });
-        if (!colPushRes.ok) throw new Error("Collections push failed");
-      }
-
-      // Pull server collections and merge — bulkPut upserts by id, no clear()
-      const colRes = await fetch(api.collections);
-      if (colRes.ok) {
-        const { collections: serverCollections } = await colRes.json();
-        if (serverCollections.length > 0) {
-          await db.collections.bulkPut(
-            serverCollections.map((c: Collection) => ({
-              ...c,
-              createdAt: new Date(c.createdAt),
-              updatedAt: new Date(c.updatedAt),
-            })),
-          );
-        }
-      }
     } catch {
-      toast.error("Sync failed, will retry next time");
+      toast.error("Sync failed — check your connection");
       hasSynced.current = false;
     }
-  }, [session, localRecipes]);
+  }, [session, localRecipes, navigate]);
 
   useEffect(() => {
     if (!session || localRecipes === undefined || hasSynced.current) return;
