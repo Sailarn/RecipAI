@@ -18,12 +18,18 @@ export function AddToCollectionSheet({
   onClose,
 }: AddToCollectionSheetProps) {
   const [mounted, setMounted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) return null;
+
+  function handleClose() {
+    if (isClosing) return;
+    setIsClosing(true);
+  }
 
   return createPortal(
     <div
@@ -33,13 +39,14 @@ export function AddToCollectionSheet({
         zIndex: 500,
         display: "flex",
         alignItems: "flex-end",
+        touchAction: "none",
       }}
     >
       <button
         type="button"
         data-testid="sheet-backdrop"
         aria-label="Close"
-        onClick={onClose}
+        onClick={handleClose}
         style={{
           position: "absolute",
           inset: 0,
@@ -52,6 +59,10 @@ export function AddToCollectionSheet({
       />
 
       <div
+        data-testid="sheet-panel"
+        onAnimationEnd={() => {
+          if (isClosing) onClose();
+        }}
         style={{
           position: "relative",
           zIndex: 1,
@@ -67,7 +78,9 @@ export function AddToCollectionSheet({
           paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
           boxShadow:
             "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
-          animation: "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+          animation: isClosing
+            ? "sheetSlideDown 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards"
+            : "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         <div

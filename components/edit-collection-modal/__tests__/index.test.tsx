@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Collection } from "@/lib/db/schema";
 import { EditCollectionModal } from "../index";
@@ -36,6 +36,7 @@ describe("EditCollectionModal", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("edit-modal-backdrop"));
+    fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -53,9 +54,12 @@ describe("EditCollectionModal", () => {
     fireEvent.change(screen.getByDisplayValue("Favourites"), {
       target: { value: "Faves" },
     });
-    fireEvent.click(screen.getByText("Save"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Save"));
+    });
     expect(onSave).toHaveBeenCalledWith({ name: "Faves", emoji: "⭐" });
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("does not call onSave when name and emoji are unchanged", () => {
@@ -84,8 +88,11 @@ describe("EditCollectionModal", () => {
         onDelete={onDelete}
       />,
     );
-    fireEvent.click(screen.getByText("Delete collection"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Delete collection"));
+    });
     expect(onDelete).toHaveBeenCalled();
-    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
+    expect(onClose).toHaveBeenCalled();
   });
 });

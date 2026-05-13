@@ -36,6 +36,7 @@ describe("NewCollectionModal", () => {
     const onClose = vi.fn();
     render(<NewCollectionModal onClose={onClose} onCreate={vi.fn()} />);
     fireEvent.click(screen.getByTestId("modal-backdrop"));
+    fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
     expect(onClose).toHaveBeenCalled();
   });
 });

@@ -72,6 +72,7 @@ describe("AddToCollectionSheet", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("sheet-backdrop"));
+    fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
     expect(onClose).toHaveBeenCalled();
   });
 });

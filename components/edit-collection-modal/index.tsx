@@ -35,6 +35,7 @@ export function EditCollectionModal({
   const [name, setName] = useState(collection.name);
   const [emoji, setEmoji] = useState(collection.emoji);
   const [mounted, setMounted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -45,15 +46,20 @@ export function EditCollectionModal({
   const hasChanges =
     name.trim() !== collection.name.trim() || emoji !== collection.emoji;
 
+  function handleClose() {
+    if (isClosing) return;
+    setIsClosing(true);
+  }
+
   async function handleSave() {
     if (!name.trim() || !hasChanges) return;
     await onSave({ name: name.trim(), emoji });
-    onClose();
+    handleClose();
   }
 
   async function handleDelete() {
     await onDelete();
-    onClose();
+    handleClose();
   }
 
   return createPortal(
@@ -64,13 +70,14 @@ export function EditCollectionModal({
         zIndex: 500,
         display: "flex",
         alignItems: "flex-end",
+        touchAction: "none",
       }}
     >
       <button
         type="button"
         data-testid="edit-modal-backdrop"
         aria-label="Close"
-        onClick={onClose}
+        onClick={handleClose}
         style={{
           position: "absolute",
           inset: 0,
@@ -83,6 +90,10 @@ export function EditCollectionModal({
       />
 
       <div
+        data-testid="sheet-panel"
+        onAnimationEnd={() => {
+          if (isClosing) onClose();
+        }}
         style={{
           position: "relative",
           zIndex: 1,
@@ -98,7 +109,9 @@ export function EditCollectionModal({
           paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
           boxShadow:
             "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
-          animation: "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+          animation: isClosing
+            ? "sheetSlideDown 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards"
+            : "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         <div
@@ -187,7 +200,7 @@ export function EditCollectionModal({
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               flex: 1,
               padding: 9,

@@ -261,6 +261,15 @@
   }
 }
 
+@keyframes sheetSlideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
 @keyframes tickIn {
   0% {
     opacity: 0;

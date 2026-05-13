@@ -30,15 +30,21 @@ export function NewCollectionModal({
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("⭐");
   const [mounted, setMounted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  function handleClose() {
+    if (isClosing) return;
+    setIsClosing(true);
+  }
+
   function handleCreate() {
     if (!name.trim()) return;
     onCreate({ name: name.trim(), emoji });
-    onClose();
+    handleClose();
   }
 
   if (!mounted) return null;
@@ -51,13 +57,15 @@ export function NewCollectionModal({
         zIndex: 500,
         display: "flex",
         alignItems: "flex-end",
+        touchAction: "none",
       }}
     >
       {/* Backdrop */}
       <button
         type="button"
         data-testid="modal-backdrop"
-        onClick={onClose}
+        aria-label="Close"
+        onClick={handleClose}
         style={{
           position: "absolute",
           inset: 0,
@@ -71,6 +79,10 @@ export function NewCollectionModal({
 
       {/* Sheet */}
       <div
+        data-testid="sheet-panel"
+        onAnimationEnd={() => {
+          if (isClosing) onClose();
+        }}
         style={{
           position: "relative",
           zIndex: 1,
@@ -80,9 +92,15 @@ export function NewCollectionModal({
           WebkitBackdropFilter: "blur(32px) saturate(200%)",
           border: "1px solid rgba(255,200,100,0.18)",
           borderRadius: "28px 28px 0 0",
-          padding: "20px 18px 36px",
+          paddingTop: "20px",
+          paddingLeft: "18px",
+          paddingRight: "18px",
+          paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
           boxShadow:
             "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
+          animation: isClosing
+            ? "sheetSlideDown 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards"
+            : "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         {/* Drag handle */}
@@ -176,7 +194,7 @@ export function NewCollectionModal({
         <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               flex: 1,
               padding: 9,
