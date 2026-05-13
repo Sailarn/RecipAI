@@ -163,7 +163,7 @@ export function NewCollectionModal({
             background: "rgba(255,170,50,0.08)",
             backdropFilter: "blur(12px)",
             color: "var(--fg-1)",
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: "var(--font-sans)",
             outline: "none",
             marginBottom: 14,
