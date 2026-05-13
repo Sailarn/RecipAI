@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Collection } from "@/lib/db/schema";
 import { EditCollectionModal } from "../index";
@@ -39,8 +39,8 @@ describe("EditCollectionModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("calls onSave with updated name when changed and saved", () => {
-    const onSave = vi.fn();
+  it("calls onSave with updated name when changed and saved", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
     const onClose = vi.fn();
     render(
       <EditCollectionModal
@@ -55,7 +55,7 @@ describe("EditCollectionModal", () => {
     });
     fireEvent.click(screen.getByText("Save"));
     expect(onSave).toHaveBeenCalledWith({ name: "Faves", emoji: "⭐" });
-    expect(onClose).toHaveBeenCalled();
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
   it("does not call onSave when name and emoji are unchanged", () => {
@@ -73,8 +73,8 @@ describe("EditCollectionModal", () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it("calls onDelete and onClose when delete button is clicked", () => {
-    const onDelete = vi.fn();
+  it("calls onDelete and onClose when delete button is clicked", async () => {
+    const onDelete = vi.fn().mockResolvedValue(undefined);
     const onClose = vi.fn();
     render(
       <EditCollectionModal
@@ -86,6 +86,6 @@ describe("EditCollectionModal", () => {
     );
     fireEvent.click(screen.getByText("Delete collection"));
     expect(onDelete).toHaveBeenCalled();
-    expect(onClose).toHaveBeenCalled();
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 });

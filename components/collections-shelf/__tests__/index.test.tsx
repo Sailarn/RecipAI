@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Collection } from "@/lib/db/schema";
 import { CollectionsShelf } from "../index";
 
@@ -21,6 +21,9 @@ const mockCollections: Collection[] = [
 ];
 
 describe("CollectionsShelf", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
   it("renders All pill and each collection", () => {
     render(
       <CollectionsShelf
@@ -88,11 +91,26 @@ describe("CollectionsShelf", () => {
         onLongPress={onLongPress}
       />,
     );
-    // Simulate mouse down held for 500ms (longer than the 450ms threshold)
-    vi.useFakeTimers();
     fireEvent.mouseDown(screen.getByText("⭐ Favourites"));
     vi.advanceTimersByTime(500);
+    fireEvent.mouseUp(screen.getByText("⭐ Favourites"));
     expect(onLongPress).toHaveBeenCalledWith(mockCollections[0]);
-    vi.useRealTimers();
+  });
+
+  it("does not call onSelect when a pill is long-pressed", () => {
+    const onSelect = vi.fn();
+    render(
+      <CollectionsShelf
+        collections={mockCollections}
+        activeId={null}
+        onSelect={onSelect}
+        onCreateNew={vi.fn()}
+        onLongPress={vi.fn()}
+      />,
+    );
+    fireEvent.mouseDown(screen.getByText("⭐ Favourites"));
+    vi.advanceTimersByTime(500);
+    fireEvent.click(screen.getByText("⭐ Favourites"));
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

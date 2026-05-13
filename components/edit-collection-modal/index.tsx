@@ -22,8 +22,8 @@ const EMOJIS = [
 interface EditCollectionModalProps {
   collection: Collection;
   onClose: () => void;
-  onSave: (data: { name: string; emoji: string }) => void;
-  onDelete: () => void;
+  onSave: (data: { name: string; emoji: string }) => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
 export function EditCollectionModal({
@@ -45,14 +45,14 @@ export function EditCollectionModal({
   const hasChanges =
     name.trim() !== collection.name.trim() || emoji !== collection.emoji;
 
-  function handleSave() {
+  async function handleSave() {
     if (!name.trim() || !hasChanges) return;
-    onSave({ name: name.trim(), emoji });
+    await onSave({ name: name.trim(), emoji });
     onClose();
   }
 
-  function handleDelete() {
-    onDelete();
+  async function handleDelete() {
+    await onDelete();
     onClose();
   }
 
