@@ -60,7 +60,9 @@ export function AddToCollectionSheet({
           WebkitBackdropFilter: "blur(32px) saturate(200%)",
           border: "1px solid rgba(255,200,100,0.18)",
           borderRadius: "28px 28px 0 0",
-          padding: "20px 18px",
+          paddingTop: "20px",
+          paddingLeft: "18px",
+          paddingRight: "18px",
           paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
           boxShadow:
             "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
