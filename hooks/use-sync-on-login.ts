@@ -41,11 +41,20 @@ export function useSyncOnLogin() {
         );
       }
 
-      // Fetch and store collections
+      // Push local-only collections to server (server ignores ids that already exist)
+      const localCollections = await db.collections.toArray();
+      if (localCollections.length > 0) {
+        await fetch(api.collectionsSync, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ collections: localCollections }),
+        });
+      }
+
+      // Pull server collections and merge — bulkPut upserts by id, no clear()
       const colRes = await fetch(api.collections);
       if (colRes.ok) {
         const { collections: serverCollections } = await colRes.json();
-        await db.collections.clear();
         if (serverCollections.length > 0) {
           await db.collections.bulkPut(
             serverCollections.map((c: Collection) => ({

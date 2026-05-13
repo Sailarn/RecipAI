@@ -27,4 +27,5 @@ export const api = {
   telegramBot: "/api/telegram-bot",
   collections: "/api/collections",
   collection: (id: string) => `/api/collections/${id}`,
+  collectionsSync: "/api/collections/sync",
 } as const;

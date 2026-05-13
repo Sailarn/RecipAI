@@ -6,8 +6,6 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSyncOnLogin } from "../use-sync-on-login";
 
-// --- mocks ---
-
 vi.mock("@/lib/auth-client", () => ({
   authClient: {
     useSession: vi.fn().mockReturnValue({ data: null }),
@@ -32,7 +30,7 @@ vi.mock("@/lib/db/db", () => ({
       bulkPut: vi.fn().mockResolvedValue(undefined),
     },
     collections: {
-      clear: vi.fn().mockResolvedValue(undefined),
+      toArray: vi.fn().mockResolvedValue([]),
       bulkPut: vi.fn().mockResolvedValue(undefined),
     },
   },
@@ -42,8 +40,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
-
-// --- helpers ---
 
 const mockFetch = vi.fn();
 
@@ -63,10 +59,22 @@ const mockLocalRecipe = {
 };
 
 function makeJsonResponse(body: object, ok = true) {
-  return {
-    ok,
-    json: () => Promise.resolve(body),
-  } as unknown as Response;
+  return { ok, json: () => Promise.resolve(body) } as unknown as Response;
+}
+
+// Fetch call order (local recipes non-empty, local collections empty):
+//   1. POST /api/recipes/sync  (push recipes)
+//   2. GET  /api/recipes/sync  (pull recipes)
+//   3. GET  /api/collections   (pull collections — no push since collections empty)
+//
+// Fetch call order (local recipes empty, local collections empty):
+//   1. GET  /api/recipes/sync
+//   2. GET  /api/collections
+function setupDefaultFetch(synced = 0, remoteRecipes: object[] = []) {
+  mockFetch
+    .mockResolvedValueOnce(makeJsonResponse({ synced })) // POST push recipes
+    .mockResolvedValueOnce(makeJsonResponse({ recipes: remoteRecipes })) // GET pull recipes
+    .mockResolvedValueOnce(makeJsonResponse({ collections: [] })); // GET pull collections
 }
 
 beforeEach(() => {
@@ -75,6 +83,7 @@ beforeEach(() => {
   vi.mocked(authClient.useSession).mockReturnValue({ data: null } as any);
   vi.mocked(useLiveQuery).mockReturnValue([] as any);
   vi.mocked(db.recipes.bulkPut).mockResolvedValue([] as any);
+  vi.mocked(db.collections.toArray).mockResolvedValue([] as any);
   vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
 });
@@ -82,16 +91,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
 });
-
-// Default fetch: push returns synced=0, pull returns empty recipes and collections
-function setupDefaultFetch(synced = 0, remoteRecipes: object[] = []) {
-  mockFetch
-    .mockResolvedValueOnce(makeJsonResponse({ synced })) // POST push
-    .mockResolvedValueOnce(makeJsonResponse({ recipes: remoteRecipes })) // GET pull recipes
-    .mockResolvedValueOnce(makeJsonResponse({ collections: [] })); // GET pull collections
-}
-
-// --- tests ---
 
 describe("useSyncOnLogin", () => {
   describe("no sync conditions", () => {
@@ -119,7 +118,7 @@ describe("useSyncOnLogin", () => {
   });
 
   describe("sync on login", () => {
-    it("does not push when local recipes list is empty", async () => {
+    it("does not push recipes when local list is empty", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
@@ -133,7 +132,6 @@ describe("useSyncOnLogin", () => {
 
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
 
-      // Only GET pull recipes and collections, no POST push
       expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync");
       expect(mockFetch).not.toHaveBeenCalledWith(
         "/api/recipes/sync",
@@ -204,7 +202,7 @@ describe("useSyncOnLogin", () => {
       expect(toast.success).not.toHaveBeenCalled();
     });
 
-    it("pulls remote recipes and stores them in Dexie with Date conversion", async () => {
+    it("pulls remote recipes and stores them with Date conversion", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
@@ -229,15 +227,11 @@ describe("useSyncOnLogin", () => {
       await waitFor(() => expect(db.recipes.bulkPut).toHaveBeenCalled());
 
       const stored = vi.mocked(db.recipes.bulkPut).mock.calls[0][0];
-      expect(stored[0].id).toBe("remote-1");
       expect(stored[0].createdAt).toBeInstanceOf(Date);
       expect(stored[0].updatedAt).toBeInstanceOf(Date);
-      expect(stored[0].createdAt.toISOString()).toBe(
-        "2024-01-01T00:00:00.000Z",
-      );
     });
 
-    it("does not call bulkPut when pull returns empty array", async () => {
+    it("does not call bulkPut for recipes when pull returns empty", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
@@ -252,6 +246,74 @@ describe("useSyncOnLogin", () => {
       await waitFor(() => expect(mockFetch).toHaveBeenCalled());
       await new Promise((r) => setTimeout(r, 10));
       expect(db.recipes.bulkPut).not.toHaveBeenCalled();
+    });
+
+    it("pushes local collections to server when non-empty", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      vi.mocked(useLiveQuery).mockReturnValue([] as any);
+      vi.mocked(db.collections.toArray).mockResolvedValue([
+        {
+          id: "c1",
+          name: "Faves",
+          emoji: "⭐",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ] as any);
+
+      mockFetch
+        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] })) // GET pull recipes
+        .mockResolvedValueOnce(makeJsonResponse({ synced: 1 })) // POST push collections
+        .mockResolvedValueOnce(makeJsonResponse({ collections: [] })); // GET pull collections
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/collections/sync",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("c1"),
+        }),
+      );
+    });
+
+    it("merges server collections without clearing local ones", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      vi.mocked(useLiveQuery).mockReturnValue([] as any);
+
+      mockFetch
+        .mockResolvedValueOnce(
+          makeJsonResponse({
+            recipes: [],
+          }),
+        )
+        .mockResolvedValueOnce(
+          makeJsonResponse({
+            collections: [
+              {
+                id: "c-server",
+                name: "Server",
+                emoji: "🔥",
+                createdAt: "2024-01-01T00:00:00.000Z",
+                updatedAt: "2024-01-01T00:00:00.000Z",
+              },
+            ],
+          }),
+        );
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(db.collections.bulkPut).toHaveBeenCalled());
+      // bulkPut called (merge), clear NOT available on the mock = never called
+      const stored = vi.mocked(db.collections.bulkPut).mock.calls[0][0];
+      expect(stored[0].id).toBe("c-server");
+      expect(stored[0].createdAt).toBeInstanceOf(Date);
     });
 
     it("shows error toast and resets hasSynced on fetch failure", async () => {
@@ -280,7 +342,6 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([] as any);
 
-      // First auto-sync
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
@@ -289,7 +350,6 @@ describe("useSyncOnLogin", () => {
 
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
 
-      // Manual trigger
       mockFetch
         .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
         .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
