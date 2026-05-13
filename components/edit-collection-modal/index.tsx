@@ -43,7 +43,7 @@ export function EditCollectionModal({
   if (!mounted) return null;
 
   const hasChanges =
-    name.trim() !== collection.name || emoji !== collection.emoji;
+    name.trim() !== collection.name.trim() || emoji !== collection.emoji;
 
   function handleSave() {
     if (!name.trim() || !hasChanges) return;

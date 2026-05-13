@@ -68,6 +68,7 @@ describe("EditCollectionModal", () => {
         onDelete={vi.fn()}
       />,
     );
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     fireEvent.click(screen.getByText("Save"));
     expect(onSave).not.toHaveBeenCalled();
   });
