@@ -16,7 +16,7 @@ export async function PATCH(
   const { id } = await params;
   const { name, emoji } = await req.json();
 
-  if (!name)
+  if (!name?.trim())
     return NextResponse.json({ error: "name required" }, { status: 400 });
 
   await db
