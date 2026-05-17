@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CompactFilterBar } from "@/components/compact-filter-bar";
 import { EditCollectionModal } from "@/components/edit-collection-modal";
 import { NewCollectionModal } from "@/components/new-collection-modal";
@@ -68,18 +68,29 @@ export default function RecipesPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  useLayoutEffect(() => {
+    if (loading) return;
+    const container = scrollRef.current;
+    const sentinel = sentinelRef.current;
+    if (!container || !sentinel) return;
+    setIsCollapsed(
+      sentinel.getBoundingClientRect().top <
+        container.getBoundingClientRect().top,
+    );
+  }, [loading]);
+
   useEffect(() => {
     if (loading) return;
     const container = scrollRef.current;
     const sentinel = sentinelRef.current;
     if (!container || !sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsCollapsed(!entry.isIntersecting),
-      { root: container, threshold: 0 },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    const check = () =>
+      setIsCollapsed(
+        sentinel.getBoundingClientRect().top <
+          container.getBoundingClientRect().top,
+      );
+    container.addEventListener("scroll", check, { passive: true });
+    return () => container.removeEventListener("scroll", check);
   }, [loading]);
 
   const { triggerSync } = useSyncOnLogin();
