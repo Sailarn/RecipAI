@@ -1,9 +1,8 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
-import { useNavigationStack } from "@/lib/navigation-stack";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
@@ -24,8 +23,11 @@ export function BottomNav() {
   const tNav = useTranslations("navigation");
   const navigate = useNavigate();
 
-  const { entries } = useNavigationStack();
-  const currentHref = entries[entries.length - 1]?.href ?? "";
+  // Use the real pathname (updates synchronously with the URL) for tab
+  // active-state and hide logic so the nav reflects navigation immediately,
+  // even while the navigation-stack entries are being updated.
+  const pathname = usePathname();
+  const currentHref = pathname;
 
   const hideOn = ["/edit", "/login"];
   const isDetailPage =

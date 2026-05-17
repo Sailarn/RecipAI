@@ -62,9 +62,9 @@ export function NavigationStackProvider({
   // history.pushState ourselves (Next.js intercepts it and updates usePathname).
   const stackPushing = useRef(false);
 
-  // Tracks the last currentPage value that was written into the sync entry.
-  // Used to detect when currentPage catches up after a router.push race condition.
-  const lastSyncedPage = useRef<React.ReactNode>(undefined);
+  // Tracks the last currentPage written into an entry via this sync effect.
+  // Initialized to currentPage so the first navigation can detect stale content.
+  const lastSyncedPage = useRef<React.ReactNode>(currentPage);
 
   // Sync with real Next.js navigations (Link, router.push, etc.).
   useEffect(() => {
@@ -77,18 +77,17 @@ export function NavigationStackProvider({
     const top = prev[prev.length - 1];
 
     if (top?.href === pathname) {
-      // Race condition fix: router.push updates pathname before currentPage
-      // re-renders. If the top entry was created by this sync effect (id prefix
-      // "nextjs-") and currentPage has since changed, update it in-place.
-      if (
-        top.id.startsWith("nextjs-") &&
-        currentPage !== lastSyncedPage.current
-      ) {
-        lastSyncedPage.current = currentPage;
-        updateEntries([...prev.slice(0, -1), { ...top, element: currentPage }]);
-      }
+      // No navigation occurred, or currentPage updated before pathname (Case B).
+      // In Case B the next effect run will fire with the new pathname and do
+      // the RESET with the already-correct currentPage — nothing to do here.
       return;
     }
+
+    // pathname changed → navigation. But if currentPage hasn't updated yet
+    // (stale: it still equals the last synced value), defer: don't create an
+    // entry with the wrong element. The effect will re-fire when currentPage
+    // catches up and we'll do the RESET then with the correct element.
+    if (currentPage === lastSyncedPage.current) return;
 
     lastSyncedPage.current = currentPage;
     updateEntries([
