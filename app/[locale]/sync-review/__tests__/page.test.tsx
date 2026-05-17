@@ -70,6 +70,22 @@ const serverOnlyRecipe: SyncNotification = {
   createdAt: new Date("2024-01-03"),
 };
 
+const serverOnlyCollection: SyncNotification = {
+  id: "n-srv-col-1",
+  entityId: "col-srv-1",
+  entityType: "collection",
+  type: "server_only",
+  serverSnapshot: JSON.stringify({
+    id: "col-srv-1",
+    name: "Server Collection",
+    emoji: "📚",
+    createdAt: "2024-01-03T00:00:00.000Z",
+    updatedAt: "2024-01-03T00:00:00.000Z",
+  }),
+  localSnapshot: null,
+  createdAt: new Date("2024-01-03"),
+};
+
 const localOnlyCollection: SyncNotification = {
   id: "n-loc-1",
   entityId: "col-loc-1",
@@ -153,6 +169,38 @@ describe("SyncReviewPage", () => {
         }),
       );
       expect(resolveNotification).toHaveBeenCalledWith("n-srv-1");
+    });
+
+    it("Delete from server calls DELETE API and resolves notification", async () => {
+      vi.mocked(useLiveQuery).mockReturnValue([serverOnlyCollection]);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ ok: true }),
+      });
+      render(<SyncReviewPage />);
+      await act(async () => {
+        fireEvent.click(
+          screen.getByRole("button", { name: /delete from server/i }),
+        );
+      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/collections/col-srv-1",
+        expect.objectContaining({ method: "DELETE" }),
+      );
+      expect(resolveNotification).toHaveBeenCalledWith("n-srv-col-1");
+    });
+
+    it("Delete from server shows error toast and does not resolve on failure", async () => {
+      vi.mocked(useLiveQuery).mockReturnValue([serverOnlyCollection]);
+      mockFetch.mockResolvedValueOnce({ ok: false });
+      render(<SyncReviewPage />);
+      await act(async () => {
+        fireEvent.click(
+          screen.getByRole("button", { name: /delete from server/i }),
+        );
+      });
+      expect(resolveNotification).not.toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalled();
     });
 
     it("Add all resolves all server_only notifications and shows toast", async () => {

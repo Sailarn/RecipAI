@@ -187,6 +187,19 @@ export default function SyncReviewPage() {
   );
   const total = (notifications ?? []).length;
 
+  async function deleteFromServer(notif: SyncNotification) {
+    const endpoint =
+      notif.entityType === "recipe"
+        ? api.recipe(notif.entityId)
+        : api.collection(notif.entityId);
+    const res = await fetch(endpoint, { method: "DELETE" });
+    if (!res.ok) {
+      toast.error("Failed to delete from server — check your connection");
+      return;
+    }
+    await resolveNotification(notif.id);
+  }
+
   async function addToDevice(notif: SyncNotification) {
     if (notif.entityType === "recipe") {
       await db.recipes.put(parseRecipeSnapshot(notif.serverSnapshot as string));
@@ -415,6 +428,11 @@ export default function SyncReviewPage() {
                         <ActionButton
                           label="Add to device"
                           onClick={() => addToDevice(notif)}
+                        />
+                        <ActionButton
+                          label="Delete from server"
+                          onClick={() => deleteFromServer(notif)}
+                          variant="danger"
                         />
                       </div>
                     </ItemCard>
