@@ -131,11 +131,11 @@ describe("RecipesPage", () => {
     );
   });
 
-  it("has create recipe button", async () => {
+  it("does not render create recipe button (moved to parse page)", async () => {
     render(<RecipesPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/createRecipe/i)).toBeInTheDocument();
+      expect(screen.queryByText(/createRecipe/i)).not.toBeInTheDocument();
     });
   });
 

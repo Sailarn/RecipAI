@@ -1,9 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { CompactFilterBar } from "@/components/compact-filter-bar";
@@ -13,7 +11,6 @@ import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
-import { RecipeNewView } from "@/components/recipe-new-view";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
@@ -25,8 +22,6 @@ import {
 } from "@/lib/db/collections";
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
-import { routes } from "@/lib/routes";
-import { useNavigate } from "@/lib/transitions";
 
 let _recipesCache: Recipe[] | undefined;
 
@@ -46,9 +41,6 @@ function getGreeting() {
 }
 
 export default function RecipesPage() {
-  const params = useParams();
-  const navigate = useNavigate();
-  const locale = params.locale as string;
   const t = useTranslations("recipes");
   const recipesFromDB = useLiveQuery(() => getAllRecipes(), []);
   if (recipesFromDB !== undefined) _recipesCache = recipesFromDB;
@@ -164,36 +156,7 @@ export default function RecipesPage() {
             </h1>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ParsedRecipesSheet />
-            <button
-              type="button"
-              onClick={() =>
-                navigate.push(
-                  routes.recipes.new(locale),
-                  <RecipeNewView locale={locale} />,
-                )
-              }
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                background: "var(--action-primary)",
-                color: "#fff",
-                borderRadius: 14,
-                padding: "8px 14px",
-                border: "none",
-                fontFamily: "var(--font-sans)",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(59,130,246,0.4)",
-              }}
-            >
-              <Plus size={13} strokeWidth={2.5} color="#fff" />
-              {t("createRecipe")}
-            </button>
-          </div>
+          <ParsedRecipesSheet />
         </div>
 
         <RecipeFilterBar
