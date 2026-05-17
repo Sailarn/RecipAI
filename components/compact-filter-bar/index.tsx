@@ -15,7 +15,7 @@ interface CompactFilterBarProps {
 
 const SORT_LABELS: Record<SortOption, string> = {
   newest: "Newest",
-  oldest: "Oldest",
+  oldest: "↓ Oldest first",
   az: "A → Z",
   za: "Z → A",
 };
@@ -66,18 +66,19 @@ export function CompactFilterBar({
       onClick={onScrollTop}
       style={{
         position: "fixed",
-        top: "env(safe-area-inset-top)",
-        left: 0,
-        right: 0,
+        top: "calc(env(safe-area-inset-top) + 10px)",
+        left: 14,
+        right: 14,
         zIndex: 100,
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "8px 14px",
-        background: "var(--glass-nav-bg)",
-        backdropFilter: "var(--glass-nav-blur)",
-        WebkitBackdropFilter: "var(--glass-nav-blur)",
-        borderBottom: "1px solid rgba(255,200,100,0.14)",
+        padding: "7px 7px 7px 12px",
+        background: "rgba(20, 16, 10, 0.88)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderRadius: 99,
+        border: "1px solid rgba(255, 200, 100, 0.22)",
         cursor: "pointer",
         textAlign: "left",
         overflowX: "auto",
@@ -100,11 +101,26 @@ export function CompactFilterBar({
         <Chip label={SORT_LABELS[sort]} color="rgba(167,139,250,1)" />
       )}
 
-      <ChevronUp
-        size={14}
-        aria-label="scroll to top"
-        style={{ color: "var(--fg-3)", flexShrink: 0, marginLeft: "auto" }}
-      />
+      <div
+        style={{
+          marginLeft: "auto",
+          flexShrink: 0,
+          width: 30,
+          height: 30,
+          borderRadius: 99,
+          background: "rgba(255, 200, 100, 0.1)",
+          border: "1px solid rgba(255, 200, 100, 0.18)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ChevronUp
+          size={14}
+          aria-label="scroll to top"
+          style={{ color: "var(--fg-2)" }}
+        />
+      </div>
     </button>
   );
 }
