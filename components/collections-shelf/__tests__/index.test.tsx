@@ -24,7 +24,7 @@ describe("CollectionsShelf", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it("renders All pill and each collection", () => {
+  it("renders All tab and each collection tab", () => {
     render(
       <CollectionsShelf
         collections={mockCollections}
@@ -36,6 +36,34 @@ describe("CollectionsShelf", () => {
     expect(screen.getByText("🍴 All")).toBeInTheDocument();
     expect(screen.getByText("⭐ Favourites")).toBeInTheDocument();
     expect(screen.getByText("🥗 Light meals")).toBeInTheDocument();
+  });
+
+  it("active tab has amber bottom border", () => {
+    render(
+      <CollectionsShelf
+        collections={mockCollections}
+        activeId={null}
+        onSelect={vi.fn()}
+        onCreateNew={vi.fn()}
+      />,
+    );
+    const allTab = screen.getByText("🍴 All");
+    expect(allTab).toHaveStyle({
+      borderBottom: "2px solid rgba(251,191,36,0.9)",
+    });
+  });
+
+  it("inactive tab has no bottom border", () => {
+    render(
+      <CollectionsShelf
+        collections={mockCollections}
+        activeId={null}
+        onSelect={vi.fn()}
+        onCreateNew={vi.fn()}
+      />,
+    );
+    const favTab = screen.getByText("⭐ Favourites");
+    expect(favTab).toHaveStyle({ borderBottom: "2px solid transparent" });
   });
 
   it("calls onSelect with null when All is clicked", () => {
@@ -52,7 +80,7 @@ describe("CollectionsShelf", () => {
     expect(onSelect).toHaveBeenCalledWith(null);
   });
 
-  it("calls onSelect with collection id when pill is clicked", () => {
+  it("calls onSelect with collection id when tab is clicked", () => {
     const onSelect = vi.fn();
     render(
       <CollectionsShelf
@@ -80,7 +108,7 @@ describe("CollectionsShelf", () => {
     expect(onCreateNew).toHaveBeenCalled();
   });
 
-  it("calls onLongPress with the collection when a pill is long-pressed", () => {
+  it("calls onLongPress with the collection when a tab is long-pressed", () => {
     const onLongPress = vi.fn();
     render(
       <CollectionsShelf
@@ -97,7 +125,7 @@ describe("CollectionsShelf", () => {
     expect(onLongPress).toHaveBeenCalledWith(mockCollections[0]);
   });
 
-  it("does not call onSelect when a pill is long-pressed", () => {
+  it("does not call onSelect when a tab is long-pressed", () => {
     const onSelect = vi.fn();
     render(
       <CollectionsShelf

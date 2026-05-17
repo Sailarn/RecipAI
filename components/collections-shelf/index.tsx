@@ -12,29 +12,26 @@ interface CollectionsShelfProps {
   onLongPress?: (collection: Collection) => void;
 }
 
-function pillStyle(active: boolean) {
+function tabStyle(active: boolean): React.CSSProperties {
   return {
-    padding: "7px 13px",
-    borderRadius: 99,
-    border: active
-      ? "1px solid rgba(255,210,120,0.50)"
-      : "1px solid rgba(255,200,100,0.14)",
-    background: active ? "rgba(255,180,60,0.20)" : "rgba(255,170,50,0.07)",
-    boxShadow: active ? "inset 0 1px 0 rgba(255,230,150,0.20)" : "none",
-    transform: "scale(1)",
+    padding: "8px 12px",
+    border: "none",
+    borderBottom: active
+      ? "2px solid rgba(251,191,36,0.9)"
+      : "2px solid transparent",
+    background: "transparent",
     cursor: "pointer",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: active ? 600 : 500,
-    color: active ? "var(--fg-1)" : "var(--fg-2)",
+    color: active ? "var(--fg-1)" : "var(--fg-3)",
     fontFamily: "var(--font-sans)",
-    transition: "all 0.18s ease",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
+    transition: "color 0.15s ease, border-color 0.15s ease",
     flexShrink: 0,
-  } as React.CSSProperties;
+    whiteSpace: "nowrap",
+  };
 }
 
-function CollectionPill({
+function CollectionTab({
   collection,
   active,
   onSelect,
@@ -73,7 +70,7 @@ function CollectionPill({
       onTouchEnd={longPressHandlers.onTouchEnd}
       onTouchMove={longPressHandlers.onTouchMove}
       onContextMenu={longPressHandlers.onContextMenu}
-      style={pillStyle(active)}
+      style={tabStyle(active)}
     >
       {collection.emoji} {collection.name}
     </button>
@@ -91,27 +88,24 @@ export function CollectionsShelf({
     <div
       style={{
         display: "flex",
-        gap: 8,
         overflowX: "auto",
         scrollbarWidth: "none",
         WebkitOverflowScrolling: "touch",
-        marginBottom: 12,
         marginLeft: -14,
         marginRight: -14,
         paddingLeft: 14,
-        paddingBottom: 4,
       }}
     >
       <button
         type="button"
         onClick={() => onSelect(null)}
-        style={pillStyle(activeId === null)}
+        style={tabStyle(activeId === null)}
       >
         🍴 All
       </button>
 
       {collections.map((c) => (
-        <CollectionPill
+        <CollectionTab
           key={c.id}
           collection={c}
           active={activeId === c.id}
@@ -125,25 +119,19 @@ export function CollectionsShelf({
         aria-label="+"
         onClick={onCreateNew}
         style={{
-          width: 34,
-          height: 34,
-          borderRadius: 99,
-          border: "1px dashed rgba(255,200,100,0.22)",
-          background: "rgba(255,170,50,0.07)",
+          padding: "8px 12px",
+          border: "none",
+          borderBottom: "2px solid transparent",
+          background: "transparent",
           color: "var(--fg-3)",
-          fontSize: 18,
+          fontSize: 16,
           cursor: "pointer",
           flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
         }}
       >
         +
       </button>
 
-      {/* Trailing spacer so the last pill has breathing room when scrolled to the end.
-          paddingRight on overflow:auto flex containers is unreliable in Safari. */}
       <div style={{ minWidth: 14, flexShrink: 0 }} />
     </div>
   );
