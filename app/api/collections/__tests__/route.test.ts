@@ -86,4 +86,15 @@ describe("POST /api/collections", () => {
     expect(body.collection.emoji).toBe("⭐");
     expect(body.collection.id).toBeDefined();
   });
+
+  it("uses client-provided id so local and server ids stay in sync", async () => {
+    mockSession();
+    setupInsert();
+    const res = await POST(
+      makeReq({ name: "Dinner", emoji: "🍽️", id: "client-id-123" }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.collection.id).toBe("client-id-123");
+  });
 });

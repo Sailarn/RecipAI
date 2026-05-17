@@ -23,13 +23,13 @@ export async function POST(req: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name, emoji = "⭐" } = await req.json();
+  const { name, emoji = "⭐", id: clientId } = await req.json();
   if (!name)
     return NextResponse.json({ error: "name required" }, { status: 400 });
 
   const now = new Date();
   const collection = {
-    id: crypto.randomUUID(),
+    id: clientId ?? crypto.randomUUID(),
     userId: session.user.id,
     name,
     emoji,
