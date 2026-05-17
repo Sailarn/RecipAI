@@ -1,18 +1,11 @@
-import { Search } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { CollectionsShelf } from "@/components/collections-shelf";
+import { FilterSheet } from "@/components/filter-sheet";
 import type { StatusFilter } from "@/components/status-chips";
-import { StatusChips } from "@/components/status-chips";
 import type { SortOption } from "@/hooks/use-recipe-filter";
-import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { Collection } from "@/lib/db/schema";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui";
 
 interface RecipeFilterBarProps {
   search: string;
@@ -46,16 +39,16 @@ export function RecipeFilterBar({
   onCollectionLongPress,
 }: RecipeFilterBarProps) {
   const t = useTranslations("recipes");
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const activeFilterCount = [
+    category !== null,
+    status !== "all",
+    sort !== "newest",
+  ].filter(Boolean).length;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        marginBottom: 14,
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", marginBottom: 8 }}>
       <CollectionsShelf
         collections={collections}
         activeId={activeCollectionId}
@@ -63,7 +56,17 @@ export function RecipeFilterBar({
         onCreateNew={onCreateCollection}
         onLongPress={onCollectionLongPress}
       />
-      {/* Search row */}
+
+      <div
+        style={{
+          height: 1,
+          background: "rgba(255,200,100,0.12)",
+          marginLeft: -14,
+          marginRight: -14,
+          marginBottom: 10,
+        }}
+      />
+
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search
@@ -100,52 +103,63 @@ export function RecipeFilterBar({
             }}
           />
         </div>
-        <Select
-          value={sort}
-          onValueChange={(v) => onSortChange(v as SortOption)}
-        >
-          <SelectTrigger className="w-36 !h-[38px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">{t("sortNewest")}</SelectItem>
-            <SelectItem value="oldest">{t("sortOldest")}</SelectItem>
-            <SelectItem value="az">{t("sortAZ")}</SelectItem>
-            <SelectItem value="za">{t("sortZA")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-        {[null, ...RECIPE_CATEGORIES].map((cat) => {
-          const isActive = category === cat;
-          return (
-            <button
-              type="button"
-              key={cat ?? "__all__"}
-              onClick={() => onCategoryChange(cat)}
-              className="shrink-0 transition-all"
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "9px 14px",
+            borderRadius: 14,
+            border: "1px solid rgba(255,200,100,0.15)",
+            background: "rgba(255,170,50,0.07)",
+            color: "var(--fg-2)",
+            fontSize: 13,
+            fontFamily: "var(--font-sans)",
+            fontWeight: 500,
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <SlidersHorizontal size={14} />
+          Filters
+          {activeFilterCount > 0 && (
+            <span
               style={{
-                padding: "5px 12px",
+                position: "absolute",
+                top: -4,
+                right: -4,
+                background: "var(--action-primary)",
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: 700,
                 borderRadius: 99,
-                fontSize: 11,
-                fontWeight: isActive ? 600 : 500,
-                fontFamily: "var(--font-sans)",
-                cursor: "pointer",
-                border: `1px solid ${isActive ? "rgba(255,210,120,0.50)" : "rgba(255,200,100,0.12)"}`,
-                background: isActive ? "rgba(255,160,40,0.18)" : "transparent",
-                color: isActive ? "var(--fg-1)" : "var(--fg-3)",
-                backdropFilter: isActive ? "blur(12px)" : undefined,
-                WebkitBackdropFilter: isActive ? "blur(12px)" : undefined,
+                width: 16,
+                height: 16,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {cat ?? t("all")}
-            </button>
-          );
-        })}
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </div>
-      <StatusChips active={status} onChange={onStatusChange} />
+
+      <FilterSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        sort={sort}
+        onSortChange={onSortChange}
+        category={category}
+        onCategoryChange={onCategoryChange}
+        status={status}
+        onStatusChange={onStatusChange}
+      />
     </div>
   );
 }
