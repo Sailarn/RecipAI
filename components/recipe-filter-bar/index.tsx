@@ -41,6 +41,11 @@ export function RecipeFilterBar({
   const t = useTranslations("recipes");
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  const activeCollection = collections.find((c) => c.id === activeCollectionId);
+  const searchPlaceholder = activeCollection
+    ? `Search in ${activeCollection.name}...`
+    : t("searchPlaceholder");
+
   const activeFilterCount = [
     category !== null,
     status !== "all",
@@ -86,7 +91,7 @@ export function RecipeFilterBar({
             type="search"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t("searchPlaceholder")}
+            placeholder={searchPlaceholder}
             className="transition-colors"
             style={{
               width: "100%",
@@ -112,7 +117,7 @@ export function RecipeFilterBar({
             display: "flex",
             alignItems: "center",
             gap: 6,
-            padding: "9px 14px",
+            padding: "9px 11px",
             borderRadius: 14,
             border: "1px solid rgba(255,200,100,0.15)",
             background: "rgba(255,170,50,0.07)",
@@ -124,8 +129,7 @@ export function RecipeFilterBar({
             flexShrink: 0,
           }}
         >
-          <SlidersHorizontal size={14} />
-          Filters
+          <SlidersHorizontal size={16} />
           {activeFilterCount > 0 && (
             <span
               style={{

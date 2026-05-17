@@ -23,8 +23,8 @@ describe("FilterSheet", () => {
 
   it("renders all four sort options", () => {
     render(<FilterSheet {...defaultProps} />);
-    expect(screen.getByText("Newest")).toBeInTheDocument();
-    expect(screen.getByText("Oldest")).toBeInTheDocument();
+    expect(screen.getByText("Newest first")).toBeInTheDocument();
+    expect(screen.getByText("Oldest first")).toBeInTheDocument();
     expect(screen.getByText("A → Z")).toBeInTheDocument();
     expect(screen.getByText("Z → A")).toBeInTheDocument();
   });
@@ -32,8 +32,29 @@ describe("FilterSheet", () => {
   it("calls onSortChange when a sort option is clicked", () => {
     const onSortChange = vi.fn();
     render(<FilterSheet {...defaultProps} onSortChange={onSortChange} />);
-    fireEvent.click(screen.getByText("Oldest"));
+    fireEvent.click(screen.getByText("Oldest first"));
     expect(onSortChange).toHaveBeenCalledWith("oldest");
+  });
+
+  it("calls all reset handlers when Reset is clicked", () => {
+    const onSortChange = vi.fn();
+    const onCategoryChange = vi.fn();
+    const onStatusChange = vi.fn();
+    render(
+      <FilterSheet
+        {...defaultProps}
+        sort="az"
+        category="Dinner"
+        status="tried"
+        onSortChange={onSortChange}
+        onCategoryChange={onCategoryChange}
+        onStatusChange={onStatusChange}
+      />,
+    );
+    fireEvent.click(screen.getByText("Reset"));
+    expect(onSortChange).toHaveBeenCalledWith("newest");
+    expect(onCategoryChange).toHaveBeenCalledWith(null);
+    expect(onStatusChange).toHaveBeenCalledWith("all");
   });
 
   it("renders All status option and calls onStatusChange", () => {
