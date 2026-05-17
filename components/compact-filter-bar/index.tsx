@@ -74,22 +74,16 @@ export function CompactFilterBar({
         alignItems: "center",
         gap: 8,
         padding: "8px 14px",
-        background: "var(--glass-subtle-bg)",
-        backdropFilter: "var(--glass-subtle-blur)",
-        WebkitBackdropFilter: "var(--glass-subtle-blur)",
-        borderBottom: "1px solid rgba(255,200,100,0.12)",
+        background: "var(--glass-nav-bg)",
+        backdropFilter: "var(--glass-nav-blur)",
+        WebkitBackdropFilter: "var(--glass-nav-blur)",
+        borderBottom: "1px solid rgba(255,200,100,0.14)",
         cursor: "pointer",
         textAlign: "left",
         overflowX: "auto",
         scrollbarWidth: "none",
       }}
     >
-      <ChevronUp
-        size={14}
-        aria-label="scroll to top"
-        style={{ color: "var(--fg-3)", flexShrink: 0 }}
-      />
-
       <Chip label={collectionLabel} color="rgba(251,191,36,1)" />
 
       {search && (
@@ -105,6 +99,12 @@ export function CompactFilterBar({
       {sort !== "newest" && (
         <Chip label={SORT_LABELS[sort]} color="rgba(167,139,250,1)" />
       )}
+
+      <ChevronUp
+        size={14}
+        aria-label="scroll to top"
+        style={{ color: "var(--fg-3)", flexShrink: 0, marginLeft: "auto" }}
+      />
     </button>
   );
 }
