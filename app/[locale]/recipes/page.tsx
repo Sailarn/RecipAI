@@ -24,6 +24,7 @@ import { getAllRecipes } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 
 let _recipesCache: Recipe[] | undefined;
+let _collectionsCache: Collection[] | undefined;
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -59,7 +60,9 @@ export default function RecipesPage() {
     setCollectionId,
     filtered,
   } = useRecipeFilter(recipes ?? []);
-  const collections = useLiveQuery(() => getAllCollections(), []) ?? [];
+  const collectionsFromDB = useLiveQuery(() => getAllCollections(), []);
+  if (collectionsFromDB !== undefined) _collectionsCache = collectionsFromDB;
+  const collections = collectionsFromDB ?? _collectionsCache ?? [];
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(
     null,

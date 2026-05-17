@@ -76,16 +76,6 @@ describe("useSyncOnLogin", () => {
       await new Promise((r) => setTimeout(r, 10));
       expect(mockFetch).not.toHaveBeenCalled();
     });
-
-    it("does not fetch when localRecipes is undefined (still loading)", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      vi.mocked(useLiveQuery).mockReturnValue(undefined as any);
-      renderHook(() => useSyncOnLogin());
-      await new Promise((r) => setTimeout(r, 10));
-      expect(mockFetch).not.toHaveBeenCalled();
-    });
   });
 
   describe("diff-based sync flow", () => {

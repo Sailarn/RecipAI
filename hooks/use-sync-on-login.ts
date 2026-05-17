@@ -1,6 +1,5 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
@@ -63,12 +62,11 @@ function parseServerCollections(raw: unknown[]): Collection[] {
 
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
-  const localRecipes = useLiveQuery(() => db.recipes.toArray());
   const hasSynced = useRef(false);
   const navigate = useNavigate();
 
   const sync = useCallback(async () => {
-    if (!session || localRecipes === undefined) return;
+    if (!session) return;
 
     try {
       const [recipesRes, collectionsRes] = await Promise.all([
@@ -84,12 +82,12 @@ export function useSyncOnLogin() {
         rawServerCollections ?? [],
       );
 
-      const [localRecipesFull, localCollections] = await Promise.all([
+      const [localRecipes, localCollections] = await Promise.all([
         db.recipes.toArray(),
         db.collections.toArray(),
       ]);
 
-      const recipeDiff = computeDiff<Recipe>(localRecipesFull, serverRecipes);
+      const recipeDiff = computeDiff<Recipe>(localRecipes, serverRecipes);
       const collectionDiff = computeDiff<Collection>(
         localCollections,
         serverCollections,
@@ -119,13 +117,13 @@ export function useSyncOnLogin() {
       toast.error("Sync failed — check your connection");
       hasSynced.current = false;
     }
-  }, [session, localRecipes, navigate]);
+  }, [session, navigate]);
 
   useEffect(() => {
-    if (!session || localRecipes === undefined || hasSynced.current) return;
+    if (!session || hasSynced.current) return;
     hasSynced.current = true;
     sync();
-  }, [session, localRecipes, sync]);
+  }, [session, sync]);
 
   const triggerSync = useCallback(async () => {
     hasSynced.current = false;
