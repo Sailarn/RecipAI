@@ -1,6 +1,5 @@
 "use client";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
@@ -10,18 +9,22 @@ import { RecipeDetail } from "@/components/recipe-detail";
 import { RecipeImage } from "@/components/recipe-image";
 import { Badge } from "@/components/ui/badge";
 import { useLongPress } from "@/hooks/use-long-press";
-import { getAllCollections } from "@/lib/db/collections";
 import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
-import type { Recipe } from "@/lib/db/schema";
+import type { Collection, Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
 interface RecipeCardProps {
   recipe: Recipe;
+  collections: Collection[];
   priority?: boolean;
 }
 
-export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
+export function RecipeCard({
+  recipe,
+  collections,
+  priority = false,
+}: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
   const navigate = useNavigate();
@@ -30,7 +33,6 @@ export function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
 
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
-  const collections = useLiveQuery(() => getAllCollections(), []) ?? [];
   const didLongPress = useRef(false);
 
   const handleLongPress = useCallback(() => {

@@ -226,6 +226,7 @@ export default function RecipesPage() {
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
+                collections={collections}
                 priority={index < 2}
               />
             ))}
