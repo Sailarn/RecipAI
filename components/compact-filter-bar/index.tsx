@@ -65,10 +65,11 @@ export function CompactFilterBar({
       type="button"
       onClick={onScrollTop}
       style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-        width: "100%",
+        position: "fixed",
+        top: "env(safe-area-inset-top)",
+        left: 0,
+        right: 0,
+        zIndex: 100,
         display: "flex",
         alignItems: "center",
         gap: 8,

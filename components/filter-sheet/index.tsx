@@ -82,12 +82,34 @@ export function FilterSheet({
       <SheetContent
         side="bottom"
         aria-describedby={undefined}
+        showCloseButton={false}
         className="rounded-t-2xl z-[300]"
         style={{
+          borderTop: "1px solid rgba(251,191,36,0.28)",
+          borderLeft: "1px solid rgba(251,191,36,0.28)",
+          borderRight: "1px solid rgba(251,191,36,0.28)",
           paddingBottom: "max(24px, env(safe-area-inset-bottom))",
         }}
       >
-        <SheetHeader className="flex-row items-center justify-between mb-6">
+        {/* Drag handle */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            paddingTop: 10,
+            paddingBottom: 2,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 99,
+              background: "rgba(255,200,100,0.28)",
+            }}
+          />
+        </div>
+        <SheetHeader className="flex-row items-center justify-between mb-2">
           <SheetTitle style={{ fontSize: 20, fontWeight: 700 }}>
             Filters
           </SheetTitle>

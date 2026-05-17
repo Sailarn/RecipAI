@@ -73,17 +73,17 @@ export default function RecipesPage() {
     null,
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const grid = gridRef.current;
+    const container = scrollRef.current;
     const sentinel = sentinelRef.current;
-    if (!grid || !sentinel) return;
+    if (!container || !sentinel) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => setIsCollapsed(!entry.isIntersecting),
-      { root: grid, threshold: 0 },
+      { root: container, threshold: 0 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -99,33 +99,35 @@ export default function RecipesPage() {
 
   return (
     <div
+      ref={scrollRef}
       style={{
         height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
+        overflowY: "auto",
+        WebkitOverflowScrolling: "touch" as never,
       }}
     >
-      {/* Fixed header: greeting, title, actions, filter bar */}
+      {/* Pull-to-refresh indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div
+          className="flex justify-center text-sm transition-all"
+          style={{
+            height: pullDistance || 32,
+            color: "var(--fg-3)",
+            paddingTop: 8,
+          }}
+        >
+          {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
+        </div>
+      )}
+
+      {/* Greeting, title, actions + filter bar — all scroll away */}
       <div
         style={{
           paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))",
           paddingLeft: 14,
           paddingRight: 14,
-          flexShrink: 0,
-          position: "relative",
-          zIndex: 1,
         }}
       >
-        {(pullDistance > 0 || isRefreshing) && (
-          <div
-            className="flex justify-center text-sm pb-2 transition-all"
-            style={{ height: pullDistance || 32, color: "var(--fg-3)" }}
-          >
-            {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
-          </div>
-        )}
-
         <div
           style={{
             display: "flex",
@@ -193,52 +195,34 @@ export default function RecipesPage() {
           </div>
         </div>
 
-        <div style={{ visibility: isCollapsed ? "hidden" : "visible" }}>
-          <RecipeFilterBar
-            search={search}
-            onSearchChange={setSearch}
-            sort={sort}
-            onSortChange={setSort}
-            category={category}
-            onCategoryChange={setCategory}
-            status={status}
-            onStatusChange={setStatus}
-            collections={collections}
-            activeCollectionId={collectionId}
-            onCollectionChange={setCollectionId}
-            onCreateCollection={() => setShowNewCollection(true)}
-            onCollectionLongPress={setEditingCollection}
-          />
-        </div>
+        <RecipeFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          sort={sort}
+          onSortChange={setSort}
+          category={category}
+          onCategoryChange={setCategory}
+          status={status}
+          onStatusChange={setStatus}
+          collections={collections}
+          activeCollectionId={collectionId}
+          onCollectionChange={setCollectionId}
+          onCreateCollection={() => setShowNewCollection(true)}
+          onCollectionLongPress={setEditingCollection}
+        />
       </div>
 
-      {/* Scrollable recipe list */}
+      {/* Sentinel — when this exits the scroll container, compact bar appears */}
+      <div ref={sentinelRef} style={{ height: 0 }} />
+
+      {/* Recipe list */}
       <div
-        ref={gridRef}
         style={{
-          flex: 1,
-          overflowY: "auto",
           paddingLeft: 14,
           paddingRight: 14,
           paddingBottom: 110,
         }}
       >
-        <div ref={sentinelRef} style={{ height: 0 }} />
-
-        {isCollapsed && (
-          <CompactFilterBar
-            activeCollectionId={collectionId}
-            collections={collections}
-            search={search}
-            sort={sort}
-            category={category}
-            status={status}
-            onScrollTop={() =>
-              gridRef.current?.scrollTo({ top: 0, behavior: "smooth" })
-            }
-          />
-        )}
-
         {filtered.length === 0 && search ? (
           <p
             style={{
@@ -270,6 +254,22 @@ export default function RecipesPage() {
           </div>
         )}
       </div>
+
+      {/* Compact bar — fixed at top when filter bar has scrolled off screen */}
+      {isCollapsed && (
+        <CompactFilterBar
+          activeCollectionId={collectionId}
+          collections={collections}
+          search={search}
+          sort={sort}
+          category={category}
+          status={status}
+          onScrollTop={() =>
+            scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+          }
+        />
+      )}
+
       {showNewCollection && (
         <NewCollectionModal
           onClose={() => setShowNewCollection(false)}
