@@ -77,6 +77,7 @@ export default function RecipesPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (loading) return;
     const container = scrollRef.current;
     const sentinel = sentinelRef.current;
     if (!container || !sentinel) return;
@@ -87,7 +88,7 @@ export default function RecipesPage() {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
