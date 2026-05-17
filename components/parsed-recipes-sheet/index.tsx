@@ -108,11 +108,12 @@ export function ParsedRecipesSheet() {
       <SheetContent
         side="top"
         className="max-h-[80vh] overflow-y-auto rounded-b-2xl"
+        aria-describedby={undefined}
       >
         <SheetHeader className="mb-4">
           <SheetTitle>Notifications</SheetTitle>
         </SheetHeader>
-        <div className="space-y-3 pb-6">
+        <div className="space-y-3 px-4 pb-6">
           {syncCount > 0 && (
             <div
               className="p-4 rounded-xl space-y-2"
