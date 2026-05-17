@@ -5,7 +5,8 @@ import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CompactFilterBar } from "@/components/compact-filter-bar";
 import { EditCollectionModal } from "@/components/edit-collection-modal";
 import { NewCollectionModal } from "@/components/new-collection-modal";
 import { RecipeCard } from "@/components/recipe-card";
@@ -71,6 +72,23 @@ export default function RecipesPage() {
   const [editingCollection, setEditingCollection] = useState<Collection | null>(
     null,
   );
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    const sentinel = sentinelRef.current;
+    if (!grid || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsCollapsed(!entry.isIntersecting),
+      { root: grid, threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   const { triggerSync } = useSyncOnLogin();
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
@@ -175,25 +193,28 @@ export default function RecipesPage() {
           </div>
         </div>
 
-        <RecipeFilterBar
-          search={search}
-          onSearchChange={setSearch}
-          sort={sort}
-          onSortChange={setSort}
-          category={category}
-          onCategoryChange={setCategory}
-          status={status}
-          onStatusChange={setStatus}
-          collections={collections}
-          activeCollectionId={collectionId}
-          onCollectionChange={setCollectionId}
-          onCreateCollection={() => setShowNewCollection(true)}
-          onCollectionLongPress={setEditingCollection}
-        />
+        <div style={{ visibility: isCollapsed ? "hidden" : "visible" }}>
+          <RecipeFilterBar
+            search={search}
+            onSearchChange={setSearch}
+            sort={sort}
+            onSortChange={setSort}
+            category={category}
+            onCategoryChange={setCategory}
+            status={status}
+            onStatusChange={setStatus}
+            collections={collections}
+            activeCollectionId={collectionId}
+            onCollectionChange={setCollectionId}
+            onCreateCollection={() => setShowNewCollection(true)}
+            onCollectionLongPress={setEditingCollection}
+          />
+        </div>
       </div>
 
       {/* Scrollable recipe list */}
       <div
+        ref={gridRef}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -202,6 +223,22 @@ export default function RecipesPage() {
           paddingBottom: 110,
         }}
       >
+        <div ref={sentinelRef} style={{ height: 0 }} />
+
+        {isCollapsed && (
+          <CompactFilterBar
+            activeCollectionId={collectionId}
+            collections={collections}
+            search={search}
+            sort={sort}
+            category={category}
+            status={status}
+            onScrollTop={() =>
+              gridRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+            }
+          />
+        )}
+
         {filtered.length === 0 && search ? (
           <p
             style={{
