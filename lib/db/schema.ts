@@ -38,6 +38,8 @@ export interface Recipe {
   description?: string;
   imageUrl?: string;
   imageFileId?: string;
+  imageFocusX?: number;
+  imageFocusY?: number;
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;

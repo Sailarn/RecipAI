@@ -113,8 +113,8 @@ export function RecipeCard({
             title={recipe.title}
             sizes="(max-width: 768px) 50vw, 33vw"
             width={300}
-            height={96}
             priority={priority}
+            objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
           />
           {recipe.category && (
             <div style={{ position: "absolute", top: 7, left: 7 }}>

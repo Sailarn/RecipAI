@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { RecipeImage } from "@/components/recipe-image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -137,17 +138,13 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           }}
         >
           {recipe.imageUrl ? (
-            // biome-ignore lint/performance/noImgElement: ImageKit URLs use on-the-fly transforms incompatible with next/image loader
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
+            <RecipeImage
+              imageUrl={recipe.imageUrl}
+              title={recipe.title}
+              width={800}
+              sizes="100vw"
+              priority
+              objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
             />
           ) : (
             <span>{"🍽️"}</span>

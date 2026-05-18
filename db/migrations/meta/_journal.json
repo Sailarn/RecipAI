@@ -57,6 +57,13 @@
       "when": 1778623127062,
       "tag": "0007_acoustic_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779119481819,
+      "tag": "0008_chief_quentin_quire",
+      "breakpoints": true
     }
   ]
 }

@@ -66,7 +66,6 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
                       imageUrl={step.imageUrl}
                       title={`Step ${step.order}`}
                       width={600}
-                      height={160}
                       sizes="(max-width: 768px) 100vw, 600px"
                     />
                   </div>

@@ -2,8 +2,13 @@
 
 import { ImageIcon, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import {
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+  useWatch,
+} from "react-hook-form";
 import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import type { RecipeFormData } from "./schema";
@@ -13,6 +18,9 @@ interface BasicInfoProps {
   errors: FieldErrors<RecipeFormData>;
   control: Control<RecipeFormData>;
   onFileSelect: (file: File | null) => void;
+  focusX: number;
+  focusY: number;
+  onFocusChange: (x: number, y: number) => void;
 }
 
 const LABEL_STYLE: React.CSSProperties = {
@@ -27,16 +35,122 @@ const REQUIRED_STAR: React.CSSProperties = {
   color: "rgba(239,68,68,0.8)",
 };
 
+function FocalPointPicker({
+  imageSrc,
+  focusX,
+  focusY,
+  onChange,
+}: {
+  imageSrc: string;
+  focusX: number;
+  focusY: number;
+  onChange: (x: number, y: number) => void;
+}) {
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(
+      0,
+      Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)),
+    );
+    const y = Math.max(
+      0,
+      Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)),
+    );
+    onChange(x, y);
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        aria-label="Tap to set focal point"
+        onClick={handleClick}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: 160,
+          borderRadius: 12,
+          overflow: "hidden",
+          cursor: "crosshair",
+          border: "1px solid rgba(255,200,100,0.18)",
+          padding: 0,
+          background: "none",
+          display: "block",
+        }}
+      >
+        {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
+        <img
+          src={imageSrc}
+          alt="Focal point preview"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: `${focusX}% ${focusY}%`,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: `${focusX}%`,
+            top: `${focusY}%`,
+            transform: "translate(-50%, -50%)",
+            width: 18,
+            height: 18,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.95)",
+            boxShadow: "0 0 0 2px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.5)",
+            pointerEvents: "none",
+          }}
+        />
+      </button>
+      <p
+        style={{
+          fontSize: 11,
+          color: "var(--fg-2)",
+          marginTop: 4,
+          textAlign: "center",
+        }}
+      >
+        Tap to set focus point
+      </p>
+    </div>
+  );
+}
+
 export function BasicInfo({
   register,
   errors,
-  control: _control,
+  control,
   onFileSelect,
+  focusX,
+  focusY,
+  onFocusChange,
 }: BasicInfoProps) {
   const t = useTranslations("recipeForm");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const onFileSelectRef = useRef(onFileSelect);
+  onFileSelectRef.current = onFileSelect;
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const currentImageUrl = useWatch({ control, name: "imageUrl" });
+
+  useEffect(() => {
+    function handlePaste(e: ClipboardEvent) {
+      const item = Array.from(e.clipboardData?.items ?? []).find((i) =>
+        i.type.startsWith("image/"),
+      );
+      if (!item) return;
+      const file = item.getAsFile();
+      if (!file) return;
+      onFileSelectRef.current(file);
+      setPreview(URL.createObjectURL(file));
+    }
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -50,6 +164,8 @@ export function BasicInfo({
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
+
+  const pickerSrc = preview ?? (currentImageUrl || null);
 
   return (
     <div className="space-y-4">
@@ -94,7 +210,6 @@ export function BasicInfo({
                 type="button"
                 onClick={() => {
                   setSelectedCategory(isActive ? "" : cat);
-                  // We use a hidden input to store the category value
                   const input = document.getElementById(
                     "category-input",
                   ) as HTMLInputElement;
@@ -189,43 +304,39 @@ export function BasicInfo({
             {errors.imageUrl.message}
           </p>
         )}
-        {preview && (
-          <div
-            style={{
-              position: "relative",
-              marginTop: 8,
-              width: 96,
-              height: 96,
-              borderRadius: 12,
-              overflow: "hidden",
-              border: "1px solid rgba(255,200,100,0.18)",
-            }}
-          >
-            {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
-            <img
-              src={preview}
-              alt="Preview"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        <p style={{ fontSize: 11, color: "var(--fg-2)", marginTop: 4 }}>
+          or ⌘V / Ctrl+V to paste
+        </p>
+        {pickerSrc && (
+          <div style={{ position: "relative", marginTop: 8 }}>
+            <FocalPointPicker
+              imageSrc={pickerSrc}
+              focusX={focusX}
+              focusY={focusY}
+              onChange={onFocusChange}
             />
-            <button
-              type="button"
-              onClick={handleClearFile}
-              style={{
-                position: "absolute",
-                top: 4,
-                right: 4,
-                background: "rgba(0,0,0,0.6)",
-                borderRadius: "50%",
-                padding: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              <X size={12} color="white" />
-            </button>
+            {preview && (
+              <button
+                type="button"
+                onClick={handleClearFile}
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  background: "rgba(0,0,0,0.6)",
+                  borderRadius: "50%",
+                  padding: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "none",
+                  cursor: "pointer",
+                  zIndex: 10,
+                }}
+              >
+                <X size={12} color="white" />
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -292,7 +403,6 @@ export function BasicInfo({
                 fontSize: 11,
                 color: "rgba(239,68,68,0.85)",
                 marginTop: 4,
-                paddingLeft: 2,
               }}
             >
               {errors.servings.message}

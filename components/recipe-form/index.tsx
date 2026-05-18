@@ -37,6 +37,8 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     control,
     handleSubmit,
     trigger,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<RecipeFormData>({
     // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
@@ -121,6 +123,12 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
               errors={errors}
               onFileSelect={(file) => {
                 pendingImageFile.current = file;
+              }}
+              focusX={watch("imageFocusX") ?? 50}
+              focusY={watch("imageFocusY") ?? 50}
+              onFocusChange={(x, y) => {
+                setValue("imageFocusX", x);
+                setValue("imageFocusY", y);
               }}
             />
           )}

@@ -46,6 +46,8 @@ export function createRecipeSchema(t: (key: string) => string) {
       .optional(),
     sourceUrl: z.string().url().or(z.literal("")).optional(),
     category: z.string().optional(),
+    imageFocusX: z.number().min(0).max(100).optional(),
+    imageFocusY: z.number().min(0).max(100).optional(),
   });
 }
 

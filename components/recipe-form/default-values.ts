@@ -45,6 +45,8 @@ export function getDefaultValues(
       })),
       sourceUrl: recipe.sourceUrl || "",
       category: recipe.category || "",
+      imageFocusX: recipe.imageFocusX,
+      imageFocusY: recipe.imageFocusY,
     };
   }
 
