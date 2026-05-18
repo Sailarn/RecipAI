@@ -6,6 +6,7 @@ import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
+import { NavLens } from "./nav-lens";
 import { NavPill } from "./nav-pill";
 import { PILL_H, useBottomNav } from "./use-bottom-nav";
 
@@ -84,8 +85,20 @@ export function BottomNav() {
           className="glass-nav flex items-center rounded-[28px] px-0 py-0 relative select-none touch-none"
           style={{ overflow: "visible" }}
         >
+          {/* Pill glass indicator — z:1, below items and lens layer */}
           {ready && (
             <NavPill leftMv={leftMv} yNormal={yNormal} hidden={isAiActive} />
+          )}
+
+          {/* Lens distortion layer — z:5, clipped to pill bounds, pointer-none */}
+          {ready && (
+            <NavLens
+              items={items}
+              leftMv={leftMv}
+              measure={measure}
+              displayActiveIndex={staticActiveIndex}
+              yNormal={yNormal}
+            />
           )}
 
           {items.map((item, i) => (
