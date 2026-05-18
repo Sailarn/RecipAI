@@ -60,7 +60,11 @@ export function useRecipeSave(recipe: Recipe | undefined, locale: string) {
     setSaveState("saved");
 
     setTimeout(() => {
-      navigate.push(routes.recipes.list(locale));
+      if (recipe) {
+        navigate.back();
+      } else {
+        navigate.replace(routes.recipes.list(locale));
+      }
     }, 600);
 
     // upload images in background after navigation
