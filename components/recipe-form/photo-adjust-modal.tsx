@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
+import { FocalPointPicker } from "./focal-point-picker";
 
 // Aspect ratios match actual display sizes in the app
 const PREVIEWS = [
@@ -25,19 +26,6 @@ export function PhotoAdjustModal({
   onChange,
   onClose,
 }: PhotoAdjustModalProps) {
-  function handlePickerClick(e: React.MouseEvent<HTMLButtonElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(
-      0,
-      Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)),
-    );
-    const y = Math.max(
-      0,
-      Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)),
-    );
-    onChange(x, y);
-  }
-
   const objectPosition = `${focusX}% ${focusY}%`;
 
   return createPortal(
@@ -70,7 +58,7 @@ export function PhotoAdjustModal({
             fontFamily: "var(--font-display)",
           }}
         >
-          Adjust photo focus
+          Adjust photo
         </p>
         <button
           type="button"
@@ -96,84 +84,21 @@ export function PhotoAdjustModal({
       {/* Focal point picker */}
       <div style={{ padding: "0 16px", flexShrink: 0 }}>
         <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
-          Tap to set focus point
+          Drag to set focus point
         </p>
-        <button
-          type="button"
-          onClick={handlePickerClick}
-          aria-label="Set focal point"
-          style={{
-            position: "relative",
-            width: "100%",
-            height: 210,
-            borderRadius: 14,
-            overflow: "hidden",
-            cursor: "crosshair",
-            border: "1px solid rgba(255,200,100,0.20)",
-            padding: 0,
-            background: "none",
-            display: "block",
-            flexShrink: 0,
-          }}
-        >
-          {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-          <img
-            src={imageSrc}
-            alt="Set focus"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition,
-              pointerEvents: "none",
-              userSelect: "none",
-            }}
-          />
-          {/* Focus crosshair dot */}
-          <div
-            style={{
-              position: "absolute",
-              left: `${focusX}%`,
-              top: `${focusY}%`,
-              transform: "translate(-50%, -50%)",
-              width: 22,
-              height: 22,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.95)",
-              boxShadow:
-                "0 0 0 2px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.6)",
-              pointerEvents: "none",
-            }}
-          />
-          {/* Crosshair lines */}
-          <div
-            style={{
-              position: "absolute",
-              left: `${focusX}%`,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              background: "rgba(255,255,255,0.25)",
-              transform: "translateX(-50%)",
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: `${focusY}%`,
-              left: 0,
-              right: 0,
-              height: 1,
-              background: "rgba(255,255,255,0.25)",
-              transform: "translateY(-50%)",
-              pointerEvents: "none",
-            }}
-          />
-        </button>
+        <FocalPointPicker
+          imageSrc={imageSrc}
+          focusX={focusX}
+          focusY={focusY}
+          height={210}
+          borderRadius={14}
+          dotSize={22}
+          showCrosshair
+          onChange={onChange}
+        />
       </div>
 
-      {/* Crop previews */}
+      {/* Previews */}
       <div style={{ padding: "20px 16px 40px" }}>
         <p
           style={{

@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
+import { FocalPointPicker } from "./focal-point-picker";
 import { PhotoAdjustModal } from "./photo-adjust-modal";
 import type { RecipeFormData } from "./schema";
 
@@ -35,91 +36,6 @@ const LABEL_STYLE: React.CSSProperties = {
 const REQUIRED_STAR: React.CSSProperties = {
   color: "rgba(239,68,68,0.8)",
 };
-
-function FocalPointPicker({
-  imageSrc,
-  focusX,
-  focusY,
-  onChange,
-}: {
-  imageSrc: string;
-  focusX: number;
-  focusY: number;
-  onChange: (x: number, y: number) => void;
-}) {
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(
-      0,
-      Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)),
-    );
-    const y = Math.max(
-      0,
-      Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)),
-    );
-    onChange(x, y);
-  }
-
-  return (
-    <div>
-      <button
-        type="button"
-        aria-label="Tap to set focal point"
-        onClick={handleClick}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: 160,
-          borderRadius: 12,
-          overflow: "hidden",
-          cursor: "crosshair",
-          border: "1px solid rgba(255,200,100,0.18)",
-          padding: 0,
-          background: "none",
-          display: "block",
-        }}
-      >
-        {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-        <img
-          src={imageSrc}
-          alt="Focal point preview"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: `${focusX}% ${focusY}%`,
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            left: `${focusX}%`,
-            top: `${focusY}%`,
-            transform: "translate(-50%, -50%)",
-            width: 18,
-            height: 18,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.95)",
-            boxShadow: "0 0 0 2px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.5)",
-            pointerEvents: "none",
-          }}
-        />
-      </button>
-      <p
-        style={{
-          fontSize: 11,
-          color: "var(--fg-2)",
-          marginTop: 4,
-          textAlign: "center",
-        }}
-      >
-        Tap to set focus point
-      </p>
-    </div>
-  );
-}
 
 export function BasicInfo({
   register,
@@ -317,6 +233,16 @@ export function BasicInfo({
               focusY={focusY}
               onChange={onFocusChange}
             />
+            <p
+              style={{
+                fontSize: 11,
+                color: "var(--fg-2)",
+                marginTop: 4,
+                textAlign: "center",
+              }}
+            >
+              Drag to set focus point
+            </p>
             {preview && (
               <button
                 type="button"
