@@ -49,7 +49,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
 
   const handleDelete = async () => {
     await deleteRecipe(recipeId);
-    navigate.push(routes.recipes.list(locale));
+    navigate.back();
   };
 
   if (loading) {
