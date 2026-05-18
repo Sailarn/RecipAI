@@ -13,8 +13,16 @@ export function usePullToRefresh({
 }: UsePullToRefreshOptions) {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const startY = useRef(0);
   const isPulling = useRef(false);
+  const pullDistanceRef = useRef(0);
+  const isRefreshingRef = useRef(false);
+  // Keep a ref to always call the latest onRefresh without re-subscribing
+  const onRefreshRef = useRef(onRefresh);
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
@@ -24,22 +32,31 @@ export function usePullToRefresh({
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!isPulling.current || isRefreshing) return;
+      if (!isPulling.current || isRefreshingRef.current) return;
       const delta = e.touches[0].clientY - startY.current;
-      if (delta < 0) return;
-      setPullDistance(Math.min(delta * 0.4, threshold));
+      if (delta < 0) {
+        isPulling.current = false;
+        return;
+      }
+      const next = Math.min(delta * 0.4, threshold);
+      pullDistanceRef.current = next;
+      setPullDistance(next);
     };
 
     const onTouchEnd = async () => {
       if (!isPulling.current) return;
       isPulling.current = false;
 
-      if (pullDistance >= threshold) {
+      if (pullDistanceRef.current >= threshold) {
+        isRefreshingRef.current = true;
         setIsRefreshing(true);
+        pullDistanceRef.current = 0;
         setPullDistance(0);
-        await onRefresh();
+        await onRefreshRef.current();
+        isRefreshingRef.current = false;
         setIsRefreshing(false);
       } else {
+        pullDistanceRef.current = 0;
         setPullDistance(0);
       }
     };
@@ -53,7 +70,7 @@ export function usePullToRefresh({
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [pullDistance, isRefreshing, onRefresh, threshold]);
+  }, [threshold]);
 
   return { pullDistance, isRefreshing };
 }

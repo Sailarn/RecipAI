@@ -339,7 +339,7 @@ export default function SyncReviewPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               type="button"
-              onClick={() => navigate.replace(routes.profile(locale))}
+              onClick={() => navigate.replace(routes.recipes.list(locale))}
               aria-label="Back"
               style={{
                 background: "none",
