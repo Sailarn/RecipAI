@@ -1,10 +1,10 @@
 "use client";
 
-import { useNavigate } from "@/lib/transitions";
 import { TAB_KEYS, type TabKey } from "./use-tab-navigation";
 
 interface FormHeaderProps {
   backLabel: string;
+  onBack: () => void;
   activeTab: TabKey;
   activeTabIndex: number;
   tabLabels: Record<TabKey, string>;
@@ -15,6 +15,7 @@ interface FormHeaderProps {
 
 export function FormHeader({
   backLabel,
+  onBack,
   activeTab: _activeTab,
   activeTabIndex,
   tabLabels,
@@ -22,7 +23,6 @@ export function FormHeader({
   getTabStyle,
   getTabPrefix,
 }: FormHeaderProps) {
-  const navigate = useNavigate();
   const progressPercent = ((activeTabIndex + 1) / TAB_KEYS.length) * 100;
 
   return (
@@ -44,7 +44,7 @@ export function FormHeader({
       >
         <button
           type="button"
-          onClick={() => navigate.back()}
+          onClick={onBack}
           style={{
             background: "none",
             border: "none",

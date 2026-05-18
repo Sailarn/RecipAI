@@ -38,7 +38,7 @@ vi.mock("sonner", () => ({
 }));
 
 vi.mock("@/lib/transitions", () => ({
-  useNavigate: vi.fn().mockReturnValue({ push: vi.fn(), back: vi.fn() }),
+  useNavigate: vi.fn().mockReturnValue({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
 
 import { useLiveQuery } from "dexie-react-hooks";

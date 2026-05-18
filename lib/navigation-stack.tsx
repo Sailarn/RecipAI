@@ -66,6 +66,13 @@ export function NavigationStackProvider({
   // Initialized to currentPage so the first navigation can detect stale content.
   const lastSyncedPage = useRef<React.ReactNode>(currentPage);
 
+  // Always-current refs so push() sees the latest pathname/page without needing
+  // them as callback deps (which would recreate push on every navigation).
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  const currentPageRef = useRef<React.ReactNode>(currentPage);
+  currentPageRef.current = currentPage;
+
   // Sync with real Next.js navigations (Link, router.push, etc.).
   useEffect(() => {
     if (stackPushing.current) {
@@ -115,9 +122,29 @@ export function NavigationStackProvider({
   const push = useCallback(
     (href: string, element: React.ReactNode) => {
       const id = `${Date.now()}-${Math.random()}`;
+
+      // Race-condition guard: the sync effect is async (useEffect), so if the
+      // user triggers a push immediately after a router.push tab-switch, the
+      // stack top may still carry the previous page's URL. Correct it in-place
+      // (preserving the entry's id so PageStack still detects an isPush) before
+      // appending the new entry, so pop() navigates back to the right page.
+      const currentEntries = entriesRef.current;
+      const top = currentEntries[currentEntries.length - 1];
+      let baseEntries = currentEntries;
+      if (top && top.href !== pathnameRef.current && currentPageRef.current) {
+        baseEntries = [
+          {
+            id: top.id,
+            href: pathnameRef.current,
+            element: currentPageRef.current,
+          },
+        ];
+        updateEntries(baseEntries);
+      }
+
       stackPushing.current = true;
       history.pushState(null, "", href);
-      updateEntries([...entriesRef.current, { id, href, element }]);
+      updateEntries([...baseEntries, { id, href, element }]);
     },
     [updateEntries],
   );

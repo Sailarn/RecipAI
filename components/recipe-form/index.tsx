@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Recipe } from "@/lib/db/schema";
+import { useNavigate } from "@/lib/transitions";
 import { BasicInfo } from "./basic-info";
 import { getDefaultValues, type ParsedRecipeData } from "./default-values";
 import { FormActionBar } from "./form-action-bar";
@@ -26,6 +27,9 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const params = useParams();
   const locale = params.locale as string;
   const t = useTranslations("recipeForm");
+  const navigate = useNavigate();
+
+  const handleFormBack = () => navigate.back();
   const recipeSchema = createRecipeSchema(t);
 
   const {
@@ -82,6 +86,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     >
       <FormHeader
         backLabel={recipe ? t("editTitle") : t("createTitle")}
+        onBack={handleFormBack}
         activeTab={activeTab}
         activeTabIndex={activeTabIndex}
         tabLabels={tabLabels}

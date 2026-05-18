@@ -29,13 +29,12 @@ export function pillLeft(index: number, m: Measure): number {
 
 interface UseBottomNavOptions {
   staticActiveIndex: number;
-  /** Incremented on each hide→show transition to force re-measurement. */
-  measureKey?: number;
+  shouldHide: boolean;
 }
 
 export function useBottomNav({
   staticActiveIndex,
-  measureKey,
+  shouldHide,
 }: UseBottomNavOptions) {
   const navRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
@@ -48,9 +47,31 @@ export function useBottomNav({
   // never flashes at position 0.
   const [ready, setReady] = useState(false);
 
-  // ─── Initial measurement ───────────────────────────────────────────────────
-  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv is a stable MotionValue ref
+  // Tracks the running animation so we can stop it before seeding a new position.
+  // Stopping prevents a stale animation (started while nav was hidden) from
+  // overriding the freshly-seeded value on the next animation frame.
+  const animCtrl = useRef<{ stop(): void } | null>(null);
+
+  // Tracks shouldHide from the previous layout-effect call.
+  // Mutating refs inside effects (not render) is safe in concurrent mode.
+  const prevShouldHideRef = useRef(shouldHide);
+
+  // True once the first measurement has completed.
+  const measuredRef = useRef(false);
+
+  // ─── Measure on mount and on hide→show ─────────────────────────────────────
+  // Fires when shouldHide or staticActiveIndex changes. staticActiveIndex is
+  // included so the closure always captures the current active tab when the
+  // nav transitions from hidden→visible (both can change in the same render).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv and animCtrl are stable refs
   useLayoutEffect(() => {
+    const wasHidden = prevShouldHideRef.current;
+    prevShouldHideRef.current = shouldHide;
+
+    if (shouldHide) return;
+    // Already visible and already measured: tab switches handled by the spring effect.
+    if (!wasHidden && measuredRef.current) return;
+
     if (!navRef.current) return;
     const navRect = navRef.current.getBoundingClientRect();
     const itemWidths: number[] = [];
@@ -62,19 +83,29 @@ export function useBottomNav({
       itemLefts.push(r.left - navRect.left);
     });
     const m: Measure = { itemWidths, itemLefts, innerHeight: navRect.height };
-    // Seed position BEFORE setReady so the pill never renders at the wrong spot.
+
+    // Stop any in-flight animation before snapping so it cannot override the
+    // seeded value on the next frame (leftMv.set does not cancel animations).
+    animCtrl.current?.stop();
     leftMv.set(pillLeft(staticActiveIndex, m));
+    measuredRef.current = true;
     setMeasure(m);
     setReady(true);
-  }, [measureKey]);
+  }, [shouldHide, staticActiveIndex]);
 
-  // ─── Route-change spring ───────────────────────────────────────────────────
-  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv is a stable MotionValue ref
+  // ─── Spring to active tab on route change ──────────────────────────────────
+  // shouldHide guards against drifting leftMv while the nav is hidden —
+  // when a route with no matching tab is active (e.g. /recipes/new) the
+  // staticActiveIndex falls back to 0, which would otherwise start a spring
+  // toward the wrong tab. Effect 1 already snaps on hide→show.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv and animCtrl are stable refs
   useLayoutEffect(() => {
     if (!measure) return;
+    if (shouldHide) return;
     const target = pillLeft(staticActiveIndex, measure);
-    animate(leftMv, target, SPRING);
-  }, [staticActiveIndex, measure]);
+    animCtrl.current?.stop();
+    animCtrl.current = animate(leftMv, target, SPRING);
+  }, [staticActiveIndex, measure, shouldHide]);
 
   return {
     navRef,

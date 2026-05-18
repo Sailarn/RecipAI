@@ -10,7 +10,7 @@ import {
   resolveNotification,
 } from "@/lib/db/notifications";
 import type { Collection, Recipe, SyncNotification } from "@/lib/db/schema";
-import { api } from "@/lib/routes";
+import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
 function parseRecipeSnapshot(json: string): Recipe {
@@ -171,7 +171,7 @@ function SectionHeader({
 export default function SyncReviewPage() {
   const navigate = useNavigate();
   const params = useParams();
-  const _locale = (params.locale as string) ?? "en";
+  const locale = (params.locale as string) ?? "en";
   const notifications = useLiveQuery(() => getAllNotifications()) as
     | SyncNotification[]
     | undefined;
@@ -308,7 +308,7 @@ export default function SyncReviewPage() {
   async function dismissAll() {
     await clearSyncNotifications();
     toast.success("Sync review cleared");
-    navigate.back();
+    navigate.replace(routes.profile(locale));
   }
 
   return (
@@ -339,7 +339,7 @@ export default function SyncReviewPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               type="button"
-              onClick={() => navigate.back()}
+              onClick={() => navigate.replace(routes.profile(locale))}
               aria-label="Back"
               style={{
                 background: "none",
