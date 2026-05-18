@@ -4,14 +4,13 @@ import { useRef, useState } from "react";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
-import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { generateId } from "@/lib/utils";
 import type { RecipeOutput } from "./schema";
 
 export type SaveState = "idle" | "saving" | "saved";
 
-export function useRecipeSave(recipe: Recipe | undefined, locale: string) {
+export function useRecipeSave(recipe: Recipe | undefined) {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -60,11 +59,7 @@ export function useRecipeSave(recipe: Recipe | undefined, locale: string) {
     setSaveState("saved");
 
     setTimeout(() => {
-      if (recipe) {
-        navigate.back();
-      } else {
-        navigate.replace(routes.recipes.list(locale));
-      }
+      navigate.back();
     }, 600);
 
     // upload images in background after navigation

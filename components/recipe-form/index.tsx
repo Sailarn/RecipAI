@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -24,8 +23,6 @@ interface RecipeFormProps {
 }
 
 export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
-  const params = useParams();
-  const locale = params.locale as string;
   const t = useTranslations("recipeForm");
   const navigate = useNavigate();
 
@@ -65,7 +62,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     pendingImageFile,
     pendingStepFiles,
     onSubmit,
-  } = useRecipeSave(recipe, locale);
+  } = useRecipeSave(recipe);
 
   const tabLabels = {
     info: t("tabInfo"),
