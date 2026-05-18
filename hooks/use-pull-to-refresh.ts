@@ -11,20 +11,27 @@ export function usePullToRefresh({
   onRefresh,
   threshold = 80,
 }: UsePullToRefreshOptions) {
-  const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const startY = useRef(0);
   const isPulling = useRef(false);
   const pullDistanceRef = useRef(0);
   const isRefreshingRef = useRef(false);
-  // Keep a ref to always call the latest onRefresh without re-subscribing
+  const indicatorRef = useRef<HTMLDivElement | null>(null);
   const onRefreshRef = useRef(onRefresh);
+
   useEffect(() => {
     onRefreshRef.current = onRefresh;
   }, [onRefresh]);
 
   useEffect(() => {
+    function setHeight(h: number, animated = false) {
+      const el = indicatorRef.current;
+      if (!el) return;
+      el.style.transition = animated ? "height 0.25s ease-out" : "none";
+      el.style.height = `${h}px`;
+    }
+
     const onTouchStart = (e: TouchEvent) => {
       if (window.scrollY !== 0) return;
       startY.current = e.touches[0].clientY;
@@ -40,7 +47,7 @@ export function usePullToRefresh({
       }
       const next = Math.min(delta * 0.4, threshold);
       pullDistanceRef.current = next;
-      setPullDistance(next);
+      setHeight(next);
     };
 
     const onTouchEnd = async () => {
@@ -48,16 +55,17 @@ export function usePullToRefresh({
       isPulling.current = false;
 
       if (pullDistanceRef.current >= threshold) {
+        setHeight(32);
+        pullDistanceRef.current = 0;
         isRefreshingRef.current = true;
         setIsRefreshing(true);
-        pullDistanceRef.current = 0;
-        setPullDistance(0);
         await onRefreshRef.current();
         isRefreshingRef.current = false;
         setIsRefreshing(false);
+        setHeight(0, true);
       } else {
         pullDistanceRef.current = 0;
-        setPullDistance(0);
+        setHeight(0, true);
       }
     };
 
@@ -72,5 +80,5 @@ export function usePullToRefresh({
     };
   }, [threshold]);
 
-  return { pullDistance, isRefreshing };
+  return { indicatorRef, isRefreshing };
 }

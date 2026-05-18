@@ -97,7 +97,7 @@ export default function RecipesPage() {
   }, [loading]);
 
   const { triggerSync } = useSyncOnLogin();
-  const { pullDistance, isRefreshing } = usePullToRefresh({
+  const { indicatorRef, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
   });
 
@@ -113,19 +113,14 @@ export default function RecipesPage() {
         WebkitOverflowScrolling: "touch" as never,
       }}
     >
-      {/* Pull-to-refresh indicator */}
-      {(pullDistance > 0 || isRefreshing) && (
-        <div
-          className="flex justify-center text-sm transition-all"
-          style={{
-            height: pullDistance || 32,
-            color: "var(--fg-3)",
-            paddingTop: 8,
-          }}
-        >
-          {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
-        </div>
-      )}
+      {/* Pull-to-refresh indicator — height driven directly via DOM ref, no React re-renders during drag */}
+      <div
+        ref={indicatorRef}
+        className="flex justify-center items-center text-sm overflow-hidden"
+        style={{ height: 0, color: "var(--fg-3)" }}
+      >
+        {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
+      </div>
 
       {/* Greeting, title, actions + filter bar — all scroll away */}
       <div
