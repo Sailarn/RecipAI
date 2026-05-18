@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -56,6 +56,19 @@ function previewImgStyle(
   };
 }
 
+const iconBtnStyle: CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
+  background: "rgba(255,255,255,0.10)",
+  border: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  flexShrink: 0,
+};
+
 export function PhotoAdjustModal({
   imageSrc,
   focusX: initFocusX,
@@ -68,9 +81,10 @@ export function PhotoAdjustModal({
   const [focusX, setFocusX] = useState(initFocusX);
   const [focusY, setFocusY] = useState(initFocusY);
   const [crop, setCrop] = useState<CropRect | null>(initCrop);
+  const [step, setStep] = useState<"crop" | "focus">("crop");
 
-  const imgStyle = previewImgStyle(crop, focusX, focusY);
   const hasCrop = crop !== null && crop.w > 0 && crop.h > 0;
+  const imgStyle = previewImgStyle(crop, focusX, focusY);
 
   function handleFocalChange(x: number, y: number) {
     setFocusX(x);
@@ -98,6 +112,7 @@ export function PhotoAdjustModal({
       {/* Header */}
       <div
         style={{
+          position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -105,159 +120,224 @@ export function PhotoAdjustModal({
           flexShrink: 0,
         }}
       >
-        <p
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: "var(--fg-1)",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          Adjust photo
-        </p>
+        {step === "focus" ? (
+          <button
+            type="button"
+            onClick={() => setStep("crop")}
+            aria-label="Back to crop"
+            style={iconBtnStyle}
+          >
+            <ChevronLeft size={18} color="rgba(255,255,255,0.75)" />
+          </button>
+        ) : (
+          <p
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: "var(--fg-1)",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            Crop photo
+          </p>
+        )}
+        {step === "focus" && (
+          <p
+            style={{
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+              fontSize: 16,
+              fontWeight: 700,
+              color: "var(--fg-1)",
+              fontFamily: "var(--font-display)",
+              pointerEvents: "none",
+            }}
+          >
+            Adjust focus
+          </p>
+        )}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.10)",
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
+          style={iconBtnStyle}
         >
           <X size={15} color="rgba(255,255,255,0.75)" />
         </button>
       </div>
 
-      {/* Focus point */}
-      <div style={{ padding: "0 16px", flexShrink: 0 }}>
-        <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
-          Drag the dot to set focus point
-        </p>
-        <FocalPointPicker
-          imageSrc={imageSrc}
-          focusX={focusX}
-          focusY={focusY}
-          height={210}
-          borderRadius={14}
-          dotSize={22}
-          showCrosshair
-          onChange={handleFocalChange}
-        />
-      </div>
+      {step === "crop" && (
+        <>
+          {/* Crop picker */}
+          <div
+            style={{
+              padding: "0 16px",
+              flexShrink: 0,
+              touchAction: "none",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 6,
+              }}
+            >
+              <p style={{ fontSize: 11, color: "var(--fg-2)" }}>
+                Drag to crop (optional)
+              </p>
+              {hasCrop && (
+                <button
+                  type="button"
+                  onClick={() => handleCropChange(null)}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--fg-2)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    textDecoration: "underline",
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <ImageCropPicker
+              imageSrc={imageSrc}
+              crop={crop}
+              onChange={handleCropChange}
+            />
+          </div>
 
-      {/* Crop */}
-      <div
-        style={{ padding: "16px 16px 0", flexShrink: 0, touchAction: "none" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 6,
-          }}
-        >
-          <p style={{ fontSize: 11, color: "var(--fg-2)" }}>
-            Drag on image to crop (optional)
-          </p>
-          {hasCrop && (
+          {/* Next */}
+          <div
+            style={{
+              padding: "20px 16px 48px",
+              flexShrink: 0,
+              marginTop: "auto",
+            }}
+          >
             <button
               type="button"
-              onClick={() => handleCropChange(null)}
+              onClick={() => setStep("focus")}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: 14,
+                background: "rgba(255,180,60,0.16)",
+                border: "1px solid rgba(255,200,100,0.28)",
+                color: "var(--fg-1)",
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {hasCrop ? "Next →" : "Skip →"}
+            </button>
+          </div>
+        </>
+      )}
+
+      {step === "focus" && (
+        <>
+          {/* Focal point picker */}
+          <div style={{ padding: "0 16px", flexShrink: 0 }}>
+            <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
+              Drag the dot to set focus point
+            </p>
+            <FocalPointPicker
+              imageSrc={imageSrc}
+              focusX={focusX}
+              focusY={focusY}
+              height={210}
+              borderRadius={14}
+              dotSize={22}
+              showCrosshair
+              onChange={handleFocalChange}
+            />
+          </div>
+
+          {/* Previews */}
+          <div style={{ padding: "20px 16px 0" }}>
+            <p
               style={{
                 fontSize: 11,
                 color: "var(--fg-2)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                textDecoration: "underline",
+                marginBottom: 12,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                fontWeight: 600,
               }}
             >
-              Clear
-            </button>
-          )}
-        </div>
-        <ImageCropPicker
-          imageSrc={imageSrc}
-          crop={crop}
-          onChange={handleCropChange}
-        />
-      </div>
-
-      {/* Previews */}
-      <div style={{ padding: "20px 16px 40px" }}>
-        <p
-          style={{
-            fontSize: 11,
-            color: "var(--fg-2)",
-            marginBottom: 12,
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            fontWeight: 600,
-          }}
-        >
-          How it looks in the app
-        </p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {PREVIEWS.map(({ label, aspectRatio }) => (
-            <div key={label}>
-              <p
-                style={{
-                  fontSize: 11,
-                  color: "var(--fg-2)",
-                  marginBottom: 4,
-                  fontWeight: 600,
-                }}
-              >
-                {label}
-              </p>
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  aspectRatio,
-                  borderRadius: 10,
-                  overflow: "hidden",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-                <img src={imageSrc} alt={`${label} preview`} style={imgStyle} />
-              </div>
+              How it looks in the app
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {PREVIEWS.map(({ label, aspectRatio }) => (
+                <div key={label}>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: "var(--fg-2)",
+                      marginBottom: 4,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {label}
+                  </p>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      aspectRatio,
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                    }}
+                  >
+                    {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
+                    <img
+                      src={imageSrc}
+                      alt={`${label} preview`}
+                      style={imgStyle}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Done */}
-      <div style={{ padding: "0 16px 48px", flexShrink: 0, marginTop: "auto" }}>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: 14,
-            background: "rgba(255,180,60,0.16)",
-            border: "1px solid rgba(255,200,100,0.28)",
-            color: "var(--fg-1)",
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Done
-        </button>
-      </div>
+          {/* Done */}
+          <div
+            style={{
+              padding: "20px 16px 48px",
+              flexShrink: 0,
+              marginTop: "auto",
+            }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: 14,
+                background: "rgba(255,180,60,0.16)",
+                border: "1px solid rgba(255,200,100,0.28)",
+                color: "var(--fg-1)",
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </>
+      )}
     </div>,
     document.body,
   );
