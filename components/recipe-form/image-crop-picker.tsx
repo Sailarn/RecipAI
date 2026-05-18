@@ -22,7 +22,12 @@ function toPercentCrop(c: CropRect): PercentCrop {
 }
 
 function fromPercentCrop(p: PercentCrop): CropRect {
-  return { x: p.x, y: p.y, w: p.width, h: p.height };
+  return {
+    x: Math.round(p.x),
+    y: Math.round(p.y),
+    w: Math.round(p.width),
+    h: Math.round(p.height),
+  };
 }
 
 export function ImageCropPicker({
