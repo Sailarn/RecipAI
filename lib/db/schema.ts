@@ -40,6 +40,10 @@ export interface Recipe {
   imageFileId?: string;
   imageFocusX?: number;
   imageFocusY?: number;
+  imageCropX?: number;
+  imageCropY?: number;
+  imageCropWidth?: number;
+  imageCropHeight?: number;
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;

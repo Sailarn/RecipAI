@@ -115,6 +115,10 @@ export function RecipeCard({
             width={300}
             priority={priority}
             objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
+            imageCropX={recipe.imageCropX}
+            imageCropY={recipe.imageCropY}
+            imageCropWidth={recipe.imageCropWidth}
+            imageCropHeight={recipe.imageCropHeight}
           />
           {recipe.category && (
             <div style={{ position: "absolute", top: 7, left: 7 }}>

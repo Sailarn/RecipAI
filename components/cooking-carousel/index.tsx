@@ -158,6 +158,10 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
                       title={recipe.title}
                       width={800}
                       objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
+                      imageCropX={recipe.imageCropX}
+                      imageCropY={recipe.imageCropY}
+                      imageCropWidth={recipe.imageCropWidth}
+                      imageCropHeight={recipe.imageCropHeight}
                     />
                     {/* Gradient overlay */}
                     <div

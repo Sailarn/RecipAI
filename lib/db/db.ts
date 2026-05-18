@@ -48,6 +48,13 @@ class RecipeDatabase extends Dexie {
       collections: "id, name, createdAt",
       notifications: "id, entityId, entityType, type, createdAt",
     });
+
+    this.version(7).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: "id, entityId, entityType, type, createdAt",
+    });
   }
 }
 

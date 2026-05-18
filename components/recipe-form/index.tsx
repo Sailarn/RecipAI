@@ -127,6 +127,22 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
                 setValue("imageFocusX", x);
                 setValue("imageFocusY", y);
               }}
+              crop={
+                watch("imageCropWidth") != null
+                  ? {
+                      x: watch("imageCropX") ?? 0,
+                      y: watch("imageCropY") ?? 0,
+                      w: watch("imageCropWidth") ?? 100,
+                      h: watch("imageCropHeight") ?? 100,
+                    }
+                  : null
+              }
+              onCropChange={(c) => {
+                setValue("imageCropX", c?.x);
+                setValue("imageCropY", c?.y);
+                setValue("imageCropWidth", c?.w);
+                setValue("imageCropHeight", c?.h);
+              }}
             />
           )}
 

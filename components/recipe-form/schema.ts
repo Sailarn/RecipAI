@@ -48,6 +48,10 @@ export function createRecipeSchema(t: (key: string) => string) {
     category: z.string().optional(),
     imageFocusX: z.number().min(0).max(100).optional(),
     imageFocusY: z.number().min(0).max(100).optional(),
+    imageCropX: z.number().min(0).max(100).optional(),
+    imageCropY: z.number().min(0).max(100).optional(),
+    imageCropWidth: z.number().min(0).max(100).optional(),
+    imageCropHeight: z.number().min(0).max(100).optional(),
   });
 }
 

@@ -145,6 +145,10 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
               sizes="100vw"
               priority
               objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
+              imageCropX={recipe.imageCropX}
+              imageCropY={recipe.imageCropY}
+              imageCropWidth={recipe.imageCropWidth}
+              imageCropHeight={recipe.imageCropHeight}
             />
           ) : (
             <span>{"🍽️"}</span>

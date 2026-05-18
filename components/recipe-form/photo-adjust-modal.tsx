@@ -1,14 +1,15 @@
 "use client";
 
 import { X } from "lucide-react";
+import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { FocalPointPicker } from "./focal-point-picker";
+import { type CropRect, ImageCropPicker } from "./image-crop-picker";
 
-// Aspect ratios match actual display sizes in the app
 const PREVIEWS = [
-  { label: "Card", paddingTop: "32%" }, // 300×96  (3.13:1)
-  { label: "Detail", paddingTop: "54%" }, // ~390×210 (1.86:1)
-  { label: "Carousel", paddingTop: "49%" }, // ~390×190 (2.05:1)
+  { label: "Card", paddingTop: "32%" },
+  { label: "Detail", paddingTop: "54%" },
+  { label: "Carousel", paddingTop: "49%" },
 ] as const;
 
 interface PhotoAdjustModalProps {
@@ -16,7 +17,39 @@ interface PhotoAdjustModalProps {
   focusX: number;
   focusY: number;
   onChange: (x: number, y: number) => void;
+  crop: CropRect | null;
+  onCropChange: (crop: CropRect | null) => void;
   onClose: () => void;
+}
+
+function previewImgStyle(
+  crop: CropRect | null,
+  focusX: number,
+  focusY: number,
+): CSSProperties {
+  if (!crop || crop.w <= 0 || crop.h <= 0) {
+    return {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      objectPosition: `${focusX}% ${focusY}%`,
+      userSelect: "none",
+    };
+  }
+  const sx = 100 / crop.w;
+  const sy = 100 / crop.h;
+  const relFx = Math.max(0, Math.min(100, ((focusX - crop.x) / crop.w) * 100));
+  const relFy = Math.max(0, Math.min(100, ((focusY - crop.y) / crop.h) * 100));
+  return {
+    position: "absolute",
+    width: `${sx * 100}%`,
+    height: `${sy * 100}%`,
+    left: `${-crop.x * sx}%`,
+    top: `${-crop.y * sy}%`,
+    objectFit: "cover",
+    objectPosition: `${relFx}% ${relFy}%`,
+    userSelect: "none",
+  };
 }
 
 export function PhotoAdjustModal({
@@ -24,9 +57,12 @@ export function PhotoAdjustModal({
   focusX,
   focusY,
   onChange,
+  crop,
+  onCropChange,
   onClose,
 }: PhotoAdjustModalProps) {
-  const objectPosition = `${focusX}% ${focusY}%`;
+  const imgStyle = previewImgStyle(crop, focusX, focusY);
+  const hasCrop = crop !== null && crop.w > 0 && crop.h > 0;
 
   return createPortal(
     <div
@@ -81,7 +117,7 @@ export function PhotoAdjustModal({
         </button>
       </div>
 
-      {/* Focal point picker */}
+      {/* Focus point */}
       <div style={{ padding: "0 16px", flexShrink: 0 }}>
         <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
           Drag to set focus point
@@ -95,6 +131,44 @@ export function PhotoAdjustModal({
           dotSize={22}
           showCrosshair
           onChange={onChange}
+        />
+      </div>
+
+      {/* Crop */}
+      <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 6,
+          }}
+        >
+          <p style={{ fontSize: 11, color: "var(--fg-2)" }}>
+            Drag to crop (optional)
+          </p>
+          {hasCrop && (
+            <button
+              type="button"
+              onClick={() => onCropChange(null)}
+              style={{
+                fontSize: 11,
+                color: "var(--fg-2)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                textDecoration: "underline",
+              }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <ImageCropPicker
+          imageSrc={imageSrc}
+          crop={crop}
+          onChange={onCropChange}
         />
       </div>
 
@@ -135,20 +209,12 @@ export function PhotoAdjustModal({
                   border: "1px solid rgba(255,255,255,0.07)",
                 }}
               >
-                <div style={{ position: "absolute", inset: 0 }}>
-                  {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-                  <img
-                    src={imageSrc}
-                    alt={`${label} preview`}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition,
-                      userSelect: "none",
-                    }}
-                  />
-                </div>
+                {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
+                <img
+                  src={imageSrc}
+                  alt={`${label} preview`}
+                  style={{ position: "absolute", ...imgStyle }}
+                />
               </div>
             </div>
           ))}

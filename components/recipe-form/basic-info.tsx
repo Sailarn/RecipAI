@@ -12,6 +12,7 @@ import {
 import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import { FocalPointPicker } from "./focal-point-picker";
+import type { CropRect } from "./image-crop-picker";
 import { PhotoAdjustModal } from "./photo-adjust-modal";
 import type { RecipeFormData } from "./schema";
 
@@ -23,6 +24,8 @@ interface BasicInfoProps {
   focusX: number;
   focusY: number;
   onFocusChange: (x: number, y: number) => void;
+  crop: CropRect | null;
+  onCropChange: (crop: CropRect | null) => void;
 }
 
 const LABEL_STYLE: React.CSSProperties = {
@@ -45,6 +48,8 @@ export function BasicInfo({
   focusX,
   focusY,
   onFocusChange,
+  crop,
+  onCropChange,
 }: BasicInfoProps) {
   const t = useTranslations("recipeForm");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -296,6 +301,8 @@ export function BasicInfo({
             focusX={focusX}
             focusY={focusY}
             onChange={onFocusChange}
+            crop={crop}
+            onCropChange={onCropChange}
             onClose={() => setShowAdjustModal(false)}
           />
         )}

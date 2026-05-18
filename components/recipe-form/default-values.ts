@@ -47,6 +47,10 @@ export function getDefaultValues(
       category: recipe.category || "",
       imageFocusX: recipe.imageFocusX,
       imageFocusY: recipe.imageFocusY,
+      imageCropX: recipe.imageCropX,
+      imageCropY: recipe.imageCropY,
+      imageCropWidth: recipe.imageCropWidth,
+      imageCropHeight: recipe.imageCropHeight,
     };
   }
 

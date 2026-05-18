@@ -20,7 +20,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.50.71"],
+  allowedDevOrigins: ["192.168.50.143"],
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
   },
