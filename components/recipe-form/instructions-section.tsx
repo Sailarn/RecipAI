@@ -176,8 +176,22 @@ export function InstructionsSection({
                   <div style={{ flex: 1 }}>
                     <Input
                       {...register(`instructions.${index}.imageUrl`)}
-                      placeholder="Image URL"
+                      placeholder="Image URL or paste"
                       type="url"
+                      onPaste={(e) => {
+                        const item = Array.from(
+                          e.clipboardData?.items ?? [],
+                        ).find((i) => i.type.startsWith("image/"));
+                        if (!item) return;
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        if (!file) return;
+                        onStepFileSelect(index, file);
+                        setStepPreviews((prev) => ({
+                          ...prev,
+                          [index]: URL.createObjectURL(file),
+                        }));
+                      }}
                     />
                   </div>
                   <button
