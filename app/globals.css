@@ -5,5 +5,6 @@
 @import "./styles/shadcn.css";
 @import "./styles/base.css";
 @import "./styles/ai-button.css";
+@import "react-image-crop/dist/ReactCrop.css";
 
 @custom-variant dark (&:is(.dark *));

@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ReactCrop, { type PercentCrop } from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
 
 export type CropRect = { x: number; y: number; w: number; h: number };
 
@@ -16,12 +16,7 @@ function toPercentCrop(c: CropRect): PercentCrop {
 }
 
 function fromPercentCrop(p: PercentCrop): CropRect {
-  return {
-    x: Math.round(p.x),
-    y: Math.round(p.y),
-    w: Math.round(p.width),
-    h: Math.round(p.height),
-  };
+  return { x: p.x, y: p.y, w: p.width, h: p.height };
 }
 
 export function ImageCropPicker({
@@ -29,12 +24,26 @@ export function ImageCropPicker({
   crop,
   onChange,
 }: ImageCropPickerProps) {
+  const [rCrop, setRCrop] = useState<PercentCrop | undefined>(
+    crop ? toPercentCrop(crop) : undefined,
+  );
+
+  useEffect(() => {
+    if (!crop) setRCrop(undefined);
+  }, [crop]);
+
   return (
     <ReactCrop
-      crop={crop ? toPercentCrop(crop) : undefined}
-      onChange={(_, pct) =>
-        onChange(pct.width > 1 && pct.height > 1 ? fromPercentCrop(pct) : null)
-      }
+      crop={rCrop}
+      onChange={(_, pct) => setRCrop(pct)}
+      onComplete={(_, pct) => {
+        if (pct.width >= 2 && pct.height >= 2) {
+          onChange(fromPercentCrop(pct));
+        } else {
+          setRCrop(undefined);
+          onChange(null);
+        }
+      }}
       minWidth={5}
       minHeight={5}
       style={{ width: "100%", borderRadius: 14, touchAction: "none" }}

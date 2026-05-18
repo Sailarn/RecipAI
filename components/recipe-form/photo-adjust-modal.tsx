@@ -8,9 +8,9 @@ import { FocalPointPicker } from "./focal-point-picker";
 import { type CropRect, ImageCropPicker } from "./image-crop-picker";
 
 const PREVIEWS = [
-  { label: "Card", paddingTop: "32%" },
-  { label: "Detail", paddingTop: "54%" },
-  { label: "Carousel", paddingTop: "49%" },
+  { label: "Card", aspectRatio: "100/32" },
+  { label: "Detail", aspectRatio: "100/54" },
+  { label: "Carousel", aspectRatio: "100/49" },
 ] as const;
 
 interface PhotoAdjustModalProps {
@@ -32,9 +32,9 @@ function previewImgStyle(
     return {
       position: "absolute",
       top: 0,
-      right: 0,
-      bottom: 0,
       left: 0,
+      width: "100%",
+      height: "100%",
       objectFit: "cover",
       objectPosition: `${focusX}% ${focusY}%`,
       userSelect: "none",
@@ -208,7 +208,7 @@ export function PhotoAdjustModal({
           How it looks in the app
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {PREVIEWS.map(({ label, paddingTop }) => (
+          {PREVIEWS.map(({ label, aspectRatio }) => (
             <div key={label}>
               <p
                 style={{
@@ -224,29 +224,14 @@ export function PhotoAdjustModal({
                 style={{
                   position: "relative",
                   width: "100%",
-                  paddingTop,
+                  aspectRatio,
                   borderRadius: 10,
                   overflow: "hidden",
                   border: "1px solid rgba(255,255,255,0.07)",
                 }}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0,
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-                  <img
-                    src={imageSrc}
-                    alt={`${label} preview`}
-                    style={imgStyle}
-                  />
-                </div>
+                {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
+                <img src={imageSrc} alt={`${label} preview`} style={imgStyle} />
               </div>
             </div>
           ))}
