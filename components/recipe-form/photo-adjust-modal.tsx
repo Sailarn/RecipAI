@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import type { CSSProperties } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { FocalPointPicker } from "./focal-point-picker";
 import { type CropRect, ImageCropPicker } from "./image-crop-picker";
@@ -57,15 +58,30 @@ function previewImgStyle(
 
 export function PhotoAdjustModal({
   imageSrc,
-  focusX,
-  focusY,
+  focusX: initFocusX,
+  focusY: initFocusY,
   onChange,
-  crop,
+  crop: initCrop,
   onCropChange,
   onClose,
 }: PhotoAdjustModalProps) {
+  const [focusX, setFocusX] = useState(initFocusX);
+  const [focusY, setFocusY] = useState(initFocusY);
+  const [crop, setCrop] = useState<CropRect | null>(initCrop);
+
   const imgStyle = previewImgStyle(crop, focusX, focusY);
   const hasCrop = crop !== null && crop.w > 0 && crop.h > 0;
+
+  function handleFocalChange(x: number, y: number) {
+    setFocusX(x);
+    setFocusY(y);
+    onChange(x, y);
+  }
+
+  function handleCropChange(c: CropRect | null) {
+    setCrop(c);
+    onCropChange(c);
+  }
 
   return createPortal(
     <div
@@ -123,7 +139,7 @@ export function PhotoAdjustModal({
       {/* Focus point */}
       <div style={{ padding: "0 16px", flexShrink: 0 }}>
         <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
-          Drag to set focus point
+          Drag the dot to set focus point
         </p>
         <FocalPointPicker
           imageSrc={imageSrc}
@@ -133,12 +149,14 @@ export function PhotoAdjustModal({
           borderRadius={14}
           dotSize={22}
           showCrosshair
-          onChange={onChange}
+          onChange={handleFocalChange}
         />
       </div>
 
       {/* Crop */}
-      <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
+      <div
+        style={{ padding: "16px 16px 0", flexShrink: 0, touchAction: "none" }}
+      >
         <div
           style={{
             display: "flex",
@@ -148,12 +166,12 @@ export function PhotoAdjustModal({
           }}
         >
           <p style={{ fontSize: 11, color: "var(--fg-2)" }}>
-            Drag to crop (optional)
+            Drag on image to crop (optional)
           </p>
           {hasCrop && (
             <button
               type="button"
-              onClick={() => onCropChange(null)}
+              onClick={() => handleCropChange(null)}
               style={{
                 fontSize: 11,
                 color: "var(--fg-2)",
@@ -171,7 +189,7 @@ export function PhotoAdjustModal({
         <ImageCropPicker
           imageSrc={imageSrc}
           crop={crop}
-          onChange={onCropChange}
+          onChange={handleCropChange}
         />
       </div>
 

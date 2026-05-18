@@ -37,13 +37,13 @@ export function ImageCropPicker({
       }
       minWidth={5}
       minHeight={5}
-      style={{ width: "100%", borderRadius: 14 }}
+      style={{ width: "100%", borderRadius: 14, touchAction: "none" }}
     >
       {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
       <img
         src={imageSrc}
         alt="Crop"
-        style={{ width: "100%", display: "block", touchAction: "none" }}
+        style={{ width: "100%", display: "block" }}
       />
     </ReactCrop>
   );
