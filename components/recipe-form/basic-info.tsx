@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, X } from "lucide-react";
+import { ImageIcon, ScanSearch, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
+import { PhotoAdjustModal } from "./photo-adjust-modal";
 import type { RecipeFormData } from "./schema";
 
 interface BasicInfoProps {
@@ -135,6 +136,7 @@ export function BasicInfo({
   onFileSelectRef.current = onFileSelect;
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
   const currentImageUrl = useWatch({ control, name: "imageUrl" });
 
   useEffect(() => {
@@ -337,7 +339,39 @@ export function BasicInfo({
                 <X size={12} color="white" />
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => setShowAdjustModal(true)}
+              style={{
+                marginTop: 8,
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                padding: "8px 0",
+                borderRadius: 10,
+                background: "rgba(255,170,50,0.07)",
+                border: "1px solid rgba(255,200,100,0.16)",
+                color: "var(--fg-2)",
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              <ScanSearch size={13} />
+              Preview in app
+            </button>
           </div>
+        )}
+        {showAdjustModal && pickerSrc && (
+          <PhotoAdjustModal
+            imageSrc={pickerSrc}
+            focusX={focusX}
+            focusY={focusY}
+            onChange={onFocusChange}
+            onClose={() => setShowAdjustModal(false)}
+          />
         )}
       </div>
 
