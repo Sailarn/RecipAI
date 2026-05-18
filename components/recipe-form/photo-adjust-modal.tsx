@@ -29,8 +29,11 @@ function previewImgStyle(
 ): CSSProperties {
   if (!crop || crop.w <= 0 || crop.h <= 0) {
     return {
-      width: "100%",
-      height: "100%",
+      position: "absolute",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
       objectFit: "cover",
       objectPosition: `${focusX}% ${focusY}%`,
       userSelect: "none",
@@ -209,12 +212,23 @@ export function PhotoAdjustModal({
                   border: "1px solid rgba(255,255,255,0.07)",
                 }}
               >
-                {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
-                <img
-                  src={imageSrc}
-                  alt={`${label} preview`}
-                  style={{ position: "absolute", ...imgStyle }}
-                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
+                  <img
+                    src={imageSrc}
+                    alt={`${label} preview`}
+                    style={imgStyle}
+                  />
+                </div>
               </div>
             </div>
           ))}

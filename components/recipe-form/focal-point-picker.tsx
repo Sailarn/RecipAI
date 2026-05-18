@@ -23,10 +23,12 @@ export function FocalPointPicker({
   showCrosshair = false,
   onChange,
 }: FocalPointPickerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
-  function calc(e: React.PointerEvent<HTMLButtonElement>) {
-    const r = e.currentTarget.getBoundingClientRect();
+  function calcFromPointer(e: React.PointerEvent) {
+    if (!containerRef.current) return;
+    const r = containerRef.current.getBoundingClientRect();
     onChange(
       Math.max(
         0,
@@ -40,32 +42,16 @@ export function FocalPointPicker({
   }
 
   return (
-    <button
-      type="button"
-      aria-label="Drag to set focal point"
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        dragging.current = true;
-        calc(e);
-      }}
-      onPointerMove={(e) => {
-        if (dragging.current) calc(e);
-      }}
-      onPointerUp={() => {
-        dragging.current = false;
-      }}
+    <div
+      ref={containerRef}
       style={{
         position: "relative",
         width: "100%",
         height,
         borderRadius,
         overflow: "hidden",
-        cursor: "crosshair",
         border: "1px solid rgba(255,200,100,0.18)",
-        padding: 0,
-        background: "none",
-        display: "block",
-        touchAction: "none",
+        userSelect: "none",
       }}
     >
       {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
@@ -79,20 +65,7 @@ export function FocalPointPicker({
           objectPosition: `${focusX}% ${focusY}%`,
           pointerEvents: "none",
           userSelect: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: `${focusX}%`,
-          top: `${focusY}%`,
-          transform: "translate(-50%, -50%)",
-          width: dotSize,
-          height: dotSize,
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.95)",
-          boxShadow: "0 0 0 2px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.5)",
-          pointerEvents: "none",
+          display: "block",
         }}
       />
       {showCrosshair && (
@@ -123,6 +96,36 @@ export function FocalPointPicker({
           />
         </>
       )}
-    </button>
+      <button
+        type="button"
+        aria-label="Drag to set focal point"
+        style={{
+          position: "absolute",
+          left: `${focusX}%`,
+          top: `${focusY}%`,
+          transform: "translate(-50%, -50%)",
+          width: dotSize,
+          height: dotSize,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.95)",
+          boxShadow: "0 0 0 2px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.5)",
+          cursor: "grab",
+          touchAction: "none",
+          border: "none",
+          padding: 0,
+        }}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          dragging.current = true;
+          calcFromPointer(e);
+        }}
+        onPointerMove={(e) => {
+          if (dragging.current) calcFromPointer(e);
+        }}
+        onPointerUp={() => {
+          dragging.current = false;
+        }}
+      />
+    </div>
   );
 }
