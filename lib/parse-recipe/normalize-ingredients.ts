@@ -85,12 +85,7 @@ async function createProvisional(
 ): Promise<string | null> {
   const id = crypto.randomUUID();
   try {
-    const res = await fetch(api.ingredients, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, en, ua, category }),
-    });
-    if (!res.ok) return null;
+    // Write locally first — works regardless of auth state
     await db.ingredients.put({
       id,
       en,
@@ -102,6 +97,12 @@ async function createProvisional(
       retryCount: 0,
       lastAttemptAt: null,
     });
+    // Background server sync — 401 is expected when unauthenticated
+    fetch(api.ingredients, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, en, ua, category }),
+    }).catch(() => {});
     return id;
   } catch {
     return null;
@@ -180,10 +181,8 @@ export async function normalizeRecipeIngredients(
         matchedId = await createProvisional(ing.item, ing.ua, ing.category);
         if (matchedId) {
           enrichIngredient(matchedId, ing.item, ing.ua, ing.category).catch(
-            (err) => console.error("[normalize] enrich error:", err),
+            () => {},
           );
-        } else {
-          console.error("[normalize] createProvisional failed for:", ing.item);
         }
       }
 
