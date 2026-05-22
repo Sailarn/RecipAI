@@ -12,10 +12,7 @@
     "en": "fiddlehead fern",
     "ua": "Рахіси папороті",
     "category": "vegetables",
-    "aliasesEn": [
-      "fiddleheads",
-      "fiddlehead greens"
-    ],
+    "aliasesEn": ["fiddleheads", "fiddlehead greens"],
     "aliasesUa": []
   },
   {
@@ -23,9 +20,7 @@
     "en": "half sour pickle",
     "ua": "квашений огірок",
     "category": "vegetables",
-    "aliasesEn": [
-      "malossol cucumber"
-    ],
+    "aliasesEn": ["malossol cucumber"],
     "aliasesUa": []
   },
   {
@@ -33,9 +28,7 @@
     "en": "pomato",
     "ua": "помопля",
     "category": "vegetables",
-    "aliasesEn": [
-      "tomato-potato hybrid"
-    ],
+    "aliasesEn": ["tomato-potato hybrid"],
     "aliasesUa": []
   },
   {
@@ -43,26 +36,16 @@
     "en": "pickled cucumber",
     "ua": "Мариновані огірки",
     "category": "vegetables",
-    "aliasesEn": [
-      "cucumber pickle",
-      "cornichon",
-      "pickle"
-    ],
-    "aliasesUa": [
-      "корнішон"
-    ]
+    "aliasesEn": ["cucumber pickle", "cornichon", "pickle"],
+    "aliasesUa": ["корнішон"]
   },
   {
     "id": "kimchi",
     "en": "Kimchi",
     "ua": "кімчі",
     "category": "vegetables",
-    "aliasesEn": [
-      "Korean kimchi"
-    ],
-    "aliasesUa": [
-      "кімчхі"
-    ]
+    "aliasesEn": ["Korean kimchi"],
+    "aliasesUa": ["кімчхі"]
   },
   {
     "id": "summer-squash",
@@ -77,22 +60,15 @@
     "en": "Salzgurke",
     "ua": "солений огірок",
     "category": "vegetables",
-    "aliasesEn": [
-      "sour pickles",
-      "Kovászos uborka"
-    ],
-    "aliasesUa": [
-      "Огірок солений"
-    ]
+    "aliasesEn": ["sour pickles", "Kovászos uborka"],
+    "aliasesUa": ["Огірок солений"]
   },
   {
     "id": "butternut-squash",
     "en": "butternut squash",
     "ua": "гарбуз мускатний",
     "category": "vegetables",
-    "aliasesEn": [
-      "butternut pumpkin"
-    ],
+    "aliasesEn": ["butternut pumpkin"],
     "aliasesUa": []
   },
   {
@@ -108,10 +84,7 @@
     "en": "garlic",
     "ua": "часник",
     "category": "vegetables",
-    "aliasesEn": [
-      "head of garlic",
-      "bulb of garlic"
-    ],
+    "aliasesEn": ["head of garlic", "bulb of garlic"],
     "aliasesUa": []
   },
   {
@@ -119,9 +92,7 @@
     "en": "Japanese radish",
     "ua": "Дайкон",
     "category": "vegetables",
-    "aliasesEn": [
-      "daikon"
-    ],
+    "aliasesEn": ["daikon"],
     "aliasesUa": []
   },
   {
@@ -129,39 +100,23 @@
     "en": "pumpkin",
     "ua": "гарбуз",
     "category": "vegetables",
-    "aliasesEn": [
-      "Telfairia ocbu 8cidentalis vine,",
-      "MbMB"
-    ],
-    "aliasesUa": [
-      "Cucurbita"
-    ]
+    "aliasesEn": ["Telfairia ocbu 8cidentalis vine,", "MbMB"],
+    "aliasesUa": ["Cucurbita"]
   },
   {
     "id": "chinese-cabbage",
     "en": "Chinese cabbage",
     "ua": "китайська капуста",
     "category": "vegetables",
-    "aliasesEn": [
-      "pak choi",
-      "napa",
-      "bok choy"
-    ],
-    "aliasesUa": [
-      "Китайська капуста"
-    ]
+    "aliasesEn": ["pak choi", "napa", "bok choy"],
+    "aliasesUa": ["Китайська капуста"]
   },
   {
     "id": "turnip",
     "en": "turnip",
     "ua": "турнепс",
     "category": "vegetables",
-    "aliasesEn": [
-      "white turnip",
-      "summer turnip",
-      "neep",
-      "swede"
-    ],
+    "aliasesEn": ["white turnip", "summer turnip", "neep", "swede"],
     "aliasesUa": []
   },
   {
@@ -202,9 +157,7 @@
     "ua": "зернобобові культури",
     "category": "vegetables",
     "aliasesEn": [],
-    "aliasesUa": [
-      "зернобобова культура"
-    ]
+    "aliasesUa": ["зернобобова культура"]
   },
   {
     "id": "thai-eggplant",
@@ -219,10 +172,7 @@
     "en": "grape leaves",
     "ua": "виноградне листя",
     "category": "vegetables",
-    "aliasesEn": [
-      "stuffed grape leaf",
-      "Vinblad"
-    ],
+    "aliasesEn": ["stuffed grape leaf", "Vinblad"],
     "aliasesUa": []
   },
   {
@@ -236,23 +186,14 @@
       "bunching onion",
       "Allium fistulosum"
     ],
-    "aliasesUa": [
-      "Цибуля батун",
-      "Allium fistulosum"
-    ]
+    "aliasesUa": ["Цибуля батун", "Allium fistulosum"]
   },
   {
     "id": "napa-cabbage",
     "en": "Napa cabbage",
     "ua": "капуста пекінська",
     "category": "vegetables",
-    "aliasesEn": [
-      "wombok",
-      "petsai",
-      "pe-tsai",
-      "Pe tsay",
-      "Chinese leaf"
-    ],
+    "aliasesEn": ["wombok", "petsai", "pe-tsai", "Pe tsay", "Chinese leaf"],
     "aliasesUa": []
   },
   {
@@ -260,15 +201,8 @@
     "en": "Lactuca sativa",
     "ua": "салат сійний",
     "category": "vegetables",
-    "aliasesEn": [
-      "lettuce"
-    ],
-    "aliasesUa": [
-      "салата",
-      "латук посівний",
-      "латук",
-      "Lactuca sativa"
-    ]
+    "aliasesEn": ["lettuce"],
+    "aliasesUa": ["салата", "латук посівний", "латук", "Lactuca sativa"]
   },
   {
     "id": "pickled-mushrooms",
@@ -283,36 +217,23 @@
     "en": "red onion",
     "ua": "червона цибуля",
     "category": "vegetables",
-    "aliasesEn": [
-      "purple onion",
-      "Bombay onion"
-    ],
-    "aliasesUa": [
-      "цибуля червона"
-    ]
+    "aliasesEn": ["purple onion", "Bombay onion"],
+    "aliasesUa": ["цибуля червона"]
   },
   {
     "id": "spinacia-oleracea",
     "en": "Spinacia oleracea",
     "ua": "шпинат городній",
     "category": "vegetables",
-    "aliasesEn": [
-      "spinach plant",
-      "spinach"
-    ],
-    "aliasesUa": [
-      "Spinacia oleracea",
-      "шпинат"
-    ]
+    "aliasesEn": ["spinach plant", "spinach"],
+    "aliasesUa": ["Spinacia oleracea", "шпинат"]
   },
   {
     "id": "preserved-lemon",
     "en": "preserved lemon",
     "ua": "Квашені лимони",
     "category": "vegetables",
-    "aliasesEn": [
-      "lemon pickle"
-    ],
+    "aliasesEn": ["lemon pickle"],
     "aliasesUa": []
   },
   {
@@ -320,10 +241,7 @@
     "en": "melon",
     "ua": "баштанні культури",
     "category": "vegetables",
-    "aliasesEn": [
-      "melon fruit",
-      "melons"
-    ],
+    "aliasesEn": ["melon fruit", "melons"],
     "aliasesUa": [
       "рослини баштанні",
       "культури баштанні",
@@ -337,11 +255,7 @@
     "ua": "сушені овочі",
     "category": "vegetables",
     "aliasesEn": [],
-    "aliasesUa": [
-      "сушений овоч",
-      "сухі овочі",
-      "сухий овоч"
-    ]
+    "aliasesUa": ["сушений овоч", "сухі овочі", "сухий овоч"]
   },
   {
     "id": "green-bean",
@@ -362,9 +276,7 @@
     "en": "salt potatoes",
     "ua": "Відварена картопля",
     "category": "vegetables",
-    "aliasesEn": [
-      "boiled potatoes"
-    ],
+    "aliasesEn": ["boiled potatoes"],
     "aliasesUa": []
   },
   {
@@ -372,11 +284,7 @@
     "en": "eggplant",
     "ua": "баклажан",
     "category": "vegetables",
-    "aliasesEn": [
-      "aubergines",
-      "brinjal",
-      "aubergine"
-    ],
+    "aliasesEn": ["aubergines", "brinjal", "aubergine"],
     "aliasesUa": []
   },
   {
@@ -384,10 +292,7 @@
     "en": "onion",
     "ua": "цибуля",
     "category": "vegetables",
-    "aliasesEn": [
-      "onion as food",
-      "onions"
-    ],
+    "aliasesEn": ["onion as food", "onions"],
     "aliasesUa": []
   },
   {
@@ -395,9 +300,7 @@
     "en": "red cabbage",
     "ua": "Капуста червоноголова",
     "category": "vegetables",
-    "aliasesEn": [
-      "Cabbage, red, raw"
-    ],
+    "aliasesEn": ["Cabbage, red, raw"],
     "aliasesUa": []
   },
   {
@@ -426,12 +329,7 @@
     "en": "tsukemono",
     "ua": "Цукемоно",
     "category": "vegetables",
-    "aliasesEn": [
-      "oshinko",
-      "okōkō",
-      "konomono",
-      "Japanese pickles"
-    ],
+    "aliasesEn": ["oshinko", "okōkō", "konomono", "Japanese pickles"],
     "aliasesUa": []
   },
   {
@@ -439,9 +337,7 @@
     "en": "sprouting",
     "ua": "Пророщування насіння",
     "category": "vegetables",
-    "aliasesEn": [
-      "sprouts"
-    ],
+    "aliasesEn": ["sprouts"],
     "aliasesUa": []
   },
   {
@@ -457,10 +353,7 @@
     "en": "gari",
     "ua": "Гарі (страва)",
     "category": "vegetables",
-    "aliasesEn": [
-      "sushi ginger",
-      "pickled ginger"
-    ],
+    "aliasesEn": ["sushi ginger", "pickled ginger"],
     "aliasesUa": []
   },
   {
@@ -468,14 +361,8 @@
     "en": "zucchini",
     "ua": "кабачок",
     "category": "vegetables",
-    "aliasesEn": [
-      "Cucurbita pepo var. cylindrica",
-      "baby marrow",
-      "courgette"
-    ],
-    "aliasesUa": [
-      "Кабачок-цукіні"
-    ]
+    "aliasesEn": ["Cucurbita pepo var. cylindrica", "baby marrow", "courgette"],
+    "aliasesUa": ["Кабачок-цукіні"]
   },
   {
     "id": "scallion",
@@ -489,10 +376,7 @@
       "onion stick",
       "long onion"
     ],
-    "aliasesUa": [
-      "молода цибуля",
-      "бут"
-    ]
+    "aliasesUa": ["молода цибуля", "бут"]
   },
   {
     "id": "cherry-tomato",
@@ -511,9 +395,7 @@
     "en": "microgreen",
     "ua": "Мікрозелень",
     "category": "vegetables",
-    "aliasesEn": [
-      "microgreens"
-    ],
+    "aliasesEn": ["microgreens"],
     "aliasesUa": []
   },
   {
@@ -529,9 +411,7 @@
     "en": "marrow",
     "ua": "кабачок",
     "category": "vegetables",
-    "aliasesEn": [
-      "vegetable marrow"
-    ],
+    "aliasesEn": ["vegetable marrow"],
     "aliasesUa": []
   },
   {
@@ -539,11 +419,7 @@
     "en": "pickle",
     "ua": "соління",
     "category": "vegetables",
-    "aliasesEn": [
-      "pickled vegetable",
-      "pickled food",
-      "pickles"
-    ],
+    "aliasesEn": ["pickled vegetable", "pickled food", "pickles"],
     "aliasesUa": []
   },
   {
@@ -559,22 +435,15 @@
     "en": "frozen vegetable",
     "ua": "заморожені овочі",
     "category": "vegetables",
-    "aliasesEn": [
-      "frozen vegetables"
-    ],
-    "aliasesUa": [
-      "овочі"
-    ]
+    "aliasesEn": ["frozen vegetables"],
+    "aliasesUa": ["овочі"]
   },
   {
     "id": "efo-riro",
     "en": "Efo riro",
     "ua": "Ефо ріро",
     "category": "vegetables",
-    "aliasesEn": [
-      "Spinach stew",
-      "Efo Riro"
-    ],
+    "aliasesEn": ["Spinach stew", "Efo Riro"],
     "aliasesUa": []
   },
   {
@@ -582,13 +451,7 @@
     "en": "cassava root",
     "ua": "корінь маніоку",
     "category": "vegetables",
-    "aliasesEn": [
-      "yuca",
-      "cassava tuber",
-      "manioc",
-      "cassava",
-      "yuca root"
-    ],
+    "aliasesEn": ["yuca", "cassava tuber", "manioc", "cassava", "yuca root"],
     "aliasesUa": []
   },
   {
@@ -596,13 +459,7 @@
     "en": "Colocasia esculenta",
     "ua": "Таро",
     "category": "vegetables",
-    "aliasesEn": [
-      "Olhuala",
-      "kalo",
-      "godere",
-      "dasheen",
-      "taro"
-    ],
+    "aliasesEn": ["Olhuala", "kalo", "godere", "dasheen", "taro"],
     "aliasesUa": [
       "колоказія їстівна",
       "колоказія древня",
@@ -616,21 +473,15 @@
     "en": "potato",
     "ua": "картопля",
     "category": "vegetables",
-    "aliasesEn": [
-      "spud"
-    ],
-    "aliasesUa": [
-      "бараболя"
-    ]
+    "aliasesEn": ["spud"],
+    "aliasesUa": ["бараболя"]
   },
   {
     "id": "mixed-pickle",
     "en": "mixed pickle",
     "ua": "Пікулі",
     "category": "vegetables",
-    "aliasesEn": [
-      "mixed pickles"
-    ],
+    "aliasesEn": ["mixed pickles"],
     "aliasesUa": []
   },
   {
@@ -654,10 +505,7 @@
     "en": "Lotus rhizome",
     "ua": "Корінь лотосу",
     "category": "vegetables",
-    "aliasesEn": [
-      "Lotus Roots",
-      "lotus root"
-    ],
+    "aliasesEn": ["Lotus Roots", "lotus root"],
     "aliasesUa": []
   },
   {
@@ -683,10 +531,7 @@
     "en": "suan cai",
     "ua": "Суаньцай",
     "category": "vegetables",
-    "aliasesEn": [
-      "suancai",
-      "suan tsai"
-    ],
+    "aliasesEn": ["suancai", "suan tsai"],
     "aliasesUa": []
   },
   {
@@ -702,13 +547,8 @@
     "en": "ginger",
     "ua": "імбир",
     "category": "vegetables",
-    "aliasesEn": [
-      "ginger spice",
-      "ginger root"
-    ],
-    "aliasesUa": [
-      "корінь імбиру"
-    ]
+    "aliasesEn": ["ginger spice", "ginger root"],
+    "aliasesUa": ["корінь імбиру"]
   },
   {
     "id": "knieperkohl",
@@ -731,9 +571,7 @@
     "en": "mung bean sprout",
     "ua": "Паростки вігни",
     "category": "vegetables",
-    "aliasesEn": [
-      "sukjunamul"
-    ],
+    "aliasesEn": ["sukjunamul"],
     "aliasesUa": []
   },
   {
@@ -741,9 +579,7 @@
     "en": "beni shōga",
     "ua": "Бені шоґа",
     "category": "vegetables",
-    "aliasesEn": [
-      "benishōga"
-    ],
+    "aliasesEn": ["benishōga"],
     "aliasesUa": []
   },
   {
@@ -758,38 +594,23 @@
       "leafy greens",
       "leaf vegetables"
     ],
-    "aliasesUa": [
-      "гич",
-      "ботвиння",
-      "ботвина",
-      "бадилля"
-    ]
+    "aliasesUa": ["гич", "ботвиння", "ботвина", "бадилля"]
   },
   {
     "id": "sweet-potato",
     "en": "sweet potato",
     "ua": "Батат",
     "category": "vegetables",
-    "aliasesEn": [
-      "Ipomoea batatas"
-    ],
-    "aliasesUa": [
-      "Солодка картопля",
-      "Ipomoea batatas"
-    ]
+    "aliasesEn": ["Ipomoea batatas"],
+    "aliasesUa": ["Солодка картопля", "Ipomoea batatas"]
   },
   {
     "id": "cucumber",
     "en": "cucumber",
     "ua": "огірок",
     "category": "vegetables",
-    "aliasesEn": [
-      "cuke",
-      "cucumbers"
-    ],
-    "aliasesUa": [
-      "огірки"
-    ]
+    "aliasesEn": ["cuke", "cucumbers"],
+    "aliasesUa": ["огірки"]
   },
   {
     "id": "kale",
@@ -808,9 +629,7 @@
     "en": "spinach",
     "ua": "шпинат",
     "category": "vegetables",
-    "aliasesEn": [
-      "green spinach"
-    ],
+    "aliasesEn": ["green spinach"],
     "aliasesUa": []
   },
   {
@@ -818,10 +637,7 @@
     "en": "globe artichoke",
     "ua": "Артишок іспанський",
     "category": "vegetables",
-    "aliasesEn": [
-      "artichokes",
-      "artichoke"
-    ],
+    "aliasesEn": ["artichokes", "artichoke"],
     "aliasesUa": []
   },
   {
@@ -870,11 +686,7 @@
     "en": "soybean sprout",
     "ua": "Паростки сої",
     "category": "vegetables",
-    "aliasesEn": [
-      "soybean sprouts",
-      "kongnamul",
-      "bean sprouts"
-    ],
+    "aliasesEn": ["soybean sprouts", "kongnamul", "bean sprouts"],
     "aliasesUa": []
   },
   {
@@ -882,9 +694,7 @@
     "en": "pickled red beet",
     "ua": "Маринований буряк",
     "category": "vegetables",
-    "aliasesEn": [
-      "pickled beetroot"
-    ],
+    "aliasesEn": ["pickled beetroot"],
     "aliasesUa": []
   },
   {
@@ -892,10 +702,7 @@
     "en": "bamboo shoots",
     "ua": "Паростки бамбука",
     "category": "vegetables",
-    "aliasesEn": [
-      "bamboo sprouts",
-      "bamboo shoot"
-    ],
+    "aliasesEn": ["bamboo sprouts", "bamboo shoot"],
     "aliasesUa": []
   },
   {
@@ -903,9 +710,7 @@
     "en": "takuan",
     "ua": "Такуан",
     "category": "vegetables",
-    "aliasesEn": [
-      "takuwan"
-    ],
+    "aliasesEn": ["takuwan"],
     "aliasesUa": []
   },
   {
@@ -921,9 +726,7 @@
     "en": "kombu",
     "ua": "комбу (страва)",
     "category": "vegetables",
-    "aliasesEn": [
-      "昆布"
-    ],
+    "aliasesEn": ["昆布"],
     "aliasesUa": []
   },
   {
@@ -931,10 +734,7 @@
     "en": "cabbage",
     "ua": "капуста",
     "category": "vegetables",
-    "aliasesEn": [
-      "cabagge",
-      "cabage"
-    ],
+    "aliasesEn": ["cabagge", "cabage"],
     "aliasesUa": []
   },
   {
@@ -950,9 +750,7 @@
     "en": "sun-dried tomato",
     "ua": "помідори висушені на сонці",
     "category": "vegetables",
-    "aliasesEn": [
-      "sundried tomato"
-    ],
+    "aliasesEn": ["sundried tomato"],
     "aliasesUa": []
   },
   {
@@ -960,12 +758,8 @@
     "en": "okra",
     "ua": "бамія",
     "category": "vegetables",
-    "aliasesEn": [
-      "lady fingers"
-    ],
-    "aliasesUa": [
-      "окра"
-    ]
+    "aliasesEn": ["lady fingers"],
+    "aliasesUa": ["окра"]
   },
   {
     "id": "broccoli",
@@ -977,18 +771,14 @@
       "Brassica oleracea italica",
       "Broccoli"
     ],
-    "aliasesUa": [
-      "брокколі"
-    ]
+    "aliasesUa": ["брокколі"]
   },
   {
     "id": "asparagus",
     "en": "asparagus",
     "ua": "спаржа",
     "category": "vegetables",
-    "aliasesEn": [
-      "sparrowgrass"
-    ],
+    "aliasesEn": ["sparrowgrass"],
     "aliasesUa": []
   },
   {
@@ -996,12 +786,8 @@
     "en": "leek",
     "ua": "цибуля порей",
     "category": "vegetables",
-    "aliasesEn": [
-      "leeks"
-    ],
-    "aliasesUa": [
-      "Allium porrum"
-    ]
+    "aliasesEn": ["leeks"],
+    "aliasesUa": ["Allium porrum"]
   },
   {
     "id": "achar",
@@ -1021,11 +807,7 @@
     "en": "bell pepper",
     "ua": "овочевий перець",
     "category": "vegetables",
-    "aliasesEn": [
-      "sweet peppers",
-      "sweet pepper",
-      "pepper"
-    ],
+    "aliasesEn": ["sweet peppers", "sweet pepper", "pepper"],
     "aliasesUa": []
   },
   {
@@ -1033,9 +815,7 @@
     "en": "horseradish root",
     "ua": "хрін",
     "category": "vegetables",
-    "aliasesEn": [
-      "horseradish"
-    ],
+    "aliasesEn": ["horseradish"],
     "aliasesUa": []
   },
   {
@@ -1051,22 +831,15 @@
     "en": "carrot",
     "ua": "морква",
     "category": "vegetables",
-    "aliasesEn": [
-      "domesticated carrot",
-      "carrot taproot"
-    ],
-    "aliasesUa": [
-      "морква посівна"
-    ]
+    "aliasesEn": ["domesticated carrot", "carrot taproot"],
+    "aliasesUa": ["морква посівна"]
   },
   {
     "id": "pattypan-squash",
     "en": "pattypan squash",
     "ua": "Патисон",
     "category": "vegetables",
-    "aliasesEn": [
-      "Cucurbita pepo var. clypeata"
-    ],
+    "aliasesEn": ["Cucurbita pepo var. clypeata"],
     "aliasesUa": []
   },
   {
@@ -1115,10 +888,7 @@
     "en": "gourd",
     "ua": "Калабас",
     "category": "vegetables",
-    "aliasesEn": [
-      "squash (plant)",
-      "squash"
-    ],
+    "aliasesEn": ["squash (plant)", "squash"],
     "aliasesUa": []
   },
   {
@@ -1133,9 +903,7 @@
       "Brassica chinensis",
       "bok choy plant"
     ],
-    "aliasesUa": [
-      "пак чой"
-    ]
+    "aliasesUa": ["пак чой"]
   },
   {
     "id": "romanesco-broccoli",
@@ -1164,24 +932,15 @@
     "en": "beefsteak tomato",
     "ua": "Волове серце (сорт)",
     "category": "vegetables",
-    "aliasesEn": [
-      "Beefsteak tomato",
-      "beef tomato"
-    ],
-    "aliasesUa": [
-      "Помідор Волове серце"
-    ]
+    "aliasesEn": ["Beefsteak tomato", "beef tomato"],
+    "aliasesUa": ["Помідор Волове серце"]
   },
   {
     "id": "hazelnut",
     "en": "hazelnut",
     "ua": "ліщинні горіхи",
     "category": "fruits",
-    "aliasesEn": [
-      "European hazelnut",
-      "cobnut",
-      "filbert"
-    ],
+    "aliasesEn": ["European hazelnut", "cobnut", "filbert"],
     "aliasesUa": []
   },
   {
@@ -1189,22 +948,15 @@
     "en": "pumpkin",
     "ua": "гарбуз",
     "category": "fruits",
-    "aliasesEn": [
-      "Telfairia ocbu 8cidentalis vine,",
-      "MbMB"
-    ],
-    "aliasesUa": [
-      "Cucurbita"
-    ]
+    "aliasesEn": ["Telfairia ocbu 8cidentalis vine,", "MbMB"],
+    "aliasesUa": ["Cucurbita"]
   },
   {
     "id": "deglet-noor",
     "en": "Deglet Noor",
     "ua": "Деглет нур",
     "category": "fruits",
-    "aliasesEn": [
-      "Deglet Nour"
-    ],
+    "aliasesEn": ["Deglet Nour"],
     "aliasesUa": []
   },
   {
@@ -1226,14 +978,8 @@
     "en": "Prunus domestica",
     "ua": "слива домашня",
     "category": "fruits",
-    "aliasesEn": [
-      "plum tree"
-    ],
-    "aliasesUa": [
-      "Сливи",
-      "Слива",
-      "Prúnus doméstica"
-    ]
+    "aliasesEn": ["plum tree"],
+    "aliasesUa": ["Сливи", "Слива", "Prúnus doméstica"]
   },
   {
     "id": "fruits-chanh-mu-i",
@@ -1256,23 +1002,15 @@
     "en": "raisin",
     "ua": "родзинки",
     "category": "fruits",
-    "aliasesEn": [
-      "raisins",
-      "dried raisin"
-    ],
-    "aliasesUa": [
-      "ізюм"
-    ]
+    "aliasesEn": ["raisins", "dried raisin"],
+    "aliasesUa": ["ізюм"]
   },
   {
     "id": "nephelium-lappaceum",
     "en": "Nephelium lappaceum",
     "ua": "Рамбутан",
     "category": "fruits",
-    "aliasesEn": [
-      "Hairfruit",
-      "rambutan"
-    ],
+    "aliasesEn": ["Hairfruit", "rambutan"],
     "aliasesUa": []
   },
   {
@@ -1280,10 +1018,7 @@
     "en": "White Transparent",
     "ua": "Білий налив",
     "category": "fruits",
-    "aliasesEn": [
-      "Baltic Sea apple",
-      "Bely Naliv"
-    ],
+    "aliasesEn": ["Baltic Sea apple", "Bely Naliv"],
     "aliasesUa": []
   },
   {
@@ -1291,14 +1026,8 @@
     "en": "banana",
     "ua": "банан",
     "category": "fruits",
-    "aliasesEn": [
-      "bananas",
-      "banana fruit"
-    ],
-    "aliasesUa": [
-      "банан (плід)",
-      "Musa"
-    ]
+    "aliasesEn": ["bananas", "banana fruit"],
+    "aliasesUa": ["банан (плід)", "Musa"]
   },
   {
     "id": "reinette-de-champagne",
@@ -1329,9 +1058,7 @@
     "en": "Jonagold",
     "ua": "Джонаголд",
     "category": "fruits",
-    "aliasesEn": [
-      "N.Y. 43013-1"
-    ],
+    "aliasesEn": ["N.Y. 43013-1"],
     "aliasesUa": []
   },
   {
@@ -1347,11 +1074,7 @@
     "en": "Riesling",
     "ua": "Рислінг",
     "category": "fruits",
-    "aliasesEn": [
-      "White Riesling",
-      "Rossling",
-      "Johannisberger"
-    ],
+    "aliasesEn": ["White Riesling", "Rossling", "Johannisberger"],
     "aliasesUa": []
   },
   {
@@ -1375,11 +1098,7 @@
     "en": "papaya",
     "ua": "папая",
     "category": "fruits",
-    "aliasesEn": [
-      "paw paw",
-      "Papayas",
-      "pawpaw"
-    ],
+    "aliasesEn": ["paw paw", "Papayas", "pawpaw"],
     "aliasesUa": []
   },
   {
@@ -1387,9 +1106,7 @@
     "en": "preserved lemon",
     "ua": "Квашені лимони",
     "category": "fruits",
-    "aliasesEn": [
-      "lemon pickle"
-    ],
+    "aliasesEn": ["lemon pickle"],
     "aliasesUa": []
   },
   {
@@ -1397,9 +1114,7 @@
     "en": "Alkmene",
     "ua": "Алкмене",
     "category": "fruits",
-    "aliasesEn": [
-      "Early Windsor"
-    ],
+    "aliasesEn": ["Early Windsor"],
     "aliasesUa": []
   },
   {
@@ -1407,10 +1122,7 @@
     "en": "melon",
     "ua": "баштанні культури",
     "category": "fruits",
-    "aliasesEn": [
-      "melon fruit",
-      "melons"
-    ],
+    "aliasesEn": ["melon fruit", "melons"],
     "aliasesUa": [
       "рослини баштанні",
       "культури баштанні",
@@ -1423,9 +1135,7 @@
     "en": "Beacon",
     "ua": "Бікон",
     "category": "fruits",
-    "aliasesEn": [
-      "Malus domestica 'Beacon'"
-    ],
+    "aliasesEn": ["Malus domestica 'Beacon'"],
     "aliasesUa": []
   },
   {
@@ -1433,11 +1143,7 @@
     "en": "pomegranate",
     "ua": "гранат",
     "category": "fruits",
-    "aliasesEn": [
-      "pomegranate fruit",
-      "grenadine fruits",
-      "grenadine fruit"
-    ],
+    "aliasesEn": ["pomegranate fruit", "grenadine fruits", "grenadine fruit"],
     "aliasesUa": []
   },
   {
@@ -1445,21 +1151,15 @@
     "en": "McIntosh",
     "ua": "Макінтош",
     "category": "fruits",
-    "aliasesEn": [
-      "McIntosh Red"
-    ],
-    "aliasesUa": [
-      "Мекінтош"
-    ]
+    "aliasesEn": ["McIntosh Red"],
+    "aliasesUa": ["Мекінтош"]
   },
   {
     "id": "nectarine",
     "en": "nectarine",
     "ua": "Нектарин",
     "category": "fruits",
-    "aliasesEn": [
-      "nectarines"
-    ],
+    "aliasesEn": ["nectarines"],
     "aliasesUa": []
   },
   {
@@ -1475,34 +1175,23 @@
     "en": "cooking banana",
     "ua": "плантан",
     "category": "fruits",
-    "aliasesEn": [
-      "green banana",
-      "plantains"
-    ],
-    "aliasesUa": [
-      "платано"
-    ]
+    "aliasesEn": ["green banana", "plantains"],
+    "aliasesUa": ["платано"]
   },
   {
     "id": "plum",
     "en": "plum",
     "ua": "слива",
     "category": "fruits",
-    "aliasesEn": [
-      "plums"
-    ],
-    "aliasesUa": [
-      "слива (фрукт)"
-    ]
+    "aliasesEn": ["plums"],
+    "aliasesUa": ["слива (фрукт)"]
   },
   {
     "id": "citrus-tachibana",
     "en": "Citrus tachibana",
     "ua": "Тачібана",
     "category": "fruits",
-    "aliasesEn": [
-      "Citrus × tachibana"
-    ],
+    "aliasesEn": ["Citrus × tachibana"],
     "aliasesUa": []
   },
   {
@@ -1510,9 +1199,7 @@
     "en": "banana chip",
     "ua": "бананові чипси",
     "category": "fruits",
-    "aliasesEn": [
-      "banana crisp"
-    ],
+    "aliasesEn": ["banana crisp"],
     "aliasesUa": []
   },
   {
@@ -1529,36 +1216,23 @@
     "ua": "Флоріна",
     "category": "fruits",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ябука «Флоріна»",
-      "сорт яблук «Флоріна»"
-    ]
+    "aliasesUa": ["ябука «Флоріна»", "сорт яблук «Флоріна»"]
   },
   {
     "id": "citrus",
     "en": "Citrus",
     "ua": "цитрус",
     "category": "fruits",
-    "aliasesEn": [
-      "Papeda (citrus)"
-    ],
-    "aliasesUa": [
-      "Цитрусові",
-      "Citrus",
-      "Citreae"
-    ]
+    "aliasesEn": ["Papeda (citrus)"],
+    "aliasesUa": ["Цитрусові", "Citrus", "Citreae"]
   },
   {
     "id": "white-currant",
     "en": "white currant",
     "ua": "біла смородина",
     "category": "fruits",
-    "aliasesEn": [
-      "whitecurrant"
-    ],
-    "aliasesUa": [
-      "біла порічка"
-    ]
+    "aliasesEn": ["whitecurrant"],
+    "aliasesUa": ["біла порічка"]
   },
   {
     "id": "melitopol-cherry",
@@ -1581,9 +1255,7 @@
     "en": "gooseberry",
     "ua": "аґрус",
     "category": "fruits",
-    "aliasesEn": [
-      "European gooseberry"
-    ],
+    "aliasesEn": ["European gooseberry"],
     "aliasesUa": []
   },
   {
@@ -1603,10 +1275,7 @@
     "en": "prune",
     "ua": "чорнослив",
     "category": "fruits",
-    "aliasesEn": [
-      "dried plum",
-      "prunes"
-    ],
+    "aliasesEn": ["dried plum", "prunes"],
     "aliasesUa": []
   },
   {
@@ -1614,9 +1283,7 @@
     "en": "Esopus Spitzenburg",
     "ua": "Езоп Спіценбург",
     "category": "fruits",
-    "aliasesEn": [
-      "Aesopus Spitzenburgh"
-    ],
+    "aliasesEn": ["Aesopus Spitzenburgh"],
     "aliasesUa": []
   },
   {
@@ -1624,13 +1291,8 @@
     "en": "grape",
     "ua": "виноград",
     "category": "fruits",
-    "aliasesEn": [
-      "🍇",
-      "grapes"
-    ],
-    "aliasesUa": [
-      "виноградина"
-    ]
+    "aliasesEn": ["🍇", "grapes"],
+    "aliasesUa": ["виноградина"]
   },
   {
     "id": "citrinos-clementina",
@@ -1658,11 +1320,7 @@
     "en": "Cox's Orange Pippin",
     "ua": "Ренет оранжевий Кокса",
     "category": "fruits",
-    "aliasesEn": [
-      "Russet Pippin",
-      "Cox Orange",
-      "Cox"
-    ],
+    "aliasesEn": ["Russet Pippin", "Cox Orange", "Cox"],
     "aliasesUa": []
   },
   {
@@ -1677,19 +1335,14 @@
       "lampun",
       "guanabana"
     ],
-    "aliasesUa": [
-      "Саусеп",
-      "Сауасеп"
-    ]
+    "aliasesUa": ["Саусеп", "Сауасеп"]
   },
   {
     "id": "solanum-betaceum",
     "en": "Solanum betaceum",
     "ua": "Тамарільйо",
     "category": "fruits",
-    "aliasesEn": [
-      "tamarillo"
-    ],
+    "aliasesEn": ["tamarillo"],
     "aliasesUa": []
   },
   {
@@ -1710,9 +1363,7 @@
     "ua": "Паперівка",
     "category": "fruits",
     "aliasesEn": [],
-    "aliasesUa": [
-      "паперівка"
-    ]
+    "aliasesUa": ["паперівка"]
   },
   {
     "id": "topaz",
@@ -1735,9 +1386,7 @@
     "en": "kola nut",
     "ua": "Горіх кола",
     "category": "fruits",
-    "aliasesEn": [
-      "Cola"
-    ],
+    "aliasesEn": ["Cola"],
     "aliasesUa": []
   },
   {
@@ -1753,27 +1402,15 @@
     "en": "pomelo",
     "ua": "помело",
     "category": "fruits",
-    "aliasesEn": [
-      "pummelo",
-      "shaddock",
-      "pommelo",
-      "Citrus maxima"
-    ],
-    "aliasesUa": [
-      "шеддок",
-      "помпельмус",
-      "Citrus maxima"
-    ]
+    "aliasesEn": ["pummelo", "shaddock", "pommelo", "Citrus maxima"],
+    "aliasesUa": ["шеддок", "помпельмус", "Citrus maxima"]
   },
   {
     "id": "mango",
     "en": "mango",
     "ua": "манго",
     "category": "fruits",
-    "aliasesEn": [
-      "Mangifera indica",
-      "mangoes"
-    ],
+    "aliasesEn": ["Mangifera indica", "mangoes"],
     "aliasesUa": []
   },
   {
@@ -1781,9 +1418,7 @@
     "en": "tklapi",
     "ua": "Тклапі",
     "category": "fruits",
-    "aliasesEn": [
-      "tqlapi"
-    ],
+    "aliasesEn": ["tqlapi"],
     "aliasesUa": []
   },
   {
@@ -1791,21 +1426,15 @@
     "en": "walnut",
     "ua": "горіх волоський",
     "category": "fruits",
-    "aliasesEn": [
-      "Juglans regia"
-    ],
-    "aliasesUa": [
-      "горіх грецький"
-    ]
+    "aliasesEn": ["Juglans regia"],
+    "aliasesUa": ["горіх грецький"]
   },
   {
     "id": "melba-apple",
     "en": "Melba apple",
     "ua": "Мелба",
     "category": "fruits",
-    "aliasesEn": [
-      "Melba"
-    ],
+    "aliasesEn": ["Melba"],
     "aliasesUa": []
   },
   {
@@ -1837,10 +1466,7 @@
     "en": "persimmon",
     "ua": "хурма",
     "category": "fruits",
-    "aliasesEn": [
-      "kaki",
-      "Persimmons"
-    ],
+    "aliasesEn": ["kaki", "Persimmons"],
     "aliasesUa": []
   },
   {
@@ -1849,11 +1475,7 @@
     "ua": "Заказаний овоч",
     "category": "fruits",
     "aliasesEn": [],
-    "aliasesUa": [
-      "яблуко спокуси",
-      "яблуко гріховне",
-      "Заборонений плід"
-    ]
+    "aliasesUa": ["яблуко спокуси", "яблуко гріховне", "Заборонений плід"]
   },
   {
     "id": "olive",
@@ -1868,9 +1490,7 @@
     "en": "Duchess of Oldenburg",
     "ua": "Боровинка",
     "category": "fruits",
-    "aliasesEn": [
-      "Charlamowsky"
-    ],
+    "aliasesEn": ["Charlamowsky"],
     "aliasesUa": []
   },
   {
@@ -1878,9 +1498,7 @@
     "en": "pineapple",
     "ua": "ананас",
     "category": "fruits",
-    "aliasesEn": [
-      "pineapples"
-    ],
+    "aliasesEn": ["pineapples"],
     "aliasesUa": []
   },
   {
@@ -1904,11 +1522,7 @@
     "en": "currant",
     "ua": "Коринка",
     "category": "fruits",
-    "aliasesEn": [
-      "Corinthian raisin",
-      "Corinth raisin",
-      "black raisin"
-    ],
+    "aliasesEn": ["Corinthian raisin", "Corinth raisin", "black raisin"],
     "aliasesUa": []
   },
   {
@@ -1923,18 +1537,14 @@
       "forest fruits",
       "berry fruit"
     ],
-    "aliasesUa": [
-      "ягода"
-    ]
+    "aliasesUa": ["ягода"]
   },
   {
     "id": "fig",
     "en": "fig",
     "ua": "інжир",
     "category": "fruits",
-    "aliasesEn": [
-      "fig fruit"
-    ],
+    "aliasesEn": ["fig fruit"],
     "aliasesUa": []
   },
   {
@@ -1958,11 +1568,7 @@
     "en": "kumquat",
     "ua": "Кумкват",
     "category": "fruits",
-    "aliasesEn": [
-      "cumquats",
-      "cumquat",
-      "kumquats"
-    ],
+    "aliasesEn": ["cumquats", "cumquat", "kumquats"],
     "aliasesUa": []
   },
   {
@@ -1970,9 +1576,7 @@
     "en": "bilberry",
     "ua": "чорниця",
     "category": "fruits",
-    "aliasesEn": [
-      "European blueberry"
-    ],
+    "aliasesEn": ["European blueberry"],
     "aliasesUa": []
   },
   {
@@ -1988,9 +1592,7 @@
     "en": "Sauerbraten",
     "ua": "Зауэрбратен",
     "category": "meat",
-    "aliasesEn": [
-      "Zoervleis"
-    ],
+    "aliasesEn": ["Zoervleis"],
     "aliasesUa": []
   },
   {
@@ -2022,10 +1624,7 @@
     "en": "turkey meat",
     "ua": "Індичатина",
     "category": "meat",
-    "aliasesEn": [
-      "turkey flesh",
-      "turkey as food"
-    ],
+    "aliasesEn": ["turkey flesh", "turkey as food"],
     "aliasesUa": []
   },
   {
@@ -2041,9 +1640,7 @@
     "en": "lamb meat",
     "ua": "ягнятина",
     "category": "meat",
-    "aliasesEn": [
-      "lamb"
-    ],
+    "aliasesEn": ["lamb"],
     "aliasesUa": []
   },
   {
@@ -2060,9 +1657,7 @@
     "ua": "собаче м’ясо",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "собачатина"
-    ]
+    "aliasesUa": ["собачатина"]
   },
   {
     "id": "chicken-breast",
@@ -2077,12 +1672,8 @@
     "en": "kofta",
     "ua": "кофта",
     "category": "meat",
-    "aliasesEn": [
-      "kofte"
-    ],
-    "aliasesUa": [
-      "кофте"
-    ]
+    "aliasesEn": ["kofte"],
+    "aliasesUa": ["кофте"]
   },
   {
     "id": "white-meat",
@@ -2097,13 +1688,8 @@
     "en": "cut of beef",
     "ua": "розбирання яловичої туші",
     "category": "meat",
-    "aliasesEn": [
-      "cuts of beef",
-      "beef cut"
-    ],
-    "aliasesUa": [
-      "розбирання яловичини"
-    ]
+    "aliasesEn": ["cuts of beef", "beef cut"],
+    "aliasesUa": ["розбирання яловичини"]
   },
   {
     "id": "pig-s-trotters",
@@ -2118,9 +1704,7 @@
     "en": "fillet",
     "ua": "Філе",
     "category": "meat",
-    "aliasesEn": [
-      "filet"
-    ],
+    "aliasesEn": ["filet"],
     "aliasesUa": []
   },
   {
@@ -2128,9 +1712,7 @@
     "en": "Kassler",
     "ua": "Каселер",
     "category": "meat",
-    "aliasesEn": [
-      "Kasseler"
-    ],
+    "aliasesEn": ["Kasseler"],
     "aliasesUa": []
   },
   {
@@ -2162,10 +1744,7 @@
     "en": "sundae",
     "ua": "сунде",
     "category": "meat",
-    "aliasesEn": [
-      "soondae",
-      "Korean sausage"
-    ],
+    "aliasesEn": ["soondae", "Korean sausage"],
     "aliasesUa": []
   },
   {
@@ -2181,24 +1760,15 @@
     "en": "bat meat",
     "ua": "М'ясо лиликоподібних",
     "category": "meat",
-    "aliasesEn": [
-      "Chiroptera as food",
-      "bat flesh",
-      "bat as food"
-    ],
-    "aliasesUa": [
-      "М'ясо кажанів"
-    ]
+    "aliasesEn": ["Chiroptera as food", "bat flesh", "bat as food"],
+    "aliasesUa": ["М'ясо кажанів"]
   },
   {
     "id": "ground-beef",
     "en": "ground beef",
     "ua": "Яловичий фарш",
     "category": "meat",
-    "aliasesEn": [
-      "mince beef meat",
-      "minced meat"
-    ],
+    "aliasesEn": ["mince beef meat", "minced meat"],
     "aliasesUa": []
   },
   {
@@ -2206,9 +1776,7 @@
     "en": "fish fillet",
     "ua": "філе риби",
     "category": "meat",
-    "aliasesEn": [
-      "fish filet"
-    ],
+    "aliasesEn": ["fish filet"],
     "aliasesUa": []
   },
   {
@@ -2216,9 +1784,7 @@
     "en": "red meat",
     "ua": "Червоне м'ясо",
     "category": "meat",
-    "aliasesEn": [
-      "red meats"
-    ],
+    "aliasesEn": ["red meats"],
     "aliasesUa": []
   },
   {
@@ -2226,9 +1792,7 @@
     "en": "kidney as food",
     "ua": "нирки",
     "category": "meat",
-    "aliasesEn": [
-      "kidneys as food"
-    ],
+    "aliasesEn": ["kidneys as food"],
     "aliasesUa": []
   },
   {
@@ -2236,9 +1800,7 @@
     "en": "wild boar meat",
     "ua": "м’ясо кабана",
     "category": "meat",
-    "aliasesEn": [
-      "boar meat"
-    ],
+    "aliasesEn": ["boar meat"],
     "aliasesUa": []
   },
   {
@@ -2246,11 +1808,7 @@
     "en": "caul fat",
     "ua": "Сальник",
     "category": "meat",
-    "aliasesEn": [
-      "lace fat",
-      "fat netting",
-      "omentum"
-    ],
+    "aliasesEn": ["lace fat", "fat netting", "omentum"],
     "aliasesUa": []
   },
   {
@@ -2258,9 +1816,7 @@
     "en": "squab",
     "ua": "Сквоб",
     "category": "meat",
-    "aliasesEn": [
-      "pigeon meat"
-    ],
+    "aliasesEn": ["pigeon meat"],
     "aliasesUa": []
   },
   {
@@ -2268,9 +1824,7 @@
     "en": "oxtail",
     "ua": "Бичачий хвіст",
     "category": "meat",
-    "aliasesEn": [
-      "cow's tail"
-    ],
+    "aliasesEn": ["cow's tail"],
     "aliasesUa": []
   },
   {
@@ -2278,11 +1832,7 @@
     "en": "minced meat",
     "ua": "фарш",
     "category": "meat",
-    "aliasesEn": [
-      "ground round",
-      "ground meat",
-      "mince"
-    ],
+    "aliasesEn": ["ground round", "ground meat", "mince"],
     "aliasesUa": []
   },
   {
@@ -2298,9 +1848,7 @@
     "en": "rack of lamb",
     "ua": "Каре з баранини",
     "category": "meat",
-    "aliasesEn": [
-      "carré d'agneau"
-    ],
+    "aliasesEn": ["carré d'agneau"],
     "aliasesUa": []
   },
   {
@@ -2333,10 +1881,7 @@
     "ua": "кишка́",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "кров’я́нка",
-      "ведарай"
-    ]
+    "aliasesUa": ["кров’я́нка", "ведарай"]
   },
   {
     "id": "lardo",
@@ -2363,9 +1908,7 @@
     "en": "camel meat",
     "ua": "Верблюжатина",
     "category": "meat",
-    "aliasesEn": [
-      "dromedary meat"
-    ],
+    "aliasesEn": ["dromedary meat"],
     "aliasesUa": []
   },
   {
@@ -2411,12 +1954,7 @@
     "en": "beef tenderloin",
     "ua": "яловича вирізка",
     "category": "meat",
-    "aliasesEn": [
-      "eye fillet",
-      "beef fillet",
-      "fillet",
-      "tenderloin"
-    ],
+    "aliasesEn": ["eye fillet", "beef fillet", "fillet", "tenderloin"],
     "aliasesUa": []
   },
   {
@@ -2441,20 +1979,14 @@
     "ua": "Котлета",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Котлети"
-    ]
+    "aliasesUa": ["Котлети"]
   },
   {
     "id": "roast",
     "en": "roast",
     "ua": "печеня",
     "category": "meat",
-    "aliasesEn": [
-      "meat roast",
-      "roast meat",
-      "roasted meat"
-    ],
+    "aliasesEn": ["meat roast", "roast meat", "roasted meat"],
     "aliasesUa": []
   },
   {
@@ -2470,9 +2002,7 @@
     "en": "entrecôte",
     "ua": "Антрекот",
     "category": "meat",
-    "aliasesEn": [
-      "entrecote"
-    ],
+    "aliasesEn": ["entrecote"],
     "aliasesUa": []
   },
   {
@@ -2488,12 +2018,8 @@
     "en": "poultry meat",
     "ua": "м'ясо птиці",
     "category": "meat",
-    "aliasesEn": [
-      "poultry as food"
-    ],
-    "aliasesUa": [
-      "пташине м'ясо"
-    ]
+    "aliasesEn": ["poultry as food"],
+    "aliasesUa": ["пташине м'ясо"]
   },
   {
     "id": "mett",
@@ -2532,10 +2058,7 @@
     "en": "short loin",
     "ua": "Шортлойн",
     "category": "meat",
-    "aliasesEn": [
-      "striploin",
-      "sirloin"
-    ],
+    "aliasesEn": ["striploin", "sirloin"],
     "aliasesUa": []
   },
   {
@@ -2543,9 +2066,7 @@
     "en": "bushmeat",
     "ua": "Бушміт",
     "category": "meat",
-    "aliasesEn": [
-      "bush meat"
-    ],
+    "aliasesEn": ["bush meat"],
     "aliasesUa": []
   },
   {
@@ -2553,10 +2074,7 @@
     "en": "Serrano ham",
     "ua": "Хамон Серрано",
     "category": "meat",
-    "aliasesEn": [
-      "serrano ham",
-      "jamon serrano"
-    ],
+    "aliasesEn": ["serrano ham", "jamon serrano"],
     "aliasesUa": []
   },
   {
@@ -2564,10 +2082,7 @@
     "en": "jamón",
     "ua": "Хамон",
     "category": "meat",
-    "aliasesEn": [
-      "Spanish raw ham",
-      "Spanish dry-cured ham"
-    ],
+    "aliasesEn": ["Spanish raw ham", "Spanish dry-cured ham"],
     "aliasesUa": []
   },
   {
@@ -2575,11 +2090,7 @@
     "en": "pork",
     "ua": "свинина",
     "category": "meat",
-    "aliasesEn": [
-      "pork meat",
-      "pigmeat",
-      "pig meat"
-    ],
+    "aliasesEn": ["pork meat", "pigmeat", "pig meat"],
     "aliasesUa": []
   },
   {
@@ -2587,9 +2098,7 @@
     "en": "braciola",
     "ua": "Брачола",
     "category": "meat",
-    "aliasesEn": [
-      "chop"
-    ],
+    "aliasesEn": ["chop"],
     "aliasesUa": []
   },
   {
@@ -2598,19 +2107,14 @@
     "ua": "Жаб'ячі лапки",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Жаб’ячі лапки"
-    ]
+    "aliasesUa": ["Жаб’ячі лапки"]
   },
   {
     "id": "duck-meat",
     "en": "duck meat",
     "ua": "качатина",
     "category": "meat",
-    "aliasesEn": [
-      "duck flesh",
-      "duck as food"
-    ],
+    "aliasesEn": ["duck flesh", "duck as food"],
     "aliasesUa": []
   },
   {
@@ -2618,9 +2122,7 @@
     "en": "Schweinsbraten",
     "ua": "Буженина",
     "category": "meat",
-    "aliasesEn": [
-      "roast pork"
-    ],
+    "aliasesEn": ["roast pork"],
     "aliasesUa": []
   },
   {
@@ -2628,9 +2130,7 @@
     "en": "Kumpiak",
     "ua": "Окіст",
     "category": "meat",
-    "aliasesEn": [
-      "Kump"
-    ],
+    "aliasesEn": ["Kump"],
     "aliasesUa": []
   },
   {
@@ -2638,11 +2138,7 @@
     "en": "sheep meat",
     "ua": "баранина",
     "category": "meat",
-    "aliasesEn": [
-      "hogget",
-      "mutton",
-      "lamb"
-    ],
+    "aliasesEn": ["hogget", "mutton", "lamb"],
     "aliasesUa": []
   },
   {
@@ -2666,9 +2162,7 @@
     "en": "pig head",
     "ua": "Свиняча голова",
     "category": "meat",
-    "aliasesEn": [
-      "pork head"
-    ],
+    "aliasesEn": ["pork head"],
     "aliasesUa": []
   },
   {
@@ -2684,9 +2178,7 @@
     "en": "veal",
     "ua": "телятина",
     "category": "meat",
-    "aliasesEn": [
-      "calf meat"
-    ],
+    "aliasesEn": ["calf meat"],
     "aliasesUa": []
   },
   {
@@ -2694,13 +2186,8 @@
     "en": "kangaroo meat",
     "ua": "Кенгурятина",
     "category": "meat",
-    "aliasesEn": [
-      "australus",
-      "Macropodidae as food"
-    ],
-    "aliasesUa": [
-      "М'ясо кенгуру"
-    ]
+    "aliasesEn": ["australus", "Macropodidae as food"],
+    "aliasesUa": ["М'ясо кенгуру"]
   },
   {
     "id": "pastrami",
@@ -2715,9 +2202,7 @@
     "en": "salo",
     "ua": "сало",
     "category": "meat",
-    "aliasesEn": [
-      "Slanina"
-    ],
+    "aliasesEn": ["Slanina"],
     "aliasesUa": []
   },
   {
@@ -2725,10 +2210,7 @@
     "en": "gizzard",
     "ua": "Мускульний шлунок",
     "category": "meat",
-    "aliasesEn": [
-      "ventriculus",
-      "gigerium"
-    ],
+    "aliasesEn": ["ventriculus", "gigerium"],
     "aliasesUa": []
   },
   {
@@ -2736,9 +2218,7 @@
     "en": "Wiener schnitzel",
     "ua": "Віденський шніцель",
     "category": "meat",
-    "aliasesEn": [
-      "Wienerschnitzel"
-    ],
+    "aliasesEn": ["Wienerschnitzel"],
     "aliasesUa": []
   },
   {
@@ -2754,10 +2234,7 @@
     "en": "rib steak",
     "ua": "Реберний стейк",
     "category": "meat",
-    "aliasesEn": [
-      "Tomahawk steak",
-      "beef rib"
-    ],
+    "aliasesEn": ["Tomahawk steak", "beef rib"],
     "aliasesUa": []
   },
   {
@@ -2766,19 +2243,14 @@
     "ua": "реберця",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ребра, ребро"
-    ]
+    "aliasesUa": ["ребра, ребро"]
   },
   {
     "id": "frikandel",
     "en": "frikandel",
     "ua": "фрикандел",
     "category": "meat",
-    "aliasesEn": [
-      "Freakandel",
-      "Dutch Dawg"
-    ],
+    "aliasesEn": ["Freakandel", "Dutch Dawg"],
     "aliasesUa": []
   },
   {
@@ -2786,9 +2258,7 @@
     "en": "biltong",
     "ua": "білтонг",
     "category": "meat",
-    "aliasesEn": [
-      "segwapa"
-    ],
+    "aliasesEn": ["segwapa"],
     "aliasesUa": []
   },
   {
@@ -2796,11 +2266,7 @@
     "en": "pork skin",
     "ua": "Шкварки",
     "category": "meat",
-    "aliasesEn": [
-      "pork rind",
-      "couenne",
-      "pig skin"
-    ],
+    "aliasesEn": ["pork rind", "couenne", "pig skin"],
     "aliasesUa": []
   },
   {
@@ -2808,10 +2274,7 @@
     "en": "shark as food",
     "ua": "акуляче м'ясо",
     "category": "meat",
-    "aliasesEn": [
-      "shark meat",
-      "shark flesh"
-    ],
+    "aliasesEn": ["shark meat", "shark flesh"],
     "aliasesUa": []
   },
   {
@@ -2826,20 +2289,14 @@
       "mi-xie-gao",
       "mi-hueh"
     ],
-    "aliasesUa": [
-      "Ті гоег кое"
-    ]
+    "aliasesUa": ["Ті гоег кое"]
   },
   {
     "id": "game-meat",
     "en": "game meat",
     "ua": "дичина",
     "category": "meat",
-    "aliasesEn": [
-      "wild meat",
-      "Bushmeat",
-      "Venison"
-    ],
+    "aliasesEn": ["wild meat", "Bushmeat", "Venison"],
     "aliasesUa": []
   },
   {
@@ -2855,9 +2312,7 @@
     "en": "smoked meat",
     "ua": "копчене м'ясо",
     "category": "meat",
-    "aliasesEn": [
-      "Smoked meat"
-    ],
+    "aliasesEn": ["Smoked meat"],
     "aliasesUa": []
   },
   {
@@ -2896,11 +2351,7 @@
     "ua": "Кров'янка",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "кров'яна ковбаса",
-      "кишка",
-      "кашанка"
-    ]
+    "aliasesUa": ["кров'яна ковбаса", "кишка", "кашанка"]
   },
   {
     "id": "rib-eye-steak",
@@ -2915,9 +2366,7 @@
     "en": "cat meat",
     "ua": "Кошатина",
     "category": "meat",
-    "aliasesEn": [
-      "cats as food"
-    ],
+    "aliasesEn": ["cats as food"],
     "aliasesUa": []
   },
   {
@@ -2939,9 +2388,7 @@
     "en": "fatback",
     "ua": "шпик",
     "category": "meat",
-    "aliasesEn": [
-      "fatback bacon"
-    ],
+    "aliasesEn": ["fatback bacon"],
     "aliasesUa": []
   },
   {
@@ -2949,11 +2396,7 @@
     "en": "offal",
     "ua": "субпродукти",
     "category": "meat",
-    "aliasesEn": [
-      "variety meats",
-      "organ meats",
-      "pluck"
-    ],
+    "aliasesEn": ["variety meats", "organ meats", "pluck"],
     "aliasesUa": []
   },
   {
@@ -2993,14 +2436,8 @@
     "en": "prosciutto",
     "ua": "Прошуто",
     "category": "meat",
-    "aliasesEn": [
-      "pršut",
-      "Italian raw ham"
-    ],
-    "aliasesUa": [
-      "Пршут",
-      "Прошутто"
-    ]
+    "aliasesEn": ["pršut", "Italian raw ham"],
+    "aliasesUa": ["Пршут", "Прошутто"]
   },
   {
     "id": "th-ringer-rotwurst",
@@ -3023,12 +2460,7 @@
     "en": "blood as food",
     "ua": "Вживання крові в їжу",
     "category": "meat",
-    "aliasesEn": [
-      "blood-based food",
-      "seonji",
-      "blood food",
-      "blood"
-    ],
+    "aliasesEn": ["blood-based food", "seonji", "blood food", "blood"],
     "aliasesUa": []
   },
   {
@@ -3059,10 +2491,7 @@
       "hen meat",
       "chick meat"
     ],
-    "aliasesUa": [
-      "куряче м'ясо",
-      "курчак"
-    ]
+    "aliasesUa": ["куряче м'ясо", "курчак"]
   },
   {
     "id": "filet-mignon",
@@ -3107,9 +2536,7 @@
     "en": "rump steak",
     "ua": "ромштекс",
     "category": "meat",
-    "aliasesEn": [
-      "striploin"
-    ],
+    "aliasesEn": ["striploin"],
     "aliasesUa": []
   },
   {
@@ -3126,18 +2553,14 @@
     "ua": "шинка з лосося",
     "category": "meat",
     "aliasesEn": [],
-    "aliasesUa": [
-      "лососева шинка"
-    ]
+    "aliasesUa": ["лососева шинка"]
   },
   {
     "id": "skirt-steak",
     "en": "skirt steak",
     "ua": "Скірт-стейк",
     "category": "meat",
-    "aliasesEn": [
-      "Skirt steak"
-    ],
+    "aliasesEn": ["Skirt steak"],
     "aliasesUa": []
   },
   {
@@ -3153,9 +2576,7 @@
     "en": "beefsteak",
     "ua": "Біфштекс",
     "category": "meat",
-    "aliasesEn": [
-      "beef steak"
-    ],
+    "aliasesEn": ["beef steak"],
     "aliasesUa": []
   },
   {
@@ -3163,9 +2584,7 @@
     "en": "numbray",
     "ua": "Електричний скат індійський",
     "category": "fish",
-    "aliasesEn": [
-      "Narke dipterygia"
-    ],
+    "aliasesEn": ["Narke dipterygia"],
     "aliasesUa": []
   },
   {
@@ -3173,9 +2592,7 @@
     "en": "Marbled electric ray",
     "ua": "Скат мармуровий",
     "category": "fish",
-    "aliasesEn": [
-      "Torpedo marmorata"
-    ],
+    "aliasesEn": ["Torpedo marmorata"],
     "aliasesUa": []
   },
   {
@@ -3183,12 +2600,8 @@
     "en": "Lamniformes",
     "ua": "Ламноподібні",
     "category": "fish",
-    "aliasesEn": [
-      "mackerel sharks"
-    ],
-    "aliasesUa": [
-      "Lamniformes"
-    ]
+    "aliasesEn": ["mackerel sharks"],
+    "aliasesUa": ["Lamniformes"]
   },
   {
     "id": "trout",
@@ -3233,12 +2646,8 @@
     "en": "juvenile fish",
     "ua": "мальок",
     "category": "fish",
-    "aliasesEn": [
-      "fingerling"
-    ],
-    "aliasesUa": [
-      "риб’яча молодь"
-    ]
+    "aliasesEn": ["fingerling"],
+    "aliasesUa": ["риб’яча молодь"]
   },
   {
     "id": "sockeye-salmon",
@@ -3252,46 +2661,30 @@
       "Fraser River salmon",
       "blueback salmon"
     ],
-    "aliasesUa": [
-      "Червоний лосось",
-      "Oncorhynchus nerka",
-      "Червона риба"
-    ]
+    "aliasesUa": ["Червоний лосось", "Oncorhynchus nerka", "Червона риба"]
   },
   {
     "id": "psychrolutes-marcidus",
     "en": "Psychrolutes marcidus",
     "ua": "Риба-крапля",
     "category": "fish",
-    "aliasesEn": [
-      "blobfish",
-      "blob fish"
-    ],
-    "aliasesUa": [
-      "риба-крапля",
-      "Psychrolutes marcidus"
-    ]
+    "aliasesEn": ["blobfish", "blob fish"],
+    "aliasesUa": ["риба-крапля", "Psychrolutes marcidus"]
   },
   {
     "id": "osteichthyes",
     "en": "Osteichthyes",
     "ua": "кісткові риби",
     "category": "fish",
-    "aliasesEn": [
-      "bony fish"
-    ],
-    "aliasesUa": [
-      "Osteichthyes"
-    ]
+    "aliasesEn": ["bony fish"],
+    "aliasesUa": ["Osteichthyes"]
   },
   {
     "id": "tetra",
     "en": "tetra",
     "ua": "Тетра",
     "category": "fish",
-    "aliasesEn": [
-      "tetras"
-    ],
+    "aliasesEn": ["tetras"],
     "aliasesUa": []
   },
   {
@@ -3299,9 +2692,7 @@
     "en": "grey gurnard",
     "ua": "Морський півень сірий",
     "category": "fish",
-    "aliasesEn": [
-      "Eutrigla gurnardus"
-    ],
+    "aliasesEn": ["Eutrigla gurnardus"],
     "aliasesUa": []
   },
   {
@@ -3316,22 +2707,15 @@
       "calico salmon",
       "Salmo keta"
     ],
-    "aliasesUa": [
-      "Oncorhynchus keta"
-    ]
+    "aliasesUa": ["Oncorhynchus keta"]
   },
   {
     "id": "chinese-sturgeon",
     "en": "Chinese sturgeon",
     "ua": "Осетер китайський",
     "category": "fish",
-    "aliasesEn": [
-      "Acipenser sinensis"
-    ],
-    "aliasesUa": [
-      "Китайський осетер",
-      "Acipenser sinensis"
-    ]
+    "aliasesEn": ["Acipenser sinensis"],
+    "aliasesUa": ["Китайський осетер", "Acipenser sinensis"]
   },
   {
     "id": "chub-mackerel",
@@ -3344,31 +2728,22 @@
       "Pacific mackerel",
       "Atlantic chub mackerel"
     ],
-    "aliasesUa": [
-      "Scomber japonicus"
-    ]
+    "aliasesUa": ["Scomber japonicus"]
   },
   {
     "id": "electric-ray",
     "en": "electric ray",
     "ua": "електричні скати",
     "category": "fish",
-    "aliasesEn": [
-      "Torpediniformes"
-    ],
-    "aliasesUa": [
-      "електричний скат",
-      "Torpediniformes"
-    ]
+    "aliasesEn": ["Torpediniformes"],
+    "aliasesUa": ["електричний скат", "Torpediniformes"]
   },
   {
     "id": "anadromous-fish",
     "en": "anadromous fish",
     "ua": "Анадромні види",
     "category": "fish",
-    "aliasesEn": [
-      "anadromous species"
-    ],
+    "aliasesEn": ["anadromous species"],
     "aliasesUa": []
   },
   {
@@ -3391,9 +2766,7 @@
       "quinnat",
       "Oncorhynchus tshawytscha"
     ],
-    "aliasesUa": [
-      "Oncorhynchus tshawytscha"
-    ]
+    "aliasesUa": ["Oncorhynchus tshawytscha"]
   },
   {
     "id": "prehistoric-fish",
@@ -3430,10 +2803,7 @@
     "en": "coho salmon",
     "ua": "Кижуч",
     "category": "fish",
-    "aliasesEn": [
-      "silver salmon",
-      "Oncorhynchus kisutch"
-    ],
+    "aliasesEn": ["silver salmon", "Oncorhynchus kisutch"],
     "aliasesUa": []
   },
   {
@@ -3441,9 +2811,7 @@
     "en": "catadromy",
     "ua": "Катадромні види",
     "category": "fish",
-    "aliasesEn": [
-      "catadromous species"
-    ],
+    "aliasesEn": ["catadromous species"],
     "aliasesUa": []
   },
   {
@@ -3459,12 +2827,8 @@
     "en": "genetically modified fish",
     "ua": "генетично модифікована риба",
     "category": "fish",
-    "aliasesEn": [
-      "GM fish"
-    ],
-    "aliasesUa": [
-      "риба, виведена із застосуванням генної технології"
-    ]
+    "aliasesEn": ["GM fish"],
+    "aliasesUa": ["риба, виведена із застосуванням генної технології"]
   },
   {
     "id": "pelagic-fish",
@@ -3479,9 +2843,7 @@
     "en": "fish stock",
     "ua": "рибний бульйон",
     "category": "fish",
-    "aliasesEn": [
-      "fish broth"
-    ],
+    "aliasesEn": ["fish broth"],
     "aliasesUa": []
   },
   {
@@ -3497,9 +2859,7 @@
     "en": "salmon",
     "ua": "лосось",
     "category": "fish",
-    "aliasesEn": [
-      "Cookbook:Salmon"
-    ],
+    "aliasesEn": ["Cookbook:Salmon"],
     "aliasesUa": []
   },
   {
@@ -3507,10 +2867,7 @@
     "en": "freshwater fish",
     "ua": "Прісноводні риби",
     "category": "fish",
-    "aliasesEn": [
-      "inland water fishes",
-      "fresh water fish"
-    ],
+    "aliasesEn": ["inland water fishes", "fresh water fish"],
     "aliasesUa": []
   },
   {
@@ -3526,9 +2883,7 @@
     "en": "Bullet tuna",
     "ua": "Тунець скумбрійовидний",
     "category": "fish",
-    "aliasesEn": [
-      "Auxis rochei rochei"
-    ],
+    "aliasesEn": ["Auxis rochei rochei"],
     "aliasesUa": []
   },
   {
@@ -3536,9 +2891,7 @@
     "en": "goldfish",
     "ua": "Карась китайський",
     "category": "fish",
-    "aliasesEn": [
-      "Carassius auratus"
-    ],
+    "aliasesEn": ["Carassius auratus"],
     "aliasesUa": [
       "Золоті рибки",
       "Золота рибка",
@@ -3551,10 +2904,7 @@
     "en": "blind electric ray",
     "ua": "Сліпий електричний скат Айсона",
     "category": "fish",
-    "aliasesEn": [
-      "Typhlonarke aysoni",
-      "Blind electric ray"
-    ],
+    "aliasesEn": ["Typhlonarke aysoni", "Blind electric ray"],
     "aliasesUa": []
   },
   {
@@ -3562,9 +2912,7 @@
     "en": "red seabream",
     "ua": "червоний морський лящ",
     "category": "fish",
-    "aliasesEn": [
-      "red sea bream"
-    ],
+    "aliasesEn": ["red sea bream"],
     "aliasesUa": []
   },
   {
@@ -3572,21 +2920,15 @@
     "en": "predatory fish",
     "ua": "хижа риба",
     "category": "fish",
-    "aliasesEn": [
-      "predatory fishes"
-    ],
-    "aliasesUa": [
-      "хижі риби"
-    ]
+    "aliasesEn": ["predatory fishes"],
+    "aliasesUa": ["хижі риби"]
   },
   {
     "id": "electric-eel",
     "en": "electric eel",
     "ua": "Вугор електричний",
     "category": "fish",
-    "aliasesEn": [
-      "Electrophorus electricus"
-    ],
+    "aliasesEn": ["Electrophorus electricus"],
     "aliasesUa": []
   },
   {
@@ -3594,10 +2936,7 @@
     "en": "demersal",
     "ua": "демерсальні риби",
     "category": "fish",
-    "aliasesEn": [
-      "groundfish",
-      "demersal fish"
-    ],
+    "aliasesEn": ["groundfish", "demersal fish"],
     "aliasesUa": [
       "Демерсальна риба",
       "Бентосні риби",
@@ -3610,9 +2949,7 @@
     "en": "European sprat",
     "ua": "Шпрот європейський",
     "category": "fish",
-    "aliasesEn": [
-      "Sprattus sprattus"
-    ],
+    "aliasesEn": ["Sprattus sprattus"],
     "aliasesUa": [
       "Шпрот чорноморський",
       "Шпрот середземноморський",
@@ -3626,9 +2963,7 @@
     "en": "aquarium fish",
     "ua": "акваріумні риби",
     "category": "fish",
-    "aliasesEn": [
-      "ornamental fish"
-    ],
+    "aliasesEn": ["ornamental fish"],
     "aliasesUa": []
   },
   {
@@ -3665,31 +3000,16 @@
     "en": "pink salmon",
     "ua": "Горбуша",
     "category": "fish",
-    "aliasesEn": [
-      "Oncorhynchus gorbuscha",
-      "humpie",
-      "humpback salmon"
-    ],
-    "aliasesUa": [
-      "Рожевий лосось",
-      "Oncorhynchus gorbuscha"
-    ]
+    "aliasesEn": ["Oncorhynchus gorbuscha", "humpie", "humpback salmon"],
+    "aliasesUa": ["Рожевий лосось", "Oncorhynchus gorbuscha"]
   },
   {
     "id": "istiophoridae",
     "en": "Istiophoridae",
     "ua": "Вітрильникові",
     "category": "fish",
-    "aliasesEn": [
-      "istiophorids",
-      "billfishes",
-      "billfish"
-    ],
-    "aliasesUa": [
-      "Списорилі",
-      "Istiophoridae",
-      "Марлін"
-    ]
+    "aliasesEn": ["istiophorids", "billfishes", "billfish"],
+    "aliasesUa": ["Списорилі", "Istiophoridae", "Марлін"]
   },
   {
     "id": "shark",
@@ -3703,10 +3023,7 @@
       "Selachii",
       "sharks"
     ],
-    "aliasesUa": [
-      "Selachimorpha",
-      "Selachii"
-    ]
+    "aliasesUa": ["Selachimorpha", "Selachii"]
   },
   {
     "id": "live-bearing-aquarium-fish",
@@ -3721,9 +3038,7 @@
     "en": "electric catfish",
     "ua": "Електричні соми",
     "category": "fish",
-    "aliasesEn": [
-      "Malapteruridae"
-    ],
+    "aliasesEn": ["Malapteruridae"],
     "aliasesUa": []
   },
   {
@@ -3731,23 +3046,15 @@
     "en": "Atlantic salmon",
     "ua": "Лосось атлантичний",
     "category": "fish",
-    "aliasesEn": [
-      "Salmo salar"
-    ],
-    "aliasesUa": [
-      "сьомга",
-      "атлантичний лосось",
-      "Salmo salar"
-    ]
+    "aliasesEn": ["Salmo salar"],
+    "aliasesUa": ["сьомга", "атлантичний лосось", "Salmo salar"]
   },
   {
     "id": "wagasi",
     "en": "wagasi",
     "ua": "Вагасі",
     "category": "dairy",
-    "aliasesEn": [
-      "wagashi"
-    ],
+    "aliasesEn": ["wagashi"],
     "aliasesUa": []
   },
   {
@@ -3795,9 +3102,7 @@
     "en": "milkshake",
     "ua": "молочний коктейль",
     "category": "dairy",
-    "aliasesEn": [
-      "thickshake"
-    ],
+    "aliasesEn": ["thickshake"],
     "aliasesUa": []
   },
   {
@@ -3813,10 +3118,7 @@
     "en": "farmer cheese",
     "ua": "домашній сир",
     "category": "dairy",
-    "aliasesEn": [
-      "farmers' cheese",
-      "farmer's cheese"
-    ],
+    "aliasesEn": ["farmers' cheese", "farmer's cheese"],
     "aliasesUa": [
       "сир домашній кисломолочний",
       "Кисломолочний сир домашнього виготовлення",
@@ -3870,10 +3172,7 @@
     "ua": "гхі",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ґі",
-      "ґгі"
-    ]
+    "aliasesUa": ["ґі", "ґгі"]
   },
   {
     "id": "american-cheese",
@@ -3908,9 +3207,7 @@
     "en": "gelato",
     "ua": "Джелато",
     "category": "dairy",
-    "aliasesEn": [
-      "Italian ice cream"
-    ],
+    "aliasesEn": ["Italian ice cream"],
     "aliasesUa": []
   },
   {
@@ -3942,12 +3239,7 @@
     "en": "goat cheese",
     "ua": "козячий сир",
     "category": "dairy",
-    "aliasesEn": [
-      "goat's-milk cheese",
-      "goat's cheese",
-      "chèvre",
-      "chevre"
-    ],
+    "aliasesEn": ["goat's-milk cheese", "goat's cheese", "chèvre", "chevre"],
     "aliasesUa": []
   },
   {
@@ -3963,12 +3255,7 @@
     "en": "skimmed milk",
     "ua": "Знежирене молоко",
     "category": "dairy",
-    "aliasesEn": [
-      "skim milk",
-      "nonfat milk",
-      "non-fat milk",
-      "fat-free milk"
-    ],
+    "aliasesEn": ["skim milk", "nonfat milk", "non-fat milk", "fat-free milk"],
     "aliasesUa": []
   },
   {
@@ -4001,9 +3288,7 @@
     "ua": "Камбозола",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Камбоцола"
-    ]
+    "aliasesUa": ["Камбоцола"]
   },
   {
     "id": "tomino",
@@ -4011,9 +3296,7 @@
     "ua": "Томіно дель боскайоло",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Томіно (сир)"
-    ]
+    "aliasesUa": ["Томіно (сир)"]
   },
   {
     "id": "raschera",
@@ -4044,9 +3327,7 @@
     "en": "Grana Padano",
     "ua": "Грана Падано",
     "category": "dairy",
-    "aliasesEn": [
-      "Grana Padano cheese"
-    ],
+    "aliasesEn": ["Grana Padano cheese"],
     "aliasesUa": []
   },
   {
@@ -4102,9 +3383,7 @@
     "en": "British cheese",
     "ua": "британський сир",
     "category": "dairy",
-    "aliasesEn": [
-      "UK cheese"
-    ],
+    "aliasesEn": ["UK cheese"],
     "aliasesUa": []
   },
   {
@@ -4112,9 +3391,7 @@
     "en": "Abbaye de Tamié",
     "ua": "Там'є",
     "category": "dairy",
-    "aliasesEn": [
-      "Abbaye de Tamie"
-    ],
+    "aliasesEn": ["Abbaye de Tamie"],
     "aliasesUa": []
   },
   {
@@ -4179,9 +3456,7 @@
     "ua": "Мецовоне",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Метсовоне"
-    ]
+    "aliasesUa": ["Метсовоне"]
   },
   {
     "id": "vieux-boulogne",
@@ -4204,9 +3479,7 @@
     "en": "camel milk",
     "ua": "верблюдяче молоко",
     "category": "dairy",
-    "aliasesEn": [
-      "camel's milk"
-    ],
+    "aliasesEn": ["camel's milk"],
     "aliasesUa": []
   },
   {
@@ -4223,9 +3496,7 @@
     "ua": "Качокавалло",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Качіокавало"
-    ]
+    "aliasesUa": ["Качіокавало"]
   },
   {
     "id": "caciotta",
@@ -4240,10 +3511,7 @@
     "en": "garlic butter",
     "ua": "часникове масло",
     "category": "dairy",
-    "aliasesEn": [
-      "beurre à la bourguignonne",
-      "beurre a la bourguignonne"
-    ],
+    "aliasesEn": ["beurre à la bourguignonne", "beurre a la bourguignonne"],
     "aliasesUa": []
   },
   {
@@ -4267,10 +3535,7 @@
     "en": "mozzarella",
     "ua": "Моцарела",
     "category": "dairy",
-    "aliasesEn": [
-      "mozzarella cheese",
-      "Cookbook:Mozzarella Cheese"
-    ],
+    "aliasesEn": ["mozzarella cheese", "Cookbook:Mozzarella Cheese"],
     "aliasesUa": []
   },
   {
@@ -4278,9 +3543,7 @@
     "en": "dadiah",
     "ua": "Дадіх",
     "category": "dairy",
-    "aliasesEn": [
-      "yogurt"
-    ],
+    "aliasesEn": ["yogurt"],
     "aliasesUa": []
   },
   {
@@ -4350,23 +3613,15 @@
     "en": "Jāņi cheese",
     "ua": "Янів сир",
     "category": "dairy",
-    "aliasesEn": [
-      "caraway cheese"
-    ],
-    "aliasesUa": [
-      "Кминний сир"
-    ]
+    "aliasesEn": ["caraway cheese"],
+    "aliasesUa": ["Кминний сир"]
   },
   {
     "id": "yogurt",
     "en": "yogurt",
     "ua": "йогурт",
     "category": "dairy",
-    "aliasesEn": [
-      "yaghurt",
-      "zabadi",
-      "yoghurt"
-    ],
+    "aliasesEn": ["yaghurt", "zabadi", "yoghurt"],
     "aliasesUa": []
   },
   {
@@ -4390,10 +3645,7 @@
     "en": "varenets",
     "ua": "варенець",
     "category": "dairy",
-    "aliasesEn": [
-      "Stewler",
-      "Simmeler"
-    ],
+    "aliasesEn": ["Stewler", "Simmeler"],
     "aliasesUa": []
   },
   {
@@ -4425,10 +3677,7 @@
     "en": "bleu du Vercors-Sassenage",
     "ua": "Блю дю Веркор-Саснаж",
     "category": "dairy",
-    "aliasesEn": [
-      "bleu du Vercors",
-      "bleu de Sassenage"
-    ],
+    "aliasesEn": ["bleu du Vercors", "bleu de Sassenage"],
     "aliasesUa": []
   },
   {
@@ -4436,10 +3685,7 @@
     "en": "dairy drink",
     "ua": "молочний напій",
     "category": "dairy",
-    "aliasesEn": [
-      "milk-based drink",
-      "dairy beverage"
-    ],
+    "aliasesEn": ["milk-based drink", "dairy beverage"],
     "aliasesUa": []
   },
   {
@@ -4473,10 +3719,7 @@
     "en": "Emmental",
     "ua": "Емменталь",
     "category": "dairy",
-    "aliasesEn": [
-      "Emmentaler",
-      "Emmental cheese"
-    ],
+    "aliasesEn": ["Emmentaler", "Emmental cheese"],
     "aliasesUa": []
   },
   {
@@ -4492,10 +3735,7 @@
     "en": "kumis",
     "ua": "Кумис",
     "category": "dairy",
-    "aliasesEn": [
-      "Koumiss",
-      "kumys"
-    ],
+    "aliasesEn": ["Koumiss", "kumys"],
     "aliasesUa": []
   },
   {
@@ -4503,11 +3743,7 @@
     "en": "munster",
     "ua": "Мюнстер",
     "category": "dairy",
-    "aliasesEn": [
-      "Munster-géromé",
-      "münster",
-      "Minschterkaas"
-    ],
+    "aliasesEn": ["Munster-géromé", "münster", "Minschterkaas"],
     "aliasesUa": []
   },
   {
@@ -4531,9 +3767,7 @@
     "en": "curd cheese",
     "ua": "Зернений сир",
     "category": "dairy",
-    "aliasesEn": [
-      "Quark"
-    ],
+    "aliasesEn": ["Quark"],
     "aliasesUa": []
   },
   {
@@ -4541,9 +3775,7 @@
     "en": "fresh cheese",
     "ua": "сир",
     "category": "dairy",
-    "aliasesEn": [
-      "fresh cheeses"
-    ],
+    "aliasesEn": ["fresh cheeses"],
     "aliasesUa": []
   },
   {
@@ -4551,9 +3783,7 @@
     "en": "Urdă",
     "ua": "Вурда",
     "category": "dairy",
-    "aliasesEn": [
-      "Urdha"
-    ],
+    "aliasesEn": ["Urdha"],
     "aliasesUa": []
   },
   {
@@ -4562,11 +3792,7 @@
     "ua": "Ґудбраннсдалсост",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Гудбраннсдалсост",
-      "Ґудбраннсдален",
-      "Гудбраннсдален"
-    ]
+    "aliasesUa": ["Гудбраннсдалсост", "Ґудбраннсдален", "Гудбраннсдален"]
   },
   {
     "id": "provolone",
@@ -4621,10 +3847,7 @@
     "en": "Mimolette",
     "ua": "Мімолет",
     "category": "dairy",
-    "aliasesEn": [
-      "vieux Hollande",
-      "Boule de Lille"
-    ],
+    "aliasesEn": ["vieux Hollande", "Boule de Lille"],
     "aliasesUa": []
   },
   {
@@ -4657,9 +3880,7 @@
     "ua": "переробка молока та виробництво сиру",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "молочарні та виробництво сиру"
-    ]
+    "aliasesUa": ["молочарні та виробництво сиру"]
   },
   {
     "id": "kefalotyri",
@@ -4674,9 +3895,7 @@
     "en": "Cabécou",
     "ua": "Кабеку",
     "category": "dairy",
-    "aliasesEn": [
-      "Cabecou"
-    ],
+    "aliasesEn": ["Cabecou"],
     "aliasesUa": []
   },
   {
@@ -4684,9 +3903,7 @@
     "en": "Greek cheese",
     "ua": "грецький сир",
     "category": "dairy",
-    "aliasesEn": [
-      "cheese of Greece"
-    ],
+    "aliasesEn": ["cheese of Greece"],
     "aliasesUa": []
   },
   {
@@ -4695,18 +3912,14 @@
     "ua": "ряжанка",
     "category": "dairy",
     "aliasesEn": [],
-    "aliasesUa": [
-      "пряжанка"
-    ]
+    "aliasesUa": ["пряжанка"]
   },
   {
     "id": "mascarpone",
     "en": "mascarpone",
     "ua": "Маскарпоне",
     "category": "dairy",
-    "aliasesEn": [
-      "Mascarpone cream"
-    ],
+    "aliasesEn": ["Mascarpone cream"],
     "aliasesUa": []
   },
   {
@@ -4714,11 +3927,7 @@
     "en": "dondurma",
     "ua": "Дондурма",
     "category": "dairy",
-    "aliasesEn": [
-      "Turkish ice cream",
-      "Maraş dondurması",
-      "Dövme dondurma"
-    ],
+    "aliasesEn": ["Turkish ice cream", "Maraş dondurması", "Dövme dondurma"],
     "aliasesUa": []
   },
   {
@@ -4726,11 +3935,7 @@
     "en": "colostrum",
     "ua": "молозиво",
     "category": "dairy",
-    "aliasesEn": [
-      "bisnings",
-      "beestings",
-      "first milk"
-    ],
+    "aliasesEn": ["bisnings", "beestings", "first milk"],
     "aliasesUa": []
   },
   {
@@ -4738,9 +3943,7 @@
     "en": "casu martzu",
     "ua": "Касу марцу",
     "category": "dairy",
-    "aliasesEn": [
-      "casu marzu"
-    ],
+    "aliasesEn": ["casu marzu"],
     "aliasesUa": []
   },
   {
@@ -4748,10 +3951,7 @@
     "en": "tvorog",
     "ua": "кисломолочний сир",
     "category": "dairy",
-    "aliasesEn": [
-      "tvarog",
-      "cottage cheese"
-    ],
+    "aliasesEn": ["tvarog", "cottage cheese"],
     "aliasesUa": []
   },
   {
@@ -4767,15 +3967,8 @@
     "en": "kashkaval",
     "ua": "Кашкавал",
     "category": "dairy",
-    "aliasesEn": [
-      "קשקבל",
-      "קאַשקאַוואַל קעז",
-      "קאַשקאַוואַל",
-      "kaskavál"
-    ],
-    "aliasesUa": [
-      "Ґляґанка"
-    ]
+    "aliasesEn": ["קשקבל", "קאַשקאַוואַל קעז", "קאַשקאַוואַל", "kaskavál"],
+    "aliasesUa": ["Ґляґанка"]
   },
   {
     "id": "pasta-filata",
@@ -4789,18 +3982,14 @@
       "spun paste cheese",
       "pulled-curd cheeses"
     ],
-    "aliasesUa": [
-      "паста-філата"
-    ]
+    "aliasesUa": ["паста-філата"]
   },
   {
     "id": "olomouc-curd-cheese",
     "en": "Olomouc curd cheese",
     "ua": "Оломоуцькі сирки",
     "category": "dairy",
-    "aliasesEn": [
-      "Olomouc cheese"
-    ],
+    "aliasesEn": ["Olomouc cheese"],
     "aliasesUa": []
   },
   {
@@ -4840,10 +4029,7 @@
     "en": "water buffalo milk",
     "ua": "буйволине молоко",
     "category": "dairy",
-    "aliasesEn": [
-      "Water buffalo milk",
-      "buffalo milk"
-    ],
+    "aliasesEn": ["Water buffalo milk", "buffalo milk"],
     "aliasesUa": []
   },
   {
@@ -4859,9 +4045,7 @@
     "en": "pearl barley",
     "ua": "Ячмінна крупа",
     "category": "grains",
-    "aliasesEn": [
-      "pearled barley"
-    ],
+    "aliasesEn": ["pearled barley"],
     "aliasesUa": []
   },
   {
@@ -4870,24 +4054,15 @@
     "ua": "озимі культури",
     "category": "grains",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Озимі",
-      "Озимина"
-    ]
+    "aliasesUa": ["Озимі", "Озимина"]
   },
   {
     "id": "rice",
     "en": "rice",
     "ua": "рис",
     "category": "grains",
-    "aliasesEn": [
-      "Rice"
-    ],
-    "aliasesUa": [
-      "рис японський",
-      "рис індійський",
-      "рис (продукт харчування)"
-    ]
+    "aliasesEn": ["Rice"],
+    "aliasesUa": ["рис японський", "рис індійський", "рис (продукт харчування)"]
   },
   {
     "id": "koshihikari",
@@ -4902,11 +4077,7 @@
     "en": "Triticum spelta",
     "ua": "полба",
     "category": "grains",
-    "aliasesEn": [
-      "hulled wheat",
-      "dinkel wheat",
-      "spelt"
-    ],
+    "aliasesEn": ["hulled wheat", "dinkel wheat", "spelt"],
     "aliasesUa": []
   },
   {
@@ -4914,9 +4085,7 @@
     "en": "basmati",
     "ua": "басматі",
     "category": "grains",
-    "aliasesEn": [
-      "basmati rice"
-    ],
+    "aliasesEn": ["basmati rice"],
     "aliasesUa": []
   },
   {
@@ -4924,10 +4093,7 @@
     "en": "cooked rice",
     "ua": "пропарений рис",
     "category": "grains",
-    "aliasesEn": [
-      "boiled rice",
-      "rice"
-    ],
+    "aliasesEn": ["boiled rice", "rice"],
     "aliasesUa": []
   },
   {
@@ -4935,10 +4101,7 @@
     "en": "sumeshi",
     "ua": "сумесі",
     "category": "grains",
-    "aliasesEn": [
-      "sushi-meshi",
-      "sushi rice"
-    ],
+    "aliasesEn": ["sushi-meshi", "sushi rice"],
     "aliasesUa": []
   },
   {
@@ -4946,9 +4109,7 @@
     "en": "bran",
     "ua": "висівки",
     "category": "grains",
-    "aliasesEn": [
-      "miller's bran"
-    ],
+    "aliasesEn": ["miller's bran"],
     "aliasesUa": []
   },
   {
@@ -4964,9 +4125,7 @@
     "en": "Patoleo",
     "ua": "Патолео",
     "category": "grains",
-    "aliasesEn": [
-      "Patoli"
-    ],
+    "aliasesEn": ["Patoli"],
     "aliasesUa": []
   },
   {
@@ -4974,28 +4133,15 @@
     "en": "Triticum dicoccum",
     "ua": "Полба",
     "category": "grains",
-    "aliasesEn": [
-      "Hulled wheat",
-      "Farro",
-      "Emmer"
-    ],
-    "aliasesUa": [
-      "Еммер",
-      "Двозернянка"
-    ]
+    "aliasesEn": ["Hulled wheat", "Farro", "Emmer"],
+    "aliasesUa": ["Еммер", "Двозернянка"]
   },
   {
     "id": "grist",
     "en": "grist",
     "ua": "шріт",
     "category": "grains",
-    "aliasesEn": [
-      "pellets",
-      "wholemeal",
-      "shred",
-      "grout",
-      "grit"
-    ],
+    "aliasesEn": ["pellets", "wholemeal", "shred", "grout", "grit"],
     "aliasesUa": []
   },
   {
@@ -5004,9 +4150,7 @@
     "ua": "булгур",
     "category": "grains",
     "aliasesEn": [],
-    "aliasesUa": [
-      "бургул"
-    ]
+    "aliasesUa": ["бургул"]
   },
   {
     "id": "upland-rice",
@@ -5021,12 +4165,7 @@
     "en": "barley",
     "ua": "ячмінь",
     "category": "grains",
-    "aliasesEn": [
-      "barley seed",
-      "barleycorn",
-      "barley grain",
-      "corn"
-    ],
+    "aliasesEn": ["barley seed", "barleycorn", "barley grain", "corn"],
     "aliasesUa": []
   },
   {
@@ -5080,14 +4219,8 @@
     "en": "Avena sativa",
     "ua": "Овес посівний",
     "category": "grains",
-    "aliasesEn": [
-      "common oat",
-      "oats"
-    ],
-    "aliasesUa": [
-      "вівсяна крупа",
-      "Avena sativa"
-    ]
+    "aliasesEn": ["common oat", "oats"],
+    "aliasesUa": ["вівсяна крупа", "Avena sativa"]
   },
   {
     "id": "sekihan",
@@ -5102,14 +4235,8 @@
     "en": "wheat",
     "ua": "пшениця",
     "category": "grains",
-    "aliasesEn": [
-      "wheat grain"
-    ],
-    "aliasesUa": [
-      "яра пшениця",
-      "озима пшениця",
-      "Triticum"
-    ]
+    "aliasesEn": ["wheat grain"],
+    "aliasesUa": ["яра пшениця", "озима пшениця", "Triticum"]
   },
   {
     "id": "bap",
@@ -5117,9 +4244,7 @@
     "ua": "бап",
     "category": "grains",
     "aliasesEn": [],
-    "aliasesUa": [
-      "бап (страва)"
-    ]
+    "aliasesUa": ["бап (страва)"]
   },
   {
     "id": "summer-cereals",
@@ -5134,13 +4259,7 @@
     "en": "jollof rice",
     "ua": "джолоф",
     "category": "grains",
-    "aliasesEn": [
-      "zaamè",
-      "party rice",
-      "jollof",
-      "ceebu jën",
-      "benachin"
-    ],
+    "aliasesEn": ["zaamè", "party rice", "jollof", "ceebu jën", "benachin"],
     "aliasesUa": []
   },
   {
@@ -5156,10 +4275,7 @@
     "en": "millet",
     "ua": "Пшоно",
     "category": "grains",
-    "aliasesEn": [
-      "minor cereals",
-      "millets"
-    ],
+    "aliasesEn": ["minor cereals", "millets"],
     "aliasesUa": []
   },
   {
@@ -5167,12 +4283,7 @@
     "en": "maize",
     "ua": "кукурудза",
     "category": "grains",
-    "aliasesEn": [
-      "corn",
-      "Zea mays",
-      "maize plant",
-      "corn plant"
-    ],
+    "aliasesEn": ["corn", "Zea mays", "maize plant", "corn plant"],
     "aliasesUa": []
   },
   {
@@ -5212,12 +4323,7 @@
     "en": "chickpea",
     "ua": "нут",
     "category": "legumes",
-    "aliasesEn": [
-      "garbanzo beans",
-      "garbanzo bean",
-      "chick pea",
-      "chickpeas"
-    ],
+    "aliasesEn": ["garbanzo beans", "garbanzo bean", "chick pea", "chickpeas"],
     "aliasesUa": []
   },
   {
@@ -5239,10 +4345,7 @@
     "en": "tonka bean",
     "ua": "боби тонка",
     "category": "legumes",
-    "aliasesEn": [
-      "tonquin bean",
-      "tonkin bean"
-    ],
+    "aliasesEn": ["tonquin bean", "tonkin bean"],
     "aliasesUa": []
   },
   {
@@ -5250,11 +4353,7 @@
     "en": "soy bean",
     "ua": "соєві боби",
     "category": "legumes",
-    "aliasesEn": [
-      "soyabean",
-      "soya bean",
-      "soybean"
-    ],
+    "aliasesEn": ["soyabean", "soya bean", "soybean"],
     "aliasesUa": []
   },
   {
@@ -5270,13 +4369,7 @@
     "en": "dal",
     "ua": "Дал (страва)",
     "category": "legumes",
-    "aliasesEn": [
-      "dhal",
-      "dāl",
-      "dail",
-      "dahl",
-      "daal"
-    ],
+    "aliasesEn": ["dhal", "dāl", "dail", "dahl", "daal"],
     "aliasesUa": []
   },
   {
@@ -5284,10 +4377,7 @@
     "en": "Mattar paneer",
     "ua": "Маттар панір",
     "category": "legumes",
-    "aliasesEn": [
-      "muttar paneer",
-      "Matar Paneer"
-    ],
+    "aliasesEn": ["muttar paneer", "Matar Paneer"],
     "aliasesUa": []
   },
   {
@@ -5295,11 +4385,7 @@
     "en": "hazelnut",
     "ua": "ліщинні горіхи",
     "category": "nuts",
-    "aliasesEn": [
-      "European hazelnut",
-      "cobnut",
-      "filbert"
-    ],
+    "aliasesEn": ["European hazelnut", "cobnut", "filbert"],
     "aliasesUa": []
   },
   {
@@ -5315,21 +4401,15 @@
     "en": "acorn",
     "ua": "Жолудь",
     "category": "nuts",
-    "aliasesEn": [
-      "oak nut"
-    ],
-    "aliasesUa": [
-      "Жолуді"
-    ]
+    "aliasesEn": ["oak nut"],
+    "aliasesUa": ["Жолуді"]
   },
   {
     "id": "nuts-kola-nut",
     "en": "kola nut",
     "ua": "Горіх кола",
     "category": "nuts",
-    "aliasesEn": [
-      "Cola"
-    ],
+    "aliasesEn": ["Cola"],
     "aliasesUa": []
   },
   {
@@ -5354,9 +4434,7 @@
     "ua": "селерова сіль",
     "category": "spices",
     "aliasesEn": [],
-    "aliasesUa": [
-      "селерна сіль"
-    ]
+    "aliasesUa": ["селерна сіль"]
   },
   {
     "id": "bay-leaf",
@@ -5364,9 +4442,7 @@
     "ua": "лавровий лист",
     "category": "spices",
     "aliasesEn": [],
-    "aliasesUa": [
-      "лаврове листя"
-    ]
+    "aliasesUa": ["лаврове листя"]
   },
   {
     "id": "saffron",
@@ -5381,12 +4457,7 @@
     "en": "cardamom",
     "ua": "кардамон",
     "category": "spices",
-    "aliasesEn": [
-      "ground cadamom",
-      "cardamum",
-      "cardamon",
-      "cardamom seeds"
-    ],
+    "aliasesEn": ["ground cadamom", "cardamum", "cardamon", "cardamom seeds"],
     "aliasesUa": []
   },
   {
@@ -5402,9 +4473,7 @@
     "en": "ginger garlic masala",
     "ua": "Часниково-імбирна масала",
     "category": "spices",
-    "aliasesEn": [
-      "ginger garlic paste"
-    ],
+    "aliasesEn": ["ginger garlic paste"],
     "aliasesUa": []
   },
   {
@@ -5412,23 +4481,15 @@
     "en": "nutmeg",
     "ua": "мускатник",
     "category": "spices",
-    "aliasesEn": [
-      "Myristica fragrans"
-    ],
-    "aliasesUa": [
-      "Мускатні горіхи",
-      "Мускатний горіх",
-      "Мускат"
-    ]
+    "aliasesEn": ["Myristica fragrans"],
+    "aliasesUa": ["Мускатні горіхи", "Мускатний горіх", "Мускат"]
   },
   {
     "id": "allspice",
     "en": "allspice",
     "ua": "духмяний перець",
     "category": "spices",
-    "aliasesEn": [
-      "Jamaica pepper"
-    ],
+    "aliasesEn": ["Jamaica pepper"],
     "aliasesUa": []
   },
   {
@@ -5436,12 +4497,7 @@
     "en": "sea salt",
     "ua": "Морська сіль",
     "category": "spices",
-    "aliasesEn": [
-      "solar salt",
-      "Sea salt",
-      "bay salt",
-      "salt"
-    ],
+    "aliasesEn": ["solar salt", "Sea salt", "bay salt", "salt"],
     "aliasesUa": []
   },
   {
@@ -5449,25 +4505,15 @@
     "en": "cinnamon",
     "ua": "Кориця",
     "category": "spices",
-    "aliasesEn": [
-      "canella",
-      "canel"
-    ],
-    "aliasesUa": [
-      "Цинамон",
-      "Коричне дерево",
-      "Cinnamomum verum"
-    ]
+    "aliasesEn": ["canella", "canel"],
+    "aliasesUa": ["Цинамон", "Коричне дерево", "Cinnamomum verum"]
   },
   {
     "id": "iodised-salt",
     "en": "iodised salt",
     "ua": "Йодована харчова сіль",
     "category": "spices",
-    "aliasesEn": [
-      "iodated salt",
-      "iodized salt"
-    ],
+    "aliasesEn": ["iodated salt", "iodized salt"],
     "aliasesUa": []
   },
   {
@@ -5475,10 +4521,7 @@
     "en": "asafoetida",
     "ua": "Асафетида (прянощі)",
     "category": "spices",
-    "aliasesEn": [
-      "stinking gum",
-      "Devil's dung"
-    ],
+    "aliasesEn": ["stinking gum", "Devil's dung"],
     "aliasesUa": []
   },
   {
@@ -5486,11 +4529,7 @@
     "en": "sumac",
     "ua": "Сумах",
     "category": "spices",
-    "aliasesEn": [
-      "sumaq",
-      "sumach",
-      "Sicilian sumac"
-    ],
+    "aliasesEn": ["sumaq", "sumach", "Sicilian sumac"],
     "aliasesUa": []
   },
   {
@@ -5498,9 +4537,7 @@
     "en": "Aleppo pepper",
     "ua": "перець алеппо",
     "category": "spices",
-    "aliasesEn": [
-      "Halaby pepper"
-    ],
+    "aliasesEn": ["Halaby pepper"],
     "aliasesUa": []
   },
   {
@@ -5508,9 +4545,7 @@
     "en": "juniper berry",
     "ua": "Ялівець (пряність)",
     "category": "spices",
-    "aliasesEn": [
-      "Juniperi pseudo-fructus"
-    ],
+    "aliasesEn": ["Juniperi pseudo-fructus"],
     "aliasesUa": []
   },
   {
@@ -5526,10 +4561,7 @@
     "en": "Kampot pepper",
     "ua": "Кампотський перець",
     "category": "spices",
-    "aliasesEn": [
-      "Indochinese pepper",
-      "Indochina pepper"
-    ],
+    "aliasesEn": ["Indochinese pepper", "Indochina pepper"],
     "aliasesUa": []
   },
   {
@@ -5537,10 +4569,7 @@
     "en": "gari",
     "ua": "Гарі (страва)",
     "category": "spices",
-    "aliasesEn": [
-      "sushi ginger",
-      "pickled ginger"
-    ],
+    "aliasesEn": ["sushi ginger", "pickled ginger"],
     "aliasesUa": []
   },
   {
@@ -5572,9 +4601,7 @@
     "en": "tabil",
     "ua": "Табіл",
     "category": "spices",
-    "aliasesEn": [
-      "tabel"
-    ],
+    "aliasesEn": ["tabel"],
     "aliasesUa": []
   },
   {
@@ -5582,9 +4609,7 @@
     "en": "paprika",
     "ua": "паприка",
     "category": "spices",
-    "aliasesEn": [
-      "پودر پاپریکا"
-    ],
+    "aliasesEn": ["پودر پاپریکا"],
     "aliasesUa": []
   },
   {
@@ -5592,11 +4617,7 @@
     "en": "za'atar",
     "ua": "Затар",
     "category": "spices",
-    "aliasesEn": [
-      "zaatar",
-      "zatar",
-      "za'tar"
-    ],
+    "aliasesEn": ["zaatar", "zatar", "za'tar"],
     "aliasesUa": []
   },
   {
@@ -5604,12 +4625,7 @@
     "en": "jalapeño",
     "ua": "халапеньйо",
     "category": "spices",
-    "aliasesEn": [
-      "jalapeño pepper",
-      "jalapeno pepper",
-      "jalapeno",
-      "Jalapeño"
-    ],
+    "aliasesEn": ["jalapeño pepper", "jalapeno pepper", "jalapeno", "Jalapeño"],
     "aliasesUa": []
   },
   {
@@ -5617,9 +4633,7 @@
     "en": "pumpkin pie spice",
     "ua": "спеції для гарбузового пирога",
     "category": "spices",
-    "aliasesEn": [
-      "pumpkin spice"
-    ],
+    "aliasesEn": ["pumpkin spice"],
     "aliasesUa": []
   },
   {
@@ -5627,11 +4641,7 @@
     "en": "clove",
     "ua": "гвоздика",
     "category": "spices",
-    "aliasesEn": [
-      "clove flower",
-      "Caryophylli Flos",
-      "cloves"
-    ],
+    "aliasesEn": ["clove flower", "Caryophylli Flos", "cloves"],
     "aliasesUa": []
   },
   {
@@ -5639,13 +4649,8 @@
     "en": "ginger",
     "ua": "імбир",
     "category": "spices",
-    "aliasesEn": [
-      "ginger spice",
-      "ginger root"
-    ],
-    "aliasesUa": [
-      "корінь імбиру"
-    ]
+    "aliasesEn": ["ginger spice", "ginger root"],
+    "aliasesUa": ["корінь імбиру"]
   },
   {
     "id": "advieh",
@@ -5660,12 +4665,8 @@
     "en": "coriander seed",
     "ua": "насіння коріандру",
     "category": "spices",
-    "aliasesEn": [
-      "coriander"
-    ],
-    "aliasesUa": [
-      "коріандр"
-    ]
+    "aliasesEn": ["coriander"],
+    "aliasesUa": ["коріандр"]
   },
   {
     "id": "vanilla-sugar",
@@ -5688,9 +4689,7 @@
     "en": "baharat",
     "ua": "Бахарат",
     "category": "spices",
-    "aliasesEn": [
-      "bahārāt"
-    ],
+    "aliasesEn": ["bahārāt"],
     "aliasesUa": []
   },
   {
@@ -5705,20 +4704,14 @@
       "dietary salt",
       "culinary salt"
     ],
-    "aliasesUa": [
-      "сіль"
-    ]
+    "aliasesUa": ["сіль"]
   },
   {
     "id": "amchoor",
     "en": "amchoor",
     "ua": "Амчур",
     "category": "spices",
-    "aliasesEn": [
-      "mango powder",
-      "amchur",
-      "aamchur"
-    ],
+    "aliasesEn": ["mango powder", "amchur", "aamchur"],
     "aliasesUa": []
   },
   {
@@ -5742,11 +4735,7 @@
     "en": "cilantro",
     "ua": "коріандр",
     "category": "spices",
-    "aliasesEn": [
-      "coriander leaf",
-      "Chinese parsley",
-      "coriander"
-    ],
+    "aliasesEn": ["coriander leaf", "Chinese parsley", "coriander"],
     "aliasesUa": []
   },
   {
@@ -5754,9 +4743,7 @@
     "en": "Pimentón de la Vera",
     "ua": "паприка з Ла-Вери",
     "category": "spices",
-    "aliasesEn": [
-      "Paprika from La Vera, Spain"
-    ],
+    "aliasesEn": ["Paprika from La Vera, Spain"],
     "aliasesUa": []
   },
   {
@@ -5764,9 +4751,7 @@
     "en": "kosher salt",
     "ua": "Кошерна сіль",
     "category": "spices",
-    "aliasesEn": [
-      "koshering salt"
-    ],
+    "aliasesEn": ["koshering salt"],
     "aliasesUa": []
   },
   {
@@ -5774,10 +4759,7 @@
     "en": "seasoned salt",
     "ua": "приправлена сіль",
     "category": "spices",
-    "aliasesEn": [
-      "flavoured salt",
-      "flavored salt"
-    ],
+    "aliasesEn": ["flavoured salt", "flavored salt"],
     "aliasesUa": []
   },
   {
@@ -5785,11 +4767,7 @@
     "en": "Erős Pista",
     "ua": "Ерош пішта",
     "category": "spices",
-    "aliasesEn": [
-      "Strong Steve",
-      "Erös Pista",
-      "Eros Pista"
-    ],
+    "aliasesEn": ["Strong Steve", "Erös Pista", "Eros Pista"],
     "aliasesUa": []
   },
   {
@@ -5810,10 +4788,7 @@
     "en": "mahleb",
     "ua": "Махлебі",
     "category": "spices",
-    "aliasesEn": [
-      "mahlab",
-      "mahalepi"
-    ],
+    "aliasesEn": ["mahlab", "mahalepi"],
     "aliasesUa": []
   },
   {
@@ -5846,20 +4821,14 @@
     "ua": "карі",
     "category": "spices",
     "aliasesEn": [],
-    "aliasesUa": [
-      "приправа каррі",
-      "карі (приправа)"
-    ]
+    "aliasesUa": ["приправа каррі", "карі (приправа)"]
   },
   {
     "id": "pink-peppercorn",
     "en": "pink peppercorn",
     "ua": "Рожевий перець",
     "category": "spices",
-    "aliasesEn": [
-      "pink pepper",
-      "baie rose"
-    ],
+    "aliasesEn": ["pink pepper", "baie rose"],
     "aliasesUa": []
   },
   {
@@ -5867,10 +4836,7 @@
     "en": "curing salt",
     "ua": "пеклосіль",
     "category": "spices",
-    "aliasesEn": [
-      "Prague powder",
-      "Bag of Prague powder #1"
-    ],
+    "aliasesEn": ["Prague powder", "Bag of Prague powder #1"],
     "aliasesUa": []
   },
   {
@@ -5878,10 +4844,7 @@
     "en": "cumin seed",
     "ua": "зерна куміна",
     "category": "spices",
-    "aliasesEn": [
-      "ground cumin",
-      "cumin"
-    ],
+    "aliasesEn": ["ground cumin", "cumin"],
     "aliasesUa": []
   },
   {
@@ -5889,9 +4852,7 @@
     "en": "Himalayan salt",
     "ua": "Гімалайська сіль",
     "category": "spices",
-    "aliasesEn": [
-      "pink Himalayan salt"
-    ],
+    "aliasesEn": ["pink Himalayan salt"],
     "aliasesUa": []
   },
   {
@@ -5907,10 +4868,7 @@
     "en": "Sichuan pepper",
     "ua": "Сичуанський перець",
     "category": "spices",
-    "aliasesEn": [
-      "Sichuan peppercorn",
-      "Chinese coriander"
-    ],
+    "aliasesEn": ["Sichuan peppercorn", "Chinese coriander"],
     "aliasesUa": []
   },
   {
@@ -5918,40 +4876,23 @@
     "en": "turmeric",
     "ua": "куркума",
     "category": "spices",
-    "aliasesEn": [
-      "turmeric powder",
-      "powdered turmeric",
-      "ground turmeric"
-    ],
-    "aliasesUa": [
-      "індійський шафран",
-      "порошок куркуми",
-      "куркума мелена"
-    ]
+    "aliasesEn": ["turmeric powder", "powdered turmeric", "ground turmeric"],
+    "aliasesUa": ["індійський шафран", "порошок куркуми", "куркума мелена"]
   },
   {
     "id": "star-anise",
     "en": "star anise",
     "ua": "зірочки анісу",
     "category": "spices",
-    "aliasesEn": [
-      "staranise",
-      "badiam"
-    ],
-    "aliasesUa": [
-      "бодян",
-      "бадьян"
-    ]
+    "aliasesEn": ["staranise", "badiam"],
+    "aliasesUa": ["бодян", "бадьян"]
   },
   {
     "id": "hawaij",
     "en": "hawaij",
     "ua": "Хаваєдж",
     "category": "spices",
-    "aliasesEn": [
-      "hawayij",
-      "hawayej"
-    ],
+    "aliasesEn": ["hawayij", "hawayej"],
     "aliasesUa": []
   },
   {
@@ -5967,9 +4908,7 @@
     "en": "gruit",
     "ua": "Грют",
     "category": "spices",
-    "aliasesEn": [
-      "gruyt"
-    ],
+    "aliasesEn": ["gruyt"],
     "aliasesUa": []
   },
   {
@@ -5985,9 +4924,7 @@
     "en": "panch phoron",
     "ua": "Панч пхорон",
     "category": "spices",
-    "aliasesEn": [
-      "Pancha Phutana"
-    ],
+    "aliasesEn": ["Pancha Phutana"],
     "aliasesUa": []
   },
   {
@@ -6002,9 +4939,7 @@
       "chile pepper",
       "chile"
     ],
-    "aliasesUa": [
-      "гострий перець"
-    ]
+    "aliasesUa": ["гострий перець"]
   },
   {
     "id": "habanero",
@@ -6031,24 +4966,15 @@
     "en": "spice mix",
     "ua": "суміш приправ",
     "category": "spices",
-    "aliasesEn": [
-      "spice blend",
-      "spice mixture"
-    ],
-    "aliasesUa": [
-      "суміш спецій",
-      "суміш прянощів"
-    ]
+    "aliasesEn": ["spice blend", "spice mixture"],
+    "aliasesUa": ["суміш спецій", "суміш прянощів"]
   },
   {
     "id": "lemon-zest",
     "en": "lemon zest",
     "ua": "лимонна цедра",
     "category": "spices",
-    "aliasesEn": [
-      "grated lemon peel",
-      "lemon peel"
-    ],
+    "aliasesEn": ["grated lemon peel", "lemon peel"],
     "aliasesUa": []
   },
   {
@@ -6086,14 +5012,8 @@
     "en": "five-spice powder",
     "ua": "П'ять спецій",
     "category": "spices",
-    "aliasesEn": [
-      "wuxiangfen",
-      "wuxiang fen",
-      "wu xiang fen"
-    ],
-    "aliasesUa": [
-      "П'ять спецій (суміш)"
-    ]
+    "aliasesEn": ["wuxiangfen", "wuxiang fen", "wu xiang fen"],
+    "aliasesUa": ["П'ять спецій (суміш)"]
   },
   {
     "id": "k-r-gusu",
@@ -6108,9 +5028,7 @@
     "en": "Chaat masala",
     "ua": "Чаат масала",
     "category": "spices",
-    "aliasesEn": [
-      "Chat Masala"
-    ],
+    "aliasesEn": ["Chat Masala"],
     "aliasesUa": []
   },
   {
@@ -6126,9 +5044,7 @@
     "en": "white pepper",
     "ua": "Перець білий",
     "category": "spices",
-    "aliasesEn": [
-      "white peppercorn"
-    ],
+    "aliasesEn": ["white peppercorn"],
     "aliasesUa": []
   },
   {
@@ -6136,9 +5052,7 @@
     "en": "Espelette pepper",
     "ua": "Перець Еспелетт",
     "category": "spices",
-    "aliasesEn": [
-      "Espelette chili pepper"
-    ],
+    "aliasesEn": ["Espelette chili pepper"],
     "aliasesUa": []
   },
   {
@@ -6146,10 +5060,7 @@
     "en": "garlic",
     "ua": "часник",
     "category": "spices",
-    "aliasesEn": [
-      "head of garlic",
-      "bulb of garlic"
-    ],
+    "aliasesEn": ["head of garlic", "bulb of garlic"],
     "aliasesUa": []
   },
   {
@@ -6157,23 +5068,15 @@
     "en": "Morus alba",
     "ua": "шовковиця біла",
     "category": "herbs",
-    "aliasesEn": [
-      "silkworm mulberry",
-      "Russian mulberry",
-      "white mulberry"
-    ],
-    "aliasesUa": [
-      "Morus alba"
-    ]
+    "aliasesEn": ["silkworm mulberry", "Russian mulberry", "white mulberry"],
+    "aliasesUa": ["Morus alba"]
   },
   {
     "id": "bouquet-garni",
     "en": "bouquet garni",
     "ua": "букет гарні",
     "category": "herbs",
-    "aliasesEn": [
-      "Cookbook:Bouquet Garni"
-    ],
+    "aliasesEn": ["Cookbook:Bouquet Garni"],
     "aliasesUa": []
   },
   {
@@ -6181,9 +5084,7 @@
     "en": "tarragon",
     "ua": "тархун",
     "category": "herbs",
-    "aliasesEn": [
-      "Artemisia dracunculus"
-    ],
+    "aliasesEn": ["Artemisia dracunculus"],
     "aliasesUa": [
       "плин естрагон",
       "естрагон",
@@ -6196,25 +5097,15 @@
     "en": "Centaurea cyanus",
     "ua": "Волошка синя",
     "category": "herbs",
-    "aliasesEn": [
-      "C. cyanus",
-      "bachelor's button",
-      "Cornflower",
-      "cornflower"
-    ],
-    "aliasesUa": [
-      "Centaurea cyanus"
-    ]
+    "aliasesEn": ["C. cyanus", "bachelor's button", "Cornflower", "cornflower"],
+    "aliasesUa": ["Centaurea cyanus"]
   },
   {
     "id": "corylus-colurna",
     "en": "Corylus colurna",
     "ua": "Ліщина турецька",
     "category": "herbs",
-    "aliasesEn": [
-      "Turkish hazel",
-      "Turkish filbert"
-    ],
+    "aliasesEn": ["Turkish hazel", "Turkish filbert"],
     "aliasesUa": []
   },
   {
@@ -6230,9 +5121,7 @@
     "en": "liquorice",
     "ua": "локриця",
     "category": "herbs",
-    "aliasesEn": [
-      "Glycyrrhiza glabra"
-    ],
+    "aliasesEn": ["Glycyrrhiza glabra"],
     "aliasesUa": []
   },
   {
@@ -6249,19 +5138,14 @@
     "ua": "ефіроолійні рослини",
     "category": "herbs",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ефіроноси",
-      "етероолійні рослини"
-    ]
+    "aliasesUa": ["ефіроноси", "етероолійні рослини"]
   },
   {
     "id": "cupressus-sempervirens",
     "en": "Cupressus sempervirens",
     "ua": "Кипарис вічнозелений",
     "category": "herbs",
-    "aliasesEn": [
-      "Mediterranean Cypress"
-    ],
+    "aliasesEn": ["Mediterranean Cypress"],
     "aliasesUa": []
   },
   {
@@ -6269,10 +5153,7 @@
     "en": "silphium",
     "ua": "Сильфій",
     "category": "herbs",
-    "aliasesEn": [
-      "silphion",
-      "laserwort"
-    ],
+    "aliasesEn": ["silphion", "laserwort"],
     "aliasesUa": []
   },
   {
@@ -6288,11 +5169,7 @@
     "en": "za'atar",
     "ua": "Затар",
     "category": "herbs",
-    "aliasesEn": [
-      "zaatar",
-      "zatar",
-      "za'tar"
-    ],
+    "aliasesEn": ["zaatar", "zatar", "za'tar"],
     "aliasesUa": []
   },
   {
@@ -6300,14 +5177,8 @@
     "en": "Prunus dulcis",
     "ua": "мигдаль",
     "category": "herbs",
-    "aliasesEn": [
-      "Prunus amygdalus",
-      "almond tree",
-      "almond"
-    ],
-    "aliasesUa": [
-      "Prunus dulcis"
-    ]
+    "aliasesEn": ["Prunus amygdalus", "almond tree", "almond"],
+    "aliasesUa": ["Prunus dulcis"]
   },
   {
     "id": "medicinal-plant",
@@ -6321,23 +5192,15 @@
       "drug plant",
       "medicinal herb"
     ],
-    "aliasesUa": [
-      "лікарська рослина"
-    ]
+    "aliasesUa": ["лікарська рослина"]
   },
   {
     "id": "anethum-graveolens",
     "en": "Anethum graveolens",
     "ua": "Кріп пахучий",
     "category": "herbs",
-    "aliasesEn": [
-      "dill"
-    ],
-    "aliasesUa": [
-      "Кріп запашний",
-      "Anethum graveolens",
-      "Кріп"
-    ]
+    "aliasesEn": ["dill"],
+    "aliasesUa": ["Кріп запашний", "Anethum graveolens", "Кріп"]
   },
   {
     "id": "cacao",
@@ -6358,28 +5221,16 @@
     "en": "Malus sylvestris",
     "ua": "Яблуня лісова",
     "category": "herbs",
-    "aliasesEn": [
-      "European crab apple",
-      "crab apple"
-    ],
-    "aliasesUa": [
-      "Malus sylvestris",
-      "Malus praecox"
-    ]
+    "aliasesEn": ["European crab apple", "crab apple"],
+    "aliasesUa": ["Malus sylvestris", "Malus praecox"]
   },
   {
     "id": "lignum-vitae",
     "en": "lignum vitae",
     "ua": "Залізне дерево",
     "category": "herbs",
-    "aliasesEn": [
-      "guayacan",
-      "guaiacum"
-    ],
-    "aliasesUa": [
-      "Lignum Vitae",
-      "Lignum vitae"
-    ]
+    "aliasesEn": ["guayacan", "guaiacum"],
+    "aliasesUa": ["Lignum Vitae", "Lignum vitae"]
   },
   {
     "id": "thyme",
@@ -6387,9 +5238,7 @@
     "ua": "чебрець",
     "category": "herbs",
     "aliasesEn": [],
-    "aliasesUa": [
-      "чабер, чабрик, чепчик"
-    ]
+    "aliasesUa": ["чабер, чабрик, чепчик"]
   },
   {
     "id": "quercus-robur",
@@ -6402,19 +5251,14 @@
       "English oak",
       "common oak"
     ],
-    "aliasesUa": [
-      "Дуб черещатий",
-      "Дуб звичайний"
-    ]
+    "aliasesUa": ["Дуб черещатий", "Дуб звичайний"]
   },
   {
     "id": "herbs-spinach",
     "en": "spinach",
     "ua": "шпинат",
     "category": "herbs",
-    "aliasesEn": [
-      "green spinach"
-    ],
+    "aliasesEn": ["green spinach"],
     "aliasesUa": []
   },
   {
@@ -6429,91 +5273,54 @@
       "caraway plant",
       "caraway"
     ],
-    "aliasesUa": [
-      "Carum carvi"
-    ]
+    "aliasesUa": ["Carum carvi"]
   },
   {
     "id": "culinary-herb",
     "en": "culinary herb",
     "ua": "трави",
     "category": "herbs",
-    "aliasesEn": [
-      "herb (culinary)",
-      "herbs",
-      "herb"
-    ],
-    "aliasesUa": [
-      "зелень"
-    ]
+    "aliasesEn": ["herb (culinary)", "herbs", "herb"],
+    "aliasesUa": ["зелень"]
   },
   {
     "id": "common-sunflower",
     "en": "common sunflower",
     "ua": "соняшник",
     "category": "herbs",
-    "aliasesEn": [
-      "Helianthus annuus",
-      "sunflower"
-    ],
-    "aliasesUa": [
-      "соняхи",
-      "сонях"
-    ]
+    "aliasesEn": ["Helianthus annuus", "sunflower"],
+    "aliasesUa": ["соняхи", "сонях"]
   },
   {
     "id": "herbs-parsley",
     "en": "parsley",
     "ua": "петрушка",
     "category": "herbs",
-    "aliasesEn": [
-      "Petroselinum crispum",
-      "garden parsley"
-    ],
-    "aliasesUa": [
-      "Петрушка кучерява",
-      "Petroselinum crispum"
-    ]
+    "aliasesEn": ["Petroselinum crispum", "garden parsley"],
+    "aliasesUa": ["Петрушка кучерява", "Petroselinum crispum"]
   },
   {
     "id": "origanum-vulgare",
     "en": "Origanum vulgare",
     "ua": "Материнка звичайна",
     "category": "herbs",
-    "aliasesEn": [
-      "wild marjoram",
-      "oregano"
-    ],
-    "aliasesUa": [
-      "Орегано",
-      "Origanum vulgare"
-    ]
+    "aliasesEn": ["wild marjoram", "oregano"],
+    "aliasesUa": ["Орегано", "Origanum vulgare"]
   },
   {
     "id": "plantanus-orientalis",
     "en": "Plantanus orientalis",
     "ua": "Платан східний",
     "category": "herbs",
-    "aliasesEn": [
-      "Oriental Plane",
-      "Chinar"
-    ],
-    "aliasesUa": [
-      "Чинар",
-      "Platanus orientalis",
-      "Чинара"
-    ]
+    "aliasesEn": ["Oriental Plane", "Chinar"],
+    "aliasesUa": ["Чинар", "Platanus orientalis", "Чинара"]
   },
   {
     "id": "herbs-cilantro",
     "en": "cilantro",
     "ua": "коріандр",
     "category": "herbs",
-    "aliasesEn": [
-      "coriander leaf",
-      "Chinese parsley",
-      "coriander"
-    ],
+    "aliasesEn": ["coriander leaf", "Chinese parsley", "coriander"],
     "aliasesUa": []
   },
   {
@@ -6521,9 +5328,7 @@
     "en": "Quercus ilex",
     "ua": "Дуб кам'яний",
     "category": "herbs",
-    "aliasesEn": [
-      "Holm Oak"
-    ],
+    "aliasesEn": ["Holm Oak"],
     "aliasesUa": []
   },
   {
@@ -6531,10 +5336,7 @@
     "en": "Apium graveolens",
     "ua": "селера",
     "category": "herbs",
-    "aliasesEn": [
-      "smallage",
-      "wild celery"
-    ],
+    "aliasesEn": ["smallage", "wild celery"],
     "aliasesUa": []
   },
   {
@@ -6561,24 +5363,15 @@
     "en": "Populus nigra",
     "ua": "тополя чорна",
     "category": "herbs",
-    "aliasesEn": [
-      "black populars",
-      "black poplar"
-    ],
-    "aliasesUa": [
-      "осокір",
-      "Populus nigra"
-    ]
+    "aliasesEn": ["black populars", "black poplar"],
+    "aliasesUa": ["осокір", "Populus nigra"]
   },
   {
     "id": "ferula-assa-foetida",
     "en": "Ferula assa-foetida",
     "ua": "Асафетида",
     "category": "herbs",
-    "aliasesEn": [
-      "Hing",
-      "asafoetida"
-    ],
+    "aliasesEn": ["Hing", "asafoetida"],
     "aliasesUa": []
   },
   {
@@ -6605,23 +5398,15 @@
     "en": "medicinal mushrooms",
     "ua": "фунготерапія",
     "category": "herbs",
-    "aliasesEn": [
-      "Medicinal fungi"
-    ],
-    "aliasesUa": [
-      "мікотерапія",
-      "застосування грибів у медицині"
-    ]
+    "aliasesEn": ["Medicinal fungi"],
+    "aliasesUa": ["мікотерапія", "застосування грибів у медицині"]
   },
   {
     "id": "levisticum-officinale",
     "en": "Levisticum officinale",
     "ua": "Любисток лікарський",
     "category": "herbs",
-    "aliasesEn": [
-      "lovage",
-      "wild celery"
-    ],
+    "aliasesEn": ["lovage", "wild celery"],
     "aliasesUa": []
   },
   {
@@ -6629,13 +5414,8 @@
     "en": "Foeniculum vulgare",
     "ua": "фенхель звичайний",
     "category": "herbs",
-    "aliasesEn": [
-      "Fennel"
-    ],
-    "aliasesUa": [
-      "фенхель",
-      "Foeniculum vulgare"
-    ]
+    "aliasesEn": ["Fennel"],
+    "aliasesUa": ["фенхель", "Foeniculum vulgare"]
   },
   {
     "id": "artocarpus-heterophyllus",
@@ -6661,31 +5441,15 @@
     "en": "Melissa officinalis",
     "ua": "Меліса лікарська",
     "category": "herbs",
-    "aliasesEn": [
-      "lemon balm",
-      "common balm",
-      "bee balm",
-      "balm mint",
-      "balm"
-    ],
-    "aliasesUa": [
-      "Лимонна трава",
-      "Лимонна м'ята",
-      "Melissa officinalis"
-    ]
+    "aliasesEn": ["lemon balm", "common balm", "bee balm", "balm mint", "balm"],
+    "aliasesUa": ["Лимонна трава", "Лимонна м'ята", "Melissa officinalis"]
   },
   {
     "id": "agarwood",
     "en": "agarwood",
     "ua": "Алойне дерево",
     "category": "herbs",
-    "aliasesEn": [
-      "oudh",
-      "eaglewood",
-      "gharuwood",
-      "aloeswood",
-      "aloes wood"
-    ],
+    "aliasesEn": ["oudh", "eaglewood", "gharuwood", "aloeswood", "aloes wood"],
     "aliasesUa": []
   },
   {
@@ -6693,9 +5457,7 @@
     "en": "Matteuccia struthiopteris",
     "ua": "страусове перо звичайне",
     "category": "herbs",
-    "aliasesEn": [
-      "ostrich fern"
-    ],
+    "aliasesEn": ["ostrich fern"],
     "aliasesUa": []
   },
   {
@@ -6723,46 +5485,30 @@
       "wild garlic",
       "ransoms"
     ],
-    "aliasesUa": [
-      "Черемша",
-      "Часник ведмежий",
-      "Левурда",
-      "Allium ursinum"
-    ]
+    "aliasesUa": ["Черемша", "Часник ведмежий", "Левурда", "Allium ursinum"]
   },
   {
     "id": "azadirachta-indica",
     "en": "Azadirachta indica",
     "ua": "Нім",
     "category": "herbs",
-    "aliasesEn": [
-      "neem",
-      "neem tree"
-    ],
-    "aliasesUa": [
-      "Ним"
-    ]
+    "aliasesEn": ["neem", "neem tree"],
+    "aliasesUa": ["Ним"]
   },
   {
     "id": "viticulture-in-italy",
     "en": "Viticulture in Italy",
     "ua": "італійське вино",
     "category": "oils",
-    "aliasesEn": [
-      "wine of Italy"
-    ],
-    "aliasesUa": [
-      "італійські вина"
-    ]
+    "aliasesEn": ["wine of Italy"],
+    "aliasesUa": ["італійські вина"]
   },
   {
     "id": "aquaponics",
     "en": "aquaponics",
     "ua": "Аквапоніка",
     "category": "oils",
-    "aliasesEn": [
-      "akvaponie"
-    ],
+    "aliasesEn": ["akvaponie"],
     "aliasesUa": []
   },
   {
@@ -6795,21 +5541,14 @@
     "ua": "Виноробство в Ефіопії",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Ефіопське вино",
-      "Виноградарство в Ефіопії"
-    ]
+    "aliasesUa": ["Ефіопське вино", "Виноградарство в Ефіопії"]
   },
   {
     "id": "wine-harvest",
     "en": "wine harvest",
     "ua": "Збір врожаю винограду",
     "category": "oils",
-    "aliasesEn": [
-      "grape harvest",
-      "harvesting",
-      "vintage"
-    ],
+    "aliasesEn": ["grape harvest", "harvesting", "vintage"],
     "aliasesUa": []
   },
   {
@@ -6825,9 +5564,7 @@
     "en": "cultivation of tobacco",
     "ua": "вирощування тютюну",
     "category": "oils",
-    "aliasesEn": [
-      "tobacco farming"
-    ],
+    "aliasesEn": ["tobacco farming"],
     "aliasesUa": []
   },
   {
@@ -6851,12 +5588,8 @@
     "en": "Madeira wine",
     "ua": "Мадера",
     "category": "oils",
-    "aliasesEn": [
-      "madeira"
-    ],
-    "aliasesUa": [
-      "мадейра"
-    ]
+    "aliasesEn": ["madeira"],
+    "aliasesUa": ["мадейра"]
   },
   {
     "id": "bardolino-doc",
@@ -6871,10 +5604,7 @@
     "en": "fruticulture",
     "ua": "Плодівництво",
     "category": "oils",
-    "aliasesEn": [
-      "fruit production",
-      "fruit growing"
-    ],
+    "aliasesEn": ["fruit production", "fruit growing"],
     "aliasesUa": []
   },
   {
@@ -6882,10 +5612,7 @@
     "en": "arable farming in Bashkortostan",
     "ua": "землеробство в Башкортостані",
     "category": "oils",
-    "aliasesEn": [
-      "farming in Bashkortostan",
-      "agriculture in Bashkortostan"
-    ],
+    "aliasesEn": ["farming in Bashkortostan", "agriculture in Bashkortostan"],
     "aliasesUa": []
   },
   {
@@ -6893,10 +5620,7 @@
     "en": "pomology",
     "ua": "помологія",
     "category": "oils",
-    "aliasesEn": [
-      "pomiculture",
-      "fruticulture"
-    ],
+    "aliasesEn": ["pomiculture", "fruticulture"],
     "aliasesUa": []
   },
   {
@@ -6904,9 +5628,7 @@
     "en": "Armenian wine",
     "ua": "виноробство Вірменії",
     "category": "oils",
-    "aliasesEn": [
-      "winemaking in Armenia"
-    ],
+    "aliasesEn": ["winemaking in Armenia"],
     "aliasesUa": [
       "вірменські вина",
       "вірменське вино",
@@ -6959,11 +5681,7 @@
     "en": "rice farming",
     "ua": "Рисівництво",
     "category": "oils",
-    "aliasesEn": [
-      "rice production",
-      "Rice Cultivation",
-      "rice cultivation"
-    ],
+    "aliasesEn": ["rice production", "Rice Cultivation", "rice cultivation"],
     "aliasesUa": []
   },
   {
@@ -6983,9 +5701,7 @@
     "en": "Montepulciano d'Abruzzo",
     "ua": "Монтепульчано д'Абруццо",
     "category": "oils",
-    "aliasesEn": [
-      "Montepulciano"
-    ],
+    "aliasesEn": ["Montepulciano"],
     "aliasesUa": []
   },
   {
@@ -6993,10 +5709,7 @@
     "en": "Etna",
     "ua": "Етна (виноробна зона)",
     "category": "oils",
-    "aliasesEn": [
-      "Etna wine",
-      "Etna DOC"
-    ],
+    "aliasesEn": ["Etna wine", "Etna DOC"],
     "aliasesUa": []
   },
   {
@@ -7005,19 +5718,14 @@
     "ua": "Виноробство в Албанії",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Албанські вина",
-      "Албанське вино"
-    ]
+    "aliasesUa": ["Албанські вина", "Албанське вино"]
   },
   {
     "id": "cotton-growing",
     "en": "cotton growing",
     "ua": "бавовництво",
     "category": "oils",
-    "aliasesEn": [
-      "cotton production"
-    ],
+    "aliasesEn": ["cotton production"],
     "aliasesUa": []
   },
   {
@@ -7025,11 +5733,7 @@
     "en": "viticulture",
     "ua": "виноградарство",
     "category": "oils",
-    "aliasesEn": [
-      "viniculture",
-      "grape growing",
-      "grape culture"
-    ],
+    "aliasesEn": ["viniculture", "grape growing", "grape culture"],
     "aliasesUa": []
   },
   {
@@ -7053,14 +5757,8 @@
     "en": "Chianti",
     "ua": "Кьянті",
     "category": "oils",
-    "aliasesEn": [
-      "Chianti and Chianti Classico",
-      "Chianti Classico"
-    ],
-    "aliasesUa": [
-      "Кьянті класіко",
-      "Chianti"
-    ]
+    "aliasesEn": ["Chianti and Chianti Classico", "Chianti Classico"],
+    "aliasesUa": ["Кьянті класіко", "Chianti"]
   },
   {
     "id": "israeli-wine",
@@ -7075,14 +5773,8 @@
     "en": "terrace",
     "ua": "Терасове рільництво",
     "category": "oils",
-    "aliasesEn": [
-      "terrace farm",
-      "terrace cultivation"
-    ],
-    "aliasesUa": [
-      "Терасове землеробство",
-      "Терасне землеробство"
-    ]
+    "aliasesEn": ["terrace farm", "terrace cultivation"],
+    "aliasesUa": ["Терасове землеробство", "Терасне землеробство"]
   },
   {
     "id": "vinho-verde",
@@ -7090,9 +5782,7 @@
     "ua": "Виньо верде",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "vinho verde"
-    ]
+    "aliasesUa": ["vinho verde"]
   },
   {
     "id": "potato-production-in-ukraine",
@@ -7100,9 +5790,7 @@
     "ua": "картоплярство в Україні",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Виробництво картоплі в Україні"
-    ]
+    "aliasesUa": ["Виробництво картоплі в Україні"]
   },
   {
     "id": "lisboa-vr",
@@ -7117,9 +5805,7 @@
     "en": "Vino Nobile di Montepulciano",
     "ua": "Віно Нобіле ді Монтепульчано",
     "category": "oils",
-    "aliasesEn": [
-      "Montepulciano"
-    ],
+    "aliasesEn": ["Montepulciano"],
     "aliasesUa": []
   },
   {
@@ -7145,10 +5831,7 @@
     "en": "Amarone della Valpolicella",
     "ua": "Амароне делла Вальполічелла",
     "category": "oils",
-    "aliasesEn": [
-      "Amarone della Valpolicella DOCG",
-      "Amarone"
-    ],
+    "aliasesEn": ["Amarone della Valpolicella DOCG", "Amarone"],
     "aliasesUa": []
   },
   {
@@ -7156,9 +5839,7 @@
     "en": "floriculture",
     "ua": "квітникарство",
     "category": "oils",
-    "aliasesEn": [
-      "flower farming"
-    ],
+    "aliasesEn": ["flower farming"],
     "aliasesUa": []
   },
   {
@@ -7181,20 +5862,14 @@
     "ua": "Партизанське садівництво",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Guerrilla Gardening",
-      "Guerilla Gardening"
-    ]
+    "aliasesUa": ["Guerrilla Gardening", "Guerilla Gardening"]
   },
   {
     "id": "potato-farming",
     "en": "potato farming",
     "ua": "картоплярство",
     "category": "oils",
-    "aliasesEn": [
-      "potato production",
-      "potato cultivation"
-    ],
+    "aliasesEn": ["potato production", "potato cultivation"],
     "aliasesUa": []
   },
   {
@@ -7210,10 +5885,7 @@
     "en": "greenhouse agriculture",
     "ua": "тепличне господарство",
     "category": "oils",
-    "aliasesEn": [
-      "protected agriculture",
-      "greenhouse cultivation"
-    ],
+    "aliasesEn": ["protected agriculture", "greenhouse cultivation"],
     "aliasesUa": []
   },
   {
@@ -7250,9 +5922,7 @@
     "en": "gardening",
     "ua": "садівництво",
     "category": "oils",
-    "aliasesEn": [
-      "hobby gardening"
-    ],
+    "aliasesEn": ["hobby gardening"],
     "aliasesUa": []
   },
   {
@@ -7277,9 +5947,7 @@
     "ua": "Вирощування ялинки",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Вирощування різдвяної ялинки"
-    ]
+    "aliasesUa": ["Вирощування різдвяної ялинки"]
   },
   {
     "id": "soave",
@@ -7303,19 +5971,14 @@
     "ua": "агроскаутинг",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "розвідка посівів",
-      "агророзвідка"
-    ]
+    "aliasesUa": ["розвідка посівів", "агророзвідка"]
   },
   {
     "id": "azerbaijani-wine",
     "en": "Azerbaijani wine",
     "ua": "Виноробство в Азербайджані",
     "category": "oils",
-    "aliasesEn": [
-      "Winemaking in Azerbaijan"
-    ],
+    "aliasesEn": ["Winemaking in Azerbaijan"],
     "aliasesUa": []
   },
   {
@@ -7416,9 +6079,7 @@
     "en": "hydroponics",
     "ua": "гідропоніка",
     "category": "oils",
-    "aliasesEn": [
-      "hydroponic"
-    ],
+    "aliasesEn": ["hydroponic"],
     "aliasesUa": []
   },
   {
@@ -7458,10 +6119,7 @@
     "en": "flower industry",
     "ua": "квітковий бізнес",
     "category": "oils",
-    "aliasesEn": [
-      "cut-flower industry",
-      "floriculture"
-    ],
+    "aliasesEn": ["cut-flower industry", "floriculture"],
     "aliasesUa": [
       "торгівля квітами",
       "садівничий розсадник",
@@ -7499,10 +6157,7 @@
     "en": "Honghe Hani Rice Terraces",
     "ua": "Рисові тераси Хунхе-Хані",
     "category": "oils",
-    "aliasesEn": [
-      "Yuanyang Rice Terraces",
-      "Hani Terraces"
-    ],
+    "aliasesEn": ["Yuanyang Rice Terraces", "Hani Terraces"],
     "aliasesUa": []
   },
   {
@@ -7546,12 +6201,8 @@
     "en": "sustainable landscaping",
     "ua": "стійкий краєвид",
     "category": "oils",
-    "aliasesEn": [
-      "Green landscaping"
-    ],
-    "aliasesUa": [
-      "стійкий ландшафт"
-    ]
+    "aliasesEn": ["Green landscaping"],
+    "aliasesUa": ["стійкий ландшафт"]
   },
   {
     "id": "arable-farming",
@@ -7572,10 +6223,7 @@
     "ua": "Виноробство в Туреччині",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Турецькі вина",
-      "Виготовлення вин в Туреччині"
-    ]
+    "aliasesUa": ["Турецькі вина", "Виготовлення вин в Туреччині"]
   },
   {
     "id": "dryland-farming",
@@ -7591,11 +6239,7 @@
     "ua": "хліборобство",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "зернові",
-      "виробництво зернових",
-      "виробництво зерна"
-    ]
+    "aliasesUa": ["зернові", "виробництво зернових", "виробництво зерна"]
   },
   {
     "id": "flower-delivery",
@@ -7603,9 +6247,7 @@
     "ua": "доставка квітів",
     "category": "oils",
     "aliasesEn": [],
-    "aliasesUa": [
-      "квітів доставка"
-    ]
+    "aliasesUa": ["квітів доставка"]
   },
   {
     "id": "douro-doc",
@@ -7620,9 +6262,7 @@
     "en": "bonsai",
     "ua": "бонсай",
     "category": "oils",
-    "aliasesEn": [
-      "bonsai tree"
-    ],
+    "aliasesEn": ["bonsai tree"],
     "aliasesUa": []
   },
   {
@@ -7630,10 +6270,7 @@
     "en": "port wine",
     "ua": "Портвейн",
     "category": "oils",
-    "aliasesEn": [
-      "Port",
-      "Vinho do Porto"
-    ],
+    "aliasesEn": ["Port", "Vinho do Porto"],
     "aliasesUa": []
   },
   {
@@ -7666,18 +6303,14 @@
     "ua": "селерова сіль",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "селерна сіль"
-    ]
+    "aliasesUa": ["селерна сіль"]
   },
   {
     "id": "pin-ur",
     "en": "Pinđur",
     "ua": "пінджур",
     "category": "condiments",
-    "aliasesEn": [
-      "pinjur"
-    ],
+    "aliasesEn": ["pinjur"],
     "aliasesUa": []
   },
   {
@@ -7685,9 +6318,7 @@
     "en": "defrutum",
     "ua": "Дефрутум",
     "category": "condiments",
-    "aliasesEn": [
-      "caroenum"
-    ],
+    "aliasesEn": ["caroenum"],
     "aliasesUa": []
   },
   {
@@ -7695,9 +6326,7 @@
     "en": "sauce chasseur",
     "ua": "мисливський соус",
     "category": "condiments",
-    "aliasesEn": [
-      "hunter's sauce"
-    ],
+    "aliasesEn": ["hunter's sauce"],
     "aliasesUa": []
   },
   {
@@ -7705,9 +6334,7 @@
     "en": "ranch dressing",
     "ua": "Соус ранч",
     "category": "condiments",
-    "aliasesEn": [
-      "ranch"
-    ],
+    "aliasesEn": ["ranch"],
     "aliasesUa": []
   },
   {
@@ -7716,19 +6343,14 @@
     "ua": "лавровий лист",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "лаврове листя"
-    ]
+    "aliasesUa": ["лаврове листя"]
   },
   {
     "id": "sweetener",
     "en": "sweetener",
     "ua": "підсолоджувачі",
     "category": "condiments",
-    "aliasesEn": [
-      "sweetening agents",
-      "sweeteners"
-    ],
+    "aliasesEn": ["sweetening agents", "sweeteners"],
     "aliasesUa": []
   },
   {
@@ -7744,16 +6366,8 @@
     "en": "soy sauce",
     "ua": "соєвий соус",
     "category": "condiments",
-    "aliasesEn": [
-      "soya sauce",
-      "shoyu",
-      "jiangyou",
-      "ganjang",
-      "soy"
-    ],
-    "aliasesUa": [
-      "соус соєвий"
-    ]
+    "aliasesEn": ["soya sauce", "shoyu", "jiangyou", "ganjang", "soy"],
+    "aliasesUa": ["соус соєвий"]
   },
   {
     "id": "russian-dressing",
@@ -7769,22 +6383,14 @@
     "ua": "гхі",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ґі",
-      "ґгі"
-    ]
+    "aliasesUa": ["ґі", "ґгі"]
   },
   {
     "id": "condiments-cardamom",
     "en": "cardamom",
     "ua": "кардамон",
     "category": "condiments",
-    "aliasesEn": [
-      "ground cadamom",
-      "cardamum",
-      "cardamon",
-      "cardamom seeds"
-    ],
+    "aliasesEn": ["ground cadamom", "cardamum", "cardamon", "cardamom seeds"],
     "aliasesUa": []
   },
   {
@@ -7792,9 +6398,7 @@
     "en": "Neapolitan sauce",
     "ua": "Неаполітанський соус",
     "category": "condiments",
-    "aliasesEn": [
-      "Napoli sauce"
-    ],
+    "aliasesEn": ["Napoli sauce"],
     "aliasesUa": []
   },
   {
@@ -7802,9 +6406,7 @@
     "en": "fruit butter",
     "ua": "леквар",
     "category": "condiments",
-    "aliasesEn": [
-      "lekvar"
-    ],
+    "aliasesEn": ["lekvar"],
     "aliasesUa": []
   },
   {
@@ -7826,12 +6428,7 @@
     "en": "ketchup",
     "ua": "кетчуп",
     "category": "condiments",
-    "aliasesEn": [
-      "tomato ketchup",
-      "Sos Coch",
-      "catsup",
-      "Catchup"
-    ],
+    "aliasesEn": ["tomato ketchup", "Sos Coch", "catsup", "Catchup"],
     "aliasesUa": []
   },
   {
@@ -7855,9 +6452,7 @@
     "en": "ginger garlic masala",
     "ua": "Часниково-імбирна масала",
     "category": "condiments",
-    "aliasesEn": [
-      "ginger garlic paste"
-    ],
+    "aliasesEn": ["ginger garlic paste"],
     "aliasesUa": []
   },
   {
@@ -7881,9 +6476,7 @@
     "en": "pesto alla trapanese",
     "ua": "Песто алла трапанезе",
     "category": "condiments",
-    "aliasesEn": [
-      "pesto alla siciliana"
-    ],
+    "aliasesEn": ["pesto alla siciliana"],
     "aliasesUa": []
   },
   {
@@ -7891,23 +6484,15 @@
     "en": "nutmeg",
     "ua": "мускатник",
     "category": "condiments",
-    "aliasesEn": [
-      "Myristica fragrans"
-    ],
-    "aliasesUa": [
-      "Мускатні горіхи",
-      "Мускатний горіх",
-      "Мускат"
-    ]
+    "aliasesEn": ["Myristica fragrans"],
+    "aliasesUa": ["Мускатні горіхи", "Мускатний горіх", "Мускат"]
   },
   {
     "id": "spice",
     "en": "spice",
     "ua": "спеції",
     "category": "condiments",
-    "aliasesEn": [
-      "spices"
-    ],
+    "aliasesEn": ["spices"],
     "aliasesUa": []
   },
   {
@@ -7931,9 +6516,7 @@
     "en": "allspice",
     "ua": "духмяний перець",
     "category": "condiments",
-    "aliasesEn": [
-      "Jamaica pepper"
-    ],
+    "aliasesEn": ["Jamaica pepper"],
     "aliasesUa": []
   },
   {
@@ -7941,9 +6524,7 @@
     "en": "salad dressing",
     "ua": "салатна заправка",
     "category": "condiments",
-    "aliasesEn": [
-      "Salad dressings"
-    ],
+    "aliasesEn": ["Salad dressings"],
     "aliasesUa": []
   },
   {
@@ -7951,12 +6532,7 @@
     "en": "sea salt",
     "ua": "Морська сіль",
     "category": "condiments",
-    "aliasesEn": [
-      "solar salt",
-      "Sea salt",
-      "bay salt",
-      "salt"
-    ],
+    "aliasesEn": ["solar salt", "Sea salt", "bay salt", "salt"],
     "aliasesUa": []
   },
   {
@@ -7972,15 +6548,8 @@
     "en": "cinnamon",
     "ua": "Кориця",
     "category": "condiments",
-    "aliasesEn": [
-      "canella",
-      "canel"
-    ],
-    "aliasesUa": [
-      "Цинамон",
-      "Коричне дерево",
-      "Cinnamomum verum"
-    ]
+    "aliasesEn": ["canella", "canel"],
+    "aliasesUa": ["Цинамон", "Коричне дерево", "Cinnamomum verum"]
   },
   {
     "id": "mushroom-ketchup",
@@ -7995,10 +6564,7 @@
     "en": "iodised salt",
     "ua": "Йодована харчова сіль",
     "category": "condiments",
-    "aliasesEn": [
-      "iodized salt",
-      "iodated salt"
-    ],
+    "aliasesEn": ["iodized salt", "iodated salt"],
     "aliasesUa": []
   },
   {
@@ -8021,9 +6587,7 @@
     "ua": "внегрет",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "вінігрет"
-    ]
+    "aliasesUa": ["вінігрет"]
   },
   {
     "id": "onion-sauce",
@@ -8038,10 +6602,7 @@
     "en": "Eggplant Caviar",
     "ua": "Баклажанна ікра",
     "category": "condiments",
-    "aliasesEn": [
-      "brinjal caviar",
-      "aubergine caviar"
-    ],
+    "aliasesEn": ["brinjal caviar", "aubergine caviar"],
     "aliasesUa": []
   },
   {
@@ -8049,9 +6610,7 @@
     "en": "bouquet garni",
     "ua": "букет гарні",
     "category": "condiments",
-    "aliasesEn": [
-      "Cookbook:Bouquet Garni"
-    ],
+    "aliasesEn": ["Cookbook:Bouquet Garni"],
     "aliasesUa": []
   },
   {
@@ -8059,10 +6618,7 @@
     "en": "baking chocolate",
     "ua": "Шоколад для випічки",
     "category": "condiments",
-    "aliasesEn": [
-      "bitter chocolate",
-      "Baking chocolate"
-    ],
+    "aliasesEn": ["bitter chocolate", "Baking chocolate"],
     "aliasesUa": []
   },
   {
@@ -8078,9 +6634,7 @@
     "en": "hogao",
     "ua": "Хогао",
     "category": "condiments",
-    "aliasesEn": [
-      "criollo sauce"
-    ],
+    "aliasesEn": ["criollo sauce"],
     "aliasesUa": []
   },
   {
@@ -8096,9 +6650,7 @@
     "en": "sugar",
     "ua": "цукор",
     "category": "condiments",
-    "aliasesEn": [
-      "sugars"
-    ],
+    "aliasesEn": ["sugars"],
     "aliasesUa": []
   },
   {
@@ -8114,10 +6666,7 @@
     "en": "asafoetida",
     "ua": "Асафетида (прянощі)",
     "category": "condiments",
-    "aliasesEn": [
-      "stinking gum",
-      "Devil's dung"
-    ],
+    "aliasesEn": ["stinking gum", "Devil's dung"],
     "aliasesUa": []
   },
   {
@@ -8133,10 +6682,7 @@
     "en": "apple cider vinegar",
     "ua": "Яблучний оцет",
     "category": "condiments",
-    "aliasesEn": [
-      "cider vinegar",
-      "ACV"
-    ],
+    "aliasesEn": ["cider vinegar", "ACV"],
     "aliasesUa": []
   },
   {
@@ -8160,9 +6706,7 @@
     "en": "Cheese sauce",
     "ua": "Сирний соус",
     "category": "condiments",
-    "aliasesEn": [
-      "cheese sauce"
-    ],
+    "aliasesEn": ["cheese sauce"],
     "aliasesUa": []
   },
   {
@@ -8178,9 +6722,7 @@
     "en": "mayonnaise",
     "ua": "майонез",
     "category": "condiments",
-    "aliasesEn": [
-      "mayo"
-    ],
+    "aliasesEn": ["mayo"],
     "aliasesUa": []
   },
   {
@@ -8220,11 +6762,7 @@
     "en": "panela",
     "ua": "Панела",
     "category": "condiments",
-    "aliasesEn": [
-      "raspadura",
-      "piloncillo",
-      "chancaca"
-    ],
+    "aliasesEn": ["raspadura", "piloncillo", "chancaca"],
     "aliasesUa": []
   },
   {
@@ -8256,11 +6794,7 @@
     "en": "tomato sauce",
     "ua": "томатний соус",
     "category": "condiments",
-    "aliasesEn": [
-      "Sunday gravy",
-      "spaghetti sauce",
-      "pasta sauce"
-    ],
+    "aliasesEn": ["Sunday gravy", "spaghetti sauce", "pasta sauce"],
     "aliasesUa": []
   },
   {
@@ -8268,11 +6802,7 @@
     "en": "sumac",
     "ua": "Сумах",
     "category": "condiments",
-    "aliasesEn": [
-      "sumaq",
-      "sumach",
-      "Sicilian sumac"
-    ],
+    "aliasesEn": ["sumaq", "sumach", "Sicilian sumac"],
     "aliasesUa": []
   },
   {
@@ -8280,9 +6810,7 @@
     "en": "Aleppo pepper",
     "ua": "перець алеппо",
     "category": "condiments",
-    "aliasesEn": [
-      "Halaby pepper"
-    ],
+    "aliasesEn": ["Halaby pepper"],
     "aliasesUa": []
   },
   {
@@ -8290,9 +6818,7 @@
     "en": "juniper berry",
     "ua": "Ялівець (пряність)",
     "category": "condiments",
-    "aliasesEn": [
-      "Juniperi pseudo-fructus"
-    ],
+    "aliasesEn": ["Juniperi pseudo-fructus"],
     "aliasesUa": []
   },
   {
@@ -8300,9 +6826,7 @@
     "en": "shrimp paste",
     "ua": "креветкова паста",
     "category": "condiments",
-    "aliasesEn": [
-      "shrimp sauce"
-    ],
+    "aliasesEn": ["shrimp sauce"],
     "aliasesUa": []
   },
   {
@@ -8318,9 +6842,7 @@
     "en": "relish",
     "ua": "реліш",
     "category": "condiments",
-    "aliasesEn": [
-      "Kurkkusalaatti"
-    ],
+    "aliasesEn": ["Kurkkusalaatti"],
     "aliasesUa": []
   },
   {
@@ -8336,9 +6858,7 @@
     "en": "acıka",
     "ua": "аджика",
     "category": "condiments",
-    "aliasesEn": [
-      "ajika"
-    ],
+    "aliasesEn": ["ajika"],
     "aliasesUa": []
   },
   {
@@ -8360,18 +6880,14 @@
     "ua": "Адобо",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Адобо (іспанська кухня)"
-    ]
+    "aliasesUa": ["Адобо (іспанська кухня)"]
   },
   {
     "id": "neapolitan-rag",
     "en": "Neapolitan ragù",
     "ua": "Неаполітанське рагу",
     "category": "condiments",
-    "aliasesEn": [
-      "Neapolitan ragu"
-    ],
+    "aliasesEn": ["Neapolitan ragu"],
     "aliasesUa": []
   },
   {
@@ -8395,9 +6911,7 @@
     "en": "banana ketchup",
     "ua": "Банановий кетчуп",
     "category": "condiments",
-    "aliasesEn": [
-      "banana sauce"
-    ],
+    "aliasesEn": ["banana sauce"],
     "aliasesUa": []
   },
   {
@@ -8405,10 +6919,7 @@
     "en": "Kampot pepper",
     "ua": "Кампотський перець",
     "category": "condiments",
-    "aliasesEn": [
-      "Indochinese pepper",
-      "Indochina pepper"
-    ],
+    "aliasesEn": ["Indochinese pepper", "Indochina pepper"],
     "aliasesUa": []
   },
   {
@@ -8416,10 +6927,7 @@
     "en": "gari",
     "ua": "Гарі (страва)",
     "category": "condiments",
-    "aliasesEn": [
-      "sushi ginger",
-      "pickled ginger"
-    ],
+    "aliasesEn": ["sushi ginger", "pickled ginger"],
     "aliasesUa": []
   },
   {
@@ -8468,20 +6976,14 @@
     "ua": "фруктовий крем",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Фруктовий курд"
-    ]
+    "aliasesUa": ["Фруктовий курд"]
   },
   {
     "id": "chocolate-liquor",
     "en": "chocolate liquor",
     "ua": "терте какао",
     "category": "condiments",
-    "aliasesEn": [
-      "cocoa paste",
-      "cocoa mass",
-      "cocoa liquor"
-    ],
+    "aliasesEn": ["cocoa paste", "cocoa mass", "cocoa liquor"],
     "aliasesUa": []
   },
   {
@@ -8497,15 +6999,8 @@
     "en": "gravy",
     "ua": "підлива",
     "category": "condiments",
-    "aliasesEn": [
-      "Universal brown sauce",
-      "UBS",
-      "gravies"
-    ],
-    "aliasesUa": [
-      "поливка",
-      "підливка"
-    ]
+    "aliasesEn": ["Universal brown sauce", "UBS", "gravies"],
+    "aliasesUa": ["поливка", "підливка"]
   },
   {
     "id": "condiments-black-garlic",
@@ -8536,9 +7031,7 @@
     "en": "tabil",
     "ua": "Табіл",
     "category": "condiments",
-    "aliasesEn": [
-      "tabel"
-    ],
+    "aliasesEn": ["tabel"],
     "aliasesUa": []
   },
   {
@@ -8563,18 +7056,14 @@
     "ua": "соус",
     "category": "condiments",
     "aliasesEn": [],
-    "aliasesUa": [
-      "соуси"
-    ]
+    "aliasesUa": ["соуси"]
   },
   {
     "id": "dark-chocolate",
     "en": "dark chocolate",
     "ua": "чорний шоколад",
     "category": "condiments",
-    "aliasesEn": [
-      "black chocolate"
-    ],
+    "aliasesEn": ["black chocolate"],
     "aliasesUa": []
   },
   {
@@ -8598,9 +7087,7 @@
     "en": "paprika",
     "ua": "паприка",
     "category": "condiments",
-    "aliasesEn": [
-      "پودر پاپریکا"
-    ],
+    "aliasesEn": ["پودر پاپریکا"],
     "aliasesUa": []
   },
   {
@@ -8608,9 +7095,7 @@
     "en": "oyster sauce",
     "ua": "Устричний соус",
     "category": "condiments",
-    "aliasesEn": [
-      "oyster ketchup"
-    ],
+    "aliasesEn": ["oyster ketchup"],
     "aliasesUa": []
   },
   {
@@ -8618,10 +7103,7 @@
     "en": "apple horseradish",
     "ua": "яблучний хрін",
     "category": "condiments",
-    "aliasesEn": [
-      "Apple Horseradish",
-      "apfelkren"
-    ],
+    "aliasesEn": ["Apple Horseradish", "apfelkren"],
     "aliasesUa": []
   },
   {
@@ -8629,9 +7111,7 @@
     "en": "avocado salsa",
     "ua": "сальса з авокадо",
     "category": "condiments",
-    "aliasesEn": [
-      "avokado salsa"
-    ],
+    "aliasesEn": ["avokado salsa"],
     "aliasesUa": []
   },
   {
@@ -8639,10 +7119,7 @@
     "en": "barley malt syrup",
     "ua": "ячмінно-солодовий сироп",
     "category": "condiments",
-    "aliasesEn": [
-      "maltose syrup",
-      "barley malt extract"
-    ],
+    "aliasesEn": ["maltose syrup", "barley malt extract"],
     "aliasesUa": []
   },
   {
@@ -8650,10 +7127,7 @@
     "en": "nib sugar",
     "ua": "Перловий цукор",
     "category": "condiments",
-    "aliasesEn": [
-      "pearl sugar",
-      "hail sugar"
-    ],
+    "aliasesEn": ["pearl sugar", "hail sugar"],
     "aliasesUa": []
   },
   {
@@ -8677,9 +7151,7 @@
     "en": "glucose syrup",
     "ua": "глюкозний сироп",
     "category": "condiments",
-    "aliasesEn": [
-      "confectioner's glucose"
-    ],
+    "aliasesEn": ["confectioner's glucose"],
     "aliasesUa": []
   },
   {
@@ -8703,10 +7175,7 @@
     "en": "chutney",
     "ua": "чатні",
     "category": "condiments",
-    "aliasesEn": [
-      "chatni",
-      "chatney"
-    ],
+    "aliasesEn": ["chatni", "chatney"],
     "aliasesUa": []
   },
   {
@@ -8790,9 +7259,7 @@
     "en": "sugar",
     "ua": "цукор",
     "category": "sweeteners",
-    "aliasesEn": [
-      "sugars"
-    ],
+    "aliasesEn": ["sugars"],
     "aliasesUa": []
   },
   {
@@ -8800,11 +7267,7 @@
     "en": "panela",
     "ua": "Панела",
     "category": "sweeteners",
-    "aliasesEn": [
-      "raspadura",
-      "piloncillo",
-      "chancaca"
-    ],
+    "aliasesEn": ["raspadura", "piloncillo", "chancaca"],
     "aliasesUa": []
   },
   {
@@ -8828,10 +7291,7 @@
     "en": "nib sugar",
     "ua": "Перловий цукор",
     "category": "sweeteners",
-    "aliasesEn": [
-      "pearl sugar",
-      "hail sugar"
-    ],
+    "aliasesEn": ["pearl sugar", "hail sugar"],
     "aliasesUa": []
   },
   {
@@ -8847,9 +7307,7 @@
     "en": "date sugar",
     "ua": "Фініковий цукор",
     "category": "sweeteners",
-    "aliasesEn": [
-      "Date sugar"
-    ],
+    "aliasesEn": ["Date sugar"],
     "aliasesUa": []
   },
   {
@@ -8880,9 +7338,7 @@
       "artificial sweetener",
       "high-intensity sweetener"
     ],
-    "aliasesUa": [
-      "Замінники цукру"
-    ]
+    "aliasesUa": ["Замінники цукру"]
   },
   {
     "id": "sugar-cube",
@@ -8903,11 +7359,7 @@
     "en": "brown sugar",
     "ua": "коричневий цукор",
     "category": "sweeteners",
-    "aliasesEn": [
-      "soft brown sugar",
-      "brown caster sugar",
-      "cassonade"
-    ],
+    "aliasesEn": ["soft brown sugar", "brown caster sugar", "cassonade"],
     "aliasesUa": []
   },
   {
@@ -8915,9 +7367,7 @@
     "en": "jaggery",
     "ua": "джаґґері",
     "category": "sweeteners",
-    "aliasesEn": [
-      "jaggeree"
-    ],
+    "aliasesEn": ["jaggeree"],
     "aliasesUa": []
   },
   {
@@ -8925,10 +7375,7 @@
     "en": "powdered sugar",
     "ua": "Цукрова пудра",
     "category": "sweeteners",
-    "aliasesEn": [
-      "icing sugar",
-      "confectioner's sugar"
-    ],
+    "aliasesEn": ["icing sugar", "confectioner's sugar"],
     "aliasesUa": []
   },
   {
@@ -8953,18 +7400,14 @@
     "ua": "пивна марка",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "пивний бренд"
-    ]
+    "aliasesUa": ["пивний бренд"]
   },
   {
     "id": "spritzer",
     "en": "spritzer",
     "ua": "Шорлє",
     "category": "beverages",
-    "aliasesEn": [
-      "Fröccs"
-    ],
+    "aliasesEn": ["Fröccs"],
     "aliasesUa": []
   },
   {
@@ -8993,9 +7436,7 @@
     "en": "Straw wine",
     "ua": "Родзинкове вино",
     "category": "beverages",
-    "aliasesEn": [
-      "Raisin wine"
-    ],
+    "aliasesEn": ["Raisin wine"],
     "aliasesUa": []
   },
   {
@@ -9011,10 +7452,7 @@
     "en": "schnapps",
     "ua": "Шнапс",
     "category": "beverages",
-    "aliasesEn": [
-      "Sznaps",
-      "schnaps"
-    ],
+    "aliasesEn": ["Sznaps", "schnaps"],
     "aliasesUa": []
   },
   {
@@ -9030,9 +7468,7 @@
     "en": "defrutum",
     "ua": "Дефрутум",
     "category": "beverages",
-    "aliasesEn": [
-      "caroenum"
-    ],
+    "aliasesEn": ["caroenum"],
     "aliasesUa": []
   },
   {
@@ -9048,9 +7484,7 @@
     "en": "milkshake",
     "ua": "молочний коктейль",
     "category": "beverages",
-    "aliasesEn": [
-      "thickshake"
-    ],
+    "aliasesEn": ["thickshake"],
     "aliasesUa": []
   },
   {
@@ -9090,23 +7524,15 @@
     "en": "Haister",
     "ua": "Гайстер джин",
     "category": "beverages",
-    "aliasesEn": [
-      "haistergin"
-    ],
-    "aliasesUa": [
-      "Хайстер",
-      "Гайстер",
-      "haistergin"
-    ]
+    "aliasesEn": ["haistergin"],
+    "aliasesUa": ["Хайстер", "Гайстер", "haistergin"]
   },
   {
     "id": "lumumba",
     "en": "Lumumba",
     "ua": "Лумумба",
     "category": "beverages",
-    "aliasesEn": [
-      "Lugumba"
-    ],
+    "aliasesEn": ["Lugumba"],
     "aliasesUa": []
   },
   {
@@ -9122,9 +7548,7 @@
     "en": "Mageu",
     "ua": "Магеу",
     "category": "beverages",
-    "aliasesEn": [
-      "MaHewu"
-    ],
+    "aliasesEn": ["MaHewu"],
     "aliasesUa": []
   },
   {
@@ -9140,9 +7564,7 @@
     "en": "arkhi",
     "ua": "Архі (напій)",
     "category": "beverages",
-    "aliasesEn": [
-      "milk vodka"
-    ],
+    "aliasesEn": ["milk vodka"],
     "aliasesUa": []
   },
   {
@@ -9158,22 +7580,15 @@
     "en": "apple juice",
     "ua": "яблучний сік",
     "category": "beverages",
-    "aliasesEn": [
-      "applejuice"
-    ],
-    "aliasesUa": [
-      "сік яблучний",
-      "сік з яблук"
-    ]
+    "aliasesEn": ["applejuice"],
+    "aliasesUa": ["сік яблучний", "сік з яблук"]
   },
   {
     "id": "varietal-wine",
     "en": "varietal wine",
     "ua": "сортове вино",
     "category": "beverages",
-    "aliasesEn": [
-      "varietal"
-    ],
+    "aliasesEn": ["varietal"],
     "aliasesUa": []
   },
   {
@@ -9206,10 +7621,7 @@
     "ua": "зброджений алкогольний напій",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "ферментований трунок",
-      "газований алкогольний напій"
-    ]
+    "aliasesUa": ["ферментований трунок", "газований алкогольний напій"]
   },
   {
     "id": "advocaat",
@@ -9217,9 +7629,7 @@
     "ua": "Адвокат",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Advocaat"
-    ]
+    "aliasesUa": ["Advocaat"]
   },
   {
     "id": "borhani",
@@ -9242,25 +7652,16 @@
     "en": "Caesar",
     "ua": "Цезар",
     "category": "beverages",
-    "aliasesEn": [
-      "Bloody Caesar",
-      "Red Eye"
-    ],
-    "aliasesUa": [
-      "кривавий Цезар"
-    ]
+    "aliasesEn": ["Bloody Caesar", "Red Eye"],
+    "aliasesUa": ["кривавий Цезар"]
   },
   {
     "id": "black-tea",
     "en": "black tea",
     "ua": "Чорний чай",
     "category": "beverages",
-    "aliasesEn": [
-      "red tea"
-    ],
-    "aliasesUa": [
-      "Червоний чай"
-    ]
+    "aliasesEn": ["red tea"],
+    "aliasesUa": ["Червоний чай"]
   },
   {
     "id": "tullamore-dew",
@@ -9307,9 +7708,7 @@
     "en": "Caffè d'orzo",
     "ua": "ячмінна кава",
     "category": "beverages",
-    "aliasesEn": [
-      "barley coffee"
-    ],
+    "aliasesEn": ["barley coffee"],
     "aliasesUa": []
   },
   {
@@ -9385,12 +7784,8 @@
     "en": "Horilka",
     "ua": "Горілка",
     "category": "beverages",
-    "aliasesEn": [
-      "Pertsivka"
-    ],
-    "aliasesUa": [
-      "Перцівка"
-    ]
+    "aliasesEn": ["Pertsivka"],
+    "aliasesUa": ["Перцівка"]
   },
   {
     "id": "cr-me-br-l-e",
@@ -9418,10 +7813,7 @@
     "en": "Sazerac",
     "ua": "Сазерак",
     "category": "beverages",
-    "aliasesEn": [
-      "drinl",
-      "drinks"
-    ],
+    "aliasesEn": ["drinl", "drinks"],
     "aliasesUa": []
   },
   {
@@ -9429,12 +7821,7 @@
     "en": "skimmed milk",
     "ua": "Знежирене молоко",
     "category": "beverages",
-    "aliasesEn": [
-      "skim milk",
-      "nonfat milk",
-      "non-fat milk",
-      "fat-free milk"
-    ],
+    "aliasesEn": ["skim milk", "nonfat milk", "non-fat milk", "fat-free milk"],
     "aliasesUa": []
   },
   {
@@ -9450,9 +7837,7 @@
     "en": "Brut",
     "ua": "Брют",
     "category": "beverages",
-    "aliasesEn": [
-      "Brut (champagne)"
-    ],
+    "aliasesEn": ["Brut (champagne)"],
     "aliasesUa": []
   },
   {
@@ -9460,9 +7845,7 @@
     "en": "Battery",
     "ua": "Battery (напій)",
     "category": "beverages",
-    "aliasesEn": [
-      "Battery Energy Drink"
-    ],
+    "aliasesEn": ["Battery Energy Drink"],
     "aliasesUa": []
   },
   {
@@ -9478,11 +7861,7 @@
     "en": "cider",
     "ua": "сидр",
     "category": "beverages",
-    "aliasesEn": [
-      "hard cider",
-      "hard apple cider",
-      "alcoholic cider"
-    ],
+    "aliasesEn": ["hard cider", "hard apple cider", "alcoholic cider"],
     "aliasesUa": []
   },
   {
@@ -9505,9 +7884,7 @@
     "ua": "Бакс Фіз",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Buck's Fizz"
-    ]
+    "aliasesUa": ["Buck's Fizz"]
   },
   {
     "id": "beverages-ethiopian-wine",
@@ -9515,19 +7892,14 @@
     "ua": "Виноробство в Ефіопії",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "Ефіопське вино",
-      "Виноградарство в Ефіопії"
-    ]
+    "aliasesUa": ["Ефіопське вино", "Виноградарство в Ефіопії"]
   },
   {
     "id": "caf-de-olla",
     "en": "café de olla",
     "ua": "Кава де оля",
     "category": "beverages",
-    "aliasesEn": [
-      "cafe de olla"
-    ],
+    "aliasesEn": ["cafe de olla"],
     "aliasesUa": []
   },
   {
@@ -9543,9 +7915,7 @@
     "en": "Shiraz wine",
     "ua": "Шираз (вино)",
     "category": "beverages",
-    "aliasesEn": [
-      "Syrah"
-    ],
+    "aliasesEn": ["Syrah"],
     "aliasesUa": []
   },
   {
@@ -9569,9 +7939,7 @@
     "en": "beer",
     "ua": "пиво",
     "category": "beverages",
-    "aliasesEn": [
-      "brew"
-    ],
+    "aliasesEn": ["brew"],
     "aliasesUa": []
   },
   {
@@ -9593,9 +7961,7 @@
     "en": "punch",
     "ua": "Пунш",
     "category": "beverages",
-    "aliasesEn": [
-      "Fruit punch"
-    ],
+    "aliasesEn": ["Fruit punch"],
     "aliasesUa": []
   },
   {
@@ -9603,10 +7969,7 @@
     "en": "French wine",
     "ua": "виноробство у Франції",
     "category": "beverages",
-    "aliasesEn": [
-      "Viticulture en France",
-      "Viticulture"
-    ],
+    "aliasesEn": ["Viticulture en France", "Viticulture"],
     "aliasesUa": []
   },
   {
@@ -9630,9 +7993,7 @@
     "en": "bière de garde",
     "ua": "Б'єр-де-Гард",
     "category": "beverages",
-    "aliasesEn": [
-      "biere de garde"
-    ],
+    "aliasesEn": ["biere de garde"],
     "aliasesUa": []
   },
   {
@@ -9641,9 +8002,7 @@
     "ua": "еспресо",
     "category": "beverages",
     "aliasesEn": [],
-    "aliasesUa": [
-      "еспрессо"
-    ]
+    "aliasesUa": ["еспрессо"]
   },
   {
     "id": "snaps",
@@ -9658,11 +8017,7 @@
     "en": "Scotch whisky",
     "ua": "Шотландське віскі",
     "category": "beverages",
-    "aliasesEn": [
-      "Scotch Whisky",
-      "Scotch whiskey",
-      "Scotch"
-    ],
+    "aliasesEn": ["Scotch Whisky", "Scotch whiskey", "Scotch"],
     "aliasesUa": []
   },
   {
@@ -9670,9 +8025,7 @@
     "en": "Mama Juana",
     "ua": "Мамахуана",
     "category": "beverages",
-    "aliasesEn": [
-      "mamajuana"
-    ],
+    "aliasesEn": ["mamajuana"],
     "aliasesUa": []
   },
   {
@@ -9680,9 +8033,7 @@
     "en": "beet kvass",
     "ua": "буряковий квас",
     "category": "beverages",
-    "aliasesEn": [
-      "Beet kvass"
-    ],
+    "aliasesEn": ["Beet kvass"],
     "aliasesUa": [
       "квас на борщ",
       "квас з буряка для борщу",
@@ -9694,12 +8045,8 @@
     "en": "chal",
     "ua": "чал",
     "category": "beverages",
-    "aliasesEn": [
-      "shubat"
-    ],
-    "aliasesUa": [
-      "шубат"
-    ]
+    "aliasesEn": ["shubat"],
+    "aliasesUa": ["шубат"]
   },
   {
     "id": "beverages-bashkir-honey",
@@ -9714,10 +8061,7 @@
     "en": "hippocrass",
     "ua": "Гіпокрас",
     "category": "beverages",
-    "aliasesEn": [
-      "hypocras",
-      "hipocras"
-    ],
+    "aliasesEn": ["hypocras", "hipocras"],
     "aliasesUa": []
   },
   {
@@ -9725,9 +8069,7 @@
     "en": "black drink",
     "ua": "Чорний напій",
     "category": "beverages",
-    "aliasesEn": [
-      "white drink"
-    ],
+    "aliasesEn": ["white drink"],
     "aliasesUa": []
   },
   {
@@ -9751,21 +8093,15 @@
     "en": "IBA official cocktail",
     "ua": "Офіційний коктейль МАБ",
     "category": "beverages",
-    "aliasesEn": [
-      "list of IBA official cocktails"
-    ],
-    "aliasesUa": [
-      "список коктейлів IBA"
-    ]
+    "aliasesEn": ["list of IBA official cocktails"],
+    "aliasesUa": ["список коктейлів IBA"]
   },
   {
     "id": "mogwa-cha",
     "en": "mogwa-cha",
     "ua": "Могва-ча",
     "category": "beverages",
-    "aliasesEn": [
-      "quince tea"
-    ],
+    "aliasesEn": ["quince tea"],
     "aliasesUa": []
   },
   {
@@ -9797,9 +8133,7 @@
     "en": "camel milk",
     "ua": "верблюдяче молоко",
     "category": "beverages",
-    "aliasesEn": [
-      "camel's milk"
-    ],
+    "aliasesEn": ["camel's milk"],
     "aliasesUa": []
   },
   {
@@ -9823,9 +8157,7 @@
     "en": "Cendol",
     "ua": "Кендол (страва)",
     "category": "beverages",
-    "aliasesEn": [
-      "Cendoi"
-    ],
+    "aliasesEn": ["Cendoi"],
     "aliasesUa": []
   },
   {
@@ -9841,10 +8173,7 @@
     "en": "Longjing tea",
     "ua": "Лун Цзин",
     "category": "beverages",
-    "aliasesEn": [
-      "West Lake Dragon Well Tea",
-      "Dragon Well tea"
-    ],
+    "aliasesEn": ["West Lake Dragon Well Tea", "Dragon Well tea"],
     "aliasesUa": []
   },
   {
@@ -9868,12 +8197,8 @@
     "en": "caffeinated drink",
     "ua": "кофеїновий напій",
     "category": "beverages",
-    "aliasesEn": [
-      "caffeinated drinks"
-    ],
-    "aliasesUa": [
-      "кофеїновий на́пій"
-    ]
+    "aliasesEn": ["caffeinated drinks"],
+    "aliasesUa": ["кофеїновий на́пій"]
   },
   {
     "id": "orujo",
@@ -9896,21 +8221,15 @@
     "en": "Madeira wine",
     "ua": "Мадера",
     "category": "beverages",
-    "aliasesEn": [
-      "madeira"
-    ],
-    "aliasesUa": [
-      "мадейра"
-    ]
+    "aliasesEn": ["madeira"],
+    "aliasesUa": ["мадейра"]
   },
   {
     "id": "single-malt-scotch",
     "en": "single malt Scotch",
     "ua": "Односолодове шотландське віскі",
     "category": "beverages",
-    "aliasesEn": [
-      "Single Malt Scotch Whisky"
-    ],
+    "aliasesEn": ["Single Malt Scotch Whisky"],
     "aliasesUa": []
   },
   {
