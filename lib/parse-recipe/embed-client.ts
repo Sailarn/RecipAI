@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { hasEmbedConsent } from "./embed-consent";
 import type { WorkerOutput } from "./embed-worker";
 
@@ -7,20 +6,18 @@ type WorkerInput = { type: "embed"; texts: string[] };
 const TIMEOUT_MS = 120_000;
 
 let worker: Worker | null = null;
-let loadingToastId: string | number | null = null;
 
 function setupWorker(w: Worker): void {
   w.addEventListener("message", (event: MessageEvent<WorkerOutput>) => {
-    if (event.data.type === "loading") {
-      loadingToastId = toast.loading(
-        "Downloading AI model for ingredient matching…",
-        { duration: Number.POSITIVE_INFINITY },
+    const { type } = event.data;
+    if (type === "progress") {
+      window.dispatchEvent(
+        new CustomEvent("embed-model-progress", {
+          detail: { progress: event.data.progress },
+        }),
       );
-    } else if (event.data.type === "loaded") {
-      if (loadingToastId !== null) {
-        toast.dismiss(loadingToastId);
-        loadingToastId = null;
-      }
+    } else if (type === "loaded") {
+      window.dispatchEvent(new CustomEvent("embed-model-loaded"));
     }
   });
 }
@@ -31,6 +28,11 @@ function getWorker(): Worker {
     setupWorker(worker);
   }
   return worker;
+}
+
+export function preWarmEmbedWorker(): void {
+  if (!hasEmbedConsent()) return;
+  getIngredientEmbeddings([" "]).catch(() => {});
 }
 
 export async function getIngredientEmbeddings(
@@ -46,7 +48,12 @@ export async function getIngredientEmbeddings(
 
     const onMessage = (event: MessageEvent<WorkerOutput>) => {
       const output = event.data;
-      if (output.type === "loading" || output.type === "loaded") return;
+      if (
+        output.type === "loading" ||
+        output.type === "loaded" ||
+        output.type === "progress"
+      )
+        return;
 
       clearTimeout(timer);
       w.removeEventListener("message", onMessage);

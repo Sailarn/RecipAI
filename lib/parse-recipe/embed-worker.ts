@@ -2,6 +2,7 @@ declare const self: DedicatedWorkerGlobalScope;
 
 import {
   type FeatureExtractionPipeline,
+  type ProgressInfo,
   pipeline,
 } from "@huggingface/transformers";
 
@@ -10,7 +11,8 @@ export type WorkerOutput =
   | { type: "embeddings"; data: number[][] }
   | { type: "error"; message: string }
   | { type: "loading" }
-  | { type: "loaded" };
+  | { type: "loaded" }
+  | { type: "progress"; progress: number };
 
 let extractor: FeatureExtractionPipeline | null = null;
 
@@ -20,6 +22,16 @@ async function loadModel(): Promise<FeatureExtractionPipeline> {
     extractor = await pipeline(
       "feature-extraction",
       "Xenova/multilingual-e5-small",
+      {
+        progress_callback: (data: ProgressInfo) => {
+          if (data.status === "progress_total") {
+            self.postMessage({
+              type: "progress",
+              progress: Math.round(data.progress),
+            } satisfies WorkerOutput);
+          }
+        },
+      },
     );
     self.postMessage({ type: "loaded" } satisfies WorkerOutput);
   }
