@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { isVideoUrl } from "@/lib/video-url";
@@ -40,6 +41,22 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cookingMode, setCookingMode] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncIngredients = async () => {
+    if (!recipe) return;
+    setSyncing(true);
+    try {
+      await normalizeRecipeIngredients(
+        recipe.id,
+        recipe.ingredients.map((ing) => ({ item: ing.item })),
+      );
+      const updated = await getRecipe(recipe.id);
+      if (updated) setRecipe(updated);
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     getRecipe(recipeId)
@@ -267,6 +284,28 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
             }}
           >
             {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
+          </button>
+        )}
+        {(recipe.canonicalIngredientIds ?? []).length === 0 && (
+          <button
+            type="button"
+            onClick={handleSyncIngredients}
+            disabled={syncing}
+            className="w-full mb-2"
+            style={{
+              padding: "11px",
+              borderRadius: 14,
+              background: "rgba(255,170,50,0.06)",
+              border: "1px solid rgba(255,200,100,0.18)",
+              color: syncing ? "var(--fg-3)" : "var(--fg-2)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: syncing ? "default" : "pointer",
+              transition: "opacity 0.15s",
+            }}
+          >
+            {syncing ? "Matching ingredients…" : "Sync ingredients"}
           </button>
         )}
         <ServingsCalculator

@@ -61,6 +61,10 @@ vi.mock("@/lib/db/recipes", () => ({
   deleteRecipe: vi.fn(),
 }));
 
+vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
+  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
+}));
+
 const mockRecipe: Recipe = {
   id: "recipe-1",
   title: "Chocolate Cake",
@@ -78,6 +82,8 @@ const mockRecipe: Recipe = {
     { id: "step-1", order: 1, instruction: "Preheat oven to 350F" },
     { id: "step-2", order: 2, instruction: "Mix ingredients" },
   ],
+  canonicalIngredientIds: ["ing-vocab-1", "ing-vocab-2"],
+  unrecognizedIngredients: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 };
