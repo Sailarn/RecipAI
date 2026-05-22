@@ -17,7 +17,6 @@ export default function NewRecipePage() {
     if (stored) {
       try {
         const parsedRecipe = JSON.parse(stored);
-        console.log("✅ Loaded parsed recipe:", parsedRecipe.title);
         setInitialData(parsedRecipe);
 
         // Clear it so it doesn't persist on page refresh

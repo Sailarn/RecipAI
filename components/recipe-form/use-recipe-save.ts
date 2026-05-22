@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
+import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { useNavigate } from "@/lib/transitions";
 import { generateId } from "@/lib/utils";
 import type { RecipeOutput } from "./schema";
@@ -49,6 +50,10 @@ export function useRecipeSave(recipe: Recipe | undefined) {
         savedId = recipe.id;
       } else {
         savedId = await createRecipe(recipeData);
+        normalizeRecipeIngredients(
+          savedId,
+          recipeData.ingredients.map((ing) => ({ item: ing.item })),
+        ).catch((err) => console.error("[normalize] top-level error:", err));
       }
     } catch {
       setSaveState("idle");
