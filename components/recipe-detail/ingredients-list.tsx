@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { Ingredient } from "@/lib/db/schema";
+import type { RecipeIngredient } from "@/lib/db/schema";
 
 interface IngredientsListProps {
-  ingredients: Ingredient[];
+  ingredients: RecipeIngredient[];
 }
 
 export function IngredientsList({ ingredients }: IngredientsListProps) {

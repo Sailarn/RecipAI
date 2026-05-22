@@ -2,11 +2,11 @@
 
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-import type { Ingredient } from "@/lib/db/schema";
+import type { RecipeIngredient } from "@/lib/db/schema";
 
 interface ServingsCalculatorProps {
   originalServings: number;
-  ingredients: Ingredient[];
+  ingredients: RecipeIngredient[];
 }
 
 export function ServingsCalculator({

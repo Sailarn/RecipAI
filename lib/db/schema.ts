@@ -1,6 +1,3 @@
-/**
- * Collection of recipes
- */
 export interface Collection {
   id: string;
   name: string;
@@ -9,29 +6,34 @@ export interface Collection {
   updatedAt: Date;
 }
 
-/**
- * Single ingredient in a recipe
- */
-export interface Ingredient {
-  id: string; // Unique ID for this ingredient
-  amount?: number; // Optional: 2, 1.5, 0.25
-  unit?: string; // Optional: "cup", "tbsp", "g", "ml"
-  item: string; // Required: "flour", "eggs", "salt"
+export interface RecipeIngredient {
+  id: string;
+  amount?: number;
+  unit?: string;
+  item: string;
 }
 
-/**
- * Single instruction step in a recipe
- */
+export interface VocabularyIngredient {
+  id: string;
+  en: string;
+  ua: string;
+  category: string;
+  aliasesEn: string[];
+  aliasesUa: string[];
+}
+
+export interface PantryItem {
+  ingredientId: string;
+  addedAt: Date;
+}
+
 export interface Step {
-  id: string; // Unique ID for this step
-  order: number; // Step number: 1, 2, 3...
-  instruction: string; // The actual instruction text
+  id: string;
+  order: number;
+  instruction: string;
   imageUrl?: string;
 }
 
-/**
- * Complete recipe with all data
- */
 export interface Recipe {
   id: string;
   title: string;
@@ -48,12 +50,14 @@ export interface Recipe {
   cookTime?: number;
   totalTime?: number;
   servings: number;
-  ingredients: Ingredient[];
+  ingredients: RecipeIngredient[];
   instructions: Step[];
   sourceUrl?: string;
   category?: string;
   status?: "tried" | "want" | null;
   collectionIds?: string[];
+  canonicalIngredientIds?: string[];
+  unrecognizedIngredients?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
