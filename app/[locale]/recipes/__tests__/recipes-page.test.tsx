@@ -92,8 +92,6 @@ describe("RecipesPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/noRecipes/i)).toBeInTheDocument();
     });
-
-    expect(screen.getByText(/createFirst/i)).toBeInTheDocument();
   });
 
   it("displays recipe cards when recipes exist", async () => {

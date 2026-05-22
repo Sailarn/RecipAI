@@ -29,4 +29,6 @@ export const api = {
   collections: "/api/collections",
   collection: (id: string) => `/api/collections/${id}`,
   collectionsSync: "/api/collections/sync",
+  ingredients: "/api/ingredients",
+  ingredientsEnrich: "/api/ingredients/enrich",
 } as const;

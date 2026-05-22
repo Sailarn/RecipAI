@@ -27,6 +27,12 @@ vi.mock("@/lib/db/db", () => ({
   db: {
     recipes: { toArray: vi.fn().mockResolvedValue([]) },
     collections: { toArray: vi.fn().mockResolvedValue([]) },
+    ingredients: {
+      filter: vi
+        .fn()
+        .mockReturnValue({ toArray: vi.fn().mockResolvedValue([]) }),
+      bulkPut: vi.fn().mockResolvedValue(undefined),
+    },
   },
 }));
 
@@ -56,6 +62,25 @@ function makeJsonResponse(body: object, ok = true) {
   return { ok, json: () => Promise.resolve(body) } as unknown as Response;
 }
 
+function setupFetch({
+  recipes = [] as unknown[],
+  collections = [] as unknown[],
+  rejectSync = false,
+} = {}) {
+  mockFetch.mockImplementation((url: string) => {
+    if (String(url).startsWith("/api/ingredients")) {
+      return Promise.resolve(
+        makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
+      );
+    }
+    if (rejectSync) return Promise.reject(new Error("Network error"));
+    if (String(url) === "/api/recipes/sync") {
+      return Promise.resolve(makeJsonResponse({ recipes }));
+    }
+    return Promise.resolve(makeJsonResponse({ collections }));
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
@@ -83,13 +108,12 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+      expect(mockFetch).toHaveBeenCalledWith("/api/ingredients");
       expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync");
       expect(mockFetch).toHaveBeenCalledWith("/api/collections");
     });
@@ -98,9 +122,7 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
@@ -113,23 +135,19 @@ describe("useSyncOnLogin", () => {
         data: mockSession,
       } as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([]);
-      mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({
-            recipes: [
-              {
-                id: "srv-1",
-                title: "Server Recipe",
-                servings: 2,
-                ingredients: [],
-                instructions: [],
-                createdAt: "2024-01-01T00:00:00.000Z",
-                updatedAt: "2024-01-01T00:00:00.000Z",
-              },
-            ],
-          }),
-        )
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch({
+        recipes: [
+          {
+            id: "srv-1",
+            title: "Server Recipe",
+            servings: 2,
+            ingredients: [],
+            instructions: [],
+            createdAt: "2024-01-01T00:00:00.000Z",
+            updatedAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
 
       renderHook(() => useSyncOnLogin());
 
@@ -159,9 +177,7 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
-      mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
@@ -190,19 +206,15 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
-      mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({
-            recipes: [
-              {
-                ...localRecipe,
-                updatedAt: "2024-01-02T00:00:00.000Z",
-                createdAt: "2024-01-01T00:00:00.000Z",
-              },
-            ],
-          }),
-        )
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch({
+        recipes: [
+          {
+            ...localRecipe,
+            updatedAt: "2024-01-02T00:00:00.000Z",
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
 
       renderHook(() => useSyncOnLogin());
 
@@ -230,19 +242,15 @@ describe("useSyncOnLogin", () => {
       } as any);
       vi.mocked(useLiveQuery).mockReturnValue([recipe] as any);
       vi.mocked(db.recipes.toArray).mockResolvedValue([recipe] as any);
-      mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({
-            recipes: [
-              {
-                ...recipe,
-                createdAt: recipe.createdAt.toISOString(),
-                updatedAt: recipe.updatedAt.toISOString(),
-              },
-            ],
-          }),
-        )
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch({
+        recipes: [
+          {
+            ...recipe,
+            createdAt: recipe.createdAt.toISOString(),
+            updatedAt: recipe.updatedAt.toISOString(),
+          },
+        ],
+      });
 
       renderHook(() => useSyncOnLogin());
 
@@ -256,23 +264,19 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({
-            recipes: [
-              {
-                id: "srv-1",
-                title: "T",
-                servings: 1,
-                ingredients: [],
-                instructions: [],
-                createdAt: "2024-01-01T00:00:00.000Z",
-                updatedAt: "2024-01-01T00:00:00.000Z",
-              },
-            ],
-          }),
-        )
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch({
+        recipes: [
+          {
+            id: "srv-1",
+            title: "T",
+            servings: 1,
+            ingredients: [],
+            instructions: [],
+            createdAt: "2024-01-01T00:00:00.000Z",
+            updatedAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
 
       renderHook(() => useSyncOnLogin());
 
@@ -298,11 +302,7 @@ describe("useSyncOnLogin", () => {
         createdAt: "2024-01-01T00:00:00.000Z",
         updatedAt: "2024-01-01T00:00:00.000Z",
       });
-      mockFetch
-        .mockResolvedValueOnce(
-          makeJsonResponse({ recipes: [makeRecipe("a"), makeRecipe("b")] }),
-        )
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch({ recipes: [makeRecipe("a"), makeRecipe("b")] });
 
       renderHook(() => useSyncOnLogin());
 
@@ -317,9 +317,7 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
@@ -332,7 +330,7 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+      setupFetch({ rejectSync: true });
 
       renderHook(() => useSyncOnLogin());
 
@@ -349,17 +347,13 @@ describe("useSyncOnLogin", () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as any);
-      mockFetch
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ recipes: [] }))
-        .mockResolvedValueOnce(makeJsonResponse({ collections: [] }));
+      setupFetch();
 
       const { result } = renderHook(() => useSyncOnLogin());
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
 
       await result.current.triggerSync();
-      expect(mockFetch).toHaveBeenCalledTimes(4);
+      expect(mockFetch).toHaveBeenCalledTimes(6);
     });
   });
 });

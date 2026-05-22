@@ -57,6 +57,19 @@ export async function callGeminiForRecipe(
   }
 }
 
+export async function callGeminiForIngredient(
+  prompt: string,
+): Promise<Record<string, unknown>> {
+  const result = await withModelFallback((modelName) =>
+    getModel(modelName).generateContent(prompt),
+  );
+  try {
+    return JSON.parse(result.response.text()) as Record<string, unknown>;
+  } catch {
+    throw new Error("Gemini returned invalid JSON");
+  }
+}
+
 export async function callGeminiForRecipePhoto(
   imageBase64: string,
   mimeType: string,

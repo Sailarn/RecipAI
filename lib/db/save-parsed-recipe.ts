@@ -1,3 +1,4 @@
+import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { isImageKitUrl, uploadImage } from "../images";
 import { generateId } from "../utils";
 import { createRecipe } from "./recipes";
@@ -31,6 +32,8 @@ export async function saveParsedRecipe(
     sourceUrl: entry.sourceUrl,
     category: entry.category,
   });
+
+  normalizeRecipeIngredients(id, entry.ingredients).catch(() => {});
 
   // upload images in background
   (async () => {

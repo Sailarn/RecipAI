@@ -15,6 +15,41 @@ import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
+async function syncIngredients(): Promise<void> {
+  const watermark = localStorage.getItem("ingredientsSyncedAt") ?? undefined;
+  const url = watermark
+    ? `${api.ingredients}?since=${encodeURIComponent(watermark)}`
+    : api.ingredients;
+  const res = await fetch(url);
+  if (!res.ok) return;
+  const { ingredients: data, serverMaxUpdatedAt } = await res.json();
+  if (data?.length) {
+    await db.ingredients.bulkPut(data);
+  }
+  if (serverMaxUpdatedAt) {
+    localStorage.setItem("ingredientsSyncedAt", serverMaxUpdatedAt);
+  }
+
+  const stuckProvisionals = await db.ingredients
+    .filter((entry) => entry.status === "provisional")
+    .toArray();
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+  for (const entry of stuckProvisionals) {
+    if (entry.retryCount !== undefined && entry.retryCount >= 3) continue;
+    if (
+      entry.lastAttemptAt !== null &&
+      entry.lastAttemptAt !== undefined &&
+      entry.lastAttemptAt > fiveMinAgo
+    )
+      continue;
+    fetch(api.ingredientsEnrich, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: entry.id, rawText: entry.en }),
+    }).catch(() => {});
+  }
+}
+
 function diffToNotifications<T extends Recipe | Collection>(
   diff: SyncDiff<T>,
   entityType: SyncEntityType,
@@ -67,6 +102,8 @@ export function useSyncOnLogin() {
 
   const sync = useCallback(async () => {
     if (!session) return;
+
+    syncIngredients().catch(() => {});
 
     try {
       const [recipesRes, collectionsRes] = await Promise.all([

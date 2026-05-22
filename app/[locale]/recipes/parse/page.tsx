@@ -5,10 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
-import { RecipeNewView } from "@/components/recipe-new-view";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
-import { routes } from "@/lib/routes";
-import { useNavigate } from "@/lib/transitions";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
 import { ParseResult } from "./components/parse-result";
@@ -19,7 +16,13 @@ export interface ParsedRecipe {
   prepTime?: number;
   cookTime?: number;
   servings: number;
-  ingredients: Array<{ amount?: number; unit?: string; item: string }>;
+  ingredients: Array<{
+    amount?: number;
+    unit?: string;
+    item: string;
+    ua?: string | null;
+    category?: string | null;
+  }>;
   instructions: Array<{ order: number; instruction: string }>;
   imageUrl?: string;
   sourceUrl: string;
@@ -32,8 +35,6 @@ export default function ParseRecipePage() {
   const params = useParams();
   const locale = params.locale as string;
   const _t = useTranslations("parse");
-  const navigate = useNavigate();
-
   const [tab, setTab] = useState<Tab>("url");
 
   const {
@@ -70,33 +71,6 @@ export default function ParseRecipePage() {
         >
           Import Recipe
         </h1>
-        <button
-          type="button"
-          onClick={() =>
-            navigate.push(
-              routes.recipes.new(locale),
-              <RecipeNewView locale={locale} />,
-            )
-          }
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            background: "var(--food-accent)",
-            color: "#fff",
-            borderRadius: 14,
-            padding: "8px 14px",
-            border: "none",
-            fontFamily: "var(--font-sans)",
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-            boxShadow: "0 4px 16px rgba(251,146,60,0.4)",
-            flexShrink: 0,
-          }}
-        >
-          Create Manually
-        </button>
       </div>
 
       {/* Tab switcher */}

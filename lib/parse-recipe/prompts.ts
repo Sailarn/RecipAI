@@ -12,6 +12,7 @@ RULES:
 - For instructions: extract in correct order, keep original wording, remove blog commentary.
 - imageUrl: ONLY the primary hero image URL.
 - If an ingredient appears without an amount, set amount to null and unit to null — do not invent "1".
+- If an ingredient string is not a food item (equipment, paper towels, etc.), omit it from the ingredients array entirely.
 - cookTime: look for patterns like "35 хв", "1 год 30 хв", "45 minutes" near the recipe title. Convert to minutes.
 - category: pick the single best fit: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
 - instructions: match [STEP IMAGE] entries from PAGE IMAGES to steps by order. Set imageUrl if a match exists, otherwise null.
@@ -24,7 +25,7 @@ OUTPUT this exact JSON:
   "cookTime": "number | null",
   "servings": "number | null",
   "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "number", "instruction": "string", "imageUrl": "string | null" }],
   "imageUrl": "string | null"
 }
@@ -49,7 +50,7 @@ RULES:
 - times (prepTime, cookTime): extract as integers in minutes (e.g. "1 год 30 хв" → 90). null if not found.
 - servings: integer. Default to 4 if not stated.
 - category: pick the single best fit from: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
-- ingredients: isolate amount, unit, and item. Convert fractions to decimals (e.g. "1½" → 1.5, "¼" → 0.25). If no amount, set amount and unit to null.
+- ingredients: isolate amount, unit, and item. Convert fractions to decimals (e.g. "1½" → 1.5, "¼" → 0.25). If no amount, set amount and unit to null. If an ingredient string is not a food item (equipment, paper towels, etc.), omit it from the ingredients array entirely.
 - instructions: extract steps in correct order. Keep original wording.
 - imageUrl: always null (we do not store the photo itself).
 - sourceUrl: always null.
@@ -62,7 +63,7 @@ Return ONLY valid JSON matching this exact schema:
   "cookTime": "integer | null",
   "servings": "integer",
   "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "integer", "instruction": "string", "imageUrl": null }],
   "imageUrl": null,
   "sourceUrl": null
@@ -111,13 +112,13 @@ ${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matchin
   "cookTime": "integer minutes | null",
   "servings": "integer — lower bound if range | null",
   "category": "one of: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "integer", "instruction": "string", "imageUrl": null }],
   "imageUrl": null
 }
 
 Rules:
-- ingredients: use caption amounts if available, transcript as fallback. Fractions to decimals (1½ → 1.5, ¼ → 0.25)
+- ingredients: use caption amounts if available, transcript as fallback. Fractions to decimals (1½ → 1.5, ¼ → 0.25). If an ingredient string is not a food item (equipment, paper towels, etc.), omit it from the ingredients array entirely.
 - instructions: from transcript steps. If no transcript, infer logical steps from caption
 - title: infer from what dish is being made
 - times: integers in minutes. null if not mentioned

@@ -16,10 +16,13 @@ export interface RecipeIngredient {
 export interface VocabularyIngredient {
   id: string;
   en: string;
-  ua: string;
+  ua: string | null;
   category: string;
   aliasesEn: string[];
   aliasesUa: string[];
+  status?: string;
+  retryCount?: number;
+  lastAttemptAt?: Date | null;
 }
 
 export interface PantryItem {
@@ -69,7 +72,13 @@ export interface ParsedRecipeEntry {
   prepTime?: number;
   cookTime?: number;
   servings: number;
-  ingredients: Array<{ amount?: number; unit?: string; item: string }>;
+  ingredients: Array<{
+    amount?: number;
+    unit?: string;
+    item: string;
+    ua?: string | null;
+    category?: string | null;
+  }>;
   instructions: Array<{
     order: number;
     instruction: string;

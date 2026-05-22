@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!components/ui", "!.claude"]
+    "includes": ["**", "!components/ui", "!.claude", "!public/vocab-embeddings.json"]
   },
   "formatter": {
     "enabled": true,

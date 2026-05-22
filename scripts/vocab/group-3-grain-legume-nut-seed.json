@@ -1,0 +1,572 @@
+[
+  {
+    "id": "all-purpose-flour",
+    "en": "all-purpose flour",
+    "ua": "борошно універсальне",
+    "category": "grain",
+    "aliasesEn": ["plain flour", "white flour", "all purpose flour", "flour"],
+    "aliasesUa": [
+      "борошна універсального",
+      "борошон універсальних",
+      "борошно",
+      "борошна",
+      "борошна (flour)"
+    ]
+  },
+  {
+    "id": "bread-flour",
+    "en": "bread flour",
+    "ua": "борошно для хліба",
+    "category": "grain",
+    "aliasesEn": ["strong flour"],
+    "aliasesUa": ["борошна для хліба", "борошон для хліба"]
+  },
+  {
+    "id": "self-raising-flour",
+    "en": "self-raising flour",
+    "ua": "самопідіймальне борошно",
+    "category": "grain",
+    "aliasesEn": ["self rising flour"],
+    "aliasesUa": ["самопідіймального борошна", "самопідіймальних борошон"]
+  },
+  {
+    "id": "rice-flour",
+    "en": "rice flour",
+    "ua": "рисове борошно",
+    "category": "grain",
+    "aliasesEn": [],
+    "aliasesUa": ["рисового борошна", "рисових борошон"]
+  },
+  {
+    "id": "corn-flour",
+    "en": "corn flour",
+    "ua": "кукурудзяне борошно",
+    "category": "grain",
+    "aliasesEn": ["cornflour", "maize flour"],
+    "aliasesUa": ["кукурудзяного борошна", "кукурудзяних борошон"]
+  },
+  {
+    "id": "whole-wheat-flour",
+    "en": "whole wheat flour",
+    "ua": "цільнозернове борошно",
+    "category": "grain",
+    "aliasesEn": ["wholemeal flour"],
+    "aliasesUa": ["цільнозернового борошна", "цільнозернових борошон"]
+  },
+  {
+    "id": "semolina",
+    "en": "semolina",
+    "ua": "манна крупа",
+    "category": "grain",
+    "aliasesEn": ["semolina flour", "cream of wheat"],
+    "aliasesUa": ["манної крупи", "манних круп", "манну крупу"]
+  },
+  {
+    "id": "cornmeal",
+    "en": "cornmeal",
+    "ua": "кукурудзяна крупа",
+    "category": "grain",
+    "aliasesEn": ["polenta", "maize meal"],
+    "aliasesUa": [
+      "кукурудзяної крупи",
+      "кукурудзяних круп",
+      "кукурудзяну крупу"
+    ]
+  },
+  {
+    "id": "rice",
+    "en": "rice",
+    "ua": "рис",
+    "category": "grain",
+    "aliasesEn": ["white rice", "long grain rice"],
+    "aliasesUa": ["рису", "рисів"]
+  },
+  {
+    "id": "rice-brown",
+    "en": "brown rice",
+    "ua": "бурий рис",
+    "category": "grain",
+    "aliasesEn": ["whole grain rice"],
+    "aliasesUa": ["бурого рису", "бурих рисів"]
+  },
+  {
+    "id": "arborio-rice",
+    "en": "arborio rice",
+    "ua": "рис арборіо",
+    "category": "grain",
+    "aliasesEn": ["risotto rice"],
+    "aliasesUa": ["рису арборіо", "рисів арборіо"]
+  },
+  {
+    "id": "basmati-rice",
+    "en": "basmati rice",
+    "ua": "рис басматі",
+    "category": "grain",
+    "aliasesEn": [],
+    "aliasesUa": ["рису басматі", "рисів басматі"]
+  },
+  {
+    "id": "jasmine-rice",
+    "en": "jasmine rice",
+    "ua": "рис жасмин",
+    "category": "grain",
+    "aliasesEn": [],
+    "aliasesUa": ["рису жасмин", "рисів жасмин"]
+  },
+  {
+    "id": "oats",
+    "en": "oats",
+    "ua": "вівсяні пластівці",
+    "category": "grain",
+    "aliasesEn": ["rolled oats", "oatmeal", "porridge oats"],
+    "aliasesUa": ["вівсяних пластівців"]
+  },
+  {
+    "id": "pasta",
+    "en": "pasta",
+    "ua": "макарони",
+    "category": "grain",
+    "aliasesEn": ["dried pasta", "durum wheat pasta"],
+    "aliasesUa": ["макаронів"]
+  },
+  {
+    "id": "spaghetti",
+    "en": "spaghetti",
+    "ua": "спагеті",
+    "category": "grain",
+    "aliasesEn": ["spaghetti pasta"],
+    "aliasesUa": ["спагеті"]
+  },
+  {
+    "id": "lasagna-sheet",
+    "en": "lasagna sheet",
+    "ua": "листи лазаньї",
+    "category": "grain",
+    "aliasesEn": ["lasagna noodles", "lasagne sheets"],
+    "aliasesUa": ["листів лазаньї"]
+  },
+  {
+    "id": "fettuccine",
+    "en": "fettuccine",
+    "ua": "фетучині",
+    "category": "grain",
+    "aliasesEn": ["fettuccine pasta"],
+    "aliasesUa": ["фетучині"]
+  },
+  {
+    "id": "penne",
+    "en": "penne",
+    "ua": "пенне",
+    "category": "grain",
+    "aliasesEn": ["penne pasta"],
+    "aliasesUa": ["пенне"]
+  },
+  {
+    "id": "udon-noodles",
+    "en": "udon noodles",
+    "ua": "локшина удон",
+    "category": "grain",
+    "aliasesEn": ["udon", "wheat udon noodles"],
+    "aliasesUa": [
+      "локшини удон",
+      "локшин удон",
+      "локшину удон",
+      "локшина пшенична удон"
+    ]
+  },
+  {
+    "id": "rice-noodles",
+    "en": "rice noodles",
+    "ua": "рисова локшина",
+    "category": "grain",
+    "aliasesEn": ["vermicelli rice noodles"],
+    "aliasesUa": ["рисової локшини", "рисових локшин", "рисову локшину"]
+  },
+  {
+    "id": "egg-noodles",
+    "en": "egg noodles",
+    "ua": "яєчна локшина",
+    "category": "grain",
+    "aliasesEn": ["egg pasta"],
+    "aliasesUa": ["яєчної локшини", "яєчних локшин", "яєчну локшину"]
+  },
+  {
+    "id": "bread",
+    "en": "bread",
+    "ua": "хліб",
+    "category": "grain",
+    "aliasesEn": ["white bread", "loaf of bread"],
+    "aliasesUa": ["хліба", "хлібів"]
+  },
+  {
+    "id": "breadcrumbs",
+    "en": "breadcrumbs",
+    "ua": "панірувальні сухарі",
+    "category": "grain",
+    "aliasesEn": ["bread crumbs", "panko"],
+    "aliasesUa": ["панірувальних сухарів"]
+  },
+  {
+    "id": "tortilla",
+    "en": "tortilla",
+    "ua": "тортилья",
+    "category": "grain",
+    "aliasesEn": ["flour tortilla", "corn tortilla", "wraps"],
+    "aliasesUa": ["тортильї", "тортильй", "тортилью"]
+  },
+  {
+    "id": "pita-bread",
+    "en": "pita bread",
+    "ua": "піта",
+    "category": "grain",
+    "aliasesEn": ["pita", "pitta bread"],
+    "aliasesUa": ["піти", "піт", "піту"]
+  },
+  {
+    "id": "brioche",
+    "en": "brioche",
+    "ua": "бріош",
+    "category": "grain",
+    "aliasesEn": ["brioche bread", "brioche bun"],
+    "aliasesUa": ["бріоша", "бріошів"]
+  },
+  {
+    "id": "gnocchi",
+    "en": "gnocchi",
+    "ua": "ньокі",
+    "category": "grain",
+    "aliasesEn": ["potato gnocchi"],
+    "aliasesUa": ["ньоків"]
+  },
+  {
+    "id": "couscous",
+    "en": "couscous",
+    "ua": "кускус",
+    "category": "grain",
+    "aliasesEn": ["couscous grains"],
+    "aliasesUa": ["кускусу", "кускусів"]
+  },
+  {
+    "id": "bulgur",
+    "en": "bulgur",
+    "ua": "булгур",
+    "category": "grain",
+    "aliasesEn": ["bulgur wheat", "cracked wheat"],
+    "aliasesUa": ["булгуру", "булгурів"]
+  },
+  {
+    "id": "quinoa",
+    "en": "quinoa",
+    "ua": "кіноа",
+    "category": "grain",
+    "aliasesEn": ["quinoa grains"],
+    "aliasesUa": ["кіноа"]
+  },
+  {
+    "id": "buckwheat",
+    "en": "buckwheat",
+    "ua": "гречка",
+    "category": "grain",
+    "aliasesEn": ["buckwheat groats"],
+    "aliasesUa": ["гречки", "гречок", "гречку"]
+  },
+  {
+    "id": "millet",
+    "en": "millet",
+    "ua": "пшоно",
+    "category": "grain",
+    "aliasesEn": ["millet grains"],
+    "aliasesUa": ["пшона", "пшон"]
+  },
+  {
+    "id": "barley",
+    "en": "barley",
+    "ua": "перлова крупа",
+    "category": "grain",
+    "aliasesEn": ["pearl barley", "barley grains"],
+    "aliasesUa": ["перлової крупи", "перлових круп", "перлову крупу"]
+  },
+  {
+    "id": "chickpea",
+    "en": "chickpea",
+    "ua": "нут",
+    "category": "legume",
+    "aliasesEn": ["garbanzo beans", "chickpeas", "ceci beans"],
+    "aliasesUa": ["нуту", "нутів"]
+  },
+  {
+    "id": "lentil",
+    "en": "lentil",
+    "ua": "сочевиця",
+    "category": "legume",
+    "aliasesEn": ["lentils", "red lentils", "green lentils"],
+    "aliasesUa": ["сочевиці", "сочевиць", "сочевицю"]
+  },
+  {
+    "id": "lentil-red",
+    "en": "red lentil",
+    "ua": "червона сочевиця",
+    "category": "legume",
+    "aliasesEn": ["red lentils"],
+    "aliasesUa": ["червоної сочевиці", "червоних сочевиць", "червону сочевицю"]
+  },
+  {
+    "id": "lentil-green",
+    "en": "green lentil",
+    "ua": "зелена сочевиця",
+    "category": "legume",
+    "aliasesEn": ["green lentils", "puy lentils"],
+    "aliasesUa": ["зеленої сочевиці", "зелених сочевиць", "зелену сочевицю"]
+  },
+  {
+    "id": "black-bean",
+    "en": "black bean",
+    "ua": "чорна квасоля",
+    "category": "legume",
+    "aliasesEn": ["black beans", "turtle beans"],
+    "aliasesUa": [
+      "чорної квасолі",
+      "чорних квасоль",
+      "чорну квасолю",
+      "квасоля"
+    ]
+  },
+  {
+    "id": "kidney-bean",
+    "en": "kidney bean",
+    "ua": "червона квасоля",
+    "category": "legume",
+    "aliasesEn": ["kidney beans", "red kidney beans"],
+    "aliasesUa": [
+      "червоної квасолі",
+      "червоних квасоль",
+      "червону квасолю",
+      "квасоля",
+      "квасоля консервована"
+    ]
+  },
+  {
+    "id": "white-bean",
+    "en": "white bean",
+    "ua": "біла квасоля",
+    "category": "legume",
+    "aliasesEn": ["white beans", "cannellini beans", "navy beans"],
+    "aliasesUa": ["білої квасолі", "білих квасоль", "білу квасолю", "квасоля"]
+  },
+  {
+    "id": "green-pea-dried",
+    "en": "dried pea",
+    "ua": "горох сушений",
+    "category": "legume",
+    "aliasesEn": ["split peas", "dried peas", "yellow peas"],
+    "aliasesUa": ["гороху сушеного", "горохів сушених"]
+  },
+  {
+    "id": "chickpea-flour",
+    "en": "chickpea flour",
+    "ua": "нутова мука",
+    "category": "legume",
+    "aliasesEn": ["gram flour", "besan", "garbanzo flour"],
+    "aliasesUa": ["нутова мука"]
+  },
+  {
+    "id": "soybean",
+    "en": "soybean",
+    "ua": "соя",
+    "category": "legume",
+    "aliasesEn": ["soy beans", "soya beans"],
+    "aliasesUa": ["сої", "сой", "сою"]
+  },
+  {
+    "id": "tofu",
+    "en": "tofu",
+    "ua": "тофу",
+    "category": "legume",
+    "aliasesEn": ["bean curd", "silken tofu", "firm tofu"],
+    "aliasesUa": ["тофу"]
+  },
+  {
+    "id": "edamame",
+    "en": "edamame",
+    "ua": "едамаме",
+    "category": "legume",
+    "aliasesEn": ["edamame beans", "soybeans fresh"],
+    "aliasesUa": ["едамаме"]
+  },
+  {
+    "id": "peanut",
+    "en": "peanut",
+    "ua": "арахіс",
+    "category": "legume",
+    "aliasesEn": ["peanuts", "groundnuts"],
+    "aliasesUa": ["арахісу", "арахісів"]
+  },
+  {
+    "id": "walnut",
+    "en": "walnut",
+    "ua": "волоський горіх",
+    "category": "nut",
+    "aliasesEn": ["walnuts", "english walnut"],
+    "aliasesUa": ["волоського горіха", "волоських горіхів"]
+  },
+  {
+    "id": "almond",
+    "en": "almond",
+    "ua": "мигдаль",
+    "category": "nut",
+    "aliasesEn": ["almonds", "almond kernels"],
+    "aliasesUa": ["мигдалю", "мигдалів"]
+  },
+  {
+    "id": "almond-flakes",
+    "en": "almond flakes",
+    "ua": "мигдалеві пластівці",
+    "category": "nut",
+    "aliasesEn": ["slivered almonds", "almond slivers"],
+    "aliasesUa": ["мигдалевих пластівців"]
+  },
+  {
+    "id": "cashew",
+    "en": "cashew",
+    "ua": "кеш'ю",
+    "category": "nut",
+    "aliasesEn": ["cashews", "cashew nuts"],
+    "aliasesUa": ["кеш'ю"]
+  },
+  {
+    "id": "hazelnut",
+    "en": "hazelnut",
+    "ua": "фундук",
+    "category": "nut",
+    "aliasesEn": ["hazelnuts", "filbert"],
+    "aliasesUa": ["фундука", "фундуків"]
+  },
+  {
+    "id": "pistachio",
+    "en": "pistachio",
+    "ua": "фісташка",
+    "category": "nut",
+    "aliasesEn": ["pistachios", "pistachio nuts"],
+    "aliasesUa": ["фісташки", "фісташок", "фісташку"]
+  },
+  {
+    "id": "pecan",
+    "en": "pecan",
+    "ua": "пекан",
+    "category": "nut",
+    "aliasesEn": ["pecans", "pecan nuts"],
+    "aliasesUa": ["пекана", "пеканів"]
+  },
+  {
+    "id": "pine-nut",
+    "en": "pine nut",
+    "ua": "кедровий горіх",
+    "category": "nut",
+    "aliasesEn": ["pine nuts", "pignoli", "pine kernels"],
+    "aliasesUa": ["кедрового горіха", "кедрових горіхів"]
+  },
+  {
+    "id": "macadamia",
+    "en": "macadamia",
+    "ua": "макадамія",
+    "category": "nut",
+    "aliasesEn": ["macadamia nuts"],
+    "aliasesUa": ["макадамії", "макадамій", "макадамію"]
+  },
+  {
+    "id": "chestnut",
+    "en": "chestnut",
+    "ua": "каштан",
+    "category": "nut",
+    "aliasesEn": ["chestnuts"],
+    "aliasesUa": ["каштани", "каштана", "каштанів"]
+  },
+  {
+    "id": "coconut-flakes",
+    "en": "coconut flakes",
+    "ua": "кокосова стружка",
+    "category": "nut",
+    "aliasesEn": ["desiccated coconut", "shredded coconut", "coconut shreds"],
+    "aliasesUa": ["кокосової стружки", "кокосових стружок", "кокосову стружку"]
+  },
+  {
+    "id": "sunflower-seed",
+    "en": "sunflower seed",
+    "ua": "насіння соняшника",
+    "category": "seed",
+    "aliasesEn": ["sunflower seeds", "sunflower kernels"],
+    "aliasesUa": ["насіння соняшника"]
+  },
+  {
+    "id": "sesame-seed",
+    "en": "sesame seed",
+    "ua": "кунжут",
+    "category": "seed",
+    "aliasesEn": ["sesame seeds", "white sesame"],
+    "aliasesUa": ["кунжуту", "кунжутів"]
+  },
+  {
+    "id": "pumpkin-seed",
+    "en": "pumpkin seed",
+    "ua": "гарбузове насіння",
+    "category": "seed",
+    "aliasesEn": ["pumpkin seeds", "pepitas"],
+    "aliasesUa": ["гарбузового насіння"]
+  },
+  {
+    "id": "flaxseed",
+    "en": "flaxseed",
+    "ua": "насіння льону",
+    "category": "seed",
+    "aliasesEn": ["flax seeds", "linseed", "linseeds"],
+    "aliasesUa": ["насіння льону"]
+  },
+  {
+    "id": "poppy-seed",
+    "en": "poppy seed",
+    "ua": "мак",
+    "category": "seed",
+    "aliasesEn": ["poppy seeds"],
+    "aliasesUa": ["маку", "маків"]
+  },
+  {
+    "id": "chia-seed",
+    "en": "chia seed",
+    "ua": "насіння чіа",
+    "category": "seed",
+    "aliasesEn": ["chia seeds"],
+    "aliasesUa": ["насіння чіа"]
+  },
+  {
+    "id": "hemp-seed",
+    "en": "hemp seed",
+    "ua": "насіння коноплі",
+    "category": "seed",
+    "aliasesEn": ["hemp seeds", "hemp hearts"],
+    "aliasesUa": ["насіння коноплі"]
+  },
+  {
+    "id": "mustard-seed",
+    "en": "mustard seed",
+    "ua": "насіння гірчиці",
+    "category": "seed",
+    "aliasesEn": ["mustard seeds", "yellow mustard seeds"],
+    "aliasesUa": ["насіння гірчиці"]
+  },
+  {
+    "id": "caraway-seed",
+    "en": "caraway seed",
+    "ua": "кмин",
+    "category": "seed",
+    "aliasesEn": ["caraway seeds"],
+    "aliasesUa": ["кмину", "кминів"]
+  },
+  {
+    "id": "cumin-seed",
+    "en": "cumin seed",
+    "ua": "зіра",
+    "category": "seed",
+    "aliasesEn": ["cumin seeds", "jeera"],
+    "aliasesUa": ["зіри", "зір", "зіру"]
+  }
+]

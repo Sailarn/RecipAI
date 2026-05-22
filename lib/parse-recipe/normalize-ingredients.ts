@@ -1,0 +1,190 @@
+import Fuse from "fuse.js";
+import { db } from "@/lib/db/db";
+import { syncUpdate } from "@/lib/db/supabase-sync";
+import { api } from "@/lib/routes";
+import { getIngredientEmbeddings } from "./embed-client";
+import { enrichIngredient } from "./enrich-ingredient";
+
+const SIMILARITY_THRESHOLD = 0.55;
+const FUSE_THRESHOLD = 0.4;
+const NULL_PATTERNS = [
+  /^за смаком$/i,
+  /^за бажанням$/i,
+  /^to taste$/i,
+  /^as needed$/i,
+  /^optional$/i,
+  /^for garnish$/i,
+  /^for serving$/i,
+];
+
+let fuseCache: {
+  index: Fuse<{ id: string; text: string }>;
+  size: number;
+} | null = null;
+
+async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
+  const vocab = await db.ingredients
+    .filter((v) => !v.status || v.status === "confirmed")
+    .toArray();
+  if (fuseCache && fuseCache.size === vocab.length) return fuseCache.index;
+  const items = vocab.flatMap((v) => [
+    { id: v.id, text: v.en },
+    ...(v.ua ? [{ id: v.id, text: v.ua }] : []),
+    ...v.aliasesEn.map((a) => ({ id: v.id, text: a })),
+    ...v.aliasesUa.map((a) => ({ id: v.id, text: a })),
+  ]);
+  const index = new Fuse(items, {
+    keys: ["text"],
+    threshold: FUSE_THRESHOLD,
+    includeScore: true,
+  });
+  fuseCache = { index, size: vocab.length };
+  return index;
+}
+
+type VocabEmbedding = { id: string; embedding: number[] };
+let embeddingCache: VocabEmbedding[] | null = null;
+
+async function getVocabEmbeddings(): Promise<VocabEmbedding[] | null> {
+  if (embeddingCache) return embeddingCache;
+  try {
+    const res = await fetch("/vocab-embeddings.json");
+    if (!res.ok) return null;
+    embeddingCache = (await res.json()) as VocabEmbedding[];
+    return embeddingCache;
+  } catch {
+    return null;
+  }
+}
+
+function cosineSim(a: number[], b: number[]): number {
+  let dot = 0;
+  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  return dot;
+}
+
+function fuseHit(
+  fuse: Fuse<{ id: string; text: string }>,
+  text: string,
+): string | null {
+  const results = fuse.search(text);
+  return results.length > 0 ? results[0].item.id : null;
+}
+
+async function createProvisional(
+  en: string,
+  ua?: string | null,
+  category?: string | null,
+): Promise<string | null> {
+  const id = crypto.randomUUID();
+  try {
+    const res = await fetch(api.ingredients, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, en, ua, category }),
+    });
+    if (!res.ok) return null;
+    await db.ingredients.put({
+      id,
+      en,
+      ua: ua ?? null,
+      category: category ?? "other",
+      aliasesEn: [],
+      aliasesUa: [],
+      status: "provisional",
+      retryCount: 0,
+      lastAttemptAt: null,
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+export async function normalizeRecipeIngredients(
+  recipeId: string,
+  ingredients: Array<{ item: string; ua?: string | null; category?: string | null }>,
+): Promise<void> {
+  const fuse = await getFuseIndex();
+
+  type Pending = { item: string; ua?: string | null; category?: string | null };
+
+  const canonicalIngredientIds: string[] = [];
+  const unrecognizedIngredients: string[] = [];
+  const pending: Pending[] = [];
+  const pendingSlots: number[] = [];
+
+  for (const ing of ingredients) {
+    if (NULL_PATTERNS.some((p) => p.test(ing.item.trim()))) {
+      unrecognizedIngredients.push(ing.item);
+      continue;
+    }
+
+    const hit =
+      fuseHit(fuse, ing.item) ?? (ing.ua ? fuseHit(fuse, ing.ua) : null);
+    if (hit) {
+      canonicalIngredientIds.push(hit);
+      continue;
+    }
+
+    pendingSlots.push(canonicalIngredientIds.length);
+    canonicalIngredientIds.push("");
+    pending.push(ing);
+  }
+
+  if (pending.length > 0) {
+    const vocabEmbs = await getVocabEmbeddings();
+    let queryEmbs: number[][] | null = null;
+
+    if (vocabEmbs) {
+      try {
+        queryEmbs = await getIngredientEmbeddings(pending.map((p) => p.item));
+      } catch {
+        queryEmbs = null;
+      }
+    }
+
+    for (let i = 0; i < pending.length; i++) {
+      const ing = pending[i];
+      let matchedId: string | null = null;
+
+      if (queryEmbs && vocabEmbs) {
+        const qEmb = queryEmbs[i];
+        let best = 0;
+        let bestId = "";
+        for (const ve of vocabEmbs) {
+          const sim = cosineSim(qEmb, ve.embedding);
+          if (sim > best) {
+            best = sim;
+            bestId = ve.id;
+          }
+        }
+        if (best >= SIMILARITY_THRESHOLD) matchedId = bestId;
+      }
+
+      if (!matchedId) {
+        matchedId = await createProvisional(ing.item, ing.ua, ing.category);
+        if (matchedId) {
+          enrichIngredient(matchedId, ing.item, ing.ua, ing.category).catch(
+            () => {},
+          );
+        }
+      }
+
+      if (matchedId) {
+        canonicalIngredientIds[pendingSlots[i]] = matchedId;
+      }
+    }
+  }
+
+  const finalIds = canonicalIngredientIds.filter(Boolean);
+
+  await db.recipes.update(recipeId, {
+    canonicalIngredientIds: finalIds,
+    unrecognizedIngredients,
+  });
+  syncUpdate(recipeId, {
+    canonicalIngredientIds: finalIds,
+    unrecognizedIngredients,
+  });
+}

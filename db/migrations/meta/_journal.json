@@ -78,6 +78,13 @@
       "when": 1779465067463,
       "tag": "0010_free_spirit",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779483489620,
+      "tag": "0011_clumsy_talkback",
+      "breakpoints": true
     }
   ]
 }
