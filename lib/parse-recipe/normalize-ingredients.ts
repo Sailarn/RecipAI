@@ -5,8 +5,8 @@ import { api } from "@/lib/routes";
 import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
 
-const SIMILARITY_THRESHOLD = 0.55;
-const FUSE_THRESHOLD = 0.4;
+const SIMILARITY_THRESHOLD = 0.7;
+const FUSE_THRESHOLD = 0.25;
 const NULL_PATTERNS = [
   /^за смаком$/i,
   /^за бажанням$/i,
@@ -63,11 +63,18 @@ function cosineSim(a: number[], b: number[]): number {
   return dot;
 }
 
+function preprocessIngredient(text: string): string {
+  return text
+    .replace(/\(.*?\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function fuseHit(
   fuse: Fuse<{ id: string; text: string }>,
   text: string,
 ): string | null {
-  const results = fuse.search(text);
+  const results = fuse.search(preprocessIngredient(text));
   return results.length > 0 ? results[0].item.id : null;
 }
 
@@ -103,7 +110,11 @@ async function createProvisional(
 
 export async function normalizeRecipeIngredients(
   recipeId: string,
-  ingredients: Array<{ item: string; ua?: string | null; category?: string | null }>,
+  ingredients: Array<{
+    item: string;
+    ua?: string | null;
+    category?: string | null;
+  }>,
 ): Promise<void> {
   const fuse = await getFuseIndex();
 

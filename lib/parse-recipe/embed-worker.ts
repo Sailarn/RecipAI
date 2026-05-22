@@ -6,18 +6,22 @@ import {
 } from "@huggingface/transformers";
 
 type WorkerInput = { type: "embed"; texts: string[] };
-type WorkerOutput =
+export type WorkerOutput =
   | { type: "embeddings"; data: number[][] }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | { type: "loading" }
+  | { type: "loaded" };
 
 let extractor: FeatureExtractionPipeline | null = null;
 
 async function loadModel(): Promise<FeatureExtractionPipeline> {
   if (!extractor) {
+    self.postMessage({ type: "loading" } satisfies WorkerOutput);
     extractor = await pipeline(
       "feature-extraction",
       "Xenova/multilingual-e5-small",
     );
+    self.postMessage({ type: "loaded" } satisfies WorkerOutput);
   }
   return extractor;
 }

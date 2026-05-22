@@ -1,5 +1,45 @@
 import * as cheerio from "cheerio";
 
+const RECIPE_CATEGORIES = [
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Soup",
+  "Salad",
+  "Snack",
+  "Dessert",
+  "Baking",
+  "Drink",
+  "Other",
+] as const;
+
+type RecipeCategory = (typeof RECIPE_CATEGORIES)[number];
+
+const CATEGORY_KEYWORDS: Array<[RecipeCategory, RegExp]> = [
+  ["Soup", /суп|борщ|юшка|бульйон|soup|broth|bisque|chowder/i],
+  ["Salad", /салат|salad/i],
+  ["Breakfast", /сніданок|ранков|breakfast|brunch/i],
+  ["Dessert", /десерт|торт|тістечк|морозив|пудинг|cake|dessert|cookie/i],
+  ["Baking", /випічк|хліб|булочк|baking|bread|muffin|pastry/i],
+  ["Drink", /напій|коктейл|смузі|drink|juice|smoothie|cocktail|beverage/i],
+  ["Snack", /закуск|снек|перекус|snack|appetizer|starter/i],
+  ["Lunch", /обід|lunch/i],
+  ["Dinner", /вечеря|dinner|м'яс|рибн|птиц|main course/i],
+];
+
+function normalizeCategoryToEnglish(raw: string | undefined): string {
+  if (!raw) return "Other";
+  const normalized = raw.trim();
+  const exact = RECIPE_CATEGORIES.find(
+    (c) => c.toLowerCase() === normalized.toLowerCase(),
+  );
+  if (exact) return exact;
+  for (const [category, pattern] of CATEGORY_KEYWORDS) {
+    if (pattern.test(normalized)) return category;
+  }
+  return "Other";
+}
+
 interface SchemaRecipe {
   title: string;
   description?: string;
@@ -139,8 +179,6 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
 
       if (!recipe) continue;
 
-      console.log("Raw schema recipe:", JSON.stringify(recipe, null, 2));
-
       // Extract servings (handle different formats)
       let servings = 4;
       if (recipe.recipeYield) {
@@ -236,7 +274,8 @@ export function extractSchemaRecipe(html: string): SchemaRecipe | null {
         const raw = Array.isArray(recipe.recipeCategory)
           ? recipe.recipeCategory[0]
           : recipe.recipeCategory;
-        category = typeof raw === "string" ? raw : undefined;
+        const rawStr = typeof raw === "string" ? raw : undefined;
+        category = normalizeCategoryToEnglish(rawStr);
       }
 
       // Return parsed recipe
