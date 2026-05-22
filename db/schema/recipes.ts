@@ -29,6 +29,8 @@ export const recipes = pgTable("recipes", {
   category: text("category"),
   status: text("status"),
   collectionIds: jsonb("collection_ids").notNull().default([]),
+  canonicalIngredientIds: jsonb("canonical_ingredient_ids").$type<string[]>(),
+  unrecognizedIngredients: jsonb("unrecognized_ingredients").$type<string[]>(),
 });
 
 export const recipesRelations = relations(recipes, ({ one }) => ({
