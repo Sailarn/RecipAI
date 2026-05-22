@@ -51,7 +51,10 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
               ? "Gemini is experiencing high demand right now. Please try again in a moment."
               : rawError.includes("429") || rawError.includes("quota")
                 ? "API quota exceeded. Please try again later."
-                : rawError;
+                : rawError.includes("Could not extract") ||
+                    rawError.includes("too little HTML")
+                  ? "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source."
+                  : rawError;
           setError(friendlyError);
           setLoading(false);
           setJobId(null);

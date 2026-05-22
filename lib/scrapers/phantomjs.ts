@@ -41,6 +41,10 @@ export async function fetchHtmlWithPhantomJs(url: string): Promise<string> {
     data?.content?.data ||
     data?.pageResponses?.[0]?.content?.data;
   if (!html) throw new Error("PhantomJsCloud returned no HTML");
+  if (html.length < 1000)
+    throw new Error(
+      `PhantomJsCloud returned too little HTML (${html.length} chars)`,
+    );
 
   return html;
 }
