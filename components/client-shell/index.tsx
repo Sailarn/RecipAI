@@ -20,6 +20,14 @@ const ParseJobWatcher = dynamic(
   { ssr: false },
 );
 
+const EmbedConsentModal = dynamic(
+  () =>
+    import("@/components/embed-consent-modal").then((m) => ({
+      default: m.EmbedConsentModal,
+    })),
+  { ssr: false },
+);
+
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -28,6 +36,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <PageStack />
       <Toaster position="bottom-center" />
       <ParseJobWatcher />
+      <EmbedConsentModal />
       <BottomNav />
     </NavigationStackProvider>
   );

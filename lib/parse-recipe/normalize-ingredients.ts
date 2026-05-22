@@ -150,7 +150,10 @@ export async function normalizeRecipeIngredients(
     if (vocabEmbs) {
       try {
         queryEmbs = await getIngredientEmbeddings(pending.map((p) => p.item));
-      } catch {
+      } catch (err) {
+        if (!(err instanceof Error && err.message === "EmbedConsentRequired")) {
+          console.error("[normalize] embedding error:", err);
+        }
         queryEmbs = null;
       }
     }
@@ -177,8 +180,10 @@ export async function normalizeRecipeIngredients(
         matchedId = await createProvisional(ing.item, ing.ua, ing.category);
         if (matchedId) {
           enrichIngredient(matchedId, ing.item, ing.ua, ing.category).catch(
-            () => {},
+            (err) => console.error("[normalize] enrich error:", err),
           );
+        } else {
+          console.error("[normalize] createProvisional failed for:", ing.item);
         }
       }
 

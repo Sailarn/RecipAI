@@ -33,7 +33,9 @@ export async function saveParsedRecipe(
     category: entry.category,
   });
 
-  normalizeRecipeIngredients(id, entry.ingredients).catch(() => {});
+  normalizeRecipeIngredients(id, entry.ingredients).catch((err) => {
+    console.error("[normalize] top-level error:", err);
+  });
 
   // upload images in background
   (async () => {

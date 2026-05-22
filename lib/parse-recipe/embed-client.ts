@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { hasEmbedConsent } from "./embed-consent";
 import type { WorkerOutput } from "./embed-worker";
 
 type WorkerInput = { type: "embed"; texts: string[] };
@@ -35,6 +36,7 @@ function getWorker(): Worker {
 export async function getIngredientEmbeddings(
   texts: string[],
 ): Promise<number[][]> {
+  if (!hasEmbedConsent()) throw new Error("EmbedConsentRequired");
   const w = getWorker();
 
   return new Promise<number[][]>((resolve, reject) => {
