@@ -1,9 +1,11 @@
 import Dexie, { type EntityTable } from "dexie";
 import type {
   Collection,
+  PantryItem,
   ParsedRecipeEntry,
   Recipe,
   SyncNotification,
+  VocabularyIngredient,
 } from "./schema";
 
 class RecipeDatabase extends Dexie {
@@ -11,6 +13,8 @@ class RecipeDatabase extends Dexie {
   parsedRecipes!: EntityTable<ParsedRecipeEntry, "id">;
   collections!: EntityTable<Collection, "id">;
   notifications!: EntityTable<SyncNotification, "id">;
+  ingredients!: EntityTable<VocabularyIngredient, "id">;
+  pantry!: EntityTable<PantryItem, "ingredientId">;
 
   constructor() {
     super("RecipeAppDB");
@@ -54,6 +58,15 @@ class RecipeDatabase extends Dexie {
       parsedRecipes: "id, createdAt",
       collections: "id, name, createdAt",
       notifications: "id, entityId, entityType, type, createdAt",
+    });
+
+    this.version(8).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: "id, entityId, entityType, type, createdAt",
+      ingredients: "id, category",
+      pantry: "ingredientId",
     });
   }
 }
