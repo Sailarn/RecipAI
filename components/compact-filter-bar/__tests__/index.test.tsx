@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { StatusFilter } from "@/components/status-chips";
 import type { Collection } from "@/lib/db/schema";
 import { CompactFilterBar } from "../index";
 
@@ -19,7 +20,7 @@ const defaultProps = {
   search: "",
   sort: "newest" as const,
   category: null as string | null,
-  status: "all" as const,
+  status: ["all"] as StatusFilter,
   onScrollTop: vi.fn(),
 };
 
@@ -55,8 +56,14 @@ describe("CompactFilterBar", () => {
   });
 
   it("renders violet chip for non-default status", () => {
-    render(<CompactFilterBar {...defaultProps} status="tried" />);
+    render(<CompactFilterBar {...defaultProps} status={["tried"]} />);
     expect(screen.getByText("Tried ✓")).toBeInTheDocument();
+  });
+
+  it("renders violet chips for multiple active statuses", () => {
+    render(<CompactFilterBar {...defaultProps} status={["tried", "nearly"]} />);
+    expect(screen.getByText("Tried ✓")).toBeInTheDocument();
+    expect(screen.getByText("Nearly")).toBeInTheDocument();
   });
 
   it("renders violet chip for non-default sort", () => {
@@ -69,7 +76,7 @@ describe("CompactFilterBar", () => {
       <CompactFilterBar
         {...defaultProps}
         sort="newest"
-        status="all"
+        status={["all"]}
         category={null}
         search=""
       />,

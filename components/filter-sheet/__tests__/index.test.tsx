@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { StatusFilter } from "@/components/status-chips";
 import { FilterSheet } from "../index";
 
 const defaultProps = {
@@ -9,7 +10,7 @@ const defaultProps = {
   onSortChange: vi.fn(),
   category: null as string | null,
   onCategoryChange: vi.fn(),
-  status: "all" as const,
+  status: ["all"] as StatusFilter,
   onStatusChange: vi.fn(),
 };
 
@@ -45,7 +46,7 @@ describe("FilterSheet", () => {
         {...defaultProps}
         sort="az"
         category="Dinner"
-        status="tried"
+        status={["tried"]}
         onSortChange={onSortChange}
         onCategoryChange={onCategoryChange}
         onStatusChange={onStatusChange}
@@ -54,14 +55,20 @@ describe("FilterSheet", () => {
     fireEvent.click(screen.getByText("Reset"));
     expect(onSortChange).toHaveBeenCalledWith("newest");
     expect(onCategoryChange).toHaveBeenCalledWith(null);
-    expect(onStatusChange).toHaveBeenCalledWith("all");
+    expect(onStatusChange).toHaveBeenCalledWith(["all"]);
   });
 
-  it("renders All status option and calls onStatusChange", () => {
+  it("clicking Tried calls onStatusChange with ['tried']", () => {
     const onStatusChange = vi.fn();
     render(<FilterSheet {...defaultProps} onStatusChange={onStatusChange} />);
     fireEvent.click(screen.getByText("Tried ✓"));
-    expect(onStatusChange).toHaveBeenCalledWith("tried");
+    expect(onStatusChange).toHaveBeenCalledWith(["tried"]);
+  });
+
+  it("renders Can Cook and Nearly status options", () => {
+    render(<FilterSheet {...defaultProps} />);
+    expect(screen.getByText("Can Cook 🟢")).toBeInTheDocument();
+    expect(screen.getByText("Nearly 🟡")).toBeInTheDocument();
   });
 
   it("renders category options including Breakfast", () => {

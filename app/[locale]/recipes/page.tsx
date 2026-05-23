@@ -48,6 +48,7 @@ export default function RecipesPage() {
   if (recipesFromDB !== undefined) _recipesCache = recipesFromDB;
   const recipes = recipesFromDB ?? _recipesCache;
   const loading = recipes === undefined;
+  const { getMissing } = useRecipeMatcher();
   const {
     search,
     setSearch,
@@ -60,8 +61,7 @@ export default function RecipesPage() {
     collectionId,
     setCollectionId,
     filtered,
-  } = useRecipeFilter(recipes ?? []);
-  const { getMissing } = useRecipeMatcher();
+  } = useRecipeFilter(recipes ?? [], getMissing);
   const collectionsFromDB = useLiveQuery(() => getAllCollections(), []);
   if (collectionsFromDB !== undefined) _collectionsCache = collectionsFromDB;
   const collections = collectionsFromDB ?? _collectionsCache ?? [];

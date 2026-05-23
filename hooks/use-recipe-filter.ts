@@ -4,11 +4,14 @@ import type { Recipe } from "@/lib/db/schema";
 
 export type SortOption = "newest" | "oldest" | "az" | "za";
 
-export function useRecipeFilter(recipes: Recipe[]) {
+export function useRecipeFilter(
+  recipes: Recipe[],
+  getMissing?: (recipe: Recipe) => number | null,
+) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
   const [category, setCategory] = useState<string | null>(null);
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const [status, setStatus] = useState<StatusFilter>(["all"]);
   const [collectionId, setCollectionId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -27,8 +30,18 @@ export function useRecipeFilter(recipes: Recipe[]) {
       result = result.filter((r) => r.category === category);
     }
 
-    if (status === "tried") {
-      result = result.filter((r) => r.status === "tried");
+    if (!status.includes("all")) {
+      result = result.filter((r) =>
+        status.some((s) => {
+          if (s === "tried") return r.status === "tried";
+          if (s === "cancook") return getMissing?.(r) === 0;
+          if (s === "nearly") {
+            const m = getMissing?.(r);
+            return m === 1 || m === 2;
+          }
+          return false;
+        }),
+      );
     }
 
     if (collectionId) {
@@ -55,7 +68,7 @@ export function useRecipeFilter(recipes: Recipe[]) {
     });
 
     return result;
-  }, [recipes, search, sort, category, status, collectionId]);
+  }, [recipes, search, sort, category, status, collectionId, getMissing]);
 
   return {
     search,

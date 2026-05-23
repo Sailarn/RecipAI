@@ -155,25 +155,71 @@ describe("useRecipeFilter", () => {
 
   it("filters by status 'tried'", () => {
     const { result } = renderHook(() => useRecipeFilter(mockRecipes));
-    act(() => result.current.setStatus("tried"));
+    act(() => result.current.setStatus(["tried"]));
     expect(result.current.filtered).toHaveLength(1);
     expect(result.current.filtered[0].id).toBe("1");
   });
 
   it("shows all recipes when status is 'all'", () => {
     const { result } = renderHook(() => useRecipeFilter(mockRecipes));
-    act(() => result.current.setStatus("all"));
+    act(() => result.current.setStatus(["all"]));
     expect(result.current.filtered).toHaveLength(3);
   });
 
   it("combines status and category filters", () => {
     const { result } = renderHook(() => useRecipeFilter(mockRecipes));
     act(() => {
-      result.current.setStatus("tried");
+      result.current.setStatus(["tried"]);
       result.current.setCategory("soup");
     });
     expect(result.current.filtered).toHaveLength(1);
     expect(result.current.filtered[0].id).toBe("1");
+  });
+
+  describe("cancook / nearly filters with getMissing", () => {
+    const mockGetMissing = (recipe: Recipe): number | null => {
+      if (recipe.id === "2") return 0;
+      if (recipe.id === "3") return 2;
+      return null;
+    };
+
+    it("filters cancook — only recipes with getMissing === 0", () => {
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, mockGetMissing),
+      );
+      act(() => result.current.setStatus(["cancook"]));
+      expect(result.current.filtered).toHaveLength(1);
+      expect(result.current.filtered[0].id).toBe("2");
+    });
+
+    it("filters nearly — only recipes with getMissing 1 or 2", () => {
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, mockGetMissing),
+      );
+      act(() => result.current.setStatus(["nearly"]));
+      expect(result.current.filtered).toHaveLength(1);
+      expect(result.current.filtered[0].id).toBe("3");
+    });
+
+    it("multi-select tried + nearly returns union", () => {
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, mockGetMissing),
+      );
+      act(() => result.current.setStatus(["tried", "nearly"]));
+      expect(result.current.filtered).toHaveLength(2);
+      const ids = result.current.filtered.map((r) => r.id);
+      expect(ids).toContain("1");
+      expect(ids).toContain("3");
+    });
+
+    it("cancook excludes recipes where getMissing is null", () => {
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, mockGetMissing),
+      );
+      act(() => result.current.setStatus(["cancook"]));
+      const ids = result.current.filtered.map((r) => r.id);
+      expect(ids).not.toContain("1");
+    });
   });
 
   it("filters by collectionId", () => {

@@ -20,9 +20,11 @@ const SORT_LABELS: Record<SortOption, string> = {
   za: "Z → A",
 };
 
-const STATUS_LABELS: Record<StatusFilter, string> = {
+const STATUS_LABELS: Record<string, string> = {
   all: "All",
   tried: "Tried ✓",
+  cancook: "Can Cook",
+  nearly: "Nearly",
 };
 
 function Chip({ label, color }: { label: string; color: string }) {
@@ -105,9 +107,14 @@ export function CompactFilterBar({
         )}
 
         {category && <Chip label={category} color="rgba(167,139,250,1)" />}
-        {status !== "all" && (
-          <Chip label={STATUS_LABELS[status]} color="rgba(167,139,250,1)" />
-        )}
+        {!status.includes("all") &&
+          status.map((s) => (
+            <Chip
+              key={s}
+              label={STATUS_LABELS[s] ?? s}
+              color="rgba(167,139,250,1)"
+            />
+          ))}
         {sort !== "newest" && (
           <Chip label={SORT_LABELS[sort]} color="rgba(167,139,250,1)" />
         )}

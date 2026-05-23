@@ -1,5 +1,9 @@
 import { Check } from "lucide-react";
-import type { StatusFilter } from "@/components/status-chips";
+import {
+  type StatusFilter,
+  type StatusFilterKey,
+  toggleStatus,
+} from "@/components/status-chips";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
@@ -22,9 +26,15 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "za", label: "Z → A" },
 ];
 
-const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+const STATUS_OPTIONS: {
+  value: StatusFilterKey;
+  label: string;
+  color?: string;
+}[] = [
   { value: "all", label: "All" },
   { value: "tried", label: "Tried ✓" },
+  { value: "cancook", label: "Can Cook 🟢" },
+  { value: "nearly", label: "Nearly 🟡" },
 ];
 
 function chipStyle(active: boolean): React.CSSProperties {
@@ -73,7 +83,7 @@ export function FilterSheet({
   function handleReset() {
     onSortChange("newest");
     onCategoryChange(null);
-    onStatusChange("all");
+    onStatusChange(["all"]);
   }
 
   return (
@@ -173,13 +183,23 @@ export function FilterSheet({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => onStatusChange(value)}
-                  style={chipStyle(status === value)}
+                  onClick={() => onStatusChange(toggleStatus(status, value))}
+                  style={chipStyle(status.includes(value))}
                 >
                   {label}
                 </button>
               ))}
             </div>
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 11,
+                color: "var(--fg-3)",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Can Cook = all ingredients in pantry. Nearly = missing 1–2.
+            </p>
           </div>
 
           {/* Sort by — list style */}

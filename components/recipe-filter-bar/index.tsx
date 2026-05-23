@@ -48,7 +48,7 @@ export function RecipeFilterBar({
 
   const activeFilterCount = [
     category !== null,
-    status !== "all",
+    !status.includes("all"),
     sort !== "newest",
   ].filter(Boolean).length;
 
