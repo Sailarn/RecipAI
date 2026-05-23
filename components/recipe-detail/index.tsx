@@ -286,28 +286,26 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
             {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
           </button>
         )}
-        {(recipe.canonicalIngredientIds ?? []).length === 0 && (
-          <button
-            type="button"
-            onClick={handleSyncIngredients}
-            disabled={syncing}
-            className="w-full mb-2"
-            style={{
-              padding: "11px",
-              borderRadius: 14,
-              background: "rgba(255,170,50,0.06)",
-              border: "1px solid rgba(255,200,100,0.18)",
-              color: syncing ? "var(--fg-3)" : "var(--fg-2)",
-              fontFamily: "var(--font-sans)",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: syncing ? "default" : "pointer",
-              transition: "opacity 0.15s",
-            }}
-          >
-            {syncing ? "Matching ingredients…" : "Sync ingredients"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleSyncIngredients}
+          disabled={syncing}
+          className="w-full mb-2"
+          style={{
+            padding: "11px",
+            borderRadius: 14,
+            background: "rgba(255,170,50,0.06)",
+            border: "1px solid rgba(255,200,100,0.18)",
+            color: syncing ? "var(--fg-3)" : "var(--fg-2)",
+            fontFamily: "var(--font-sans)",
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: syncing ? "default" : "pointer",
+            transition: "opacity 0.15s",
+          }}
+        >
+          {syncing ? "Matching ingredients…" : "Sync ingredients"}
+        </button>
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
