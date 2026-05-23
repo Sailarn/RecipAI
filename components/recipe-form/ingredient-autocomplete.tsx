@@ -25,7 +25,7 @@ function detectScript(text: string): "cyrillic" | "latin" {
 }
 
 const MAX_RESULTS = 5;
-const FUSE_THRESHOLD = 0.35;
+const FUSE_THRESHOLD = 0.55;
 
 export function IngredientAutocomplete({
   value,
@@ -137,13 +137,14 @@ export function IngredientAutocomplete({
             left: 0,
             right: 0,
             zIndex: 50,
-            background: "var(--bg-2)",
-            border: "1px solid rgba(255,200,100,0.2)",
+            background: "var(--bg-card)",
+            border: "1px solid rgba(255,200,100,0.25)",
             borderRadius: 10,
             marginTop: 4,
             padding: "4px 0",
             maxHeight: 200,
             overflowY: "auto",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
           }}
         >
           {results.map((entry, idx) => (
