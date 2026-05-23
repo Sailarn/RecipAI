@@ -19,6 +19,10 @@ export function useRecipeSave(recipe: Recipe | undefined) {
   const pendingStepFiles = useRef<Record<number, File>>({});
 
   const onSubmit = async (data: RecipeOutput) => {
+    console.log(
+      "[useRecipeSave] onSubmit called, ingredients:",
+      JSON.stringify(data.ingredients),
+    );
     setImageError(null);
     setSaveState("saving");
 
@@ -50,11 +54,11 @@ export function useRecipeSave(recipe: Recipe | undefined) {
         savedId = recipe.id;
       } else {
         savedId = await createRecipe(recipeData);
-        normalizeRecipeIngredients(
-          savedId,
-          recipeData.ingredients.map((ing) => ({ item: ing.item })),
-        ).catch((err) => console.error("[normalize] top-level error:", err));
       }
+      normalizeRecipeIngredients(
+        savedId,
+        recipeData.ingredients.map((ing) => ({ item: ing.item })),
+      ).catch(() => {});
     } catch {
       setSaveState("idle");
       setImageError("Failed to save recipe");

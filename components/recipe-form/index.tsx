@@ -183,7 +183,12 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         onBack={handleBack}
         onNext={handleNext}
         // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
-        onSave={handleSubmit(onSubmit as any)}
+        onSave={handleSubmit(onSubmit as any, (errs) => {
+          console.warn(
+            "[RecipeForm] handleSubmit validation errors:",
+            JSON.stringify(errs, null, 2),
+          );
+        })}
       />
     </div>
   );
