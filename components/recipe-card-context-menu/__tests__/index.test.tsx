@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RecipeCardContextMenu } from "../index";
 
 const baseProps = {
-  status: null as "tried" | "want" | null,
+  status: null as "tried" | null,
   pos: { x: 100, y: 200 },
   onClose: vi.fn(),
   onToggleStatus: vi.fn(),
@@ -24,8 +24,8 @@ describe("RecipeCardContextMenu", () => {
     expect(screen.getByText("Mark as untried")).toBeInTheDocument();
   });
 
-  it("shows 'Mark as tried' when status is want", () => {
-    render(<RecipeCardContextMenu {...baseProps} status="want" />);
+  it("shows 'Mark as tried' when status is null", () => {
+    render(<RecipeCardContextMenu {...baseProps} status={null} />);
     expect(screen.getByText("Mark as tried")).toBeInTheDocument();
   });
 

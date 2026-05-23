@@ -3,11 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 import { StatusChips } from "../index";
 
 describe("StatusChips", () => {
-  it("renders all three options", () => {
+  it("renders all options", () => {
     render(<StatusChips active="all" onChange={vi.fn()} />);
     expect(screen.getByText("All")).toBeInTheDocument();
     expect(screen.getByText("Tried ✓")).toBeInTheDocument();
-    expect(screen.getByText("Want to try")).toBeInTheDocument();
+  });
+
+  it("does not render Want to try chip", () => {
+    render(<StatusChips active="all" onChange={vi.fn()} />);
+    expect(screen.queryByText("Want to try")).not.toBeInTheDocument();
   });
 
   it("calls onChange with 'tried' when Tried chip is clicked", () => {
@@ -15,13 +19,6 @@ describe("StatusChips", () => {
     render(<StatusChips active="all" onChange={onChange} />);
     fireEvent.click(screen.getByText("Tried ✓"));
     expect(onChange).toHaveBeenCalledWith("tried");
-  });
-
-  it("calls onChange with 'want' when Want chip is clicked", () => {
-    const onChange = vi.fn();
-    render(<StatusChips active="all" onChange={onChange} />);
-    fireEvent.click(screen.getByText("Want to try"));
-    expect(onChange).toHaveBeenCalledWith("want");
   });
 
   it("calls onChange with 'all' when All chip is clicked", () => {

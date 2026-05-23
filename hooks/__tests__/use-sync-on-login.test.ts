@@ -40,6 +40,11 @@ vi.mock("@/lib/db/notifications", () => ({
   replaceSyncNotifications: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@/lib/db/pantry", () => ({
+  clearPantry: vi.fn().mockResolvedValue(undefined),
+  bulkPutPantry: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("@/lib/transitions", () => ({
   useNavigate: vi.fn().mockReturnValue({ push: vi.fn(), back: vi.fn() }),
 }));
@@ -72,6 +77,9 @@ function setupFetch({
       return Promise.resolve(
         makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
       );
+    }
+    if (String(url) === "/api/pantry") {
+      return Promise.resolve(makeJsonResponse({ items: [] }));
     }
     if (rejectSync) return Promise.reject(new Error("Network error"));
     if (String(url) === "/api/recipes/sync") {
@@ -112,8 +120,9 @@ describe("useSyncOnLogin", () => {
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
       expect(mockFetch).toHaveBeenCalledWith("/api/ingredients");
+      expect(mockFetch).toHaveBeenCalledWith("/api/pantry");
       expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync");
       expect(mockFetch).toHaveBeenCalledWith("/api/collections");
     });
@@ -350,10 +359,10 @@ describe("useSyncOnLogin", () => {
       setupFetch();
 
       const { result } = renderHook(() => useSyncOnLogin());
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
 
       await result.current.triggerSync();
-      expect(mockFetch).toHaveBeenCalledTimes(6);
+      expect(mockFetch).toHaveBeenCalledTimes(8);
     });
   });
 });

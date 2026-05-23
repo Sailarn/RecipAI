@@ -29,8 +29,6 @@ export function useRecipeFilter(recipes: Recipe[]) {
 
     if (status === "tried") {
       result = result.filter((r) => r.status === "tried");
-    } else if (status === "want") {
-      result = result.filter((r) => r.status === "want");
     }
 
     if (collectionId) {

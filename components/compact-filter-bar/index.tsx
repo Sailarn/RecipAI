@@ -23,7 +23,6 @@ const SORT_LABELS: Record<SortOption, string> = {
 const STATUS_LABELS: Record<StatusFilter, string> = {
   all: "All",
   tried: "Tried ✓",
-  want: "Want to try",
 };
 
 function Chip({ label, color }: { label: string; color: string }) {

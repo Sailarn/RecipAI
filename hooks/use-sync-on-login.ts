@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
+import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
 import type {
   Collection,
+  PantryItem,
   Recipe,
   SyncEntityType,
   SyncNotification,
@@ -14,6 +16,20 @@ import type {
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+
+async function syncPantry(): Promise<void> {
+  const res = await fetch(api.pantry);
+  if (!res.ok) return;
+  const { items } = await res.json();
+  const parsed: PantryItem[] = (items as Record<string, unknown>[]).map(
+    (r) => ({
+      ...(r as Omit<PantryItem, "addedAt">),
+      addedAt: new Date(r.addedAt as string),
+    }),
+  );
+  await clearPantry();
+  await bulkPutPantry(parsed);
+}
 
 async function syncIngredients(): Promise<void> {
   const watermark = localStorage.getItem("ingredientsSyncedAt") ?? undefined;
@@ -104,6 +120,7 @@ export function useSyncOnLogin() {
     if (!session) return;
 
     syncIngredients().catch(() => {});
+    syncPantry().catch(() => {});
 
     try {
       const [recipesRes, collectionsRes] = await Promise.all([

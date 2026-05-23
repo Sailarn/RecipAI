@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface RecipeCardContextMenuProps {
-  status: "tried" | "want" | null;
+  status: "tried" | null;
   pos: { x: number; y: number };
   onClose: () => void;
   onToggleStatus: () => void;
@@ -46,7 +46,6 @@ export function RecipeCardContextMenu({
   if (!mounted) return null;
 
   const statusLabel = status === "tried" ? "Mark as untried" : "Mark as tried";
-  const statusColor = status === "want" ? "#4ade80" : "var(--fg-1)";
 
   return createPortal(
     <>
@@ -94,7 +93,7 @@ export function RecipeCardContextMenu({
             onToggleStatus();
             onClose();
           }}
-          style={{ ...itemStyle, color: statusColor }}
+          style={{ ...itemStyle, color: "var(--fg-1)" }}
         >
           {statusLabel}
         </button>

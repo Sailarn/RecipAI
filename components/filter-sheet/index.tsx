@@ -25,7 +25,6 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "tried", label: "Tried ✓" },
-  { value: "want", label: "Want to try" },
 ];
 
 function chipStyle(active: boolean): React.CSSProperties {

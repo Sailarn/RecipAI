@@ -1,6 +1,6 @@
 "use client";
 
-export type StatusFilter = "all" | "tried" | "want";
+export type StatusFilter = "all" | "tried";
 
 interface StatusChipsProps {
   active: StatusFilter;
@@ -10,7 +10,6 @@ interface StatusChipsProps {
 const OPTIONS: { key: StatusFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "tried", label: "Tried ✓" },
-  { key: "want", label: "Want to try" },
 ];
 
 export function StatusChips({ active, onChange }: StatusChipsProps) {

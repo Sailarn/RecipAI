@@ -7,6 +7,7 @@ export const routes = {
     parse: (locale: string) => `/${locale}/recipes/parse`,
   },
 
+  pantry: (locale: string) => `/${locale}/pantry`,
   profile: (locale: string) => `/${locale}/profile`,
   login: (locale: string) => `/${locale}/login`,
   syncReview: (locale: string) => `/${locale}/sync-review`,
@@ -31,4 +32,5 @@ export const api = {
   collectionsSync: "/api/collections/sync",
   ingredients: "/api/ingredients",
   ingredientsEnrich: "/api/ingredients/enrich",
+  pantry: "/api/pantry",
 } as const;

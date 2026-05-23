@@ -22,7 +22,7 @@ const mockRecipes: Recipe[] = [
     title: "Apple Pie",
     description: "Sweet dessert",
     category: "dessert",
-    status: "want",
+    status: null,
     servings: 8,
     ingredients: [],
     instructions: [],
@@ -110,7 +110,6 @@ describe("useRecipeFilter", () => {
       result.current.setSearch("a");
       result.current.setSort("az");
     });
-    // matches "Apple Pie" and "Zucchini Pasta" (has 'a' in title)
     expect(result.current.filtered[0].title).toBe("Apple Pie");
   });
 
@@ -161,13 +160,6 @@ describe("useRecipeFilter", () => {
     expect(result.current.filtered[0].id).toBe("1");
   });
 
-  it("filters by status 'want'", () => {
-    const { result } = renderHook(() => useRecipeFilter(mockRecipes));
-    act(() => result.current.setStatus("want"));
-    expect(result.current.filtered).toHaveLength(1);
-    expect(result.current.filtered[0].id).toBe("2");
-  });
-
   it("shows all recipes when status is 'all'", () => {
     const { result } = renderHook(() => useRecipeFilter(mockRecipes));
     act(() => result.current.setStatus("all"));
@@ -187,7 +179,7 @@ describe("useRecipeFilter", () => {
   it("filters by collectionId", () => {
     const { result } = renderHook(() => useRecipeFilter(mockRecipes));
     act(() => result.current.setCollectionId("c1"));
-    expect(result.current.filtered).toHaveLength(2); // recipes 1 and 2
+    expect(result.current.filtered).toHaveLength(2);
   });
 
   it("shows all when collectionId is null", () => {

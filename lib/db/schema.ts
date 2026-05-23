@@ -26,7 +26,13 @@ export interface VocabularyIngredient {
 }
 
 export interface PantryItem {
-  ingredientId: string;
+  id: string;
+  ingredientId?: string;
+  name: string;
+  qty: number;
+  unit: string;
+  cat: string;
+  on: boolean;
   addedAt: Date;
 }
 
@@ -57,7 +63,7 @@ export interface Recipe {
   instructions: Step[];
   sourceUrl?: string;
   category?: string;
-  status?: "tried" | "want" | null;
+  status?: "tried" | null;
   collectionIds?: string[];
   canonicalIngredientIds?: string[];
   unrecognizedIngredients?: string[];
