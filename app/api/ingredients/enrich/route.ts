@@ -49,6 +49,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Upsert provisional first — the client fires create and enrich in parallel,
+  // so the ingredient may not exist in Supabase yet when this handler runs.
+  await db
+    .insert(ingredients)
+    .values({
+      id,
+      en: rawText,
+      ua: ua ?? null,
+      category: category ?? "other",
+      aliasesEn: [],
+      aliasesUa: [],
+      status: "provisional",
+    })
+    .onConflictDoNothing();
+
   const rows = await db
     .select()
     .from(ingredients)
