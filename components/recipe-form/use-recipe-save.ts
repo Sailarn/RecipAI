@@ -42,6 +42,12 @@ export function useRecipeSave(recipe: Recipe | undefined) {
         ...ing,
       })),
       instructions,
+      imageFocusX: data.imageFocusX ?? undefined,
+      imageFocusY: data.imageFocusY ?? undefined,
+      imageCropX: data.imageCropX ?? undefined,
+      imageCropY: data.imageCropY ?? undefined,
+      imageCropWidth: data.imageCropWidth ?? undefined,
+      imageCropHeight: data.imageCropHeight ?? undefined,
     };
 
     let savedId: string;

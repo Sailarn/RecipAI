@@ -36,6 +36,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     trigger,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<RecipeFormData>({
     // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
@@ -187,6 +188,10 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
           console.warn(
             "[RecipeForm] validation errors:",
             JSON.stringify(errs, null, 2),
+          );
+          console.warn(
+            "[RecipeForm] raw form values:",
+            JSON.stringify(getValues(), null, 2),
           );
         })}
       />
