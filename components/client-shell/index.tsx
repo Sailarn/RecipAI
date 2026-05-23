@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { PageStack } from "@/components/page-stack";
+import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { NavigationStackProvider } from "@/lib/navigation-stack";
 
 const BottomNav = dynamic(
@@ -30,6 +31,7 @@ const EmbedConsentModal = dynamic(
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  useNormalizeOnStartup();
 
   return (
     <NavigationStackProvider initialHref={pathname} currentPage={children}>

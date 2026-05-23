@@ -61,10 +61,6 @@ vi.mock("@/lib/db/recipes", () => ({
   deleteRecipe: vi.fn(),
 }));
 
-vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
-  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
-}));
-
 const mockRecipe: Recipe = {
   id: "recipe-1",
   title: "Chocolate Cake",

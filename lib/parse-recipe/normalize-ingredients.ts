@@ -227,13 +227,16 @@ export async function normalizeRecipeIngredients(
   }
 
   const finalIds = canonicalIngredientIds.filter(Boolean);
+  const updatedAt = new Date();
 
   await db.recipes.update(recipeId, {
     canonicalIngredientIds: finalIds,
     unrecognizedIngredients,
+    updatedAt,
   });
   syncUpdate(recipeId, {
     canonicalIngredientIds: finalIds,
     unrecognizedIngredients,
+    updatedAt,
   });
 }
