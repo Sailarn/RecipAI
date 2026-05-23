@@ -111,7 +111,13 @@ export function FormActionBar({
         ) : (
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => {
+              console.log(
+                "[FormActionBar] save button clicked, saveState:",
+                saveState,
+              );
+              onSave();
+            }}
             disabled={saveState === "saving"}
             style={{
               flex: activeTabIndex === 0 ? "0 1 auto" : 2,

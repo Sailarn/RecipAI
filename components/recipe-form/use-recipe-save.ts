@@ -19,6 +19,7 @@ export function useRecipeSave(recipe: Recipe | undefined) {
   const pendingStepFiles = useRef<Record<number, File>>({});
 
   const onSubmit = async (data: RecipeOutput) => {
+    console.log("[useRecipeSave] onSubmit called, data:", JSON.stringify(data));
     setImageError(null);
     setSaveState("saving");
 
