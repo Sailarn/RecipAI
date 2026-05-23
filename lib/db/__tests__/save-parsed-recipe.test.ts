@@ -13,6 +13,11 @@ vi.mock("../../images", () => ({
   isImageKitUrl: vi.fn().mockReturnValue(false),
 }));
 
+vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
+  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
+}));
+
+import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { isImageKitUrl, uploadImage } from "../../images";
 import { createRecipe, updateRecipe } from "../recipes";
 
@@ -163,6 +168,35 @@ describe("saveParsedRecipe", () => {
       // give the IIFE time to settle
       await new Promise((r) => setTimeout(r, 10));
       expect(updateRecipe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("normalization", () => {
+    it("calls normalizeRecipeIngredients after createRecipe with the recipe's ingredient items", async () => {
+      await saveParsedRecipe(baseEntry);
+
+      expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
+      const [id, ingredients] = vi.mocked(normalizeRecipeIngredients).mock
+        .calls[0];
+      expect(id).toBe("new-recipe-id");
+      expect(ingredients.map((i) => i.item)).toEqual(["pasta", "eggs"]);
+    });
+
+    it("does not await normalizeRecipeIngredients — saveParsedRecipe resolves before normalization completes", async () => {
+      let resolveNormalize!: () => void;
+      vi.mocked(normalizeRecipeIngredients).mockReturnValue(
+        new Promise<void>((res) => {
+          resolveNormalize = res;
+        }),
+      );
+
+      // saveParsedRecipe must resolve even though normalization is still pending
+      await saveParsedRecipe(baseEntry);
+
+      // Normalization was called but not yet resolved
+      expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
+      // Unblock it so the test doesn't leave a dangling promise
+      resolveNormalize();
     });
   });
 });

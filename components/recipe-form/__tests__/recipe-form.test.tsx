@@ -34,6 +34,12 @@ vi.mock("@/lib/images", () => ({
   isImageKitUrl: vi.fn().mockReturnValue(false),
 }));
 
+vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
+  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
+}));
+
+import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+
 /** Fill required fields on the info tab so tab navigation is not blocked */
 function fillRequiredInfo(title?: string) {
   fireEvent.change(screen.getByLabelText(/^title/i), {
@@ -386,6 +392,127 @@ describe("RecipeForm", () => {
       expect(screen.getByText("titleRequired")).toBeInTheDocument();
 
       expect(createRecipe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Normalization wiring", () => {
+    it("calls normalizeRecipeIngredients after create with the submitted ingredient items", async () => {
+      render(<RecipeForm />);
+
+      fireEvent.change(screen.getByLabelText(/^title/i), {
+        target: { value: "Normalization Test" },
+      });
+      fireEvent.change(screen.getByLabelText(/servings/i), {
+        target: { value: "2" },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
+        target: { value: "garlic" },
+      });
+      fireEvent.change(screen.getByLabelText(/qty/i), {
+        target: { value: "3" },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
+      });
+
+      const [id, ingredients] = vi.mocked(normalizeRecipeIngredients).mock
+        .calls[0];
+      expect(id).toBe("new-recipe-id");
+      expect(ingredients.map((i) => i.item)).toContain("garlic");
+    });
+
+    it("calls normalizeRecipeIngredients after update with the submitted ingredient items", async () => {
+      const mockRecipe: Recipe = {
+        id: "update-test-id",
+        title: "Old Recipe",
+        servings: 2,
+        ingredients: [{ id: "i1", item: "flour", amount: 2, unit: "cups" }],
+        instructions: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      render(<RecipeForm recipe={mockRecipe} />);
+
+      // Navigate to ingredients tab and change the ingredient
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
+        target: { value: "bread flour" },
+      });
+
+      // Navigate to last tab and save
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
+      });
+
+      const [id, ingredients] = vi.mocked(normalizeRecipeIngredients).mock
+        .calls[0];
+      expect(id).toBe("update-test-id");
+      expect(ingredients.map((i) => i.item)).toContain("bread flour");
+    });
+
+    it("does not block navigation when normalizeRecipeIngredients rejects", async () => {
+      vi.mocked(normalizeRecipeIngredients).mockRejectedValue(
+        new Error("normalize failed"),
+      );
+
+      render(<RecipeForm />);
+
+      fireEvent.change(screen.getByLabelText(/^title/i), {
+        target: { value: "Error Test" },
+      });
+      fireEvent.change(screen.getByLabelText(/servings/i), {
+        target: { value: "1" },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
+        target: { value: "salt" },
+      });
+      fireEvent.change(screen.getByLabelText(/qty/i), {
+        target: { value: "1" },
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      // createRecipe must have been called (form submitted successfully)
+      await waitFor(() => {
+        expect(createRecipe).toHaveBeenCalled();
+      });
     });
   });
 });
