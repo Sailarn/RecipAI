@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import Fuse from "fuse.js";
 import { useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui";
 import { db } from "@/lib/db/db";
 import type { VocabularyIngredient } from "@/lib/db/schema";
@@ -25,7 +26,7 @@ function detectScript(text: string): "cyrillic" | "latin" {
 }
 
 const MAX_RESULTS = 5;
-const FUSE_THRESHOLD = 0.55;
+const FUSE_THRESHOLD = 0.35;
 
 export function IngredientAutocomplete({
   value,
@@ -35,6 +36,8 @@ export function IngredientAutocomplete({
 }: IngredientAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const vocab = useLiveQuery(
@@ -69,6 +72,13 @@ export function IngredientAutocomplete({
     return entry.en;
   }
 
+  function openDropdown() {
+    if (anchorRef.current) {
+      setDropdownRect(anchorRef.current.getBoundingClientRect());
+    }
+    setOpen(true);
+  }
+
   function select(entry: VocabularyIngredient) {
     if (blurTimerRef.current) {
       clearTimeout(blurTimerRef.current);
@@ -81,7 +91,11 @@ export function IngredientAutocomplete({
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     onChange(e.target.value);
-    setOpen(e.target.value.trim().length > 0);
+    if (e.target.value.trim().length > 0) {
+      openDropdown();
+    } else {
+      setOpen(false);
+    }
     setActiveIndex(-1);
   }
 
@@ -118,8 +132,55 @@ export function IngredientAutocomplete({
     select(entry);
   }
 
+  const dropdown =
+    open && results.length > 0 && dropdownRect
+      ? createPortal(
+          <div
+            role="listbox"
+            style={{
+              position: "fixed",
+              top: dropdownRect.bottom + 4,
+              left: dropdownRect.left,
+              width: dropdownRect.width,
+              zIndex: 9999,
+              background: "var(--bg-card)",
+              border: "1px solid rgba(255,200,100,0.25)",
+              borderRadius: 10,
+              padding: "4px 0",
+              maxHeight: 200,
+              overflowY: "auto",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+            }}
+          >
+            {results.map((entry, idx) => (
+              <div
+                key={entry.id}
+                role="option"
+                tabIndex={-1}
+                aria-selected={idx === activeIndex}
+                onMouseDown={(e) => handleMouseDown(e, entry)}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  background:
+                    idx === activeIndex
+                      ? "rgba(255,180,60,0.12)"
+                      : "transparent",
+                  color: "var(--fg-1)",
+                  fontSize: "var(--text-base)",
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
+                {getDisplayName(entry)}
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div style={{ position: "relative" }}>
+    <div ref={anchorRef}>
       <Input
         value={value}
         onChange={handleChange}
@@ -128,47 +189,7 @@ export function IngredientAutocomplete({
         placeholder={placeholder}
         error={error}
       />
-      {open && results.length > 0 && (
-        <div
-          role="listbox"
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            background: "var(--bg-card)",
-            border: "1px solid rgba(255,200,100,0.25)",
-            borderRadius: 10,
-            marginTop: 4,
-            padding: "4px 0",
-            maxHeight: 200,
-            overflowY: "auto",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
-          }}
-        >
-          {results.map((entry, idx) => (
-            <div
-              key={entry.id}
-              role="option"
-              tabIndex={-1}
-              aria-selected={idx === activeIndex}
-              onMouseDown={(e) => handleMouseDown(e, entry)}
-              style={{
-                padding: "8px 12px",
-                cursor: "pointer",
-                background:
-                  idx === activeIndex ? "rgba(255,180,60,0.12)" : "transparent",
-                color: "var(--fg-1)",
-                fontSize: "var(--text-base)",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              {getDisplayName(entry)}
-            </div>
-          ))}
-        </div>
-      )}
+      {dropdown}
     </div>
   );
 }
