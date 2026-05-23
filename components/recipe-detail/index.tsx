@@ -309,6 +309,8 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
+          canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
+          locale={locale}
         />
         <InstructionsList instructions={recipe.instructions} />
         {cookingMode && (

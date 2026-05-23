@@ -1,26 +1,60 @@
 "use client";
 
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { db } from "@/lib/db/db";
 import type { RecipeIngredient } from "@/lib/db/schema";
 
 interface ServingsCalculatorProps {
   originalServings: number;
   ingredients: RecipeIngredient[];
+  canonicalIngredientIds?: string[];
+  locale?: string;
 }
 
 export function ServingsCalculator({
   originalServings,
   ingredients,
+  canonicalIngredientIds,
+  locale,
 }: ServingsCalculatorProps) {
   const [servings, setServings] = useState(originalServings);
+  const [canonicalNames, setCanonicalNames] = useState<Map<string, string>>(
+    new Map(),
+  );
+
   const ratio = servings / originalServings;
+
+  useEffect(() => {
+    const ids = (canonicalIngredientIds ?? []).filter(Boolean);
+    if (!ids.length) return;
+
+    db.ingredients.bulkGet(ids).then((entries) => {
+      const map = new Map<string, string>();
+      for (const entry of entries) {
+        if (!entry) continue;
+        const isUk = locale === "uk";
+        const name = isUk ? (entry.ua ?? entry.en) : (entry.en ?? entry.ua);
+        if (name) map.set(entry.id, name);
+      }
+      setCanonicalNames(map);
+    });
+  }, [canonicalIngredientIds, locale]);
 
   const formatAmount = (amount?: number) => {
     if (!amount) return null;
     const scaled = amount * ratio;
     if (Number.isInteger(scaled)) return String(scaled);
     return scaled.toFixed(1).replace(/\.0$/, "");
+  };
+
+  const displayName = (ing: RecipeIngredient, idx: number): string => {
+    const canonicalId = canonicalIngredientIds?.[idx];
+    if (canonicalId) {
+      const name = canonicalNames.get(canonicalId);
+      if (name) return name;
+    }
+    return ing.item;
   };
 
   return (
@@ -129,7 +163,7 @@ export function ServingsCalculator({
                 </span>
               )}
               {ing.unit && <span>{ing.unit} </span>}
-              {ing.item}
+              {displayName(ing, i)}
             </span>
           </li>
         ))}
