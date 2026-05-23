@@ -91,14 +91,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    const enriched = {
+      en: result.en as string,
+      ua: result.ua as string,
+      category: result.category as string,
+      aliasesEn: result.aliasesEn as string[],
+      aliasesUa: result.aliasesUa as string[],
+    };
+
     await db
       .update(ingredients)
       .set({
-        en: result.en as string,
-        ua: result.ua as string,
-        category: result.category as string,
-        aliasesEn: result.aliasesEn as string[],
-        aliasesUa: result.aliasesUa as string[],
+        ...enriched,
         status: "confirmed",
         retryCount: 0,
         lastAttemptAt: new Date(),
@@ -106,7 +110,7 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(ingredients.id, id));
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, ingredient: enriched });
   } catch {
     const newRetryCount = (entry.retryCount ?? 0) + 1;
 

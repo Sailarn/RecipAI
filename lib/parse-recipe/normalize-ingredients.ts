@@ -104,6 +104,13 @@ async function createProvisional(
   ua?: string | null,
   category?: string | null,
 ): Promise<string | null> {
+  // Reuse any existing entry with the same raw text to avoid duplicate provisionals
+  const lc = en.toLowerCase();
+  const existing = await db.ingredients
+    .filter((v) => v.en.toLowerCase() === lc)
+    .first();
+  if (existing) return existing.id;
+
   const id = crypto.randomUUID();
   try {
     // Write locally first — works regardless of auth state
