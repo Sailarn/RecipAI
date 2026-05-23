@@ -4,11 +4,13 @@ import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   type Control,
+  Controller,
   type FieldErrors,
   type UseFormRegister,
   useFieldArray,
 } from "react-hook-form";
 import { Input } from "@/components/ui";
+import { IngredientAutocomplete } from "./ingredient-autocomplete";
 import type { RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {
@@ -145,10 +147,17 @@ export function IngredientsSection({
 
               {/* Ingredient name */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Input
-                  {...register(`ingredients.${index}.item`)}
-                  placeholder={t("ingredientName")}
-                  error={!!itemErr}
+                <Controller
+                  control={control}
+                  name={`ingredients.${index}.item`}
+                  render={({ field }) => (
+                    <IngredientAutocomplete
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      placeholder={t("ingredientName")}
+                      error={!!itemErr}
+                    />
+                  )}
                 />
                 <p
                   style={{
