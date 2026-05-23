@@ -45,12 +45,12 @@ export function getDefaultValues(
       })),
       sourceUrl: recipe.sourceUrl || "",
       category: recipe.category || "",
-      imageFocusX: recipe.imageFocusX,
-      imageFocusY: recipe.imageFocusY,
-      imageCropX: recipe.imageCropX,
-      imageCropY: recipe.imageCropY,
-      imageCropWidth: recipe.imageCropWidth,
-      imageCropHeight: recipe.imageCropHeight,
+      imageFocusX: recipe.imageFocusX ?? undefined,
+      imageFocusY: recipe.imageFocusY ?? undefined,
+      imageCropX: recipe.imageCropX ?? undefined,
+      imageCropY: recipe.imageCropY ?? undefined,
+      imageCropWidth: recipe.imageCropWidth ?? undefined,
+      imageCropHeight: recipe.imageCropHeight ?? undefined,
     };
   }
 
