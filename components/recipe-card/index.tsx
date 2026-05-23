@@ -18,12 +18,14 @@ interface RecipeCardProps {
   recipe: Recipe;
   collections: Collection[];
   priority?: boolean;
+  missing?: number | null;
 }
 
 export function RecipeCard({
   recipe,
   collections,
   priority = false,
+  missing,
 }: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -172,6 +174,66 @@ export function RecipeCard({
                   strokeLinejoin="round"
                 />
               </svg>
+            </div>
+          )}
+          {/* Can Cook badge — missing === 0 */}
+          {missing === 0 && recipe.status !== "tried" && (
+            <div
+              data-testid="badge-cancook"
+              style={{
+                position: "absolute",
+                top: 7,
+                right: 7,
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                background: "rgba(34,197,94,0.95)",
+                border: "1.5px solid rgba(134,239,172,0.60)",
+                boxShadow: "0 0 12px rgba(34,197,94,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 6l3 3 5-5"
+                  stroke="#fff"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          )}
+          {/* Nearly badge — missing 1 or 2 */}
+          {(missing === 1 || missing === 2) && (
+            <div
+              data-testid="badge-nearly"
+              style={{
+                position: "absolute",
+                top: 7,
+                right: 7,
+                padding: "2px 6px",
+                borderRadius: 99,
+                background: "rgba(255,160,40,0.30)",
+                border:
+                  "1px solid var(--glass-pill-border, rgba(255,200,100,0.28))",
+                color: "var(--food-accent, rgba(251,191,36,1))",
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                fontWeight: 600,
+                lineHeight: 1.4,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Missing {missing}
             </div>
           )}
         </div>

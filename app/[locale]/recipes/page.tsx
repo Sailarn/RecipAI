@@ -13,6 +13,7 @@ import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
+import { useRecipeMatcher } from "@/hooks/use-recipe-matcher";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import {
   createCollection,
@@ -60,6 +61,7 @@ export default function RecipesPage() {
     setCollectionId,
     filtered,
   } = useRecipeFilter(recipes ?? []);
+  const { getMissing } = useRecipeMatcher();
   const collectionsFromDB = useLiveQuery(() => getAllCollections(), []);
   if (collectionsFromDB !== undefined) _collectionsCache = collectionsFromDB;
   const collections = collectionsFromDB ?? _collectionsCache ?? [];
@@ -223,6 +225,7 @@ export default function RecipesPage() {
                 recipe={recipe}
                 collections={collections}
                 priority={index < 2}
+                missing={getMissing(recipe)}
               />
             ))}
           </div>
