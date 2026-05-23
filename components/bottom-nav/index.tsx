@@ -1,7 +1,9 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { lazy, Suspense } from "react";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
@@ -10,12 +12,43 @@ import { NavLens } from "./nav-lens";
 import { NavPill } from "./nav-pill";
 import { PILL_H, useBottomNav } from "./use-bottom-nav";
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
-// 3 items: Recipes | AI Import | Profile
-// PILL_W = 74, PILL_H = 45
-// NAV_W ≈ (74 + 6.5) × 3 = 241.5 → 260px wrapper
-// See use-bottom-nav.ts for the sizing constants.
-// ─────────────────────────────────────────────────────────────────────────────
+// Lazy-load PantryPage to avoid circular import and reduce initial bundle
+const PantryPage = lazy(() =>
+  import("@/components/pantry").then((m) => ({ default: m.PantryPage })),
+);
+
+// Width constants for the two-pill layout
+const MAIN_NAV_W = 260;
+const ORB_W = 60;
+const PANTRY_W = 124;
+
+// CSS transition for pill width morphing (elastic overshoot)
+const WIDTH_TRANSITION =
+  "width 0.46s cubic-bezier(0.34, 1.4, 0.64, 1), min-width 0.46s cubic-bezier(0.34, 1.4, 0.64, 1)";
+
+// Shared pill glass style
+const pillBase: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 28,
+  overflow: "hidden",
+  position: "relative",
+  transition: WIDTH_TRANSITION,
+  flexShrink: 0,
+};
+
+// Cross-fade in — content fades in after pill has started expanding
+const fadeIn: React.CSSProperties = {
+  animation: "pillContentIn 0.26s ease forwards",
+  animationDelay: "0.18s",
+  opacity: 0,
+};
+
+// Cross-fade out — content fades out quickly before pill shrinks
+const fadeOut: React.CSSProperties = {
+  animation: "pillContentOut 0.16s ease forwards",
+};
 
 export function BottomNav() {
   const params = useParams();
@@ -23,11 +56,10 @@ export function BottomNav() {
   const tNav = useTranslations("navigation");
   const navigate = useNavigate();
 
-  // Use the real pathname (updates synchronously with the URL) for tab
-  // active-state and hide logic so the nav reflects navigation immediately,
-  // even while the navigation-stack entries are being updated.
   const pathname = usePathname();
   const currentHref = pathname;
+
+  const isPantryMode = currentHref.includes("/pantry");
 
   const hideOn = ["/edit", "/login"];
   const isDetailPage =
@@ -62,74 +94,157 @@ export function BottomNav() {
 
   const { navRef, itemRefs, ready, leftMv, measure } = useBottomNav({
     staticActiveIndex,
-    shouldHide,
+    shouldHide: shouldHide || isPantryMode,
   });
 
   if (shouldHide) return null;
 
-  // Subtract 2px for the nav's 1px top/bottom border so the pill
-  // is centered within the content area, not the border-box.
   const navH = measure?.innerHeight ?? 48;
   const yNormal = (navH - 2 - PILL_H) / 2;
   const isAiActive = staticActiveIndex === 1;
 
   return (
-    <>
-      {/* w-[260px] — 3 items × ~87px, pill 74px → ~6.5px gap each side */}
-      <div
-        className="fixed left-1/2 -translate-x-1/2 z-[200] w-[260px]"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
+    <div
+      className="fixed left-1/2 -translate-x-1/2 z-[200]"
+      style={{
+        bottom: "calc(env(safe-area-inset-bottom) + 20px)",
+        display: "flex",
+        gap: 8,
+        alignItems: "center",
+      }}
+    >
+      {/* Left pill — main nav (260px) or recipes back-orb (60px) */}
+      <nav
+        ref={!isPantryMode ? navRef : undefined}
+        className="glass-nav select-none touch-none"
+        style={{
+          ...pillBase,
+          width: isPantryMode ? ORB_W : MAIN_NAV_W,
+          minWidth: isPantryMode ? ORB_W : MAIN_NAV_W,
+          height: 48,
+        }}
       >
-        <nav
-          ref={navRef}
-          className="glass-nav flex items-center rounded-[28px] px-0 py-0 relative select-none touch-none"
-          style={{ overflow: "visible" }}
-        >
-          {/* Pill glass indicator — z:1, below items and lens layer */}
-          {ready && (
-            <NavPill leftMv={leftMv} yNormal={yNormal} hidden={isAiActive} />
-          )}
-
-          {/* Lens distortion layer — z:5, clipped to pill bounds, pointer-none */}
-          {ready && (
-            <NavLens
-              items={items}
-              leftMv={leftMv}
-              measure={measure}
-              displayActiveIndex={staticActiveIndex}
-              yNormal={yNormal}
-            />
-          )}
-
-          {items.map((item, i) => (
-            <div
-              key={item.href}
-              ref={(el) => {
-                itemRefs.current[i] = el;
-              }}
-              style={{
-                zIndex: 4,
-                position: "relative",
-                flex: 1,
-                display: "flex",
-              }}
-            >
-              <NavItem
-                label={item.label}
-                icon={item.icon}
-                renderIcon={
-                  item.label === "AI Import"
-                    ? (active) => <AINavIcon isActive={active} />
-                    : undefined
-                }
-                isActive={i === staticActiveIndex}
-                onClick={() => navigate.push(item.href)}
-                hideLabelWhenActive={item.label === "AI Import"}
+        {isPantryMode ? (
+          // Pantry mode: single back orb
+          <button
+            type="button"
+            data-testid="pantry-back-orb"
+            onClick={() => navigate.back(routes.recipes.list(locale))}
+            style={{ ...fadeIn, ...orbButtonStyle }}
+            aria-label="Back to Recipes"
+          >
+            <ChevronLeft size={20} style={{ color: "var(--fg-2)" }} />
+          </button>
+        ) : (
+          // Main mode: full nav with pill indicator + lens
+          <>
+            {ready && (
+              <NavPill leftMv={leftMv} yNormal={yNormal} hidden={isAiActive} />
+            )}
+            {ready && (
+              <NavLens
+                items={items}
+                leftMv={leftMv}
+                measure={measure}
+                displayActiveIndex={staticActiveIndex}
+                yNormal={yNormal}
               />
-            </div>
-          ))}
-        </nav>
+            )}
+            {items.map((item, i) => (
+              <div
+                key={item.href}
+                ref={(el) => {
+                  itemRefs.current[i] = el;
+                }}
+                style={{
+                  zIndex: 4,
+                  position: "relative",
+                  flex: 1,
+                  display: "flex",
+                  ...fadeOut,
+                }}
+              >
+                <NavItem
+                  label={item.label}
+                  icon={item.icon}
+                  renderIcon={
+                    item.label === "AI Import"
+                      ? (active) => <AINavIcon isActive={active} />
+                      : undefined
+                  }
+                  isActive={i === staticActiveIndex}
+                  onClick={() => navigate.push(item.href)}
+                  hideLabelWhenActive={item.label === "AI Import"}
+                />
+              </div>
+            ))}
+          </>
+        )}
+      </nav>
+
+      {/* Right orb — pantry basket (60px) or pantry expanded (124px) */}
+      <div
+        className="glass-nav select-none touch-none"
+        style={{
+          ...pillBase,
+          width: isPantryMode ? PANTRY_W : ORB_W,
+          minWidth: isPantryMode ? PANTRY_W : ORB_W,
+          height: 48,
+        }}
+      >
+        {isPantryMode ? (
+          // Pantry mode: expanded label
+          <div
+            data-testid="pantry-label"
+            style={{
+              ...fadeIn,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              paddingLeft: 16,
+              paddingRight: 16,
+              whiteSpace: "nowrap",
+              color: "var(--fg-1)",
+              fontSize: 15,
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🧺</span>
+            <span>Pantry</span>
+          </div>
+        ) : (
+          // Main mode: pantry orb button
+          <button
+            type="button"
+            data-testid="pantry-orb"
+            onClick={() =>
+              navigate.push(
+                routes.pantry(locale),
+                <Suspense>
+                  <PantryPage />
+                </Suspense>,
+              )
+            }
+            style={{ ...fadeOut, ...orbButtonStyle }}
+            aria-label="Open Pantry"
+          >
+            <span style={{ fontSize: 20 }}>🧺</span>
+          </button>
+        )}
       </div>
-    </>
+    </div>
   );
 }
+
+const orbButtonStyle: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  padding: 0,
+};
