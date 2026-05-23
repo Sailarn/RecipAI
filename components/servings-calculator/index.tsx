@@ -19,9 +19,11 @@ export function ServingsCalculator({
   locale,
 }: ServingsCalculatorProps) {
   const [servings, setServings] = useState(originalServings);
+  const [useCanonical, setUseCanonical] = useState(true);
   const [canonicalNames, setCanonicalNames] = useState<Map<string, string>>(
     new Map(),
   );
+  const hasCanonical = (canonicalIngredientIds ?? []).length > 0;
 
   const ratio = servings / originalServings;
 
@@ -49,10 +51,12 @@ export function ServingsCalculator({
   };
 
   const displayName = (ing: RecipeIngredient, idx: number): string => {
-    const canonicalId = canonicalIngredientIds?.[idx];
-    if (canonicalId) {
-      const name = canonicalNames.get(canonicalId);
-      if (name) return name;
+    if (useCanonical) {
+      const canonicalId = canonicalIngredientIds?.[idx];
+      if (canonicalId) {
+        const name = canonicalNames.get(canonicalId);
+        if (name) return name;
+      }
     }
     return ing.item;
   };
@@ -67,15 +71,59 @@ export function ServingsCalculator({
       >
         <div
           style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--fg-2)",
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             marginBottom: 9,
           }}
         >
-          Servings
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--fg-2)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Servings
+          </span>
+          {hasCanonical && (
+            <div
+              style={{
+                display: "flex",
+                borderRadius: 8,
+                border: "1px solid var(--border-subtle)",
+                overflow: "hidden",
+              }}
+            >
+              {(["parsed", "original"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setUseCanonical(mode === "parsed")}
+                  style={{
+                    padding: "3px 9px",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    border: "none",
+                    cursor: "pointer",
+                    background:
+                      (mode === "parsed") === useCanonical
+                        ? "var(--food-accent)"
+                        : "transparent",
+                    color:
+                      (mode === "parsed") === useCanonical
+                        ? "#fff"
+                        : "var(--fg-3)",
+                    transition: "background 0.15s, color 0.15s",
+                  }}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <button
