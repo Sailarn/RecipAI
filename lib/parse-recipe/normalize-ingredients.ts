@@ -6,7 +6,7 @@ import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
 
 const SIMILARITY_THRESHOLD = 0.7;
-const FUSE_THRESHOLD = 0.25;
+const FUSE_THRESHOLD = 0.2;
 const NULL_PATTERNS = [
   /^за смаком$/i,
   /^за бажанням$/i,
@@ -74,8 +74,28 @@ function fuseHit(
   fuse: Fuse<{ id: string; text: string }>,
   text: string,
 ): string | null {
-  const results = fuse.search(preprocessIngredient(text));
-  return results.length > 0 ? results[0].item.id : null;
+  const preprocessed = preprocessIngredient(text);
+
+  // Try the full preprocessed text first
+  const full = fuse.search(preprocessed);
+  if (full.length > 0) return full[0].item.id;
+
+  // Fall back to individual token search — handles multi-word phrases like
+  // "кетчупу Торчин для дітей" → token "кетчупу" → ketchup.
+  // Guard: only accept when the matched alias is ≤ 2 words, so a common word
+  // like "власному" doesn't hit a long alias phrase.
+  const tokens = preprocessed
+    .split(/\s+/)
+    .map((t) => t.replace(/[.,]/g, ""))
+    .filter((t) => t.length > 3);
+  for (const token of tokens) {
+    const r = fuse.search(token);
+    if (r.length > 0 && r[0].item.text.trim().split(/\s+/).length <= 2) {
+      return r[0].item.id;
+    }
+  }
+
+  return null;
 }
 
 async function createProvisional(
