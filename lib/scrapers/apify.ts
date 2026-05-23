@@ -38,13 +38,9 @@ async function runApifyActor(url: string): Promise<Response> {
         );
       }
 
-      console.log(
-        `Apify attempt ${attempt} failed (${res.status}), retrying...`,
-      );
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
     } catch (err) {
       if (attempt === RETRY_ATTEMPTS) throw err;
-      console.log(`Apify attempt ${attempt} threw, retrying:`, err);
       await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
     }
   }

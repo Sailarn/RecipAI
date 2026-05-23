@@ -28,7 +28,6 @@ export async function parseVideoRecipe(
 
   // if transcript is empty or too short, fall back to caption only
   if (transcript.length < MIN_TRANSCRIPT_LENGTH) {
-    console.log("Transcript too short, falling back to caption only");
     if (!caption) {
       throw new Error(
         "No speech detected in video and no caption available. Cannot extract recipe.",

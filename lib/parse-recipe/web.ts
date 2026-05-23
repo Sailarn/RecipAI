@@ -18,18 +18,13 @@ export async function parseWebRecipe(
 ): Promise<ParsedRecipe> {
   let html: string;
   try {
-    console.log("Fetching with PhantomJsCloud...");
     html = await fetchHtmlWithPhantomJs(url);
-    console.log("PhantomJsCloud ok, length:", html.length);
-  } catch (err) {
-    console.log("PhantomJsCloud failed, falling back to scrape.do:", err);
+  } catch {
     html = await fetchHtmlWithScrapeDo(url);
-    console.log("scrape.do ok, length:", html.length);
   }
 
   const $ = cheerio.load(html);
   const stepImages = extractStepImages($);
-  console.log("Step images found:", stepImages.length);
 
   // try schema.org first — instant if found
   const schemaRecipe = extractSchemaRecipe(html);

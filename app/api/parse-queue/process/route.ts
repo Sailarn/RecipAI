@@ -8,6 +8,7 @@ import { uploadImageServer } from "@/lib/imagekit";
 import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
+import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;
 
@@ -31,7 +32,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
   try {
-    const recipe = await parseRecipeFromUrl(
+    const recipe = await parseWithRetry(
+      parseRecipeFromUrl,
       job.url,
       job.userComment ?? undefined,
     );
@@ -80,7 +82,6 @@ export async function POST(req: NextRequest) {
         updatedAt: new Date(),
       });
 
-      // send success message
       const ingredients = r.ingredients?.length ?? 0;
       const steps = r.instructions?.length ?? 0;
       await sendTelegramMessage(
@@ -100,12 +101,8 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(parseJobs.id, jobId));
 
-    // notify failure via Telegram
     if (job.telegramChatId) {
-      await sendTelegramMessage(
-        job.telegramChatId,
-        `❌ Failed to parse recipe from:\n${job.url}\n\nTry again or open RecipAI to parse manually.`,
-      );
+      await sendTelegramMessage(job.telegramChatId, classifyParseError(error));
     }
 
     return NextResponse.json({ ok: false });

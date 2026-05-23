@@ -30,12 +30,6 @@ export async function fetchHtmlWithPhantomJs(url: string): Promise<string> {
   }
 
   const data = await response.json();
-  console.log("PhantomJs response keys:", JSON.stringify(Object.keys(data)));
-  console.log("PhantomJs full response:", JSON.stringify(data).slice(0, 500));
-  console.log(
-    "pageResponse[0] keys:",
-    JSON.stringify(Object.keys(data.pageResponses?.[0] || {})),
-  );
   const html =
     data?.pageResponses?.[0]?.frameData?.content ||
     data?.content?.data ||
