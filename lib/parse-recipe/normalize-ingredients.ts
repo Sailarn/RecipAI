@@ -5,7 +5,8 @@ import { api } from "@/lib/routes";
 import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
 
-const SIMILARITY_THRESHOLD = 0.7;
+const SIMILARITY_THRESHOLD = 0.82;
+const SIMILARITY_GAP = 0.08;
 const FUSE_THRESHOLD = 0.2;
 const NULL_PATTERNS = [
   /^за смаком$/i,
@@ -186,15 +187,21 @@ export async function normalizeRecipeIngredients(
       if (queryEmbs && vocabEmbs) {
         const qEmb = queryEmbs[i];
         let best = 0;
+        let second = 0;
         let bestId = "";
         for (const ve of vocabEmbs) {
           const sim = cosineSim(qEmb, ve.embedding);
           if (sim > best) {
+            second = best;
             best = sim;
             bestId = ve.id;
+          } else if (sim > second) {
+            second = sim;
           }
         }
-        if (best >= SIMILARITY_THRESHOLD) matchedId = bestId;
+        if (best >= SIMILARITY_THRESHOLD && best - second >= SIMILARITY_GAP) {
+          matchedId = bestId;
+        }
       }
 
       if (!matchedId) {
