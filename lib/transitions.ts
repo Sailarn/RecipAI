@@ -14,9 +14,11 @@ export function useNavigate() {
         router.push(href);
       }
     },
-    back: () => {
+    back: (fallback?: string) => {
       if (stack.canPop) {
         stack.pop();
+      } else if (fallback) {
+        router.replace(fallback);
       } else {
         router.back();
       }

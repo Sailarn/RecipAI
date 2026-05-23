@@ -1,10 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Recipe } from "@/lib/db/schema";
+import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { BasicInfo } from "./basic-info";
 import { getDefaultValues, type ParsedRecipeData } from "./default-values";
@@ -25,8 +27,10 @@ interface RecipeFormProps {
 export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const t = useTranslations("recipeForm");
   const navigate = useNavigate();
+  const params = useParams();
+  const locale = (params.locale as string) ?? "en";
 
-  const handleFormBack = () => navigate.back();
+  const handleFormBack = () => navigate.back(routes.recipes.list(locale));
   const recipeSchema = createRecipeSchema(t);
 
   const {
@@ -36,7 +40,6 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     trigger,
     watch,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<RecipeFormData>({
     // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
@@ -184,16 +187,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         onBack={handleBack}
         onNext={handleNext}
         // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
-        onSave={handleSubmit(onSubmit as any, (errs) => {
-          console.warn(
-            "[RecipeForm] validation errors:",
-            JSON.stringify(errs, null, 2),
-          );
-          console.warn(
-            "[RecipeForm] raw form values:",
-            JSON.stringify(getValues(), null, 2),
-          );
-        })}
+        onSave={handleSubmit(onSubmit as any)}
       />
     </div>
   );
