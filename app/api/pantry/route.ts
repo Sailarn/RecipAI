@@ -45,17 +45,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await db.insert(pantry).values({
-    id,
-    userId: session.user.id,
-    ingredientId: ingredientId ?? null,
-    name,
-    qty,
-    unit,
-    cat,
-    on,
-    addedAt: new Date(),
-  });
+  await db
+    .insert(pantry)
+    .values({
+      id,
+      userId: session.user.id,
+      ingredientId: ingredientId ?? null,
+      name,
+      qty,
+      unit,
+      cat,
+      on,
+      addedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: pantry.id,
+      set: { ingredientId: ingredientId ?? null, name, qty, unit, cat, on },
+    });
 
   return NextResponse.json({ ok: true });
 }
