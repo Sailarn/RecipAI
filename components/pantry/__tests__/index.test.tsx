@@ -245,6 +245,24 @@ describe("AddItemSheet", () => {
       });
       expect(screen.getByTestId("add-item-sheet")).toBeInTheDocument();
     });
+
+    it("shows toast and keeps sheet open when addPantryItem throws", async () => {
+      vi.mocked(createProvisionalIngredient).mockResolvedValue(
+        "provisional-id",
+      );
+      vi.mocked(addPantryItem).mockRejectedValue(new Error("QuotaExceeded"));
+      await openSheet();
+
+      fireEvent.change(screen.getByTestId("item-name-input"), {
+        target: { value: "Anything" },
+      });
+      fireEvent.click(screen.getByTestId("add-item-submit"));
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith("Couldn't save ingredient");
+      });
+      expect(screen.getByTestId("add-item-sheet")).toBeInTheDocument();
+    });
   });
 
   describe("validation", () => {

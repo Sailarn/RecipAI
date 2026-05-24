@@ -198,14 +198,19 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
       }
     }
 
-    await addPantryItem({
-      name: trimmed,
-      qty,
-      unit,
-      cat,
-      on: true,
-      ingredientId: resolvedIngredientId,
-    });
+    try {
+      await addPantryItem({
+        name: trimmed,
+        qty,
+        unit,
+        cat,
+        on: true,
+        ingredientId: resolvedIngredientId,
+      });
+    } catch {
+      toast.error("Couldn't save ingredient");
+      return;
+    }
 
     onClose();
   }
