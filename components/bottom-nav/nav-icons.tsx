@@ -1,5 +1,5 @@
 import "@/app/styles/nav-icons.css";
-import { CircleUserRound, UtensilsCrossed } from "lucide-react";
+import { CircleUserRound, ShoppingBasket, UtensilsCrossed } from "lucide-react";
 
 export const RecipesIcon = () => (
   <UtensilsCrossed aria-hidden="true" width={20} height={20} strokeWidth={2} />
@@ -7,6 +7,10 @@ export const RecipesIcon = () => (
 
 export const ProfileIcon = () => (
   <CircleUserRound aria-hidden="true" width={20} height={20} strokeWidth={2} />
+);
+
+export const PantryIcon = () => (
+  <ShoppingBasket aria-hidden="true" width={20} height={20} strokeWidth={2} />
 );
 
 const PARTICLES = [

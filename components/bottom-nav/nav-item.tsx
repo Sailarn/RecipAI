@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "motion/react";
 import type { ComponentType, ReactNode } from "react";
 
@@ -7,8 +9,8 @@ interface NavItemProps {
   renderIcon?: (isActive: boolean) => ReactNode;
   isActive: boolean;
   onClick: () => void;
-  /** When true, the label collapses (display:none) while the item is active.
-   *  Uses no Motion animation so the change is synchronous with the React render. */
+  /** When true the label animates out when the item is active and the icon
+   *  springs down to fill the vertical centre left by the departing text. */
   hideLabelWhenActive?: boolean;
 }
 
@@ -39,36 +41,40 @@ export function NavItem({
       }}
     >
       {hideLabelWhenActive ? (
-        // Plain span — no Motion so the icon repositions synchronously
-        // when the label collapses (display:none removes its space instantly).
-        <span
-          className="flex items-center justify-center"
-          style={{ height: 28 }}
-        >
-          {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
-        </span>
+        // AI Import: label fades and icon slides simultaneously (no DOM removal,
+        // so no two-phase stutter). Label stays in the DOM at opacity 0 so the
+        // flex layout is unchanged — the y offset reaches true vertical centre.
+        <>
+          <motion.span
+            className="flex items-center justify-center"
+            style={{ height: 28 }}
+            animate={{ y: labelHidden ? 6 : 0 }}
+            transition={{ type: "tween", ease: "easeInOut", duration: 0.22 }}
+          >
+            {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
+          </motion.span>
+          <motion.span
+            className="text-[10px] font-medium leading-none text-center"
+            animate={{ opacity: labelHidden ? 0 : 1 }}
+            transition={{ type: "tween", ease: "easeInOut", duration: 0.22 }}
+          >
+            {label}
+          </motion.span>
+        </>
       ) : (
-        // Spring animation for regular nav items that never hide their label.
-        <motion.span
-          className="flex items-center justify-center"
-          style={{ height: 28 }}
-          animate={{ y: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 400,
-            damping: 28,
-            mass: 0.5,
-          }}
-        >
-          {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
-        </motion.span>
+        // Regular items: no animation — plain spans avoid any Motion frame delay.
+        <>
+          <span
+            className="flex items-center justify-center"
+            style={{ height: 28 }}
+          >
+            {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
+          </span>
+          <span className="text-[10px] font-medium leading-none text-center">
+            {label}
+          </span>
+        </>
       )}
-      <span
-        className="text-[10px] font-medium leading-none text-center"
-        style={{ display: labelHidden ? "none" : undefined }}
-      >
-        {label}
-      </span>
     </button>
   );
 }

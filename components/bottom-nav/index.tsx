@@ -5,9 +5,8 @@ import { useTranslations } from "next-intl";
 import { lazy, Suspense } from "react";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
+import { AINavIcon, PantryIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
-import { NavLens } from "./nav-lens";
 import { NavPill } from "./nav-pill";
 import { PILL_H, PILL_W, useBottomNav } from "./use-bottom-nav";
 
@@ -18,8 +17,7 @@ const PantryPage = lazy(() =>
 
 // Width constants for the two-pill layout
 const MAIN_NAV_W = 260;
-const ORB_W = 60;
-const PANTRY_ITEM_W = 96; // compact single-item pantry pill
+const PANTRY_ITEM_W = 80; // compact single-item pantry pill (both modes)
 
 // Vertical centre of a static pill indicator inside a 48px-tall pill
 const STATIC_PILL_TOP = (48 - PILL_H) / 2;
@@ -110,41 +108,55 @@ export function BottomNav() {
         alignItems: "center",
       }}
     >
-      {/* Left pill — main nav (260px) or recipes back orb (60px) */}
+      {/* Left pill — main nav (260px) or recipes item (80px) in pantry mode */}
       <nav
         ref={!isPantryMode ? navRef : undefined}
         className="glass-nav select-none touch-none"
         style={{
           ...pillBase,
-          width: isPantryMode ? ORB_W : MAIN_NAV_W,
-          minWidth: isPantryMode ? ORB_W : MAIN_NAV_W,
+          width: isPantryMode ? PANTRY_ITEM_W : MAIN_NAV_W,
+          minWidth: isPantryMode ? PANTRY_ITEM_W : MAIN_NAV_W,
           height: 48,
         }}
       >
         {isPantryMode ? (
-          // Pantry mode: compact orb with RecipesIcon
+          // Pantry mode: Recipes icon + label as nav item
           <button
             type="button"
             data-testid="pantry-back-orb"
             onClick={() => navigate.back()}
             aria-label="Back to Recipes"
-            style={{ ...fadeIn, ...orbButtonStyle }}
+            style={{ ...fadeIn, ...pantryNavItemStyle }}
           >
-            <RecipesIcon />
+            <span
+              style={{
+                height: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <RecipesIcon />
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                fontFamily: "var(--font-sans)",
+                lineHeight: 1,
+              }}
+            >
+              {tNav("recipes")}
+            </span>
           </button>
         ) : (
           // Main mode: full nav with pill indicator + lens
           <>
             {ready && (
-              <NavPill leftMv={leftMv} yNormal={yNormal} hidden={isAiActive} />
-            )}
-            {ready && (
-              <NavLens
-                items={items}
+              <NavPill
                 leftMv={leftMv}
-                measure={measure}
-                displayActiveIndex={staticActiveIndex}
                 yNormal={yNormal}
+                isHidden={isAiActive}
               />
             )}
             {items.map((item, i) => (
@@ -178,13 +190,13 @@ export function BottomNav() {
         )}
       </nav>
 
-      {/* Right orb — pantry basket (60px) or pantry item (PANTRY_ITEM_W) */}
+      {/* Right pill — pantry nav item (PANTRY_ITEM_W in both modes) */}
       <div
         className="glass-nav select-none touch-none"
         style={{
           ...pillBase,
-          width: isPantryMode ? PANTRY_ITEM_W : ORB_W,
-          minWidth: isPantryMode ? PANTRY_ITEM_W : ORB_W,
+          width: PANTRY_ITEM_W,
+          minWidth: PANTRY_ITEM_W,
           height: 48,
         }}
       >
@@ -227,10 +239,9 @@ export function BottomNav() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 18,
                 }}
               >
-                🧺
+                <PantryIcon />
               </span>
               <span
                 style={{
@@ -245,7 +256,7 @@ export function BottomNav() {
             </div>
           </>
         ) : (
-          // Main mode: pantry orb button
+          // Main mode: pantry nav item (icon + label, same layout as NavItem)
           <button
             type="button"
             data-testid="pantry-orb"
@@ -257,10 +268,13 @@ export function BottomNav() {
                 </Suspense>,
               )
             }
-            style={orbButtonStyle}
+            style={pantryNavItemStyle}
             aria-label="Open Pantry"
           >
-            <span style={{ fontSize: 20 }}>🧺</span>
+            <span style={pantryIconWrapStyle}>
+              <PantryIcon />
+            </span>
+            <span style={pantryLabelStyle}>Pantry</span>
           </button>
         )}
       </div>
@@ -268,14 +282,33 @@ export function BottomNav() {
   );
 }
 
-const orbButtonStyle: React.CSSProperties = {
+const pantryNavItemStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  gap: 2,
+  color: "var(--fg-2)",
   background: "none",
   border: "none",
   cursor: "pointer",
   padding: 0,
+  userSelect: "none",
+  WebkitUserSelect: "none",
+};
+
+const pantryIconWrapStyle: React.CSSProperties = {
+  height: 28,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const pantryLabelStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  fontFamily: "var(--font-sans)",
+  lineHeight: 1,
 };

@@ -1,41 +1,50 @@
 "use client";
 
 import type { MotionValue } from "motion/react";
-import { motion } from "motion/react";
+import { motion, useMotionValue } from "motion/react";
+import { useLayoutEffect } from "react";
 import { PILL_H, PILL_W } from "./use-bottom-nav";
 
 interface NavPillProps {
   leftMv: MotionValue<number>;
-  yNormal: number; // vertical offset that centers the pill within the nav
-  hidden?: boolean; // when true, pill is invisible but stays mounted to track position
+  yNormal: number;
+  /** When true the pill is hidden immediately but leftMv still tracks the slot,
+   *  so when isHidden goes false again the pill springs away from the correct
+   *  position without any extra snap. */
+  isHidden?: boolean;
 }
 
-export function NavPill({ leftMv, yNormal, hidden }: NavPillProps) {
+/**
+ * The glass pill indicator that slides under the active nav item.
+ * Position is driven by leftMv (a MotionValue animated by the spring in
+ * useBottomNav). All other dimensions are static CSS — no Motion animate
+ * props, which avoids the "grow-in" flash that occurred on first mount when
+ * width/height were missing from initial.
+ *
+ * Visibility (opacity) is updated synchronously via useLayoutEffect so it
+ * changes in the same frame as the parent's spring — no render-cycle gap.
+ */
+export function NavPill({ leftMv, yNormal, isHidden }: NavPillProps) {
+  const opacityMv = useMotionValue(isHidden ? 0 : 1);
+
+  useLayoutEffect(() => {
+    opacityMv.set(isHidden ? 0 : 1);
+  }, [isHidden, opacityMv]);
+
   return (
     <motion.div
-      initial={{ borderRadius: 28 }}
-      animate={{
-        width: PILL_W,
-        height: PILL_H,
-        borderRadius: 28,
-        opacity: hidden ? 0 : 1,
-        scale: hidden ? 0.8 : 1,
-      }}
-      transition={{
-        width: { type: "spring", stiffness: 400, damping: 28 },
-        height: { type: "spring", stiffness: 400, damping: 28 },
-        borderRadius: { duration: 0.15 },
-        opacity: { duration: 0.15 },
-        scale: { duration: 0.15 },
-      }}
+      className="nav-pill"
       style={{
         position: "absolute",
         top: yNormal,
         left: leftMv,
+        width: PILL_W,
+        height: PILL_H,
+        borderRadius: 28,
         pointerEvents: "none",
         zIndex: 0,
+        opacity: opacityMv,
       }}
-      className="nav-pill"
     />
   );
 }
