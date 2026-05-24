@@ -377,16 +377,22 @@ export function PantryPage() {
   const outOfStock = items.filter((i) => !i.on);
 
   return (
+    // position:relative so the FAB (position:absolute) anchors to this container,
+    // not the viewport — necessary because PageStack's willChange:transform breaks
+    // position:fixed inside it.
     <div
       style={{
-        minHeight: "100dvh",
+        position: "relative",
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
         background: "var(--bg)",
-        paddingBottom: "max(100px, calc(env(safe-area-inset-bottom) + 80px))",
       }}
     >
-      {/* Header */}
+      {/* Header — stays pinned at the top */}
       <div
         style={{
+          flexShrink: 0,
           padding: "max(20px, calc(env(safe-area-inset-top) + 8px)) 20px 16px",
         }}
       >
@@ -415,65 +421,42 @@ export function PantryPage() {
         </p>
       </div>
 
-      {/* Empty state */}
-      {items.length === 0 && (
-        <div
-          data-testid="pantry-empty"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "64px 24px",
-            gap: 12,
-            color: "var(--fg-3)",
-            fontFamily: "var(--font-sans)",
-            fontSize: 15,
-            textAlign: "center",
-          }}
-        >
-          <span style={{ fontSize: 40 }}>🧺</span>
-          <p style={{ margin: 0 }}>Your pantry is empty.</p>
-          <p style={{ margin: 0, fontSize: 13 }}>
-            Tap + to add ingredients you have at home.
-          </p>
-        </div>
-      )}
-
-      {/* In-stock items */}
-      {inStock.length > 0 && (
-        <div
-          className="glass-card"
-          style={{
-            margin: "0 16px 12px",
-            borderRadius: 18,
-            overflow: "hidden",
-          }}
-        >
-          {inStock.map((item) => (
-            <PantryRow key={item.id} item={item} />
-          ))}
-        </div>
-      )}
-
-      {/* Out-of-stock divider + items */}
-      {outOfStock.length > 0 && (
-        <>
-          {inStock.length > 0 && (
-            <p
-              style={{
-                margin: "0 20px 8px",
-                fontSize: 11,
-                fontWeight: 600,
-                color: "var(--fg-3)",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              Out of stock
+      {/* Scrollable list area */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch" as never,
+          paddingBottom: "max(100px, calc(env(safe-area-inset-bottom) + 80px))",
+        }}
+      >
+        {/* Empty state */}
+        {items.length === 0 && (
+          <div
+            data-testid="pantry-empty"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "64px 24px",
+              gap: 12,
+              color: "var(--fg-3)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 15,
+              textAlign: "center",
+            }}
+          >
+            <span style={{ fontSize: 40 }}>🧺</span>
+            <p style={{ margin: 0 }}>Your pantry is empty.</p>
+            <p style={{ margin: 0, fontSize: 13 }}>
+              Tap + to add ingredients you have at home.
             </p>
-          )}
+          </div>
+        )}
+
+        {/* In-stock items */}
+        {inStock.length > 0 && (
           <div
             className="glass-card"
             style={{
@@ -482,20 +465,53 @@ export function PantryPage() {
               overflow: "hidden",
             }}
           >
-            {outOfStock.map((item) => (
+            {inStock.map((item) => (
               <PantryRow key={item.id} item={item} />
             ))}
           </div>
-        </>
-      )}
+        )}
 
-      {/* FAB — add item */}
+        {/* Out-of-stock divider + items */}
+        {outOfStock.length > 0 && (
+          <>
+            {inStock.length > 0 && (
+              <p
+                style={{
+                  margin: "0 20px 8px",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--fg-3)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
+                Out of stock
+              </p>
+            )}
+            <div
+              className="glass-card"
+              style={{
+                margin: "0 16px 12px",
+                borderRadius: 18,
+                overflow: "hidden",
+              }}
+            >
+              {outOfStock.map((item) => (
+                <PantryRow key={item.id} item={item} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* FAB — anchored to the page container, not the viewport */}
       <button
         type="button"
         data-testid="add-pantry-item"
         onClick={() => setShowAddSheet(true)}
         style={{
-          position: "fixed",
+          position: "absolute",
           right: 20,
           bottom: "calc(env(safe-area-inset-bottom) + 88px)",
           width: 52,
