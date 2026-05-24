@@ -32,6 +32,10 @@ vi.mock("../use-bottom-nav", () => ({
 
 vi.mock("../nav-pill", () => ({ NavPill: () => null }));
 vi.mock("../nav-lens", () => ({ NavLens: () => null }));
+vi.mock("@/lib/recipes-prefetch", () => ({
+  prefetchRecipesPage: vi.fn(),
+  recipesPageCache: { recipes: undefined, collections: undefined },
+}));
 
 import { usePathname } from "next/navigation";
 import { useNavigate } from "@/lib/transitions";

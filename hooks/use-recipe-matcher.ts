@@ -1,10 +1,10 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useMemo } from "react";
+import { useLiveQueryTransition } from "@/hooks/use-live-query-transition";
 import { db } from "@/lib/db/db";
 import type { Recipe } from "@/lib/db/schema";
 
 export function useRecipeMatcher() {
-  const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
+  const pantryItems = useLiveQueryTransition(() => db.pantry.toArray(), []);
 
   const pantrySet = useMemo(
     () =>

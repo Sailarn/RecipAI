@@ -3,6 +3,7 @@
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lazy, Suspense } from "react";
+import { prefetchRecipesPage } from "@/lib/recipes-prefetch";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { AINavIcon, PantryIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
@@ -165,6 +166,9 @@ export function BottomNav() {
                 ref={(el) => {
                   itemRefs.current[i] = el;
                 }}
+                // Recipes tab (i === 0): seed cache as soon as the finger
+                // touches, giving Dexie a head-start before navigation fires.
+                onPointerDown={i === 0 ? prefetchRecipesPage : undefined}
                 style={{
                   zIndex: 4,
                   position: "relative",

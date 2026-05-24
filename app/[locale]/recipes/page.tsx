@@ -1,7 +1,6 @@
 "use client";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +11,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
+import { useLiveQueryTransition } from "@/hooks/use-live-query-transition";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useRecipeMatcher } from "@/hooks/use-recipe-matcher";
@@ -23,10 +23,8 @@ import {
   renameCollection,
 } from "@/lib/db/collections";
 import { getAllRecipes } from "@/lib/db/recipes";
-import type { Collection, Recipe } from "@/lib/db/schema";
-
-let _recipesCache: Recipe[] | undefined;
-let _collectionsCache: Collection[] | undefined;
+import type { Collection } from "@/lib/db/schema";
+import { recipesPageCache } from "@/lib/recipes-prefetch";
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -45,9 +43,9 @@ function getGreeting() {
 
 export default function RecipesPage() {
   const t = useTranslations("recipes");
-  const recipesFromDB = useLiveQuery(() => getAllRecipes(), []);
-  if (recipesFromDB !== undefined) _recipesCache = recipesFromDB;
-  const recipes = recipesFromDB ?? _recipesCache;
+  const recipesFromDB = useLiveQueryTransition(() => getAllRecipes(), []);
+  if (recipesFromDB !== undefined) recipesPageCache.recipes = recipesFromDB;
+  const recipes = recipesFromDB ?? recipesPageCache.recipes;
   const loading = recipes === undefined;
   const { getMissing } = useRecipeMatcher();
   const {
@@ -63,9 +61,13 @@ export default function RecipesPage() {
     setCollectionId,
     filtered,
   } = useRecipeFilter(recipes ?? [], getMissing);
-  const collectionsFromDB = useLiveQuery(() => getAllCollections(), []);
-  if (collectionsFromDB !== undefined) _collectionsCache = collectionsFromDB;
-  const collections = collectionsFromDB ?? _collectionsCache ?? [];
+  const collectionsFromDB = useLiveQueryTransition(
+    () => getAllCollections(),
+    [],
+  );
+  if (collectionsFromDB !== undefined)
+    recipesPageCache.collections = collectionsFromDB;
+  const collections = collectionsFromDB ?? recipesPageCache.collections ?? [];
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(
     null,
@@ -113,11 +115,11 @@ export default function RecipesPage() {
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    // 240px covers a typical card (image ~150px + title + padding) plus 10px row gap.
-    // measureElement updates this per-row after first paint so variable heights
-    // (long titles, multi-badge cards) are tracked accurately.
-    estimateSize: () => 240,
-    overscan: 3,
+    // 170px: image (96) + content area (64: p-2 + 2-line title + servings) + row paddingBottom (10).
+    // Keeping the estimate close to real height minimises the correction render
+    // that measureElement fires after first paint.
+    estimateSize: () => 170,
+    overscan: 5,
   });
 
   const { triggerSync } = useSyncOnLogin();
@@ -228,8 +230,6 @@ export default function RecipesPage() {
       ) : (
         <div
           style={{
-            paddingLeft: 14,
-            paddingRight: 14,
             marginTop: 12,
             position: "relative",
             height: virtualizer.getTotalSize(),
@@ -247,10 +247,14 @@ export default function RecipesPage() {
                   top: 0,
                   left: 0,
                   width: "100%",
+                  // border-box so left/right padding doesn't push width beyond 100%
+                  boxSizing: "border-box",
                   transform: `translateY(${virtualRow.start}px)`,
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
                   gap: 10,
+                  paddingLeft: 14,
+                  paddingRight: 14,
                   paddingBottom: 10,
                 }}
               >

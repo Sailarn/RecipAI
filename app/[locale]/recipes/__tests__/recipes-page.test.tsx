@@ -36,6 +36,11 @@ vi.mock("@/lib/db/recipes", () => ({
   getAllRecipes: vi.fn(),
 }));
 
+vi.mock("@/lib/recipes-prefetch", () => ({
+  prefetchRecipesPage: vi.fn(),
+  recipesPageCache: { recipes: undefined, collections: undefined },
+}));
+
 // useVirtualizer relies on scroll-element measurements that are always 0 in
 // jsdom, so no virtual items are produced and cards never render. This mock
 // returns every row as a visible item so existing card-content tests still work.
