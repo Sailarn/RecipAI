@@ -1,5 +1,6 @@
 "use client";
 
+import { ShoppingBasket } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useRef, useState } from "react";
@@ -239,9 +240,18 @@ export const RecipeCard = memo(function RecipeCard({
                   color: "var(--food-accent, rgba(251,191,36,1))",
                   fontFamily: "var(--font-sans)",
                   fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
                 }}
               >
-                Missing {missing}
+                <ShoppingBasket
+                  width={11}
+                  height={11}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                />
+                {missing}
               </p>
             )}
           </div>
