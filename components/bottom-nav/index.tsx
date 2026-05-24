@@ -19,7 +19,7 @@ const PantryPage = lazy(() =>
 // Width constants for the two-pill layout
 const MAIN_NAV_W = 260;
 const ORB_W = 60;
-const PANTRY_W = 124;
+const PANTRY_ITEM_W = 96; // compact single-item pantry pill
 
 // Vertical centre of a static pill indicator inside a 48px-tall pill
 const STATIC_PILL_TOP = (48 - PILL_H) / 2;
@@ -110,60 +110,27 @@ export function BottomNav() {
         alignItems: "center",
       }}
     >
-      {/* Left pill — main nav (260px) or recipes back (PANTRY_W) */}
+      {/* Left pill — main nav (260px) or recipes back orb (60px) */}
       <nav
         ref={!isPantryMode ? navRef : undefined}
         className="glass-nav select-none touch-none"
         style={{
           ...pillBase,
-          width: isPantryMode ? PANTRY_W : MAIN_NAV_W,
-          minWidth: isPantryMode ? PANTRY_W : MAIN_NAV_W,
+          width: isPantryMode ? ORB_W : MAIN_NAV_W,
+          minWidth: isPantryMode ? ORB_W : MAIN_NAV_W,
           height: 48,
         }}
       >
         {isPantryMode ? (
-          // Pantry mode: Recipes nav-item style back button
+          // Pantry mode: compact orb with RecipesIcon
           <button
             type="button"
             data-testid="pantry-back-orb"
             onClick={() => navigate.back()}
             aria-label="Back to Recipes"
-            style={{
-              ...fadeIn,
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              color: "var(--fg-2)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-            }}
+            style={{ ...fadeIn, ...orbButtonStyle }}
           >
-            <span
-              style={{
-                height: 28,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <RecipesIcon />
-            </span>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 500,
-                fontFamily: "var(--font-sans)",
-                lineHeight: 1,
-              }}
-            >
-              Recipes
-            </span>
+            <RecipesIcon />
           </button>
         ) : (
           // Main mode: full nav with pill indicator + lens
@@ -211,25 +178,25 @@ export function BottomNav() {
         )}
       </nav>
 
-      {/* Right orb — pantry basket (60px) or pantry expanded (124px) */}
+      {/* Right orb — pantry basket (60px) or pantry item (PANTRY_ITEM_W) */}
       <div
         className="glass-nav select-none touch-none"
         style={{
           ...pillBase,
-          width: isPantryMode ? PANTRY_W : ORB_W,
-          minWidth: isPantryMode ? PANTRY_W : ORB_W,
+          width: isPantryMode ? PANTRY_ITEM_W : ORB_W,
+          minWidth: isPantryMode ? PANTRY_ITEM_W : ORB_W,
           height: 48,
         }}
       >
         {isPantryMode ? (
-          // Pantry mode: Pantry nav-item style with pill indicator
+          // Pantry mode: Pantry icon + label with pill indicator
           <>
             {/* Static pill indicator — same glass style as the main nav pill */}
             <div
               className="nav-pill"
               style={{
                 position: "absolute",
-                left: (PANTRY_W - PILL_W) / 2,
+                left: (PANTRY_ITEM_W - PILL_W) / 2,
                 top: STATIC_PILL_TOP,
                 width: PILL_W,
                 height: PILL_H,

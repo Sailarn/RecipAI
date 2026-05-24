@@ -7,7 +7,8 @@ interface NavItemProps {
   renderIcon?: (isActive: boolean) => ReactNode;
   isActive: boolean;
   onClick: () => void;
-  /** When true, the label text becomes invisible while the item is active. */
+  /** When true, the label collapses (display:none) while the item is active.
+   *  Uses no Motion animation so the change is synchronous with the React render. */
   hideLabelWhenActive?: boolean;
 }
 
@@ -37,23 +38,34 @@ export function NavItem({
         cursor: "pointer",
       }}
     >
-      {/* Icon wrapper — shifts down by half the label+gap height when label is hidden
-          so the icon stays vertically centered in the button. */}
-      <motion.span
-        className="flex items-center justify-center"
-        style={{ height: 28 }}
-        animate={{ y: labelHidden ? 6 : 0 }}
-        transition={
-          hideLabelWhenActive
-            ? { duration: 0 }
-            : { type: "spring", stiffness: 400, damping: 28, mass: 0.5 }
-        }
-      >
-        {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
-      </motion.span>
+      {hideLabelWhenActive ? (
+        // Plain span — no Motion so the icon repositions synchronously
+        // when the label collapses (display:none removes its space instantly).
+        <span
+          className="flex items-center justify-center"
+          style={{ height: 28 }}
+        >
+          {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
+        </span>
+      ) : (
+        // Spring animation for regular nav items that never hide their label.
+        <motion.span
+          className="flex items-center justify-center"
+          style={{ height: 28 }}
+          animate={{ y: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 28,
+            mass: 0.5,
+          }}
+        >
+          {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
+        </motion.span>
+      )}
       <span
         className="text-[10px] font-medium leading-none text-center"
-        style={{ visibility: labelHidden ? "hidden" : "visible" }}
+        style={{ display: labelHidden ? "none" : undefined }}
       >
         {label}
       </span>
