@@ -177,9 +177,11 @@ describe("useRecipeFilter", () => {
   });
 
   describe("cancook / nearly filters with getMissing", () => {
-    const mockGetMissing = (recipe: Recipe): number | null => {
-      if (recipe.id === "2") return 0;
-      if (recipe.id === "3") return 2;
+    const mockGetMissing = (
+      recipe: Recipe,
+    ): { missing: number; total: number } | null => {
+      if (recipe.id === "2") return { missing: 0, total: 5 };
+      if (recipe.id === "3") return { missing: 2, total: 5 };
       return null;
     };
 

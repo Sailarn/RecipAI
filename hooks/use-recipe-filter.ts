@@ -6,7 +6,7 @@ export type SortOption = "newest" | "oldest" | "az" | "za";
 
 export function useRecipeFilter(
   recipes: Recipe[],
-  getMissing?: (recipe: Recipe) => number | null,
+  getMissing?: (recipe: Recipe) => { missing: number; total: number } | null,
 ) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("newest");
@@ -34,9 +34,9 @@ export function useRecipeFilter(
       result = result.filter((r) =>
         status.some((s) => {
           if (s === "tried") return r.status === "tried";
-          if (s === "cancook") return getMissing?.(r) === 0;
+          if (s === "cancook") return getMissing?.(r)?.missing === 0;
           if (s === "nearly") {
-            const m = getMissing?.(r);
+            const m = getMissing?.(r)?.missing;
             return m === 1 || m === 2;
           }
           return false;

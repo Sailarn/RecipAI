@@ -19,14 +19,14 @@ interface RecipeCardProps {
   recipe: Recipe;
   collections: Collection[];
   priority?: boolean;
-  missing?: number | null;
+  pantryMatch?: { missing: number; total: number } | null;
 }
 
 export const RecipeCard = memo(function RecipeCard({
   recipe,
   collections,
   priority = false,
-  missing,
+  pantryMatch,
 }: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -177,8 +177,8 @@ export const RecipeCard = memo(function RecipeCard({
               </svg>
             </div>
           )}
-          {/* Can Cook badge — missing === 0 */}
-          {missing === 0 && recipe.status !== "tried" && (
+          {/* Can Cook badge — all ingredients in pantry */}
+          {pantryMatch?.missing === 0 && recipe.status !== "tried" && (
             <div
               data-testid="badge-cancook"
               style={{
@@ -196,21 +196,13 @@ export const RecipeCard = memo(function RecipeCard({
                 justifyContent: "center",
               }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
+              <ShoppingBasket
+                width={12}
+                height={12}
+                strokeWidth={2.2}
+                color="#fff"
                 aria-hidden="true"
-              >
-                <path
-                  d="M2 6l3 3 5-5"
-                  stroke="#fff"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              />
             </div>
           )}
         </div>
@@ -232,7 +224,7 @@ export const RecipeCard = memo(function RecipeCard({
                 🍽️ {recipe.servings} {t("servings")}
               </p>
             )}
-            {(missing === 1 || missing === 2) && (
+            {pantryMatch && pantryMatch.missing > 0 && (
               <p
                 data-testid="badge-nearly"
                 className="text-[10px] ml-auto"
@@ -251,7 +243,7 @@ export const RecipeCard = memo(function RecipeCard({
                   strokeWidth={2.2}
                   aria-hidden="true"
                 />
-                {missing}
+                {pantryMatch.total - pantryMatch.missing}/{pantryMatch.total}
               </p>
             )}
           </div>

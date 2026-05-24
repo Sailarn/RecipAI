@@ -264,7 +264,7 @@ export default function RecipesPage() {
                     recipe={recipe}
                     collections={collections}
                     priority={virtualRow.index === 0}
-                    missing={getMissing(recipe)}
+                    pantryMatch={getMissing(recipe)}
                   />
                 ))}
                 {/* Keep grid balanced when the last row has one card */}

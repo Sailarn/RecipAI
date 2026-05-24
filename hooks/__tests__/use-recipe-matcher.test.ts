@@ -45,7 +45,7 @@ describe("useRecipeMatcher", () => {
     expect(result.current.getMissing(makeRecipe([]) as Recipe)).toBeNull();
   });
 
-  it("returns 0 when all canonical ingredients are in pantry (on=true)", () => {
+  it("returns missing:0 and total when all canonical ingredients are in pantry (on=true)", () => {
     vi.mocked(useLiveQueryTransition).mockReturnValue([
       makePantryItem("p1", "ing-1", true),
       makePantryItem("p2", "ing-2", true),
@@ -53,10 +53,10 @@ describe("useRecipeMatcher", () => {
     const { result } = renderHook(() => useRecipeMatcher());
     expect(
       result.current.getMissing(makeRecipe(["ing-1", "ing-2"]) as Recipe),
-    ).toBe(0);
+    ).toEqual({ missing: 0, total: 2 });
   });
 
-  it("returns missing count when some ingredients not in pantry", () => {
+  it("returns missing count and total when some ingredients not in pantry", () => {
     vi.mocked(useLiveQueryTransition).mockReturnValue([
       makePantryItem("p1", "ing-1", true),
     ]);
@@ -65,7 +65,7 @@ describe("useRecipeMatcher", () => {
       result.current.getMissing(
         makeRecipe(["ing-1", "ing-2", "ing-3"]) as Recipe,
       ),
-    ).toBe(2);
+    ).toEqual({ missing: 2, total: 3 });
   });
 
   it("does not count pantry items with on=false as available", () => {
@@ -73,7 +73,10 @@ describe("useRecipeMatcher", () => {
       makePantryItem("p1", "ing-1", false),
     ]);
     const { result } = renderHook(() => useRecipeMatcher());
-    expect(result.current.getMissing(makeRecipe(["ing-1"]) as Recipe)).toBe(1);
+    expect(result.current.getMissing(makeRecipe(["ing-1"]) as Recipe)).toEqual({
+      missing: 1,
+      total: 1,
+    });
   });
 
   it("does not count pantry items without ingredientId", () => {
@@ -81,7 +84,10 @@ describe("useRecipeMatcher", () => {
       makePantryItem("p1", undefined, true),
     ]);
     const { result } = renderHook(() => useRecipeMatcher());
-    expect(result.current.getMissing(makeRecipe(["ing-1"]) as Recipe)).toBe(1);
+    expect(result.current.getMissing(makeRecipe(["ing-1"]) as Recipe)).toEqual({
+      missing: 1,
+      total: 1,
+    });
   });
 
   it("returns correct count when pantry is empty", () => {
@@ -89,6 +95,6 @@ describe("useRecipeMatcher", () => {
     const { result } = renderHook(() => useRecipeMatcher());
     expect(
       result.current.getMissing(makeRecipe(["ing-1", "ing-2"]) as Recipe),
-    ).toBe(2);
+    ).toEqual({ missing: 2, total: 2 });
   });
 });

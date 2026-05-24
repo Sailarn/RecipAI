@@ -17,10 +17,13 @@ export function useRecipeMatcher() {
   );
 
   const getMissing = useCallback(
-    (recipe: Recipe): number | null => {
+    (recipe: Recipe): { missing: number; total: number } | null => {
       const ids = recipe.canonicalIngredientIds;
       if (!ids || ids.length === 0) return null;
-      return ids.filter((id) => !pantrySet.has(id)).length;
+      return {
+        missing: ids.filter((id) => !pantrySet.has(id)).length,
+        total: ids.length,
+      };
     },
     [pantrySet],
   );
