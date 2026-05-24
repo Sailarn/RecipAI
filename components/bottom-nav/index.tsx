@@ -38,16 +38,11 @@ const pillBase: React.CSSProperties = {
   flexShrink: 0,
 };
 
-// Cross-fade in — content fades in after pill has started expanding
+// Fade-in for content that just appeared (entering a new pill mode)
 const fadeIn: React.CSSProperties = {
   animation: "pillContentIn 0.26s ease forwards",
   animationDelay: "0.18s",
   opacity: 0,
-};
-
-// Cross-fade out — content fades out quickly before pill shrinks
-const fadeOut: React.CSSProperties = {
-  animation: "pillContentOut 0.16s ease forwards",
 };
 
 export function BottomNav() {
@@ -161,7 +156,6 @@ export function BottomNav() {
                   position: "relative",
                   flex: 1,
                   display: "flex",
-                  ...fadeOut,
                 }}
               >
                 <NavItem
@@ -226,7 +220,7 @@ export function BottomNav() {
                 </Suspense>,
               )
             }
-            style={{ ...fadeOut, ...orbButtonStyle }}
+            style={orbButtonStyle}
             aria-label="Open Pantry"
           >
             <span style={{ fontSize: 20 }}>🧺</span>
