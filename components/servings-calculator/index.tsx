@@ -1,7 +1,8 @@
 "use client";
 
+import { useLiveQuery } from "dexie-react-hooks";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "@/lib/db/db";
 import type { RecipeIngredient } from "@/lib/db/schema";
 
@@ -24,6 +25,17 @@ export function ServingsCalculator({
     new Map(),
   );
   const hasCanonical = (canonicalIngredientIds ?? []).length > 0;
+
+  const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
+  const pantrySet = useMemo(
+    () =>
+      new Set(
+        (pantryItems ?? [])
+          .filter((p) => p.on && p.ingredientId)
+          .map((p) => p.ingredientId as string),
+      ),
+    [pantryItems],
+  );
 
   const ratio = servings / originalServings;
 
@@ -48,6 +60,13 @@ export function ServingsCalculator({
     const scaled = amount * ratio;
     if (Number.isInteger(scaled)) return String(scaled);
     return scaled.toFixed(1).replace(/\.0$/, "");
+  };
+
+  // "in" | "out" | "unknown"
+  const stockStatus = (idx: number): "in" | "out" | "unknown" => {
+    const id = canonicalIngredientIds?.[idx];
+    if (!id) return "unknown";
+    return pantrySet.has(id) ? "in" : "out";
   };
 
   const displayName = (ing: RecipeIngredient, idx: number): string => {
@@ -181,40 +200,58 @@ export function ServingsCalculator({
       </div>
 
       <ul>
-        {ingredients.map((ing, i) => (
-          <li
-            key={ing.id || `ing-${i}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 14px",
-              borderBottom:
-                i < ingredients.length - 1
-                  ? "1px solid var(--border-subtle)"
-                  : "none",
-            }}
-          >
-            <div
+        {ingredients.map((ing, i) => {
+          const status = stockStatus(i);
+          const bulletColor =
+            status === "in"
+              ? "rgba(34,197,94,0.9)"
+              : status === "out"
+                ? "rgba(239,68,68,0.7)"
+                : "var(--food-accent)";
+          const textOpacity = status === "out" ? 0.45 : 1;
+
+          return (
+            <li
+              key={ing.id || `ing-${i}`}
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                background: "var(--food-accent)",
-                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 14px",
+                borderBottom:
+                  i < ingredients.length - 1
+                    ? "1px solid var(--border-subtle)"
+                    : "none",
               }}
-            />
-            <span style={{ fontSize: 13, color: "var(--fg-1)" }}>
-              {formatAmount(ing.amount) && (
-                <span style={{ fontWeight: 600 }}>
-                  {formatAmount(ing.amount)}{" "}
-                </span>
-              )}
-              {ing.unit && <span>{ing.unit} </span>}
-              {displayName(ing, i)}
-            </span>
-          </li>
-        ))}
+            >
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  background: bulletColor,
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 13,
+                  color: "var(--fg-1)",
+                  opacity: textOpacity,
+                  transition: "opacity 0.2s",
+                }}
+              >
+                {formatAmount(ing.amount) && (
+                  <span style={{ fontWeight: 600 }}>
+                    {formatAmount(ing.amount)}{" "}
+                  </span>
+                )}
+                {ing.unit && <span>{ing.unit} </span>}
+                {displayName(ing, i)}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
