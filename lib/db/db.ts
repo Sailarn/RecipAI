@@ -69,7 +69,19 @@ class RecipeDatabase extends Dexie {
       pantry: "ingredientId",
     });
 
+    // v9: drop pantry so we can recreate it with a new primary key in v10
+    // (IndexedDB does not support changing a store's keyPath in-place)
     this.version(9).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: "id, entityId, entityType, type, createdAt",
+      ingredients: "id, category",
+      pantry: null,
+    });
+
+    // v10: recreate pantry with id as primary key
+    this.version(10).stores({
       recipes: "id, title, createdAt, updatedAt, status",
       parsedRecipes: "id, createdAt",
       collections: "id, name, createdAt",
