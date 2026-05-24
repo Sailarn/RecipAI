@@ -11,6 +11,7 @@ import type { VocabularyIngredient } from "@/lib/db/schema";
 interface IngredientAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
+  onSelect?: (entry: VocabularyIngredient) => void;
   placeholder?: string;
   error?: boolean;
 }
@@ -31,6 +32,7 @@ const FUSE_THRESHOLD = 0.35;
 export function IngredientAutocomplete({
   value,
   onChange,
+  onSelect,
   placeholder,
   error,
 }: IngredientAutocompleteProps) {
@@ -87,6 +89,7 @@ export function IngredientAutocomplete({
     onChange(getDisplayName(entry));
     setOpen(false);
     setActiveIndex(-1);
+    onSelect?.(entry);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
