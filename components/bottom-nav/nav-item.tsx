@@ -43,7 +43,11 @@ export function NavItem({
         className="flex items-center justify-center"
         style={{ height: 28 }}
         animate={{ y: labelHidden ? 6 : 0 }}
-        transition={{ type: "spring", stiffness: 400, damping: 28, mass: 0.5 }}
+        transition={
+          hideLabelWhenActive
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 400, damping: 28, mass: 0.5 }
+        }
       >
         {renderIcon ? renderIcon(isActive) : Icon ? <Icon /> : null}
       </motion.span>

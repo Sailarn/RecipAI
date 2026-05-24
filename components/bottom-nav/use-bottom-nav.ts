@@ -52,10 +52,6 @@ export function useBottomNav({
   // overriding the freshly-seeded value on the next animation frame.
   const animCtrl = useRef<{ stop(): void } | null>(null);
 
-  // Tracks shouldHide from the previous layout-effect call.
-  // Mutating refs inside effects (not render) is safe in concurrent mode.
-  const prevShouldHideRef = useRef(shouldHide);
-
   // True once the first measurement has completed.
   const measuredRef = useRef(false);
 
@@ -65,12 +61,12 @@ export function useBottomNav({
   // nav transitions from hidden→visible (both can change in the same render).
   // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv and animCtrl are stable refs
   useLayoutEffect(() => {
-    const wasHidden = prevShouldHideRef.current;
-    prevShouldHideRef.current = shouldHide;
-
     if (shouldHide) return;
-    // Already visible and already measured: tab switches handled by the spring effect.
-    if (!wasHidden && measuredRef.current) return;
+    // Already measured: whether this is a tab switch or a return from pantry,
+    // the spring effect (below) repositions the pill using the stored measure.
+    // Re-measuring here risks reading stale ref values mid-commit and producing
+    // a NaN leftMv that can only be cleared by a full page reload.
+    if (measuredRef.current) return;
 
     if (!navRef.current) return;
     const navRect = navRef.current.getBoundingClientRect();

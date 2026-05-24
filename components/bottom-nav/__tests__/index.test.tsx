@@ -97,11 +97,11 @@ describe("BottomNav — pantry mode", () => {
     expect(screen.queryByText("AI Import")).not.toBeInTheDocument();
   });
 
-  it("clicking back orb calls navigate.back with recipes fallback", () => {
+  it("clicking back orb calls navigate.back with no arguments", () => {
     vi.mocked(usePathname).mockReturnValue("/en/pantry");
     render(<BottomNav />);
     fireEvent.click(screen.getByTestId("pantry-back-orb"));
-    expect(navigate.back).toHaveBeenCalledWith("/en/recipes");
+    expect(navigate.back).toHaveBeenCalledWith();
   });
 });
 
