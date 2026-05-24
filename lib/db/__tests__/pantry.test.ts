@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/routes", () => ({
+  api: {
+    pantry: "/api/pantry",
+  },
+}));
+
+const fetchMock = vi.fn();
+vi.stubGlobal("fetch", fetchMock);
+
 vi.mock("../db", () => ({
   db: {
     pantry: {
@@ -25,7 +34,10 @@ import {
   togglePantryItem,
 } from "../pantry";
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  fetchMock.mockResolvedValue(undefined);
+});
 
 describe("getPantryItems", () => {
   it("returns all pantry items from dexie", async () => {
@@ -50,8 +62,8 @@ describe("getPantryItems", () => {
 });
 
 describe("addPantryItem", () => {
-  it("adds item with generated id and addedAt, returns the id", async () => {
-    vi.mocked(db.pantry.add).mockResolvedValue("generated-id" as never);
+  it("adds item with generated id and addedAt to Dexie", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
 
     const id = await addPantryItem({
       name: "Eggs",
@@ -68,15 +80,48 @@ describe("addPantryItem", () => {
         unit: "pcs",
         cat: "Dairy",
         on: true,
-        id: expect.any(String),
+        id,
         addedAt: expect.any(Date),
       }),
     );
-    expect(id).toBe("generated-id");
   });
 
-  it("includes ingredientId when provided", async () => {
-    vi.mocked(db.pantry.add).mockResolvedValue("id-2" as never);
+  it("returns the generated id", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+
+    const id = await addPantryItem({
+      name: "Eggs",
+      qty: 12,
+      unit: "pcs",
+      cat: "Dairy",
+      on: true,
+    });
+
+    expect(typeof id).toBe("string");
+    expect(id.length).toBeGreaterThan(0);
+  });
+
+  it("fires POST to /api/pantry after writing to Dexie", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+
+    await addPantryItem({
+      name: "Eggs",
+      qty: 12,
+      unit: "pcs",
+      cat: "Dairy",
+      on: true,
+    });
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, opts] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/pantry");
+    expect(opts.method).toBe("POST");
+    const body = JSON.parse(opts.body as string) as { name: string };
+    expect(body.name).toBe("Eggs");
+  });
+
+  it("includes ingredientId in the fetch body when provided", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
 
     await addPantryItem({
       name: "Milk",
@@ -87,9 +132,27 @@ describe("addPantryItem", () => {
       ingredientId: "vocab-123",
     });
 
-    expect(db.pantry.add).toHaveBeenCalledWith(
-      expect.objectContaining({ ingredientId: "vocab-123" }),
-    );
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string,
+    ) as { ingredientId: string };
+    expect(body.ingredientId).toBe("vocab-123");
+  });
+
+  it("Dexie write succeeds even when the server fetch throws", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+    fetchMock.mockRejectedValue(new Error("network error"));
+
+    await expect(
+      addPantryItem({
+        name: "Eggs",
+        qty: 1,
+        unit: "pcs",
+        cat: "Other",
+        on: true,
+      }),
+    ).resolves.toEqual(expect.any(String));
+
+    expect(db.pantry.add).toHaveBeenCalledOnce();
   });
 });
 
@@ -100,6 +163,19 @@ describe("removePantryItem", () => {
     await removePantryItem("item-1");
 
     expect(db.pantry.delete).toHaveBeenCalledWith("item-1");
+  });
+
+  it("fires DELETE to /api/pantry after deleting from Dexie", async () => {
+    vi.mocked(db.pantry.delete).mockResolvedValue(undefined);
+
+    await removePantryItem("item-1");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, opts] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/pantry");
+    expect(opts.method).toBe("DELETE");
+    const body = JSON.parse(opts.body as string) as { id: string };
+    expect(body.id).toBe("item-1");
   });
 });
 
@@ -144,6 +220,30 @@ describe("togglePantryItem", () => {
     await togglePantryItem("missing");
 
     expect(db.pantry.update).not.toHaveBeenCalled();
+  });
+
+  it("fires POST with the full updated item after toggling", async () => {
+    const item = {
+      id: "item-1",
+      name: "Flour",
+      qty: 1,
+      unit: "kg",
+      cat: "Pantry",
+      on: true,
+      addedAt: new Date(),
+    };
+    vi.mocked(db.pantry.get).mockResolvedValue(item as never);
+    vi.mocked(db.pantry.update).mockResolvedValue(1 as never);
+
+    await togglePantryItem("item-1");
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, opts] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/pantry");
+    expect(opts.method).toBe("POST");
+    const body = JSON.parse(opts.body as string) as { id: string; on: boolean };
+    expect(body.id).toBe("item-1");
+    expect(body.on).toBe(false);
   });
 });
 
