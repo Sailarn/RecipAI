@@ -177,34 +177,6 @@ export const RecipeCard = memo(function RecipeCard({
               </svg>
             </div>
           )}
-          {/* Can Cook badge — all ingredients in pantry */}
-          {pantryMatch?.missing === 0 && recipe.status !== "tried" && (
-            <div
-              data-testid="badge-cancook"
-              style={{
-                position: "absolute",
-                top: 7,
-                right: 7,
-                width: 22,
-                height: 22,
-                borderRadius: "50%",
-                background: "rgba(34,197,94,0.95)",
-                border: "1.5px solid rgba(134,239,172,0.60)",
-                boxShadow: "0 0 12px rgba(34,197,94,0.45)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ShoppingBasket
-                width={12}
-                height={12}
-                strokeWidth={2.2}
-                color="#fff"
-                aria-hidden="true"
-              />
-            </div>
-          )}
         </div>
         <div className="flex flex-col flex-1 p-2 gap-1">
           <h2
@@ -222,6 +194,26 @@ export const RecipeCard = memo(function RecipeCard({
             {recipe.servings && (
               <p className="text-[11px]" style={{ color: "var(--fg-2)" }}>
                 🍽️ {recipe.servings} {t("servings")}
+              </p>
+            )}
+            {pantryMatch?.missing === 0 && (
+              <p
+                data-testid="badge-cancook"
+                className="text-[10px] ml-auto"
+                style={{
+                  color: "rgba(34,197,94,1)",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <ShoppingBasket
+                  width={11}
+                  height={11}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                />
               </p>
             )}
             {pantryMatch && pantryMatch.missing > 0 && (
