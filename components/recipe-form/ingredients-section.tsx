@@ -9,8 +9,8 @@ import {
   type UseFormRegister,
   useFieldArray,
 } from "react-hook-form";
+import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
 import { Input } from "@/components/ui";
-import { IngredientAutocomplete } from "./ingredient-autocomplete";
 import type { RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {

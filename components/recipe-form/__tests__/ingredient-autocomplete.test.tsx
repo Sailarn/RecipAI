@@ -5,8 +5,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
 import type { VocabularyIngredient } from "@/lib/db/schema";
-import { IngredientAutocomplete } from "../ingredient-autocomplete";
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: vi.fn(),
