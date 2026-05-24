@@ -212,30 +212,6 @@ export const RecipeCard = memo(function RecipeCard({
               </svg>
             </div>
           )}
-          {/* Nearly badge — missing 1 or 2 */}
-          {(missing === 1 || missing === 2) && (
-            <div
-              data-testid="badge-nearly"
-              style={{
-                position: "absolute",
-                top: 7,
-                right: 7,
-                padding: "2px 6px",
-                borderRadius: 99,
-                background: "rgba(255,160,40,0.30)",
-                border:
-                  "1px solid var(--glass-pill-border, rgba(255,200,100,0.28))",
-                color: "var(--food-accent, rgba(251,191,36,1))",
-                fontFamily: "var(--font-sans)",
-                fontSize: 10,
-                fontWeight: 600,
-                lineHeight: 1.4,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Missing {missing}
-            </div>
-          )}
         </div>
         <div className="flex flex-col flex-1 p-2 gap-1">
           <h2
@@ -249,11 +225,26 @@ export const RecipeCard = memo(function RecipeCard({
           >
             {recipe.title}
           </h2>
-          {recipe.servings && (
-            <p className="text-[11px] mt-auto" style={{ color: "var(--fg-2)" }}>
-              🍽️ {recipe.servings} {t("servings")}
-            </p>
-          )}
+          <div className="flex items-center mt-auto">
+            {recipe.servings && (
+              <p className="text-[11px]" style={{ color: "var(--fg-2)" }}>
+                🍽️ {recipe.servings} {t("servings")}
+              </p>
+            )}
+            {(missing === 1 || missing === 2) && (
+              <p
+                data-testid="badge-nearly"
+                className="text-[10px] ml-auto"
+                style={{
+                  color: "var(--food-accent, rgba(251,191,36,1))",
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 600,
+                }}
+              >
+                Missing {missing}
+              </p>
+            )}
+          </div>
         </div>
       </button>
 
