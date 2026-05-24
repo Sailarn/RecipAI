@@ -176,7 +176,10 @@ describe("useRecipeFilter", () => {
     expect(result.current.filtered[0].id).toBe("1");
   });
 
-  describe("cancook / nearly filters with getMissing", () => {
+  describe("cancook / half+ filters with getMissing", () => {
+    // recipe "2": missing 0/5  → cancook
+    // recipe "3": missing 2/5  → half+ (have 3, need 5, 2*2=4 ≤ 5 ✓)
+    // recipe "1": getMissing null (no canonical ids)
     const mockGetMissing = (
       recipe: Recipe,
     ): { missing: number; total: number } | null => {
@@ -185,7 +188,7 @@ describe("useRecipeFilter", () => {
       return null;
     };
 
-    it("filters cancook — only recipes with getMissing === 0", () => {
+    it("filters cancook — only recipes with missing === 0", () => {
       const { result } = renderHook(() =>
         useRecipeFilter(mockRecipes, mockGetMissing),
       );
@@ -194,7 +197,7 @@ describe("useRecipeFilter", () => {
       expect(result.current.filtered[0].id).toBe("2");
     });
 
-    it("filters nearly — only recipes with getMissing 1 or 2", () => {
+    it("filters half+ — recipes where missing > 0 and missing * 2 <= total", () => {
       const { result } = renderHook(() =>
         useRecipeFilter(mockRecipes, mockGetMissing),
       );
@@ -203,7 +206,36 @@ describe("useRecipeFilter", () => {
       expect(result.current.filtered[0].id).toBe("3");
     });
 
-    it("multi-select tried + nearly returns union", () => {
+    it("half+ excludes recipes where you have fewer than half", () => {
+      const getMissingMajorityMissing = (
+        recipe: Recipe,
+      ): { missing: number; total: number } | null => {
+        if (recipe.id === "3") return { missing: 4, total: 5 }; // have 1/5 — not half+
+        return null;
+      };
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, getMissingMajorityMissing),
+      );
+      act(() => result.current.setStatus(["nearly"]));
+      expect(result.current.filtered).toHaveLength(0);
+    });
+
+    it("half+ includes recipe where you have exactly half", () => {
+      const getMissingExactHalf = (
+        recipe: Recipe,
+      ): { missing: number; total: number } | null => {
+        if (recipe.id === "3") return { missing: 3, total: 6 }; // have 3/6 = exactly half
+        return null;
+      };
+      const { result } = renderHook(() =>
+        useRecipeFilter(mockRecipes, getMissingExactHalf),
+      );
+      act(() => result.current.setStatus(["nearly"]));
+      expect(result.current.filtered).toHaveLength(1);
+      expect(result.current.filtered[0].id).toBe("3");
+    });
+
+    it("multi-select tried + half+ returns union", () => {
       const { result } = renderHook(() =>
         useRecipeFilter(mockRecipes, mockGetMissing),
       );

@@ -68,7 +68,7 @@ describe("FilterSheet", () => {
   it("renders Can Cook and Nearly status options", () => {
     render(<FilterSheet {...defaultProps} />);
     expect(screen.getByText("Can Cook 🟢")).toBeInTheDocument();
-    expect(screen.getByText("Nearly 🟡")).toBeInTheDocument();
+    expect(screen.getByText("Half+ 🟡")).toBeInTheDocument();
   });
 
   it("renders category options including Breakfast", () => {

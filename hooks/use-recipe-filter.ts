@@ -36,8 +36,10 @@ export function useRecipeFilter(
           if (s === "tried") return r.status === "tried";
           if (s === "cancook") return getMissing?.(r)?.missing === 0;
           if (s === "nearly") {
-            const m = getMissing?.(r)?.missing;
-            return m === 1 || m === 2;
+            const match = getMissing?.(r);
+            if (!match) return false;
+            // "Half+" — have at least half the ingredients but not all
+            return match.missing > 0 && match.missing * 2 <= match.total;
           }
           return false;
         }),

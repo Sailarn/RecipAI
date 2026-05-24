@@ -34,7 +34,7 @@ const STATUS_OPTIONS: {
   { value: "all", label: "All" },
   { value: "tried", label: "Tried ✓" },
   { value: "cancook", label: "Can Cook 🟢" },
-  { value: "nearly", label: "Nearly 🟡" },
+  { value: "nearly", label: "Half+ 🟡" },
 ];
 
 function chipStyle(active: boolean): React.CSSProperties {

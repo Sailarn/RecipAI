@@ -12,7 +12,7 @@ const OPTIONS: { key: StatusFilterKey; label: string }[] = [
   { key: "all", label: "All" },
   { key: "tried", label: "Tried ✓" },
   { key: "cancook", label: "Can Cook 🟢" },
-  { key: "nearly", label: "Nearly 🟡" },
+  { key: "nearly", label: "Half+ 🟡" },
 ];
 
 export function toggleStatus(

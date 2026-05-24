@@ -35,7 +35,7 @@ describe("StatusChips", () => {
     expect(screen.getByText("All")).toBeInTheDocument();
     expect(screen.getByText("Tried ✓")).toBeInTheDocument();
     expect(screen.getByText("Can Cook 🟢")).toBeInTheDocument();
-    expect(screen.getByText("Nearly 🟡")).toBeInTheDocument();
+    expect(screen.getByText("Half+ 🟡")).toBeInTheDocument();
   });
 
   it("does not render Want to try chip", () => {
@@ -67,7 +67,7 @@ describe("StatusChips", () => {
   it("adds 'nearly' to existing selection", () => {
     const onChange = vi.fn();
     render(<StatusChips active={["tried"]} onChange={onChange} />);
-    fireEvent.click(screen.getByText("Nearly 🟡"));
+    fireEvent.click(screen.getByText("Half+ 🟡"));
     const called = onChange.mock.calls[0][0] as StatusFilter;
     expect(called).toContain("tried");
     expect(called).toContain("nearly");
