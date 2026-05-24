@@ -2,7 +2,8 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import {
@@ -134,6 +135,11 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
   const [qty, setQty] = useState(1);
   const [unit, setUnit] = useState<(typeof UNIT_OPTIONS)[number]>("pcs");
   const [cat, setCat] = useState<(typeof CAT_OPTIONS)[number]>("Other");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function handleSubmit() {
     const trimmed = name.trim();
@@ -142,7 +148,9 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
     onClose();
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       data-testid="add-item-sheet"
       style={{
@@ -303,7 +311,8 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
           Add to Pantry
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
