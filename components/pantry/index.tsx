@@ -5,13 +5,15 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
 import { db } from "@/lib/db/db";
+import { createProvisionalIngredient } from "@/lib/db/ingredients";
 import {
   addPantryItem,
   removePantryItem,
   togglePantryItem,
 } from "@/lib/db/pantry";
-import type { PantryItem } from "@/lib/db/schema";
+import type { PantryItem, VocabularyIngredient } from "@/lib/db/schema";
 
 const UNIT_OPTIONS = ["pcs", "g", "kg", "ml", "l", "tbsp", "tsp"] as const;
 const CAT_OPTIONS = [
@@ -22,6 +24,32 @@ const CAT_OPTIONS = [
   "Frozen",
   "Other",
 ] as const;
+
+type UnitOption = (typeof UNIT_OPTIONS)[number];
+type CatOption = (typeof CAT_OPTIONS)[number];
+
+const VOCAB_CATEGORY_MAP: Record<string, CatOption> = {
+  Produce: "Produce",
+  Vegetable: "Produce",
+  Fruit: "Produce",
+  Dairy: "Dairy",
+  "Dairy & Eggs": "Dairy",
+  Meat: "Other",
+  Seafood: "Other",
+  Grain: "Pantry",
+  Legume: "Pantry",
+  Spice: "Spices",
+  Herb: "Spices",
+  Oil: "Pantry",
+  Sauce: "Pantry",
+  Sweetener: "Pantry",
+  Frozen: "Frozen",
+  Other: "Other",
+};
+
+function mapVocabCategory(vocabCat: string): CatOption | null {
+  return (VOCAB_CATEGORY_MAP[vocabCat] as CatOption) ?? null;
+}
 
 // Subtitle: "N in stock · M to buy"
 function subtitle(items: PantryItem[]): string {
@@ -132,19 +160,53 @@ interface AddItemSheetProps {
 
 function AddItemSheet({ onClose }: AddItemSheetProps) {
   const [name, setName] = useState("");
+  const [ingredientId, setIngredientId] = useState<string | undefined>(
+    undefined,
+  );
   const [qty, setQty] = useState(1);
-  const [unit, setUnit] = useState<(typeof UNIT_OPTIONS)[number]>("pcs");
-  const [cat, setCat] = useState<(typeof CAT_OPTIONS)[number]>("Other");
+  const [unit, setUnit] = useState<UnitOption>("pcs");
+  const [cat, setCat] = useState<CatOption>("Other");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  function handleNameChange(value: string) {
+    setName(value);
+    setIngredientId(undefined);
+  }
+
+  function handleSelect(entry: VocabularyIngredient) {
+    setIngredientId(entry.id);
+    const mapped = mapVocabCategory(entry.category);
+    if (mapped) setCat(mapped);
+  }
+
   async function handleSubmit() {
     const trimmed = name.trim();
     if (!trimmed) return;
-    await addPantryItem({ name: trimmed, qty, unit, cat, on: true });
+
+    let resolvedIngredientId = ingredientId;
+
+    if (!resolvedIngredientId) {
+      try {
+        resolvedIngredientId = await createProvisionalIngredient(trimmed);
+      } catch {
+        toast.error("Couldn't save ingredient");
+        return;
+      }
+    }
+
+    await addPantryItem({
+      name: trimmed,
+      qty,
+      unit,
+      cat,
+      on: true,
+      ingredientId: resolvedIngredientId,
+    });
+
     onClose();
   }
 
@@ -202,24 +264,12 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
           Add to Pantry
         </h2>
 
-        {/* Name input */}
-        <input
-          data-testid="item-name-input"
-          type="text"
+        {/* Name autocomplete */}
+        <IngredientAutocomplete
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleNameChange}
+          onSelect={handleSelect}
           placeholder="Ingredient name"
-          style={{
-            width: "100%",
-            padding: "12px 14px",
-            background: "rgba(255,200,100,0.06)",
-            border: "1px solid rgba(255,200,100,0.2)",
-            borderRadius: 12,
-            color: "var(--fg-1)",
-            fontFamily: "var(--font-sans)",
-            fontSize: 16,
-            boxSizing: "border-box",
-          }}
         />
 
         {/* Qty + unit row */}
@@ -243,9 +293,7 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
           />
           <select
             value={unit}
-            onChange={(e) =>
-              setUnit(e.target.value as (typeof UNIT_OPTIONS)[number])
-            }
+            onChange={(e) => setUnit(e.target.value as UnitOption)}
             style={{
               flex: 1,
               padding: "10px 12px",
