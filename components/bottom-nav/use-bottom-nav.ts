@@ -1,9 +1,13 @@
 import { animate, useMotionValue } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
 
-// ─── Nav sizing ───────────────────────────────────────────────────────────────
-export const PILL_W = 74; // pill width at rest
-export const PILL_H = 45; // pill height at rest
+export const PILL_W = 74;
+export const PILL_H = 45;
+
+// Nav layout constants — exported so index.tsx can reuse them for styling.
+export const MAIN_NAV_W = 260;
+const NAV_H = 48;
+const ITEM_COUNT = 3; // Recipes · AI Import · Profile
 
 export const SPRING = {
   type: "spring" as const,
@@ -18,12 +22,24 @@ export type Measure = {
   innerHeight: number;
 };
 
+// Items use flex:1 across MAIN_NAV_W, so positions are fully deterministic.
+// No DOM measurement is needed or attempted — this eliminates the timing bug
+// where getBoundingClientRect() read mid-CSS-transition (80→260px on pantry
+// return) and stored permanently wrong positions.
+const ITEM_W = MAIN_NAV_W / ITEM_COUNT;
+
+const STATIC_MEASURE: Measure = {
+  itemWidths: Array<number>(ITEM_COUNT).fill(ITEM_W),
+  itemLefts: Array.from({ length: ITEM_COUNT }, (_, i) => ITEM_W * i),
+  innerHeight: NAV_H,
+};
+
 /**
  * Returns the pill's `left` position (nav-relative) for the given item index.
- * The pill is always centered on the item's slot.
+ * Computed analytically from layout constants — never reads the DOM.
  */
-export function pillLeft(index: number, m: Measure): number {
-  const center = m.itemLefts[index] + m.itemWidths[index] / 2;
+export function pillLeft(index: number): number {
+  const center = ITEM_W * index + ITEM_W / 2;
   return center - PILL_W / 2;
 }
 
@@ -36,78 +52,31 @@ export function useBottomNav({
   staticActiveIndex,
   shouldHide,
 }: UseBottomNavOptions) {
-  const navRef = useRef<HTMLElement>(null);
-  const itemRefs = useRef<(HTMLElement | null)[]>([]);
-  const [measure, setMeasure] = useState<Measure | null>(null);
-
-  // Single source of truth for the pill's horizontal position.
-  const leftMv = useMotionValue(0);
-
-  // Gates pill rendering — pill only appears after the first measurement so it
-  // never flashes at position 0.
+  // Initialize to the correct position so NavPill never starts at 0.
+  const leftMv = useMotionValue(pillLeft(staticActiveIndex));
   const [ready, setReady] = useState(false);
-
-  // Tracks the running animation so we can stop it before seeding a new position.
-  // Stopping prevents a stale animation (started while nav was hidden) from
-  // overriding the freshly-seeded value on the next animation frame.
   const animCtrl = useRef<{ stop(): void } | null>(null);
 
-  // True once the first measurement has completed.
-  const measuredRef = useRef(false);
-
-  // ─── Measure on mount and on hide→show ─────────────────────────────────────
-  // Fires when shouldHide or staticActiveIndex changes. staticActiveIndex is
-  // included so the closure always captures the current active tab when the
-  // nav transitions from hidden→visible (both can change in the same render).
-  // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv and animCtrl are stable refs
+  // Snap to the correct slot on mount, then mark ready so NavPill renders.
+  // Runs once — the spring effect below handles all subsequent movement.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally runs once on mount
   useLayoutEffect(() => {
-    if (shouldHide) return;
-    // Already measured: whether this is a tab switch or a return from pantry,
-    // the spring effect (below) repositions the pill using the stored measure.
-    // Re-measuring here risks reading stale ref values mid-commit and producing
-    // a NaN leftMv that can only be cleared by a full page reload.
-    if (measuredRef.current) return;
-
-    if (!navRef.current) return;
-    const navRect = navRef.current.getBoundingClientRect();
-    const itemWidths: number[] = [];
-    const itemLefts: number[] = [];
-    itemRefs.current.forEach((el) => {
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      itemWidths.push(r.width);
-      itemLefts.push(r.left - navRect.left);
-    });
-    const m: Measure = { itemWidths, itemLefts, innerHeight: navRect.height };
-
-    // Stop any in-flight animation before snapping so it cannot override the
-    // seeded value on the next frame (leftMv.set does not cancel animations).
     animCtrl.current?.stop();
-    leftMv.set(pillLeft(staticActiveIndex, m));
-    measuredRef.current = true;
-    setMeasure(m);
+    leftMv.set(pillLeft(staticActiveIndex));
     setReady(true);
-  }, [shouldHide, staticActiveIndex]);
+  }, []);
 
-  // ─── Spring to active tab on route change ──────────────────────────────────
-  // shouldHide guards against drifting leftMv while the nav is hidden —
-  // when a route with no matching tab is active (e.g. /recipes/new) the
-  // staticActiveIndex falls back to 0, which would otherwise start a spring
-  // toward the wrong tab. Effect 1 already snaps on hide→show.
+  // Spring to the active slot whenever the tab changes or the nav re-appears.
+  // shouldHide guards against drifting while the nav is invisible — when a
+  // route with no matching tab is active (e.g. /pantry) staticActiveIndex
+  // falls back to 0; the guard prevents a stray spring toward the wrong tab.
   // biome-ignore lint/correctness/useExhaustiveDependencies: leftMv and animCtrl are stable refs
   useLayoutEffect(() => {
-    if (!measure) return;
     if (shouldHide) return;
-    const target = pillLeft(staticActiveIndex, measure);
+    const target = pillLeft(staticActiveIndex);
     animCtrl.current?.stop();
     animCtrl.current = animate(leftMv, target, SPRING);
-  }, [staticActiveIndex, measure, shouldHide]);
+  }, [staticActiveIndex, shouldHide]);
 
-  return {
-    navRef,
-    itemRefs,
-    ready,
-    leftMv,
-    measure,
-  };
+  return { ready, leftMv, measure: STATIC_MEASURE };
 }

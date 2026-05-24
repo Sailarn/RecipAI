@@ -21,12 +21,11 @@ vi.mock("@/lib/transitions", () => ({
 vi.mock("../use-bottom-nav", () => ({
   PILL_H: 45,
   PILL_W: 74,
+  MAIN_NAV_W: 260,
   useBottomNav: vi.fn().mockReturnValue({
-    navRef: { current: null },
-    itemRefs: { current: [] },
     ready: false,
     leftMv: { set: vi.fn(), get: vi.fn() },
-    measure: null,
+    measure: { itemWidths: [], itemLefts: [], innerHeight: 48 },
   }),
 }));
 

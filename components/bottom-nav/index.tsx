@@ -9,16 +9,15 @@ import { useNavigate } from "@/lib/transitions";
 import { AINavIcon, PantryIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
 import { NavItem } from "./nav-item";
 import { NavPill } from "./nav-pill";
-import { PILL_H, PILL_W, useBottomNav } from "./use-bottom-nav";
+import { MAIN_NAV_W, PILL_H, PILL_W, useBottomNav } from "./use-bottom-nav";
 
 // Lazy-load PantryPage to avoid circular import and reduce initial bundle
 const PantryPage = lazy(() =>
   import("@/components/pantry").then((m) => ({ default: m.PantryPage })),
 );
 
-// Width constants for the two-pill layout
-const MAIN_NAV_W = 260;
-const PANTRY_ITEM_W = 80; // compact single-item pantry pill (both modes)
+// Width of the compact single-item pantry pill (both modes)
+const PANTRY_ITEM_W = 80;
 
 // Vertical centre of a static pill indicator inside a 48px-tall pill
 const STATIC_PILL_TOP = (48 - PILL_H) / 2;
@@ -88,7 +87,7 @@ export function BottomNav() {
     items.findIndex((it) => it.isActive),
   );
 
-  const { navRef, itemRefs, ready, leftMv, measure } = useBottomNav({
+  const { ready, leftMv, measure } = useBottomNav({
     staticActiveIndex,
     shouldHide: shouldHide || isPantryMode,
   });
@@ -111,7 +110,6 @@ export function BottomNav() {
     >
       {/* Left pill — main nav (260px) or recipes item (80px) in pantry mode */}
       <nav
-        ref={!isPantryMode ? navRef : undefined}
         className="glass-nav select-none touch-none"
         style={{
           ...pillBase,
@@ -163,9 +161,6 @@ export function BottomNav() {
             {items.map((item, i) => (
               <div
                 key={item.href}
-                ref={(el) => {
-                  itemRefs.current[i] = el;
-                }}
                 // Recipes tab (i === 0): seed cache as soon as the finger
                 // touches, giving Dexie a head-start before navigation fires.
                 onPointerDown={i === 0 ? prefetchRecipesPage : undefined}
