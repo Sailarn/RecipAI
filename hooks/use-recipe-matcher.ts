@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { db } from "@/lib/db/db";
 import type { Recipe } from "@/lib/db/schema";
 
@@ -16,11 +16,14 @@ export function useRecipeMatcher() {
     [pantryItems],
   );
 
-  function getMissing(recipe: Recipe): number | null {
-    const ids = recipe.canonicalIngredientIds;
-    if (!ids || ids.length === 0) return null;
-    return ids.filter((id) => !pantrySet.has(id)).length;
-  }
+  const getMissing = useCallback(
+    (recipe: Recipe): number | null => {
+      const ids = recipe.canonicalIngredientIds;
+      if (!ids || ids.length === 0) return null;
+      return ids.filter((id) => !pantrySet.has(id)).length;
+    },
+    [pantrySet],
+  );
 
   return { pantrySet, getMissing };
 }

@@ -1,9 +1,10 @@
 "use client";
 
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useLiveQuery } from "dexie-react-hooks";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CompactFilterBar } from "@/components/compact-filter-bar";
 import { EditCollectionModal } from "@/components/edit-collection-modal";
 import { NewCollectionModal } from "@/components/new-collection-modal";
@@ -98,6 +99,27 @@ export default function RecipesPage() {
     return () => container.removeEventListener("scroll", check);
   }, [loading]);
 
+  // Group filtered recipes into rows of 2 for the virtualizer.
+  // All filtering/sorting runs on the full array; the virtualizer only renders
+  // the visible slice.
+  const rows = useMemo(() => {
+    const result: (typeof filtered)[] = [];
+    for (let i = 0; i < filtered.length; i += 2) {
+      result.push(filtered.slice(i, i + 2));
+    }
+    return result;
+  }, [filtered]);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => scrollRef.current,
+    // 240px covers a typical card (image ~150px + title + padding) plus 10px row gap.
+    // measureElement updates this per-row after first paint so variable heights
+    // (long titles, multi-badge cards) are tracked accurately.
+    estimateSize: () => 240,
+    overscan: 3,
+  });
+
   const { triggerSync } = useSyncOnLogin();
   const { indicatorRef, isRefreshing } = usePullToRefresh({
     onRefresh: triggerSync,
@@ -190,47 +212,66 @@ export default function RecipesPage() {
       {/* Sentinel — when this exits the scroll container, compact bar appears */}
       <div ref={sentinelRef} style={{ height: 0 }} />
 
-      {/* Recipe list */}
-      <div
-        style={{
-          paddingLeft: 14,
-          paddingRight: 14,
-          paddingBottom: 110,
-        }}
-      >
-        {filtered.length === 0 && search ? (
-          <p
-            style={{
-              textAlign: "center",
-              padding: "40px 0",
-              fontSize: 13,
-              color: "var(--fg-2)",
-              lineHeight: 1.8,
-            }}
-          >
-            {t("noResults")}
-          </p>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 10,
-              marginTop: 12,
-            }}
-          >
-            {filtered.map((recipe, index) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                collections={collections}
-                priority={index < 2}
-                missing={getMissing(recipe)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Recipe list — virtualised: only visible rows are in the DOM */}
+      {filtered.length === 0 && search ? (
+        <p
+          style={{
+            textAlign: "center",
+            padding: "40px 0",
+            fontSize: 13,
+            color: "var(--fg-2)",
+            lineHeight: 1.8,
+          }}
+        >
+          {t("noResults")}
+        </p>
+      ) : (
+        <div
+          style={{
+            paddingLeft: 14,
+            paddingRight: 14,
+            marginTop: 12,
+            position: "relative",
+            height: virtualizer.getTotalSize(),
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const rowItems = rows[virtualRow.index];
+            return (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                  paddingBottom: 10,
+                }}
+              >
+                {rowItems.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    collections={collections}
+                    priority={virtualRow.index === 0}
+                    missing={getMissing(recipe)}
+                  />
+                ))}
+                {/* Keep grid balanced when the last row has one card */}
+                {rowItems.length === 1 && <div />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {/* Nav bar clearance — outside the virtualiser so it always adds to scroll height */}
+      <div style={{ height: 110 }} />
 
       {/* Compact bar — fixed at top when filter bar has scrolled off screen */}
       {isCollapsed && (

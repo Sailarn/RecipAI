@@ -36,6 +36,34 @@ vi.mock("@/lib/db/recipes", () => ({
   getAllRecipes: vi.fn(),
 }));
 
+// useVirtualizer relies on scroll-element measurements that are always 0 in
+// jsdom, so no virtual items are produced and cards never render. This mock
+// returns every row as a visible item so existing card-content tests still work.
+vi.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: ({
+    count,
+    estimateSize,
+  }: {
+    count: number;
+    estimateSize: () => number;
+  }) => {
+    const rowH = estimateSize();
+    return {
+      getTotalSize: () => count * rowH,
+      getVirtualItems: () =>
+        Array.from({ length: count }, (_, i) => ({
+          key: i,
+          index: i,
+          start: i * rowH,
+          end: (i + 1) * rowH,
+          size: rowH,
+          lane: 0,
+        })),
+      measureElement: () => {},
+    };
+  },
+}));
+
 // Prevents real auth HTTP calls during page render
 vi.mock("@/hooks/use-sync-on-login", () => ({
   useSyncOnLogin: () => ({ triggerSync: vi.fn() }),

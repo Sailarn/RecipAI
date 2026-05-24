@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { AddToCollectionSheet } from "@/components/add-to-collection-sheet";
 import { RecipeCardContextMenu } from "@/components/recipe-card-context-menu";
 import { RecipeDetail } from "@/components/recipe-detail";
@@ -21,7 +21,7 @@ interface RecipeCardProps {
   missing?: number | null;
 }
 
-export function RecipeCard({
+export const RecipeCard = memo(function RecipeCard({
   recipe,
   collections,
   priority = false,
@@ -283,4 +283,4 @@ export function RecipeCard({
       )}
     </>
   );
-}
+});
