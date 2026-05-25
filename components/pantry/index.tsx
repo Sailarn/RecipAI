@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
@@ -371,12 +371,25 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
 
 export function PantryPage() {
   const items = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
+  const vocabItems = useLiveQuery(() => db.ingredients.toArray(), []);
+  const vocabById = useMemo(
+    () => new Map((vocabItems ?? []).map((v) => [v.id, v])),
+    [vocabItems],
+  );
+
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [search, setSearch] = useState("");
 
   const query = search.trim().toLowerCase();
   const filtered = query
-    ? items.filter((i) => i.name.toLowerCase().includes(query))
+    ? items.filter((i) => {
+        if (i.name.toLowerCase().includes(query)) return true;
+        const vocab = vocabById.get(i.ingredientId ?? "");
+        return (
+          vocab?.en?.toLowerCase().includes(query) ||
+          (vocab?.ua?.toLowerCase().includes(query) ?? false)
+        );
+      })
     : items;
 
   const inStock = filtered.filter((i) => i.on);
