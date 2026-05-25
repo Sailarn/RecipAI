@@ -119,9 +119,9 @@ describe("CollectionsShelf", () => {
         onLongPress={onLongPress}
       />,
     );
-    fireEvent.mouseDown(screen.getByText("⭐ Favourites"));
+    fireEvent.pointerDown(screen.getByText("⭐ Favourites"));
     vi.advanceTimersByTime(500);
-    fireEvent.mouseUp(screen.getByText("⭐ Favourites"));
+    fireEvent.pointerUp(screen.getByText("⭐ Favourites"));
     expect(onLongPress).toHaveBeenCalledWith(mockCollections[0]);
   });
 
@@ -136,7 +136,7 @@ describe("CollectionsShelf", () => {
         onLongPress={vi.fn()}
       />,
     );
-    fireEvent.mouseDown(screen.getByText("⭐ Favourites"));
+    fireEvent.pointerDown(screen.getByText("⭐ Favourites"));
     vi.advanceTimersByTime(500);
     fireEvent.click(screen.getByText("⭐ Favourites"));
     expect(onSelect).not.toHaveBeenCalled();

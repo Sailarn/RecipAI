@@ -49,7 +49,9 @@ function CollectionTab({
     onLongPress?.(collection);
   }, [collection, onLongPress]);
 
-  const longPressHandlers = useLongPress(handleLongPress);
+  // pos is provided by the hook but not needed here — collection tab doesn't show a
+  // positioned menu, it delegates positioning to the parent via onLongPress callback
+  const longPressHandlers = useLongPress((_pos) => handleLongPress());
 
   function handleClick() {
     if (didLongPress.current) {
@@ -63,12 +65,11 @@ function CollectionTab({
     <button
       type="button"
       onClick={handleClick}
-      onMouseDown={longPressHandlers.onMouseDown}
-      onMouseUp={longPressHandlers.onMouseUp}
-      onMouseLeave={longPressHandlers.onMouseLeave}
-      onTouchStart={longPressHandlers.onTouchStart}
-      onTouchEnd={longPressHandlers.onTouchEnd}
-      onTouchMove={longPressHandlers.onTouchMove}
+      onPointerDown={longPressHandlers.onPointerDown}
+      onPointerUp={longPressHandlers.onPointerUp}
+      onPointerLeave={longPressHandlers.onPointerLeave}
+      onPointerCancel={longPressHandlers.onPointerCancel}
+      onPointerMove={longPressHandlers.onPointerMove}
       onContextMenu={longPressHandlers.onContextMenu}
       style={tabStyle(active)}
     >

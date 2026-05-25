@@ -38,11 +38,13 @@ export const RecipeCard = memo(function RecipeCard({
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
   const didLongPress = useRef(false);
 
-  const handleLongPress = useCallback(() => {
+  const handleLongPress = useCallback((pos: { x: number; y: number }) => {
     didLongPress.current = true;
+    const menuW = 200;
+    const menuH = 160;
     setMenuPos({
-      x: window.innerWidth / 2 - 95,
-      y: window.innerHeight / 2 - 80,
+      x: Math.min(pos.x, window.innerWidth - menuW - 8),
+      y: Math.min(pos.y, window.innerHeight - menuH - 8),
     });
   }, []);
 
@@ -81,16 +83,17 @@ export const RecipeCard = memo(function RecipeCard({
             <RecipeDetail recipeId={recipe.id} locale={locale} />,
           );
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => {
-          setHovered(false);
-          longPressHandlers.onMouseLeave();
+        onPointerEnter={(e) => {
+          if (e.pointerType === "mouse") setHovered(true);
         }}
-        onMouseDown={longPressHandlers.onMouseDown}
-        onMouseUp={longPressHandlers.onMouseUp}
-        onTouchStart={longPressHandlers.onTouchStart}
-        onTouchEnd={longPressHandlers.onTouchEnd}
-        onTouchMove={longPressHandlers.onTouchMove}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") setHovered(false);
+          longPressHandlers.onPointerLeave();
+        }}
+        onPointerDown={longPressHandlers.onPointerDown}
+        onPointerUp={longPressHandlers.onPointerUp}
+        onPointerCancel={longPressHandlers.onPointerCancel}
+        onPointerMove={longPressHandlers.onPointerMove}
         onContextMenu={longPressHandlers.onContextMenu}
         className="glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden"
         style={{
