@@ -2,9 +2,10 @@ import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
+import { ingredients } from "@/db/schema/ingredients";
 import { pantry } from "@/db/schema/pantry";
 import { auth } from "@/lib/auth";
-import type { PantryItem } from "@/lib/db/schema";
+import type { PantryItem, VocabularyIngredient } from "@/lib/db/schema";
 
 export async function GET(_req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -35,14 +36,37 @@ export async function POST(req: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = (await req.json()) as Partial<PantryItem>;
-  const { id, ingredientId, name, qty, unit, cat, on } = body;
+  const body = (await req.json()) as Partial<PantryItem> & {
+    ingredientData?: VocabularyIngredient | null;
+  };
+  const { id, ingredientId, name, qty, unit, cat, on, ingredientData } = body;
 
   if (!id || !name || qty === undefined || !unit || !cat || on === undefined) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 },
     );
+  }
+
+  // Upsert the ingredient first so the pantry FK never fails.
+  // Handles provisionals (not yet enriched) and canonical sync gaps.
+  if (ingredientId && ingredientData) {
+    await db
+      .insert(ingredients)
+      .values({
+        id: ingredientData.id,
+        en: ingredientData.en,
+        ua: ingredientData.ua ?? null,
+        category: ingredientData.category,
+        aliasesEn: ingredientData.aliasesEn ?? [],
+        aliasesUa: ingredientData.aliasesUa ?? [],
+        status: ingredientData.status ?? "provisional",
+        retryCount: ingredientData.retryCount ?? 0,
+        lastAttemptAt: ingredientData.lastAttemptAt
+          ? new Date(ingredientData.lastAttemptAt)
+          : null,
+      })
+      .onConflictDoNothing();
   }
 
   await db

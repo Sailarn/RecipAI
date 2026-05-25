@@ -20,6 +20,9 @@ vi.mock("../db", () => ({
       clear: vi.fn(),
       bulkPut: vi.fn(),
     },
+    ingredients: {
+      get: vi.fn(),
+    },
   },
 }));
 
@@ -120,8 +123,20 @@ describe("addPantryItem", () => {
     expect(body.name).toBe("Eggs");
   });
 
-  it("includes ingredientId in the fetch body when provided", async () => {
+  it("includes ingredientId and ingredientData in the fetch body when provided", async () => {
     vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+    const mockIngredient = {
+      id: "vocab-123",
+      en: "Milk",
+      ua: null,
+      category: "Dairy",
+      aliasesEn: [],
+      aliasesUa: [],
+      status: "confirmed" as const,
+      retryCount: 0,
+      lastAttemptAt: null,
+    };
+    vi.mocked(db.ingredients.get).mockResolvedValue(mockIngredient as never);
 
     await addPantryItem({
       name: "Milk",
@@ -134,8 +149,9 @@ describe("addPantryItem", () => {
 
     const body = JSON.parse(
       (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string,
-    ) as { ingredientId: string };
+    ) as { ingredientId: string; ingredientData: { id: string } };
     expect(body.ingredientId).toBe("vocab-123");
+    expect(body.ingredientData).toMatchObject({ id: "vocab-123", en: "Milk" });
   });
 
   it("Dexie write succeeds even when the server fetch throws", async () => {

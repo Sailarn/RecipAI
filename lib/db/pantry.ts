@@ -1,6 +1,6 @@
 import { api } from "@/lib/routes";
 import { db } from "./db";
-import type { PantryItem } from "./schema";
+import type { PantryItem, VocabularyIngredient } from "./schema";
 
 export async function getPantryItems(): Promise<PantryItem[]> {
   return db.pantry.toArray();
@@ -12,10 +12,22 @@ export async function addPantryItem(
   const id = crypto.randomUUID();
   const pantryItem: PantryItem = { ...item, id, addedAt: new Date() };
   await db.pantry.add(pantryItem);
+
+  // Include the ingredient record so the route can upsert it before the
+  // pantry row — prevents FK violations when the ingredient hasn't synced
+  // to Postgres yet (provisional race condition or canonical sync gap).
+  let ingredientData: VocabularyIngredient | undefined;
+  if (item.ingredientId) {
+    ingredientData = await db.ingredients.get(item.ingredientId);
+  }
+
   fetch(api.pantry, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(pantryItem),
+    body: JSON.stringify({
+      ...pantryItem,
+      ingredientData: ingredientData ?? null,
+    }),
   }).catch(() => {});
   return id;
 }
