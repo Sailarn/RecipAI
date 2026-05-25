@@ -4,7 +4,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { db } from "@/lib/db/db";
-import type { RecipeIngredient } from "@/lib/db/schema";
+import { createProvisionalIngredient } from "@/lib/db/ingredients";
+import { addPantryItem, togglePantryItem } from "@/lib/db/pantry";
+import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
 
 interface ServingsCalculatorProps {
   originalServings: number;
@@ -27,14 +29,39 @@ export function ServingsCalculator({
   const hasCanonical = (canonicalIngredientIds ?? []).length > 0;
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
-  const pantrySet = useMemo(
+
+  // All pantry items keyed by vocab ingredientId (for canonical-ID lookup)
+  const pantryByIngredientId = useMemo(
     () =>
-      new Set(
+      new Map<string, PantryItem>(
         (pantryItems ?? [])
-          .filter((p) => p.on && p.ingredientId)
-          .map((p) => p.ingredientId as string),
+          .filter(
+            (p): p is PantryItem & { ingredientId: string } =>
+              typeof p.ingredientId === "string",
+          )
+          .map((p) => [p.ingredientId, p]),
       ),
     [pantryItems],
+  );
+
+  // Fallback lookup by name for unknown/provisional ingredients
+  const pantryByName = useMemo(
+    () =>
+      new Map<string, PantryItem>(
+        (pantryItems ?? []).map((p) => [p.name.toLowerCase(), p]),
+      ),
+    [pantryItems],
+  );
+
+  // Only on:true IDs — used for the green dot
+  const pantrySet = useMemo(
+    () =>
+      new Set<string>(
+        [...pantryByIngredientId.values()]
+          .filter((p) => p.on)
+          .map((p) => p.ingredientId as string),
+      ),
+    [pantryByIngredientId],
   );
 
   const ratio = servings / originalServings;
@@ -79,6 +106,36 @@ export function ServingsCalculator({
     }
     return ing.item;
   };
+
+  // Returns the pantry item for this ingredient row, or undefined if not tracked
+  function pantryItemFor(
+    ing: RecipeIngredient,
+    idx: number,
+  ): PantryItem | undefined {
+    const id = canonicalIngredientIds?.[idx];
+    if (id) return pantryByIngredientId.get(id);
+    return pantryByName.get(ing.item.toLowerCase());
+  }
+
+  async function addToPantry(ing: RecipeIngredient, idx: number) {
+    const canonicalId = canonicalIngredientIds?.[idx];
+    const name = displayName(ing, idx);
+
+    let ingredientId = canonicalId;
+    if (!ingredientId) {
+      // No vocab entry yet — create provisional, Gemini enriches in background
+      ingredientId = await createProvisionalIngredient(ing.item);
+    }
+
+    await addPantryItem({
+      name,
+      qty: 1,
+      unit: "pcs",
+      cat: "Other",
+      on: true,
+      ingredientId,
+    });
+  }
 
   return (
     <div className="glass-card mb-4" style={{ borderRadius: 20 }}>
@@ -209,6 +266,7 @@ export function ServingsCalculator({
                 ? "rgba(239,68,68,0.7)"
                 : "var(--food-accent)";
           const textOpacity = status === "out" ? 0.45 : 1;
+          const pantryItem = pantryItemFor(ing, i);
 
           return (
             <li
@@ -235,6 +293,7 @@ export function ServingsCalculator({
               />
               <span
                 style={{
+                  flex: 1,
                   fontSize: 13,
                   color: "var(--fg-1)",
                   opacity: textOpacity,
@@ -249,6 +308,59 @@ export function ServingsCalculator({
                 {ing.unit && <span>{ing.unit} </span>}
                 {displayName(ing, i)}
               </span>
+
+              {pantryItem ? (
+                // Already in pantry — show checkbox to toggle in/out of stock
+                <button
+                  type="button"
+                  onClick={() => togglePantryItem(pantryItem.id)}
+                  aria-label={
+                    pantryItem.on ? "Mark as out of stock" : "Mark as in stock"
+                  }
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    border: `2px solid ${pantryItem.on ? "rgba(251,191,36,0.8)" : "rgba(255,200,100,0.28)"}`,
+                    background: pantryItem.on
+                      ? "rgba(251,191,36,0.18)"
+                      : "transparent",
+                    flexShrink: 0,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    color: "rgba(251,191,36,0.9)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {pantryItem.on ? "✓" : ""}
+                </button>
+              ) : (
+                // Not in pantry — add button
+                <button
+                  type="button"
+                  onClick={() => addToPantry(ing, i)}
+                  aria-label={`Add ${displayName(ing, i)} to pantry`}
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    border: "1px solid rgba(255,200,100,0.25)",
+                    background: "rgba(255,200,100,0.06)",
+                    flexShrink: 0,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "rgba(255,200,100,0.6)",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <PlusIcon style={{ width: 11, height: 11 }} />
+                </button>
+              )}
             </li>
           );
         })}
