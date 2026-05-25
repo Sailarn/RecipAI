@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ProfileAuth } from "@/components/profile-auth";
+import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 
 function Toggle({ checked }: { checked: boolean }) {
   return (
@@ -87,7 +88,8 @@ export default function ProfilePage() {
   const t = useTranslations("profile");
   const params = useParams();
   const router = useRouter();
-  const locale = params.locale as string;
+  const locale = params.locale as Locale;
+  const nextLocale = locales.find((l) => l !== locale) ?? locales[0];
 
   const [isDark, setIsDark] = useState(false);
 
@@ -108,15 +110,12 @@ export default function ProfilePage() {
 
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newLocale = locale === "ua" ? "en" : "ua";
     const newPath = window.location.pathname.replace(
       `/${locale}`,
-      `/${newLocale}`,
+      `/${nextLocale}`,
     );
     router.push(newPath);
   };
-
-  const targetLanguageName = locale === "ua" ? "English" : "Українська";
 
   return (
     <div>
@@ -167,7 +166,7 @@ export default function ProfilePage() {
                 color: "var(--fg-2)",
               }}
             >
-              {targetLanguageName}
+              {LOCALE_DISPLAY_NAME[nextLocale]}
             </span>
             <ChevronRight
               size={13}

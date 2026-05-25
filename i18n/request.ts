@@ -1,15 +1,15 @@
+export {
+  defaultLocale,
+  LOCALE_DISPLAY_NAME,
+  type Locale,
+  locales,
+} from "./config";
+
 import { notFound } from "next/navigation";
 import { getRequestConfig } from "next-intl/server";
-
-// Supported locales
-export const locales = ["en", "ua"] as const;
-export type Locale = (typeof locales)[number];
-
-// Default locale
-export const defaultLocale: Locale = "ua";
+import { type Locale, locales } from "./config";
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Validate that the incoming locale parameter is valid
   const locale = await requestLocale;
 
   if (!locale || !locales.includes(locale as Locale)) {

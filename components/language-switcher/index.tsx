@@ -2,17 +2,19 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 
 export function LanguageSwitcher() {
   const t = useTranslations("language");
   const router = useRouter();
   const params = useParams();
-  const currentLocale = params.locale as string;
+  const currentLocale = params.locale as Locale;
+
+  const nextLocale = locales.find((l) => l !== currentLocale) ?? locales[0];
 
   const toggleLocale = () => {
-    const newLocale = currentLocale === "ua" ? "en" : "ua";
     const currentPath = window.location.pathname;
-    const newPath = currentPath.replace(`/${currentLocale}`, `/${newLocale}`);
+    const newPath = currentPath.replace(`/${currentLocale}`, `/${nextLocale}`);
     router.push(newPath);
   };
 
@@ -26,7 +28,7 @@ export function LanguageSwitcher() {
       type="button"
       aria-label={t("switch")}
     >
-      {currentLocale === "ua" ? t("english") : t("ukrainian")}
+      {LOCALE_DISPLAY_NAME[nextLocale]}
     </button>
   );
 }

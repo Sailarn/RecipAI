@@ -7,7 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";
 import { ThemeColorSync } from "@/components/theme-color-sync";
-import { locales } from "@/i18n/request";
+import { type Locale, locales } from "@/i18n/request";
 import "../globals.css";
 
 const inter = Inter({
@@ -32,7 +32,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!locales.includes(locale as "ua" | "en")) {
+  if (!locales.includes(locale as Locale)) {
     notFound();
   }
 
