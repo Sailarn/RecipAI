@@ -46,10 +46,19 @@ export async function togglePantryItem(id: string): Promise<void> {
   if (!item) return;
   const updated = { ...item, on: !item.on };
   await db.pantry.update(id, { on: updated.on });
+
+  let ingredientData: VocabularyIngredient | undefined;
+  if (updated.ingredientId) {
+    ingredientData = await db.ingredients.get(updated.ingredientId);
+  }
+
   fetch(api.pantry, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updated),
+    body: JSON.stringify({
+      ...updated,
+      ingredientData: ingredientData ?? null,
+    }),
   }).catch(() => {});
 }
 
