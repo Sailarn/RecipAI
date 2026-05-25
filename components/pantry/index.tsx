@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -372,9 +372,15 @@ function AddItemSheet({ onClose }: AddItemSheetProps) {
 export function PantryPage() {
   const items = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const inStock = items.filter((i) => i.on);
-  const outOfStock = items.filter((i) => !i.on);
+  const query = search.trim().toLowerCase();
+  const filtered = query
+    ? items.filter((i) => i.name.toLowerCase().includes(query))
+    : items;
+
+  const inStock = filtered.filter((i) => i.on);
+  const outOfStock = filtered.filter((i) => !i.on);
 
   return (
     // position:relative so the FAB (position:absolute) anchors to this container,
@@ -419,6 +425,46 @@ export function PantryPage() {
         >
           {subtitle(items)}
         </p>
+
+        {/* Search */}
+        {items.length > 0 && (
+          <div
+            style={{
+              position: "relative",
+              marginTop: 12,
+            }}
+          >
+            <Search
+              size={15}
+              style={{
+                position: "absolute",
+                left: 12,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "var(--fg-3)",
+                pointerEvents: "none",
+              }}
+            />
+            <input
+              type="search"
+              placeholder="Search pantry…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "9px 12px 9px 34px",
+                background: "rgba(255,200,100,0.06)",
+                border: "1px solid rgba(255,200,100,0.14)",
+                borderRadius: 12,
+                color: "var(--fg-1)",
+                fontFamily: "var(--font-sans)",
+                fontSize: 14,
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Scrollable list area */}
@@ -430,7 +476,7 @@ export function PantryPage() {
           paddingBottom: "max(100px, calc(env(safe-area-inset-bottom) + 80px))",
         }}
       >
-        {/* Empty state */}
+        {/* Empty state — no items at all */}
         {items.length === 0 && (
           <div
             data-testid="pantry-empty"
@@ -452,6 +498,26 @@ export function PantryPage() {
             <p style={{ margin: 0, fontSize: 13 }}>
               Tap + to add ingredients you have at home.
             </p>
+          </div>
+        )}
+
+        {/* No search results */}
+        {items.length > 0 && query && filtered.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "48px 24px",
+              gap: 8,
+              color: "var(--fg-3)",
+              fontFamily: "var(--font-sans)",
+              fontSize: 14,
+              textAlign: "center",
+            }}
+          >
+            <p style={{ margin: 0 }}>No ingredients match "{search}"</p>
           </div>
         )}
 
