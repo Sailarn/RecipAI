@@ -94,7 +94,25 @@ export const RecipeCard = memo(function RecipeCard({
         onPointerUp={longPressHandlers.onPointerUp}
         onPointerCancel={longPressHandlers.onPointerCancel}
         onPointerMove={longPressHandlers.onPointerMove}
-        onContextMenu={longPressHandlers.onContextMenu}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // On fine-pointer devices (mouse/trackpad) right-click opens the app context menu.
+          // On touch, the long-press timer handles it; here we just block the browser menu.
+          if (
+            typeof window !== "undefined" &&
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(pointer: fine)").matches
+          ) {
+            didLongPress.current = true;
+            const menuW = 200;
+            const menuH = 160;
+            setMenuPos({
+              x: Math.min(e.clientX, window.innerWidth - menuW - 8),
+              y: Math.min(e.clientY, window.innerHeight - menuH - 8),
+            });
+          }
+        }}
         className="glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden"
         style={{
           background: "none",
