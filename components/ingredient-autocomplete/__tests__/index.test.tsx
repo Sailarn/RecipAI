@@ -89,7 +89,11 @@ describe("IngredientAutocomplete — onSelect prop", () => {
     function Wrapper() {
       const [val, setVal] = useState("");
       return (
-        <IngredientAutocomplete value={val} onChange={setVal} placeholder="ingredient" />
+        <IngredientAutocomplete
+          value={val}
+          onChange={setVal}
+          placeholder="ingredient"
+        />
       );
     }
 

@@ -20,6 +20,16 @@ export function useLongPress(
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
+      // On fine-pointer devices (mouse/trackpad) skip the timer — right-click via
+      // onContextMenu handles desktop instead. This prevents conflicts with Chrome's
+      // own context menu on Mac, including DevTools iPhone simulator.
+      if (
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: fine)").matches
+      ) {
+        return;
+      }
       startPos.current = { x: e.clientX, y: e.clientY };
       timerRef.current = setTimeout(() => {
         // Clear ref BEFORE firing so cancel() won't see a pending timer
