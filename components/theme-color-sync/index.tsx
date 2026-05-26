@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { THEME } from "@/lib/theme";
 
 // Sets theme-color meta to match the current theme on every page load.
 // The anti-FOUC script already applied the correct class before first paint,
@@ -12,7 +13,7 @@ export function ThemeColorSync() {
       'meta[name="theme-color"]',
     );
     if (!meta) return;
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark = document.documentElement.classList.contains(THEME.DARK);
     meta.setAttribute("content", isDark ? "#0a0a0a" : "#ffffff");
   }, []);
 

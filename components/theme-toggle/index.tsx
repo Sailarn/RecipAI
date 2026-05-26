@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { THEME } from "@/lib/theme";
 
 export function ThemeToggle() {
   const t = useTranslations("theme");
@@ -12,11 +13,11 @@ export function ThemeToggle() {
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
-    setIsDark(theme === "dark" || (!theme && prefersDark));
+    setIsDark(theme === THEME.DARK || (!theme && prefersDark));
   }, []);
 
   const toggleTheme = () => {
-    localStorage.setItem("theme", isDark ? "light" : "dark");
+    localStorage.setItem("theme", isDark ? THEME.LIGHT : THEME.DARK);
     window.location.reload();
   };
 

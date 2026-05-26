@@ -8,6 +8,7 @@ import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";
 import { ThemeColorSync } from "@/components/theme-color-sync";
 import { type Locale, locales } from "@/i18n/request";
+import { THEME } from "@/lib/theme";
 import "../globals.css";
 
 const inter = Inter({
@@ -39,7 +40,8 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   const cookieStore = await cookies();
-  const theme = cookieStore.get("theme")?.value === "light" ? "light" : "dark";
+  const theme =
+    cookieStore.get("theme")?.value === THEME.LIGHT ? THEME.LIGHT : THEME.DARK;
 
   return (
     <html

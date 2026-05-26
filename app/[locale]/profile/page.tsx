@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ProfileAuth } from "@/components/profile-auth";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
+import { THEME } from "@/lib/theme";
 
 function Toggle({ checked }: { checked: boolean }) {
   return (
@@ -94,14 +95,14 @@ export default function ProfilePage() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
+    setIsDark(document.documentElement.classList.contains(THEME.DARK));
   }, []);
 
   const toggleTheme = (e: React.MouseEvent) => {
     e.stopPropagation();
     const next = !isDark;
     setIsDark(next);
-    const themeName = next ? "dark" : "light";
+    const themeName = next ? THEME.DARK : THEME.LIGHT;
     localStorage.setItem("theme", themeName);
     // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=31536000; SameSite=Lax`;
