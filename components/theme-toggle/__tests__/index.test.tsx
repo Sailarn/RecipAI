@@ -1,5 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { ThemeToggle } from "../index";
 
 const reloadSpy = vi.fn();

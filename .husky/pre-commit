@@ -1,1 +1,4 @@
-bun run check && bun run typecheck && bun run test --run
+STAGED=$(git diff --cached --name-only)
+bun run check
+for f in $STAGED; do git add "$f" 2>/dev/null || true; done
+bun run typecheck && bun run test --run
