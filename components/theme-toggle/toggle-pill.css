@@ -1,0 +1,61 @@
+/* TogglePill — scoped styles
+   Local tokens (--_) are private to this component.
+   Global vars (--ease-spring, --duration-normal, --glass-light-bg) come from tokens.css */
+
+.toggle-pill {
+  /* Local tokens */
+  --_bg-off: rgba(255, 255, 255, 0.2);
+  --_bg-on: rgba(255, 160, 40, 0.3);
+  --_border-off: rgba(255, 255, 255, 0.3);
+  --_border-on: rgba(255, 200, 100, 0.45);
+  --_glow-on: 0 0 10px rgba(255, 180, 60, 0.2);
+  --_circle-bg-off: var(
+    --glass-light-bg
+  ); /* rgba(255,255,255,0.85) — exact match */
+  --_circle-bg-on: rgba(251, 191, 36, 0.95);
+  --_circle-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  --_icon-color: rgba(0, 0, 0, 0.55);
+
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  position: relative;
+  flex-shrink: 0;
+  background: var(--_bg-off);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--_border-off);
+  box-shadow: none;
+  transition:
+    background var(--duration-normal) var(--ease-default),
+    border-color var(--duration-normal) var(--ease-default);
+}
+
+.toggle-pill[data-on="true"] {
+  background: var(--_bg-on);
+  border-color: var(--_border-on);
+  box-shadow: var(--_glow-on);
+}
+
+.toggle-pill__circle {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--_circle-bg-off);
+  box-shadow: var(--_circle-shadow);
+  color: var(--_icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    left var(--duration-normal) var(--ease-spring),
+    background var(--duration-normal) var(--ease-default);
+}
+
+.toggle-pill[data-on="true"] .toggle-pill__circle {
+  left: 21px;
+  background: var(--_circle-bg-on);
+}
