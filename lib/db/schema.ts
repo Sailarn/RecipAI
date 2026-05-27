@@ -1,3 +1,8 @@
+import type { RecipeCategory } from "@/lib/categories";
+
+export const RECIPE_STATUSES = ["tried"] as const;
+export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
+
 export interface Collection {
   id: string;
   name: string;
@@ -63,7 +68,7 @@ export interface Recipe {
   instructions: Step[];
   sourceUrl?: string;
   category?: string;
-  status?: "tried" | null;
+  status?: RecipeStatus | null;
   collectionIds?: string[];
   canonicalIngredientIds?: string[];
   unrecognizedIngredients?: string[];
@@ -89,7 +94,7 @@ export interface ParsedRecipe {
   instructions: Array<{ order: number; instruction: string }>;
   imageUrl?: string;
   sourceUrl: string;
-  category?: string;
+  category?: RecipeCategory;
 }
 
 export interface ParsedRecipeEntry {

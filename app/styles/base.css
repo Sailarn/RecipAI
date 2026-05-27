@@ -82,6 +82,13 @@
     box-shadow: var(--glass-card-shadow);
   }
 
+  .glass-subtle {
+    background: var(--glass-subtle-bg);
+    backdrop-filter: var(--glass-subtle-blur);
+    -webkit-backdrop-filter: var(--glass-subtle-blur);
+    border: 1px solid var(--glass-subtle-border);
+  }
+
   /* Light mode: use light glass tokens */
   .glass-nav {
     background: var(--glass-light-bg);

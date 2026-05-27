@@ -1,19 +1,5 @@
 import * as cheerio from "cheerio";
-
-const RECIPE_CATEGORIES = [
-  "Breakfast",
-  "Lunch",
-  "Dinner",
-  "Soup",
-  "Salad",
-  "Snack",
-  "Dessert",
-  "Baking",
-  "Drink",
-  "Other",
-] as const;
-
-type RecipeCategory = (typeof RECIPE_CATEGORIES)[number];
+import { RECIPE_CATEGORIES, type RecipeCategory } from "@/lib/categories";
 
 const CATEGORY_KEYWORDS: Array<[RecipeCategory, RegExp]> = [
   ["Soup", /суп|борщ|юшка|бульйон|soup|broth|bisque|chowder/i],

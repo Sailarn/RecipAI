@@ -7,22 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface ParseFormProps {
   url: string;
-  onUrlChange: (v: string) => void;
+  onUrlChange: (value: string) => void;
   userComment: string;
-  onCommentChange: (v: string) => void;
+  onCommentChange: (value: string) => void;
   loading: boolean;
   error: string | null;
   onSubmit: () => void;
 }
 
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontFamily: "var(--font-sans)",
-  fontSize: 12,
-  fontWeight: 500,
-  color: "var(--fg-2)",
-  marginBottom: 5,
-};
+const LABEL_CLASSES =
+  "block font-sans text-[12px] font-medium text-[var(--fg-2)] mb-[5px]";
 
 export function ParseForm({
   url,
@@ -36,7 +30,7 @@ export function ParseForm({
   return (
     <div className="space-y-4 mb-6">
       <div>
-        <label htmlFor="url" style={labelStyle}>
+        <label htmlFor="url" className={LABEL_CLASSES}>
           Recipe URL
         </label>
         <Input
@@ -51,9 +45,9 @@ export function ParseForm({
       </div>
 
       <div>
-        <label htmlFor="comment" style={labelStyle}>
+        <label htmlFor="comment" className={LABEL_CLASSES}>
           Hints for AI{" "}
-          <span style={{ color: "var(--fg-3)", fontWeight: 400 }}>
+          <span className="text-[var(--fg-3)] font-normal">
             optional — e.g. "Ingredients are in grams"
           </span>
         </label>
