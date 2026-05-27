@@ -9,28 +9,27 @@ import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 
 const ROW_ICON_SIZE = 15;
 const ROW_ICON_STROKE_WIDTH = 1.75;
-const NAV_CLEARANCE_PX = 100;
+const CHEVRON_ICON_SIZE = 13;
+const CHEVRON_STROKE_WIDTH = 2;
 
 const ROW_CLASSES =
   "flex items-center gap-2 py-3.5 px-4 bg-transparent border-none w-full text-left";
 
-const ROW_LABEL: React.CSSProperties = {
-  fontFamily: "var(--font-sans)",
-  fontSize: "var(--text-sm)",
-  fontWeight: "var(--font-medium)",
-  color: "var(--fg-1)",
-};
+const ROW_LABEL_CLASSES =
+  "flex-1 font-sans text-sm font-medium text-[var(--fg-1)]";
+const ROW_ICON_CLASSES = "shrink-0 text-[var(--fg-2)]";
 
-const ROW_ICON: React.CSSProperties = {
-  color: "var(--fg-2)",
-};
+function RowDivider() {
+  return <div className="h-px mx-4 bg-[var(--border-subtle)]" />;
+}
 
 export default function ProfilePage() {
   const t = useTranslations("profile");
   const params = useParams();
   const router = useRouter();
   const locale = params.locale as Locale;
-  const nextLocale = locales.find((l) => l !== locale) ?? locales[0];
+  const nextLocale =
+    locales.find((candidateLocale) => candidateLocale !== locale) ?? locales[0];
 
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,24 +42,8 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <div
-        className="px-4 max-w-md mx-auto"
-        style={{
-          paddingTop: "max(20px, calc(env(safe-area-inset-top) + 8px))",
-          paddingBottom: NAV_CLEARANCE_PX,
-        }}
-      >
-        <h1
-          className="mb-5"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: 26,
-            lineHeight: "var(--leading-tight)",
-            letterSpacing: "var(--tracking-tight)",
-            color: "var(--fg-1)",
-          }}
-        >
+      <div className="px-4 max-w-md mx-auto pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-[100px]">
+        <h1 className="mb-5 font-heading text-[26px] font-extrabold leading-tight tracking-tight text-[var(--fg-1)]">
           {t("title")}
         </h1>
 
@@ -73,74 +56,45 @@ export default function ProfilePage() {
             <Moon
               size={ROW_ICON_SIZE}
               strokeWidth={ROW_ICON_STROKE_WIDTH}
-              className="shrink-0"
-              style={ROW_ICON}
+              className={ROW_ICON_CLASSES}
             />
-            <span className="flex-1" style={ROW_LABEL}>
-              {t("theme")}
-            </span>
+            <span className={ROW_LABEL_CLASSES}>{t("theme")}</span>
             <ThemeToggle />
           </div>
 
-          <div
-            className="h-px mx-4"
-            style={{ background: "var(--border-subtle)" }}
-          />
+          <RowDivider />
 
           <button
             type="button"
             onClick={toggleLanguage}
-            className={`${ROW_CLASSES} cursor-pointer`}
-            style={{ WebkitTapHighlightColor: "transparent" }}
+            className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
           >
             <Globe
               size={ROW_ICON_SIZE}
               strokeWidth={ROW_ICON_STROKE_WIDTH}
-              className="shrink-0"
-              style={ROW_ICON}
+              className={ROW_ICON_CLASSES}
             />
-            <span className="flex-1" style={ROW_LABEL}>
-              {t("language")}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "var(--text-sm)",
-                color: "var(--fg-2)",
-              }}
-            >
+            <span className={ROW_LABEL_CLASSES}>{t("language")}</span>
+            <span className="font-sans text-sm text-[var(--fg-2)]">
               {LOCALE_DISPLAY_NAME[nextLocale]}
             </span>
             <ChevronRight
-              size={13}
-              strokeWidth={2}
-              className="shrink-0"
-              style={{ color: "var(--fg-3)" }}
+              size={CHEVRON_ICON_SIZE}
+              strokeWidth={CHEVRON_STROKE_WIDTH}
+              className="shrink-0 text-[var(--fg-3)]"
             />
           </button>
 
-          <div
-            className="h-px mx-4"
-            style={{ background: "var(--border-subtle)" }}
-          />
+          <RowDivider />
 
           <div className={`${ROW_CLASSES} cursor-default`}>
             <Info
               size={ROW_ICON_SIZE}
               strokeWidth={ROW_ICON_STROKE_WIDTH}
-              className="shrink-0"
-              style={ROW_ICON}
+              className={ROW_ICON_CLASSES}
             />
-            <span className="flex-1" style={ROW_LABEL}>
-              Version
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "var(--text-sm)",
-                color: "var(--fg-3)",
-              }}
-            >
+            <span className={ROW_LABEL_CLASSES}>Version</span>
+            <span className="font-sans text-sm text-[var(--fg-3)]">
               v{process.env.NEXT_PUBLIC_APP_VERSION}
             </span>
           </div>
