@@ -1,5 +1,5 @@
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { api } from "@/lib/routes";
+import type { ParsedRecipe } from "@/lib/types";
 
 export async function compressImage(
   file: File,

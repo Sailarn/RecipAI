@@ -1,4 +1,4 @@
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
+import type { ParsedRecipe } from "@/lib/types";
 import { isVideoUrl } from "@/lib/video-url";
 import { parseVideoRecipe } from "./video";
 import { parseWebRecipe } from "./web";

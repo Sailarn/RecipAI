@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
+import type { ParsedRecipe } from "@/lib/types";
 import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {

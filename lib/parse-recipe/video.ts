@@ -1,7 +1,7 @@
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { callGeminiForRecipe } from "@/lib/gemini";
 import { fetchInstagramReel } from "@/lib/scrapers/apify";
 import { transcribeWithGroq } from "@/lib/transcribe/groq";
+import type { ParsedRecipe } from "@/lib/types";
 import { isInstagramUrl } from "@/lib/video-url";
 import { buildTranscriptPrompt } from "./prompts";
 

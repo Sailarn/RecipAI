@@ -4,11 +4,11 @@ import { useState } from "react";
 import { ParseForm } from "@/app/[locale]/recipes/parse/components/parse-form";
 import { ParseInfoBanner } from "@/app/[locale]/recipes/parse/components/parse-info-banner";
 import { ParseResult } from "@/app/[locale]/recipes/parse/components/parse-result";
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
 import { useNavigate } from "@/lib/transitions";
+import type { ParsedRecipe } from "@/lib/types";
 
 interface RecipeParseViewProps {
   locale: string;

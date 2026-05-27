@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
@@ -8,6 +7,7 @@ import { uploadImageServer } from "@/lib/imagekit";
 import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
+import type { ParsedRecipe } from "@/lib/types";
 import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;

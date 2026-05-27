@@ -1,4 +1,4 @@
-import type { ParsedRecipe } from "@/app/[locale]/recipes/parse/page";
+import type { ParsedRecipe } from "@/lib/types";
 
 export const PARSE_RETRY_ATTEMPTS = 2;
 export const PARSE_RETRY_DELAY_MS = 4000;

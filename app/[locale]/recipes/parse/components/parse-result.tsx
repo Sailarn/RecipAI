@@ -1,6 +1,6 @@
 "use client";
 
-import type { ParsedRecipe } from "../page";
+import type { ParsedRecipe } from "@/lib/types";
 
 interface ParseResultProps {
   result: ParsedRecipe;
