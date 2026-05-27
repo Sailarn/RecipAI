@@ -5,8 +5,8 @@ import {
   DEFAULT_CATEGORY_VISUAL_STYLE,
 } from "@/lib/categories";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { CategoryBadge } from "./category-badge";
-import { IngredientsPreview } from "./ingredients-preview";
+import { CategoryBadge } from "../category-badge";
+import { IngredientsPreview } from "../ingredients-preview";
 
 interface ParseResultProps {
   result: ParsedRecipe;
