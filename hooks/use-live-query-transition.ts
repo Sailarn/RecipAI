@@ -16,13 +16,14 @@ import { startTransition, useEffect, useState } from "react";
 export function useLiveQueryTransition<T>(
   querier: () => Promise<T> | T,
   deps: readonly unknown[],
+  onError?: () => void,
 ): T | undefined {
   const [state, setState] = useState<T | undefined>(undefined);
 
   useEffect(() => {
     const subscription = liveQuery(querier).subscribe({
       next: (value) => startTransition(() => setState(value as T)),
-      error: () => {},
+      error: () => onError?.(),
     });
     return () => subscription.unsubscribe();
     // biome-ignore lint/correctness/useExhaustiveDependencies: mirrors useLiveQuery — caller owns deps
