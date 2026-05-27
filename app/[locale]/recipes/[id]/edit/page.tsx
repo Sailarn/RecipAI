@@ -3,15 +3,10 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { PageCentered } from "@/components/page-centered";
 import { RecipeForm } from "@/components/recipe-form";
 import { getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-
-function PageCentered({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="h-full flex items-center justify-center">{children}</div>
-  );
-}
 
 export default function EditRecipePage() {
   const params = useParams();

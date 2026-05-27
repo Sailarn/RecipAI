@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { Collection, Recipe } from "@/lib/db/schema";
-import { RecipeVirtualList } from "../recipe-virtual-list";
+import { RecipeVirtualList } from "../index";
 
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn().mockReturnValue((key: string) => key),
