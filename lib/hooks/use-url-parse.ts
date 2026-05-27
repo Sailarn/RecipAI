@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
-import type { ParsedRecipe } from "@/lib/types";
 
 interface UseUrlParseOptions {
   locale: string;

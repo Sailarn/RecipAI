@@ -71,6 +71,27 @@ export interface Recipe {
   updatedAt: Date;
 }
 
+export interface ParsedIngredient {
+  amount?: number;
+  unit?: string;
+  item: string;
+  ua?: string | null;
+  category?: string | null;
+}
+
+export interface ParsedRecipe {
+  title: string;
+  description?: string;
+  prepTime?: number;
+  cookTime?: number;
+  servings: number;
+  ingredients: ParsedIngredient[];
+  instructions: Array<{ order: number; instruction: string }>;
+  imageUrl?: string;
+  sourceUrl: string;
+  category?: string;
+}
+
 export interface ParsedRecipeEntry {
   id: string;
   title: string;
@@ -78,13 +99,7 @@ export interface ParsedRecipeEntry {
   prepTime?: number;
   cookTime?: number;
   servings: number;
-  ingredients: Array<{
-    amount?: number;
-    unit?: string;
-    item: string;
-    ua?: string | null;
-    category?: string | null;
-  }>;
+  ingredients: ParsedIngredient[];
   instructions: Array<{
     order: number;
     instruction: string;

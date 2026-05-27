@@ -1,6 +1,6 @@
 "use client";
 
-import type { ParsedRecipe } from "@/lib/types";
+import type { ParsedRecipe } from "@/lib/db/schema";
 
 interface ParseResultProps {
   result: ParsedRecipe;

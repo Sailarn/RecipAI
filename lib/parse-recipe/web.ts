@@ -1,9 +1,9 @@
 import * as cheerio from "cheerio";
 import { extractSchemaRecipe } from "@/app/api/parse-recipe/schema-parser";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import { callGeminiForRecipe } from "@/lib/gemini";
 import { fetchHtmlWithPhantomJs } from "@/lib/scrapers/phantomjs";
 import { fetchHtmlWithScrapeDo } from "@/lib/scrapers/scrape-do";
-import type { ParsedRecipe } from "@/lib/types";
 import {
   buildImagesText,
   extractAllImages,

@@ -1,4 +1,4 @@
-import type { ParsedRecipe } from "@/lib/types";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import { isVideoUrl } from "@/lib/video-url";
 import { parseVideoRecipe } from "./video";
 import { parseWebRecipe } from "./web";

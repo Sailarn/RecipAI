@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { ParsedRecipe } from "@/lib/types";
+import type { ParsedRecipe } from "@/lib/db/schema";
 
 // Fallback chain: if a model hits 429/503, the next one is tried.
 const MODEL_CHAIN = [

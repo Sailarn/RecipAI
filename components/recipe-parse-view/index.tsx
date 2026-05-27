@@ -6,9 +6,9 @@ import { ParseInfoBanner } from "@/app/[locale]/recipes/parse/components/parse-i
 import { ParseResult } from "@/app/[locale]/recipes/parse/components/parse-result";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
 import { useNavigate } from "@/lib/transitions";
-import type { ParsedRecipe } from "@/lib/types";
 
 interface RecipeParseViewProps {
   locale: string;
