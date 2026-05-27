@@ -7,6 +7,12 @@ import { RecipeForm } from "@/components/recipe-form";
 import { getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 
+function PageCentered({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="h-full flex items-center justify-center">{children}</div>
+  );
+}
+
 export default function EditRecipePage() {
   const params = useParams();
   const id = params.id as string;
@@ -14,26 +20,39 @@ export default function EditRecipePage() {
 
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     getRecipe(id)
-      .then((recipe) => setRecipe(recipe ?? null))
+      .then((fetchedRecipe) => setRecipe(fetchedRecipe ?? null))
+      .catch((caughtError) => {
+        setError(true);
+        throw caughtError;
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <PageCentered>
         <p className="text-[var(--fg-3)]">{tCommon("loading")}</p>
-      </div>
+      </PageCentered>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageCentered>
+        <p className="text-[var(--fg-3)]">{tCommon("error")}</p>
+      </PageCentered>
     );
   }
 
   if (!recipe) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <PageCentered>
         <p className="text-[var(--fg-3)]">{tCommon("recipeNotFound")}</p>
-      </div>
+      </PageCentered>
     );
   }
 
