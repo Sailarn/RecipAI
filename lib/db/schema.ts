@@ -117,8 +117,15 @@ export interface ParsedRecipeEntry {
   createdAt: Date;
 }
 
-export type SyncEntityType = "recipe" | "collection";
-export type SyncNotificationType = "server_only" | "local_only" | "conflicted";
+export const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
+export type SyncEntityType = (typeof SYNC_ENTITY_TYPES)[number];
+
+export const SYNC_NOTIFICATION_TYPES = [
+  "server_only",
+  "local_only",
+  "conflicted",
+] as const;
+export type SyncNotificationType = (typeof SYNC_NOTIFICATION_TYPES)[number];
 
 export interface SyncNotification {
   id: string;
