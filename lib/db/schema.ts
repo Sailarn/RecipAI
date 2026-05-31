@@ -11,6 +11,15 @@ export const INGREDIENT_STATUS = {
 export type IngredientStatus =
   (typeof INGREDIENT_STATUS)[keyof typeof INGREDIENT_STATUS];
 
+export const PARSE_JOB_STATUS = {
+  PENDING: "pending",
+  PROCESSING: "processing",
+  DONE: "done",
+  FAILED: "failed",
+} as const;
+export type ParseJobStatus =
+  (typeof PARSE_JOB_STATUS)[keyof typeof PARSE_JOB_STATUS];
+
 export interface Collection {
   id: string;
   name: string;

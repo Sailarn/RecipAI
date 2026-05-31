@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { account } from "@/db/schema/auth";
 import { parseJobs } from "@/db/schema/parse-jobs";
+import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 import { extractUrl, sendTelegramMessage } from "@/lib/telegram-bot";
 
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     userId: foundAccount.userId,
     url,
     telegramChatId: String(chatId),
-    status: "pending",
+    status: PARSE_JOB_STATUS.PENDING,
   });
 
   // trigger processing (fire and forget)

@@ -12,6 +12,7 @@ vi.mock("@/db/schema/parse-jobs", () => ({
 }));
 
 import { db } from "@/db";
+import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { GET } from "../route";
 
 function makeRequest(id: string) {
@@ -49,7 +50,7 @@ describe("GET /api/parse-queue/[id]", () => {
   it("returns job status, result and error when found", async () => {
     const mockJob = {
       id: "job-1",
-      status: "done",
+      status: PARSE_JOB_STATUS.DONE,
       result: { title: "Pasta", servings: 2 },
       error: null,
     };
@@ -61,7 +62,7 @@ describe("GET /api/parse-queue/[id]", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual({
-      status: "done",
+      status: PARSE_JOB_STATUS.DONE,
       result: { title: "Pasta", servings: 2 },
       error: null,
     });
@@ -70,7 +71,7 @@ describe("GET /api/parse-queue/[id]", () => {
   it("returns job with failed status and error message", async () => {
     const mockJob = {
       id: "job-2",
-      status: "failed",
+      status: PARSE_JOB_STATUS.FAILED,
       result: null,
       error: "Could not parse",
     };
@@ -81,7 +82,7 @@ describe("GET /api/parse-queue/[id]", () => {
 
     const body = await res.json();
     expect(body).toEqual({
-      status: "failed",
+      status: PARSE_JOB_STATUS.FAILED,
       result: null,
       error: "Could not parse",
     });
@@ -90,7 +91,7 @@ describe("GET /api/parse-queue/[id]", () => {
   it("returns pending job with null result", async () => {
     const mockJob = {
       id: "job-3",
-      status: "pending",
+      status: PARSE_JOB_STATUS.PENDING,
       result: null,
       error: null,
     };
@@ -100,7 +101,7 @@ describe("GET /api/parse-queue/[id]", () => {
     const res = await GET(req, params);
 
     const body = await res.json();
-    expect(body.status).toBe("pending");
+    expect(body.status).toBe(PARSE_JOB_STATUS.PENDING);
     expect(body.result).toBeNull();
   });
 });

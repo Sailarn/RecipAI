@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth";
+import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { mintUploadToken } from "@/lib/upload-token";
 
 export async function POST(req: NextRequest) {
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       userId: session?.user.id ?? null,
       url,
       userComment: userComment ?? null,
-      status: "pending",
+      status: PARSE_JOB_STATUS.PENDING,
     });
 
     const uploadToken = await mintUploadToken();

@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { PARSE_JOB_STATUS, type ParseJobStatus } from "@/lib/db/schema";
 import { user } from "./auth";
 
 export const parseJobs = pgTable("parse_jobs", {
@@ -8,7 +9,10 @@ export const parseJobs = pgTable("parse_jobs", {
   url: text("url").notNull(),
   userComment: text("user_comment"),
   telegramChatId: text("telegram_chat_id"),
-  status: text("status").notNull().default("pending"),
+  status: text("status")
+    .$type<ParseJobStatus>()
+    .notNull()
+    .default(PARSE_JOB_STATUS.PENDING),
   result: jsonb("result"),
   error: text("error"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

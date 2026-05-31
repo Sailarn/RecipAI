@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ParsedRecipe } from "@/lib/db/schema";
+import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import {
   addJobId,
   getJobIds,
@@ -43,14 +43,14 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         const statusRes = await fetch(api.parseQueueJob(id));
         const { status, result, error } = await statusRes.json();
 
-        if (status === "done") {
+        if (status === PARSE_JOB_STATUS.DONE) {
           const uploadToken = getUploadToken(id);
           if (uploadToken) storePendingUploadToken(uploadToken);
           removeJobId(id);
           setResult(result as ParsedRecipe);
           setLoading(false);
           setJobId(null);
-        } else if (status === "failed") {
+        } else if (status === PARSE_JOB_STATUS.FAILED) {
           const rawError: string = error || "Failed to parse recipe";
           const friendlyError =
             rawError.includes("503") ||

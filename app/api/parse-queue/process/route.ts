@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
-import type { ParsedRecipe } from "@/lib/db/schema";
+import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { uploadImageServer } from "@/lib/imagekit";
 import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   await db
     .update(parseJobs)
-    .set({ status: "processing", updatedAt: new Date() })
+    .set({ status: PARSE_JOB_STATUS.PROCESSING, updatedAt: new Date() })
     .where(eq(parseJobs.id, jobId));
 
   const [job] = await db
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     await db
       .update(parseJobs)
       .set({
-        status: "done",
+        status: PARSE_JOB_STATUS.DONE,
         result: recipe as unknown as Record<string, unknown>,
         updatedAt: new Date(),
       })
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     await db
       .update(parseJobs)
       .set({
-        status: "failed",
+        status: PARSE_JOB_STATUS.FAILED,
         error: error instanceof Error ? error.message : "Unknown error",
         updatedAt: new Date(),
       })
