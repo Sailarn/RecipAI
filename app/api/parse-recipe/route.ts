@@ -1,17 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { ApiError } from "@/lib/api-errors";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { mintUploadToken } from "@/lib/upload-token";
 
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+  let body: { url?: string; userComment?: string };
   try {
-    const { url, userComment } = await request.json();
-    if (!url)
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    body = await request.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
 
-    const recipe = await parseRecipeFromUrl(url, userComment);
+  const { url, userComment } = body;
+  if (!url) return ApiError.badRequest("URL is required");
 
-    return NextResponse.json({ success: true, recipe });
+  try {
+    const [recipe, uploadToken] = await Promise.all([
+      parseRecipeFromUrl(url, userComment),
+      mintUploadToken(),
+    ]);
+    return NextResponse.json({ success: true, recipe, uploadToken });
   } catch (error) {
     return NextResponse.json(
       {

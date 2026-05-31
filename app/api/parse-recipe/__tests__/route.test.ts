@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/parse-recipe", () => ({
   parseRecipeFromUrl: vi.fn(),
 }));
+vi.mock("@/lib/upload-token", () => ({
+  mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
+}));
 
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { POST } from "../route";
@@ -42,7 +45,11 @@ describe("POST /api/parse-recipe", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ success: true, recipe: mockRecipe });
+    expect(body).toEqual({
+      success: true,
+      recipe: mockRecipe,
+      uploadToken: "mock-upload-token",
+    });
   });
 
   it("passes userComment to parseRecipeFromUrl", async () => {

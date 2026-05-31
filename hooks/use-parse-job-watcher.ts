@@ -6,70 +6,84 @@ import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
-import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
+import {
+  getJobIds,
+  getUploadToken,
+  removeJobId,
+  storePendingUploadToken,
+} from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {
+  const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleDone = useCallback(async (id: string, result: ParsedRecipe) => {
-    removeJobId(id);
+  const handleDone = useCallback(
+    async (id: string, result: ParsedRecipe) => {
+      // Read and preserve the token before removeJobId wipes it.
+      const uploadToken = getUploadToken(id) ?? undefined;
+      if (uploadToken) storePendingUploadToken(uploadToken);
+      removeJobId(id);
 
-    // save to parsedRecipes table
-    const entry: ParsedRecipeEntry = {
-      id: generateId(),
-      title: result.title,
-      description: result.description,
-      prepTime: result.prepTime,
-      cookTime: result.cookTime,
-      servings: result.servings ?? 1,
-      ingredients: result.ingredients,
-      instructions: result.instructions,
-      imageUrl: result.imageUrl,
-      sourceUrl: result.sourceUrl,
-      category: result.category,
-      createdAt: new Date(),
-    };
+      // save to parsedRecipes table
+      const entry: ParsedRecipeEntry = {
+        id: generateId(),
+        title: result.title,
+        description: result.description,
+        prepTime: result.prepTime,
+        cookTime: result.cookTime,
+        servings: result.servings ?? 1,
+        ingredients: result.ingredients,
+        instructions: result.instructions,
+        imageUrl: result.imageUrl,
+        sourceUrl: result.sourceUrl,
+        category: result.category,
+        createdAt: new Date(),
+      };
 
-    let imageUrl = entry.imageUrl;
-    let imageFileId: string | undefined;
+      let imageUrl = entry.imageUrl;
+      let imageFileId: string | undefined;
 
-    if (imageUrl && !isImageKitUrl(imageUrl)) {
-      try {
-        const uploaded = await uploadImage(imageUrl);
-        imageUrl = uploaded.url;
-        imageFileId = uploaded.fileId;
-      } catch {
-        // continue without image upload
+      if (imageUrl && !isImageKitUrl(imageUrl)) {
+        try {
+          const uploaded = await uploadImage(imageUrl, { uploadToken });
+          imageUrl = uploaded.url;
+          imageFileId = uploaded.fileId;
+        } catch {
+          // continue without image upload
+        }
       }
-    }
 
-    const updatedEntry = { ...entry, imageUrl, imageFileId };
-    await db.parsedRecipes.add(updatedEntry);
+      const updatedEntry = { ...entry, imageUrl, imageFileId };
+      await db.parsedRecipes.add(updatedEntry);
 
-    toast(result.title, {
-      description: "Recipe parsed — tap to review",
-      duration: 10000,
-      closeButton: true,
-      action: {
-        label: "Save",
-        onClick: async () => {
-          await saveParsedRecipe(updatedEntry);
-          await db.parsedRecipes.delete(updatedEntry.id);
-          toast.success("Recipe saved!");
+      toast(result.title, {
+        description: "Recipe parsed — tap to review",
+        duration: 10000,
+        closeButton: true,
+        action: {
+          label: "Save",
+          onClick: async () => {
+            await saveParsedRecipe(updatedEntry);
+            await db.parsedRecipes.delete(updatedEntry.id);
+            toast.success("Recipe saved!");
+          },
         },
-      },
-      cancel: {
-        label: "Edit",
-        onClick: () => {
-          localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
-          const locale = window.location.pathname.split("/")[1];
-          window.location.href = routes.recipes.new(locale);
+        cancel: {
+          label: "Edit",
+          onClick: () => {
+            localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
+            db.parsedRecipes.delete(updatedEntry.id).catch(() => {});
+            const locale = window.location.pathname.split("/")[1];
+            navigate.push(routes.recipes.new(locale));
+          },
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [navigate],
+  );
 
   const poll = useCallback(
     (id: string) => {

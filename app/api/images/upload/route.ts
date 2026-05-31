@@ -1,58 +1,80 @@
 import { NextResponse } from "next/server";
+import { ApiError } from "@/lib/api-errors";
 import { imagekit } from "@/lib/imagekit";
+import { requireUploadAuth } from "@/lib/upload-auth";
+import {
+  isAllowedImageType,
+  MAX_IMAGE_BYTES,
+  UPLOAD_ERRORS,
+} from "@/lib/upload-limits";
 
 export async function POST(request: Request) {
-  try {
-    const contentType = request.headers.get("content-type") || "";
-    let fileData: string;
-    let name: string = `recipe-${Date.now()}`;
+  const authError = await requireUploadAuth(request);
+  if (authError) return authError;
 
-    if (contentType.includes("multipart/form-data")) {
+  const contentType = request.headers.get("content-type") ?? "";
+  let fileData: string;
+  let fileName = `recipe-${Date.now()}`;
+
+  if (contentType.includes("multipart/form-data")) {
+    try {
       const form = await request.formData();
       const file = form.get("file") as File | null;
-      if (!file) {
-        return NextResponse.json(
-          { error: "No file provided" },
-          { status: 400 },
-        );
-      }
+      if (!file) return ApiError.badRequest("No file provided");
+
+      if (!isAllowedImageType(file.type))
+        return ApiError.badRequest(UPLOAD_ERRORS.UNSUPPORTED_TYPE);
+      if (file.size > MAX_IMAGE_BYTES)
+        return ApiError.badRequest(UPLOAD_ERRORS.FILE_TOO_LARGE);
+
       const buffer = await file.arrayBuffer();
       fileData = Buffer.from(buffer).toString("base64");
-      name = file.name || name;
-    } else {
-      const body = await request.json();
-      const { url, file, fileName } = body;
-      name = fileName || name;
-
-      if (url) {
-        const response = await fetch(url);
-        if (!response.ok) {
-          return NextResponse.json(
-            { error: "Failed to fetch image from URL" },
-            { status: 400 },
-          );
-        }
-        const buffer = await response.arrayBuffer();
-        fileData = Buffer.from(buffer).toString("base64");
-      } else if (file) {
-        fileData = file;
-      } else {
-        return NextResponse.json(
-          { error: "No image source provided" },
-          { status: 400 },
-        );
-      }
+      fileName = file.name || fileName;
+    } catch {
+      return ApiError.invalidBody();
+    }
+  } else {
+    let body: { url?: string; file?: string; fileName?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return ApiError.invalidBody();
     }
 
+    const { url, file, fileName: bodyFileName } = body;
+    fileName = bodyFileName || fileName;
+
+    if (url) {
+      const response = await fetch(url);
+      if (!response.ok)
+        return ApiError.badRequest("Failed to fetch image from URL");
+
+      const fetchedContentType = response.headers.get("content-type") ?? "";
+      if (!isAllowedImageType(fetchedContentType))
+        return ApiError.badRequest(UPLOAD_ERRORS.UNSUPPORTED_TYPE);
+
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength > MAX_IMAGE_BYTES)
+        return ApiError.badRequest(UPLOAD_ERRORS.FILE_TOO_LARGE);
+
+      fileData = Buffer.from(buffer).toString("base64");
+    } else if (file) {
+      if (Buffer.byteLength(file, "base64") > MAX_IMAGE_BYTES)
+        return ApiError.badRequest(UPLOAD_ERRORS.FILE_TOO_LARGE);
+      fileData = file;
+    } else {
+      return ApiError.badRequest("No image source provided");
+    }
+  }
+
+  try {
     const result = await imagekit.upload({
       file: fileData,
-      fileName: name,
+      fileName,
       folder: "/recipes",
     });
-
     return NextResponse.json({ url: result.url, fileId: result.fileId });
   } catch (error) {
-    console.error("ImageKit upload error:", error);
-    return NextResponse.json({ error: "Image upload failed" }, { status: 500 });
+    return ApiError.internal(error, request);
   }
 }

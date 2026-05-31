@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
+import {
+  addJobId,
+  getJobIds,
+  getUploadToken,
+  removeJobId,
+  storePendingUploadToken,
+} from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -38,10 +44,12 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         const { status, result, error } = await statusRes.json();
 
         if (status === "done") {
+          const uploadToken = getUploadToken(id);
+          if (uploadToken) storePendingUploadToken(uploadToken);
+          removeJobId(id);
           setResult(result as ParsedRecipe);
           setLoading(false);
           setJobId(null);
-          removeJobId(id);
         } else if (status === "failed") {
           const rawError: string = error || "Failed to parse recipe";
           const friendlyError =
@@ -100,8 +108,8 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         body: JSON.stringify({ url, userComment: userComment || undefined }),
       });
 
-      const { jobId: newJobId } = await res.json();
-      addJobId(newJobId);
+      const { jobId: newJobId, uploadToken } = await res.json();
+      addJobId(newJobId, uploadToken);
       setJobId(newJobId);
       setLoading(false);
 

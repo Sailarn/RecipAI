@@ -4,6 +4,10 @@ import { useRef, useState } from "react";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
+import {
+  clearPendingUploadToken,
+  getPendingUploadToken,
+} from "@/lib/parse-job-storage";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { useNavigate } from "@/lib/transitions";
 import { generateId } from "@/lib/utils";
@@ -75,6 +79,10 @@ export function useRecipeSave(recipe: Recipe | undefined) {
 
     // upload images in background after navigation
     (async () => {
+      const uploadToken = getPendingUploadToken() ?? undefined;
+      clearPendingUploadToken();
+
+      const uploadOptions = uploadToken ? { uploadToken } : undefined;
       const updates: Partial<typeof recipeData> = {};
       let hasUpdates = false;
 
@@ -82,7 +90,7 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       if (file) {
         try {
           if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
-          const uploaded = await uploadImage(file);
+          const uploaded = await uploadImage(file, uploadOptions);
           updates.imageUrl = uploaded.url;
           updates.imageFileId = uploaded.fileId;
           hasUpdates = true;
@@ -92,7 +100,10 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       } else if (recipeData.imageUrl && !isImageKitUrl(recipeData.imageUrl)) {
         try {
           if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
-          const uploaded = await uploadImage(recipeData.imageUrl);
+          const uploaded = await uploadImage(
+            recipeData.imageUrl,
+            uploadOptions,
+          );
           updates.imageUrl = uploaded.url;
           updates.imageFileId = uploaded.fileId;
           hasUpdates = true;
@@ -107,7 +118,7 @@ export function useRecipeSave(recipe: Recipe | undefined) {
         const stepFile = pendingStepFiles.current[idx];
         if (stepFile) {
           try {
-            const uploaded = await uploadImage(stepFile);
+            const uploaded = await uploadImage(stepFile, uploadOptions);
             hasUpdates = true;
             updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
           } catch {
@@ -115,7 +126,7 @@ export function useRecipeSave(recipe: Recipe | undefined) {
           }
         } else if (inst.imageUrl && !isImageKitUrl(inst.imageUrl)) {
           try {
-            const uploaded = await uploadImage(inst.imageUrl);
+            const uploaded = await uploadImage(inst.imageUrl, uploadOptions);
             hasUpdates = true;
             updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
           } catch {

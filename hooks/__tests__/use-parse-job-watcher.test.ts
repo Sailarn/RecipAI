@@ -15,8 +15,10 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/lib/parse-job-storage", () => ({
   getJobIds: vi.fn().mockReturnValue([]),
+  getUploadToken: vi.fn().mockReturnValue(null),
   removeJobId: vi.fn(),
   addJobId: vi.fn(),
+  storePendingUploadToken: vi.fn(),
 }));
 
 vi.mock("@/lib/db/db", () => ({
@@ -37,10 +39,19 @@ vi.mock("@/lib/images", () => ({
   uploadImage: vi.fn(),
 }));
 
+vi.mock("@/lib/transitions", () => ({
+  useNavigate: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
+}));
+
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import { isImageKitUrl, uploadImage } from "@/lib/images";
-import { getJobIds, removeJobId } from "@/lib/parse-job-storage";
+import {
+  getJobIds,
+  getUploadToken,
+  removeJobId,
+  storePendingUploadToken,
+} from "@/lib/parse-job-storage";
 
 const mockFetch = vi.fn();
 
@@ -269,6 +280,29 @@ describe("useParseJobWatcher", () => {
     });
   });
 
+  describe("toast callbacks", () => {
+    it("Edit cancel deletes parsedRecipe entry so it does not persist in the notification center", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(doneResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(toast).toHaveBeenCalled());
+
+      const toastOptions = vi.mocked(toast).mock.calls[0][1] as unknown as {
+        cancel: { onClick: () => void };
+      };
+
+      act(() => {
+        toastOptions.cancel.onClick();
+      });
+
+      await waitFor(() =>
+        expect(db.parsedRecipes.delete).toHaveBeenCalledOnce(),
+      );
+    });
+  });
+
   describe("image upload", () => {
     it("uploads non-ImageKit imageUrl before saving to parsedRecipes", async () => {
       vi.mocked(getJobIds).mockReturnValue(["job-1"]);
@@ -291,7 +325,9 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() => expect(db.parsedRecipes.add).toHaveBeenCalled());
 
-      expect(uploadImage).toHaveBeenCalledWith("https://external.com/img.jpg");
+      expect(uploadImage).toHaveBeenCalledWith("https://external.com/img.jpg", {
+        uploadToken: undefined,
+      });
       const entry = vi.mocked(db.parsedRecipes.add).mock.calls[0][0];
       expect(entry.imageUrl).toBe("https://ik.imagekit.io/x/uploaded.jpg");
       expect(entry.imageFileId).toBe("file-abc");
@@ -314,6 +350,33 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() => expect(db.parsedRecipes.add).toHaveBeenCalled());
       expect(uploadImage).not.toHaveBeenCalled();
+    });
+
+    it("passes upload token from storage to uploadImage", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      vi.mocked(getUploadToken).mockReturnValue("tok-abc");
+      vi.mocked(isImageKitUrl).mockReturnValue(false);
+      vi.mocked(uploadImage).mockResolvedValue({
+        url: "https://ik.imagekit.io/x/uploaded.jpg",
+        fileId: "file-abc",
+      });
+      mockFetch.mockResolvedValue(
+        makeResponse({
+          status: "done",
+          result: {
+            ...mockParsedRecipe,
+            imageUrl: "https://external.com/img.jpg",
+          },
+        }),
+      );
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(uploadImage).toHaveBeenCalled());
+      expect(storePendingUploadToken).toHaveBeenCalledWith("tok-abc");
+      expect(uploadImage).toHaveBeenCalledWith("https://external.com/img.jpg", {
+        uploadToken: "tok-abc",
+      });
     });
 
     it("continues without upload when imageUrl upload fails", async () => {

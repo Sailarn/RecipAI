@@ -5,8 +5,12 @@ vi.mock("@/lib/imagekit", () => ({
     deleteFile: vi.fn(),
   },
 }));
+vi.mock("@/lib/upload-auth", () => ({
+  requireUploadAuth: vi.fn(),
+}));
 
 import { imagekit } from "@/lib/imagekit";
+import { requireUploadAuth } from "@/lib/upload-auth";
 import { DELETE } from "../delete/route";
 
 function makeRequest(body: object) {
@@ -19,49 +23,77 @@ function makeRequest(body: object) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Default: authorised.
+  vi.mocked(requireUploadAuth).mockResolvedValue(null);
 });
 
 describe("DELETE /api/images/delete", () => {
-  it("returns 400 when fileId is missing", async () => {
-    const res = await DELETE(makeRequest({}));
+  describe("authentication", () => {
+    it("returns 401 when requireUploadAuth rejects the request", async () => {
+      vi.mocked(requireUploadAuth).mockResolvedValue(
+        new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+        }) as never,
+      );
 
-    expect(res.status).toBe(400);
-    const body = await res.json();
-    expect(body).toEqual({ error: "No fileId provided" });
+      const res = await DELETE(makeRequest({ fileId: "file-123" }));
+
+      expect(res.status).toBe(401);
+    });
+
+    it("delegates auth decisions to requireUploadAuth", async () => {
+      vi.mocked(imagekit.deleteFile).mockResolvedValue(undefined as never);
+
+      await DELETE(makeRequest({ fileId: "file-123" }));
+
+      expect(requireUploadAuth).toHaveBeenCalledOnce();
+    });
   });
 
-  it("returns success:true when file is deleted", async () => {
-    vi.mocked(imagekit.deleteFile).mockResolvedValue(undefined as any);
+  describe("request validation", () => {
+    it("returns 400 when fileId is missing", async () => {
+      const res = await DELETE(makeRequest({}));
 
-    const res = await DELETE(makeRequest({ fileId: "file-123" }));
-
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({ success: true });
-    expect(imagekit.deleteFile).toHaveBeenCalledWith("file-123");
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body).toEqual({ error: "fileId required" });
+    });
   });
 
-  it("returns success:true when file does not exist (graceful)", async () => {
-    vi.mocked(imagekit.deleteFile).mockRejectedValue(
-      new Error("File does not exist"),
-    );
+  describe("deletion", () => {
+    it("returns success:true when file is deleted", async () => {
+      vi.mocked(imagekit.deleteFile).mockResolvedValue(undefined as never);
 
-    const res = await DELETE(makeRequest({ fileId: "file-ghost" }));
+      const res = await DELETE(makeRequest({ fileId: "file-123" }));
 
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body).toEqual({ success: true });
-  });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ success: true });
+      expect(imagekit.deleteFile).toHaveBeenCalledWith("file-123");
+    });
 
-  it("returns 500 for other errors", async () => {
-    vi.mocked(imagekit.deleteFile).mockRejectedValue(
-      new Error("Network timeout"),
-    );
+    it("returns success:true when file does not exist (graceful)", async () => {
+      vi.mocked(imagekit.deleteFile).mockRejectedValue(
+        new Error("File does not exist"),
+      );
 
-    const res = await DELETE(makeRequest({ fileId: "file-123" }));
+      const res = await DELETE(makeRequest({ fileId: "file-ghost" }));
 
-    expect(res.status).toBe(500);
-    const body = await res.json();
-    expect(body).toEqual({ error: "Image deletion failed" });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ success: true });
+    });
+
+    it("returns 500 for other errors", async () => {
+      vi.mocked(imagekit.deleteFile).mockRejectedValue(
+        new Error("Network timeout"),
+      );
+
+      const res = await DELETE(makeRequest({ fileId: "file-123" }));
+
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body).toEqual({ error: "Internal server error" });
+    });
   });
 });
