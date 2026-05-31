@@ -19,6 +19,9 @@ import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
+const BELL_BUTTON_CLASS =
+  "relative p-2 rounded-full bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)]";
+
 export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
@@ -57,8 +60,7 @@ export function ParsedRecipesSheet() {
       if (!entry) return;
       localStorage.setItem("parsedRecipe", JSON.stringify(entry));
       db.parsedRecipes.delete(id);
-      const loc = window.location.pathname.split("/")[1];
-      window.location.href = `/${loc}/recipes/new`;
+      navigate.push(routes.recipes.new(locale));
     });
   };
 
@@ -66,41 +68,27 @@ export function ParsedRecipesSheet() {
     await db.parsedRecipes.delete(id);
   };
 
-  if (totalCount === 0) return null;
+  if (totalCount === 0) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={`${BELL_BUTTON_CLASS} opacity-30 cursor-default`}
+      >
+        <BellIcon size={18} className="text-[var(--fg-1)]" />
+      </button>
+    );
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
           type="button"
-          className="relative"
-          style={{
-            padding: 8,
-            borderRadius: 99,
-            background: "rgba(255,170,50,0.08)",
-            border: "1px solid rgba(255,200,100,0.18)",
-            cursor: "pointer",
-            transition: "background 0.15s ease",
-          }}
+          className={`${BELL_BUTTON_CLASS} cursor-pointer transition-colors duration-150`}
         >
-          <BellIcon size={18} style={{ color: "var(--fg-1)" }} />
-          <span
-            style={{
-              position: "absolute",
-              top: -2,
-              right: -2,
-              background: "var(--action-primary)",
-              color: "#fff",
-              fontSize: 10,
-              fontWeight: 700,
-              borderRadius: 99,
-              width: 16,
-              height: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <BellIcon size={18} className="text-[var(--fg-1)]" />
+          <span className="absolute -top-0.5 -right-0.5 bg-[var(--action-primary)] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
             {totalCount}
           </span>
         </button>
@@ -115,13 +103,7 @@ export function ParsedRecipesSheet() {
         </SheetHeader>
         <div className="space-y-3 px-4 pb-6">
           {syncCount > 0 && (
-            <div
-              className="p-4 rounded-xl space-y-2"
-              style={{
-                background: "rgba(255,170,50,0.08)",
-                border: "1px solid rgba(255,200,100,0.18)",
-              }}
-            >
+            <div className="p-4 rounded-xl space-y-2 bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)]">
               <div className="flex items-center justify-between gap-2">
                 <p className="font-medium text-sm">
                   🔄 {syncCount} item{syncCount !== 1 ? "s" : ""} need sync

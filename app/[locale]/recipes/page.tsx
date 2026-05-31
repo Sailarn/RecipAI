@@ -85,7 +85,8 @@ export default function RecipesPage() {
 
   if (recipesError) return <RecipeListError />;
   if (recipes === undefined) return <RecipeListSkeleton />;
-  if (recipes.length === 0) return <RecipeEmptyState />;
+
+  const isEmpty = recipes.length === 0;
 
   return (
     <div
@@ -102,7 +103,7 @@ export default function RecipesPage() {
         {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
       </div>
 
-      {/* Greeting, title, actions + filter bar — all scroll away */}
+      {/* Greeting, title, notifications bell — always visible so parsed recipes are always reachable */}
       <div className="pt-[max(20px,calc(env(safe-area-inset-top)+8px))] px-3.5">
         <div className="flex justify-between items-end mb-4">
           <div>
@@ -117,36 +118,44 @@ export default function RecipesPage() {
           <ParsedRecipesSheet />
         </div>
 
-        <RecipeFilterBar
-          search={search}
-          onSearchChange={setSearch}
-          sort={sort}
-          onSortChange={setSort}
-          category={category}
-          onCategoryChange={setCategory}
-          status={status}
-          onStatusChange={setStatus}
-          collections={collections}
-          activeCollectionId={collectionId}
-          onCollectionChange={setCollectionId}
-          onCreateCollection={newCollectionModal.open}
-          onCollectionLongPress={editCollectionModal.open}
-        />
+        {!isEmpty && (
+          <RecipeFilterBar
+            search={search}
+            onSearchChange={setSearch}
+            sort={sort}
+            onSortChange={setSort}
+            category={category}
+            onCategoryChange={setCategory}
+            status={status}
+            onStatusChange={setStatus}
+            collections={collections}
+            activeCollectionId={collectionId}
+            onCollectionChange={setCollectionId}
+            onCreateCollection={newCollectionModal.open}
+            onCollectionLongPress={editCollectionModal.open}
+          />
+        )}
       </div>
 
-      {/* Sentinel — when this exits the scroll container, compact bar appears */}
-      <div ref={sentinelRef} className="h-0" />
+      {isEmpty ? (
+        <RecipeEmptyState />
+      ) : (
+        <>
+          {/* Sentinel — when this exits the scroll container, compact bar appears */}
+          <div ref={sentinelRef} className="h-0" />
 
-      {/* Recipe list — virtualised: only visible rows are in the DOM */}
-      <RecipeVirtualList
-        filtered={filtered}
-        collections={collections}
-        getMissing={getMissing}
-        scrollRef={scrollRef}
-        hasActiveSearch={!!search}
-      />
-      {/* Nav bar clearance — outside the virtualiser so it always adds to scroll height */}
-      <div className="h-[110px]" />
+          {/* Recipe list — virtualised: only visible rows are in the DOM */}
+          <RecipeVirtualList
+            filtered={filtered}
+            collections={collections}
+            getMissing={getMissing}
+            scrollRef={scrollRef}
+            hasActiveSearch={!!search}
+          />
+          {/* Nav bar clearance — outside the virtualiser so it always adds to scroll height */}
+          <div className="h-[110px]" />
+        </>
+      )}
 
       <RecipesPageOverlays
         isCollapsed={isCollapsed}
