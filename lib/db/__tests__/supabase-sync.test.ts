@@ -1,4 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/session-state", () => ({
+  isSignedIn: vi.fn().mockReturnValue(true),
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: vi.fn(),
+}));
+
 import type { Recipe } from "../schema";
 import { syncCreate, syncDelete, syncUpdate } from "../supabase-sync";
 

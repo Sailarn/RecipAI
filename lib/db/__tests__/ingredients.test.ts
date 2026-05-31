@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/session-state", () => ({
+  isSignedIn: vi.fn().mockReturnValue(true),
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: vi.fn(),
+}));
+
 vi.mock("../db", () => ({
   db: {
     ingredients: {
@@ -23,7 +31,7 @@ vi.stubGlobal("fetch", fetchMock);
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(db.ingredients.add).mockResolvedValue("ignored" as never);
-  fetchMock.mockResolvedValue(undefined);
+  fetchMock.mockResolvedValue(new Response());
 });
 
 describe("createProvisionalIngredient", () => {

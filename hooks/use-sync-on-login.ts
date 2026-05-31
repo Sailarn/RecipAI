@@ -6,15 +6,18 @@ import { authClient } from "@/lib/auth-client";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
 import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
-import type {
-  Collection,
-  PantryItem,
-  Recipe,
-  SyncEntityType,
-  SyncNotification,
+import {
+  type Collection,
+  INGREDIENT_STATUS,
+  type PantryItem,
+  type Recipe,
+  type SyncEntityType,
+  type SyncNotification,
 } from "@/lib/db/schema";
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { api, routes } from "@/lib/routes";
+import { setIsSignedIn } from "@/lib/session-state";
+import { syncFetch } from "@/lib/sync-fetch";
 import { useNavigate } from "@/lib/transitions";
 
 async function syncPantry(): Promise<void> {
@@ -22,9 +25,9 @@ async function syncPantry(): Promise<void> {
   if (!res.ok) return;
   const { items } = await res.json();
   const parsed: PantryItem[] = (items as Record<string, unknown>[]).map(
-    (r) => ({
-      ...(r as Omit<PantryItem, "addedAt">),
-      addedAt: new Date(r.addedAt as string),
+    (rawItem) => ({
+      ...(rawItem as Omit<PantryItem, "addedAt">),
+      addedAt: new Date(rawItem.addedAt as string),
     }),
   );
   await clearPantry();
@@ -47,7 +50,7 @@ async function syncIngredients(): Promise<void> {
   }
 
   const stuckProvisionals = await db.ingredients
-    .filter((entry) => entry.status === "provisional")
+    .filter((entry) => entry.status === INGREDIENT_STATUS.PROVISIONAL)
     .toArray();
   const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
   for (const entry of stuckProvisionals) {
@@ -58,11 +61,11 @@ async function syncIngredients(): Promise<void> {
       entry.lastAttemptAt > fiveMinAgo
     )
       continue;
-    fetch(api.ingredientsEnrich, {
+    syncFetch(api.ingredientsEnrich, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: entry.id, rawText: entry.en }),
-    }).catch(() => {});
+    });
   }
 }
 
@@ -96,24 +99,28 @@ function diffToNotifications<T extends Recipe | Collection>(
 }
 
 function parseServerRecipes(raw: unknown[]): Recipe[] {
-  return (raw as Record<string, unknown>[]).map((r) => ({
-    ...(r as Omit<Recipe, "createdAt" | "updatedAt">),
-    createdAt: new Date(r.createdAt as string),
-    updatedAt: new Date(r.updatedAt as string),
+  return (raw as Record<string, unknown>[]).map((rawRecipe) => ({
+    ...(rawRecipe as Omit<Recipe, "createdAt" | "updatedAt">),
+    createdAt: new Date(rawRecipe.createdAt as string),
+    updatedAt: new Date(rawRecipe.updatedAt as string),
   }));
 }
 
 function parseServerCollections(raw: unknown[]): Collection[] {
-  return (raw as Record<string, unknown>[]).map((c) => ({
-    ...(c as Omit<Collection, "createdAt" | "updatedAt">),
-    createdAt: new Date(c.createdAt as string),
-    updatedAt: new Date(c.updatedAt as string),
+  return (raw as Record<string, unknown>[]).map((rawCollection) => ({
+    ...(rawCollection as Omit<Collection, "createdAt" | "updatedAt">),
+    createdAt: new Date(rawCollection.createdAt as string),
+    updatedAt: new Date(rawCollection.updatedAt as string),
   }));
 }
 
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
+
+  useEffect(() => {
+    setIsSignedIn(!!session);
+  }, [session]);
   const navigate = useNavigate();
 
   const sync = useCallback(async () => {

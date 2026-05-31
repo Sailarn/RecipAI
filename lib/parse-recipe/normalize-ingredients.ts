@@ -1,7 +1,9 @@
 import Fuse from "fuse.js";
 import { db } from "@/lib/db/db";
+import { INGREDIENT_STATUS } from "@/lib/db/schema";
 import { syncUpdate } from "@/lib/db/supabase-sync";
 import { api } from "@/lib/routes";
+import { syncFetch } from "@/lib/sync-fetch";
 import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
 
@@ -25,14 +27,23 @@ let fuseCache: {
 
 async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
   const vocab = await db.ingredients
-    .filter((v) => !v.status || v.status === "confirmed")
+    .filter(
+      (ingredient) =>
+        !ingredient.status || ingredient.status === INGREDIENT_STATUS.CONFIRMED,
+    )
     .toArray();
   if (fuseCache && fuseCache.size === vocab.length) return fuseCache.index;
-  const items = vocab.flatMap((v) => [
-    { id: v.id, text: v.en },
-    ...(v.ua ? [{ id: v.id, text: v.ua }] : []),
-    ...v.aliasesEn.map((a) => ({ id: v.id, text: a })),
-    ...v.aliasesUa.map((a) => ({ id: v.id, text: a })),
+  const items = vocab.flatMap((vocabEntry) => [
+    { id: vocabEntry.id, text: vocabEntry.en },
+    ...(vocabEntry.ua ? [{ id: vocabEntry.id, text: vocabEntry.ua }] : []),
+    ...vocabEntry.aliasesEn.map((alias) => ({
+      id: vocabEntry.id,
+      text: alias,
+    })),
+    ...vocabEntry.aliasesUa.map((alias) => ({
+      id: vocabEntry.id,
+      text: alias,
+    })),
   ]);
   const index = new Fuse(items, {
     keys: ["text"],
@@ -87,12 +98,15 @@ function fuseHit(
   // like "власному" doesn't hit a long alias phrase.
   const tokens = preprocessed
     .split(/\s+/)
-    .map((t) => t.replace(/[.,]/g, ""))
-    .filter((t) => t.length > 3);
+    .map((token) => token.replace(/[.,]/g, ""))
+    .filter((token) => token.length > 3);
   for (const token of tokens) {
-    const r = fuse.search(token);
-    if (r.length > 0 && r[0].item.text.trim().split(/\s+/).length <= 2) {
-      return r[0].item.id;
+    const fuseResults = fuse.search(token);
+    if (
+      fuseResults.length > 0 &&
+      fuseResults[0].item.text.trim().split(/\s+/).length <= 2
+    ) {
+      return fuseResults[0].item.id;
     }
   }
 
@@ -107,7 +121,7 @@ async function createProvisional(
   // Reuse any existing entry with the same raw text to avoid duplicate provisionals
   const lc = en.toLowerCase();
   const existing = await db.ingredients
-    .filter((v) => v.en.toLowerCase() === lc)
+    .filter((vocabEntry) => vocabEntry.en.toLowerCase() === lc)
     .first();
   if (existing) return existing.id;
 
@@ -121,16 +135,15 @@ async function createProvisional(
       category: category ?? "other",
       aliasesEn: [],
       aliasesUa: [],
-      status: "provisional",
+      status: INGREDIENT_STATUS.PROVISIONAL,
       retryCount: 0,
       lastAttemptAt: null,
     });
-    // Background server sync — 401 is expected when unauthenticated
-    fetch(api.ingredients, {
+    syncFetch(api.ingredients, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, en, ua, category }),
-    }).catch(() => {});
+    });
     return id;
   } catch {
     return null;
@@ -155,7 +168,7 @@ export async function normalizeRecipeIngredients(
   const pendingSlots: number[] = [];
 
   for (const ing of ingredients) {
-    if (NULL_PATTERNS.some((p) => p.test(ing.item.trim()))) {
+    if (NULL_PATTERNS.some((pattern) => pattern.test(ing.item.trim()))) {
       unrecognizedIngredients.push(ing.item);
       continue;
     }
@@ -178,7 +191,9 @@ export async function normalizeRecipeIngredients(
 
     if (vocabEmbs) {
       try {
-        queryEmbs = await getIngredientEmbeddings(pending.map((p) => p.item));
+        queryEmbs = await getIngredientEmbeddings(
+          pending.map((pendingItem) => pendingItem.item),
+        );
       } catch (err) {
         if (!(err instanceof Error && err.message === "EmbedConsentRequired")) {
           console.error("[normalize] embedding error:", err);

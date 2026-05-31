@@ -1,4 +1,5 @@
 import { api } from "@/lib/routes";
+import { syncFetch } from "@/lib/sync-fetch";
 import { db } from "./db";
 import type { PantryItem, VocabularyIngredient } from "./schema";
 
@@ -21,24 +22,24 @@ export async function addPantryItem(
     ingredientData = await db.ingredients.get(item.ingredientId);
   }
 
-  fetch(api.pantry, {
+  syncFetch(api.pantry, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...pantryItem,
       ingredientData: ingredientData ?? null,
     }),
-  }).catch(() => {});
+  });
   return id;
 }
 
 export async function removePantryItem(id: string): Promise<void> {
   await db.pantry.delete(id);
-  fetch(api.pantry, {
+  syncFetch(api.pantry, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id }),
-  }).catch(() => {});
+  });
 }
 
 export async function togglePantryItem(id: string): Promise<void> {
@@ -52,14 +53,14 @@ export async function togglePantryItem(id: string): Promise<void> {
     ingredientData = await db.ingredients.get(updated.ingredientId);
   }
 
-  fetch(api.pantry, {
+  syncFetch(api.pantry, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...updated,
       ingredientData: ingredientData ?? null,
     }),
-  }).catch(() => {});
+  });
 }
 
 export async function setPantryQty(

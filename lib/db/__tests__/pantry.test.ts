@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/session-state", () => ({
+  isSignedIn: vi.fn().mockReturnValue(true),
+}));
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: vi.fn(),
+}));
+
 vi.mock("@/lib/routes", () => ({
   api: {
     pantry: "/api/pantry",
@@ -39,7 +47,7 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  fetchMock.mockResolvedValue(undefined);
+  fetchMock.mockResolvedValue(new Response());
 });
 
 describe("getPantryItems", () => {

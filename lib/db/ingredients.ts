@@ -1,5 +1,7 @@
 import { api } from "@/lib/routes";
+import { syncFetch } from "@/lib/sync-fetch";
 import { db } from "./db";
+import { INGREDIENT_STATUS } from "./schema";
 
 export async function createProvisionalIngredient(
   rawText: string,
@@ -12,14 +14,14 @@ export async function createProvisionalIngredient(
     category: "Other",
     aliasesEn: [],
     aliasesUa: [],
-    status: "provisional",
+    status: INGREDIENT_STATUS.PROVISIONAL,
     retryCount: 0,
     lastAttemptAt: null,
   });
-  fetch(api.ingredientsEnrich, {
+  syncFetch(api.ingredientsEnrich, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, rawText }),
-  }).catch(() => {});
+  });
   return id;
 }
