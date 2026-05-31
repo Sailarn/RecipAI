@@ -3,48 +3,76 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
+import { ApiError } from "@/lib/api-errors";
+import { MAX_SYNC_BATCH_SIZE, RECIPE_SYNC_ERRORS } from "@/lib/api-limits";
 import { auth } from "@/lib/auth";
 import type { Recipe } from "@/lib/db/schema";
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const { recipes: localRecipes } = await req.json();
-  if (!localRecipes?.length) return NextResponse.json({ synced: 0 });
-
-  const ids = localRecipes.map((r: Recipe) => r.id);
-  const existing = await db
-    .select({ id: recipes.id })
-    .from(recipes)
-    .where(inArray(recipes.id, ids));
-
-  const existingIds = new Set(existing.map((r) => r.id));
-  const newRecipes = localRecipes.filter((r: Recipe) => !existingIds.has(r.id));
-
-  if (newRecipes.length > 0) {
-    const rows = newRecipes.map((r: Recipe) => ({
-      ...r,
-      userId: session.user.id,
-      createdAt: new Date(r.createdAt),
-      updatedAt: new Date(r.updatedAt),
-    }));
-    await db.insert(recipes).values(rows).onConflictDoNothing();
+  let body: { recipes?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
   }
 
-  return NextResponse.json({ synced: newRecipes.length });
+  const { recipes: localRecipes } = body;
+
+  if (!Array.isArray(localRecipes) || localRecipes.length === 0)
+    return NextResponse.json({ synced: 0 });
+
+  if (localRecipes.length > MAX_SYNC_BATCH_SIZE)
+    return ApiError.badRequest(RECIPE_SYNC_ERRORS.TOO_MANY);
+
+  try {
+    const ids = localRecipes.map((recipe: Recipe) => recipe.id);
+    const existingRows = await db
+      .select({ id: recipes.id })
+      .from(recipes)
+      .where(inArray(recipes.id, ids));
+
+    const existingIdSet = new Set(
+      existingRows.map((existingRow) => existingRow.id),
+    );
+    const newRecipes = localRecipes.filter(
+      (recipe: Recipe) => !existingIdSet.has(recipe.id),
+    );
+
+    if (newRecipes.length > 0) {
+      await db
+        .insert(recipes)
+        .values(
+          newRecipes.map((recipe: Recipe) => ({
+            ...recipe,
+            userId: session.user.id,
+            createdAt: new Date(recipe.createdAt),
+            updatedAt: new Date(recipe.updatedAt),
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    return NextResponse.json({ synced: newRecipes.length });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const userRecipes = await db
-    .select()
-    .from(recipes)
-    .where(eq(recipes.userId, session.user.id));
+  try {
+    const userRecipes = await db
+      .select()
+      .from(recipes)
+      .where(eq(recipes.userId, session.user.id));
 
-  return NextResponse.json({ recipes: userRecipes });
+    return NextResponse.json({ recipes: userRecipes });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }

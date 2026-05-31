@@ -4,103 +4,127 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { pantry } from "@/db/schema/pantry";
+import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth";
-import type { PantryItem, VocabularyIngredient } from "@/lib/db/schema";
+import {
+  INGREDIENT_STATUS,
+  type PantryItem,
+  type VocabularyIngredient,
+} from "@/lib/db/schema";
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const rows = await db
-    .select()
-    .from(pantry)
-    .where(eq(pantry.userId, session.user.id));
+  try {
+    const rows = await db
+      .select()
+      .from(pantry)
+      .where(eq(pantry.userId, session.user.id));
 
-  const items: PantryItem[] = rows.map((r) => ({
-    id: r.id,
-    ingredientId: r.ingredientId ?? undefined,
-    name: r.name,
-    qty: r.qty,
-    unit: r.unit,
-    cat: r.cat,
-    on: r.on,
-    addedAt: r.addedAt,
-  }));
+    const items: PantryItem[] = rows.map((row) => ({
+      id: row.id,
+      ingredientId: row.ingredientId ?? undefined,
+      name: row.name,
+      qty: row.qty,
+      unit: row.unit,
+      cat: row.cat,
+      on: row.on,
+      addedAt: row.addedAt,
+    }));
 
-  return NextResponse.json({ items });
+    return NextResponse.json({ items });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const body = (await req.json()) as Partial<PantryItem> & {
+  let body: Partial<PantryItem> & {
     ingredientData?: VocabularyIngredient | null;
   };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
+
   const { id, ingredientId, name, qty, unit, cat, on, ingredientData } = body;
 
   if (!id || !name || qty === undefined || !unit || !cat || on === undefined) {
-    return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 },
-    );
+    return ApiError.badRequest("Missing required fields");
   }
 
-  // Upsert the ingredient first so the pantry FK never fails.
-  // Handles provisionals (not yet enriched) and canonical sync gaps.
-  if (ingredientId && ingredientData) {
+  try {
+    // Upsert the ingredient first so the pantry FK never fails.
+    // Handles provisionals (not yet enriched) and canonical sync gaps.
+    if (ingredientId && ingredientData) {
+      await db
+        .insert(ingredients)
+        .values({
+          id: ingredientData.id,
+          en: ingredientData.en,
+          ua: ingredientData.ua ?? null,
+          category: ingredientData.category,
+          aliasesEn: ingredientData.aliasesEn ?? [],
+          aliasesUa: ingredientData.aliasesUa ?? [],
+          status: ingredientData.status ?? INGREDIENT_STATUS.PROVISIONAL,
+          retryCount: ingredientData.retryCount ?? 0,
+          lastAttemptAt: ingredientData.lastAttemptAt
+            ? new Date(ingredientData.lastAttemptAt)
+            : null,
+        })
+        .onConflictDoNothing();
+    }
+
     await db
-      .insert(ingredients)
+      .insert(pantry)
       .values({
-        id: ingredientData.id,
-        en: ingredientData.en,
-        ua: ingredientData.ua ?? null,
-        category: ingredientData.category,
-        aliasesEn: ingredientData.aliasesEn ?? [],
-        aliasesUa: ingredientData.aliasesUa ?? [],
-        status: ingredientData.status ?? "provisional",
-        retryCount: ingredientData.retryCount ?? 0,
-        lastAttemptAt: ingredientData.lastAttemptAt
-          ? new Date(ingredientData.lastAttemptAt)
-          : null,
+        id,
+        userId: session.user.id,
+        ingredientId: ingredientId ?? null,
+        name,
+        qty,
+        unit,
+        cat,
+        on,
+        addedAt: new Date(),
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: pantry.id,
+        set: { ingredientId: ingredientId ?? null, name, qty, unit, cat, on },
+      });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return ApiError.internal(error, req);
   }
-
-  await db
-    .insert(pantry)
-    .values({
-      id,
-      userId: session.user.id,
-      ingredientId: ingredientId ?? null,
-      name,
-      qty,
-      unit,
-      cat,
-      on,
-      addedAt: new Date(),
-    })
-    .onConflictDoUpdate({
-      target: pantry.id,
-      set: { ingredientId: ingredientId ?? null, name, qty, unit, cat, on },
-    });
-
-  return NextResponse.json({ ok: true });
 }
 
 export async function DELETE(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const { id } = (await req.json()) as { id: string };
-  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+  let body: { id?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
 
-  await db
-    .delete(pantry)
-    .where(and(eq(pantry.id, id), eq(pantry.userId, session.user.id)));
+  const { id } = body;
+  if (!id) return ApiError.badRequest("id required");
 
-  return NextResponse.json({ ok: true });
+  try {
+    await db
+      .delete(pantry)
+      .where(and(eq(pantry.id, id), eq(pantry.userId, session.user.id)));
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }

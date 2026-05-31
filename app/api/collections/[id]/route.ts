@@ -3,6 +3,12 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { collections } from "@/db/schema/collections";
+import { ApiError } from "@/lib/api-errors";
+import {
+  COLLECTION_ERRORS,
+  MAX_COLLECTION_EMOJI_LENGTH,
+  MAX_COLLECTION_NAME_LENGTH,
+} from "@/lib/api-limits";
 import { auth } from "@/lib/auth";
 
 export async function PATCH(
@@ -10,40 +16,57 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
   const { id } = await params;
-  const { name, emoji } = await req.json();
 
+  let body: { name?: string; emoji?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
+
+  const { name, emoji } = body;
   if (!name?.trim())
-    return NextResponse.json({ error: "name required" }, { status: 400 });
+    return ApiError.badRequest(COLLECTION_ERRORS.NAME_REQUIRED);
+  if (name.length > MAX_COLLECTION_NAME_LENGTH)
+    return ApiError.badRequest(COLLECTION_ERRORS.NAME_TOO_LONG);
+  if (emoji !== undefined && emoji.length > MAX_COLLECTION_EMOJI_LENGTH)
+    return ApiError.badRequest(COLLECTION_ERRORS.EMOJI_TOO_LONG);
 
-  await db
-    .update(collections)
-    .set({ name, emoji, updatedAt: new Date() })
-    .where(
-      and(eq(collections.id, id), eq(collections.userId, session.user.id)),
-    );
+  try {
+    await db
+      .update(collections)
+      .set({ name: name.trim(), emoji, updatedAt: new Date() })
+      .where(
+        and(eq(collections.id, id), eq(collections.userId, session.user.id)),
+      );
 
-  return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
   const { id } = await params;
 
-  await db
-    .delete(collections)
-    .where(
-      and(eq(collections.id, id), eq(collections.userId, session.user.id)),
-    );
+  try {
+    await db
+      .delete(collections)
+      .where(
+        and(eq(collections.id, id), eq(collections.userId, session.user.id)),
+      );
 
-  return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }

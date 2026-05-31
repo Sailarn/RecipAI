@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
+import { ApiError } from "@/lib/api-errors";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { uploadImageServer } from "@/lib/imagekit";
 import { isImageKitUrl } from "@/lib/images";
@@ -13,10 +14,15 @@ import { classifyParseError, parseWithRetry } from "./helpers";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const { jobId } = await req.json();
+  let body: { jobId?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
 
-  if (!jobId)
-    return NextResponse.json({ error: "jobId required" }, { status: 400 });
+  const { jobId } = body;
+  if (!jobId) return ApiError.badRequest("jobId required");
 
   await db
     .update(parseJobs)
@@ -28,8 +34,7 @@ export async function POST(req: NextRequest) {
     .from(parseJobs)
     .where(eq(parseJobs.id, jobId));
 
-  if (!job)
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
+  if (!job) return ApiError.notFound("Job not found");
 
   try {
     const recipe = await parseWithRetry(
@@ -49,9 +54,9 @@ export async function POST(req: NextRequest) {
 
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
-      const r = recipe as ParsedRecipe;
+      const parsedRecipe = recipe as ParsedRecipe;
 
-      let finalImageUrl = r.imageUrl ?? null;
+      let finalImageUrl = parsedRecipe.imageUrl ?? null;
       let finalImageFileId: string | null = null;
       if (finalImageUrl && !isImageKitUrl(finalImageUrl)) {
         try {
@@ -66,27 +71,30 @@ export async function POST(req: NextRequest) {
       await db.insert(recipes).values({
         id: crypto.randomUUID(),
         userId: job.userId,
-        title: r.title,
-        description: r.description ?? null,
+        title: parsedRecipe.title,
+        description: parsedRecipe.description ?? null,
         imageUrl: finalImageUrl,
         imageFileId: finalImageFileId,
-        prepTime: r.prepTime ?? null,
-        cookTime: r.cookTime ?? null,
-        totalTime: r.prepTime && r.cookTime ? r.prepTime + r.cookTime : null,
-        servings: r.servings ?? 1,
-        ingredients: r.ingredients ?? [],
-        instructions: r.instructions ?? [],
+        prepTime: parsedRecipe.prepTime ?? null,
+        cookTime: parsedRecipe.cookTime ?? null,
+        totalTime:
+          parsedRecipe.prepTime && parsedRecipe.cookTime
+            ? parsedRecipe.prepTime + parsedRecipe.cookTime
+            : null,
+        servings: parsedRecipe.servings ?? 1,
+        ingredients: parsedRecipe.ingredients ?? [],
+        instructions: parsedRecipe.instructions ?? [],
         sourceUrl: job.url,
-        category: r.category ?? null,
+        category: parsedRecipe.category ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
 
-      const ingredients = r.ingredients?.length ?? 0;
-      const steps = r.instructions?.length ?? 0;
+      const ingredientCount = parsedRecipe.ingredients?.length ?? 0;
+      const stepCount = parsedRecipe.instructions?.length ?? 0;
       await sendTelegramMessage(
         job.telegramChatId,
-        `✅ <b>${r.title}</b> saved to RecipAI!\n\n📦 ${ingredients} ingredients · 👨‍🍳 ${steps} steps`,
+        `✅ <b>${parsedRecipe.title}</b> saved to RecipAI!\n\n📦 ${ingredientCount} ingredients · 👨‍🍳 ${stepCount} steps`,
       );
     }
 

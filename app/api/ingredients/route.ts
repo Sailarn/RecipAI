@@ -3,12 +3,14 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
+import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth";
+import { INGREDIENT_STATUS } from "@/lib/db/schema";
 
 export async function GET(req: NextRequest) {
   const since = req.nextUrl.searchParams.get("since");
 
-  const conditions = [eq(ingredients.status, "confirmed")];
+  const conditions = [eq(ingredients.status, INGREDIENT_STATUS.CONFIRMED)];
   if (since) {
     const sinceDate = new Date(since);
     if (!Number.isNaN(sinceDate.getTime())) {
@@ -16,64 +18,71 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const rows = await db
-    .select({
-      id: ingredients.id,
-      en: ingredients.en,
-      ua: ingredients.ua,
-      category: ingredients.category,
-      aliasesEn: ingredients.aliasesEn,
-      aliasesUa: ingredients.aliasesUa,
-      status: ingredients.status,
-      retryCount: ingredients.retryCount,
-      lastAttemptAt: ingredients.lastAttemptAt,
-      updatedAt: ingredients.updatedAt,
-    })
-    .from(ingredients)
-    .where(and(...conditions));
+  try {
+    const rows = await db
+      .select({
+        id: ingredients.id,
+        en: ingredients.en,
+        ua: ingredients.ua,
+        category: ingredients.category,
+        aliasesEn: ingredients.aliasesEn,
+        aliasesUa: ingredients.aliasesUa,
+        status: ingredients.status,
+        retryCount: ingredients.retryCount,
+        lastAttemptAt: ingredients.lastAttemptAt,
+        updatedAt: ingredients.updatedAt,
+      })
+      .from(ingredients)
+      .where(and(...conditions));
 
-  const serverMaxUpdatedAt =
-    rows.length > 0
-      ? rows
-          .reduce(
-            (max, r) => (r.updatedAt > max ? r.updatedAt : max),
-            rows[0].updatedAt,
-          )
-          .toISOString()
-      : (since ?? "");
+    const serverMaxUpdatedAt =
+      rows.length > 0
+        ? rows
+            .reduce(
+              (max, row) => (row.updatedAt > max ? row.updatedAt : max),
+              rows[0].updatedAt,
+            )
+            .toISOString()
+        : (since ?? "");
 
-  const result = rows.map(({ updatedAt: _updatedAt, ...rest }) => rest);
+    const result = rows.map(({ updatedAt: _updatedAt, ...rest }) => rest);
 
-  return NextResponse.json({ ingredients: result, serverMaxUpdatedAt });
+    return NextResponse.json({ ingredients: result, serverMaxUpdatedAt });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
 
-  const body = await req.json();
-  const { id, en, ua, category } = body as {
-    id?: string;
-    en?: string;
-    ua?: string | null;
-    category?: string;
-  };
-  if (!id || !en)
-    return NextResponse.json({ error: "id and en required" }, { status: 400 });
+  let body: { id?: string; en?: string; ua?: string | null; category?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
 
-  await db
-    .insert(ingredients)
-    .values({
-      id,
-      en,
-      ua: ua ?? null,
-      category: category ?? "other",
-      aliasesEn: [],
-      aliasesUa: [],
-      status: "provisional",
-    })
-    .onConflictDoNothing();
+  const { id, en, ua, category } = body;
+  if (!id || !en) return ApiError.badRequest("id and en required");
 
-  return NextResponse.json({ id });
+  try {
+    await db
+      .insert(ingredients)
+      .values({
+        id,
+        en,
+        ua: ua ?? null,
+        category: category ?? "other",
+        aliasesEn: [],
+        aliasesUa: [],
+        status: INGREDIENT_STATUS.PROVISIONAL,
+      })
+      .onConflictDoNothing();
+
+    return NextResponse.json({ id });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
 }

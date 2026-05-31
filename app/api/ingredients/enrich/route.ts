@@ -3,7 +3,9 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
+import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth";
+import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
 import { callGeminiForIngredient } from "@/lib/gemini";
 
 function buildEnrichmentPrompt(
@@ -29,54 +31,51 @@ ${category ? `Suggested category: "${category}"` : ""}`;
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { id, rawText, ua, category } = body as {
-    id?: string;
-    rawText?: string;
-    ua?: string;
-    category?: string;
-  };
-
-  if (!id || !rawText) {
-    return NextResponse.json(
-      { error: "id and rawText are required" },
-      { status: 400 },
-    );
-  }
-
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return ApiError.unauthorized();
+
+  let body: { id?: string; rawText?: string; ua?: string; category?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return ApiError.invalidBody();
   }
+
+  const { id, rawText, ua, category } = body;
+  if (!id || !rawText)
+    return ApiError.badRequest("id and rawText are required");
 
   // Upsert provisional first — the client fires create and enrich in parallel,
   // so the ingredient may not exist in Supabase yet when this handler runs.
-  await db
-    .insert(ingredients)
-    .values({
-      id,
-      en: rawText,
-      ua: ua ?? null,
-      category: category ?? "other",
-      aliasesEn: [],
-      aliasesUa: [],
-      status: "provisional",
-    })
-    .onConflictDoNothing();
+  let entry:
+    | { retryCount: number | null; status: IngredientStatus }
+    | undefined;
+  try {
+    await db
+      .insert(ingredients)
+      .values({
+        id,
+        en: rawText,
+        ua: ua ?? null,
+        category: category ?? "other",
+        aliasesEn: [],
+        aliasesUa: [],
+        status: INGREDIENT_STATUS.PROVISIONAL,
+      })
+      .onConflictDoNothing();
 
-  const rows = await db
-    .select()
-    .from(ingredients)
-    .where(eq(ingredients.id, id));
-  const entry = rows[0];
-
-  if (!entry) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const rows = await db
+      .select()
+      .from(ingredients)
+      .where(eq(ingredients.id, id));
+    entry = rows[0];
+  } catch (error) {
+    return ApiError.internal(error, req);
   }
 
-  if (entry.status === "confirmed") {
+  if (!entry) return ApiError.notFound("Ingredient not found");
+  if (entry.status === INGREDIENT_STATUS.CONFIRMED)
     return NextResponse.json({ success: true });
-  }
 
   const prompt = buildEnrichmentPrompt(rawText, ua, category);
 
@@ -86,7 +85,7 @@ export async function POST(req: NextRequest) {
     if (result.skip === true) {
       await db
         .update(ingredients)
-        .set({ status: "failed" })
+        .set({ status: INGREDIENT_STATUS.FAILED })
         .where(eq(ingredients.id, id));
       return NextResponse.json({ success: true });
     }
@@ -103,7 +102,7 @@ export async function POST(req: NextRequest) {
       .update(ingredients)
       .set({
         ...enriched,
-        status: "confirmed",
+        status: INGREDIENT_STATUS.CONFIRMED,
         retryCount: 0,
         lastAttemptAt: new Date(),
         updatedAt: new Date(),
@@ -111,7 +110,8 @@ export async function POST(req: NextRequest) {
       .where(eq(ingredients.id, id));
 
     return NextResponse.json({ success: true, ingredient: enriched });
-  } catch {
+  } catch (error) {
+    ApiError.capture(error, req);
     const newRetryCount = (entry.retryCount ?? 0) + 1;
 
     await db
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       .set({
         retryCount: newRetryCount,
         lastAttemptAt: new Date(),
-        ...(newRetryCount >= 3 ? { status: "failed" } : {}),
+        ...(newRetryCount >= 3 ? { status: INGREDIENT_STATUS.FAILED } : {}),
       })
       .where(eq(ingredients.id, id));
 
