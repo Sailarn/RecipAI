@@ -6,7 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Input } from "@/components/ui";
 import { db } from "@/lib/db/db";
-import type { VocabularyIngredient } from "@/lib/db/schema";
+import { INGREDIENT_STATUS, type VocabularyIngredient } from "@/lib/db/schema";
 
 interface IngredientAutocompleteProps {
   value: string;
@@ -45,7 +45,11 @@ export function IngredientAutocomplete({
   const vocab = useLiveQuery(
     () =>
       db.ingredients
-        .filter((v) => !v.status || v.status === "confirmed")
+        .filter(
+          (ingredient) =>
+            !ingredient.status ||
+            ingredient.status === INGREDIENT_STATUS.CONFIRMED,
+        )
         .toArray(),
     [],
   );
@@ -64,7 +68,7 @@ export function IngredientAutocomplete({
     return fuse
       .search(value.trim())
       .slice(0, MAX_RESULTS)
-      .map((r) => r.item);
+      .map((fuseResult) => fuseResult.item);
   }, [fuse, value]);
 
   const script = useMemo(() => detectScript(value), [value]);
@@ -140,19 +144,11 @@ export function IngredientAutocomplete({
       ? createPortal(
           <div
             role="listbox"
+            className="fixed z-[9999] bg-[var(--bg-card)] border border-[rgba(255,200,100,0.25)] rounded-[10px] py-1 max-h-[200px] overflow-y-auto shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
             style={{
-              position: "fixed",
               top: dropdownRect.bottom + 4,
               left: dropdownRect.left,
               width: dropdownRect.width,
-              zIndex: 9999,
-              background: "var(--bg-card)",
-              border: "1px solid rgba(255,200,100,0.25)",
-              borderRadius: 10,
-              padding: "4px 0",
-              maxHeight: 200,
-              overflowY: "auto",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
             }}
           >
             {results.map((entry, idx) => (
@@ -162,16 +158,12 @@ export function IngredientAutocomplete({
                 tabIndex={-1}
                 aria-selected={idx === activeIndex}
                 onMouseDown={(e) => handleMouseDown(e, entry)}
+                className="px-3 py-2 cursor-pointer text-[var(--fg-1)] text-[length:var(--text-base)] font-sans"
                 style={{
-                  padding: "8px 12px",
-                  cursor: "pointer",
                   background:
                     idx === activeIndex
                       ? "rgba(255,180,60,0.12)"
                       : "transparent",
-                  color: "var(--fg-1)",
-                  fontSize: "var(--text-base)",
-                  fontFamily: "var(--font-sans)",
                 }}
               >
                 {getDisplayName(entry)}

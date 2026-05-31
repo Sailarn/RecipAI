@@ -3,6 +3,14 @@ import type { RecipeCategory } from "@/lib/categories";
 export const RECIPE_STATUSES = ["tried"] as const;
 export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
 
+export const INGREDIENT_STATUS = {
+  PROVISIONAL: "provisional",
+  CONFIRMED: "confirmed",
+  FAILED: "failed",
+} as const;
+export type IngredientStatus =
+  (typeof INGREDIENT_STATUS)[keyof typeof INGREDIENT_STATUS];
+
 export interface Collection {
   id: string;
   name: string;
@@ -25,7 +33,7 @@ export interface VocabularyIngredient {
   category: string;
   aliasesEn: string[];
   aliasesUa: string[];
-  status?: string;
+  status?: IngredientStatus;
   retryCount?: number;
   lastAttemptAt?: Date | null;
 }
