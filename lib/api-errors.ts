@@ -36,11 +36,13 @@ export const ApiError = {
   /** Capture an error in Sentry without changing the response — use when the
    *  catch block has its own response logic (e.g. retry handling). */
   capture: (error: unknown, req?: Request) => captureWithContext(error, req),
-  /** Capture an error in Sentry and return a 500 response. */
-  internal: (error?: unknown, req?: Request) => {
+  /** Capture an error in Sentry and return a 500 response. The real error
+   *  always goes to Sentry; pass `userMessage` to show the client a friendlier
+   *  message than the generic default instead of leaking the raw cause. */
+  internal: (error?: unknown, req?: Request, userMessage?: string) => {
     if (error !== undefined) captureWithContext(error, req);
     return NextResponse.json(
-      { error: API_ERROR_MESSAGES.INTERNAL },
+      { error: userMessage ?? API_ERROR_MESSAGES.INTERNAL },
       { status: 500 },
     );
   },

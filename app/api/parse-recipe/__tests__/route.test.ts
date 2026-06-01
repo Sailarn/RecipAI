@@ -7,7 +7,11 @@ vi.mock("@/lib/parse-recipe", () => ({
 vi.mock("@/lib/upload-token", () => ({
   mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
 }));
+vi.mock("@sentry/nextjs", () => ({
+  captureException: vi.fn(),
+}));
 
+import * as Sentry from "@sentry/nextjs";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { POST } from "../route";
 
@@ -68,23 +72,37 @@ describe("POST /api/parse-recipe", () => {
     );
   });
 
-  it("returns 500 with error message when parsing fails", async () => {
+  it("returns 500 with a friendly message when parsing fails", async () => {
     vi.mocked(parseRecipeFromUrl).mockRejectedValue(new Error("Parse failed"));
 
     const res = await POST(makeRequest({ url: "https://example.com/recipe" }));
 
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body).toEqual({ error: "Parse failed", success: false });
+    expect(body).toEqual({ error: "Failed to parse recipe" });
   });
 
-  it("returns generic error message for non-Error throws", async () => {
+  it("captures the real error in Sentry while hiding it from the client", async () => {
+    const realError = new Error("Parse failed");
+    vi.mocked(parseRecipeFromUrl).mockRejectedValue(realError);
+
+    const res = await POST(makeRequest({ url: "https://example.com/recipe" }));
+
+    const body = await res.json();
+    expect(body.error).not.toContain("Parse failed");
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      realError,
+      expect.any(Object),
+    );
+  });
+
+  it("returns the friendly message for non-Error throws", async () => {
     vi.mocked(parseRecipeFromUrl).mockRejectedValue("something went wrong");
 
     const res = await POST(makeRequest({ url: "https://example.com/recipe" }));
 
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body).toEqual({ error: "Failed to parse recipe", success: false });
+    expect(body).toEqual({ error: "Failed to parse recipe" });
   });
 });

@@ -23,13 +23,6 @@ export async function POST(request: NextRequest) {
     ]);
     return NextResponse.json({ success: true, recipe, uploadToken });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Failed to parse recipe",
-        success: false,
-      },
-      { status: 500 },
-    );
+    return ApiError.internal(error, request, "Failed to parse recipe");
   }
 }
