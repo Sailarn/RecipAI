@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
+import { logger } from "@/lib/logger";
 import {
   addJobId,
   getJobIds,
@@ -121,7 +122,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: newJobId }),
-      }).catch((err) => console.error("process error:", err));
+      }).catch((err) => logger.error("process error:", err));
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);

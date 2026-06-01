@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { logger } from "@/lib/logger";
 
 // Fallback chain: if a model hits 429/503, the next one is tried.
 const MODEL_CHAIN = [
@@ -38,7 +39,7 @@ async function withModelFallback<T>(
     } catch (err) {
       lastErr = err;
       if (!isRetryable(err)) throw err; // non-retryable: fail immediately
-      console.warn(`[Gemini] ${modelName} unavailable, trying next model...`);
+      logger.warn(`[Gemini] ${modelName} unavailable, trying next model...`);
     }
   }
   throw lastErr;

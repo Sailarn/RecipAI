@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { isImageKitUrl, uploadImage } from "../images";
 import { generateId } from "../utils";
@@ -34,7 +35,7 @@ export async function saveParsedRecipe(
   });
 
   normalizeRecipeIngredients(id, entry.ingredients).catch((err) => {
-    console.error("[normalize] top-level error:", err);
+    logger.error("[normalize] top-level error:", err);
   });
 
   // upload images in background

@@ -2,6 +2,7 @@ import Fuse from "fuse.js";
 import { db } from "@/lib/db/db";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
 import { syncUpdate } from "@/lib/db/supabase-sync";
+import { logger } from "@/lib/logger";
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
 import { getIngredientEmbeddings } from "./embed-client";
@@ -196,7 +197,7 @@ export async function normalizeRecipeIngredients(
         );
       } catch (err) {
         if (!(err instanceof Error && err.message === "EmbedConsentRequired")) {
-          console.error("[normalize] embedding error:", err);
+          logger.error("[normalize] embedding error:", err);
         }
         queryEmbs = null;
       }

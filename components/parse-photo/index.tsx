@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { logger } from "@/lib/logger";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
 import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
 import { PhotoParsingBanner } from "./photo-parsing-banner";
@@ -83,7 +84,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
         try {
           await savePhotoParseResult(recipe, capturedLocale);
         } catch (err) {
-          console.error("[ParsePhoto] failed to save:", err);
+          logger.error("[ParsePhoto] failed to save:", err);
           toast.error("Failed to process parsed recipe", {
             duration: 10000,
             closeButton: true,

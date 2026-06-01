@@ -40,7 +40,8 @@
         "noUselessFragments": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noConsole": "error"
       }
     }
   },
@@ -90,6 +91,16 @@
           "a11y": {
             "noLabelWithoutControl": "off",
             "useSemanticElements": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["lib/logger.ts", "scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
           }
         }
       }
