@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Collection } from "@/lib/db/schema";
+import { CollectionRow } from "./collection-row";
 
 interface AddToCollectionSheetProps {
   collections: Collection[];
@@ -32,30 +33,13 @@ export function AddToCollectionSheet({
   }
 
   return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 500,
-        display: "flex",
-        alignItems: "flex-end",
-        touchAction: "none",
-      }}
-    >
+    <div className="fixed inset-0 z-[500] flex items-end touch-none">
       <button
         type="button"
         data-testid="sheet-backdrop"
         aria-label="Close"
         onClick={handleClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(4px)",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-        }}
+        className="absolute inset-0 bg-black/55 backdrop-blur-[4px] border-none cursor-pointer p-0"
       />
 
       <div
@@ -63,116 +47,30 @@ export function AddToCollectionSheet({
         onAnimationEnd={() => {
           if (isClosing) onClose();
         }}
+        className="relative z-[1] w-full bg-[rgba(18,14,8,0.92)] backdrop-blur-[32px] backdrop-saturate-200 border border-[rgba(255,200,100,0.18)] rounded-t-[28px] pt-5 px-[18px] pb-[max(36px,calc(env(safe-area-inset-bottom)+20px))] shadow-[0_-8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,220,130,0.12)]"
         style={{
-          position: "relative",
-          zIndex: 1,
-          width: "100%",
-          background: "rgba(18,14,8,0.92)",
-          backdropFilter: "blur(32px) saturate(200%)",
-          WebkitBackdropFilter: "blur(32px) saturate(200%)",
-          border: "1px solid rgba(255,200,100,0.18)",
-          borderRadius: "28px 28px 0 0",
-          paddingTop: "20px",
-          paddingLeft: "18px",
-          paddingRight: "18px",
-          paddingBottom: "max(36px, calc(env(safe-area-inset-bottom) + 20px))",
-          boxShadow:
-            "0 -8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,220,130,0.12)",
           animation: isClosing
             ? "sheetSlideDown 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards"
             : "sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
-        <div
-          style={{
-            width: 36,
-            height: 4,
-            borderRadius: 2,
-            background: "rgba(255,200,100,0.25)",
-            margin: "0 auto 18px",
-          }}
-        />
+        <div className="w-9 h-1 rounded-[2px] bg-[rgba(255,200,100,0.25)] mx-auto mb-[18px]" />
 
-        <div
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "var(--fg-1)",
-            fontFamily: "var(--font-display)",
-            marginBottom: 14,
-          }}
-        >
+        <div className="text-[15px] font-bold text-[var(--fg-1)] font-heading mb-3.5">
           Add to collection
         </div>
 
-        {collections.map((c) => {
-          const inCollection = currentCollectionIds.includes(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => onSelect(c.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-                minHeight: 48,
-                padding: "0 14px",
-                background: "transparent",
-                border: "none",
-                borderBottom: "1px solid rgba(255,200,100,0.08)",
-                cursor: "pointer",
-                color: "var(--fg-1)",
-                fontSize: 14,
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              <span>
-                {c.emoji} {c.name}
-              </span>
-              <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                {inCollection && (
-                  <svg
-                    data-testid={`check-${c.id}`}
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <circle cx="9" cy="9" r="9" fill="rgba(34,197,94,0.85)" />
-                    <path
-                      d="M5 9l3 3 5-5"
-                      stroke="#fff"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </span>
-            </button>
-          );
-        })}
+        {collections.map((collection) => (
+          <CollectionRow
+            key={collection.id}
+            collection={collection}
+            inCollection={currentCollectionIds.includes(collection.id)}
+            onSelect={onSelect}
+          />
+        ))}
 
         {collections.length === 0 && (
-          <p
-            style={{
-              color: "var(--fg-3)",
-              fontSize: 13,
-              textAlign: "center",
-            }}
-          >
+          <p className="text-[var(--fg-3)] text-[13px] text-center">
             No collections yet. Create one from the recipe list.
           </p>
         )}
