@@ -1,27 +1,33 @@
+import { ApiError } from "@/lib/api-errors";
 import { callGeminiForRecipePhoto } from "@/lib/gemini";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
 
 export async function POST(request: Request) {
+  let body: { imageBase64?: string; mimeType?: string; userComment?: string };
   try {
-    const { imageBase64, mimeType, userComment } = await request.json();
+    body = await request.json();
+  } catch {
+    return ApiError.invalidBody();
+  }
 
-    if (!imageBase64 || !mimeType) {
-      return Response.json(
-        { error: "imageBase64 and mimeType are required" },
-        { status: 400 },
-      );
-    }
+  const { imageBase64, mimeType, userComment } = body;
+  if (!imageBase64 || !mimeType) {
+    return ApiError.badRequest("imageBase64 and mimeType are required");
+  }
 
+  try {
     const prompt = buildPhotoPrompt(userComment);
     const recipe = await callGeminiForRecipePhoto(
       imageBase64,
       mimeType,
       prompt,
     );
-
     return Response.json(recipe);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Parse failed";
+  } catch (error) {
+    // The client (parseRecipeFromPhoto) maps the raw Gemini message to friendly
+    // errors (503/429/quota), so surface it here while still reporting to Sentry.
+    ApiError.capture(error, request);
+    const message = error instanceof Error ? error.message : "Parse failed";
     return Response.json({ error: message }, { status: 500 });
   }
 }
