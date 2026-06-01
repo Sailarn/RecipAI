@@ -1,17 +1,16 @@
 import { and, eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
+import { requireSession } from "@/lib/require-session";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   const { id } = await params;
 
@@ -31,7 +30,9 @@ export async function PATCH(
           ? new Date(updates.updatedAt as string)
           : new Date(),
       })
-      .where(and(eq(recipes.id, id), eq(recipes.userId, session.user.id)));
+      .where(
+        and(eq(recipes.id, id), eq(recipes.userId, authed.session.user.id)),
+      );
 
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -43,15 +44,17 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   const { id } = await params;
 
   try {
     await db
       .delete(recipes)
-      .where(and(eq(recipes.id, id), eq(recipes.userId, session.user.id)));
+      .where(
+        and(eq(recipes.id, id), eq(recipes.userId, authed.session.user.id)),
+      );
 
     return NextResponse.json({ ok: true });
   } catch (error) {

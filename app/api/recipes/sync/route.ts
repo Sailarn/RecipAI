@@ -1,16 +1,15 @@
 import { eq, inArray } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { MAX_SYNC_BATCH_SIZE, RECIPE_SYNC_ERRORS } from "@/lib/api-limits";
-import { auth } from "@/lib/auth";
 import type { Recipe } from "@/lib/db/schema";
+import { requireSession } from "@/lib/require-session";
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: { recipes?: unknown };
   try {
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
         .values(
           newRecipes.map((recipe: Recipe) => ({
             ...recipe,
-            userId: session.user.id,
+            userId: authed.session.user.id,
             createdAt: new Date(recipe.createdAt),
             updatedAt: new Date(recipe.updatedAt),
           })),
@@ -62,14 +61,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   try {
     const userRecipes = await db
       .select()
       .from(recipes)
-      .where(eq(recipes.userId, session.user.id));
+      .where(eq(recipes.userId, authed.session.user.id));
 
     return NextResponse.json({ recipes: userRecipes });
   } catch (error) {

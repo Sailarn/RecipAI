@@ -37,13 +37,18 @@ function makeRequest(body: object) {
   }) as unknown as NextRequest;
 }
 
-function setupInsertChain() {
-  const mockOnConflictDoNothing = vi.fn().mockResolvedValue([]);
+function setupInsertChain(
+  insertedRows: Array<{ id: string }> = [{ id: "r1" }],
+) {
+  const mockReturning = vi.fn().mockResolvedValue(insertedRows);
+  const mockOnConflictDoNothing = vi
+    .fn()
+    .mockReturnValue({ returning: mockReturning });
   const mockValues = vi
     .fn()
     .mockReturnValue({ onConflictDoNothing: mockOnConflictDoNothing });
   vi.mocked(db.insert).mockReturnValue({ values: mockValues } as any);
-  return { mockValues, mockOnConflictDoNothing };
+  return { mockValues, mockOnConflictDoNothing, mockReturning };
 }
 
 beforeEach(() => {
@@ -68,9 +73,9 @@ describe("POST /api/recipes", () => {
     expect(body).toEqual({ error: "Unauthorized" });
   });
 
-  it("returns ok:true when authenticated", async () => {
+  it("returns created:true when a row is inserted", async () => {
     vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
-    setupInsertChain();
+    setupInsertChain([{ id: "r1" }]);
 
     const res = await POST(
       makeRequest({
@@ -83,7 +88,25 @@ describe("POST /api/recipes", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ ok: true });
+    expect(body).toEqual({ created: true });
+  });
+
+  it("returns created:false when the row already exists (conflict skipped)", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    setupInsertChain([]);
+
+    const res = await POST(
+      makeRequest({
+        id: "r1",
+        title: "Test",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual({ created: false });
   });
 
   it("inserts with userId from session and converts dates", async () => {

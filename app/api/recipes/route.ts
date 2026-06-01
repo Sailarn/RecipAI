@@ -1,14 +1,13 @@
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
 import type { Recipe } from "@/lib/db/schema";
+import { requireSession } from "@/lib/require-session";
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let recipe: Recipe;
   try {
@@ -18,17 +17,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await db
+    const inserted = await db
       .insert(recipes)
       .values({
         ...recipe,
-        userId: session.user.id,
+        userId: authed.session.user.id,
         createdAt: new Date(recipe.createdAt),
         updatedAt: new Date(recipe.updatedAt),
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning({ id: recipes.id });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ created: inserted.length > 0 });
   } catch (error) {
     return ApiError.internal(error, req);
   }
