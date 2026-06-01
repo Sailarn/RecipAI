@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingBasket } from "lucide-react";
+import { Check, ShoppingBasket } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useRef, useState } from "react";
@@ -181,21 +181,13 @@ export const RecipeCard = memo(function RecipeCard({
                 animation: "tickIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both",
               }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
+              <Check
+                width={12}
+                height={12}
+                strokeWidth={2.5}
+                stroke="#fff"
                 aria-hidden="true"
-              >
-                <path
-                  d="M2 6l3 3 5-5"
-                  stroke="#fff"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              />
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { TAB_KEYS, type TabKey } from "./use-tab-navigation";
 
 interface FormHeaderProps {
@@ -59,20 +60,13 @@ export function FormHeader({
             padding: 0,
           }}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <ChevronLeft
+            width={14}
+            height={14}
+            strokeWidth={2}
             style={{ color: "var(--fg-2)" }}
             aria-hidden="true"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+          />
           {backLabel}
         </button>
         <div style={{ width: 60 }} />

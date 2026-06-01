@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import type { SaveState } from "./use-recipe-save";
 import { TAB_KEYS } from "./use-tab-navigation";
 
@@ -93,20 +94,13 @@ export function FormActionBar({
             }}
           >
             {nextLabel}
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <ChevronRight
+              width={14}
+              height={14}
+              strokeWidth={2}
               style={{ flexShrink: 0 }}
               aria-hidden="true"
-            >
-              <path d="m9 18 6-6-6-6" />
-            </svg>
+            />
           </button>
         ) : (
           <button
