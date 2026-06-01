@@ -1,11 +1,12 @@
 "use client";
 
 import { ChevronRight, Globe, Info, Moon } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ProfileAuth } from "@/components/profile-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
+import { useNavigate } from "@/lib/transitions";
 
 const ROW_ICON_SIZE = 15;
 const ROW_ICON_STROKE_WIDTH = 1.75;
@@ -26,7 +27,7 @@ function RowDivider() {
 export default function ProfilePage() {
   const t = useTranslations("profile");
   const params = useParams();
-  const router = useRouter();
+  const navigate = useNavigate();
   const locale = params.locale as Locale;
   const nextLocale =
     locales.find((candidateLocale) => candidateLocale !== locale) ?? locales[0];
@@ -37,7 +38,7 @@ export default function ProfilePage() {
       `/${locale}`,
       `/${nextLocale}`,
     );
-    router.push(newPath);
+    navigate.push(newPath);
   };
 
   return (
