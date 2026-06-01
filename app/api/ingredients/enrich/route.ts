@@ -1,12 +1,11 @@
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
 import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
 import { callGeminiForIngredient } from "@/lib/gemini";
+import { requireSession } from "@/lib/require-session";
 
 function buildEnrichmentPrompt(
   rawText: string,
@@ -31,8 +30,8 @@ ${category ? `Suggested category: "${category}"` : ""}`;
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: { id?: string; rawText?: string; ua?: string; category?: string };
   try {

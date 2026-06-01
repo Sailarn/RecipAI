@@ -1,11 +1,10 @@
 import { and, eq, gt } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
+import { requireSession } from "@/lib/require-session";
 
 export async function GET(req: NextRequest) {
   const since = req.nextUrl.searchParams.get("since");
@@ -54,8 +53,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: { id?: string; en?: string; ua?: string | null; category?: string };
   try {

@@ -1,5 +1,4 @@
 import { and, eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { collections } from "@/db/schema/collections";
@@ -9,14 +8,14 @@ import {
   MAX_COLLECTION_EMOJI_LENGTH,
   MAX_COLLECTION_NAME_LENGTH,
 } from "@/lib/api-limits";
-import { auth } from "@/lib/auth";
+import { requireSession } from "@/lib/require-session";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   const { id } = await params;
 
@@ -40,7 +39,10 @@ export async function PATCH(
       .update(collections)
       .set({ name: name.trim(), emoji, updatedAt: new Date() })
       .where(
-        and(eq(collections.id, id), eq(collections.userId, session.user.id)),
+        and(
+          eq(collections.id, id),
+          eq(collections.userId, authed.session.user.id),
+        ),
       );
 
     return NextResponse.json({ ok: true });
@@ -53,8 +55,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   const { id } = await params;
 
@@ -62,7 +64,10 @@ export async function DELETE(
     await db
       .delete(collections)
       .where(
-        and(eq(collections.id, id), eq(collections.userId, session.user.id)),
+        and(
+          eq(collections.id, id),
+          eq(collections.userId, authed.session.user.id),
+        ),
       );
 
     return NextResponse.json({ ok: true });

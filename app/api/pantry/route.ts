@@ -1,26 +1,25 @@
 import { and, eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { pantry } from "@/db/schema/pantry";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
 import {
   INGREDIENT_STATUS,
   type PantryItem,
   type VocabularyIngredient,
 } from "@/lib/db/schema";
+import { requireSession } from "@/lib/require-session";
 
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   try {
     const rows = await db
       .select()
       .from(pantry)
-      .where(eq(pantry.userId, session.user.id));
+      .where(eq(pantry.userId, authed.session.user.id));
 
     const items: PantryItem[] = rows.map((row) => ({
       id: row.id,
@@ -40,8 +39,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: Partial<PantryItem> & {
     ingredientData?: VocabularyIngredient | null;
@@ -84,7 +83,7 @@ export async function POST(req: NextRequest) {
       .insert(pantry)
       .values({
         id,
-        userId: session.user.id,
+        userId: authed.session.user.id,
         ingredientId: ingredientId ?? null,
         name,
         qty,
@@ -105,8 +104,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: { id?: string };
   try {
@@ -121,7 +120,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await db
       .delete(pantry)
-      .where(and(eq(pantry.id, id), eq(pantry.userId, session.user.id)));
+      .where(and(eq(pantry.id, id), eq(pantry.userId, authed.session.user.id)));
 
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -1,5 +1,4 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { collections } from "@/db/schema/collections";
@@ -10,7 +9,7 @@ import {
   MAX_COLLECTION_NAME_LENGTH,
   MAX_SYNC_BATCH_SIZE,
 } from "@/lib/api-limits";
-import { auth } from "@/lib/auth";
+import { requireSession } from "@/lib/require-session";
 
 interface IncomingCollection {
   id: string;
@@ -40,8 +39,8 @@ function isValidIncomingCollection(item: unknown): item is IncomingCollection {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return ApiError.unauthorized();
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
 
   let body: { collections?: unknown };
   try {
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
       .from(collections)
       .where(
         and(
-          eq(collections.userId, session.user.id),
+          eq(collections.userId, authed.session.user.id),
           inArray(
             collections.id,
             incoming.map((collection) => collection.id),
@@ -89,7 +88,7 @@ export async function POST(req: NextRequest) {
     await db.insert(collections).values(
       toInsert.map((collection) => ({
         id: collection.id,
-        userId: session.user.id,
+        userId: authed.session.user.id,
         name: collection.name.trim(),
         emoji: collection.emoji ?? "⭐",
         createdAt: collection.createdAt
