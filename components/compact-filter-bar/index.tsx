@@ -13,6 +13,11 @@ interface CompactFilterBarProps {
   onScrollTop: () => void;
 }
 
+// Design-system accent tokens, tinted per chip via color-mix below.
+const CHIP_COLLECTION = "var(--food-accent)";
+const CHIP_SEARCH = "var(--action-primary)";
+const CHIP_FILTER = "var(--ai-accent)";
+
 const SORT_LABELS: Record<SortOption, string> = {
   newest: "Newest",
   oldest: "↓ Oldest first",
@@ -30,16 +35,11 @@ const STATUS_LABELS: Record<string, string> = {
 function Chip({ label, color }: { label: string; color: string }) {
   return (
     <span
+      className="py-[3px] px-2.5 rounded-full text-xs font-semibold font-sans whitespace-nowrap border"
       style={{
-        padding: "3px 10px",
-        borderRadius: 99,
-        fontSize: 12,
-        fontWeight: 600,
-        fontFamily: "var(--font-sans)",
-        background: `${color}22`,
+        background: `color-mix(in oklch, ${color} 13%, transparent)`,
         color,
-        border: `1px solid ${color}44`,
-        whiteSpace: "nowrap",
+        borderColor: `color-mix(in oklch, ${color} 27%, transparent)`,
       }}
     >
       {label}
@@ -56,83 +56,42 @@ export function CompactFilterBar({
   status,
   onScrollTop,
 }: CompactFilterBarProps) {
-  const activeCollection = collections.find((c) => c.id === activeCollectionId);
+  const activeCollection = collections.find(
+    (collection) => collection.id === activeCollectionId,
+  );
   const collectionLabel = activeCollection
     ? `${activeCollection.emoji} ${activeCollection.name}`
     : "🍴 All";
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        paddingTop: "calc(env(safe-area-inset-top) + 10px)",
-        paddingBottom: 10,
-        paddingLeft: 14,
-        paddingRight: 14,
-        background: "rgba(8, 6, 3, 0.45)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-      }}
-    >
+    <div className="fixed top-0 left-0 right-0 z-[100] px-[14px] pb-2.5 pt-[calc(env(safe-area-inset-top)+10px)] bg-[rgba(8,6,3,0.45)] backdrop-blur-[8px]">
       <button
         type="button"
         onClick={onScrollTop}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "7px 7px 7px 12px",
-          background: "rgba(20, 16, 10, 0.88)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          borderRadius: 99,
-          border: "1px solid rgba(255, 200, 100, 0.22)",
-          cursor: "pointer",
-          textAlign: "left",
-          overflowX: "auto",
-          scrollbarWidth: "none",
-        }}
+        className="w-full flex items-center gap-2 py-[7px] pl-3 pr-[7px] rounded-full border border-[rgba(255,200,100,0.22)] bg-[rgba(20,16,10,0.88)] backdrop-blur-[24px] backdrop-saturate-[1.8] cursor-pointer text-left overflow-x-auto [scrollbar-width:none]"
       >
-        <Chip label={collectionLabel} color="rgba(251,191,36,1)" />
+        <Chip label={collectionLabel} color={CHIP_COLLECTION} />
 
         {search && (
           <span data-testid="search-chip">
-            <Chip label={search} color="rgba(96,165,250,1)" />
+            <Chip label={search} color={CHIP_SEARCH} />
           </span>
         )}
 
-        {category && <Chip label={category} color="rgba(167,139,250,1)" />}
+        {category && <Chip label={category} color={CHIP_FILTER} />}
         {!status.includes("all") &&
-          status.map((s) => (
+          status.map((statusValue) => (
             <Chip
-              key={s}
-              label={STATUS_LABELS[s] ?? s}
-              color="rgba(167,139,250,1)"
+              key={statusValue}
+              label={STATUS_LABELS[statusValue] ?? statusValue}
+              color={CHIP_FILTER}
             />
           ))}
         {sort !== "newest" && (
-          <Chip label={SORT_LABELS[sort]} color="rgba(167,139,250,1)" />
+          <Chip label={SORT_LABELS[sort]} color={CHIP_FILTER} />
         )}
 
-        <div
-          style={{
-            marginLeft: "auto",
-            flexShrink: 0,
-            width: 30,
-            height: 30,
-            borderRadius: 99,
-            background: "rgba(255, 200, 100, 0.1)",
-            border: "1px solid rgba(255, 200, 100, 0.18)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className="ml-auto shrink-0 w-[30px] h-[30px] rounded-full bg-[rgba(255,200,100,0.1)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center">
           <ChevronUp
             size={14}
             aria-label="scroll to top"
