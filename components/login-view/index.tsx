@@ -29,16 +29,8 @@ function GoogleLogo() {
   );
 }
 
-const chipStyle: React.CSSProperties = {
-  width: 28,
-  height: 28,
-  borderRadius: 8,
-  background: "rgba(0,0,0,0.30)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexShrink: 0,
-};
+const CHIP_CLASS =
+  "w-7 h-7 rounded-lg bg-black/30 flex items-center justify-center shrink-0";
 
 export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
@@ -46,7 +38,7 @@ export function LoginView({ locale }: { locale: string }) {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/recipes",
+      callbackURL: routes.recipes.list(locale),
     });
   };
 
@@ -64,84 +56,39 @@ export function LoginView({ locale }: { locale: string }) {
   };
 
   return (
-    <main
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
+    <main className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none bg-[var(--app-mesh)]"
         aria-hidden
-        style={{ background: "var(--app-mesh)" }}
       />
 
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          width: "calc(100% - 32px)",
-          maxWidth: 360,
-          background: "rgba(18,14,6,0.78)",
-          backdropFilter: "blur(32px) saturate(200%)",
-          WebkitBackdropFilter: "blur(32px) saturate(200%)",
-          border: "1px solid rgba(255,200,100,0.18)",
-          borderRadius: 32,
-          padding: "32px 20px 28px",
-          boxShadow:
-            "0 16px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,220,130,0.12)",
-        }}
-      >
+      <div className="relative z-[1] w-[calc(100%-32px)] max-w-[360px] bg-[rgba(18,14,6,0.78)] backdrop-blur-[32px] backdrop-saturate-200 border border-[rgba(255,200,100,0.18)] rounded-[32px] px-5 pt-8 pb-7 shadow-[0_16px_48px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,220,130,0.12)]">
         {/* Logo section */}
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
+        <div className="text-center mb-7">
           <Image
             src="/icon-192x192.png"
             alt="RecipAI"
             width={64}
             height={64}
             priority
-            style={{
-              borderRadius: 20,
-              display: "block",
-              margin: "0 auto 14px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.40)",
-            }}
+            className="rounded-[20px] block mx-auto mb-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.40)]"
           />
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 26,
-              fontWeight: 800,
-              color: "var(--fg-1)",
-              letterSpacing: "-0.02em",
-            }}
-          >
+          <h1 className="font-display text-[26px] font-extrabold text-[var(--fg-1)] tracking-[-0.02em]">
             RecipAI
           </h1>
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              color: "var(--fg-2)",
-              marginTop: 4,
-            }}
-          >
+          <p className="font-sans text-xs text-[var(--fg-2)] mt-1">
             Save and discover your favourite recipes with AI
           </p>
         </div>
 
         {/* Auth buttons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           <button
             type="button"
             onClick={handleGoogleSignIn}
             className="signin-btn"
           >
-            <div style={chipStyle}>
+            <div className={CHIP_CLASS}>
               <GoogleLogo />
             </div>
             <span>Continue with Google</span>
@@ -151,7 +98,7 @@ export function LoginView({ locale }: { locale: string }) {
             onClick={handlePasskeySignIn}
             className="signin-btn"
           >
-            <div style={{ ...chipStyle, color: "var(--food-accent)" }}>
+            <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
               <KeyRound size={14} strokeWidth={2} />
             </div>
             <span>Continue with Passkey</span>
@@ -161,22 +108,14 @@ export function LoginView({ locale }: { locale: string }) {
             onClick={handleTelegramSignIn}
             className="signin-btn"
           >
-            <div style={{ ...chipStyle, color: "#229ED9" }}>
+            <div className={`${CHIP_CLASS} text-[#229ED9]`}>
               <Send size={14} strokeWidth={2} />
             </div>
             <span>Continue with Telegram</span>
           </button>
         </div>
 
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 11,
-            color: "var(--fg-3)",
-            marginTop: 18,
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="text-center text-[11px] text-[var(--fg-3)] mt-[18px] leading-[1.6]">
           By continuing, you agree to our terms of service and privacy policy
         </p>
       </div>
