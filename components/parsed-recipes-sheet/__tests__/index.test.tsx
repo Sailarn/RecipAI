@@ -54,6 +54,11 @@ vi.mock("@/lib/transitions", () => ({
   }),
 }));
 
+const useEmbedDownload = vi.hoisted(() =>
+  vi.fn().mockReturnValue({ phase: "idle", progress: 0 }),
+);
+vi.mock("@/lib/parse-recipe/use-embed-download", () => ({ useEmbedDownload }));
+
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
@@ -83,6 +88,7 @@ function mockLiveQuery(parsedCount: number, syncCount: number) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useEmbedDownload.mockReturnValue({ phase: "idle", progress: 0 });
 });
 
 describe("ParsedRecipesSheet", () => {
@@ -92,6 +98,22 @@ describe("ParsedRecipesSheet", () => {
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
     expect(button).toBeDisabled();
+  });
+
+  it("enables the bell while downloading even with no notifications", () => {
+    mockLiveQuery(0, 0);
+    useEmbedDownload.mockReturnValue({ phase: "downloading", progress: 40 });
+    render(<ParsedRecipesSheet />);
+    expect(screen.getByRole("button")).not.toBeDisabled();
+  });
+
+  it("toasts when the model download completes", () => {
+    mockLiveQuery(0, 0);
+    useEmbedDownload.mockReturnValue({ phase: "done", progress: 100 });
+    render(<ParsedRecipesSheet />);
+    expect(toast.success).toHaveBeenCalledWith(
+      expect.stringContaining("AI model ready"),
+    );
   });
 
   it("renders the bell button when only parsedCount > 0", () => {

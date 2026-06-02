@@ -203,6 +203,8 @@
   --food-accent: var(--amber-500);
   --food-accent-warm: var(--amber-300);
   --food-tint: rgba(251, 191, 36, 0.08);
+
+  --download-accent: var(--amber-600);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -242,6 +244,8 @@
   --food-accent: var(--amber-400);
   --food-accent-warm: var(--amber-300);
   --food-tint: rgba(251, 191, 36, 0.05);
+
+  --download-accent: var(--amber-400);
 }
 
 /* ─────────────────────────────────────────────────────────────
