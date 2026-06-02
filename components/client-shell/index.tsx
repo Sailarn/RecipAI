@@ -9,22 +9,24 @@ import { NavigationStackProvider } from "@/lib/navigation-stack";
 
 const BottomNav = dynamic(
   () =>
-    import("@/components/bottom-nav").then((m) => ({ default: m.BottomNav })),
+    import("@/components/bottom-nav").then((module) => ({
+      default: module.BottomNav,
+    })),
   { ssr: false },
 );
 
 const ParseJobWatcher = dynamic(
   () =>
-    import("@/components/parse-job-watcher").then((m) => ({
-      default: m.ParseJobWatcher,
+    import("@/components/parse-job-watcher").then((module) => ({
+      default: module.ParseJobWatcher,
     })),
   { ssr: false },
 );
 
 const EmbedConsentModal = dynamic(
   () =>
-    import("@/components/embed-consent-modal").then((m) => ({
-      default: m.EmbedConsentModal,
+    import("@/components/embed-consent-modal").then((module) => ({
+      default: module.EmbedConsentModal,
     })),
   { ssr: false },
 );
