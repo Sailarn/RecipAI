@@ -12,23 +12,14 @@ interface CollectionsShelfProps {
   onLongPress?: (collection: Collection) => void;
 }
 
-function tabStyle(active: boolean): React.CSSProperties {
-  return {
-    padding: "8px 12px",
-    border: "none",
-    borderBottom: active
-      ? "2px solid rgba(251,191,36,0.9)"
-      : "2px solid transparent",
-    background: "transparent",
-    cursor: "pointer",
-    fontSize: 13,
-    fontWeight: active ? 600 : 500,
-    color: active ? "var(--fg-1)" : "var(--fg-3)",
-    fontFamily: "var(--font-sans)",
-    transition: "color 0.15s ease, border-color 0.15s ease",
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-  };
+const TAB_BASE_CLASS =
+  "py-2 px-3 border-b-2 bg-transparent cursor-pointer text-[13px] font-sans whitespace-nowrap shrink-0 transition-[color,border-color] duration-150";
+
+function tabClass(active: boolean): string {
+  const stateClass = active
+    ? "border-b-[var(--food-accent)] font-semibold text-[var(--fg-1)]"
+    : "border-b-transparent font-medium text-[var(--fg-3)]";
+  return `${TAB_BASE_CLASS} ${stateClass}`;
 }
 
 function CollectionTab({
@@ -64,6 +55,7 @@ function CollectionTab({
   return (
     <button
       type="button"
+      data-active={active}
       onClick={handleClick}
       onPointerDown={longPressHandlers.onPointerDown}
       onPointerUp={longPressHandlers.onPointerUp}
@@ -71,7 +63,7 @@ function CollectionTab({
       onPointerCancel={longPressHandlers.onPointerCancel}
       onPointerMove={longPressHandlers.onPointerMove}
       onContextMenu={longPressHandlers.onContextMenu}
-      style={tabStyle(active)}
+      className={tabClass(active)}
     >
       {collection.emoji} {collection.name}
     </button>
@@ -86,31 +78,22 @@ export function CollectionsShelf({
   onLongPress,
 }: CollectionsShelfProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        overflowX: "auto",
-        scrollbarWidth: "none",
-        WebkitOverflowScrolling: "touch",
-        marginLeft: -14,
-        marginRight: -14,
-        paddingLeft: 14,
-      }}
-    >
+    <div className="flex overflow-x-auto [scrollbar-width:none] -mx-[14px] pl-[14px]">
       <button
         type="button"
+        data-active={activeId === null}
         onClick={() => onSelect(null)}
-        style={tabStyle(activeId === null)}
+        className={tabClass(activeId === null)}
       >
         🍴 All
       </button>
 
-      {collections.map((c) => (
+      {collections.map((collection) => (
         <CollectionTab
-          key={c.id}
-          collection={c}
-          active={activeId === c.id}
-          onSelect={() => onSelect(c.id)}
+          key={collection.id}
+          collection={collection}
+          active={activeId === collection.id}
+          onSelect={() => onSelect(collection.id)}
           onLongPress={onLongPress}
         />
       ))}
@@ -119,21 +102,12 @@ export function CollectionsShelf({
         type="button"
         aria-label="+"
         onClick={onCreateNew}
-        style={{
-          padding: "8px 12px",
-          border: "none",
-          borderBottom: "2px solid transparent",
-          background: "transparent",
-          color: "var(--fg-3)",
-          fontSize: 16,
-          cursor: "pointer",
-          flexShrink: 0,
-        }}
+        className="py-2 px-3 border-b-2 border-b-transparent bg-transparent text-[var(--fg-3)] text-base cursor-pointer shrink-0"
       >
         +
       </button>
 
-      <div style={{ minWidth: 14, flexShrink: 0 }} />
+      <div className="min-w-[14px] shrink-0" />
     </div>
   );
 }

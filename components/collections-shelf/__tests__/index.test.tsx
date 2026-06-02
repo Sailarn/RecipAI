@@ -38,7 +38,7 @@ describe("CollectionsShelf", () => {
     expect(screen.getByText("🥗 Light meals")).toBeInTheDocument();
   });
 
-  it("active tab has amber bottom border", () => {
+  it("marks the active tab", () => {
     render(
       <CollectionsShelf
         collections={mockCollections}
@@ -47,13 +47,10 @@ describe("CollectionsShelf", () => {
         onCreateNew={vi.fn()}
       />,
     );
-    const allTab = screen.getByText("🍴 All");
-    expect(allTab).toHaveStyle({
-      borderBottom: "2px solid rgba(251,191,36,0.9)",
-    });
+    expect(screen.getByText("🍴 All")).toHaveAttribute("data-active", "true");
   });
 
-  it("inactive tab has no bottom border", () => {
+  it("marks inactive tabs as not active", () => {
     render(
       <CollectionsShelf
         collections={mockCollections}
@@ -62,8 +59,10 @@ describe("CollectionsShelf", () => {
         onCreateNew={vi.fn()}
       />,
     );
-    const favTab = screen.getByText("⭐ Favourites");
-    expect(favTab).toHaveStyle({ borderBottom: "2px solid transparent" });
+    expect(screen.getByText("⭐ Favourites")).toHaveAttribute(
+      "data-active",
+      "false",
+    );
   });
 
   it("calls onSelect with null when All is clicked", () => {
