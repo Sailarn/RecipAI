@@ -23,7 +23,7 @@ export function PageStack() {
   const { entries } = useNavigationStack();
 
   const [display, setDisplay] = useState<DisplayEntry[]>(() =>
-    entries.map((e) => ({ ...e, status: "stable" })),
+    entries.map((entry) => ({ ...entry, status: "stable" })),
   );
   const prevRef = useRef(entries);
 
@@ -36,43 +36,50 @@ export function PageStack() {
 
     const isPush =
       curr.length > prev.length &&
-      curr.slice(0, prev.length).every((e, i) => e.id === prev[i].id);
+      curr
+        .slice(0, prev.length)
+        .every((entry, index) => entry.id === prev[index].id);
 
     const isPop =
       curr.length < prev.length &&
       curr.length > 0 &&
-      curr.every((e, i) => e.id === prev[i].id);
+      curr.every((entry, index) => entry.id === prev[index].id);
 
     if (isPush) {
       const incoming = curr[curr.length - 1];
-      setDisplay((d) => [
-        ...d.map((e) => ({ ...e, status: "stable" as Status })),
+      setDisplay((current) => [
+        ...current.map((entry) => ({ ...entry, status: "stable" as Status })),
         { ...incoming, status: "entering" as Status },
       ]);
     } else if (isPop) {
       if (isNativePopPending()) {
         // Native gesture already animated the transition — just swap instantly.
         clearNativePopPending();
-        setDisplay(curr.map((e) => ({ ...e, status: "stable" as Status })));
+        setDisplay(
+          curr.map((entry) => ({ ...entry, status: "stable" as Status })),
+        );
       } else {
         // Programmatic pop (back button click) — slide the leaving page out.
-        setDisplay((d) =>
-          d.map((e, i) =>
-            i === d.length - 1
-              ? { ...e, status: "leaving" as Status }
-              : { ...e, status: "stable" as Status },
+        setDisplay((current) =>
+          current.map((entry, index) =>
+            index === current.length - 1
+              ? { ...entry, status: "leaving" as Status }
+              : { ...entry, status: "stable" as Status },
           ),
         );
       }
     } else {
       // Reset (tab switch, Next.js hard navigation) — no animation.
-      setDisplay(curr.map((e) => ({ ...e, status: "stable" as Status })));
+      setDisplay(
+        curr.map((entry) => ({ ...entry, status: "stable" as Status })),
+      );
     }
   }, [entries]);
 
   // Last non-leaving entry is the "active top" — visible beneath any leaving page.
   const topIdx = display.reduce(
-    (acc, e, i) => (e.status !== "leaving" ? i : acc),
+    (topAccumulator, entry, index) =>
+      entry.status !== "leaving" ? index : topAccumulator,
     -1,
   );
 
@@ -97,13 +104,15 @@ export function PageStack() {
             transition={TRANSITION}
             onAnimationComplete={() => {
               if (entry.status === "leaving") {
-                setDisplay((d) => d.filter((e) => e.id !== entry.id));
+                setDisplay((current) =>
+                  current.filter((item) => item.id !== entry.id),
+                );
               } else if (entry.status === "entering") {
-                setDisplay((d) =>
-                  d.map((e) =>
-                    e.id === entry.id
-                      ? { ...e, status: "stable" as Status }
-                      : e,
+                setDisplay((current) =>
+                  current.map((item) =>
+                    item.id === entry.id
+                      ? { ...item, status: "stable" as Status }
+                      : item,
                   ),
                 );
               }
