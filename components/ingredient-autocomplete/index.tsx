@@ -96,9 +96,9 @@ export function IngredientAutocomplete({
     onSelect?.(entry);
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    onChange(e.target.value);
-    if (e.target.value.trim().length > 0) {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    onChange(event.target.value);
+    if (event.target.value.trim().length > 0) {
       openDropdown();
     } else {
       setOpen(false);
@@ -106,8 +106,8 @@ export function IngredientAutocomplete({
     setActiveIndex(-1);
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Escape") {
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
       setOpen(false);
       setActiveIndex(-1);
       return;
@@ -115,14 +115,14 @@ export function IngredientAutocomplete({
 
     if (!open || results.length === 0) return;
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => (i + 1) % results.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => (i <= 0 ? results.length - 1 : i - 1));
-    } else if (e.key === "Enter" && activeIndex >= 0) {
-      e.preventDefault();
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index) => (index + 1) % results.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index) => (index <= 0 ? results.length - 1 : index - 1));
+    } else if (event.key === "Enter" && activeIndex >= 0) {
+      event.preventDefault();
       select(results[activeIndex]);
     }
   }
@@ -134,8 +134,11 @@ export function IngredientAutocomplete({
     }, 150);
   }
 
-  function handleMouseDown(e: React.MouseEvent, entry: VocabularyIngredient) {
-    e.preventDefault();
+  function handleMouseDown(
+    event: React.MouseEvent,
+    entry: VocabularyIngredient,
+  ) {
+    event.preventDefault();
     select(entry);
   }
 
@@ -151,20 +154,18 @@ export function IngredientAutocomplete({
               width: dropdownRect.width,
             }}
           >
-            {results.map((entry, idx) => (
+            {results.map((entry, index) => (
               <div
                 key={entry.id}
                 role="option"
                 tabIndex={-1}
-                aria-selected={idx === activeIndex}
-                onMouseDown={(e) => handleMouseDown(e, entry)}
-                className="px-3 py-2 cursor-pointer text-[var(--fg-1)] text-[length:var(--text-base)] font-sans"
-                style={{
-                  background:
-                    idx === activeIndex
-                      ? "rgba(255,180,60,0.12)"
-                      : "transparent",
-                }}
+                aria-selected={index === activeIndex}
+                onMouseDown={(event) => handleMouseDown(event, entry)}
+                className={`px-3 py-2 cursor-pointer text-[var(--fg-1)] text-[length:var(--text-base)] font-sans ${
+                  index === activeIndex
+                    ? "bg-[rgba(255,180,60,0.12)]"
+                    : "bg-transparent"
+                }`}
               >
                 {getDisplayName(entry)}
               </div>
