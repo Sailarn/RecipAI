@@ -3,6 +3,7 @@ import type {
   Collection,
   PantryItem,
   ParsedRecipeEntry,
+  ParseHistoryEntry,
   Recipe,
   SyncNotification,
   VocabularyIngredient,
@@ -15,6 +16,7 @@ class RecipeDatabase extends Dexie {
   notifications!: EntityTable<SyncNotification, "id">;
   ingredients!: EntityTable<VocabularyIngredient, "id">;
   pantry!: EntityTable<PantryItem, "id">;
+  parseHistory!: EntityTable<ParseHistoryEntry, "id">;
 
   constructor() {
     super("RecipeAppDB");
@@ -88,6 +90,17 @@ class RecipeDatabase extends Dexie {
       notifications: "id, entityId, entityType, type, createdAt",
       ingredients: "id, category",
       pantry: "id, ingredientId",
+    });
+
+    // v11: local parse history (done/failed jobs)
+    this.version(11).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: "id, entityId, entityType, type, createdAt",
+      ingredients: "id, category",
+      pantry: "id, ingredientId",
+      parseHistory: "id, createdAt, status",
     });
   }
 }

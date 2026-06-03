@@ -20,6 +20,14 @@ export const PARSE_JOB_STATUS = {
 export type ParseJobStatus =
   (typeof PARSE_JOB_STATUS)[keyof typeof PARSE_JOB_STATUS];
 
+// Terminal outcomes recorded in the local parse history.
+export const PARSE_HISTORY_STATUS = {
+  DONE: "done",
+  FAILED: "failed",
+} as const;
+export type ParseHistoryStatus =
+  (typeof PARSE_HISTORY_STATUS)[keyof typeof PARSE_HISTORY_STATUS];
+
 export interface Collection {
   id: string;
   name: string;
@@ -131,6 +139,18 @@ export interface ParsedRecipeEntry {
   imageFileId?: string;
   sourceUrl?: string;
   category?: string;
+  createdAt: Date;
+}
+
+// One row per finished parse job (done or failed), kept locally so the user
+// can review past imports — including failures — offline. `id` is the parse
+// job id, so it aligns with the server `parse_jobs` row for future sync.
+export interface ParseHistoryEntry {
+  id: string;
+  title: string;
+  status: ParseHistoryStatus;
+  url: string;
+  reason?: string;
   createdAt: Date;
 }
 
