@@ -27,6 +27,27 @@ function isValidUrl(value: string): boolean {
   }
 }
 
+// Map a raw parse-job failure into a message the user can act on.
+export function friendlyParseError(rawError: string): string {
+  if (
+    rawError.includes("503") ||
+    rawError.includes("Service Unavailable") ||
+    rawError.includes("high demand")
+  ) {
+    return "Gemini is experiencing high demand right now. Please try again in a moment.";
+  }
+  if (rawError.includes("429") || rawError.includes("quota")) {
+    return "API quota exceeded. Please try again later.";
+  }
+  if (
+    rawError.includes("Could not extract") ||
+    rawError.includes("too little HTML")
+  ) {
+    return "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source.";
+  }
+  return rawError;
+}
+
 export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -53,18 +74,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           setJobId(null);
         } else if (status === PARSE_JOB_STATUS.FAILED) {
           const rawError: string = error || "Failed to parse recipe";
-          const friendlyError =
-            rawError.includes("503") ||
-            rawError.includes("Service Unavailable") ||
-            rawError.includes("high demand")
-              ? "Gemini is experiencing high demand right now. Please try again in a moment."
-              : rawError.includes("429") || rawError.includes("quota")
-                ? "API quota exceeded. Please try again later."
-                : rawError.includes("Could not extract") ||
-                    rawError.includes("too little HTML")
-                  ? "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source."
-                  : rawError;
-          setError(friendlyError);
+          setError(friendlyParseError(rawError));
           setLoading(false);
           setJobId(null);
           removeJobId(id);
@@ -122,7 +132,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: newJobId }),
-      }).catch((err) => logger.error("process error:", err));
+      }).catch((caughtError) => logger.error("process error:", caughtError));
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);

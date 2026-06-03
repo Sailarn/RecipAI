@@ -7,13 +7,16 @@ import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredi
 export function useNormalizeOnStartup() {
   useEffect(() => {
     db.recipes
-      .filter((r) => !r.canonicalIngredientIds && r.ingredients.length > 0)
+      .filter(
+        (recipe) =>
+          !recipe.canonicalIngredientIds && recipe.ingredients.length > 0,
+      )
       .toArray()
       .then((pending) => {
         for (const recipe of pending) {
           normalizeRecipeIngredients(
             recipe.id,
-            recipe.ingredients.map((ing) => ({ item: ing.item })),
+            recipe.ingredients.map((ingredient) => ({ item: ingredient.item })),
           ).catch(() => {});
         }
       })
