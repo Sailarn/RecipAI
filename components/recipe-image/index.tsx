@@ -47,27 +47,33 @@ export const RecipeImage = ({
     imageCropHeight > 0;
 
   if (hasCrop) {
-    const cx = imageCropX ?? 0;
-    const cy = imageCropY ?? 0;
-    const cw = imageCropWidth ?? 100;
-    const ch = imageCropHeight ?? 100;
-    const sx = 100 / cw;
-    const sy = 100 / ch;
+    const cropX = imageCropX ?? 0;
+    const cropY = imageCropY ?? 0;
+    const cropWidth = imageCropWidth ?? 100;
+    const cropHeight = imageCropHeight ?? 100;
+    const scaleX = 100 / cropWidth;
+    const scaleY = 100 / cropHeight;
 
     // Parse focal point from objectPosition string ("50% 50%")
-    const [fpx, fpy] = objectPosition.split(" ").map(parseFloat);
-    const relFx = Math.max(0, Math.min(100, ((fpx - cx) / cw) * 100));
-    const relFy = Math.max(0, Math.min(100, ((fpy - cy) / ch) * 100));
+    const [focalX, focalY] = objectPosition.split(" ").map(parseFloat);
+    const relativeFocalX = Math.max(
+      0,
+      Math.min(100, ((focalX - cropX) / cropWidth) * 100),
+    );
+    const relativeFocalY = Math.max(
+      0,
+      Math.min(100, ((focalY - cropY) / cropHeight) * 100),
+    );
 
     return (
       <div className="relative w-full h-full overflow-hidden bg-muted">
         <div
           style={{
             position: "absolute",
-            width: `${sx * 100}%`,
-            height: `${sy * 100}%`,
-            left: `${-cx * sx}%`,
-            top: `${-cy * sy}%`,
+            width: `${scaleX * 100}%`,
+            height: `${scaleY * 100}%`,
+            left: `${-cropX * scaleX}%`,
+            top: `${-cropY * scaleY}%`,
           }}
         >
           <div className="relative w-full h-full">
@@ -80,7 +86,9 @@ export const RecipeImage = ({
               sizes={sizes}
               loading="eager"
               onError={() => setErrored(true)}
-              style={{ objectPosition: `${relFx}% ${relFy}%` }}
+              style={{
+                objectPosition: `${relativeFocalX}% ${relativeFocalY}%`,
+              }}
             />
           </div>
         </div>
