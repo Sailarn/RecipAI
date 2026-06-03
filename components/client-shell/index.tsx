@@ -38,7 +38,10 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <NavigationStackProvider initialHref={pathname} currentPage={children}>
       <PageStack />
-      <Toaster position="bottom-center" />
+      <Toaster
+        position="top-center"
+        swipeDirections={["top", "left", "right"]}
+      />
       <ParseJobWatcher />
       <EmbedConsentModal />
       <BottomNav />
