@@ -2,7 +2,7 @@ import { logger } from "@/lib/logger";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { isImageKitUrl, uploadImage } from "../images";
 import { generateId } from "../utils";
-import { createRecipe } from "./recipes";
+import { createRecipe, updateRecipe } from "./recipes";
 import type { ParsedRecipeEntry, Recipe } from "./schema";
 
 export async function saveParsedRecipe(
@@ -18,29 +18,28 @@ export async function saveParsedRecipe(
     cookTime: entry.cookTime,
     totalTime: (entry.prepTime || 0) + (entry.cookTime || 0) || undefined,
     servings: entry.servings,
-    ingredients: entry.ingredients.map((ing) => ({
+    ingredients: entry.ingredients.map((ingredient) => ({
       id: generateId(),
-      item: ing.item,
-      amount: ing.amount,
-      unit: ing.unit,
+      item: ingredient.item,
+      amount: ingredient.amount,
+      unit: ingredient.unit,
     })),
-    instructions: entry.instructions.map((inst, idx) => ({
+    instructions: entry.instructions.map((instruction, index) => ({
       id: generateId(),
-      order: idx + 1,
-      instruction: inst.instruction,
-      imageUrl: inst.imageUrl || undefined,
+      order: index + 1,
+      instruction: instruction.instruction,
+      imageUrl: instruction.imageUrl || undefined,
     })),
     sourceUrl: entry.sourceUrl,
     category: entry.category,
   });
 
-  normalizeRecipeIngredients(id, entry.ingredients).catch((err) => {
-    logger.error("[normalize] top-level error:", err);
+  normalizeRecipeIngredients(id, entry.ingredients).catch((error) => {
+    logger.error("[normalize] top-level error:", error);
   });
 
   // upload images in background
   (async () => {
-    const { updateRecipe } = await import("./recipes");
     const updates: Partial<Recipe> = {};
     let hasUpdates = false;
 
@@ -54,26 +53,21 @@ export async function saveParsedRecipe(
     }
 
     const updatedInstructions = await Promise.all(
-      entry.instructions.map(async (inst, idx) => {
-        const imageUrl = inst.imageUrl || undefined;
-        if (imageUrl && !isImageKitUrl(imageUrl)) {
+      entry.instructions.map(async (instruction, index) => {
+        const step = {
+          id: generateId(),
+          order: index + 1,
+          instruction: instruction.instruction,
+          imageUrl: instruction.imageUrl || undefined,
+        };
+        if (step.imageUrl && !isImageKitUrl(step.imageUrl)) {
           try {
-            const uploaded = await uploadImage(imageUrl);
+            const uploaded = await uploadImage(step.imageUrl);
             hasUpdates = true;
-            return {
-              id: generateId(),
-              order: idx + 1,
-              instruction: inst.instruction,
-              imageUrl: uploaded.url,
-            };
+            return { ...step, imageUrl: uploaded.url };
           } catch {}
         }
-        return {
-          id: generateId(),
-          order: idx + 1,
-          instruction: inst.instruction,
-          imageUrl,
-        };
+        return step;
       }),
     );
 
