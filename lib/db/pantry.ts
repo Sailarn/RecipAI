@@ -7,16 +7,11 @@ export async function getPantryItems(): Promise<PantryItem[]> {
   return db.pantry.toArray();
 }
 
-export async function addPantryItem(
-  item: Omit<PantryItem, "id" | "addedAt">,
-): Promise<string> {
-  const id = crypto.randomUUID();
-  const pantryItem: PantryItem = { ...item, id, addedAt: new Date() };
-  await db.pantry.add(pantryItem);
-
-  // Include the ingredient record so the route can upsert it before the
-  // pantry row — prevents FK violations when the ingredient hasn't synced
-  // to Postgres yet (provisional race condition or canonical sync gap).
+// Sync a pantry row to the server. Includes the ingredient record so the route
+// can upsert it before the pantry row — prevents FK violations when the
+// ingredient hasn't synced to Postgres yet (provisional race condition or
+// canonical sync gap).
+async function syncPantryUpsert(item: PantryItem): Promise<void> {
   let ingredientData: VocabularyIngredient | undefined;
   if (item.ingredientId) {
     ingredientData = await db.ingredients.get(item.ingredientId);
@@ -26,10 +21,19 @@ export async function addPantryItem(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      ...pantryItem,
+      ...item,
       ingredientData: ingredientData ?? null,
     }),
   });
+}
+
+export async function addPantryItem(
+  item: Omit<PantryItem, "id" | "addedAt">,
+): Promise<string> {
+  const id = crypto.randomUUID();
+  const pantryItem: PantryItem = { ...item, id, addedAt: new Date() };
+  await db.pantry.add(pantryItem);
+  await syncPantryUpsert(pantryItem);
   return id;
 }
 
@@ -47,28 +51,7 @@ export async function togglePantryItem(id: string): Promise<void> {
   if (!item) return;
   const updated = { ...item, on: !item.on };
   await db.pantry.update(id, { on: updated.on });
-
-  let ingredientData: VocabularyIngredient | undefined;
-  if (updated.ingredientId) {
-    ingredientData = await db.ingredients.get(updated.ingredientId);
-  }
-
-  syncFetch(api.pantry, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...updated,
-      ingredientData: ingredientData ?? null,
-    }),
-  });
-}
-
-export async function setPantryQty(
-  id: string,
-  qty: number,
-  unit: string,
-): Promise<void> {
-  await db.pantry.update(id, { qty, unit });
+  await syncPantryUpsert(updated);
 }
 
 export async function clearPantry(): Promise<void> {

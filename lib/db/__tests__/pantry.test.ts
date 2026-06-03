@@ -41,7 +41,6 @@ import {
   clearPantry,
   getPantryItems,
   removePantryItem,
-  setPantryQty,
   togglePantryItem,
 } from "../pantry";
 
@@ -268,19 +267,6 @@ describe("togglePantryItem", () => {
     const body = JSON.parse(opts.body as string) as { id: string; on: boolean };
     expect(body.id).toBe("item-1");
     expect(body.on).toBe(false);
-  });
-});
-
-describe("setPantryQty", () => {
-  it("updates qty and unit for the item", async () => {
-    vi.mocked(db.pantry.update).mockResolvedValue(1 as never);
-
-    await setPantryQty("item-1", 500, "g");
-
-    expect(db.pantry.update).toHaveBeenCalledWith("item-1", {
-      qty: 500,
-      unit: "g",
-    });
   });
 });
 

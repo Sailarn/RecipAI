@@ -15,7 +15,6 @@ vi.mock("@/lib/db/pantry", () => ({
   addPantryItem: vi.fn().mockResolvedValue("new-id"),
   removePantryItem: vi.fn().mockResolvedValue(undefined),
   togglePantryItem: vi.fn().mockResolvedValue(undefined),
-  setPantryQty: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("sonner", () => ({
