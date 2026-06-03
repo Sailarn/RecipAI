@@ -70,10 +70,37 @@ async function getVocabEmbeddings(): Promise<VocabEmbedding[] | null> {
   }
 }
 
-function cosineSim(a: number[], b: number[]): number {
+// Embeddings are L2-normalized, so the dot product equals cosine similarity.
+function cosineSim(vectorA: number[], vectorB: number[]): number {
   let dot = 0;
-  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  for (let i = 0; i < vectorA.length; i++) dot += vectorA[i] * vectorB[i];
   return dot;
+}
+
+// Pick the closest vocab entry to a query embedding, but only when the top
+// match is both strong enough and clearly ahead of the runner-up — otherwise
+// return null so the caller falls back to creating a provisional ingredient.
+function findBestEmbeddingMatch(
+  queryEmbedding: number[],
+  vocabEmbeddings: VocabEmbedding[],
+): string | null {
+  let best = 0;
+  let second = 0;
+  let bestId = "";
+  for (const vocabEmbedding of vocabEmbeddings) {
+    const sim = cosineSim(queryEmbedding, vocabEmbedding.embedding);
+    if (sim > best) {
+      second = best;
+      best = sim;
+      bestId = vocabEmbedding.id;
+    } else if (sim > second) {
+      second = sim;
+    }
+  }
+  if (best >= SIMILARITY_THRESHOLD && best - second >= SIMILARITY_GAP) {
+    return bestId;
+  }
+  return null;
 }
 
 function preprocessIngredient(text: string): string {
@@ -120,9 +147,9 @@ async function createProvisional(
   category?: string | null,
 ): Promise<string | null> {
   // Reuse any existing entry with the same raw text to avoid duplicate provisionals
-  const lc = en.toLowerCase();
+  const lowerEn = en.toLowerCase();
   const existing = await db.ingredients
-    .filter((vocabEntry) => vocabEntry.en.toLowerCase() === lc)
+    .filter((vocabEntry) => vocabEntry.en.toLowerCase() === lowerEn)
     .first();
   if (existing) return existing.id;
 
@@ -168,14 +195,15 @@ export async function normalizeRecipeIngredients(
   const pending: Pending[] = [];
   const pendingSlots: number[] = [];
 
-  for (const ing of ingredients) {
-    if (NULL_PATTERNS.some((pattern) => pattern.test(ing.item.trim()))) {
-      unrecognizedIngredients.push(ing.item);
+  for (const ingredient of ingredients) {
+    if (NULL_PATTERNS.some((pattern) => pattern.test(ingredient.item.trim()))) {
+      unrecognizedIngredients.push(ingredient.item);
       continue;
     }
 
     const hit =
-      fuseHit(fuse, ing.item) ?? (ing.ua ? fuseHit(fuse, ing.ua) : null);
+      fuseHit(fuse, ingredient.item) ??
+      (ingredient.ua ? fuseHit(fuse, ingredient.ua) : null);
     if (hit) {
       canonicalIngredientIds.push(hit);
       continue;
@@ -183,7 +211,7 @@ export async function normalizeRecipeIngredients(
 
     pendingSlots.push(canonicalIngredientIds.length);
     canonicalIngredientIds.push("");
-    pending.push(ing);
+    pending.push(ingredient);
   }
 
   if (pending.length > 0) {
@@ -195,44 +223,40 @@ export async function normalizeRecipeIngredients(
         queryEmbs = await getIngredientEmbeddings(
           pending.map((pendingItem) => pendingItem.item),
         );
-      } catch (err) {
-        if (!(err instanceof Error && err.message === "EmbedConsentRequired")) {
-          logger.error("[normalize] embedding error:", err);
+      } catch (caughtError) {
+        if (
+          !(
+            caughtError instanceof Error &&
+            caughtError.message === "EmbedConsentRequired"
+          )
+        ) {
+          logger.error("[normalize] embedding error:", caughtError);
         }
         queryEmbs = null;
       }
     }
 
     for (let i = 0; i < pending.length; i++) {
-      const ing = pending[i];
+      const pendingItem = pending[i];
       let matchedId: string | null = null;
 
       if (queryEmbs && vocabEmbs) {
-        const qEmb = queryEmbs[i];
-        let best = 0;
-        let second = 0;
-        let bestId = "";
-        for (const ve of vocabEmbs) {
-          const sim = cosineSim(qEmb, ve.embedding);
-          if (sim > best) {
-            second = best;
-            best = sim;
-            bestId = ve.id;
-          } else if (sim > second) {
-            second = sim;
-          }
-        }
-        if (best >= SIMILARITY_THRESHOLD && best - second >= SIMILARITY_GAP) {
-          matchedId = bestId;
-        }
+        matchedId = findBestEmbeddingMatch(queryEmbs[i], vocabEmbs);
       }
 
       if (!matchedId) {
-        matchedId = await createProvisional(ing.item, ing.ua, ing.category);
+        matchedId = await createProvisional(
+          pendingItem.item,
+          pendingItem.ua,
+          pendingItem.category,
+        );
         if (matchedId) {
-          enrichIngredient(matchedId, ing.item, ing.ua, ing.category).catch(
-            () => {},
-          );
+          enrichIngredient(
+            matchedId,
+            pendingItem.item,
+            pendingItem.ua,
+            pendingItem.category,
+          ).catch(() => {});
         }
       }
 

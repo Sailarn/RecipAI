@@ -31,9 +31,9 @@ export async function parseWebRecipe(
   if (schemaRecipe && schemaRecipe.ingredients.length > 0) {
     if (stepImages.length > 0) {
       schemaRecipe.instructions = schemaRecipe.instructions.map(
-        (inst, idx) => ({
-          ...inst,
-          imageUrl: stepImages[idx] || undefined,
+        (instruction, index) => ({
+          ...instruction,
+          imageUrl: stepImages[index] || undefined,
         }),
       );
     }

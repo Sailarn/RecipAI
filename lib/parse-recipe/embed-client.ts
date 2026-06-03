@@ -7,19 +7,22 @@ const TIMEOUT_MS = 120_000;
 
 let worker: Worker | null = null;
 
-function setupWorker(w: Worker): void {
-  w.addEventListener("message", (event: MessageEvent<WorkerOutput>) => {
-    const { type } = event.data;
-    if (type === "progress") {
-      window.dispatchEvent(
-        new CustomEvent("embed-model-progress", {
-          detail: { progress: event.data.progress },
-        }),
-      );
-    } else if (type === "loaded") {
-      window.dispatchEvent(new CustomEvent("embed-model-loaded"));
-    }
-  });
+function setupWorker(workerInstance: Worker): void {
+  workerInstance.addEventListener(
+    "message",
+    (event: MessageEvent<WorkerOutput>) => {
+      const { type } = event.data;
+      if (type === "progress") {
+        window.dispatchEvent(
+          new CustomEvent("embed-model-progress", {
+            detail: { progress: event.data.progress },
+          }),
+        );
+      } else if (type === "loaded") {
+        window.dispatchEvent(new CustomEvent("embed-model-loaded"));
+      }
+    },
+  );
 }
 
 function getWorker(): Worker {
@@ -39,7 +42,7 @@ export async function getIngredientEmbeddings(
   texts: string[],
 ): Promise<number[][]> {
   if (!hasEmbedConsent()) throw new Error("EmbedConsentRequired");
-  const w = getWorker();
+  const workerInstance = getWorker();
 
   return new Promise<number[][]>((resolve, reject) => {
     const timer = setTimeout(() => {
@@ -56,8 +59,8 @@ export async function getIngredientEmbeddings(
         return;
 
       clearTimeout(timer);
-      w.removeEventListener("message", onMessage);
-      w.removeEventListener("error", onError);
+      workerInstance.removeEventListener("message", onMessage);
+      workerInstance.removeEventListener("error", onError);
 
       if (output.type === "embeddings") {
         resolve(output.data);
@@ -68,15 +71,15 @@ export async function getIngredientEmbeddings(
 
     const onError = (event: ErrorEvent) => {
       clearTimeout(timer);
-      w.removeEventListener("message", onMessage);
-      w.removeEventListener("error", onError);
+      workerInstance.removeEventListener("message", onMessage);
+      workerInstance.removeEventListener("error", onError);
       reject(new Error(event.message));
     };
 
-    w.addEventListener("message", onMessage);
-    w.addEventListener("error", onError);
+    workerInstance.addEventListener("message", onMessage);
+    workerInstance.addEventListener("error", onError);
 
     const input: WorkerInput = { type: "embed", texts };
-    w.postMessage(input);
+    workerInstance.postMessage(input);
   });
 }

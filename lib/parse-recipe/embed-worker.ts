@@ -58,10 +58,13 @@ self.addEventListener("message", (event: MessageEvent<WorkerInput>) => {
 
       const message: WorkerOutput = { type: "embeddings", data: embeddings };
       self.postMessage(message);
-    } catch (err) {
+    } catch (caughtError) {
       const message: WorkerOutput = {
         type: "error",
-        message: err instanceof Error ? err.message : String(err),
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : String(caughtError),
       };
       self.postMessage(message);
     }
