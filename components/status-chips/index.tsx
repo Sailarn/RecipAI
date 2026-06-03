@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 export type StatusFilterKey = "all" | "tried" | "cancook" | "nearly";
 export type StatusFilter = StatusFilterKey[];
 
@@ -20,35 +22,30 @@ export function toggleStatus(
   key: StatusFilterKey,
 ): StatusFilter {
   if (key === "all") return ["all"];
-  const without = current.filter((k) => k !== "all" && k !== key);
+  const without = current.filter(
+    (existingKey) => existingKey !== "all" && existingKey !== key,
+  );
   const next = current.includes(key) ? without : [...without, key];
   return next.length === 0 ? ["all"] : next;
 }
 
 export function StatusChips({ active, onChange }: StatusChipsProps) {
   return (
-    <div
-      style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}
-    >
+    <div className="flex gap-[6px] mb-[14px] flex-wrap">
       {OPTIONS.map(({ key, label }) => {
         const isActive = active.includes(key);
         return (
           <button
             key={key}
             type="button"
+            data-active={isActive}
             onClick={() => onChange(toggleStatus(active, key))}
-            style={{
-              padding: "5px 12px",
-              borderRadius: 99,
-              border: "none",
-              fontSize: 11,
-              fontFamily: "var(--font-sans)",
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? "var(--fg-1)" : "var(--fg-3)",
-              background: isActive ? "rgba(255,160,40,0.18)" : "transparent",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
+            className={cn(
+              "py-[5px] px-3 rounded-full border-0 text-[11px] font-[family-name:var(--font-sans)] cursor-pointer transition-all duration-150 ease",
+              isActive
+                ? "font-semibold text-[var(--fg-1)] bg-[rgba(255,160,40,0.18)]"
+                : "font-medium text-[var(--fg-3)] bg-transparent",
+            )}
           >
             {label}
           </button>

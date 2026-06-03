@@ -73,11 +73,9 @@ describe("StatusChips", () => {
     expect(called).toContain("nearly");
   });
 
-  it("applies active styles to the active chip", () => {
+  it("marks the active chip with data-active=true and others with data-active=false", () => {
     render(<StatusChips active={["tried"]} onChange={vi.fn()} />);
-    const triedBtn = screen.getByText("Tried ✓");
-    expect(triedBtn).toHaveStyle({ fontWeight: "600" });
-    const allBtn = screen.getByText("All");
-    expect(allBtn).toHaveStyle({ fontWeight: "500" });
+    expect(screen.getByText("Tried ✓")).toHaveAttribute("data-active", "true");
+    expect(screen.getByText("All")).toHaveAttribute("data-active", "false");
   });
 });
