@@ -29,8 +29,8 @@ export async function transcribeWithGroq(
   );
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Groq transcription failed: ${res.status} — ${err}`);
+    const errorBody = await res.text();
+    throw new Error(`Groq transcription failed: ${res.status} — ${errorBody}`);
   }
 
   return (await res.text()).trim();
