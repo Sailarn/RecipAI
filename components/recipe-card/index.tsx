@@ -118,7 +118,7 @@ export const RecipeCard = memo(function RecipeCard({
       {menuPos && (
         <RecipeCardContextMenu
           status={recipe.status ?? null}
-          pos={menuPos}
+          position={menuPos}
           onClose={() => setMenuPos(null)}
           onToggleStatus={handleToggleStatus}
           onAddToCollection={() => {

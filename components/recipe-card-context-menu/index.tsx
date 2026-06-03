@@ -2,36 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 interface RecipeCardContextMenuProps {
   status: "tried" | null;
-  pos: { x: number; y: number };
+  position: { x: number; y: number };
   onClose: () => void;
   onToggleStatus: () => void;
   onAddToCollection: () => void;
   onDelete: () => void;
 }
 
-const itemStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-  padding: "11px 14px",
-  background: "transparent",
-  border: "none",
-  width: "100%",
-  textAlign: "left",
-  cursor: "pointer",
-  fontSize: 13,
-  fontWeight: 500,
-  fontFamily: "var(--font-sans)",
-  borderBottom: "1px solid rgba(255,200,100,0.10)",
-  transition: "background 0.12s ease",
-};
+const VIEWPORT_CLAMP_WIDTH = 210;
+const VIEWPORT_CLAMP_HEIGHT = 160;
+
+const menuItemClass =
+  "flex items-center gap-[10px] px-[14px] py-[11px] bg-transparent w-full text-left cursor-pointer text-[13px] font-medium font-sans border-b border-b-[rgba(255,200,100,0.10)] [transition:background_0.12s_ease]";
 
 export function RecipeCardContextMenu({
   status,
-  pos,
+  position,
   onClose,
   onToggleStatus,
   onAddToCollection,
@@ -53,38 +43,19 @@ export function RecipeCardContextMenu({
         type="button"
         data-testid="ctx-backdrop"
         onClick={onClose}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") {
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
             onClose();
           }
         }}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 300,
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          padding: 0,
-        }}
+        className="fixed inset-0 z-[300] bg-transparent cursor-pointer p-0"
       />
 
       <div
+        className="fixed z-[400] min-w-[190px] bg-[rgba(18,14,6,0.92)] border border-[rgba(255,200,100,0.20)] rounded-[18px] shadow-[0_8px_32px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,220,130,0.10)] backdrop-blur-[28px] backdrop-saturate-200 overflow-hidden animate-[ctxIn_0.18s_cubic-bezier(0.34,1.56,0.64,1)]"
         style={{
-          position: "fixed",
-          left: Math.min(pos.x, window.innerWidth - 210),
-          top: Math.min(pos.y, window.innerHeight - 160),
-          zIndex: 400,
-          minWidth: 190,
-          background: "rgba(18,14,6,0.92)",
-          border: "1px solid rgba(255,200,100,0.20)",
-          borderRadius: 18,
-          boxShadow:
-            "0 8px 32px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,220,130,0.10)",
-          backdropFilter: "blur(28px) saturate(200%)",
-          WebkitBackdropFilter: "blur(28px) saturate(200%)",
-          overflow: "hidden",
-          animation: "ctxIn 0.18s cubic-bezier(0.34,1.56,0.64,1)",
+          left: Math.min(position.x, window.innerWidth - VIEWPORT_CLAMP_WIDTH),
+          top: Math.min(position.y, window.innerHeight - VIEWPORT_CLAMP_HEIGHT),
         }}
       >
         <button
@@ -93,7 +64,7 @@ export function RecipeCardContextMenu({
             onToggleStatus();
             onClose();
           }}
-          style={{ ...itemStyle, color: "var(--fg-1)" }}
+          className={cn(menuItemClass, "text-[var(--fg-1)]")}
         >
           {statusLabel}
         </button>
@@ -104,7 +75,7 @@ export function RecipeCardContextMenu({
             onAddToCollection();
             onClose();
           }}
-          style={{ ...itemStyle, color: "var(--fg-1)" }}
+          className={cn(menuItemClass, "text-[var(--fg-1)]")}
         >
           Add to collection
         </button>
@@ -115,7 +86,7 @@ export function RecipeCardContextMenu({
             onDelete();
             onClose();
           }}
-          style={{ ...itemStyle, color: "#ef4444", borderBottom: "none" }}
+          className={cn(menuItemClass, "text-red-500 border-b-0")}
         >
           Delete recipe
         </button>

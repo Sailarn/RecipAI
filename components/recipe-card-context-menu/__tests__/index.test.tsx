@@ -4,7 +4,7 @@ import { RecipeCardContextMenu } from "../index";
 
 const baseProps = {
   status: null as "tried" | null,
-  pos: { x: 100, y: 200 },
+  position: { x: 100, y: 200 },
   onClose: vi.fn(),
   onToggleStatus: vi.fn(),
   onAddToCollection: vi.fn(),
