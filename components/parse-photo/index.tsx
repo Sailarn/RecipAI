@@ -12,11 +12,11 @@ import type { ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
 import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
-import { PhotoParsingBanner } from "./photo-parsing-banner";
+import { ParseBackgroundBanner } from "../parse-background-banner";
 
 interface ParsePhotoProps {
   locale: string;
-  /** Optional override — used by RecipeParseView when an onSuccess callback is provided */
+  /** Optional override — when provided, called directly instead of saving to DB + toast */
   onResult?: (recipe: ParsedRecipe) => void;
 }
 
@@ -43,8 +43,8 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     };
   }, [previewUrl]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files?.[0];
     if (!selected) return;
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(selected);
@@ -74,8 +74,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
       .then(async (recipe) => {
         if (mountedRef.current) setIsParsing(false);
 
-        // RecipeParseView with onSuccess: hand off only if still on-screen.
-        // If the user navigated away, fall through to the DB+toast path.
+        // Hand off only if still on-screen; otherwise fall through to DB+toast path.
         if (capturedOnResult && mountedRef.current) {
           capturedOnResult(recipe);
           return;
@@ -105,9 +104,9 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
 
   if (isParsing) {
     return (
-      <PhotoParsingBanner
+      <ParseBackgroundBanner
         locale={locale}
-        onParseAnother={() => setIsParsing(false)}
+        onReset={() => setIsParsing(false)}
       />
     );
   }
