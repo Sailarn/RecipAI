@@ -19,30 +19,38 @@ function getModel(modelName: string) {
   });
 }
 
-function isRetryable(err: unknown): boolean {
-  const msg = err instanceof Error ? err.message : String(err);
+function isRetryable(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
   return (
-    msg.includes("503") ||
-    msg.includes("429") ||
-    msg.includes("Service Unavailable") ||
-    msg.includes("Too Many Requests")
+    message.includes("503") ||
+    message.includes("429") ||
+    message.includes("Service Unavailable") ||
+    message.includes("Too Many Requests")
   );
 }
 
 async function withModelFallback<T>(
-  fn: (modelName: string) => Promise<T>,
+  callModel: (modelName: string) => Promise<T>,
 ): Promise<T> {
-  let lastErr: unknown;
+  let lastError: unknown;
   for (const modelName of MODEL_CHAIN) {
     try {
-      return await fn(modelName);
-    } catch (err) {
-      lastErr = err;
-      if (!isRetryable(err)) throw err; // non-retryable: fail immediately
+      return await callModel(modelName);
+    } catch (caughtError) {
+      lastError = caughtError;
+      if (!isRetryable(caughtError)) throw caughtError; // non-retryable: fail immediately
       logger.warn(`[Gemini] ${modelName} unavailable, trying next model...`);
     }
   }
-  throw lastErr;
+  throw lastError;
+}
+
+function parseGeminiJson<T>(result: { response: { text: () => string } }): T {
+  try {
+    return JSON.parse(result.response.text()) as T;
+  } catch {
+    throw new Error("Gemini returned invalid JSON");
+  }
 }
 
 export async function callGeminiForRecipe(
@@ -51,11 +59,7 @@ export async function callGeminiForRecipe(
   const result = await withModelFallback((modelName) =>
     getModel(modelName).generateContent(prompt),
   );
-  try {
-    return JSON.parse(result.response.text()) as ParsedRecipe;
-  } catch {
-    throw new Error("Gemini returned invalid JSON");
-  }
+  return parseGeminiJson<ParsedRecipe>(result);
 }
 
 export async function callGeminiForIngredient(
@@ -64,11 +68,7 @@ export async function callGeminiForIngredient(
   const result = await withModelFallback((modelName) =>
     getModel(modelName).generateContent(prompt),
   );
-  try {
-    return JSON.parse(result.response.text()) as Record<string, unknown>;
-  } catch {
-    throw new Error("Gemini returned invalid JSON");
-  }
+  return parseGeminiJson<Record<string, unknown>>(result);
 }
 
 export async function callGeminiForRecipePhoto(
@@ -82,9 +82,5 @@ export async function callGeminiForRecipePhoto(
       { text: prompt },
     ]),
   );
-  try {
-    return JSON.parse(result.response.text()) as ParsedRecipe;
-  } catch {
-    throw new Error("Gemini returned invalid JSON");
-  }
+  return parseGeminiJson<ParsedRecipe>(result);
 }
