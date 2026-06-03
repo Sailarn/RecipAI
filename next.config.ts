@@ -4,18 +4,12 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import packageJson from "./package.json";
 
-// import bundleAnalyzer from "@next/bundle-analyzer";
-
-// const withBundleAnalyzer = bundleAnalyzer({
-//   enabled: process.env.ANALYZE === "true",
-// });
-
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
-  disable: false, // temporarily force enable to test
+  disable: false,
   reloadOnOnline: false,
 });
 
