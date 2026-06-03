@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/imagekit", () => ({
+vi.mock("@/lib/upload/imagekit", () => ({
   imagekit: {
     upload: vi.fn(),
   },
 }));
-vi.mock("@/lib/upload-auth", () => ({
+vi.mock("@/lib/upload/upload-auth", () => ({
   requireUploadAuth: vi.fn(),
 }));
 
-import { imagekit } from "@/lib/imagekit";
-import { requireUploadAuth } from "@/lib/upload-auth";
-import { UPLOAD_ERRORS } from "@/lib/upload-limits";
+import { imagekit } from "@/lib/upload/imagekit";
+import { requireUploadAuth } from "@/lib/upload/upload-auth";
+import { UPLOAD_ERRORS } from "@/lib/upload/upload-limits";
 import { POST } from "../upload/route";
 
 const mockUploadResult = {

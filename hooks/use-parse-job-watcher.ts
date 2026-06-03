@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
-import { isImageKitUrl, uploadImage } from "@/lib/images";
 import {
   getJobIds,
   getUploadToken,
@@ -14,6 +13,7 @@ import {
 } from "@/lib/parse-job-storage";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {

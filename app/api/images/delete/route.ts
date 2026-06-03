@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { imagekit } from "@/lib/imagekit";
-import { requireUploadAuth } from "@/lib/upload-auth";
+import { imagekit } from "@/lib/upload/imagekit";
+import { requireUploadAuth } from "@/lib/upload/upload-auth";
 
 export async function DELETE(request: Request) {
   const authError = await requireUploadAuth(request);

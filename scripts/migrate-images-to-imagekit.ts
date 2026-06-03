@@ -5,7 +5,7 @@ dotenv.config({ path: ".env.local" });
 import { eq, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
-import { uploadImageServer } from "@/lib/imagekit";
+import { uploadImageServer } from "@/lib/upload/imagekit";
 
 const IMAGEKIT_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
 

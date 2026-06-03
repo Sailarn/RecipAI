@@ -34,7 +34,7 @@ vi.mock("@/lib/db/save-parsed-recipe", () => ({
   saveParsedRecipe: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/images", () => ({
+vi.mock("@/lib/upload/images", () => ({
   isImageKitUrl: vi.fn().mockReturnValue(false),
   uploadImage: vi.fn(),
 }));
@@ -45,13 +45,13 @@ vi.mock("@/lib/transitions", () => ({
 
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
-import { isImageKitUrl, uploadImage } from "@/lib/images";
 import {
   getJobIds,
   getUploadToken,
   removeJobId,
   storePendingUploadToken,
 } from "@/lib/parse-job-storage";
+import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 
 const mockFetch = vi.fn();
 

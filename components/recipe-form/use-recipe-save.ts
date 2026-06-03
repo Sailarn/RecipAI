@@ -3,13 +3,13 @@
 import { useRef, useState } from "react";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/images";
 import {
   clearPendingUploadToken,
   getPendingUploadToken,
 } from "@/lib/parse-job-storage";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { useNavigate } from "@/lib/transitions";
+import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
 import type { RecipeOutput } from "./schema";
 

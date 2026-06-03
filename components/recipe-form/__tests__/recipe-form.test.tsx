@@ -28,7 +28,7 @@ vi.mock("@/lib/db/recipes", () => ({
   updateRecipe: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/images", () => ({
+vi.mock("@/lib/upload/images", () => ({
   uploadImage: vi.fn(),
   deleteImage: vi.fn(),
   isImageKitUrl: vi.fn().mockReturnValue(false),

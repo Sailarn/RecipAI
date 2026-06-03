@@ -13,11 +13,11 @@ vi.mock("@/db/schema/parse-jobs", () => ({ parseJobs: {} }));
 vi.mock("@/db/schema/recipes", () => ({ recipes: {} }));
 vi.mock("drizzle-orm", () => ({ eq: vi.fn() }));
 
-vi.mock("@/lib/imagekit", () => ({
+vi.mock("@/lib/upload/imagekit", () => ({
   uploadImageServer: vi.fn(),
 }));
 
-vi.mock("@/lib/images", () => ({
+vi.mock("@/lib/upload/images", () => ({
   isImageKitUrl: vi.fn(),
 }));
 
@@ -30,9 +30,9 @@ vi.mock("@/lib/telegram-bot", () => ({
 }));
 
 import { db } from "@/db";
-import { uploadImageServer } from "@/lib/imagekit";
-import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { uploadImageServer } from "@/lib/upload/imagekit";
+import { isImageKitUrl } from "@/lib/upload/images";
 import { POST } from "../route";
 
 const IMAGEKIT_URL = "https://ik.imagekit.io/test/recipes/recipe-123.jpg";

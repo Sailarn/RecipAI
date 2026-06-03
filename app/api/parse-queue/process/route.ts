@@ -5,10 +5,10 @@ import { parseJobs } from "@/db/schema/parse-jobs";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
-import { uploadImageServer } from "@/lib/imagekit";
-import { isImageKitUrl } from "@/lib/images";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
+import { uploadImageServer } from "@/lib/upload/imagekit";
+import { isImageKitUrl } from "@/lib/upload/images";
 import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;

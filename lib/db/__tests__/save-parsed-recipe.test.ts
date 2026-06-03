@@ -8,7 +8,7 @@ vi.mock("../recipes", () => ({
   updateRecipe: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../images", () => ({
+vi.mock("../../upload/images", () => ({
   uploadImage: vi.fn(),
   isImageKitUrl: vi.fn().mockReturnValue(false),
 }));
@@ -18,7 +18,7 @@ vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
 }));
 
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
-import { isImageKitUrl, uploadImage } from "../../images";
+import { isImageKitUrl, uploadImage } from "../../upload/images";
 import { createRecipe, updateRecipe } from "../recipes";
 
 const baseEntry: ParsedRecipeEntry = {

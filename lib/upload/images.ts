@@ -1,4 +1,4 @@
-import { api } from "./routes";
+import { api } from "../routes";
 
 const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
 

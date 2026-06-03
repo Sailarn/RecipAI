@@ -3,7 +3,7 @@ import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
   UPLOAD_ERRORS,
-} from "@/lib/upload-limits";
+} from "@/lib/upload/upload-limits";
 
 export const imagekit = new ImageKit({
   publicKey: process.env.IMAGEKIT_PUBLIC_KEY ?? "",

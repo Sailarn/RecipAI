@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { imagekit } from "@/lib/imagekit";
-import { requireUploadAuth } from "@/lib/upload-auth";
-import { resolveImageSource } from "@/lib/upload-image-source";
+import { imagekit } from "@/lib/upload/imagekit";
+import { requireUploadAuth } from "@/lib/upload/upload-auth";
+import { resolveImageSource } from "@/lib/upload/upload-image-source";
 
 export async function POST(request: Request) {
   const authError = await requireUploadAuth(request);

@@ -4,7 +4,7 @@ import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
   UPLOAD_ERRORS,
-} from "@/lib/upload-limits";
+} from "@/lib/upload/upload-limits";
 
 export type ImageSource = { fileData: string; fileName: string };
 

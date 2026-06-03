@@ -1,6 +1,6 @@
 import { logger } from "@/lib/logger";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
-import { isImageKitUrl, uploadImage } from "../images";
+import { isImageKitUrl, uploadImage } from "../upload/images";
 import { generateId } from "../utils";
 import { createRecipe, updateRecipe } from "./recipes";
 import type { ParsedRecipeEntry, Recipe } from "./schema";

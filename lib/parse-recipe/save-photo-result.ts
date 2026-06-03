@@ -2,8 +2,8 @@ import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { routes } from "@/lib/routes";
+import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
 
 export async function savePhotoParseResult(

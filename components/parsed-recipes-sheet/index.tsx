@@ -15,10 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
-import { isImageKitUrl, uploadImage } from "@/lib/images";
 import { useEmbedDownload } from "@/lib/parse-recipe/use-embed-download";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { BellProgressRing } from "./bell-progress-ring";
 
 const BELL_BUTTON_CLASS =

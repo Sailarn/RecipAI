@@ -12,12 +12,12 @@ vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
-vi.mock("@/lib/upload-token", () => ({
+vi.mock("@/lib/upload/upload-token", () => ({
   mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
 }));
 
 import { auth } from "@/lib/auth/auth";
-import { mintUploadToken } from "@/lib/upload-token";
+import { mintUploadToken } from "@/lib/upload/upload-token";
 import { POST } from "../route";
 
 function makeRequest(body: object) {

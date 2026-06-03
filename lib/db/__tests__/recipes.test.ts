@@ -15,11 +15,11 @@ vi.mock("../supabase-sync", () => ({
   syncDelete: vi.fn(),
 }));
 
-vi.mock("../../images", () => ({
+vi.mock("../../upload/images", () => ({
   deleteImage: vi.fn(),
 }));
 
-import { deleteImage } from "../../images";
+import { deleteImage } from "../../upload/images";
 import { syncCreate, syncDelete, syncUpdate } from "../supabase-sync";
 
 beforeEach(async () => {

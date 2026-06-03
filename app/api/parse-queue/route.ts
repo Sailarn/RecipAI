@@ -5,7 +5,7 @@ import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
-import { mintUploadToken } from "@/lib/upload-token";
+import { mintUploadToken } from "@/lib/upload/upload-token";
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });

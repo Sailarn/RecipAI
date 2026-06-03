@@ -1,4 +1,4 @@
-import { deleteImage } from "../images";
+import { deleteImage } from "../upload/images";
 import { generateId } from "../utils";
 import { db } from "./db";
 import type { Recipe } from "./schema";
