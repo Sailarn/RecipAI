@@ -12,17 +12,8 @@ interface RecipeHeaderProps {
   onDeleteClick: () => void;
 }
 
-const glassPillStyle: React.CSSProperties = {
-  background: "rgba(0,0,0,0.38)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(255,255,255,0.15)",
-  borderRadius: "99px",
-  color: "rgba(255,255,255,0.90)",
-  fontSize: "12px",
-  fontWeight: 500,
-  cursor: "pointer",
-};
+const glassPillClass =
+  "bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.15)] rounded-full text-[rgba(255,255,255,0.90)] text-[12px] font-medium cursor-pointer";
 
 export function RecipeHeader({
   locale,
@@ -34,32 +25,16 @@ export function RecipeHeader({
   const navigate = useNavigate();
 
   return (
-    <div
-      style={{
-        position: "relative",
-        zIndex: 20,
-        flexShrink: 0,
-        padding: "56px 14px 8px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
+    <div className="relative z-[20] shrink-0 pt-[56px] px-[14px] pb-2 flex justify-between items-center">
       <button
         type="button"
         onClick={() => navigate.back()}
-        style={{
-          ...glassPillStyle,
-          padding: "7px 14px 7px 10px",
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-        }}
+        className={`${glassPillClass} py-[7px] pr-[14px] pl-[10px] flex items-center gap-1`}
       >
-        <ChevronLeft size={13} color="rgba(255,255,255,0.75)" />
+        <ChevronLeft size={13} className="text-[rgba(255,255,255,0.75)]" />
         {tRecipes("backToRecipes")}
       </button>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="flex gap-2 items-center">
         <button
           type="button"
           onClick={() =>
@@ -68,10 +43,7 @@ export function RecipeHeader({
               <RecipeEditView recipeId={recipeId} />,
             )
           }
-          style={{
-            ...glassPillStyle,
-            padding: "7px 16px",
-          }}
+          className={`${glassPillClass} py-[7px] px-4`}
         >
           {t("edit")}
         </button>
@@ -79,13 +51,7 @@ export function RecipeHeader({
           type="button"
           onClick={onDeleteClick}
           aria-label="Delete"
-          style={{
-            ...glassPillStyle,
-            padding: "7px 10px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className={`${glassPillClass} py-[7px] px-[10px] flex items-center justify-center`}
         >
           <Trash2 size={13} />
         </button>

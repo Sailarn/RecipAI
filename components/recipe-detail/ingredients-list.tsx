@@ -11,29 +11,9 @@ export function IngredientsList({ ingredients }: IngredientsListProps) {
   const t = useTranslations("recipes");
 
   return (
-    <div
-      style={{
-        background: "var(--glass-card-bg)",
-        backdropFilter: "var(--glass-card-blur)",
-        WebkitBackdropFilter: "var(--glass-card-blur)",
-        border: "1px solid var(--glass-card-border)",
-        borderRadius: 20,
-      }}
-    >
-      <div
-        style={{
-          padding: "12px 14px",
-          borderBottom: "1px solid var(--border-subtle)",
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 13,
-            fontWeight: 700,
-            color: "var(--fg-1)",
-          }}
-        >
+    <div className="bg-[var(--glass-card-bg)] [backdrop-filter:var(--glass-card-blur)] [-webkit-backdrop-filter:var(--glass-card-blur)] border border-[var(--glass-card-border)] rounded-[20px]">
+      <div className="px-[14px] py-3 border-b border-[var(--border-subtle)]">
+        <h3 className="font-[family-name:var(--font-display)] text-[13px] font-bold text-[var(--fg-1)]">
           {t("ingredients")}
         </h3>
       </div>
@@ -41,29 +21,12 @@ export function IngredientsList({ ingredients }: IngredientsListProps) {
         {ingredients.map((ingredient, index) => (
           <li
             key={ingredient.id || `ing-${index}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 14px",
-              borderBottom:
-                index === ingredients.length - 1
-                  ? "none"
-                  : "1px solid var(--border-subtle)",
-            }}
+            className={`flex items-center gap-[10px] px-[14px] py-[10px]${index < ingredients.length - 1 ? " border-b border-[var(--border-subtle)]" : ""}`}
           >
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                background: "#f59e0b",
-                flexShrink: 0,
-              }}
-            />
-            <span style={{ fontSize: 13, color: "var(--fg-1)" }}>
+            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#f59e0b]" />
+            <span className="text-[13px] text-[var(--fg-1)]">
               {ingredient.amount && (
-                <span style={{ fontWeight: 600 }}>{ingredient.amount} </span>
+                <span className="font-semibold">{ingredient.amount} </span>
               )}
               {ingredient.unit && `${ingredient.unit} `}
               {ingredient.item}

@@ -13,55 +13,23 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
 
   return (
     <div className="mb-8">
-      <h2
-        className="mb-3"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: 15,
-          fontWeight: 700,
-          color: "var(--fg-1)",
-        }}
-      >
+      <h2 className="mb-3 font-[family-name:var(--font-display)] text-[15px] font-bold text-[var(--fg-1)]">
         {t("instructions")}
       </h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-[10px]">
         {instructions
           .sort((a, b) => a.order - b.order)
           .map((step) => (
             <div
               key={step.id || `step-${step.order}`}
-              className="glass-card"
-              style={{
-                borderRadius: 16,
-                padding: "12px 14px",
-                display: "flex",
-                gap: 12,
-                alignItems: "flex-start",
-              }}
+              className="glass-card rounded-[16px] p-[12px_14px] flex gap-3 items-start"
             >
-              <div
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 11,
-                  flexShrink: 0,
-                  background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
-                  color: "#fff",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className="w-[22px] h-[22px] rounded-full shrink-0 bg-[linear-gradient(135deg,#3b82f6,#8b5cf6)] text-white text-[11px] font-bold flex items-center justify-center">
                 {step.order}
               </div>
-              <div style={{ flex: 1 }}>
+              <div className="flex-1">
                 {step.imageUrl && (
-                  <div
-                    className="relative w-full overflow-hidden mb-2"
-                    style={{ height: 160, borderRadius: 10 }}
-                  >
+                  <div className="relative w-full overflow-hidden mb-2 h-[160px] rounded-[10px]">
                     <RecipeImage
                       imageUrl={step.imageUrl}
                       title={`Step ${step.order}`}
@@ -70,13 +38,7 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
                     />
                   </div>
                 )}
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "var(--fg-1)",
-                    lineHeight: 1.55,
-                  }}
-                >
+                <p className="text-[13px] text-[var(--fg-1)] leading-[1.55]">
                   {step.instruction}
                 </p>
               </div>

@@ -9,22 +9,12 @@ interface RecipeMetaProps {
   totalTime?: number;
 }
 
+const iconClass = "w-3 h-3 shrink-0 text-[var(--fg-2)]";
+
 const iconMap: Record<string, React.ReactNode> = {
-  prepTime: (
-    <Clock
-      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
-    />
-  ),
-  cookTime: (
-    <Timer
-      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
-    />
-  ),
-  totalTime: (
-    <Hourglass
-      style={{ width: 12, height: 12, flexShrink: 0, color: "var(--fg-2)" }}
-    />
-  ),
+  prepTime: <Clock className={iconClass} />,
+  cookTime: <Timer className={iconClass} />,
+  totalTime: <Hourglass className={iconClass} />,
 };
 
 export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
@@ -62,24 +52,10 @@ export function RecipeMeta({ prepTime, cookTime, totalTime }: RecipeMetaProps) {
       {items.map((item) => (
         <div
           key={item.label}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            fontSize: 11,
-            color: "var(--fg-2)",
-            background: "var(--glass-card-bg)",
-            backdropFilter: "var(--glass-card-blur)",
-            WebkitBackdropFilter: "var(--glass-card-blur)",
-            border: "1px solid var(--glass-card-border)",
-            borderRadius: 20,
-            padding: "5px 10px",
-          }}
+          className="flex items-center gap-[5px] text-[11px] text-[var(--fg-2)] bg-[var(--glass-card-bg)] [backdrop-filter:var(--glass-card-blur)] [-webkit-backdrop-filter:var(--glass-card-blur)] border border-[var(--glass-card-border)] rounded-[20px] px-[10px] py-[5px]"
         >
           {iconMap[item.key]}
-          <span style={{ fontWeight: 600, color: "var(--fg-1)" }}>
-            {item.label}
-          </span>
+          <span className="font-semibold text-[var(--fg-1)]">{item.label}</span>
           <span>{item.value}</span>
         </div>
       ))}

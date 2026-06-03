@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { RecipeImage } from "@/components/recipe-image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +21,10 @@ import { isVideoUrl } from "@/lib/video-url";
 import { CookingCarousel } from "../cooking-carousel";
 import { ServingsCalculator } from "../servings-calculator";
 import { TransitionLink } from "../transition-link";
+import { CategoryBadge } from "./category-badge";
 import { InstructionsList } from "./instructions-list";
 import { RecipeHeader } from "./recipe-header";
+import { RecipeHero } from "./recipe-hero";
 import { RecipeMeta } from "./recipe-meta";
 
 interface RecipeDetailProps {
@@ -43,7 +44,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
 
   useEffect(() => {
     getRecipe(recipeId)
-      .then((recipe) => setRecipe(recipe ?? null))
+      .then((result) => setRecipe(result ?? null))
       .finally(() => setLoading(false));
   }, [recipeId]);
 
@@ -77,13 +78,12 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   if (!recipe) {
     return (
       <div className="text-center py-12">
-        <p className="mb-4" style={{ color: "var(--muted-foreground)" }}>
+        <p className="mb-4 text-muted-foreground">
           {tRecipes("recipeNotFound")}
         </p>
         <TransitionLink
           href={routes.recipes.list(locale)}
-          className="hover:underline"
-          style={{ color: "var(--primary)" }}
+          className="text-primary hover:underline"
         >
           {tRecipes("backToRecipes")}
         </TransitionLink>
@@ -92,16 +92,8 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   }
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        background: "var(--bg-base)",
-      }}
-    >
-      {/* Nav row - rendered by RecipeHeader which now has its own padding */}
-      <div style={{ position: "relative", zIndex: 20, flexShrink: 0 }}>
+    <div className="h-full flex flex-col bg-[var(--bg-base)]">
+      <div className="relative z-[20] shrink-0">
         <RecipeHeader
           locale={locale}
           recipeId={recipeId}
@@ -109,115 +101,18 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         />
       </div>
 
-      {/* Scrollable content area - pulls up under nav for hero bleed */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          flex: 1,
-          overflowY: "auto",
-          marginTop: "-72px",
-          padding: "0 14px 40px",
-          userSelect: "text",
-          WebkitUserSelect: "text",
-        }}
-      >
-        {/* Hero gradient + emoji fallback */}
-        <div
-          style={{
-            height: 210,
-            flexShrink: 0,
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 72,
-            paddingTop: 72,
-            borderRadius: 0,
-            overflow: "hidden",
-          }}
-        >
-          {recipe.imageUrl ? (
-            <RecipeImage
-              imageUrl={recipe.imageUrl}
-              title={recipe.title}
-              width={800}
-              sizes="100vw"
-              priority
-              objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
-              imageCropX={recipe.imageCropX}
-              imageCropY={recipe.imageCropY}
-              imageCropWidth={recipe.imageCropWidth}
-              imageCropHeight={recipe.imageCropHeight}
-            />
-          ) : (
-            <span>{"🍽️"}</span>
-          )}
-          {/* Bottom fade overlay */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 60,
-              background:
-                "linear-gradient(to bottom, transparent, var(--bg-base))",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
+      <div className="relative z-[1] flex-1 overflow-y-auto -mt-[72px] px-[14px] pb-[40px] select-text">
+        <RecipeHero recipe={recipe} />
 
         <div className="flex items-start justify-between gap-2 mb-4">
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-2xl)",
-              fontWeight: "var(--font-extrabold)",
-              lineHeight: "var(--leading-tight)",
-              color: "var(--fg-1)",
-              flex: 1,
-            }}
-          >
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight text-[var(--fg-1)] flex-1">
             {recipe.title}
           </h1>
-          {recipe.category &&
-            (() => {
-              const BADGE: Record<string, { bg: string; color: string }> = {
-                Breakfast: { bg: "rgba(232,89,12,0.22)", color: "#fdba74" },
-                Lunch: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
-                Dinner: { bg: "rgba(59,91,219,0.22)", color: "#93c5fd" },
-                Soup: { bg: "rgba(234,88,12,0.22)", color: "#fb923c" },
-                Salad: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
-                Snack: { bg: "rgba(139,92,246,0.22)", color: "#c4b5fd" },
-                Dessert: { bg: "rgba(194,37,92,0.22)", color: "#f9a8d4" },
-                Baking: { bg: "rgba(234,179,8,0.22)", color: "#fde047" },
-                Drink: { bg: "rgba(6,182,212,0.22)", color: "#67e8f9" },
-                Other: { bg: "rgba(100,100,110,0.22)", color: "#d4d4d8" },
-              };
-              const b = BADGE[recipe.category] ?? BADGE.Other;
-              return (
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    padding: "3px 9px",
-                    borderRadius: 99,
-                    background: b.bg,
-                    color: b.color,
-                    border: `1px solid ${b.color}30`,
-                    marginTop: 4,
-                    flexShrink: 0,
-                  }}
-                >
-                  {recipe.category}
-                </span>
-              );
-            })()}
+          {recipe.category && <CategoryBadge category={recipe.category} />}
         </div>
 
         {recipe.description && (
-          <p className="mb-4 text-sm" style={{ color: "var(--fg-2)" }}>
+          <p className="mb-4 text-sm text-[var(--fg-2)]">
             {recipe.description}
           </p>
         )}
@@ -227,48 +122,26 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           cookTime={recipe.cookTime}
           totalTime={recipe.totalTime}
         />
+
         <button
           type="button"
           onClick={() => setCookingMode(true)}
-          className="w-full mb-2"
-          style={{
-            padding: "13px",
-            borderRadius: 16,
-            background: "#3b82f6",
-            border: "none",
-            color: "#fff",
-            fontFamily: "var(--font-sans)",
-            fontSize: "14px",
-            fontWeight: 700,
-            cursor: "pointer",
-            boxShadow: "0 4px 20px rgba(59,130,246,0.45)",
-            letterSpacing: "0.2px",
-          }}
+          className="w-full mb-2 p-[13px] rounded-[16px] bg-[#3b82f6] text-white font-sans text-[14px] font-bold cursor-pointer shadow-[0_4px_20px_rgba(59,130,246,0.45)] tracking-[0.2px]"
         >
           Start Cooking
         </button>
+
         {recipe.sourceUrl && (
-          <button
-            type="button"
-            onClick={() => window.open(recipe.sourceUrl, "_blank")}
-            className="w-full mb-6"
-            style={{
-              padding: "13px",
-              borderRadius: 14,
-              background: "rgba(255,170,50,0.08)",
-              border: "1px solid rgba(255,200,100,0.18)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              color: "var(--fg-1)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-sm)",
-              fontWeight: "var(--font-medium)",
-              cursor: "pointer",
-            }}
+          <a
+            href={recipe.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full mb-6 p-[13px] rounded-[14px] bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)] backdrop-blur-[12px] text-[var(--fg-1)] font-sans text-sm font-medium text-center"
           >
             {isVideoUrl(recipe.sourceUrl) ? "Watch video" : "Source"}
-          </button>
+          </a>
         )}
+
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
@@ -276,12 +149,14 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
           locale={locale}
         />
         <InstructionsList instructions={recipe.instructions} />
+
         {cookingMode && (
           <CookingCarousel
             recipe={recipe}
             onClose={() => setCookingMode(false)}
           />
         )}
+
         <AlertDialog
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}
