@@ -41,7 +41,9 @@ export function RecipeFilterBar({
   const t = useTranslations("recipes");
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const activeCollection = collections.find((c) => c.id === activeCollectionId);
+  const activeCollection = collections.find(
+    (collection) => collection.id === activeCollectionId,
+  );
   const searchPlaceholder = activeCollection
     ? `Search in ${activeCollection.name}...`
     : t("searchPlaceholder");
@@ -53,7 +55,7 @@ export function RecipeFilterBar({
   ].filter(Boolean).length;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", marginBottom: 8 }}>
+    <div className="flex flex-col mb-2">
       <CollectionsShelf
         collections={collections}
         activeId={activeCollectionId}
@@ -62,92 +64,32 @@ export function RecipeFilterBar({
         onLongPress={onCollectionLongPress}
       />
 
-      <div
-        style={{
-          height: 1,
-          background: "rgba(255,200,100,0.12)",
-          marginLeft: -14,
-          marginRight: -14,
-          marginBottom: 10,
-        }}
-      />
+      <div className="h-px bg-[rgba(255,200,100,0.12)] -mx-[14px] mb-[10px]" />
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <div style={{ position: "relative", flex: 1 }}>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
           <Search
             size={14}
             strokeWidth={2}
-            style={{
-              position: "absolute",
-              left: 11,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "var(--fg-3)",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
+            className="absolute left-[11px] top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-[1]"
           />
           <input
             type="search"
             value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="transition-colors"
-            style={{
-              width: "100%",
-              fontFamily: "var(--font-sans)",
-              background: "rgba(255,170,50,0.07)",
-              border: "1px solid rgba(255,200,100,0.15)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderRadius: 14,
-              padding: "9px 12px 9px 32px",
-              fontSize: 13,
-              color: "var(--fg-1)",
-              outline: "none",
-            }}
+            className="w-full font-[family-name:var(--font-sans)] bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.15)] backdrop-blur-[12px] rounded-[14px] py-[9px] pr-3 pl-8 text-[13px] text-[var(--fg-1)] outline-none transition-colors"
           />
         </div>
 
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "9px 11px",
-            borderRadius: 14,
-            border: "1px solid rgba(255,200,100,0.15)",
-            background: "rgba(255,170,50,0.07)",
-            color: "var(--fg-2)",
-            fontSize: 13,
-            fontFamily: "var(--font-sans)",
-            fontWeight: 500,
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
+          className="relative flex items-center gap-[6px] py-[9px] px-[11px] rounded-[14px] border border-[rgba(255,200,100,0.15)] bg-[rgba(255,170,50,0.07)] text-[var(--fg-2)] text-[13px] font-[family-name:var(--font-sans)] font-medium cursor-pointer shrink-0"
         >
           <SlidersHorizontal size={16} />
           {activeFilterCount > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: -4,
-                right: -4,
-                background: "var(--action-primary)",
-                color: "#fff",
-                fontSize: 10,
-                fontWeight: 700,
-                borderRadius: 99,
-                width: 16,
-                height: 16,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <span className="absolute -top-1 -right-1 bg-[var(--action-primary)] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
               {activeFilterCount}
             </span>
           )}
