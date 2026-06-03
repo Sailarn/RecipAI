@@ -7,7 +7,7 @@ const VIDEO_PATTERNS = [
 ];
 
 export function isVideoUrl(url: string): boolean {
-  return VIDEO_PATTERNS.some((p) => p.test(url));
+  return VIDEO_PATTERNS.some((pattern) => pattern.test(url));
 }
 
 // YouTube only — Instagram/TikTok thumbnails require auth
