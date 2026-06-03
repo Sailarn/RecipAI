@@ -222,6 +222,12 @@
    ANIMATION KEYFRAMES
    ───────────────────────────────────────────────────────────── */
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes aiGrad {
   0%,
   100% {
