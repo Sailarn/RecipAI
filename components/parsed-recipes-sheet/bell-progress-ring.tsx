@@ -4,11 +4,6 @@ const STROKE = 2;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-/**
- * A progress arc drawn around the notifications bell while the embed model
- * downloads. `progress` is 0–100; the arc fills clockwise from the top in the
- * --download-accent colour, turning green once `done`.
- */
 export function BellProgressRing({
   progress,
   done = false,
