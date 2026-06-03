@@ -10,8 +10,8 @@ export function useRecipeMatcher() {
     () =>
       new Set(
         (pantryItems ?? [])
-          .filter((p) => p.on && p.ingredientId)
-          .map((p) => p.ingredientId as string),
+          .filter((pantryItem) => pantryItem.on && pantryItem.ingredientId)
+          .map((pantryItem) => pantryItem.ingredientId as string),
       ),
     [pantryItems],
   );

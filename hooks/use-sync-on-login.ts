@@ -98,20 +98,16 @@ function diffToNotifications<T extends Recipe | Collection>(
   ];
 }
 
-function parseServerRecipes(raw: unknown[]): Recipe[] {
-  return (raw as Record<string, unknown>[]).map((rawRecipe) => ({
-    ...(rawRecipe as Omit<Recipe, "createdAt" | "updatedAt">),
-    createdAt: new Date(rawRecipe.createdAt as string),
-    updatedAt: new Date(rawRecipe.updatedAt as string),
-  }));
-}
-
-function parseServerCollections(raw: unknown[]): Collection[] {
-  return (raw as Record<string, unknown>[]).map((rawCollection) => ({
-    ...(rawCollection as Omit<Collection, "createdAt" | "updatedAt">),
-    createdAt: new Date(rawCollection.createdAt as string),
-    updatedAt: new Date(rawCollection.updatedAt as string),
-  }));
+// Supabase returns createdAt/updatedAt as ISO strings; revive them to Date
+// before writing to Dexie.
+function parseTimestamps<T extends { createdAt: Date; updatedAt: Date }>(
+  raw: unknown[],
+): T[] {
+  return (raw as Record<string, unknown>[]).map((row) => ({
+    ...(row as Omit<T, "createdAt" | "updatedAt">),
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  })) as T[];
 }
 
 export function useSyncOnLogin() {
@@ -138,8 +134,8 @@ export function useSyncOnLogin() {
       const { recipes: rawServerRecipes } = await recipesRes.json();
       const { collections: rawServerCollections } = await collectionsRes.json();
 
-      const serverRecipes = parseServerRecipes(rawServerRecipes ?? []);
-      const serverCollections = parseServerCollections(
+      const serverRecipes = parseTimestamps<Recipe>(rawServerRecipes ?? []);
+      const serverCollections = parseTimestamps<Collection>(
         rawServerCollections ?? [],
       );
 

@@ -117,8 +117,8 @@ export function useParseJobWatcher() {
     });
 
     // listen for new jobs created after mount
-    const handler = (e: Event) => {
-      const { jobId } = (e as CustomEvent).detail;
+    const handler = (event: Event) => {
+      const { jobId } = (event as CustomEvent).detail;
       poll(jobId);
     };
     window.addEventListener("parse-job-created", handler);

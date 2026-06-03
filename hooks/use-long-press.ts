@@ -19,7 +19,7 @@ export function useLongPress(
   }, [onCancel]);
 
   const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
+    (event: React.PointerEvent) => {
       // On fine-pointer devices (mouse/trackpad) skip the timer — right-click via
       // onContextMenu handles desktop instead. This prevents conflicts with Chrome's
       // own context menu on Mac, including DevTools iPhone simulator.
@@ -30,7 +30,7 @@ export function useLongPress(
       ) {
         return;
       }
-      startPos.current = { x: e.clientX, y: e.clientY };
+      startPos.current = { x: event.clientX, y: event.clientY };
       timerRef.current = setTimeout(() => {
         // Clear ref BEFORE firing so cancel() won't see a pending timer
         // and won't call onCancel() — preserving didLongPress state in callers.
@@ -43,21 +43,21 @@ export function useLongPress(
   );
 
   const onPointerMove = useCallback(
-    (e: React.PointerEvent) => {
+    (event: React.PointerEvent) => {
       if (timerRef.current === null) return;
-      const dx = e.clientX - startPos.current.x;
-      const dy = e.clientY - startPos.current.y;
+      const deltaX = event.clientX - startPos.current.x;
+      const deltaY = event.clientY - startPos.current.y;
       // Cancel if the pointer drifted enough that the user is probably scrolling
-      if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) {
+      if (deltaX * deltaX + deltaY * deltaY > MOVE_CANCEL_PX * MOVE_CANCEL_PX) {
         cancel();
       }
     },
     [cancel],
   );
 
-  const onContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const onContextMenu = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
   }, []);
 
   return {

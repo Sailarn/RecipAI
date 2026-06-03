@@ -25,22 +25,22 @@ export function usePullToRefresh({
   }, [onRefresh]);
 
   useEffect(() => {
-    function setHeight(h: number, animated = false) {
-      const el = indicatorRef.current;
-      if (!el) return;
-      el.style.transition = animated ? "height 0.25s ease-out" : "none";
-      el.style.height = `${h}px`;
+    function setHeight(height: number, animated = false) {
+      const element = indicatorRef.current;
+      if (!element) return;
+      element.style.transition = animated ? "height 0.25s ease-out" : "none";
+      element.style.height = `${height}px`;
     }
 
-    const onTouchStart = (e: TouchEvent) => {
+    const onTouchStart = (event: TouchEvent) => {
       if (window.scrollY !== 0) return;
-      startY.current = e.touches[0].clientY;
+      startY.current = event.touches[0].clientY;
       isPulling.current = true;
     };
 
-    const onTouchMove = (e: TouchEvent) => {
+    const onTouchMove = (event: TouchEvent) => {
       if (!isPulling.current || isRefreshingRef.current) return;
-      const delta = e.touches[0].clientY - startY.current;
+      const delta = event.touches[0].clientY - startY.current;
       if (delta < 0) {
         isPulling.current = false;
         return;

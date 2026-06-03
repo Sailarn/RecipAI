@@ -20,23 +20,24 @@ export function useRecipeFilter(
     if (search.trim()) {
       const query = search.toLowerCase();
       result = result.filter(
-        (r) =>
-          r.title.toLowerCase().includes(query) ||
-          r.description?.toLowerCase().includes(query),
+        (recipe) =>
+          recipe.title.toLowerCase().includes(query) ||
+          recipe.description?.toLowerCase().includes(query),
       );
     }
 
     if (category) {
-      result = result.filter((r) => r.category === category);
+      result = result.filter((recipe) => recipe.category === category);
     }
 
     if (!status.includes("all")) {
-      result = result.filter((r) =>
-        status.some((s) => {
-          if (s === "tried") return r.status === "tried";
-          if (s === "cancook") return getMissing?.(r)?.missing === 0;
-          if (s === "nearly") {
-            const match = getMissing?.(r);
+      result = result.filter((recipe) =>
+        status.some((statusKey) => {
+          if (statusKey === "tried") return recipe.status === "tried";
+          if (statusKey === "cancook")
+            return getMissing?.(recipe)?.missing === 0;
+          if (statusKey === "nearly") {
+            const match = getMissing?.(recipe);
             if (!match) return false;
             // "Half+" — have at least half the ingredients but not all
             return match.missing > 0 && match.missing * 2 <= match.total;
@@ -47,7 +48,9 @@ export function useRecipeFilter(
     }
 
     if (collectionId) {
-      result = result.filter((r) => r.collectionIds?.includes(collectionId));
+      result = result.filter((recipe) =>
+        recipe.collectionIds?.includes(collectionId),
+      );
     }
 
     result.sort((a, b) => {
