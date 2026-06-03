@@ -28,21 +28,23 @@ export function useRecipeSave(recipe: Recipe | undefined) {
 
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
 
-    const instructions = (data.instructions || []).map((inst, idx) => ({
-      id: generateId(),
-      order: idx + 1,
-      instruction: inst.instruction,
-      imageUrl: inst.imageUrl || undefined,
-    }));
+    const instructions = (data.instructions || []).map(
+      (instruction, index) => ({
+        id: generateId(),
+        order: index + 1,
+        instruction: instruction.instruction,
+        imageUrl: instruction.imageUrl || undefined,
+      }),
+    );
 
     const recipeData = {
       ...data,
       imageUrl: data.imageUrl || "",
       imageFileId: recipe?.imageFileId,
       totalTime,
-      ingredients: data.ingredients.map((ing) => ({
+      ingredients: data.ingredients.map((ingredient) => ({
         id: generateId(),
-        ...ing,
+        ...ingredient,
       })),
       instructions,
       imageFocusX: data.imageFocusX ?? undefined,
@@ -63,7 +65,7 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       }
       normalizeRecipeIngredients(
         savedId,
-        recipeData.ingredients.map((ing) => ({ item: ing.item })),
+        recipeData.ingredients.map((ingredient) => ({ item: ingredient.item })),
       ).catch(() => {});
     } catch {
       setSaveState("idle");
@@ -113,27 +115,39 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       }
 
       const updatedInstructions = [];
-      for (const inst of instructions) {
-        const idx = inst.order - 1;
-        const stepFile = pendingStepFiles.current[idx];
+      for (const instruction of instructions) {
+        const stepIndex = instruction.order - 1;
+        const stepFile = pendingStepFiles.current[stepIndex];
         if (stepFile) {
           try {
             const uploaded = await uploadImage(stepFile, uploadOptions);
             hasUpdates = true;
-            updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
+            updatedInstructions.push({
+              ...instruction,
+              imageUrl: uploaded.url,
+            });
           } catch {
-            updatedInstructions.push(inst);
+            updatedInstructions.push(instruction);
           }
-        } else if (inst.imageUrl && !isImageKitUrl(inst.imageUrl)) {
+        } else if (
+          instruction.imageUrl &&
+          !isImageKitUrl(instruction.imageUrl)
+        ) {
           try {
-            const uploaded = await uploadImage(inst.imageUrl, uploadOptions);
+            const uploaded = await uploadImage(
+              instruction.imageUrl,
+              uploadOptions,
+            );
             hasUpdates = true;
-            updatedInstructions.push({ ...inst, imageUrl: uploaded.url });
+            updatedInstructions.push({
+              ...instruction,
+              imageUrl: uploaded.url,
+            });
           } catch {
-            updatedInstructions.push(inst);
+            updatedInstructions.push(instruction);
           }
         } else {
-          updatedInstructions.push(inst);
+          updatedInstructions.push(instruction);
         }
       }
 

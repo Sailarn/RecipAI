@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { TAB_KEYS, type TabKey } from "./use-tab-navigation";
 
 interface FormHeaderProps {
@@ -10,7 +11,7 @@ interface FormHeaderProps {
   activeTabIndex: number;
   tabLabels: Record<TabKey, string>;
   onTabClick: (tab: TabKey) => void;
-  getTabStyle: (tab: TabKey) => React.CSSProperties;
+  getTabClassName: (tab: TabKey) => string;
   getTabPrefix: (tab: TabKey) => string;
 }
 
@@ -21,80 +22,41 @@ export function FormHeader({
   activeTabIndex,
   tabLabels,
   onTabClick,
-  getTabStyle,
+  getTabClassName,
   getTabPrefix,
 }: FormHeaderProps) {
   const progressPercent = ((activeTabIndex + 1) / TAB_KEYS.length) * 100;
 
   return (
-    <div
-      style={{
-        position: "relative",
-        zIndex: 2,
-        flexShrink: 0,
-        padding: "max(16px, env(safe-area-inset-top, 16px)) 16px 0",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
+    <div className="relative z-[2] shrink-0 pt-[max(16px,env(safe-area-inset-top,16px))] px-4 pb-0">
+      <div className="flex items-center justify-between mb-4">
         <button
           type="button"
           onClick={onBack}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--fg-2)",
-            fontSize: 13,
-            fontWeight: 500,
-            fontFamily: "var(--font-sans)",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            cursor: "pointer",
-            padding: 0,
-          }}
+          className="bg-transparent border-0 text-[var(--fg-2)] text-[13px] font-medium font-[family-name:var(--font-sans)] flex items-center gap-1 cursor-pointer p-0"
         >
           <ChevronLeft
             width={14}
             height={14}
             strokeWidth={2}
-            style={{ color: "var(--fg-2)" }}
+            className="text-[var(--fg-2)]"
             aria-hidden="true"
           />
           {backLabel}
         </button>
-        <div style={{ width: 60 }} />
+        <div className="w-[60px]" />
       </div>
 
-      {/* Tab Step Indicators */}
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          justifyContent: "center",
-          marginBottom: 16,
-        }}
-      >
+      <div className="flex gap-2 justify-center mb-4">
         {TAB_KEYS.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => onTabClick(tab)}
-            style={{
-              padding: "7px 16px",
-              borderRadius: 99,
-              fontSize: 12,
-              fontFamily: "var(--font-sans)",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              ...getTabStyle(tab),
-            }}
+            className={cn(
+              "py-[7px] px-4 rounded-full text-[12px] font-[family-name:var(--font-sans)] cursor-pointer transition-all duration-150 ease",
+              getTabClassName(tab),
+            )}
           >
             {getTabPrefix(tab)}
             {tabLabels[tab]}
@@ -102,23 +64,10 @@ export function FormHeader({
         ))}
       </div>
 
-      {/* Progress Bar */}
-      <div
-        style={{
-          height: 2,
-          background: "rgba(255,200,100,0.10)",
-          borderRadius: 1,
-          marginBottom: 2,
-        }}
-      >
+      <div className="h-0.5 bg-[rgba(255,200,100,0.10)] rounded-[1px] mb-0.5">
         <div
-          style={{
-            height: "100%",
-            background: "rgba(255,180,60,0.55)",
-            borderRadius: 1,
-            width: `${progressPercent}%`,
-            transition: "width 0.3s ease",
-          }}
+          className="h-full bg-[rgba(255,180,60,0.55)] rounded-[1px] transition-[width] duration-300 ease"
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
     </div>

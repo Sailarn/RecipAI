@@ -57,14 +57,14 @@ export function ImageCropPicker({
   }, []);
 
   return (
-    <div ref={wrapperRef} style={{ touchAction: "none" }}>
+    <div ref={wrapperRef} className="touch-none">
       <ReactCrop
         crop={rCrop}
-        onChange={(_, pct) => setRCrop(pct)}
-        onComplete={(_, pct) => {
-          if (pct.width >= 2 && pct.height >= 2) {
+        onChange={(_, percentCrop) => setRCrop(percentCrop)}
+        onComplete={(_, percentCrop) => {
+          if (percentCrop.width >= 2 && percentCrop.height >= 2) {
             // Normalize to full width so horizontal sides are never clipped
-            const full: PercentCrop = { ...pct, x: 0, width: 100 };
+            const full: PercentCrop = { ...percentCrop, x: 0, width: 100 };
             setRCrop(full);
             onChange(fromPercentCrop(full));
           } else {
@@ -81,7 +81,7 @@ export function ImageCropPicker({
           src={imageSrc}
           alt="Crop"
           draggable={false}
-          style={{ width: "100%", display: "block" }}
+          className="w-full block"
         />
       </ReactCrop>
     </div>

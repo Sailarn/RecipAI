@@ -54,7 +54,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     handleTabClick,
     handleNext,
     handleBack,
-    getTabStyle,
+    getTabClassName,
     getTabPrefix,
   } = useTabNavigation(trigger);
 
@@ -75,18 +75,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   };
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
+    <div className="absolute inset-0 flex flex-col overflow-hidden">
       <FormHeader
         backLabel={recipe ? t("editTitle") : t("createTitle")}
         onBack={handleFormBack}
@@ -94,28 +83,20 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         activeTabIndex={activeTabIndex}
         tabLabels={tabLabels}
         onTabClick={handleTabClick}
-        getTabStyle={getTabStyle}
+        getTabClassName={getTabClassName}
         getTabPrefix={getTabPrefix}
       />
 
       {/* Scrollable Tab Content */}
       <div
         ref={scrollRef}
-        style={{
-          position: "relative",
-          zIndex: 1,
-          flex: 1,
-          minHeight: 0,
-          overflowY: needsScroll ? "auto" : "hidden",
-          overscrollBehavior: "contain",
-          WebkitOverflowScrolling: "touch",
-          padding: "16px",
-        }}
+        className="relative z-[1] flex-1 min-h-0 overscroll-contain [-webkit-overflow-scrolling:touch] p-4"
+        style={{ overflowY: needsScroll ? "auto" : "hidden" }}
       >
         <form
           // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
           onSubmit={handleSubmit(onSubmit as any)}
-          style={{ overflow: "hidden" }}
+          className="overflow-hidden"
         >
           {activeTab === "info" && (
             <BasicInfo
@@ -141,11 +122,11 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
                     }
                   : null
               }
-              onCropChange={(c) => {
-                setValue("imageCropX", c?.x);
-                setValue("imageCropY", c?.y);
-                setValue("imageCropWidth", c?.w);
-                setValue("imageCropHeight", c?.h);
+              onCropChange={(crop) => {
+                setValue("imageCropX", crop?.x);
+                setValue("imageCropY", crop?.y);
+                setValue("imageCropWidth", crop?.w);
+                setValue("imageCropHeight", crop?.h);
               }}
             />
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { SaveState } from "./use-recipe-save";
 import { TAB_KEYS } from "./use-tab-navigation";
 
@@ -29,39 +30,21 @@ export function FormActionBar({
 
   return (
     <div
+      className="shrink-0 pt-3 px-4 bg-[rgba(8,8,8,0.85)] backdrop-blur-[24px] border-t border-t-[rgba(255,200,100,0.12)] flex items-center"
       style={{
-        flexShrink: 0,
-        padding: "12px 16px",
         paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
-        background: "rgba(8,8,8,0.85)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        borderTop: "1px solid rgba(255,200,100,0.12)",
-        display: "flex",
-        alignItems: "center",
       }}
     >
-      <div style={{ display: "flex", gap: 10, width: "100%" }}>
+      <div className="flex gap-[10px] w-full">
         {activeTabIndex > 0 && (
           <button
             type="button"
             onClick={onBack}
             disabled={saveState === "saving"}
-            style={{
-              flex: 1,
-              padding: 13,
-              borderRadius: 16,
-              border: "1px solid rgba(255,200,100,0.20)",
-              background: "rgba(255,170,50,0.08)",
-              color: "var(--fg-1)",
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: "var(--font-sans)",
-              lineHeight: 1,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              opacity: saveState === "saving" ? 0.5 : 1,
-            }}
+            className={cn(
+              "flex-1 p-[13px] rounded-[16px] border border-[rgba(255,200,100,0.20)] bg-[rgba(255,170,50,0.08)] text-[var(--fg-1)] text-[14px] font-semibold font-[family-name:var(--font-sans)] leading-none cursor-pointer transition-all duration-150 ease",
+              saveState === "saving" && "opacity-50",
+            )}
           >
             {backLabel}
           </button>
@@ -71,34 +54,17 @@ export function FormActionBar({
           <button
             type="button"
             onClick={onNext}
-            style={{
-              flex: activeTabIndex === 0 ? "0 1 auto" : 2,
-              padding: "13px 32px",
-              borderRadius: 16,
-              maxHeight: 43,
-              border: "none",
-              width: "100%",
-              background: "var(--action-primary)",
-              color: "#fff",
-              fontSize: 14,
-              fontWeight: 700,
-              fontFamily: "var(--font-sans)",
-              lineHeight: 1,
-              boxShadow: "0 4px 18px rgba(59,130,246,0.45)",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-            }}
+            className={cn(
+              "py-[13px] px-8 rounded-[16px] max-h-[43px] border-0 w-full bg-[var(--action-primary)] text-white text-[14px] font-bold font-[family-name:var(--font-sans)] leading-none shadow-[0_4px_18px_rgba(59,130,246,0.45)] cursor-pointer transition-all duration-150 ease flex items-center justify-center gap-[6px]",
+              activeTabIndex === 0 ? "flex-initial" : "flex-[2]",
+            )}
           >
             {nextLabel}
             <ChevronRight
               width={14}
               height={14}
               strokeWidth={2}
-              style={{ flexShrink: 0 }}
+              className="shrink-0"
               aria-hidden="true"
             />
           </button>
@@ -107,36 +73,14 @@ export function FormActionBar({
             type="button"
             onClick={onSave}
             disabled={saveState === "saving"}
-            style={{
-              flex: activeTabIndex === 0 ? "0 1 auto" : 2,
-              padding: "13px 32px",
-              borderRadius: 16,
-              maxHeight: 43,
-              border: "none",
-              width: "100%",
-              fontSize: 14,
-              fontWeight: 700,
-              fontFamily: "var(--font-sans)",
-              lineHeight: 1,
-              cursor: saveState === "saving" ? "not-allowed" : "pointer",
-              transition: "all 0.3s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              ...(saveState === "saved"
-                ? {
-                    background: "rgba(74,222,128,0.70)",
-                    boxShadow: "0 4px 18px rgba(74,222,128,0.45)",
-                    color: "#fff",
-                  }
-                : {
-                    background: "var(--action-primary)",
-                    boxShadow: "0 4px 18px rgba(59,130,246,0.45)",
-                    color: "#fff",
-                  }),
-              opacity: saveState === "saving" ? 0.6 : 1,
-            }}
+            className={cn(
+              "py-[13px] px-8 rounded-[16px] max-h-[43px] border-0 w-full text-white text-[14px] font-bold font-[family-name:var(--font-sans)] leading-none cursor-pointer transition-all duration-300 ease flex items-center justify-center gap-[6px]",
+              activeTabIndex === 0 ? "flex-initial" : "flex-[2]",
+              saveState === "saving" && "opacity-60 cursor-not-allowed",
+              saveState === "saved"
+                ? "bg-[rgba(74,222,128,0.70)] shadow-[0_4px_18px_rgba(74,222,128,0.45)]"
+                : "bg-[var(--action-primary)] shadow-[0_4px_18px_rgba(59,130,246,0.45)]",
+            )}
           >
             {saveState === "saved"
               ? "✓ Saved!"

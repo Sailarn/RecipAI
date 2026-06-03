@@ -33,9 +33,9 @@ export function InstructionsSection({
   const [expandedImages, setExpandedImages] = useState<Record<number, boolean>>(
     () => {
       const initial: Record<number, boolean> = {};
-      fields.forEach((field, idx) => {
+      fields.forEach((field, index) => {
         // biome-ignore lint/suspicious/noExplicitAny: useFieldArray field type doesn't expose imageUrl
-        if ((field as any).imageUrl) initial[idx] = true;
+        if ((field as any).imageUrl) initial[index] = true;
       });
       return initial;
     },
@@ -49,9 +49,9 @@ export function InstructionsSection({
 
   function handleStepFileChange(
     index: number,
-    e: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>,
   ) {
-    const file = e.target.files?.[0] ?? null;
+    const file = event.target.files?.[0] ?? null;
     if (!file) return;
     onStepFileSelect(index, file);
     setStepPreviews((prev) => ({
@@ -73,118 +73,60 @@ export function InstructionsSection({
 
   return (
     <div>
-      {/* Hint text */}
-      <p
-        style={{
-          fontSize: 12,
-          color: "var(--fg-2)",
-          lineHeight: 1.6,
-          marginBottom: 16,
-        }}
-      >
+      <p className="text-[12px] text-[var(--fg-2)] leading-[1.6] mb-4">
         {t("stepHintText")}
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="flex flex-col gap-3">
         {fields.map((field, index) => (
           <div
             key={field.id}
-            style={{
-              borderRadius: 16,
-              padding: "12px 14px",
-              background: "var(--glass-card-bg)",
-              backdropFilter: "var(--glass-card-blur)",
-              WebkitBackdropFilter: "var(--glass-card-blur)",
-              border: "1px solid var(--glass-card-border)",
-              boxShadow: "var(--glass-card-shadow)",
-            }}
+            className="rounded-[16px] p-[12px_14px] bg-[var(--glass-card-bg)] [backdrop-filter:var(--glass-card-blur)] [-webkit-backdrop-filter:var(--glass-card-blur)] border border-[var(--glass-card-border)] shadow-[var(--glass-card-shadow)]"
           >
-            {/* Step header row */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 8,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {/* Gradient number badge */}
-                <div
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 8,
-                    background:
-                      "linear-gradient(135deg, var(--action-primary), var(--ai-accent))",
-                    color: "#fff",
-                    font: "11px / 700 var(--font-sans)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-[22px] h-[22px] rounded-[8px] bg-[linear-gradient(135deg,var(--action-primary),var(--ai-accent))] text-white text-[11px] font-bold font-[family-name:var(--font-sans)] flex items-center justify-center">
                   {index + 1}
                 </div>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "var(--fg-2)",
-                  }}
-                >
+                <span className="text-[12px] font-semibold text-[var(--fg-2)]">
                   Step {index + 1}
                 </span>
               </div>
 
-              {/* Remove button */}
               {fields.length > 1 && (
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 8,
-                    background: "rgba(239,68,68,0.10)",
-                    border: "1px solid rgba(239,68,68,0.20)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                  }}
+                  className="w-7 h-7 rounded-[8px] bg-[rgba(239,68,68,0.10)] border border-[rgba(239,68,68,0.20)] flex items-center justify-center cursor-pointer shrink-0"
                 >
-                  <X size={12} style={{ color: "var(--action-destructive)" }} />
+                  <X size={12} className="text-[var(--action-destructive)]" />
                 </button>
               )}
             </div>
 
-            {/* Textarea */}
             <Textarea
               {...register(`instructions.${index}.instruction`)}
               rows={3}
               placeholder={t("instructionPlaceholder")}
               error={!!errors.instructions?.[index]?.instruction}
-              style={{ marginBottom: 8 }}
+              className="mb-2"
             />
 
-            {/* Image section */}
             {expandedImages[index] && (
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <div style={{ flex: 1 }}>
+              <div className="mb-2">
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1">
                     <Input
                       {...register(`instructions.${index}.imageUrl`)}
                       placeholder="Image URL or paste"
                       type="url"
-                      onPaste={(e) => {
-                        const item = Array.from(
-                          e.clipboardData?.items ?? [],
-                        ).find((i) => i.type.startsWith("image/"));
-                        if (!item) return;
-                        e.preventDefault();
-                        const file = item.getAsFile();
+                      onPaste={(event) => {
+                        const clipboardItem = Array.from(
+                          event.clipboardData?.items ?? [],
+                        ).find((item) => item.type.startsWith("image/"));
+                        if (!clipboardItem) return;
+                        event.preventDefault();
+                        const file = clipboardItem.getAsFile();
                         if (!file) return;
                         onStepFileSelect(index, file);
                         setStepPreviews((prev) => ({
@@ -197,21 +139,10 @@ export function InstructionsSection({
                   <button
                     type="button"
                     onClick={() => fileInputRefs.current[index]?.click()}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: "rgba(255,170,50,0.09)",
-                      border: "1px solid rgba(255,200,100,0.18)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      flexShrink: 0,
-                    }}
+                    className="w-8 h-8 rounded-[8px] bg-[rgba(255,170,50,0.09)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center cursor-pointer shrink-0"
                     title="Upload from device"
                   >
-                    <ImagePlus size={14} style={{ color: "var(--fg-2)" }} />
+                    <ImagePlus size={14} className="text-[var(--fg-2)]" />
                   </button>
                   <input
                     ref={(el) => {
@@ -220,47 +151,21 @@ export function InstructionsSection({
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => handleStepFileChange(index, e)}
+                    onChange={(event) => handleStepFileChange(index, event)}
                   />
                 </div>
                 {stepPreviews[index] && (
-                  <div
-                    style={{
-                      position: "relative",
-                      marginTop: 8,
-                      height: 80,
-                      width: 128,
-                      borderRadius: 8,
-                      overflow: "hidden",
-                      border: "1px solid rgba(255,200,100,0.18)",
-                    }}
-                  >
+                  <div className="relative mt-2 h-20 w-32 rounded-[8px] overflow-hidden border border-[rgba(255,200,100,0.18)]">
                     {/* biome-ignore lint/performance/noImgElement: preview uses blob URL */}
                     <img
                       src={stepPreviews[index]}
                       alt={`Step ${index + 1}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      className="w-full h-full object-cover"
                     />
                     <button
                       type="button"
                       onClick={() => handleClearStepFile(index)}
-                      style={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        background: "rgba(0,0,0,0.6)",
-                        borderRadius: "50%",
-                        padding: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
+                      className="absolute top-1 right-1 bg-[rgba(0,0,0,0.6)] rounded-full p-0.5 flex items-center justify-center border-0 cursor-pointer"
                     >
                       <X size={10} color="white" />
                     </button>
@@ -268,47 +173,22 @@ export function InstructionsSection({
                 )}
                 {!stepPreviews[index] &&
                   (field as { imageUrl?: string }).imageUrl && (
-                    <div
-                      style={{
-                        position: "relative",
-                        marginTop: 8,
-                        height: 80,
-                        width: 128,
-                        borderRadius: 8,
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="relative mt-2 h-20 w-32 rounded-[8px] overflow-hidden">
                       {/* biome-ignore lint/performance/noImgElement: existing image URL */}
                       <img
                         src={(field as { imageUrl?: string }).imageUrl}
                         alt={`Step ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   )}
               </div>
             )}
 
-            {/* Add image ghost link */}
             <button
               type="button"
               onClick={() => toggleImage(index)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 12,
-                color: "var(--fg-3)",
-                padding: 0,
-                fontFamily: "var(--font-sans)",
-              }}
+              className="bg-transparent border-0 cursor-pointer flex items-center gap-[5px] text-[12px] text-[var(--fg-3)] p-0 font-[family-name:var(--font-sans)]"
             >
               <ImageIcon size={12} />
               {expandedImages[index] ? t("removeImage") : t("addImage")}
@@ -318,41 +198,17 @@ export function InstructionsSection({
       </div>
 
       {errors.instructions && (
-        <p
-          style={{
-            fontSize: 11,
-            color: "rgba(239,68,68,0.85)",
-            marginTop: 4,
-            paddingLeft: 2,
-          }}
-        >
+        <p className="text-[11px] text-[rgba(239,68,68,0.85)] mt-1 pl-[2px]">
           {errors.instructions.message}
         </p>
       )}
 
-      {/* Add step dashed button */}
       <button
         type="button"
         onClick={() => append({ instruction: "", imageUrl: "" })}
-        style={{
-          marginTop: 12,
-          padding: 10,
-          borderRadius: 14,
-          maxHeight: 37.5,
-          border: "1px dashed rgba(255,200,100,0.25)",
-          background: "rgba(255,170,50,0.05)",
-          font: "13px / 500 var(--font-sans)",
-          color: "var(--fg-2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          cursor: "pointer",
-          width: "100%",
-          transition: "all 0.15s ease",
-        }}
+        className="mt-3 p-[10px] rounded-[14px] max-h-[37.5px] border border-dashed border-[rgba(255,200,100,0.25)] bg-[rgba(255,170,50,0.05)] text-[13px] font-medium font-[family-name:var(--font-sans)] text-[var(--fg-2)] flex items-center justify-center gap-[6px] cursor-pointer w-full transition-all duration-150 ease"
       >
-        <Plus size={14} style={{ color: "var(--fg-2)" }} />
+        <Plus size={14} className="text-[var(--fg-2)]" />
         {t("addStep")}
       </button>
     </div>

@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { Input, Textarea } from "@/components/ui";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
+import { cn } from "@/lib/utils";
 import { FocalPointPicker } from "./focal-point-picker";
 import type { CropRect } from "./image-crop-picker";
 import { PhotoAdjustModal } from "./photo-adjust-modal";
@@ -28,17 +29,10 @@ interface BasicInfoProps {
   onCropChange: (crop: CropRect | null) => void;
 }
 
-const LABEL_STYLE: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 600,
-  color: "var(--fg-2)",
-  marginBottom: 5,
-};
-
-const REQUIRED_STAR: React.CSSProperties = {
-  color: "rgba(239,68,68,0.8)",
-};
+const labelClass =
+  "block text-[12px] font-semibold text-[var(--fg-2)] mb-[5px]";
+const requiredStarClass = "text-[rgba(239,68,68,0.8)]";
+const errorClass = "text-[11px] text-[rgba(239,68,68,0.85)] mt-1 pl-[2px]";
 
 export function BasicInfo({
   register,
@@ -61,12 +55,12 @@ export function BasicInfo({
   const currentImageUrl = useWatch({ control, name: "imageUrl" });
 
   useEffect(() => {
-    function handlePaste(e: ClipboardEvent) {
-      const item = Array.from(e.clipboardData?.items ?? []).find((i) =>
-        i.type.startsWith("image/"),
+    function handlePaste(event: ClipboardEvent) {
+      const clipboardItem = Array.from(event.clipboardData?.items ?? []).find(
+        (item) => item.type.startsWith("image/"),
       );
-      if (!item) return;
-      const file = item.getAsFile();
+      if (!clipboardItem) return;
+      const file = clipboardItem.getAsFile();
       if (!file) return;
       onFileSelectRef.current(file);
       setPreview(URL.createObjectURL(file));
@@ -75,8 +69,8 @@ export function BasicInfo({
     return () => document.removeEventListener("paste", handlePaste);
   }, []);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
     if (!file) return;
     onFileSelect(file);
     setPreview(URL.createObjectURL(file));
@@ -92,39 +86,25 @@ export function BasicInfo({
 
   return (
     <div className="space-y-4">
-      {/* Title */}
       <div>
-        <label htmlFor="title" style={LABEL_STYLE}>
+        <label htmlFor="title" className={labelClass}>
           {t("title")}
-          <span style={REQUIRED_STAR}> *</span>
+          <span className={requiredStarClass}> *</span>
         </label>
         <Input id="title" {...register("title")} error={!!errors.title} />
-        {errors.title && (
-          <p
-            style={{
-              fontSize: 11,
-              color: "rgba(239,68,68,0.85)",
-              marginTop: 4,
-              paddingLeft: 2,
-            }}
-          >
-            {errors.title.message}
-          </p>
-        )}
+        {errors.title && <p className={errorClass}>{errors.title.message}</p>}
       </div>
 
-      {/* Description */}
       <div>
-        <label htmlFor="description" style={LABEL_STYLE}>
+        <label htmlFor="description" className={labelClass}>
           {t("description")}
         </label>
         <Textarea id="description" {...register("description")} rows={3} />
       </div>
 
-      {/* Category Picker */}
       <div>
-        <div style={LABEL_STYLE}>{t("category")}</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+        <div className={labelClass}>{t("category")}</div>
+        <div className="flex flex-wrap gap-[7px]">
           {RECIPE_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat;
             return (
@@ -138,34 +118,18 @@ export function BasicInfo({
                   ) as HTMLInputElement;
                   if (input) input.value = isActive ? "" : cat;
                 }}
-                style={{
-                  padding: "6px 13px",
-                  borderRadius: 99,
-                  font: "12px / var(--font-sans)",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  ...(isActive
-                    ? {
-                        background: "rgba(255,180,60,0.20)",
-                        border: "1px solid rgba(255,210,120,0.45)",
-                        color: "var(--fg-1)",
-                        fontWeight: 600,
-                        boxShadow: "0 0 10px rgba(255,180,60,0.18)",
-                      }
-                    : {
-                        background: "rgba(255,170,50,0.07)",
-                        border: "1px solid rgba(255,200,100,0.14)",
-                        color: "var(--fg-2)",
-                        fontWeight: 500,
-                      }),
-                }}
+                className={cn(
+                  "py-[6px] px-[13px] rounded-full text-[12px] font-[family-name:var(--font-sans)] cursor-pointer transition-all duration-150 ease",
+                  isActive
+                    ? "bg-[rgba(255,180,60,0.20)] border border-[rgba(255,210,120,0.45)] text-[var(--fg-1)] font-semibold shadow-[0_0_10px_rgba(255,180,60,0.18)]"
+                    : "bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.14)] text-[var(--fg-2)] font-medium",
+                )}
               >
                 {cat}
               </button>
             );
           })}
         </div>
-        {/* Hidden input to store category value for react-hook-form */}
         <input
           id="category-input"
           type="hidden"
@@ -174,13 +138,12 @@ export function BasicInfo({
         />
       </div>
 
-      {/* Image URL Row */}
       <div>
-        <label htmlFor="imageUrl" style={LABEL_STYLE}>
+        <label htmlFor="imageUrl" className={labelClass}>
           {t("imageUrl")}
         </label>
-        <div style={{ display: "flex", gap: 8 }}>
-          <div style={{ flex: 1 }}>
+        <div className="flex gap-2">
+          <div className="flex-1">
             <Input
               id="imageUrl"
               {...register("imageUrl")}
@@ -191,21 +154,10 @@ export function BasicInfo({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              background: "rgba(255,170,50,0.09)",
-              border: "1px solid rgba(255,200,100,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
+            className="w-[42px] h-[42px] rounded-[12px] bg-[rgba(255,170,50,0.09)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center cursor-pointer shrink-0"
             title="Upload from device"
           >
-            <ImageIcon size={16} style={{ color: "var(--fg-2)" }} />
+            <ImageIcon size={16} className="text-[var(--fg-2)]" />
           </button>
           <input
             ref={fileInputRef}
@@ -216,56 +168,27 @@ export function BasicInfo({
           />
         </div>
         {errors.imageUrl && (
-          <p
-            style={{
-              fontSize: 11,
-              color: "rgba(239,68,68,0.85)",
-              marginTop: 4,
-              paddingLeft: 2,
-            }}
-          >
-            {errors.imageUrl.message}
-          </p>
+          <p className={errorClass}>{errors.imageUrl.message}</p>
         )}
-        <p style={{ fontSize: 11, color: "var(--fg-2)", marginTop: 4 }}>
+        <p className="text-[11px] text-[var(--fg-2)] mt-1">
           or ⌘V / Ctrl+V to paste
         </p>
         {pickerSrc && (
-          <div style={{ position: "relative", marginTop: 8 }}>
+          <div className="relative mt-2">
             <FocalPointPicker
               imageSrc={pickerSrc}
               focusX={focusX}
               focusY={focusY}
               onChange={onFocusChange}
             />
-            <p
-              style={{
-                fontSize: 11,
-                color: "var(--fg-2)",
-                marginTop: 4,
-                textAlign: "center",
-              }}
-            >
+            <p className="text-[11px] text-[var(--fg-2)] mt-1 text-center">
               Drag to set focus point
             </p>
             {preview && (
               <button
                 type="button"
                 onClick={handleClearFile}
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  background: "rgba(0,0,0,0.6)",
-                  borderRadius: "50%",
-                  padding: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "none",
-                  cursor: "pointer",
-                  zIndex: 10,
-                }}
+                className="absolute top-2 right-2 bg-[rgba(0,0,0,0.6)] rounded-full p-1 flex items-center justify-center border-0 cursor-pointer z-[10]"
               >
                 <X size={12} color="white" />
               </button>
@@ -273,22 +196,7 @@ export function BasicInfo({
             <button
               type="button"
               onClick={() => setShowAdjustModal(true)}
-              style={{
-                marginTop: 8,
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                padding: "8px 0",
-                borderRadius: 10,
-                background: "rgba(255,170,50,0.07)",
-                border: "1px solid rgba(255,200,100,0.16)",
-                color: "var(--fg-2)",
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
+              className="mt-2 w-full flex items-center justify-center gap-[6px] py-2 rounded-[10px] bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.16)] text-[var(--fg-2)] text-[12px] font-medium cursor-pointer"
             >
               <ScanSearch size={13} />
               Preview in app
@@ -308,72 +216,59 @@ export function BasicInfo({
         )}
       </div>
 
-      {/* Number Grid: Prep / Cook / Servings */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 10,
-        }}
-      >
+      <div className="grid grid-cols-3 gap-[10px]">
         <div>
-          <label htmlFor="prepTime" style={{ ...LABEL_STYLE, fontSize: 11 }}>
+          <label htmlFor="prepTime" className={`${labelClass} text-[11px]`}>
             {t("prepTime")}
           </label>
           <Input
             id="prepTime"
             {...register("prepTime", {
-              setValueAs: (v) => {
-                if (v === "" || v === null || v === undefined) return undefined;
-                const n = Number(v);
-                return Number.isNaN(n) ? undefined : n;
+              setValueAs: (value) => {
+                if (value === "" || value === null || value === undefined)
+                  return undefined;
+                const number = Number(value);
+                return Number.isNaN(number) ? undefined : number;
               },
             })}
             type="number"
             step="0.01"
-            style={{ textAlign: "center" }}
+            className="text-center"
           />
         </div>
         <div>
-          <label htmlFor="cookTime" style={{ ...LABEL_STYLE, fontSize: 11 }}>
+          <label htmlFor="cookTime" className={`${labelClass} text-[11px]`}>
             {t("cookTime")}
           </label>
           <Input
             id="cookTime"
             {...register("cookTime", {
-              setValueAs: (v) => {
-                if (v === "" || v === null || v === undefined) return undefined;
-                const n = Number(v);
-                return Number.isNaN(n) ? undefined : n;
+              setValueAs: (value) => {
+                if (value === "" || value === null || value === undefined)
+                  return undefined;
+                const number = Number(value);
+                return Number.isNaN(number) ? undefined : number;
               },
             })}
             type="number"
             step="0.01"
-            style={{ textAlign: "center" }}
+            className="text-center"
           />
         </div>
         <div>
-          <label htmlFor="servings" style={{ ...LABEL_STYLE, fontSize: 11 }}>
+          <label htmlFor="servings" className={`${labelClass} text-[11px]`}>
             {t("servings")}
-            <span style={REQUIRED_STAR}> *</span>
+            <span className={requiredStarClass}> *</span>
           </label>
           <Input
             id="servings"
             {...register("servings")}
             type="number"
             error={!!errors.servings}
-            style={{ textAlign: "center" }}
+            className="text-center"
           />
           {errors.servings && (
-            <p
-              style={{
-                fontSize: 11,
-                color: "rgba(239,68,68,0.85)",
-                marginTop: 4,
-              }}
-            >
-              {errors.servings.message}
-            </p>
+            <p className={errorClass}>{errors.servings.message}</p>
           )}
         </div>
       </div>

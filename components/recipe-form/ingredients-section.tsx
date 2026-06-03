@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
 import { Input } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import type { RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {
@@ -19,21 +20,10 @@ interface IngredientsSectionProps {
   errors: FieldErrors<RecipeFormData>;
 }
 
-const QTY_W = 56;
-const UNIT_W = 68;
-const REMOVE_W = 32;
-const COL_GAP = 6;
-const ERROR_H = 16;
-
-const colLabel: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 600,
-  fontFamily: "var(--font-sans)",
-  color: "var(--fg-3)",
-  textTransform: "uppercase",
-  letterSpacing: "0.06em",
-  paddingLeft: 3,
-};
+const colLabelClass =
+  "text-[10px] font-semibold font-[family-name:var(--font-sans)] text-[var(--fg-3)] uppercase tracking-[0.06em] pl-[3px]";
+const errorRowClass =
+  "text-[10px] text-[rgba(239,68,68,0.85)] mt-[3px] pl-[2px] min-h-4 leading-[1.3]";
 
 export function IngredientsSection({
   register,
@@ -48,71 +38,33 @@ export function IngredientsSection({
 
   return (
     <div>
-      {/* Header: hint + count badge */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: 4,
-        }}
-      >
-        <p style={{ fontSize: 12, color: "var(--fg-2)", lineHeight: 1.6 }}>
+      <div className="flex justify-between items-baseline mb-1">
+        <p className="text-[12px] text-[var(--fg-2)] leading-[1.6]">
           {t("hintText")}
         </p>
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            fontFamily: "var(--font-sans)",
-            color: "rgba(255,180,60,0.9)",
-            background: "rgba(255,180,60,0.12)",
-            border: "1px solid rgba(255,200,100,0.22)",
-            borderRadius: 99,
-            padding: "2px 8px",
-            flexShrink: 0,
-            marginLeft: 8,
-          }}
-        >
+        <span className="text-[11px] font-semibold font-[family-name:var(--font-sans)] text-[rgba(255,180,60,0.9)] bg-[rgba(255,180,60,0.12)] border border-[rgba(255,200,100,0.22)] rounded-full py-[2px] px-2 shrink-0 ml-2">
           {fields.length}
         </span>
       </div>
-      <p
-        style={{
-          fontSize: 12,
-          color: "var(--fg-3)",
-          lineHeight: 1.6,
-          marginBottom: 10,
-        }}
-      >
+      <p className="text-[12px] text-[var(--fg-3)] leading-[1.6] mb-[10px]">
         {t("hintExample")}
       </p>
 
-      {/* Column labels — always visible, aligned to inputs below */}
-      <div style={{ display: "flex", gap: COL_GAP, marginBottom: 4 }}>
-        <div style={{ ...colLabel, width: QTY_W, flexShrink: 0 }}>Qty</div>
-        <div style={{ ...colLabel, width: UNIT_W, flexShrink: 0 }}>Unit</div>
-        <div style={{ ...colLabel, flex: 1, minWidth: 0 }}>Ingredient</div>
-        {/* spacer matches remove button — keeps labels aligned even when button hides */}
-        <div style={{ width: REMOVE_W, flexShrink: 0 }} />
+      <div className="flex gap-[6px] mb-1">
+        <div className={cn(colLabelClass, "w-[56px] shrink-0")}>Qty</div>
+        <div className={cn(colLabelClass, "w-[68px] shrink-0")}>Unit</div>
+        <div className={cn(colLabelClass, "flex-1 min-w-0")}>Ingredient</div>
+        <div className="w-8 shrink-0" />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <div className="flex flex-col gap-0.5">
         {fields.map((field, index) => {
           const amountErr = errors.ingredients?.[index]?.amount;
           const itemErr = errors.ingredients?.[index]?.item;
 
           return (
-            <div
-              key={field.id}
-              style={{
-                display: "flex",
-                gap: COL_GAP,
-                alignItems: "flex-start",
-              }}
-            >
-              {/* Amount — no placeholder: column header provides context */}
-              <div style={{ width: QTY_W, flexShrink: 0 }}>
+            <div key={field.id} className="flex gap-[6px] items-start">
+              <div className="w-[56px] shrink-0">
                 <Input
                   {...register(`ingredients.${index}.amount`)}
                   type="text"
@@ -121,32 +73,24 @@ export function IngredientsSection({
                   error={!!amountErr}
                 />
                 <p
-                  style={{
-                    fontSize: 10,
-                    color: "rgba(239,68,68,0.85)",
-                    marginTop: 3,
-                    paddingLeft: 2,
-                    minHeight: ERROR_H,
-                    lineHeight: 1.3,
-                    visibility: amountErr ? "visible" : "hidden",
-                  }}
+                  className={cn(
+                    errorRowClass,
+                    amountErr ? "visible" : "invisible",
+                  )}
                 >
                   {amountErr?.message ?? " "}
                 </p>
               </div>
 
-              {/* Unit */}
-              <div style={{ width: UNIT_W, flexShrink: 0 }}>
+              <div className="w-[68px] shrink-0">
                 <Input
                   {...register(`ingredients.${index}.unit`)}
                   placeholder={t("unit")}
                 />
-                {/* spacer keeps this column height in sync with error rows */}
-                <div style={{ minHeight: ERROR_H, marginTop: 3 }} />
+                <div className="min-h-4 mt-[3px]" />
               </div>
 
-              {/* Ingredient name */}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="flex-1 min-w-0">
                 <Controller
                   control={control}
                   name={`ingredients.${index}.item`}
@@ -160,40 +104,24 @@ export function IngredientsSection({
                   )}
                 />
                 <p
-                  style={{
-                    fontSize: 10,
-                    color: "rgba(239,68,68,0.85)",
-                    marginTop: 3,
-                    paddingLeft: 2,
-                    minHeight: ERROR_H,
-                    lineHeight: 1.3,
-                    visibility: itemErr ? "visible" : "hidden",
-                  }}
+                  className={cn(
+                    errorRowClass,
+                    itemErr ? "visible" : "invisible",
+                  )}
                 >
                   {itemErr?.message ?? " "}
                 </p>
               </div>
 
-              {/* Remove — always takes space, invisible when only 1 row */}
               <button
                 type="button"
                 onClick={() => remove(index)}
-                style={{
-                  width: REMOVE_W,
-                  height: 36,
-                  borderRadius: 10,
-                  flexShrink: 0,
-                  background: "rgba(239,68,68,0.10)",
-                  border: "1px solid rgba(239,68,68,0.20)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  visibility: fields.length > 1 ? "visible" : "hidden",
-                }}
+                className={cn(
+                  "w-8 h-9 rounded-[10px] shrink-0 bg-[rgba(239,68,68,0.10)] border border-[rgba(239,68,68,0.20)] flex items-center justify-center cursor-pointer transition-all duration-150 ease",
+                  fields.length > 1 ? "visible" : "invisible",
+                )}
               >
-                <X size={13} style={{ color: "var(--action-destructive)" }} />
+                <X size={13} className="text-[var(--action-destructive)]" />
               </button>
             </div>
           );
@@ -201,41 +129,17 @@ export function IngredientsSection({
       </div>
 
       {errors.ingredients?.message && (
-        <p
-          style={{
-            fontSize: 11,
-            color: "rgba(239,68,68,0.85)",
-            marginTop: 4,
-            paddingLeft: 2,
-          }}
-        >
+        <p className="text-[11px] text-[rgba(239,68,68,0.85)] mt-1 pl-[2px]">
           {errors.ingredients.message}
         </p>
       )}
 
-      {/* Add ingredient */}
       <button
         type="button"
         onClick={() => append({ item: "", amount: "", unit: "" })}
-        style={{
-          marginTop: 6,
-          padding: 10,
-          borderRadius: 14,
-          maxHeight: 37.5,
-          border: "1px dashed rgba(255,200,100,0.25)",
-          background: "rgba(255,170,50,0.05)",
-          font: "13px / 500 var(--font-sans)",
-          color: "var(--fg-2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          cursor: "pointer",
-          width: "100%",
-          transition: "all 0.15s ease",
-        }}
+        className="mt-[6px] p-[10px] rounded-[14px] max-h-[37.5px] border border-dashed border-[rgba(255,200,100,0.25)] bg-[rgba(255,170,50,0.05)] text-[13px] font-medium font-[family-name:var(--font-sans)] text-[var(--fg-2)] flex items-center justify-center gap-[6px] cursor-pointer w-full transition-all duration-150 ease"
       >
-        <Plus size={14} style={{ color: "var(--fg-2)" }} />
+        <Plus size={14} className="text-[var(--fg-2)]" />
         {t("addIngredient")}
       </button>
     </div>

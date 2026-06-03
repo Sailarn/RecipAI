@@ -56,18 +56,8 @@ function previewImgStyle(
   };
 }
 
-const iconBtnStyle: CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: "50%",
-  background: "rgba(255,255,255,0.10)",
-  border: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  flexShrink: 0,
-};
+const iconBtnClass =
+  "w-8 h-8 rounded-full bg-[rgba(255,255,255,0.10)] border-0 flex items-center justify-center cursor-pointer shrink-0";
 
 export function PhotoAdjustModal({
   imageSrc,
@@ -92,68 +82,30 @@ export function PhotoAdjustModal({
     onChange(x, y);
   }
 
-  function handleCropChange(c: CropRect | null) {
-    setCrop(c);
-    onCropChange(c);
+  function handleCropChange(updatedCrop: CropRect | null) {
+    setCrop(updatedCrop);
+    onCropChange(updatedCrop);
   }
 
   return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 500,
-        background: "rgba(6,4,2,0.97)",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "56px 16px 12px",
-          flexShrink: 0,
-        }}
-      >
+    <div className="fixed inset-0 z-[500] bg-[rgba(6,4,2,0.97)] flex flex-col overflow-y-auto">
+      <div className="relative flex items-center justify-between pt-[56px] px-4 pb-3 shrink-0">
         {step === "focus" ? (
           <button
             type="button"
             onClick={() => setStep("crop")}
             aria-label="Back to crop"
-            style={iconBtnStyle}
+            className={iconBtnClass}
           >
             <ChevronLeft size={18} color="rgba(255,255,255,0.75)" />
           </button>
         ) : (
-          <p
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "var(--fg-1)",
-              fontFamily: "var(--font-display)",
-            }}
-          >
+          <p className="text-[16px] font-bold text-[var(--fg-1)] font-[family-name:var(--font-display)]">
             Crop photo
           </p>
         )}
         {step === "focus" && (
-          <p
-            style={{
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
-              fontSize: 16,
-              fontWeight: 700,
-              color: "var(--fg-1)",
-              fontFamily: "var(--font-display)",
-              pointerEvents: "none",
-            }}
-          >
+          <p className="absolute left-1/2 -translate-x-1/2 text-[16px] font-bold text-[var(--fg-1)] font-[family-name:var(--font-display)] pointer-events-none">
             Adjust focus
           </p>
         )}
@@ -161,7 +113,7 @@ export function PhotoAdjustModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          style={iconBtnStyle}
+          className={iconBtnClass}
         >
           <X size={15} color="rgba(255,255,255,0.75)" />
         </button>
@@ -169,38 +121,16 @@ export function PhotoAdjustModal({
 
       {step === "crop" && (
         <>
-          {/* Crop picker */}
-          <div
-            style={{
-              padding: "0 16px",
-              flexShrink: 0,
-              touchAction: "none",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <p style={{ fontSize: 11, color: "var(--fg-2)" }}>
+          <div className="px-4 pb-0 shrink-0 touch-none">
+            <div className="flex items-center justify-between mb-[6px]">
+              <p className="text-[11px] text-[var(--fg-2)]">
                 Drag to crop (optional)
               </p>
               {hasCrop && (
                 <button
                   type="button"
                   onClick={() => handleCropChange(null)}
-                  style={{
-                    fontSize: 11,
-                    color: "var(--fg-2)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    textDecoration: "underline",
-                  }}
+                  className="text-[11px] text-[var(--fg-2)] bg-transparent border-0 cursor-pointer p-0 underline"
                 >
                   Clear
                 </button>
@@ -213,28 +143,11 @@ export function PhotoAdjustModal({
             />
           </div>
 
-          {/* Next */}
-          <div
-            style={{
-              padding: "20px 16px 48px",
-              flexShrink: 0,
-              marginTop: "auto",
-            }}
-          >
+          <div className="px-4 pt-5 pb-12 shrink-0 mt-auto">
             <button
               type="button"
               onClick={() => setStep("focus")}
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 14,
-                background: "rgba(255,180,60,0.16)",
-                border: "1px solid rgba(255,200,100,0.28)",
-                color: "var(--fg-1)",
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+              className="w-full py-[14px] rounded-[14px] bg-[rgba(255,180,60,0.16)] border border-[rgba(255,200,100,0.28)] text-[var(--fg-1)] text-[15px] font-semibold cursor-pointer"
             >
               {hasCrop ? "Next →" : "Skip →"}
             </button>
@@ -244,9 +157,8 @@ export function PhotoAdjustModal({
 
       {step === "focus" && (
         <>
-          {/* Focal point picker */}
-          <div style={{ padding: "0 16px", flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: "var(--fg-2)", marginBottom: 6 }}>
+          <div className="px-4 pb-0 shrink-0">
+            <p className="text-[11px] text-[var(--fg-2)] mb-[6px]">
               Drag the dot to set focus point
             </p>
             <FocalPointPicker
@@ -261,42 +173,19 @@ export function PhotoAdjustModal({
             />
           </div>
 
-          {/* Previews */}
-          <div style={{ padding: "20px 16px 0" }}>
-            <p
-              style={{
-                fontSize: 11,
-                color: "var(--fg-2)",
-                marginBottom: 12,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                fontWeight: 600,
-              }}
-            >
+          <div className="px-4 pt-5 pb-0">
+            <p className="text-[11px] text-[var(--fg-2)] mb-3 uppercase tracking-[0.06em] font-semibold">
               How it looks in the app
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="flex flex-col gap-[10px]">
               {PREVIEWS.map(({ label, aspectRatio }) => (
                 <div key={label}>
-                  <p
-                    style={{
-                      fontSize: 11,
-                      color: "var(--fg-2)",
-                      marginBottom: 4,
-                      fontWeight: 600,
-                    }}
-                  >
+                  <p className="text-[11px] text-[var(--fg-2)] mb-1 font-semibold">
                     {label}
                   </p>
                   <div
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      aspectRatio,
-                      borderRadius: 10,
-                      overflow: "hidden",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                    }}
+                    className="relative w-full rounded-[10px] overflow-hidden border border-[rgba(255,255,255,0.07)]"
+                    style={{ aspectRatio }}
                   >
                     {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
                     <img
@@ -310,28 +199,11 @@ export function PhotoAdjustModal({
             </div>
           </div>
 
-          {/* Done */}
-          <div
-            style={{
-              padding: "20px 16px 48px",
-              flexShrink: 0,
-              marginTop: "auto",
-            }}
-          >
+          <div className="px-4 pt-5 pb-12 shrink-0 mt-auto">
             <button
               type="button"
               onClick={onClose}
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 14,
-                background: "rgba(255,180,60,0.16)",
-                border: "1px solid rgba(255,200,100,0.28)",
-                color: "var(--fg-1)",
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+              className="w-full py-[14px] rounded-[14px] bg-[rgba(255,180,60,0.16)] border border-[rgba(255,200,100,0.28)] text-[var(--fg-1)] text-[15px] font-semibold cursor-pointer"
             >
               Done
             </button>
