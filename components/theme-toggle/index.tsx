@@ -28,13 +28,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 0,
-        flexShrink: 0,
-        cursor: "pointer",
-      }}
+      className="bg-transparent border-0 p-0 shrink-0 cursor-pointer"
     >
       <TogglePill checked={isDark} />
     </button>
