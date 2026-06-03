@@ -22,13 +22,13 @@ export const recipesPageCache: {
  */
 export function prefetchRecipesPage(): void {
   getAllRecipes()
-    .then((r) => {
-      recipesPageCache.recipes = r;
+    .then((recipes) => {
+      recipesPageCache.recipes = recipes;
     })
     .catch(() => {});
   getAllCollections()
-    .then((c) => {
-      recipesPageCache.collections = c;
+    .then((collections) => {
+      recipesPageCache.collections = collections;
     })
     .catch(() => {});
 }

@@ -16,7 +16,7 @@ export type StackEntry = {
   element: React.ReactNode;
 };
 
-type NavigationStackCtx = {
+type NavigationStackContextValue = {
   entries: StackEntry[];
   push: (href: string, element: React.ReactNode) => void;
   pop: () => void;
@@ -24,7 +24,8 @@ type NavigationStackCtx = {
   canPop: boolean;
 };
 
-const Ctx = createContext<NavigationStackCtx | null>(null);
+const NavigationStackContext =
+  createContext<NavigationStackContextValue | null>(null);
 
 // Module-level flag set synchronously before a native-back pop so PageStack
 // can skip the slide-out animation (iOS/Chrome already animated it).
@@ -167,17 +168,17 @@ export function NavigationStackProvider({
   );
 
   return (
-    <Ctx.Provider
+    <NavigationStackContext.Provider
       value={{ entries, push, pop, reset, canPop: entries.length > 1 }}
     >
       {children}
-    </Ctx.Provider>
+    </NavigationStackContext.Provider>
   );
 }
 
 export function useNavigationStack() {
-  const ctx = useContext(Ctx);
-  if (!ctx)
+  const context = useContext(NavigationStackContext);
+  if (!context)
     throw new Error("useNavigationStack outside NavigationStackProvider");
-  return ctx;
+  return context;
 }
