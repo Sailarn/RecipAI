@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { friendlyParseError } from "../use-url-parse";
+import { friendlyParseError } from "../friendly-parse-error";
 
 describe("friendlyParseError", () => {
   it("maps 503 / Service Unavailable / high demand to a high-demand message", () => {
@@ -14,6 +14,26 @@ describe("friendlyParseError", () => {
     const expected = "API quota exceeded. Please try again later.";
     expect(friendlyParseError("HTTP 429")).toBe(expected);
     expect(friendlyParseError("quota reached")).toBe(expected);
+  });
+
+  it("maps restricted / private to a privacy message", () => {
+    const expected =
+      "This account is private or the content is restricted — only public posts can be parsed.";
+    expect(friendlyParseError("account is private")).toBe(expected);
+    expect(friendlyParseError("restricted_page")).toBe(expected);
+  });
+
+  it("maps an unsupported platform to an Instagram-only message", () => {
+    expect(friendlyParseError("Unsupported video platform")).toBe(
+      "Only Instagram Reels are supported. Try an Instagram link.",
+    );
+  });
+
+  it("maps missing speech/caption to a no-recipe message", () => {
+    const expected =
+      "No recipe found — the video has no speech or caption to extract from.";
+    expect(friendlyParseError("No speech detected")).toBe(expected);
+    expect(friendlyParseError("no caption available")).toBe(expected);
   });
 
   it("maps extraction failures to a scraper-blocked message", () => {

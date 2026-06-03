@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
+import { recordParseHistory } from "@/lib/db/parse-history";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
 import {
@@ -11,6 +12,10 @@ import {
   removeJobId,
   storePendingUploadToken,
 } from "@/lib/parse-job-storage";
+import {
+  doneParseHistoryEntry,
+  failedParseHistoryEntry,
+} from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
@@ -90,13 +95,25 @@ export function useParseJobWatcher() {
       const run = async () => {
         try {
           const res = await fetch(api.parseQueueJob(id));
-          const { status, result, error } = await res.json();
+          const { status, result, error, url: jobUrl } = await res.json();
 
           if (status === "done") {
-            await handleDone(id, result as ParsedRecipe);
+            const parsed = result as ParsedRecipe;
+            await handleDone(id, parsed);
+            recordParseHistory(
+              doneParseHistoryEntry(
+                id,
+                parsed.title,
+                parsed.sourceUrl ?? jobUrl,
+              ),
+            ).catch(() => {});
           } else if (status === "failed") {
+            const rawError: string = error || "Failed to parse recipe";
             removeJobId(id);
-            toast.error(error || "Failed to parse recipe");
+            recordParseHistory(
+              failedParseHistoryEntry(id, jobUrl, rawError),
+            ).catch(() => {});
+            toast.error(rawError);
           } else {
             pollRef.current = setTimeout(run, 3000);
           }

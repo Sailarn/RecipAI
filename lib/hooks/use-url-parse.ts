@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { recordParseHistory } from "@/lib/db/parse-history";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import {
@@ -10,6 +11,11 @@ import {
   removeJobId,
   storePendingUploadToken,
 } from "@/lib/parse-job-storage";
+import { friendlyParseError } from "@/lib/parse-recipe/friendly-parse-error";
+import {
+  doneParseHistoryEntry,
+  failedParseHistoryEntry,
+} from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -27,27 +33,6 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-// Map a raw parse-job failure into a message the user can act on.
-export function friendlyParseError(rawError: string): string {
-  if (
-    rawError.includes("503") ||
-    rawError.includes("Service Unavailable") ||
-    rawError.includes("high demand")
-  ) {
-    return "Gemini is experiencing high demand right now. Please try again in a moment.";
-  }
-  if (rawError.includes("429") || rawError.includes("quota")) {
-    return "API quota exceeded. Please try again later.";
-  }
-  if (
-    rawError.includes("Could not extract") ||
-    rawError.includes("too little HTML")
-  ) {
-    return "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source.";
-  }
-  return rawError;
-}
-
 export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,17 +48,24 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     const run = async () => {
       try {
         const statusRes = await fetch(api.parseQueueJob(id));
-        const { status, result, error } = await statusRes.json();
+        const { status, result, error, url: jobUrl } = await statusRes.json();
 
         if (status === PARSE_JOB_STATUS.DONE) {
+          const parsed = result as ParsedRecipe;
           const uploadToken = getUploadToken(id);
           if (uploadToken) storePendingUploadToken(uploadToken);
           removeJobId(id);
-          setResult(result as ParsedRecipe);
+          recordParseHistory(
+            doneParseHistoryEntry(id, parsed.title, parsed.sourceUrl ?? jobUrl),
+          ).catch(() => {});
+          setResult(parsed);
           setLoading(false);
           setJobId(null);
         } else if (status === PARSE_JOB_STATUS.FAILED) {
           const rawError: string = error || "Failed to parse recipe";
+          recordParseHistory(
+            failedParseHistoryEntry(id, jobUrl, rawError),
+          ).catch(() => {});
           setError(friendlyParseError(rawError));
           setLoading(false);
           setJobId(null);

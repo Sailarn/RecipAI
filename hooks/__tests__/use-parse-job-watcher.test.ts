@@ -34,6 +34,10 @@ vi.mock("@/lib/db/save-parsed-recipe", () => ({
   saveParsedRecipe: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@/lib/db/parse-history", () => ({
+  recordParseHistory: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("@/lib/upload/images", () => ({
   isImageKitUrl: vi.fn().mockReturnValue(false),
   uploadImage: vi.fn(),
@@ -45,6 +49,7 @@ vi.mock("@/lib/transitions", () => ({
 
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
+import { recordParseHistory } from "@/lib/db/parse-history";
 import {
   getJobIds,
   getUploadToken,
@@ -70,9 +75,13 @@ function makeResponse(body: object) {
   return { ok: true, json: () => Promise.resolve(body) } as unknown as Response;
 }
 const doneResponse = () =>
-  makeResponse({ status: "done", result: mockParsedRecipe });
+  makeResponse({
+    status: "done",
+    result: mockParsedRecipe,
+    url: "https://example.com/recipe",
+  });
 const failedResponse = (error?: string) =>
-  makeResponse({ status: "failed", error });
+  makeResponse({ status: "failed", error, url: "https://bad.example.com/x" });
 const pendingResponse = () => makeResponse({ status: "pending" });
 
 beforeEach(() => {
@@ -154,6 +163,23 @@ describe("useParseJobWatcher", () => {
       expect(entry.createdAt).toBeInstanceOf(Date);
     });
 
+    it("records a done parse-history entry", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(doneResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(recordParseHistory).toHaveBeenCalled());
+      expect(recordParseHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "job-1",
+          title: "Test Recipe",
+          status: "done",
+          url: "https://example.com/recipe",
+        }),
+      );
+    });
+
     it("defaults servings to 1 when result has no servings", async () => {
       vi.mocked(getJobIds).mockReturnValue(["job-1"]);
       mockFetch.mockResolvedValue(
@@ -180,6 +206,25 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() => expect(removeJobId).toHaveBeenCalledWith("job-1"));
       expect(toast.error).toHaveBeenCalledWith("Could not parse URL");
+    });
+
+    it("records a failed parse-history entry with a friendly reason", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(failedResponse("restricted account"));
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(recordParseHistory).toHaveBeenCalled());
+      expect(recordParseHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "job-1",
+          status: "failed",
+          url: "https://bad.example.com/x",
+          title: "bad.example.com",
+          reason:
+            "This account is private or the content is restricted — only public posts can be parsed.",
+        }),
+      );
     });
 
     it("shows generic error message when no error provided", async () => {
