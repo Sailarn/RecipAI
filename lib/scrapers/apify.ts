@@ -1,6 +1,9 @@
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 2000;
 
+// Errors that won't fix themselves on retry (bad token, missing reel).
+class FatalApifyError extends Error {}
+
 interface ApifyReelResult {
   videoUrl?: string;
   audioUrl?: string;
@@ -27,21 +30,22 @@ async function runApifyActor(url: string): Promise<Response> {
       if (res.ok) return res;
 
       const errorBody = await res.text();
-      // don't retry on auth or not-found errors
+      // Don't retry on auth or not-found errors — they won't succeed later.
       if (res.status === 401 || res.status === 403 || res.status === 404) {
-        throw new Error(`Apify error: ${res.status} — ${errorBody}`);
+        throw new FatalApifyError(`Apify error: ${res.status} — ${errorBody}`);
       }
-
       if (attempt === RETRY_ATTEMPTS) {
         throw new Error(
           `Apify error after ${RETRY_ATTEMPTS} attempts: ${res.status} — ${errorBody}`,
         );
       }
-
-      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
-    } catch (err) {
-      if (attempt === RETRY_ATTEMPTS) throw err;
-      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt));
+      throw new Error(`Apify error: ${res.status} — ${errorBody}`);
+    } catch (caughtError) {
+      if (caughtError instanceof FatalApifyError) throw caughtError;
+      if (attempt === RETRY_ATTEMPTS) throw caughtError;
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_DELAY_MS * attempt),
+      );
     }
   }
 
