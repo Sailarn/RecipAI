@@ -10,9 +10,7 @@ interface RecipeEditViewProps {
   recipeId: string;
 }
 
-// Prop-based edit view used when pushing onto the navigation stack.
-// Accepts recipeId as a prop instead of useParams() so it works correctly
-// after a history.pushState navigation where Next.js params are not updated.
+// uses props not useParams() — pushState nav doesn't update Next.js params
 export function RecipeEditView({ recipeId }: RecipeEditViewProps) {
   const tCommon = useTranslations("common");
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -20,7 +18,7 @@ export function RecipeEditView({ recipeId }: RecipeEditViewProps) {
 
   useEffect(() => {
     getRecipe(recipeId)
-      .then((r) => setRecipe(r ?? null))
+      .then((result) => setRecipe(result ?? null))
       .finally(() => setLoading(false));
   }, [recipeId]);
 
