@@ -1,19 +1,19 @@
 "use client";
 
-import { Check, ShoppingBasket } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { memo, useCallback, useRef, useState } from "react";
 import { AddToCollectionSheet } from "@/components/add-to-collection-sheet";
 import { RecipeCardContextMenu } from "@/components/recipe-card-context-menu";
 import { RecipeDetail } from "@/components/recipe-detail";
-import { RecipeImage } from "@/components/recipe-image";
-import { Badge } from "@/components/ui/badge";
 import { useLongPress } from "@/hooks/use-long-press";
 import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { cn } from "@/lib/utils";
+import { CardFooter } from "./card-footer";
+import { CardThumbnail } from "./card-thumbnail";
+import { clampMenuPos } from "./constants";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -31,21 +31,14 @@ export const RecipeCard = memo(function RecipeCard({
   const params = useParams();
   const locale = params.locale as string;
   const navigate = useNavigate();
-  const t = useTranslations("recipes");
   const [hovered, setHovered] = useState(false);
-
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
   const didLongPress = useRef(false);
 
   const handleLongPress = useCallback((pos: { x: number; y: number }) => {
     didLongPress.current = true;
-    const menuW = 200;
-    const menuH = 160;
-    setMenuPos({
-      x: Math.min(pos.x, window.innerWidth - menuW - 8),
-      y: Math.min(pos.y, window.innerHeight - menuH - 8),
-    });
+    setMenuPos(clampMenuPos(pos.x, pos.y));
   }, []);
 
   const longPressHandlers = useLongPress(handleLongPress, () => {
@@ -83,20 +76,20 @@ export const RecipeCard = memo(function RecipeCard({
             <RecipeDetail recipeId={recipe.id} locale={locale} />,
           );
         }}
-        onPointerEnter={(e) => {
-          if (e.pointerType === "mouse") setHovered(true);
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") setHovered(true);
         }}
-        onPointerLeave={(e) => {
-          if (e.pointerType === "mouse") setHovered(false);
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setHovered(false);
           longPressHandlers.onPointerLeave();
         }}
         onPointerDown={longPressHandlers.onPointerDown}
         onPointerUp={longPressHandlers.onPointerUp}
         onPointerCancel={longPressHandlers.onPointerCancel}
         onPointerMove={longPressHandlers.onPointerMove}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+        onContextMenu={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
           // On fine-pointer devices (mouse/trackpad) right-click opens the app context menu.
           // On touch, the long-press timer handles it; here we just block the browser menu.
           if (
@@ -105,154 +98,21 @@ export const RecipeCard = memo(function RecipeCard({
             window.matchMedia("(pointer: fine)").matches
           ) {
             didLongPress.current = true;
-            const menuW = 200;
-            const menuH = 160;
-            setMenuPos({
-              x: Math.min(e.clientX, window.innerWidth - menuW - 8),
-              y: Math.min(e.clientY, window.innerHeight - menuH - 8),
-            });
+            setMenuPos(clampMenuPos(event.clientX, event.clientY));
           }
         }}
-        className="glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden"
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          textAlign: "left",
-          borderRadius: 22,
-          userSelect: "none",
-          WebkitTouchCallout: "none",
-          transform: hovered ? "translateY(-2px)" : "none",
-          boxShadow: hovered
-            ? "0 8px 36px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,220,130,0.18)"
-            : undefined,
-          borderColor: hovered ? "rgba(255,210,130,0.28)" : undefined,
-          transition:
-            "box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease",
-        }}
+        className={cn(
+          "glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden p-0 text-left rounded-[22px] select-none [-webkit-touch-callout:none] [transition:box-shadow_0.2s_ease,border-color_0.2s_ease,transform_0.15s_ease]",
+          hovered &&
+            "-translate-y-0.5 shadow-[0_8px_36px_rgba(0,0,0,0.60),inset_0_1px_0_rgba(255,220,130,0.18)] border-[rgba(255,210,130,0.28)]",
+        )}
       >
-        <div className="relative w-full overflow-hidden" style={{ height: 96 }}>
-          <RecipeImage
-            imageUrl={recipe.imageUrl}
-            title={recipe.title}
-            sizes="(max-width: 768px) 50vw, 33vw"
-            width={300}
-            priority={priority}
-            objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
-            imageCropX={recipe.imageCropX}
-            imageCropY={recipe.imageCropY}
-            imageCropWidth={recipe.imageCropWidth}
-            imageCropHeight={recipe.imageCropHeight}
-          />
-          {recipe.category && (
-            <div style={{ position: "absolute", top: 7, left: 7 }}>
-              <div
-                style={{
-                  background: "rgba(0,0,0,0.45)",
-                  borderRadius: 99,
-                  padding: 0,
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  display: "inline-flex",
-                }}
-              >
-                <Badge category={recipe.category} />
-              </div>
-            </div>
-          )}
-          {recipe.status === "tried" && (
-            <div
-              key="tried-badge"
-              style={{
-                position: "absolute",
-                top: 7,
-                right: 7,
-                width: 22,
-                height: 22,
-                borderRadius: "50%",
-                background: "rgba(34,197,94,0.90)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                border: "1.5px solid rgba(134,239,172,0.60)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: "tickIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both",
-              }}
-            >
-              <Check
-                width={12}
-                height={12}
-                strokeWidth={2.5}
-                stroke="#fff"
-                aria-hidden="true"
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col flex-1 p-2 gap-1">
-          <h2
-            className="line-clamp-2 leading-snug"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--fg-1)",
-            }}
-          >
-            {recipe.title}
-          </h2>
-          <div className="flex items-center mt-auto">
-            {recipe.servings && (
-              <p className="text-[11px]" style={{ color: "var(--fg-2)" }}>
-                🍽️ {recipe.servings} {t("servings")}
-              </p>
-            )}
-            {pantryMatch?.missing === 0 && (
-              <p
-                data-testid="badge-cancook"
-                className="text-[10px] ml-auto"
-                style={{
-                  color: "rgba(34,197,94,1)",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <ShoppingBasket
-                  width={11}
-                  height={11}
-                  strokeWidth={2.2}
-                  aria-hidden="true"
-                />
-              </p>
-            )}
-            {pantryMatch && pantryMatch.missing > 0 && (
-              <p
-                data-testid="badge-nearly"
-                className="text-[10px] ml-auto"
-                style={{
-                  color: "var(--food-accent, rgba(251,191,36,1))",
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 3,
-                }}
-              >
-                <ShoppingBasket
-                  width={11}
-                  height={11}
-                  strokeWidth={2.2}
-                  aria-hidden="true"
-                />
-                {pantryMatch.total - pantryMatch.missing}/{pantryMatch.total}
-              </p>
-            )}
-          </div>
-        </div>
+        <CardThumbnail recipe={recipe} priority={priority} />
+        <CardFooter
+          title={recipe.title}
+          servings={recipe.servings}
+          pantryMatch={pantryMatch}
+        />
       </button>
 
       {menuPos && (
