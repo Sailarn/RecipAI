@@ -19,11 +19,17 @@ export function useLinkedAccounts(hasSession: boolean) {
   const [passkeyAdded, setPasskeyAdded] = useState(
     _cache?.passkeyAdded ?? false,
   );
-  const [isLoading, setIsLoading] = useState(_cache === undefined);
+  // hasFetched tracks whether the API call has completed (or cache was available).
+  // isLoading is DERIVED: true only when we have a session but no data yet.
+  // This avoids a stale-false window when hasSession transitions false→true
+  // before the useEffect fires.
+  const [hasFetched, setHasFetched] = useState(_cache !== undefined);
+  const isLoading = hasSession && !hasFetched;
 
   useEffect(() => {
-    if (!hasSession) {
-      setIsLoading(false);
+    if (!hasSession) return;
+    if (_cache !== undefined) {
+      setHasFetched(true);
       return;
     }
     Promise.all([
@@ -31,7 +37,7 @@ export function useLinkedAccounts(hasSession: boolean) {
       authClient.passkey.listUserPasskeys(),
     ]).then(([accountsRes, passkeysRes]) => {
       const providers = (accountsRes.data ?? []).map(
-        (a: { providerId: string }) => a.providerId,
+        (account: { providerId: string }) => account.providerId,
       );
       const telegram =
         providers.includes("telegram") || providers.includes("telegram-oidc");
@@ -44,7 +50,7 @@ export function useLinkedAccounts(hasSession: boolean) {
       setLinkedProviders(providers);
       setTelegramLinked(telegram);
       setPasskeyAdded(passkey);
-      setIsLoading(false);
+      setHasFetched(true);
     });
   }, [hasSession]);
 

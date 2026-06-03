@@ -38,18 +38,6 @@ function GoogleIcon() {
   );
 }
 
-const chipStyle: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: 10,
-  background: "rgba(0,0,0,0.28)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexShrink: 0,
-};
-
 export function LinkedAccounts({
   linkedProviders,
   telegramLinked,
@@ -72,33 +60,14 @@ export function LinkedAccounts({
 
   if (isLoading) {
     return (
-      <div
-        className="glass-card mb-3"
-        style={{ borderRadius: 24, overflow: "hidden" }}
-      >
-        <p
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: "var(--fg-3)",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            padding: "14px 16px 6px",
-          }}
-        >
+      <div className="glass-card mb-3 rounded-3xl overflow-hidden">
+        <p className="text-xs font-semibold text-[var(--fg-3)] uppercase tracking-[0.07em] px-4 pt-[14px] pb-1.5">
           Connected accounts
         </p>
-        <div
-          style={{
-            padding: "0 16px 14px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
-          <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
-          <Skeleton className="h-12 w-full" style={{ borderRadius: 10 }} />
+        <div className="px-4 pb-3.5 flex flex-col gap-2">
+          <Skeleton className="h-12 w-full rounded-[10px]" />
+          <Skeleton className="h-12 w-full rounded-[10px]" />
+          <Skeleton className="h-12 w-full rounded-[10px]" />
         </div>
       </div>
     );
@@ -119,7 +88,7 @@ export function LinkedAccounts({
         <KeyRound
           size={15}
           strokeWidth={2}
-          style={{ color: "var(--food-accent)" }}
+          className="text-[var(--food-accent)]"
         />
       ),
       isLinked: passkeyLinked,
@@ -128,96 +97,45 @@ export function LinkedAccounts({
     {
       key: "telegram",
       name: "Telegram",
-      icon: <Send size={15} strokeWidth={2} style={{ color: "#229ED9" }} />,
+      icon: <Send size={15} strokeWidth={2} className="text-[#229ED9]" />,
       isLinked: telegramLinked,
       onConnect: handleLinkTelegramOIDC,
     },
   ];
 
   return (
-    <div
-      className="glass-card mb-3"
-      style={{ borderRadius: 24, overflow: "hidden" }}
-    >
-      <p
-        style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "var(--fg-3)",
-          textTransform: "uppercase",
-          letterSpacing: "0.07em",
-          padding: "14px 16px 6px",
-        }}
-      >
+    <div className="glass-card mb-3 rounded-3xl overflow-hidden">
+      <p className="text-xs font-semibold text-[var(--fg-3)] uppercase tracking-[0.07em] px-4 pt-[14px] pb-1.5">
         Connected accounts
       </p>
 
-      {providers.map((p, i) => (
+      {providers.map((provider, index) => (
         <div
-          key={p.key}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "10px 16px",
-            gap: 12,
-            borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)",
-          }}
+          key={provider.key}
+          className={`flex items-center py-2.5 px-4 gap-3${index > 0 ? " border-t border-[var(--border-subtle)]" : ""}`}
         >
-          <div style={chipStyle}>{p.icon}</div>
+          <div className="w-8 h-8 rounded-[10px] bg-[rgba(0,0,0,0.28)] border border-white/[0.08] flex items-center justify-center shrink-0">
+            {provider.icon}
+          </div>
 
-          <span
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 14,
-              color: "var(--fg-1)",
-              flex: 1,
-            }}
-          >
-            {p.name}
+          <span className="font-sans text-sm text-[var(--fg-1)] flex-1">
+            {provider.name}
           </span>
 
-          {p.isLinked ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div
-                style={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: 9,
-                  background: "rgba(74,222,128,0.18)",
-                  border: "1px solid rgba(74,222,128,0.40)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Check size={11} style={{ color: "#4ade80" }} />
+          {provider.isLinked ? (
+            <div className="flex items-center gap-[5px]">
+              <div className="w-[18px] h-[18px] rounded-full bg-green-400/[0.18] border border-green-400/[0.4] flex items-center justify-center">
+                <Check size={11} className="text-green-400" />
               </div>
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  color: "#4ade80",
-                }}
-              >
+              <span className="font-sans text-xs text-green-400">
                 Connected
               </span>
             </div>
           ) : (
             <button
               type="button"
-              onClick={p.onConnect}
-              style={{
-                padding: "5px 12px",
-                borderRadius: 99,
-                background: "rgba(255,170,50,0.10)",
-                border: "1px solid rgba(255,200,100,0.25)",
-                fontFamily: "var(--font-sans)",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--food-accent)",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
+              onClick={provider.onConnect}
+              className="py-[5px] px-3 rounded-full bg-[rgba(255,170,50,0.10)] border border-[rgba(255,200,100,0.25)] font-sans text-xs font-semibold text-[var(--food-accent)] cursor-pointer transition-all duration-150"
             >
               Connect
             </button>
