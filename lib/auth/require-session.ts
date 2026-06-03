@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 
 type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
 

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
-import { requireSession } from "@/lib/require-session";
+import { requireSession } from "@/lib/auth/require-session";
 
 export async function PATCH(
   req: NextRequest,

@@ -8,7 +8,7 @@ vi.mock("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
 }));
 
-vi.mock("@/lib/auth-client", () => ({
+vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     linkSocial: vi.fn().mockResolvedValue(undefined),
   },

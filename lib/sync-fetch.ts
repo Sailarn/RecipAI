@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
-import { isSignedIn } from "@/lib/session-state";
+import { isSignedIn } from "@/lib/auth/session-state";
 
 /**
  * Fire-and-forget fetch gated on auth state.

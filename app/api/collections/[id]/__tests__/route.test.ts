@@ -5,13 +5,13 @@ vi.mock("@/db", () => ({
 }));
 vi.mock("@/db/schema/collections", () => ({ collections: {} }));
 vi.mock("drizzle-orm", () => ({ and: vi.fn(), eq: vi.fn() }));
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 
 import { db } from "@/db";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { DELETE, PATCH } from "../route";
 
 function makeDeleteReq(id: string) {

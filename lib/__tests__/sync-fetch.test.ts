@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/session-state", () => ({
+vi.mock("@/lib/auth/session-state", () => ({
   isSignedIn: vi.fn(),
 }));
 
@@ -9,7 +9,7 @@ vi.mock("@sentry/nextjs", () => ({
 }));
 
 import * as Sentry from "@sentry/nextjs";
-import { isSignedIn } from "@/lib/session-state";
+import { isSignedIn } from "@/lib/auth/session-state";
 import { syncFetch } from "../sync-fetch";
 
 const fetchMock = vi.fn();

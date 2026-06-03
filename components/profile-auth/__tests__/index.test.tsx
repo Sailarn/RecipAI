@@ -13,7 +13,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockRefresh = vi.hoisted(() => vi.fn());
 const mockPush = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/auth-client", () => ({
+vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     useSession: vi.fn(),
     signOut: vi.fn().mockResolvedValue(undefined),
@@ -48,7 +48,7 @@ vi.mock("@/components/login-view", () => ({
   LoginView: () => null,
 }));
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
 import { ProfileAuth } from "../index";
 

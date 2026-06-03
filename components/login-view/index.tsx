@@ -2,7 +2,7 @@
 
 import { KeyRound, Send } from "lucide-react";
 import Image from "next/image";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 

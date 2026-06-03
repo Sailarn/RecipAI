@@ -3,8 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { ApiError } from "@/lib/api-errors";
+import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
-import { requireSession } from "@/lib/require-session";
 
 export async function GET(req: NextRequest) {
   const since = req.nextUrl.searchParams.get("since");

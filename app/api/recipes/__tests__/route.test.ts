@@ -5,7 +5,7 @@ vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Headers()),
 }));
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/auth/auth", () => ({
   auth: {
     api: {
       getSession: vi.fn(),
@@ -24,7 +24,7 @@ vi.mock("@/db/schema/recipes", () => ({
 }));
 
 import { db } from "@/db";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { POST } from "../route";
 
 const mockSession = { user: { id: "user-1" } };

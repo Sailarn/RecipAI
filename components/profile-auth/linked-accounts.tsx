@@ -3,7 +3,7 @@
 import { Check, KeyRound, Send } from "lucide-react";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
 
 interface LinkedAccountsProps {

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
+import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
 import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
@@ -16,7 +17,6 @@ import {
 } from "@/lib/db/schema";
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { api, routes } from "@/lib/routes";
-import { setIsSignedIn } from "@/lib/session-state";
 import { syncFetch } from "@/lib/sync-fetch";
 import { useNavigate } from "@/lib/transitions";
 

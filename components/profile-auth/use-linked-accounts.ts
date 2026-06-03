@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 interface AccountsCache {
   linkedProviders: string[];

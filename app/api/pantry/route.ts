@@ -4,12 +4,12 @@ import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { pantry } from "@/db/schema/pantry";
 import { ApiError } from "@/lib/api-errors";
+import { requireSession } from "@/lib/auth/require-session";
 import {
   INGREDIENT_STATUS,
   type PantryItem,
   type VocabularyIngredient,
 } from "@/lib/db/schema";
-import { requireSession } from "@/lib/require-session";
 
 export async function GET(req: NextRequest) {
   const authed = await requireSession();

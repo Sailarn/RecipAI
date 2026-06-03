@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { mintUploadToken } from "@/lib/upload-token";
 

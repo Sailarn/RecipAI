@@ -5,7 +5,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth-client", () => ({
+vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     useSession: vi.fn().mockReturnValue({ data: null }),
   },
@@ -51,7 +51,7 @@ vi.mock("@/lib/transitions", () => ({
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
 import { useSyncOnLogin } from "../use-sync-on-login";

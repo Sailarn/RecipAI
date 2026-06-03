@@ -8,7 +8,7 @@ import {
   MAX_COLLECTION_EMOJI_LENGTH,
   MAX_COLLECTION_NAME_LENGTH,
 } from "@/lib/api-limits";
-import { requireSession } from "@/lib/require-session";
+import { requireSession } from "@/lib/auth/require-session";
 
 export async function PATCH(
   req: NextRequest,

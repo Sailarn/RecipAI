@@ -4,8 +4,8 @@ import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { MAX_SYNC_BATCH_SIZE, RECIPE_SYNC_ERRORS } from "@/lib/api-limits";
+import { requireSession } from "@/lib/auth/require-session";
 import type { Recipe } from "@/lib/db/schema";
-import { requireSession } from "@/lib/require-session";
 
 export async function POST(req: NextRequest) {
   const authed = await requireSession();

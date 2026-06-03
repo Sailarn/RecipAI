@@ -5,14 +5,14 @@ vi.mock("@/db", () => ({
 }));
 vi.mock("@/db/schema/pantry", () => ({ pantry: { id: "id-column" } }));
 vi.mock("drizzle-orm", () => ({ and: vi.fn(), eq: vi.fn() }));
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 
 import { db } from "@/db";
 import { pantry as pantrySchema } from "@/db/schema/pantry";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { DELETE, POST } from "../route";
 
 function mockSession(userId = "user-1") {

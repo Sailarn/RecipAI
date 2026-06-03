@@ -1,9 +1,9 @@
 "use client";
 
+import { isSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
-import { isSignedIn } from "@/lib/session-state";
 
 type EnrichResponse = {
   success: boolean;

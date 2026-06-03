@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const listAccounts = vi.hoisted(() => vi.fn());
 const listUserPasskeys = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/auth-client", () => ({
+vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     listAccounts,
     passkey: { listUserPasskeys },

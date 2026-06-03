@@ -9,7 +9,7 @@ import {
   MAX_COLLECTION_NAME_LENGTH,
   MAX_SYNC_BATCH_SIZE,
 } from "@/lib/api-limits";
-import { requireSession } from "@/lib/require-session";
+import { requireSession } from "@/lib/auth/require-session";
 
 interface IncomingCollection {
   id: string;

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
@@ -8,7 +8,7 @@ vi.mock("@/lib/upload-token", () => ({
   verifyUploadToken: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { verifyUploadToken } from "@/lib/upload-token";
 import { requireUploadAuth } from "../upload-auth";
 

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/session-state", () => ({
+vi.mock("@/lib/auth/session-state", () => ({
   isSignedIn: vi.fn().mockReturnValue(true),
 }));
 

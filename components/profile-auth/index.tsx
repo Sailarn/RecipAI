@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { LoginView } from "@/components/login-view";
 import { Skeleton } from "@/components/ui";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { LinkedAccounts } from "./linked-accounts";

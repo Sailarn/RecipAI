@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
 import { ApiError } from "@/lib/api-errors";
+import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
 import { callGeminiForIngredient } from "@/lib/gemini";
-import { requireSession } from "@/lib/require-session";
 
 function buildEnrichmentPrompt(
   rawText: string,

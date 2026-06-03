@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
+import { requireSession } from "@/lib/auth/require-session";
 import type { Recipe } from "@/lib/db/schema";
-import { requireSession } from "@/lib/require-session";
 
 export async function POST(req: NextRequest) {
   const authed = await requireSession();
