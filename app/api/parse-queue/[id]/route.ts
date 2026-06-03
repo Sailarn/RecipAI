@@ -19,6 +19,7 @@ export async function GET(
       status: job.status,
       result: job.result,
       error: job.error,
+      url: job.url,
     });
   } catch (error) {
     return ApiError.internal(error, req);

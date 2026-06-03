@@ -53,6 +53,7 @@ describe("GET /api/parse-queue/[id]", () => {
       status: PARSE_JOB_STATUS.DONE,
       result: { title: "Pasta", servings: 2 },
       error: null,
+      url: "https://example.com/pasta",
     };
     setupSelectChain([mockJob]);
     const { req, params } = makeRequest("job-1");
@@ -65,6 +66,7 @@ describe("GET /api/parse-queue/[id]", () => {
       status: PARSE_JOB_STATUS.DONE,
       result: { title: "Pasta", servings: 2 },
       error: null,
+      url: "https://example.com/pasta",
     });
   });
 
@@ -74,6 +76,7 @@ describe("GET /api/parse-queue/[id]", () => {
       status: PARSE_JOB_STATUS.FAILED,
       result: null,
       error: "Could not parse",
+      url: "https://example.com/broken",
     };
     setupSelectChain([mockJob]);
     const { req, params } = makeRequest("job-2");
@@ -85,6 +88,7 @@ describe("GET /api/parse-queue/[id]", () => {
       status: PARSE_JOB_STATUS.FAILED,
       result: null,
       error: "Could not parse",
+      url: "https://example.com/broken",
     });
   });
 
