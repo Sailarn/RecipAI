@@ -113,7 +113,15 @@ export function useParseJobWatcher() {
             recordParseHistory(
               failedParseHistoryEntry(id, jobUrl, rawError),
             ).catch(() => {});
-            toast.error(rawError);
+            toast.error(rawError, {
+              action: {
+                label: "Details",
+                onClick: () => {
+                  const locale = window.location.pathname.split("/")[1];
+                  navigate.push(routes.parseHistory(locale));
+                },
+              },
+            });
           } else {
             pollRef.current = setTimeout(run, 3000);
           }
@@ -123,7 +131,7 @@ export function useParseJobWatcher() {
       };
       run();
     },
-    [handleDone],
+    [handleDone, navigate],
   );
 
   useEffect(() => {

@@ -11,6 +11,7 @@ export const routes = {
   profile: (locale: string) => `/${locale}/profile`,
   login: (locale: string) => `/${locale}/login`,
   syncReview: (locale: string) => `/${locale}/sync-review`,
+  parseHistory: (locale: string) => `/${locale}/parse-history`,
 } as const;
 
 export const api = {

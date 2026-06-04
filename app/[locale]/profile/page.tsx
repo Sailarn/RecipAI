@@ -1,11 +1,13 @@
 "use client";
 
-import { ChevronRight, Globe, Info, Moon } from "lucide-react";
+import { ChevronRight, Globe, History, Info, Moon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ParseHistoryView } from "@/components/parse-history-view";
 import { ProfileAuth } from "@/components/profile-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
+import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
 const ROW_ICON_SIZE = 15;
@@ -79,6 +81,28 @@ export default function ProfilePage() {
             <span className="font-sans text-sm text-[var(--fg-2)]">
               {LOCALE_DISPLAY_NAME[nextLocale]}
             </span>
+            <ChevronRight
+              size={CHEVRON_ICON_SIZE}
+              strokeWidth={CHEVRON_STROKE_WIDTH}
+              className="shrink-0 text-[var(--fg-3)]"
+            />
+          </button>
+
+          <RowDivider />
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate.push(routes.parseHistory(locale), <ParseHistoryView />)
+            }
+            className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
+          >
+            <History
+              size={ROW_ICON_SIZE}
+              strokeWidth={ROW_ICON_STROKE_WIDTH}
+              className={ROW_ICON_CLASSES}
+            />
+            <span className={ROW_LABEL_CLASSES}>Import history</span>
             <ChevronRight
               size={CHEVRON_ICON_SIZE}
               strokeWidth={CHEVRON_STROKE_WIDTH}

@@ -205,7 +205,12 @@ describe("useParseJobWatcher", () => {
       renderHook(() => useParseJobWatcher());
 
       await waitFor(() => expect(removeJobId).toHaveBeenCalledWith("job-1"));
-      expect(toast.error).toHaveBeenCalledWith("Could not parse URL");
+      expect(toast.error).toHaveBeenCalledWith(
+        "Could not parse URL",
+        expect.objectContaining({
+          action: expect.objectContaining({ label: "Details" }),
+        }),
+      );
     });
 
     it("records a failed parse-history entry with a friendly reason", async () => {
@@ -234,7 +239,12 @@ describe("useParseJobWatcher", () => {
       renderHook(() => useParseJobWatcher());
 
       await waitFor(() => expect(toast.error).toHaveBeenCalled());
-      expect(toast.error).toHaveBeenCalledWith("Failed to parse recipe");
+      expect(toast.error).toHaveBeenCalledWith(
+        "Failed to parse recipe",
+        expect.objectContaining({
+          action: expect.objectContaining({ label: "Details" }),
+        }),
+      );
     });
   });
 
