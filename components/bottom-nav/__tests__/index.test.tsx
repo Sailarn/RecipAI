@@ -126,6 +126,12 @@ describe("BottomNav — visibility", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("hides on /parse-history route", () => {
+    vi.mocked(usePathname).mockReturnValue("/en/parse-history");
+    const { container } = render(<BottomNav />);
+    expect(container.firstChild).toBeNull();
+  });
+
   it("stays visible on /pantry route", () => {
     vi.mocked(usePathname).mockReturnValue("/en/pantry");
     const { container } = render(<BottomNav />);

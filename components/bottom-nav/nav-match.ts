@@ -25,6 +25,7 @@ export function getBottomNavState(
   const profileHref = routes.profile(locale);
   const pantryHref = routes.pantry(locale);
   const loginHref = routes.login(locale);
+  const parseHistoryHref = routes.parseHistory(locale);
 
   const isPantryMode = pathname.startsWith(pantryHref);
 
@@ -33,6 +34,7 @@ export function getBottomNavState(
   const shouldHide =
     pathname.endsWith(EDIT_SUFFIX) ||
     pathname.startsWith(loginHref) ||
+    pathname.startsWith(parseHistoryHref) ||
     isRecipeDetail;
 
   const activeHref = pathname.startsWith(parseHref)
