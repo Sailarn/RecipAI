@@ -1,11 +1,38 @@
+import { desc, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
+import { requireSession } from "@/lib/auth/require-session";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { mintUploadToken } from "@/lib/upload/upload-token";
+
+export async function GET(req: NextRequest) {
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
+
+  try {
+    const jobs = await db
+      .select({
+        id: parseJobs.id,
+        url: parseJobs.url,
+        status: parseJobs.status,
+        result: parseJobs.result,
+        error: parseJobs.error,
+        createdAt: parseJobs.createdAt,
+      })
+      .from(parseJobs)
+      .where(eq(parseJobs.userId, authed.session.user.id))
+      .orderBy(desc(parseJobs.createdAt))
+      .limit(100);
+
+    return NextResponse.json({ jobs });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });

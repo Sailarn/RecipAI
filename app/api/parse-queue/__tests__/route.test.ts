@@ -1,24 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/db", () => ({
-  db: {
-    insert: vi.fn().mockReturnValue({
-      values: vi.fn().mockResolvedValue(undefined),
-    }),
-  },
-}));
+const { selectLimit } = vi.hoisted(() => ({ selectLimit: vi.fn() }));
+
+vi.mock("@/db", () => {
+  const chain = {
+    from: vi.fn(() => chain),
+    where: vi.fn(() => chain),
+    orderBy: vi.fn(() => chain),
+    limit: selectLimit,
+  };
+  return {
+    db: {
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockResolvedValue(undefined),
+      }),
+      select: vi.fn(() => chain),
+    },
+  };
+});
 vi.mock("@/db/schema/parse-jobs", () => ({ parseJobs: {} }));
 vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
+vi.mock("@/lib/auth/require-session", () => ({ requireSession: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/upload/upload-token", () => ({
   mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
 }));
 
 import { auth } from "@/lib/auth/auth";
+import { requireSession } from "@/lib/auth/require-session";
 import { mintUploadToken } from "@/lib/upload/upload-token";
-import { POST } from "../route";
+import { GET, POST } from "../route";
 
 function makeRequest(body: object) {
   return {
@@ -98,5 +111,40 @@ describe("POST /api/parse-queue", () => {
     await POST(makeRequest({ url: "https://example.com/recipe" }) as never);
 
     expect(mintUploadToken).toHaveBeenCalledOnce();
+  });
+});
+
+describe("GET /api/parse-queue", () => {
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(requireSession).mockResolvedValue({
+      response: new Response(null, { status: 401 }) as never,
+    });
+
+    const res = await GET({} as never);
+
+    expect(res.status).toBe(401);
+  });
+
+  it("returns the signed-in user's jobs", async () => {
+    vi.mocked(requireSession).mockResolvedValue({
+      session: { user: { id: "user-1" } },
+    } as never);
+    const jobs = [
+      {
+        id: "job-1",
+        url: "https://example.com/a",
+        status: "done",
+        result: { title: "A" },
+        error: null,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+    selectLimit.mockResolvedValue(jobs);
+
+    const res = await GET({} as never);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.jobs).toEqual(jobs);
   });
 });
