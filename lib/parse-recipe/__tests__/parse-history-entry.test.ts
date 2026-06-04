@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   doneParseHistoryEntry,
   failedParseHistoryEntry,
+  parseHistoryEntryFromServerJob,
 } from "../parse-history-entry";
 
 describe("doneParseHistoryEntry", () => {
@@ -48,5 +49,54 @@ describe("failedParseHistoryEntry", () => {
     const entry = failedParseHistoryEntry("job-4", "not a url", "boom");
 
     expect(entry.title).toBe("not a url");
+  });
+});
+
+describe("parseHistoryEntryFromServerJob", () => {
+  it("maps a done job, preserving the server createdAt", () => {
+    const entry = parseHistoryEntryFromServerJob({
+      id: "job-1",
+      url: "https://example.com/pasta",
+      status: "done",
+      result: { title: "Pasta", sourceUrl: "https://src.example.com/pasta" },
+      error: null,
+      createdAt: "2026-01-02T00:00:00.000Z",
+    });
+
+    expect(entry).toMatchObject({
+      id: "job-1",
+      title: "Pasta",
+      status: "done",
+      url: "https://src.example.com/pasta",
+    });
+    expect(entry?.createdAt).toEqual(new Date("2026-01-02T00:00:00.000Z"));
+  });
+
+  it("maps a failed job with a host title and friendly reason", () => {
+    const entry = parseHistoryEntryFromServerJob({
+      id: "job-2",
+      url: "https://www.instagram.com/reel/x",
+      status: "failed",
+      result: null,
+      error: "restricted",
+      createdAt: "2026-01-03T00:00:00.000Z",
+    });
+
+    expect(entry?.status).toBe("failed");
+    expect(entry?.title).toBe("instagram.com");
+    expect(entry?.reason).toContain("private or the content is restricted");
+  });
+
+  it("returns null for a non-terminal job", () => {
+    const entry = parseHistoryEntryFromServerJob({
+      id: "job-3",
+      url: "https://example.com",
+      status: "pending",
+      result: null,
+      error: null,
+      createdAt: "2026-01-04T00:00:00.000Z",
+    });
+
+    expect(entry).toBeNull();
   });
 });

@@ -13,6 +13,7 @@ vi.mock("../db", () => ({
   db: {
     parseHistory: {
       put: vi.fn(),
+      bulkPut: vi.fn(),
       count: vi.fn(),
       orderBy,
       bulkDelete: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock("../db", () => ({
 
 import { db } from "../db";
 import {
+  bulkPutParseHistory,
   clearParseHistory,
   getParseHistory,
   recordParseHistory,
@@ -86,6 +88,23 @@ describe("getParseHistory", () => {
     expect(orderBy).toHaveBeenCalledWith("createdAt");
     expect(reverse).toHaveBeenCalled();
     expect(result).toBe(rows);
+  });
+});
+
+describe("bulkPutParseHistory", () => {
+  it("does nothing for an empty list", async () => {
+    await bulkPutParseHistory([]);
+
+    expect(db.parseHistory.bulkPut).not.toHaveBeenCalled();
+  });
+
+  it("bulk-puts the entries and prunes", async () => {
+    vi.mocked(db.parseHistory.count).mockResolvedValue(1);
+
+    await bulkPutParseHistory([entry]);
+
+    expect(db.parseHistory.bulkPut).toHaveBeenCalledWith([entry]);
+    expect(db.parseHistory.count).toHaveBeenCalled();
   });
 });
 

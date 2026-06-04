@@ -7,18 +7,44 @@ import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
 import { replaceSyncNotifications } from "@/lib/db/notifications";
 import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
+import { bulkPutParseHistory } from "@/lib/db/parse-history";
 import {
   type Collection,
   INGREDIENT_STATUS,
   type PantryItem,
+  type ParseHistoryEntry,
   type Recipe,
   type SyncEntityType,
   type SyncNotification,
 } from "@/lib/db/schema";
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
+import { parseHistoryEntryFromServerJob } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
 import { useNavigate } from "@/lib/transitions";
+
+// Adopt this client's anonymous parse jobs into the account, then pull the
+// user's full server-side history into Dexie so it shows across devices.
+async function syncParseHistory(): Promise<void> {
+  const localIds = (await db.parseHistory.toArray()).map((entry) => entry.id);
+  if (localIds.length > 0) {
+    await fetch(api.parseQueueClaim, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: localIds.slice(0, 200) }),
+    });
+  }
+
+  const res = await fetch(api.parseQueue);
+  if (!res.ok) return;
+  const { jobs } = await res.json();
+  const entries = (
+    jobs as Parameters<typeof parseHistoryEntryFromServerJob>[0][]
+  )
+    .map(parseHistoryEntryFromServerJob)
+    .filter((entry): entry is ParseHistoryEntry => entry !== null);
+  await bulkPutParseHistory(entries);
+}
 
 async function syncPantry(): Promise<void> {
   const res = await fetch(api.pantry);
@@ -124,6 +150,7 @@ export function useSyncOnLogin() {
 
     syncIngredients().catch(() => {});
     syncPantry().catch(() => {});
+    syncParseHistory().catch(() => {});
 
     try {
       const [recipesRes, collectionsRes] = await Promise.all([
