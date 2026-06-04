@@ -11,7 +11,7 @@ export function ParseHistoryView() {
   const entries = useLiveQuery(() => getParseHistory(), []);
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-y-auto">
+    <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-hidden">
       <header className="shrink-0 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] px-4 pb-3 flex items-center gap-2">
         <button
           type="button"
@@ -34,7 +34,7 @@ export function ParseHistoryView() {
           </p>
         </div>
       ) : (
-        <ul className="px-4 pb-[100px] space-y-3">
+        <ul className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-[100px] space-y-3">
           {entries?.map((entry) => (
             <ParseHistoryRow key={entry.id} entry={entry} />
           ))}

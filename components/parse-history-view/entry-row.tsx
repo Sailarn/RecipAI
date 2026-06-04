@@ -10,7 +10,7 @@ export function ParseHistoryRow({ entry }: { entry: ParseHistoryEntry }) {
   return (
     <li className="glass-card rounded-2xl p-4 space-y-2">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-medium text-sm text-[var(--fg-1)] break-words">
+        <p className="min-w-0 font-medium text-sm text-[var(--fg-1)] break-words">
           {entry.title}
         </p>
         <span
@@ -27,7 +27,7 @@ export function ParseHistoryRow({ entry }: { entry: ParseHistoryEntry }) {
       </div>
 
       {entry.reason && (
-        <p className="text-xs text-[var(--fg-2)] leading-relaxed">
+        <p className="text-xs text-[var(--fg-2)] leading-relaxed break-words line-clamp-4">
           {entry.reason}
         </p>
       )}
