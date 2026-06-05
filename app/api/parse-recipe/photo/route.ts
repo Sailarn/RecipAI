@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
+import { callAiForRecipePhoto } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
-import { callGeminiForRecipePhoto } from "@/lib/gemini";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 
@@ -25,11 +25,7 @@ export async function POST(request: Request) {
 
   try {
     const prompt = buildPhotoPrompt(userComment);
-    const recipe = await callGeminiForRecipePhoto(
-      imageBase64,
-      mimeType,
-      prompt,
-    );
+    const recipe = await callAiForRecipePhoto(imageBase64, mimeType, prompt);
     return Response.json(recipe);
   } catch (error) {
     // The client (parseRecipeFromPhoto) maps the raw Gemini message to friendly

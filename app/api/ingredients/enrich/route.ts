@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
+import { callAiForIngredient } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
-import { callGeminiForIngredient } from "@/lib/gemini";
 
 function buildEnrichmentPrompt(
   rawText: string,
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   const prompt = buildEnrichmentPrompt(rawText, ua, category);
 
   try {
-    const result = await callGeminiForIngredient(prompt);
+    const result = await callAiForIngredient(prompt);
 
     if (result.skip === true) {
       await db

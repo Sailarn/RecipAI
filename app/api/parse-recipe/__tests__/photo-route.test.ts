@@ -7,8 +7,8 @@ vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/rate-limit", () => ({
   enforceParseRateLimit: vi.fn().mockResolvedValue(null),
 }));
-vi.mock("@/lib/gemini", () => ({
-  callGeminiForRecipePhoto: vi.fn(),
+vi.mock("@/lib/ai", () => ({
+  callAiForRecipePhoto: vi.fn(),
 }));
 vi.mock("@/lib/parse-recipe/prompts", () => ({
   buildPhotoPrompt: vi.fn().mockReturnValue("prompt"),
@@ -16,7 +16,7 @@ vi.mock("@/lib/parse-recipe/prompts", () => ({
 vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
 import * as Sentry from "@sentry/nextjs";
-import { callGeminiForRecipePhoto } from "@/lib/gemini";
+import { callAiForRecipePhoto } from "@/lib/ai";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { POST } from "../photo/route";
 
@@ -51,7 +51,7 @@ describe("POST /api/parse-recipe/photo", () => {
     );
 
     expect(res.status).toBe(429);
-    expect(callGeminiForRecipePhoto).not.toHaveBeenCalled();
+    expect(callAiForRecipePhoto).not.toHaveBeenCalled();
   });
 
   it("returns 400 on invalid JSON body", async () => {
@@ -79,7 +79,7 @@ describe("POST /api/parse-recipe/photo", () => {
   });
 
   it("returns the parsed recipe on success", async () => {
-    vi.mocked(callGeminiForRecipePhoto).mockResolvedValue(mockRecipe as never);
+    vi.mocked(callAiForRecipePhoto).mockResolvedValue(mockRecipe as never);
 
     const res = await POST(
       makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
@@ -92,7 +92,7 @@ describe("POST /api/parse-recipe/photo", () => {
 
   it("preserves the raw error message and captures it in Sentry on failure", async () => {
     const realError = new Error("503 Service Unavailable");
-    vi.mocked(callGeminiForRecipePhoto).mockRejectedValue(realError);
+    vi.mocked(callAiForRecipePhoto).mockRejectedValue(realError);
 
     const res = await POST(
       makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),

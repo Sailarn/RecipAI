@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import { extractSchemaRecipe } from "@/app/api/parse-recipe/schema-parser";
+import { callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { callGeminiForRecipe } from "@/lib/gemini";
 import { fetchHtmlWithPhantomJs } from "@/lib/scrapers/phantomjs";
 import { fetchHtmlWithScrapeDo } from "@/lib/scrapers/scrape-do";
 import {
@@ -62,7 +62,7 @@ export async function parseWebRecipe(
     textContent = `Hero image URL: ${hero}\n\n${textContent}`;
   }
 
-  const recipe = await callGeminiForRecipe(
+  const recipe = await callAiForRecipe(
     buildWebPrompt(textContent, userComment),
   );
   return { ...recipe, sourceUrl: url };

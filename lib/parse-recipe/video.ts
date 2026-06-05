@@ -1,5 +1,5 @@
+import { callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { callGeminiForRecipe } from "@/lib/gemini";
 import { fetchInstagramReel } from "@/lib/scrapers/apify";
 import { transcribeWithGroq } from "@/lib/transcribe/groq";
 import { isInstagramUrl } from "@/lib/video-url";
@@ -37,7 +37,7 @@ export async function parseVideoRecipe(
   }
 
   const prompt = buildTranscriptPrompt(transcript, caption, userComment);
-  const recipe = await callGeminiForRecipe(prompt);
+  const recipe = await callAiForRecipe(prompt);
 
   if (!recipe.imageUrl) {
     recipe.imageUrl = thumbnailUrl;
