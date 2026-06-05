@@ -3,7 +3,10 @@ import {
   PARSE_JOB_STATUS,
   type ParseHistoryEntry,
 } from "@/lib/db/schema";
+import { generateId } from "@/lib/utils";
 import { friendlyParseError } from "./friendly-parse-error";
+
+const PHOTO_IMPORT_TITLE = "Photo import";
 
 // A readable heading for a failed job, which has no recipe title.
 function hostLabel(url: string): string {
@@ -38,6 +41,26 @@ export function failedParseHistoryEntry(
     title: hostLabel(url),
     status: PARSE_HISTORY_STATUS.FAILED,
     url,
+    reason: friendlyParseError(rawError),
+    createdAt: new Date(),
+  };
+}
+
+// Photo imports have no job id (synchronous parse) and no source link.
+export function donePhotoHistoryEntry(title: string): ParseHistoryEntry {
+  return {
+    id: generateId(),
+    title,
+    status: PARSE_HISTORY_STATUS.DONE,
+    createdAt: new Date(),
+  };
+}
+
+export function failedPhotoHistoryEntry(rawError: string): ParseHistoryEntry {
+  return {
+    id: generateId(),
+    title: PHOTO_IMPORT_TITLE,
+    status: PARSE_HISTORY_STATUS.FAILED,
     reason: friendlyParseError(rawError),
     createdAt: new Date(),
   };

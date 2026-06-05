@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   doneParseHistoryEntry,
+  donePhotoHistoryEntry,
   failedParseHistoryEntry,
+  failedPhotoHistoryEntry,
   parseHistoryEntryFromServerJob,
 } from "../parse-history-entry";
 
@@ -49,6 +51,28 @@ describe("failedParseHistoryEntry", () => {
     const entry = failedParseHistoryEntry("job-4", "not a url", "boom");
 
     expect(entry.title).toBe("not a url");
+  });
+});
+
+describe("photo history entries", () => {
+  it("builds a done photo entry with no url", () => {
+    const entry = donePhotoHistoryEntry("Grandma's Soup");
+
+    expect(entry).toMatchObject({ title: "Grandma's Soup", status: "done" });
+    expect(entry.url).toBeUndefined();
+    expect(typeof entry.id).toBe("string");
+    expect(entry.id.length).toBeGreaterThan(0);
+  });
+
+  it("builds a failed photo entry with a friendly reason and no url", () => {
+    const entry = failedPhotoHistoryEntry("503");
+
+    expect(entry.status).toBe("failed");
+    expect(entry.title).toBe("Photo import");
+    expect(entry.url).toBeUndefined();
+    expect(entry.reason).toBe(
+      "Gemini is experiencing high demand right now. Please try again in a moment.",
+    );
   });
 });
 

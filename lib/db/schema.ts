@@ -149,7 +149,8 @@ export interface ParseHistoryEntry {
   id: string;
   title: string;
   status: ParseHistoryStatus;
-  url: string;
+  /** Original source link; absent for photo imports. */
+  url?: string;
   reason?: string;
   createdAt: Date;
 }

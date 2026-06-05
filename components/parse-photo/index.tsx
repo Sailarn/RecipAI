@@ -8,10 +8,17 @@ import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { recordParseHistory } from "@/lib/db/parse-history";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
+import {
+  donePhotoHistoryEntry,
+  failedPhotoHistoryEntry,
+} from "@/lib/parse-recipe/parse-history-entry";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
 import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
+import { routes } from "@/lib/routes";
+import { useNavigate } from "@/lib/transitions";
 import { ParseBackgroundBanner } from "../parse-background-banner";
 
 interface ParsePhotoProps {
@@ -22,6 +29,7 @@ interface ParsePhotoProps {
 
 export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
   const t = useTranslations("parse");
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(true);
   const [file, setFile] = useState<File | null>(null);
@@ -73,6 +81,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     parseRecipeFromPhoto(photoFile, comment)
       .then(async (recipe) => {
         if (mountedRef.current) setIsParsing(false);
+        recordParseHistory(donePhotoHistoryEntry(recipe.title)).catch(() => {});
 
         // Hand off only if still on-screen; otherwise fall through to DB+toast path.
         if (capturedOnResult && mountedRef.current) {
@@ -93,11 +102,19 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
       })
       .catch((err) => {
         const msg = err instanceof Error ? err.message : "Parse failed";
+        recordParseHistory(failedPhotoHistoryEntry(msg)).catch(() => {});
         if (mountedRef.current) {
           setIsParsing(false);
           setError(msg);
         } else {
-          toast.error(msg, { duration: 10000, closeButton: true });
+          toast.error(msg, {
+            duration: 10000,
+            closeButton: true,
+            action: {
+              label: "Details",
+              onClick: () => navigate.push(routes.parseHistory(capturedLocale)),
+            },
+          });
         }
       });
   };
