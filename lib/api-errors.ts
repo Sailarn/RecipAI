@@ -6,6 +6,8 @@ export const API_ERROR_MESSAGES = {
   NOT_FOUND: "Not found",
   INTERNAL: "Internal server error",
   INVALID_BODY: "Invalid request body",
+  TOO_MANY_REQUESTS:
+    "Too many requests — please slow down and try again later.",
 } as const;
 
 function captureWithContext(error: unknown, req?: Request) {
@@ -32,6 +34,16 @@ export const ApiError = {
     NextResponse.json(
       { error: API_ERROR_MESSAGES.INVALID_BODY },
       { status: 400 },
+    ),
+  rateLimited: (retryAfterSeconds?: number) =>
+    NextResponse.json(
+      { error: API_ERROR_MESSAGES.TOO_MANY_REQUESTS },
+      {
+        status: 429,
+        headers: retryAfterSeconds
+          ? { "Retry-After": String(retryAfterSeconds) }
+          : undefined,
+      },
     ),
   /** Capture an error in Sentry without changing the response — use when the
    *  catch block has its own response logic (e.g. retry handling). */

@@ -44,6 +44,8 @@ const baseJob = {
   userId: "user-1",
   telegramChatId: "chat-1",
   userComment: null,
+  status: "pending",
+  updatedAt: new Date(),
 };
 
 const baseRecipe = {
@@ -100,6 +102,32 @@ describe("POST /api/parse-queue/process", () => {
     setupDb(null);
     const res = await POST(makeRequest({ jobId: "missing" }));
     expect(res.status).toBe(404);
+  });
+
+  it("does not re-parse a job that is already done", async () => {
+    setupDb({ ...baseJob, status: "done" });
+
+    const res = await POST(makeRequest({ jobId: "job-1" }));
+
+    expect(res.status).toBe(200);
+    expect(parseRecipeFromUrl).not.toHaveBeenCalled();
+  });
+
+  it("does not re-parse a job that is processing in-flight", async () => {
+    setupDb({ ...baseJob, status: "processing", updatedAt: new Date() });
+
+    await POST(makeRequest({ jobId: "job-1" }));
+
+    expect(parseRecipeFromUrl).not.toHaveBeenCalled();
+  });
+
+  it("re-parses a previously failed job", async () => {
+    setupDb({ ...baseJob, status: "failed", telegramChatId: null });
+    vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+    await POST(makeRequest({ jobId: "job-1" }));
+
+    expect(parseRecipeFromUrl).toHaveBeenCalled();
   });
 
   describe("Telegram-triggered save — image upload", () => {

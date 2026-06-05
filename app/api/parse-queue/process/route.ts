@@ -13,6 +13,10 @@ import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;
 
+// A job whose PROCESSING row is newer than this is treated as in-flight, so a
+// replayed call won't kick off a second Gemini parse for the same job.
+const IN_FLIGHT_SECONDS = 90;
+
 export async function POST(req: NextRequest) {
   let body: { jobId?: string };
   try {
@@ -24,17 +28,28 @@ export async function POST(req: NextRequest) {
   const { jobId } = body;
   if (!jobId) return ApiError.badRequest("jobId required");
 
-  await db
-    .update(parseJobs)
-    .set({ status: PARSE_JOB_STATUS.PROCESSING, updatedAt: new Date() })
-    .where(eq(parseJobs.id, jobId));
-
   const [job] = await db
     .select()
     .from(parseJobs)
     .where(eq(parseJobs.id, jobId));
 
   if (!job) return ApiError.notFound("Job not found");
+
+  // Idempotency: never re-run Gemini for a job that's already done or actively
+  // processing — bounds cost against replayed/duplicate process calls.
+  const ageSeconds = (Date.now() - job.updatedAt.getTime()) / 1000;
+  if (
+    job.status === PARSE_JOB_STATUS.DONE ||
+    (job.status === PARSE_JOB_STATUS.PROCESSING &&
+      ageSeconds < IN_FLIGHT_SECONDS)
+  ) {
+    return NextResponse.json({ ok: true });
+  }
+
+  await db
+    .update(parseJobs)
+    .set({ status: PARSE_JOB_STATUS.PROCESSING, updatedAt: new Date() })
+    .where(eq(parseJobs.id, jobId));
 
   try {
     const recipe = await parseWithRetry(

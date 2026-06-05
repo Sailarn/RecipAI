@@ -1,8 +1,16 @@
+import { headers } from "next/headers";
 import { ApiError } from "@/lib/api-errors";
+import { auth } from "@/lib/auth/auth";
 import { callGeminiForRecipePhoto } from "@/lib/gemini";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
+import { enforceParseRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  const limited = await enforceParseRateLimit(request, session?.user.id);
+  if (limited) return limited;
+
   let body: { imageBase64?: string; mimeType?: string; userComment?: string };
   try {
     body = await request.json();

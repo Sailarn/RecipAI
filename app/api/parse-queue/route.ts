@@ -7,6 +7,7 @@ import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
+import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { mintUploadToken } from "@/lib/upload/upload-token";
 
 export async function GET(req: NextRequest) {
@@ -36,6 +37,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
+
+  const limited = await enforceParseRateLimit(req, session?.user.id);
+  if (limited) return limited;
 
   let body: { url?: string; userComment?: string };
   try {

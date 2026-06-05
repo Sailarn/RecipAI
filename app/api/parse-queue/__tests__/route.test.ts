@@ -23,6 +23,9 @@ vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: vi.fn() } },
 }));
 vi.mock("@/lib/auth/require-session", () => ({ requireSession: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({
+  enforceParseRateLimit: vi.fn().mockResolvedValue(null),
+}));
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/upload/upload-token", () => ({
   mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
@@ -30,6 +33,7 @@ vi.mock("@/lib/upload/upload-token", () => ({
 
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
+import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { mintUploadToken } from "@/lib/upload/upload-token";
 import { GET, POST } from "../route";
 
@@ -43,6 +47,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
   vi.mocked(mintUploadToken).mockResolvedValue("mock-upload-token");
+  vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
 });
 
 describe("POST /api/parse-queue", () => {
@@ -52,6 +57,18 @@ describe("POST /api/parse-queue", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body).toEqual({ error: "URL required" });
+  });
+
+  it("returns the rate-limit response when over the limit", async () => {
+    vi.mocked(enforceParseRateLimit).mockResolvedValue(
+      new Response(null, { status: 429 }) as never,
+    );
+
+    const res = await POST(
+      makeRequest({ url: "https://example.com/recipe" }) as never,
+    );
+
+    expect(res.status).toBe(429);
   });
 
   it("returns 400 on invalid JSON body", async () => {

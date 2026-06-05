@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession: vi.fn().mockResolvedValue(null) } },
+}));
+vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
+vi.mock("@/lib/rate-limit", () => ({
+  enforceParseRateLimit: vi.fn().mockResolvedValue(null),
+}));
 vi.mock("@/lib/gemini", () => ({
   callGeminiForRecipePhoto: vi.fn(),
 }));
@@ -10,6 +17,7 @@ vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
 import * as Sentry from "@sentry/nextjs";
 import { callGeminiForRecipePhoto } from "@/lib/gemini";
+import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { POST } from "../photo/route";
 
 const mockRecipe = {
@@ -29,9 +37,23 @@ function makeRequest(body: unknown): Request {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
 });
 
 describe("POST /api/parse-recipe/photo", () => {
+  it("returns the rate-limit response and skips Gemini when over the limit", async () => {
+    vi.mocked(enforceParseRateLimit).mockResolvedValue(
+      new Response(null, { status: 429 }) as never,
+    );
+
+    const res = await POST(
+      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+    );
+
+    expect(res.status).toBe(429);
+    expect(callGeminiForRecipePhoto).not.toHaveBeenCalled();
+  });
+
   it("returns 400 on invalid JSON body", async () => {
     const req = { json: () => Promise.reject(new Error("bad")) } as Request;
 
