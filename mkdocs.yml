@@ -1,0 +1,66 @@
+site_name: RecipAI
+site_description: Offline-first recipe PWA — developer documentation
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep orange
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep orange
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.indexes
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - attr_list
+
+nav:
+  - Overview: index.md
+  - Reference:
+    - Data Model: reference/data-model.md
+    - API Routes: reference/api-routes.md
+    - Library Map: reference/lib-map.md
+    - Environment Variables: reference/env.md
+    - Gotchas: reference/gotchas.md
+  - Explanation:
+    - Parse Pipeline: explanation/parse-pipeline.md
+    - Auth & Sync: explanation/auth-and-sync.md
+    - Local Storage & Sync: explanation/offline-first.md
+    - Architecture Decisions: explanation/decisions.md
+  - How-To:
+    - Run Tests: how-to/run-tests.md
+    - Add an API Route: how-to/add-api-route.md
+    - Add a Dexie Migration: how-to/add-dexie-migration.md
+    - Deploy to Pi: how-to/deploy-pi.md
+    - Deploy to Vercel: how-to/deploy-vercel.md
+  - Tutorial:
+    - Getting Started: tutorial/getting-started.md

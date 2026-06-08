@@ -1,150 +1,56 @@
-# 🍳 Recipe App
+# RecipAI
 
-A mobile-first, offline-capable Progressive Web App for saving and managing your favorite recipes with AI-powered URL parsing.
+AI-powered recipe management app. Import from any URL, Instagram Reel, or photo — recipes are parsed by AI and saved to your device. No account required; sign in to sync across devices.
 
-> **Status:** ✅ Iteration 1 Complete - Full CRUD MVP | 35 tests passing | 89% coverage
+## Features
 
-## ✨ Features
+- **AI import** — paste a URL or upload a photo; the app extracts title, ingredients, steps, and images automatically
+- **Instagram Reels** — video audio is transcribed and parsed into a recipe
+- **Collections** — organise recipes into named groups
+- **Ingredient vocabulary** — ingredients are normalised to a shared vocabulary across your recipes
+- **Pantry** — track what you have at home
+- **Sync** — sign in to back up and access recipes across devices
+- **PWA** — installable on iOS and Android, works offline for browsing saved recipes
+- **Bilingual** — Ukrainian 🇺🇦 and English 🇬🇧
 
-### Current (Iteration 1 - MVP)
-- ✅ Full recipe CRUD (Create, Read, Update, Delete)
-- ✅ Offline-first with IndexedDB storage
-- ✅ PWA installable on mobile devices
-- ✅ Dark/Light theme
-- ✅ Bilingual: Ukrainian 🇺🇦 / English 🇬🇧
-- ✅ Mobile-optimized UI (iPhone-first)
-- ✅ Image preview support (URL/gallery upload)
+## Stack
 
-### Planned (Iteration 2)
-- 🔮 AI-powered recipe extraction from URLs
-- 🔮 Smart servings calculator
-- 🔮 Camera photo capture
-- 🔮 Recipe sorting & search
-- 🔮 Multi-provider AI support (Claude, OpenAI, Gemini)
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16, React 19, TypeScript |
+| Styling | Tailwind CSS v4, Radix UI, Motion |
+| Local storage | Dexie.js (IndexedDB) |
+| Database | Supabase Postgres, Drizzle ORM |
+| Auth | better-auth (Google, Passkey, Telegram) |
+| AI | Gemini + OpenAI fallback |
+| Scraping | PhantomJsCloud (primary), scrape.do (fallback) |
+| Images | ImageKit |
+| Infrastructure | Redis (rate limiting), Sentry, Serwist (PWA) |
+| i18n | next-intl |
+| Testing | Vitest, React Testing Library |
 
-## 🛠 Tech Stack
-
-**Frontend:**
-- [Next.js 15](https://nextjs.org/) with App Router (stable)
-- [TypeScript 5.9](https://www.typescriptlang.org/)
-- [Tailwind CSS 3.4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) (iteration 2)
-- [Dexie.js 4.x](https://dexie.org/) (IndexedDB wrapper)
-- [React Hook Form 7.x](https://react-hook-form.com/) + [Zod 3.x](https://zod.dev/)
-- [Bun 1.3+](https://bun.sh/) (package manager)
-- [Biome 2.4](https://biomejs.dev/) (linting + formatting)
-
-**Infrastructure:**
-- [Vercel](https://vercel.com/) (deployment)
-- [Sentry](https://sentry.io/) (error tracking)
-- [ImageKit.io](https://imagekit.io/) (future: image hosting)
-
-**Testing:**
-- [Vitest](https://vitest.dev/) (unit tests)
-- [React Testing Library](https://testing-library.com/react) (component tests)
-- [Playwright](https://playwright.dev/) (future: E2E tests)
-
-## 🚀 Getting Started
+## Getting started
 
 ```bash
-# Install dependencies
 bun install
-
-# Run development server
-bun dev
-
-# Run tests
-bun test
-
-# Run tests with UI
-bun run test:ui
-
-# Generate coverage report
-bun run test:coverage
-
-# Lint and format code
-bun run check
-
-# Build for production
-bun run build
+cp .env.example .env.local   # fill in required vars
+bun run db:migrate
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+See [docs/tutorial/getting-started.md](docs/tutorial/getting-started.md) for the full setup guide including required environment variables.
 
-## 📱 Installation (PWA)
-
-### iOS (Safari)
-1. Open the app in Safari
-2. Tap the Share button
-3. Select "Add to Home Screen"
-4. Tap "Add"
-
-### Android (Chrome)
-1. Open the app in Chrome
-2. Tap the menu (three dots)
-3. Select "Add to Home Screen"
-4. Tap "Add"
-
-## 📚 Documentation
-
-- **[Full Specification](./docs/SPECIFICATION.md)** - Complete project requirements and roadmap
-- **Architecture** (coming soon)
-- **API Documentation** (coming soon)
-
-## 🗺️ Roadmap
-
-- [x] Project setup and architecture
-- [x] **Iteration 1:** CRUD MVP with offline support ← *✅ COMPLETE (35 tests, 89% coverage)*
-- [ ] **Iteration 2:** AI parsing & servings calculator ← *next*
-- [ ] **Iteration 3:** Accessibility improvements
-- [ ] **Future:** Cloud sync, user accounts, recipe sharing
-
-## 🧪 Testing
-
-**Current Status:** ✅ 35 tests passing | 89% coverage
+## Commands
 
 ```bash
-# Run all tests
-bun test
-
-# Run specific test file
-bun test recipe-form
-
-# Open test UI
-bun run test:ui
-
-# Coverage report
-bun run test:coverage
+bun run dev           # dev server (Turbopack, localhost:3000)
+bun run build         # production build (webpack — required for PWA)
+bun run test          # Vitest (watch mode)
+bun run test --run    # Vitest (single run, CI)
+bun run check:ci      # Biome lint + format check (warnings = errors)
+bun run docs          # MkDocs preview (localhost:8000)
 ```
 
-**Coverage Breakdown:**
-- Database layer: 100%
-- Recipe detail: 100%
-- Recipe list: 100%
-- Delete modal: 100%
-- Recipe form: 75%
+## Docs
 
-**Test Strategy:**
-- Unit tests for business logic (Vitest)
-- Component tests for UI (React Testing Library)
-- E2E tests for critical flows (Playwright - iteration 2)
-- Target: 80%+ code coverage
-
-## 🌍 Internationalization
-
-Currently supports:
-- 🇺🇦 Ukrainian (default)
-- 🇬🇧 English
-
-Translation contributions welcome!
-
-## 📝 License
-
-This is a personal learning project. License TBD.
-
-## 🤝 Contributing
-
-This is primarily a personal learning project, but feedback and suggestions are welcome!
-
----
-
-**Built with ❤️ for personal use and skill development**
+Developer documentation lives in `docs/` and is viewable with `bun run docs`.

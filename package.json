@@ -20,7 +20,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "release": "release-it"
+    "release": "release-it",
+    "docs": "python3 -m mkdocs serve",
+    "docs:build": "python3 -m mkdocs build --strict"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.5.6",

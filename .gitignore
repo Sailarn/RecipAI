@@ -53,8 +53,12 @@ next-env.d.ts
 /RecipAI Design System
 /design-spec
 
-# markdown — ignore all .md files except README.md
+# markdown — ignore all .md files except README.md and the docs/ site
 *.md
 !README.md
+!docs/**
 # Debug-script output dumps
 scripts/out/
+
+# MkDocs build output
+/site/
