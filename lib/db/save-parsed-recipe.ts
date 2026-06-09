@@ -7,6 +7,7 @@ import type { ParsedRecipeEntry, Recipe } from "./schema";
 
 export async function saveParsedRecipe(
   entry: ParsedRecipeEntry,
+  uploadToken?: string,
 ): Promise<void> {
   // save immediately with original URLs
   const id = await createRecipe({
@@ -43,9 +44,11 @@ export async function saveParsedRecipe(
     const updates: Partial<Recipe> = {};
     let hasUpdates = false;
 
+    const uploadOptions = uploadToken ? { uploadToken } : undefined;
+
     if (entry.imageUrl && !isImageKitUrl(entry.imageUrl)) {
       try {
-        const uploaded = await uploadImage(entry.imageUrl);
+        const uploaded = await uploadImage(entry.imageUrl, uploadOptions);
         updates.imageUrl = uploaded.url;
         updates.imageFileId = uploaded.fileId;
         hasUpdates = true;
@@ -62,7 +65,7 @@ export async function saveParsedRecipe(
         };
         if (step.imageUrl && !isImageKitUrl(step.imageUrl)) {
           try {
-            const uploaded = await uploadImage(step.imageUrl);
+            const uploaded = await uploadImage(step.imageUrl, uploadOptions);
             hasUpdates = true;
             return { ...step, imageUrl: uploaded.url };
           } catch {}

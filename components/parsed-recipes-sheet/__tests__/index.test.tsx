@@ -194,6 +194,7 @@ describe("ParsedRecipesSheet", () => {
       await waitFor(() => {
         expect(saveParsedRecipe).toHaveBeenCalledWith(
           expect.objectContaining({ id: "p0" }),
+          undefined,
         );
         expect(db.parsedRecipes.delete).toHaveBeenCalledWith("p0");
         expect(toast.success).toHaveBeenCalledWith("Recipe saved!");

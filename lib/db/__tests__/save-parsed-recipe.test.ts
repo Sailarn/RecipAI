@@ -136,6 +136,7 @@ describe("saveParsedRecipe", () => {
 
       expect(uploadImage).toHaveBeenCalledWith(
         "https://external.com/image.jpg",
+        undefined,
       );
       const [id, updates] = vi.mocked(updateRecipe).mock.calls[0];
       expect(id).toBe("new-recipe-id");

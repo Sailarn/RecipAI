@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
+import { getPendingUploadToken } from "@/lib/parse-job-storage";
 import { useEmbedDownload } from "@/lib/parse-recipe/use-embed-download";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -50,18 +51,21 @@ export function ParsedRecipesSheet() {
     const entry = await db.parsedRecipes.get(id);
     if (!entry) return;
 
+    const uploadToken = getPendingUploadToken() ?? undefined;
+    const uploadOptions = uploadToken ? { uploadToken } : undefined;
+
     let imageUrl = entry.imageUrl;
     let imageFileId: string | undefined;
 
     if (imageUrl && !isImageKitUrl(imageUrl)) {
       try {
-        const uploaded = await uploadImage(imageUrl);
+        const uploaded = await uploadImage(imageUrl, uploadOptions);
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
       } catch {}
     }
 
-    await saveParsedRecipe({ ...entry, imageUrl, imageFileId });
+    await saveParsedRecipe({ ...entry, imageUrl, imageFileId }, uploadToken);
     await db.parsedRecipes.delete(id);
     toast.success("Recipe saved!");
   };

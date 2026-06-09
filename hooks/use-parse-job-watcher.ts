@@ -8,6 +8,7 @@ import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
 import {
   getJobIds,
+  getPendingUploadToken,
   getUploadToken,
   removeJobId,
   storePendingUploadToken,
@@ -71,7 +72,10 @@ export function useParseJobWatcher() {
         action: {
           label: "Save",
           onClick: async () => {
-            await saveParsedRecipe(updatedEntry);
+            await saveParsedRecipe(
+              updatedEntry,
+              getPendingUploadToken() ?? undefined,
+            );
             await db.parsedRecipes.delete(updatedEntry.id);
             toast.success("Recipe saved!");
           },
