@@ -1,5 +1,5 @@
 site_name: RecipAI
-site_description: Offline-first recipe PWA — developer documentation
+site_description: RecipAI — developer documentation
 docs_dir: docs
 
 theme:
