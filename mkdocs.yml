@@ -54,7 +54,7 @@ nav:
   - Explanation:
     - Parse Pipeline: explanation/parse-pipeline.md
     - Auth & Sync: explanation/auth-and-sync.md
-    - Local Storage & Sync: explanation/offline-first.md
+    - Local Storage & Sync: explanation/local-storage-and-sync.md
     - Architecture Decisions: explanation/decisions.md
   - How-To:
     - Run Tests: how-to/run-tests.md
