@@ -137,7 +137,7 @@ export function PantryPage() {
         data-testid="add-pantry-item"
         onClick={() => setShowAddSheet(true)}
         aria-label="Add pantry item"
-        className="absolute right-5 bottom-[calc(env(safe-area-inset-bottom)+88px)] w-13 h-13 rounded-full bg-[rgba(251,191,36,0.9)] border-none cursor-pointer flex items-center justify-center shadow-[0_4px_20px_rgba(251,191,36,0.35)] z-[100]"
+        className="absolute right-5 bottom-[calc(env(safe-area-inset-bottom)+100px)] w-13 h-13 rounded-full bg-[rgba(251,191,36,0.9)] border-none cursor-pointer flex items-center justify-center shadow-[0_4px_20px_rgba(251,191,36,0.35)] z-[100]"
       >
         <Plus size={22} className="text-[#1a0f00]" />
       </button>

@@ -6,7 +6,7 @@ export const PILL_H = 45;
 
 // Nav layout constants — exported so index.tsx can reuse them for styling.
 export const MAIN_NAV_W = 260;
-const NAV_H = 48;
+const NAV_H = 56;
 const ITEM_COUNT = 3; // Recipes · AI Import · Profile
 
 export const SPRING = {
@@ -26,7 +26,10 @@ export type Measure = {
 // No DOM measurement is needed or attempted — this eliminates the timing bug
 // where getBoundingClientRect() read mid-CSS-transition (80→260px on pantry
 // return) and stored permanently wrong positions.
-const ITEM_W = MAIN_NAV_W / ITEM_COUNT;
+// The items live in the nav's padding box (MAIN_NAV_W minus the 1px glass
+// border each side), so the pill must map into that inner width — otherwise it
+// drifts right and the end items sit unevenly from the edges.
+const ITEM_W = (MAIN_NAV_W - 2) / ITEM_COUNT;
 
 const STATIC_MEASURE: Measure = {
   itemWidths: Array<number>(ITEM_COUNT).fill(ITEM_W),

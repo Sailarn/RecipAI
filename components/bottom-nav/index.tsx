@@ -26,7 +26,7 @@ const WIDTH_TRANSITION =
   "width 0.46s cubic-bezier(0.34, 1.4, 0.64, 1), min-width 0.46s cubic-bezier(0.34, 1.4, 0.64, 1)";
 
 const PILL_BASE_CLASS =
-  "flex items-center justify-center rounded-[28px] overflow-hidden relative shrink-0 h-12";
+  "flex items-center justify-center rounded-[28px] overflow-hidden relative shrink-0 h-14";
 
 export function BottomNav() {
   const params = useParams();
@@ -69,7 +69,7 @@ export function BottomNav() {
 
   if (shouldHide) return null;
 
-  const navH = measure?.innerHeight ?? 48;
+  const navH = measure?.innerHeight ?? 56;
   const yNormal = (navH - 2 - PILL_H) / 2;
   const isAiActive = staticActiveIndex === 1;
 
@@ -82,7 +82,7 @@ export function BottomNav() {
     );
 
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 bottom-[calc(env(safe-area-inset-bottom)+20px)]">
+    <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 bottom-[calc(env(safe-area-inset-bottom)+32px)]">
       {/* Left pill — main nav (260px) or recipes item (80px) in pantry mode */}
       <nav
         className={`glass-nav select-none touch-none ${PILL_BASE_CLASS}`}

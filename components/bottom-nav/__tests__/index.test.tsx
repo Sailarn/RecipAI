@@ -25,7 +25,7 @@ vi.mock("../use-bottom-nav", () => ({
   useBottomNav: vi.fn().mockReturnValue({
     ready: false,
     leftMv: { set: vi.fn(), get: vi.fn() },
-    measure: { itemWidths: [], itemLefts: [], innerHeight: 48 },
+    measure: { itemWidths: [], itemLefts: [], innerHeight: 56 },
   }),
 }));
 
