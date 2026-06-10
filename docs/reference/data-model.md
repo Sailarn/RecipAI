@@ -155,6 +155,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `url` | text | |
 | `user_comment` | text | Optional hint passed to AI |
 | `telegram_chat_id` | text | Set when job originates from the Telegram bot |
+| `push_endpoint` | text | Nullable. The push subscription endpoint to notify when the job completes |
 | `status` | text | `pending` / `processing` / `done` / `failed` |
 | `result` | jsonb | `ParsedRecipe` payload when done |
 | `error` | text | Failure message when failed |
@@ -167,6 +168,18 @@ Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliase
 ### `pantry`
 
 `id`, `user_id` (FK → `user`), `ingredient_id` (nullable FK → `ingredients`, set null on delete), `name`, `qty`, `unit`, `cat`, `on` (boolean), `added_at`.
+
+### `push_subscriptions`
+
+Stores browser push subscriptions so the server can send notifications when a parse job completes.
+
+| Column | Type | Notes |
+|---|---|---|
+| `endpoint` | text PK | Browser push endpoint URL |
+| `p256dh` | text | Client public key (base64url) |
+| `auth` | text | Client auth secret (base64url) |
+| `user_id` | text | Nullable FK → `user`. Linked when the subscribing browser has an active session |
+| `created_at` | timestamp | |
 
 ### Auth tables
 

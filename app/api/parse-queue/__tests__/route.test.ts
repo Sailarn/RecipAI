@@ -124,6 +124,50 @@ describe("POST /api/parse-queue", () => {
     );
   });
 
+  it("stores null userId when the session id is an empty string", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue({
+      user: { id: "" },
+    } as never);
+
+    const { db } = await import("@/db");
+
+    await POST(makeRequest({ url: "https://example.com/recipe" }) as never);
+
+    const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: null }),
+    );
+  });
+
+  it("stores the pushEndpoint when provided", async () => {
+    const { db } = await import("@/db");
+
+    await POST(
+      makeRequest({
+        url: "https://example.com/recipe",
+        pushEndpoint: "https://web.push.apple.com/abc",
+      }) as never,
+    );
+
+    const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pushEndpoint: "https://web.push.apple.com/abc",
+      }),
+    );
+  });
+
+  it("stores null pushEndpoint when omitted", async () => {
+    const { db } = await import("@/db");
+
+    await POST(makeRequest({ url: "https://example.com/recipe" }) as never);
+
+    const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ pushEndpoint: null }),
+    );
+  });
+
   it("mints an upload token on every successful request", async () => {
     await POST(makeRequest({ url: "https://example.com/recipe" }) as never);
 

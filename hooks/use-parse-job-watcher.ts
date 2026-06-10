@@ -140,15 +140,15 @@ export function useParseJobWatcher() {
 
   useEffect(() => {
     // check on mount
-    const savedJobIds = getJobIds();
+    const savedJobIds = getJobIds().filter(Boolean);
     savedJobIds.forEach((jobId) => {
       poll(jobId);
     });
 
     // listen for new jobs created after mount
     const handler = (event: Event) => {
-      const { jobId } = (event as CustomEvent).detail;
-      poll(jobId);
+      const { jobId } = (event as CustomEvent<{ jobId: string }>).detail;
+      if (jobId) poll(jobId);
     };
     window.addEventListener("parse-job-created", handler);
 

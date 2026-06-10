@@ -58,6 +58,24 @@ describe("addJobId", () => {
     addJobId("job-1");
     expect(getJobIds()).toEqual(["job-1"]);
   });
+
+  it("ignores a falsy jobId instead of storing it", () => {
+    addJobId(undefined as unknown as string);
+    addJobId("");
+
+    expect(getJobIds()).toEqual([]);
+  });
+});
+
+describe("getJobIds — corrupted entries", () => {
+  it("filters out null, empty, and non-string entries", () => {
+    localStorage.setItem(
+      "parseJobIds",
+      JSON.stringify([null, "", "job-1", 42, undefined, "job-2"]),
+    );
+
+    expect(getJobIds()).toEqual(["job-1", "job-2"]);
+  });
 });
 
 describe("removeJobId", () => {

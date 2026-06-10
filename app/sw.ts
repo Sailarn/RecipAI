@@ -59,3 +59,42 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+self.addEventListener("push", (event: PushEvent) => {
+  let data: { title?: string; body?: string; url?: string } = {};
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = { title: "RecipAI", body: event.data?.text() ?? "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title ?? "RecipAI", {
+      body: data.body ?? "",
+      icon: "/icon-192x192.png",
+      badge: "/icon-192x192.png",
+      tag: "recipe-parse",
+      data: { url: data.url ?? "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
+  event.notification.close();
+  const targetUrl: string = event.notification.data?.url ?? "/";
+  event.waitUntil(
+    (async () => {
+      const allClients = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of allClients) {
+        if (client.url === targetUrl && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })(),
+  );
+});

@@ -6,12 +6,15 @@ vi.mock("@/db", () => ({
     update: vi.fn(),
     select: vi.fn(),
     insert: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 vi.mock("@/db/schema/parse-jobs", () => ({ parseJobs: {} }));
 vi.mock("@/db/schema/recipes", () => ({ recipes: {} }));
-vi.mock("drizzle-orm", () => ({ eq: vi.fn() }));
+vi.mock("@/db/schema/push-subscriptions", () => ({ pushSubscriptions: {} }));
+vi.mock("drizzle-orm", () => ({ eq: vi.fn(), relations: vi.fn() }));
+vi.mock("@/lib/web-push", () => ({ sendPushNotification: vi.fn() }));
 
 vi.mock("@/lib/upload/imagekit", () => ({
   uploadImageServer: vi.fn(),
@@ -33,6 +36,7 @@ import { db } from "@/db";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
+import { sendPushNotification } from "@/lib/web-push";
 import { POST } from "../route";
 
 const IMAGEKIT_URL = "https://ik.imagekit.io/test/recipes/recipe-123.jpg";
@@ -84,7 +88,15 @@ function setupDb(job: object | null) {
   const insertChain = { values: vi.fn().mockResolvedValue(undefined) };
   vi.mocked(db.insert).mockReturnValue(insertChain as any);
 
-  return { updateChain, selectChain, insertChain };
+  const deleteChain = { where: vi.fn().mockResolvedValue(undefined) };
+  vi.mocked(db.delete).mockReturnValue(deleteChain as any);
+
+  return { updateChain, selectChain, insertChain, deleteChain };
+}
+
+// Lets the fire-and-forget push `.catch()` chain settle before assertions.
+function flushMicrotasks() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 beforeEach(() => {
@@ -128,6 +140,66 @@ describe("POST /api/parse-queue/process", () => {
     await POST(makeRequest({ jobId: "job-1" }));
 
     expect(parseRecipeFromUrl).toHaveBeenCalled();
+  });
+
+  describe("Web push notification", () => {
+    it("sends a push when the job has a subscribed endpoint", async () => {
+      setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: "https://web.push.apple.com/abc",
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendPushNotification).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ title: "Pasta" }),
+      );
+    });
+
+    it("does not send a push when the job has no endpoint", async () => {
+      setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendPushNotification).not.toHaveBeenCalled();
+    });
+
+    it("prunes the subscription when the push service reports it expired", async () => {
+      const { deleteChain } = setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        endpoint: "https://web.push.apple.com/gone",
+        pushEndpoint: "https://web.push.apple.com/gone",
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(sendPushNotification).mockRejectedValue({ statusCode: 410 });
+
+      await POST(makeRequest({ jobId: "job-1" }));
+      await flushMicrotasks();
+
+      expect(db.delete).toHaveBeenCalled();
+      expect(deleteChain.where).toHaveBeenCalled();
+    });
+
+    it("keeps the subscription when the push fails for a transient reason", async () => {
+      setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        endpoint: "https://web.push.apple.com/abc",
+        pushEndpoint: "https://web.push.apple.com/abc",
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(sendPushNotification).mockRejectedValue({ statusCode: 500 });
+
+      await POST(makeRequest({ jobId: "job-1" }));
+      await flushMicrotasks();
+
+      expect(db.delete).not.toHaveBeenCalled();
+    });
   });
 
   describe("Telegram-triggered save — image upload", () => {

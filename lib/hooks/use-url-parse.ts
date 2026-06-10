@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
+import { usePushSubscription } from "@/lib/hooks/use-push-subscription";
 import { logger } from "@/lib/logger";
 import {
   addJobId,
@@ -36,6 +37,8 @@ function isValidUrl(value: string): boolean {
 export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { subscription, subscribe, isSupported, permission } =
+    usePushSubscription();
 
   const [url, setUrl] = useState("");
   const [userComment, setUserComment] = useState("");
@@ -105,12 +108,30 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     setResult(null);
 
     try {
+      // Subscribe to push notifications if not yet subscribed.
+      // Race against a 3s timeout so a stuck serviceWorker.ready (e.g. Chrome
+      // on iOS WKWebView) never blocks the parse from starting.
+      let pushEndpoint: string | undefined;
+      if (isSupported && permission !== "denied") {
+        const timeout = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 3000),
+        );
+        const sub =
+          subscription ?? (await Promise.race([subscribe(), timeout]));
+        pushEndpoint = sub?.endpoint;
+      }
+
       const res = await fetch(api.parseQueue, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, userComment: userComment || undefined }),
+        body: JSON.stringify({
+          url,
+          userComment: userComment || undefined,
+          pushEndpoint,
+        }),
       });
 
+      if (!res.ok) throw new Error("Failed to create parse job");
       const { jobId: newJobId, uploadToken } = await res.json();
       addJobId(newJobId, uploadToken);
       setJobId(newJobId);

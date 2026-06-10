@@ -11,13 +11,19 @@ export function getJobIds(): string[] {
     return [legacyJobId];
   }
   try {
-    return JSON.parse(localStorage.getItem(PARSE_JOB_IDS_KEY) || "[]");
+    const parsed: unknown[] = JSON.parse(
+      localStorage.getItem(PARSE_JOB_IDS_KEY) || "[]",
+    );
+    return parsed.filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
   } catch {
     return [];
   }
 }
 
 export function addJobId(jobId: string, uploadToken?: string) {
+  if (!jobId) return;
   const ids = getJobIds();
   if (!ids.includes(jobId)) {
     localStorage.setItem(PARSE_JOB_IDS_KEY, JSON.stringify([...ids, jobId]));

@@ -34,4 +34,5 @@ export const api = {
   ingredients: "/api/ingredients",
   ingredientsEnrich: "/api/ingredients/enrich",
   pantry: "/api/pantry",
+  pushSubscribe: "/api/push/subscribe",
 } as const;

@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
   const limited = await enforceParseRateLimit(req, session?.user.id);
   if (limited) return limited;
 
-  let body: { url?: string; userComment?: string };
+  let body: { url?: string; userComment?: string; pushEndpoint?: string };
   try {
     body = await req.json();
   } catch {
     return ApiError.invalidBody();
   }
 
-  const { url, userComment } = body;
+  const { url, userComment, pushEndpoint } = body;
   if (!url) return ApiError.badRequest("URL required");
 
   const id = crypto.randomUUID();
@@ -56,9 +56,10 @@ export async function POST(req: NextRequest) {
   try {
     await db.insert(parseJobs).values({
       id,
-      userId: session?.user.id ?? null,
+      userId: session?.user.id || null,
       url,
       userComment: userComment ?? null,
+      pushEndpoint: pushEndpoint ?? null,
       status: PARSE_JOB_STATUS.PENDING,
     });
 

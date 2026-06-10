@@ -86,6 +86,17 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 
 ---
 
+## Web Push
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/push/subscribe` | None (session optional) | Upsert a push subscription (`{ endpoint, keys: { p256dh, auth } }`). If a session is present the subscription is linked to the user. |
+| `DELETE` | `/api/push/subscribe` | None | Remove a push subscription by `{ endpoint }`. |
+
+The server sends a push notification via VAPID when a parse job completes (`POST /api/parse-queue/process`). The client passes its subscription endpoint when creating a job; the process route looks up the full subscription and fires the notification.
+
+---
+
 ## Auth
 
 | Route | Description |

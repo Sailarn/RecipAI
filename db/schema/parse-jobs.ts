@@ -15,6 +15,7 @@ export const parseJobs = pgTable("parse_jobs", {
     .default(PARSE_JOB_STATUS.PENDING),
   result: jsonb("result"),
   error: text("error"),
+  pushEndpoint: text("push_endpoint"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

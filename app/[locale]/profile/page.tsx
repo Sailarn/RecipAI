@@ -1,12 +1,22 @@
 "use client";
 
-import { ChevronRight, Globe, History, Info, Moon } from "lucide-react";
+import {
+  ChevronRight,
+  Globe,
+  History,
+  Info,
+  Moon,
+  Smartphone,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { InstallPwaSheet } from "@/components/install-pwa-sheet";
 import { ParseHistoryView } from "@/components/parse-history-view";
 import { ProfileAuth } from "@/components/profile-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
+import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -33,6 +43,17 @@ export default function ProfilePage() {
   const locale = params.locale as Locale;
   const nextLocale =
     locales.find((candidateLocale) => candidateLocale !== locale) ?? locales[0];
+  const { showInstallOption, install, isIOS } = usePwaInstall();
+  const [showInstallSheet, setShowInstallSheet] = useState(false);
+
+  const handleInstall = async () => {
+    if (isIOS) {
+      setShowInstallSheet(true);
+      return;
+    }
+    const prompted = await install();
+    if (!prompted) setShowInstallSheet(true);
+  };
 
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,6 +133,29 @@ export default function ProfilePage() {
 
           <RowDivider />
 
+          {showInstallOption && (
+            <>
+              <button
+                type="button"
+                onClick={handleInstall}
+                className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
+              >
+                <Smartphone
+                  size={ROW_ICON_SIZE}
+                  strokeWidth={ROW_ICON_STROKE_WIDTH}
+                  className={ROW_ICON_CLASSES}
+                />
+                <span className={ROW_LABEL_CLASSES}>Add to Home Screen</span>
+                <ChevronRight
+                  size={CHEVRON_ICON_SIZE}
+                  strokeWidth={CHEVRON_STROKE_WIDTH}
+                  className="shrink-0 text-[var(--fg-3)]"
+                />
+              </button>
+              <RowDivider />
+            </>
+          )}
+
           <div className={`${ROW_CLASSES} cursor-default`}>
             <Info
               size={ROW_ICON_SIZE}
@@ -125,6 +169,13 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {showInstallSheet && (
+        <InstallPwaSheet
+          isIOS={isIOS}
+          onClose={() => setShowInstallSheet(false)}
+        />
+      )}
     </div>
   );
 }

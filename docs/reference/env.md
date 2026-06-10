@@ -72,6 +72,21 @@ All image uploads go through [ImageKit](https://imagekit.io).
 
 ---
 
+## Web Push
+
+VAPID keys are required to send web push notifications when a recipe parse completes. Generate a fresh pair with `bunx web-push generate-vapid-keys`.
+
+| Variable | Required | Description |
+|---|---|---|
+| `VAPID_PUBLIC_KEY` | Yes* | VAPID public key (URL-safe base64). |
+| `VAPID_PRIVATE_KEY` | Yes* | VAPID private key (URL-safe base64). |
+| `VAPID_SUBJECT` | Yes* | Contact email for push services (e.g. `mailto:you@example.com`). |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Yes* | Same as `VAPID_PUBLIC_KEY` — exposed to the client so the browser can subscribe. |
+
+\*Required for push notifications. Omit all four to disable push: the client gates subscription on `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, so the browser never subscribes, and the server send becomes a no-op. The `/api/push/subscribe` route itself does **not** use the VAPID keys (it only stores the subscription), so it keeps working regardless.
+
+---
+
 ## Infrastructure
 
 | Variable | Required | Description |
