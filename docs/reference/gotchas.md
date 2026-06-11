@@ -76,7 +76,7 @@ Never hand-roll `NextResponse.json({ error }, { status })`. Use `ApiError.unauth
 ## Overflow detection
 
 **Use `getBoundingClientRect`, not `scrollHeight`.**
-`scrollHeight` is inflated under `overflow: hidden`. Compare `getBoundingClientRect` heights to detect actual overflow. See `lib/hooks/use-scroll-overflow.ts`.
+`scrollHeight` is inflated under `overflow: hidden`. Compare `getBoundingClientRect` heights to detect actual overflow. See `components/recipe-form/use-scroll-overflow.ts`.
 
 ---
 

@@ -83,7 +83,7 @@ No account is required for parsing and saving. Recipes are stored locally in Ind
 
 ```bash
 bun run check:ci    # lint + format check
-bun run test --run  # 781 tests, all should pass
+bun run test --run  # full test suite, all should pass
 ```
 
 ---
