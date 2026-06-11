@@ -48,6 +48,18 @@ Everything works without an account:
 - Parse history is recorded in Dexie `parseHistory` locally.
 - On login, anonymous jobs are **claimed** — `POST /api/parse-queue/claim` sets their `user_id` to the now-signed-in user, and the full server history is pulled into Dexie.
 
+### Ingredient vocabulary stays local for anonymous users
+
+When a parsed ingredient has no match in the vocabulary, the app creates a **provisional** entry (`createProvisional` in `lib/parse-recipe/normalize-ingredients.ts`). For anonymous users this entry exists in local Dexie only:
+
+- The server upsert (`POST /api/ingredients`) goes through `syncFetch`, which is a no-op when signed out.
+- AI enrichment (`enrichIngredient` in `lib/parse-recipe/enrich-ingredient.ts`) early-returns when signed out, so the entry never gets translated, categorised, or aliased — it stays `provisional` with the raw parsed text as its name.
+- Both server routes (`POST /api/ingredients`, `POST /api/ingredients/enrich`) require a session. Only `GET /api/ingredients` (confirmed vocabulary download) is public.
+
+This is **intentional**, not a bug: AI enrichment costs money per call, and the shared vocabulary is a curated dataset — both are reserved for signed-in users as a login incentive. Anonymous users still get full local matching against the public confirmed vocabulary; only *new* entries stay raw.
+
+The limitation heals on login: `syncIngredients` (`hooks/use-sync-on-login.ts`) re-submits stuck provisional entries to `/api/ingredients/enrich` (up to 3 retries, 5-minute backoff), so vocabulary created while anonymous gets enriched and confirmed once the user signs in.
+
 ---
 
 ## Service worker (`@serwist/next`)

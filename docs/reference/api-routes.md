@@ -70,7 +70,10 @@ Both routes accept either a valid session **or** a short-lived upload token (min
 | Method | Route | Auth | Description |
 |---|---|---|---|
 | `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary ingredients. Supports `?since=<ISO>` for delta sync. |
+| `POST` | `/api/ingredients` | Session required | Create a provisional vocabulary entry (`{ id, en, ua?, category? }`). Conflict-safe (`onConflictDoNothing`). |
 | `POST` | `/api/ingredients/enrich` | Session required | Enrich a provisional ingredient via AI (fills `en`, `ua`, `category`, aliases). |
+
+For anonymous users the `POST` routes are skipped client-side — provisional entries stay in local Dexie only. See [Local storage & sync](../explanation/local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
 
 ---
 
