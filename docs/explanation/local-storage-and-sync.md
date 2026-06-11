@@ -56,7 +56,7 @@ When a parsed ingredient has no match in the vocabulary, the app creates a **pro
 - AI enrichment (`enrichIngredient` in `lib/parse-recipe/enrich-ingredient.ts`) early-returns when signed out, so the entry never gets translated, categorised, or aliased — it stays `provisional` with the raw parsed text as its name.
 - Both server routes (`POST /api/ingredients`, `POST /api/ingredients/enrich`) require a session. Only `GET /api/ingredients` (confirmed vocabulary download) is public.
 
-This is **intentional**, not a bug: AI enrichment costs money per call, and the shared vocabulary is a curated dataset — both are reserved for signed-in users as a login incentive. Anonymous users still get full local matching against the public confirmed vocabulary; only *new* entries stay raw.
+This is **intentional**, not a bug: AI enrichment costs money per call, and the shared vocabulary is a curated dataset — both are reserved for signed-in users as a login incentive. Anonymous users still get [embedding-based matching](ingredient-vocabulary.md#signed-in-vs-anonymous) against the public confirmed vocabulary (`vocab-embeddings.json` is a static file); what they miss is alias-based fuzzy matching — the vocabulary itself is only pulled into Dexie on login — and enrichment of new entries.
 
 The limitation heals on login: `syncIngredients` (`hooks/use-sync-on-login.ts`) re-submits stuck provisional entries to `/api/ingredients/enrich` (up to 3 retries, 5-minute backoff), so vocabulary created while anonymous gets enriched and confirmed once the user signs in.
 

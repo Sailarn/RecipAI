@@ -154,3 +154,9 @@ The counter uses Redis `INCR` + `EXPIRE`. Rate limiting **fails open** — if Re
 ## Parse history (`lib/db/parse-history.ts`)
 
 Every finished parse (done or failed) is recorded locally in Dexie `parseHistory`. The table is capped at 100 entries (oldest pruned). On login, the client syncs its local history with the server via the claim + pull flow in `useSyncOnLogin`.
+
+---
+
+## After parsing: ingredient normalization
+
+A `ParsedRecipe` is not the end of the line — when it is saved, every ingredient string is matched against the canonical vocabulary (fuzzy match → on-device embeddings → provisional creation + AI enrichment) to populate `canonicalIngredientIds`. That pipeline has its own page: [Ingredient Vocabulary](ingredient-vocabulary.md).
