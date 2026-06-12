@@ -72,6 +72,19 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 ---
 
+## Observability / Telemetry
+
+| Task | File |
+|---|---|
+| Add or change an analytics event | `lib/telemetry/events.ts` |
+| Change the telemetry mode (consent gating) | `lib/telemetry/consent.ts` |
+| Wire PostHog client (browser SDK) | `lib/telemetry/posthog-client.ts` |
+| Wire PostHog server (Node SDK) | `lib/telemetry/posthog-server.ts` |
+| Wire Axiom structured logs | `lib/telemetry/axiom.ts` |
+| Call an event or log in app code | `lib/telemetry/index.ts` (`trackEvent`, `log`) |
+
+---
+
 ## Infrastructure
 
 | File | Purpose |

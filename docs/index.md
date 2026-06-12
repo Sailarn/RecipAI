@@ -12,6 +12,7 @@ AI-powered recipe management app. Import from any URL, Instagram Reel, or photo 
 |---|---|
 | Understand how parsing works | [Parse Pipeline](explanation/parse-pipeline.md) |
 | Understand ingredient matching | [Ingredient Vocabulary](explanation/ingredient-vocabulary.md) |
+| Understand analytics and error monitoring | [Observability](explanation/observability.md) |
 | Understand local storage and sync | [Local Storage & Sync](explanation/local-storage-and-sync.md) |
 | Look up a Dexie table or Postgres column | [Data Model](reference/data-model.md) |
 | Find which file to edit | [Library Map](reference/lib-map.md) |

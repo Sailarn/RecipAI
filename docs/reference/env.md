@@ -93,3 +93,20 @@ VAPID keys are required to send web push notifications when a recipe parse compl
 |---|---|---|
 | `REDIS_URL` | Yes | Redis connection URL (Upstash or self-hosted). Used for AI parse rate limiting — anonymous: 15 req/hour, signed-in: 60 req/hour. Rate limiting fails open if Redis is unreachable, but the app will not start if this variable is missing entirely. |
 | `NEXT_PUBLIC_SENTRY_DSN` | No | Sentry DSN for error reporting. Omit to disable Sentry. |
+
+---
+
+## Analytics
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_POSTHOG_KEY` | No | PostHog Cloud EU project API key. Omit to disable all PostHog analytics and session replay. Events are sent via the `/ingest` Next.js rewrite proxy to bypass adblockers; the EU endpoint is hardcoded in `next.config.ts`. |
+
+---
+
+## Logging
+
+| Variable | Required | Description |
+|---|---|---|
+| `AXIOM_TOKEN` | No | Axiom API token for structured server logs (AI call cost, rate limit hits, enrich completions). Omit to disable. |
+| `AXIOM_DATASET` | No | Axiom dataset name (default: `recipai`). |
