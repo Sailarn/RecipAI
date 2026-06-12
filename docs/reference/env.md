@@ -110,3 +110,12 @@ VAPID keys are required to send web push notifications when a recipe parse compl
 |---|---|---|
 | `AXIOM_TOKEN` | No | Axiom API token for structured server logs (AI call cost, rate limit hits, enrich completions). Omit to disable. |
 | `AXIOM_DATASET` | No | Axiom dataset name (default: `recipai`). |
+
+### Telemetry environment gate
+
+PostHog and Axiom only send data when `NODE_ENV === "production"` (like Sentry). These opt-in flags let you exercise the pipeline locally without a production build. Restart the dev server after changing them.
+
+| Variable | Required | Description |
+|---|---|---|
+| `TELEMETRY_DEV` | No | Set to `1` to enable the **server-side** vendors (Axiom, PostHog-node) in development. |
+| `NEXT_PUBLIC_TELEMETRY_DEV` | No | Set to `1` to enable the **client-side** PostHog browser SDK in development. |
