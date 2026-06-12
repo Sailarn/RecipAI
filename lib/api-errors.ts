@@ -1,5 +1,5 @@
-import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import { captureError } from "@/lib/telemetry";
 
 export const API_ERROR_MESSAGES = {
   UNAUTHORIZED: "Unauthorized",
@@ -11,7 +11,7 @@ export const API_ERROR_MESSAGES = {
 } as const;
 
 function captureWithContext(error: unknown, req?: Request) {
-  Sentry.captureException(error, {
+  captureError(error, {
     tags: {
       "http.method": req?.method ?? "unknown",
       "api.route": req ? new URL(req.url).pathname : "unknown",

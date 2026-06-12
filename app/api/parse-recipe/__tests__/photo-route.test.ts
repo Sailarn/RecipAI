@@ -13,11 +13,10 @@ vi.mock("@/lib/ai", () => ({
 vi.mock("@/lib/parse-recipe/prompts", () => ({
   buildPhotoPrompt: vi.fn().mockReturnValue("prompt"),
 }));
-vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
-import * as Sentry from "@sentry/nextjs";
 import { callAiForRecipePhoto } from "@/lib/ai";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
+import { captureError } from "@/lib/telemetry";
 import { POST } from "../photo/route";
 
 const mockRecipe = {
@@ -101,9 +100,9 @@ describe("POST /api/parse-recipe/photo", () => {
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body).toEqual({ error: "503 Service Unavailable" });
-    expect(Sentry.captureException).toHaveBeenCalledWith(
+    expect(captureError).toHaveBeenCalledWith(
       realError,
-      expect.any(Object),
+      expect.objectContaining({ tags: expect.any(Object) }),
     );
   });
 });
