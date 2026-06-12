@@ -21,6 +21,7 @@ import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { parseHistoryEntryFromServerJob } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
+import { identifyUser, resetIdentity } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 
 // Adopt this client's anonymous parse jobs into the account, then pull the
@@ -142,6 +143,13 @@ export function useSyncOnLogin() {
 
   useEffect(() => {
     setIsSignedIn(!!session);
+    if (session) {
+      identifyUser(session.user.id, {
+        locale: window.location.pathname.split("/")[1],
+      });
+    } else {
+      resetIdentity();
+    }
   }, [session]);
   const navigate = useNavigate();
 

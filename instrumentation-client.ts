@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { initPostHogClient } from "@/lib/telemetry/posthog-client";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({
@@ -14,5 +15,7 @@ if (process.env.NODE_ENV === "production") {
     tracesSampleRate: 0.2,
   });
 }
+
+initPostHogClient();
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

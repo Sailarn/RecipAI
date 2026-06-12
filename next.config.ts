@@ -15,6 +15,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.50.143", "192.168.50.92"],
+  skipTrailingSlashRedirect: true,
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
   },
@@ -34,6 +35,18 @@ const nextConfig: NextConfig = {
         hostname: "*.fbcdn.net",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://eu-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
   },
 };
 
