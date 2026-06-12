@@ -4,6 +4,7 @@ import { callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchHtmlWithPhantomJs } from "@/lib/scrapers/phantomjs";
 import { fetchHtmlWithScrapeDo } from "@/lib/scrapers/scrape-do";
+import { log } from "@/lib/telemetry";
 import {
   buildImagesText,
   extractAllImages,
@@ -43,16 +44,51 @@ export function trimChrome($: cheerio.CheerioAPI): void {
   });
 }
 
+// Structured per-parse record for Axiom: which path served the recipe (instant
+// schema vs. paid AI), which scraper fired, and how long each took. Powers the
+// pipeline performance/cost dashboard — see docs/explanation/observability.md.
+function logParsePipeline(
+  url: string,
+  path: "schema" | "ai",
+  scraper: "phantomjs" | "scrape-do",
+  scrapeMs: number,
+  startedAt: number,
+  recipe: ParsedRecipe,
+): void {
+  let domain: string | undefined;
+  try {
+    domain = new URL(url).hostname;
+  } catch {
+    domain = undefined;
+  }
+  log("info", "parse_pipeline", {
+    source: "url",
+    domain,
+    path,
+    scraper,
+    scrape_ms: scrapeMs,
+    total_ms: Date.now() - startedAt,
+    ingredient_count: recipe.ingredients?.length ?? 0,
+    step_count: recipe.instructions?.length ?? 0,
+    success: true,
+  });
+}
+
 export async function parseWebRecipe(
   url: string,
   userComment?: string,
 ): Promise<ParsedRecipe> {
+  const startedAt = Date.now();
+  let scraper: "phantomjs" | "scrape-do" = "phantomjs";
   let html: string;
+  const scrapeStartedAt = Date.now();
   try {
     html = await fetchHtmlWithPhantomJs(url);
   } catch {
+    scraper = "scrape-do";
     html = await fetchHtmlWithScrapeDo(url);
   }
+  const scrapeMs = Date.now() - scrapeStartedAt;
 
   const $ = cheerio.load(html);
   const stepImages = extractStepImages($);
@@ -68,7 +104,9 @@ export async function parseWebRecipe(
         }),
       );
     }
-    return { ...schemaRecipe, sourceUrl: url } as ParsedRecipe;
+    const schemaResult = { ...schemaRecipe, sourceUrl: url } as ParsedRecipe;
+    logParsePipeline(url, "schema", scraper, scrapeMs, startedAt, schemaResult);
+    return schemaResult;
   }
 
   // AI fallback path
@@ -106,5 +144,7 @@ export async function parseWebRecipe(
   const recipe = await callAiForRecipe(
     buildWebPrompt(textContent, userComment),
   );
-  return { ...recipe, sourceUrl: url };
+  const aiResult = { ...recipe, sourceUrl: url };
+  logParsePipeline(url, "ai", scraper, scrapeMs, startedAt, aiResult);
+  return aiResult;
 }

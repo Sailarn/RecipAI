@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
+import { log } from "@/lib/telemetry";
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -23,9 +24,18 @@ export async function POST(request: Request) {
     return ApiError.badRequest("imageBase64 and mimeType are required");
   }
 
+  const startedAt = Date.now();
   try {
     const prompt = buildPhotoPrompt(userComment);
     const recipe = await callAiForRecipePhoto(imageBase64, mimeType, prompt);
+    log("info", "parse_pipeline", {
+      source: "photo",
+      path: "ai",
+      total_ms: Date.now() - startedAt,
+      ingredient_count: recipe.ingredients?.length ?? 0,
+      step_count: recipe.instructions?.length ?? 0,
+      success: true,
+    });
     return Response.json(recipe);
   } catch (error) {
     // The client (parseRecipeFromPhoto) maps the raw Gemini message to friendly
