@@ -1,0 +1,44 @@
+// lib/telemetry/events.ts
+
+/** Every analytics event in the app. Adding an event = adding an entry here.
+ *  Inline event-name strings at call sites are forbidden. */
+export type TelemetryEvents = {
+  // identity
+  signup: { method: "google" | "passkey" | "telegram" };
+  login: { method: "google" | "passkey" | "telegram" };
+  logout: undefined;
+  account_linked: { provider: string };
+  // parse funnel
+  parse_started: { source: "url" | "photo"; domain?: string };
+  parse_succeeded: { source: "url" | "photo" };
+  parse_failed: { source: "url" | "photo"; reason: string };
+  parse_reviewed: undefined;
+  recipe_saved: { source: "parse" | "edit" };
+  ingredients_normalized: { matched: number; total: number };
+  // recipe lifecycle (recipe edits are recipe_saved {source:"edit"} — no separate event)
+  recipe_viewed: { via: "list" | "search" | "collection" | "deep_link" };
+  recipe_deleted: undefined;
+  step_images_viewed: undefined;
+  recipe_tried_toggled: { tried: boolean };
+  servings_adjusted: { servings: number };
+  // engagement
+  search_performed: { query: string; results_count: number };
+  filter_applied: { kind: "category" | "status" | "sort" | "collection" };
+  collection_created: undefined;
+  collection_assigned: undefined;
+  pantry_item_added: undefined;
+  pantry_item_toggled: { have: boolean };
+  theme_changed: { theme: string };
+  language_changed: { locale: string };
+  embed_consent_responded: { granted: boolean };
+  embed_model_downloaded: undefined;
+  push_subscribed: undefined;
+  pwa_installed: undefined;
+  parse_history_viewed: undefined;
+  sync_review_resolved: { choice: string };
+  // server-side mirrors (cost/abuse alerting)
+  ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
+  rate_limit_hit: { caller_type: "user" | "anon" };
+};
+
+export type EventName = keyof TelemetryEvents;

@@ -6,19 +6,21 @@ import "fake-indexeddb/auto";
 // Mock matchMedia — happy-dom simulates a desktop (pointer: fine = true), which causes
 // useLongPress to skip its timer entirely. Default to non-fine pointer so timer-based
 // long-press tests work. Individual tests can override via vi.spyOn / Object.assign.
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+// Guard: node-environment tests (e.g. server-branch telemetry) have no window.
+if (typeof window !== "undefined")
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 
 vi.mock("@/lib/transitions", () => ({
   slideTransition: vi.fn(),
@@ -28,6 +30,14 @@ vi.mock("@/lib/transitions", () => ({
     replace: vi.fn(),
     reset: vi.fn(),
   }),
+}));
+
+vi.mock("@/lib/telemetry", () => ({
+  trackEvent: vi.fn(),
+  identifyUser: vi.fn(),
+  resetIdentity: vi.fn(),
+  captureError: vi.fn(),
+  log: vi.fn(),
 }));
 
 afterEach(() => {
