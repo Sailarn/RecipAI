@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StatusFilter } from "@/components/status-chips";
 import { useLiveQueryTransition } from "@/hooks/use-live-query-transition";
 import { type SortOption, useRecipeFilter } from "@/hooks/use-recipe-filter";
@@ -12,6 +12,7 @@ import {
 import { getAllRecipes } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { recipesPageCache } from "@/lib/recipes-prefetch";
+import { trackEvent } from "@/lib/telemetry";
 
 export interface FilterState {
   search: string;
@@ -99,12 +100,24 @@ export function useRecipesPageState(): RecipesPageState {
     null,
   );
 
+  useEffect(() => {
+    if (!search.trim()) return;
+    const timer = setTimeout(() => {
+      trackEvent("search_performed", {
+        query: search,
+        results_count: filtered.length,
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [search, filtered.length]);
+
   const newCollectionModal: NewCollectionModalState = {
     isOpen: showNewCollection,
     open: () => setShowNewCollection(true),
     close: () => setShowNewCollection(false),
     onCreate: async (data) => {
       await createCollection(data);
+      trackEvent("collection_created", undefined);
       setShowNewCollection(false);
     },
   };

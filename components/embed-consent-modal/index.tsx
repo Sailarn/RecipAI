@@ -7,6 +7,7 @@ import {
   grantEmbedConsent,
   hasEmbedConsent,
 } from "@/lib/parse-recipe/embed-consent";
+import { trackEvent } from "@/lib/telemetry";
 
 let shownThisSession = false;
 
@@ -29,10 +30,16 @@ export function EmbedConsentModal() {
   }
 
   function handleAllow() {
+    trackEvent("embed_consent_responded", { granted: true });
     grantEmbedConsent();
     // Download proceeds in the background; progress is shown in the
     // notifications bell, not here — so the modal closes immediately.
     preWarmEmbedWorker();
+    requestClose();
+  }
+
+  function handleDecline() {
+    trackEvent("embed_consent_responded", { granted: false });
     requestClose();
   }
 
@@ -81,7 +88,7 @@ export function EmbedConsentModal() {
           </button>
           <button
             type="button"
-            onClick={requestClose}
+            onClick={handleDecline}
             className="p-[11px] bg-transparent text-[var(--fg-3)] border-none rounded-xl text-[13px] font-sans cursor-pointer"
           >
             Not now

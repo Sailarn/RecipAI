@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/telemetry";
 import { THEME } from "@/lib/theme";
 import { TogglePill } from "./toggle-pill";
 
@@ -17,6 +18,7 @@ export function ThemeToggle() {
     const next = !isDark;
     setIsDark(next);
     const themeName = next ? THEME.DARK : THEME.LIGHT;
+    trackEvent("theme_changed", { theme: themeName });
     localStorage.setItem("theme", themeName);
     // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;

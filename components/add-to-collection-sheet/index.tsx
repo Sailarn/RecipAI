@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Collection } from "@/lib/db/schema";
+import { trackEvent } from "@/lib/telemetry";
 import { CollectionRow } from "./collection-row";
 
 interface AddToCollectionSheetProps {
@@ -65,7 +66,10 @@ export function AddToCollectionSheet({
             key={collection.id}
             collection={collection}
             inCollection={currentCollectionIds.includes(collection.id)}
-            onSelect={onSelect}
+            onSelect={(collectionId) => {
+              trackEvent("collection_assigned", undefined);
+              onSelect(collectionId);
+            }}
           />
         ))}
 

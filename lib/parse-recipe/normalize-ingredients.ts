@@ -185,7 +185,7 @@ export async function normalizeRecipeIngredients(
     ua?: string | null;
     category?: string | null;
   }>,
-): Promise<void> {
+): Promise<{ matched: number; total: number }> {
   const fuse = await getFuseIndex();
 
   type Pending = { item: string; ua?: string | null; category?: string | null };
@@ -279,4 +279,6 @@ export async function normalizeRecipeIngredients(
     unrecognizedIngredients,
     updatedAt,
   });
+
+  return { matched: finalIds.length, total: ingredients.length };
 }

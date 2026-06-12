@@ -18,6 +18,7 @@ import {
   failedParseHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
@@ -83,6 +84,7 @@ export function useParseJobWatcher() {
         cancel: {
           label: "Edit",
           onClick: () => {
+            trackEvent("parse_reviewed", undefined);
             localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
             db.parsedRecipes.delete(updatedEntry.id).catch(() => {});
             const locale = window.location.pathname.split("/")[1];
@@ -104,6 +106,7 @@ export function useParseJobWatcher() {
           if (status === "done") {
             const parsed = result as ParsedRecipe;
             await handleDone(id, parsed);
+            trackEvent("parse_succeeded", { source: "url" });
             recordParseHistory(
               doneParseHistoryEntry(
                 id,
@@ -114,6 +117,7 @@ export function useParseJobWatcher() {
           } else if (status === "failed") {
             const rawError: string = error || "Failed to parse recipe";
             removeJobId(id);
+            trackEvent("parse_failed", { source: "url", reason: rawError });
             recordParseHistory(
               failedParseHistoryEntry(id, jobUrl, rawError),
             ).catch(() => {});

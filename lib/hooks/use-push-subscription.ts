@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { logger } from "@/lib/logger";
 import { api } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 
@@ -59,6 +60,7 @@ export function usePushSubscription(): UsePushSubscriptionResult {
 
       setSubscription(sub);
       setPermission("granted");
+      trackEvent("push_subscribed", undefined);
 
       const json = sub.toJSON();
       await fetch(api.pushSubscribe, {

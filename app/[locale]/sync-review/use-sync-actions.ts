@@ -13,6 +13,7 @@ import type {
   SyncNotification,
 } from "@/lib/db/schema";
 import { api, routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 
 // Snapshot parsers — convert ISO date strings from JSON back to Date objects.
@@ -76,6 +77,7 @@ export function useSyncActions(locale: string) {
     if (!notif.serverSnapshot) return;
     await putSnapshotToStore(notif.entityType, notif.serverSnapshot);
     await resolveNotification(notif.id);
+    trackEvent("sync_review_resolved", { choice: "add_to_device" });
   }
 
   async function deleteFromServer(notif: SyncNotification): Promise<void> {
@@ -86,6 +88,7 @@ export function useSyncActions(locale: string) {
       return;
     }
     await resolveNotification(notif.id);
+    trackEvent("sync_review_resolved", { choice: "delete_from_server" });
   }
 
   async function uploadToServer(notif: SyncNotification): Promise<void> {
@@ -103,11 +106,13 @@ export function useSyncActions(locale: string) {
       return;
     }
     await resolveNotification(notif.id);
+    trackEvent("sync_review_resolved", { choice: "upload_to_server" });
   }
 
   async function deleteFromDevice(notif: SyncNotification): Promise<void> {
     await deleteFromStore(notif.entityType, notif.entityId);
     await resolveNotification(notif.id);
+    trackEvent("sync_review_resolved", { choice: "delete_from_device" });
   }
 
   // takeServerVersion is identical to addToDevice — use addToDevice directly.
@@ -131,6 +136,7 @@ export function useSyncActions(locale: string) {
       return;
     }
     await resolveNotification(notif.id);
+    trackEvent("sync_review_resolved", { choice: "keep_mine" });
   }
 
   async function addAll(notifications: SyncNotification[]): Promise<void> {

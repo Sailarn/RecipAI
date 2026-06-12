@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/telemetry";
 
 export type EmbedDownloadPhase = "idle" | "downloading" | "done";
 
@@ -32,6 +33,7 @@ export function useEmbedDownload(): EmbedDownloadState {
     const onLoaded = () => {
       setProgress(100);
       setPhase("done");
+      trackEvent("embed_model_downloaded", undefined);
     };
 
     window.addEventListener("embed-model-progress", onProgress);

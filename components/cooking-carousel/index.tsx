@@ -10,6 +10,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import type { Recipe } from "@/lib/db/schema";
+import { trackEvent } from "@/lib/telemetry";
 import { CookingNavBar } from "./cooking-nav-bar";
 import { IngredientsSheet } from "./ingredients-sheet";
 import { OverviewSlide } from "./overview-slide";
@@ -35,6 +36,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    trackEvent("step_images_viewed", undefined);
     return () => {
       document.body.style.overflow = "";
     };

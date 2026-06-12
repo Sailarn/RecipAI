@@ -9,6 +9,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { cn } from "@/lib/utils";
 import { CardFooter } from "./card-footer";
@@ -47,6 +48,7 @@ export const RecipeCard = memo(function RecipeCard({
 
   async function handleToggleStatus() {
     const next = recipe.status === "tried" ? null : "tried";
+    trackEvent("recipe_tried_toggled", { tried: next === "tried" });
     await updateRecipe(recipe.id, { status: next });
   }
 

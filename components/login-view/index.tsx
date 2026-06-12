@@ -4,6 +4,7 @@ import { KeyRound, Send } from "lucide-react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 
 function GoogleLogo() {
@@ -36,6 +37,7 @@ export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
+    trackEvent("login", { method: "google" });
     await authClient.signIn.social({
       provider: "google",
       callbackURL: routes.recipes.list(locale),
@@ -43,6 +45,7 @@ export function LoginView({ locale }: { locale: string }) {
   };
 
   const handlePasskeySignIn = async () => {
+    trackEvent("login", { method: "passkey" });
     const result = await authClient.signIn.passkey();
     if (!result?.error) {
       navigate.push(routes.recipes.list(locale));
@@ -50,6 +53,7 @@ export function LoginView({ locale }: { locale: string }) {
   };
 
   const handleTelegramSignIn = async () => {
+    trackEvent("login", { method: "telegram" });
     await authClient.signInWithTelegramOIDC({
       callbackURL: routes.recipes.list(locale),
     });

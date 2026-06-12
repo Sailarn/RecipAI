@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 
 export type StatusFilterKey = "all" | "tried" | "cancook" | "nearly";
@@ -39,7 +40,10 @@ export function StatusChips({ active, onChange }: StatusChipsProps) {
             key={key}
             type="button"
             data-active={isActive}
-            onClick={() => onChange(toggleStatus(active, key))}
+            onClick={() => {
+              onChange(toggleStatus(active, key));
+              trackEvent("filter_applied", { kind: "status" });
+            }}
             className={cn(
               "py-[5px] px-3 rounded-full border-0 text-[11px] font-[family-name:var(--font-sans)] cursor-pointer transition-all duration-150 ease",
               isActive

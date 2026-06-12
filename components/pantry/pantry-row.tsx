@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { removePantryItem, togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem } from "@/lib/db/schema";
+import { trackEvent } from "@/lib/telemetry";
 
 export function PantryRow({ item }: { item: PantryItem }) {
   return (
@@ -9,7 +10,10 @@ export function PantryRow({ item }: { item: PantryItem }) {
       <button
         type="button"
         data-testid={`toggle-${item.id}`}
-        onClick={() => togglePantryItem(item.id)}
+        onClick={() => {
+          trackEvent("pantry_item_toggled", { have: !item.on });
+          togglePantryItem(item.id);
+        }}
         aria-label={item.on ? "Mark as out of stock" : "Mark as in stock"}
         className={`w-[22px] h-[22px] rounded-md border-2 shrink-0 cursor-pointer flex items-center justify-center text-[13px] transition-all duration-150 ${
           item.on

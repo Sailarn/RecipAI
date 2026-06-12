@@ -7,6 +7,7 @@ import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
 import { createProvisionalIngredient } from "@/lib/db/ingredients";
 import { addPantryItem } from "@/lib/db/pantry";
 import type { VocabularyIngredient } from "@/lib/db/schema";
+import { trackEvent } from "@/lib/telemetry";
 import {
   CAT_OPTIONS,
   type CatOption,
@@ -67,6 +68,7 @@ export function AddItemSheet({ onClose }: { onClose: () => void }) {
         on: true,
         ingredientId: resolvedIngredientId,
       });
+      trackEvent("pantry_item_added", undefined);
     } catch {
       toast.error("Couldn't save ingredient");
       return;

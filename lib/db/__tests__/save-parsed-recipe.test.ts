@@ -14,7 +14,9 @@ vi.mock("../../upload/images", () => ({
 }));
 
 vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
-  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
+  normalizeRecipeIngredients: vi
+    .fn()
+    .mockResolvedValue({ matched: 0, total: 0 }),
 }));
 
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
@@ -184,9 +186,12 @@ describe("saveParsedRecipe", () => {
     });
 
     it("does not await normalizeRecipeIngredients — saveParsedRecipe resolves before normalization completes", async () => {
-      let resolveNormalize!: () => void;
+      let resolveNormalize!: (value: {
+        matched: number;
+        total: number;
+      }) => void;
       vi.mocked(normalizeRecipeIngredients).mockReturnValue(
-        new Promise<void>((res) => {
+        new Promise<{ matched: number; total: number }>((res) => {
           resolveNormalize = res;
         }),
       );
@@ -197,7 +202,7 @@ describe("saveParsedRecipe", () => {
       // Normalization was called but not yet resolved
       expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
       // Unblock it so the test doesn't leave a dangling promise
-      resolveNormalize();
+      resolveNormalize({ matched: 0, total: 0 });
     });
   });
 });

@@ -35,7 +35,9 @@ vi.mock("@/lib/upload/images", () => ({
 }));
 
 vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
-  normalizeRecipeIngredients: vi.fn().mockResolvedValue(undefined),
+  normalizeRecipeIngredients: vi
+    .fn()
+    .mockResolvedValue({ matched: 0, total: 0 }),
 }));
 
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";

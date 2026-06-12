@@ -1,11 +1,12 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/lib/db/db";
 import { createProvisionalIngredient } from "@/lib/db/ingredients";
 import { addPantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
+import { trackEvent } from "@/lib/telemetry";
 
 export type StockStatus = "in" | "out" | "unknown";
 
@@ -22,6 +23,7 @@ export function useServingsCalculator({
 }: UseServingsCalculatorProps) {
   const [servings, setServings] = useState(originalServings);
   const [useCanonical, setUseCanonical] = useState(true);
+  const isInitialMount = useRef(true);
   const [canonicalNames, setCanonicalNames] = useState<Map<string, string>>(
     new Map(),
   );
@@ -29,6 +31,17 @@ export function useServingsCalculator({
   const ratio = servings / originalServings;
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      trackEvent("servings_adjusted", { servings });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [servings]);
 
   const pantryByIngredientId = useMemo(
     () =>

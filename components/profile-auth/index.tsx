@@ -6,6 +6,7 @@ import { LoginView } from "@/components/login-view";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { LinkedAccounts } from "./linked-accounts";
 import { useLinkedAccounts } from "./use-linked-accounts";
@@ -23,11 +24,13 @@ export function ProfileAuth() {
     navigate.push(routes.login(locale), <LoginView locale={locale} />);
 
   const handleSignOut = async () => {
+    trackEvent("logout", undefined);
     await authClient.signOut();
     router.refresh();
   };
 
   const handleLinkGoogle = async () => {
+    trackEvent("account_linked", { provider: "google" });
     await authClient.linkSocial({
       provider: "google",
       callbackURL: routes.profile(locale),
@@ -35,6 +38,7 @@ export function ProfileAuth() {
   };
 
   const handleAddPasskey = async () => {
+    trackEvent("account_linked", { provider: "passkey" });
     await authClient.passkey.addPasskey();
   };
 

@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { isVideoUrl } from "@/lib/video-url";
 import { CookingCarousel } from "../cooking-carousel";
@@ -44,11 +45,15 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
 
   useEffect(() => {
     getRecipe(recipeId)
-      .then((result) => setRecipe(result ?? null))
+      .then((result) => {
+        setRecipe(result ?? null);
+        if (result) trackEvent("recipe_viewed", { via: "list" });
+      })
       .finally(() => setLoading(false));
   }, [recipeId]);
 
   const handleDelete = async () => {
+    trackEvent("recipe_deleted", undefined);
     await deleteRecipe(recipeId);
     navigate.back();
   };

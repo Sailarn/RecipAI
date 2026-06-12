@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 
 interface LinkedAccountsProps {
   linkedProviders: string[];
@@ -52,6 +53,7 @@ export function LinkedAccounts({
   const passkeyLinked = linkedProviders.includes("passkey") || passkeyAdded;
 
   const handleLinkTelegramOIDC = async () => {
+    trackEvent("account_linked", { provider: "telegram" });
     await authClient.linkSocial({
       provider: "telegram-oidc",
       callbackURL: routes.profile(locale),

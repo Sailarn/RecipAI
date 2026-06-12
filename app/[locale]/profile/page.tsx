@@ -18,6 +18,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
 import { routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 
 const ROW_ICON_SIZE = 15;
@@ -57,6 +58,7 @@ export default function ProfilePage() {
 
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    trackEvent("language_changed", { locale: nextLocale });
     const newPath = window.location.pathname.replace(
       `/${locale}`,
       `/${nextLocale}`,

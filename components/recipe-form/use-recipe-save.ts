@@ -8,6 +8,7 @@ import {
   getPendingUploadToken,
 } from "@/lib/parse-job-storage";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
@@ -63,10 +64,17 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       } else {
         savedId = await createRecipe(recipeData);
       }
+      trackEvent("recipe_saved", { source: recipe ? "edit" : "parse" });
       normalizeRecipeIngredients(
         savedId,
         recipeData.ingredients.map((ingredient) => ({ item: ingredient.item })),
-      ).catch(() => {});
+      )
+        .then((counts) => {
+          trackEvent("ingredients_normalized", counts);
+        })
+        .catch((caughtError) => {
+          captureError(caughtError);
+        });
     } catch {
       setSaveState("idle");
       setImageError("Failed to save recipe");

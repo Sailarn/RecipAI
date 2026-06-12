@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { trackEvent } from "@/lib/telemetry";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -31,7 +32,16 @@ export function usePwaInstall() {
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+
+    const installedHandler = () => {
+      trackEvent("pwa_installed", undefined);
+    };
+    window.addEventListener("appinstalled", installedHandler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
   }, []);
 
   const install = useCallback(async (): Promise<boolean> => {

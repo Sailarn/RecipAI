@@ -2,13 +2,19 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft } from "lucide-react";
+import { useEffect } from "react";
 import { getParseHistory } from "@/lib/db/parse-history";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { ParseHistoryRow } from "./entry-row";
 
 export function ParseHistoryView() {
   const navigate = useNavigate();
   const entries = useLiveQuery(() => getParseHistory(), []);
+
+  useEffect(() => {
+    trackEvent("parse_history_viewed", undefined);
+  }, []);
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-hidden">

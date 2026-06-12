@@ -18,6 +18,7 @@ import {
   failedParseHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
+import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 
 interface UseUrlParseOptions {
@@ -61,6 +62,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           recordParseHistory(
             doneParseHistoryEntry(id, parsed.title, parsed.sourceUrl ?? jobUrl),
           ).catch(() => {});
+          trackEvent("parse_succeeded", { source: "url" });
           setResult(parsed);
           setLoading(false);
           setJobId(null);
@@ -69,6 +71,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           recordParseHistory(
             failedParseHistoryEntry(id, jobUrl, rawError),
           ).catch(() => {});
+          trackEvent("parse_failed", { source: "url", reason: rawError });
           setError(friendlyParseError(rawError));
           setLoading(false);
           setJobId(null);
@@ -136,6 +139,10 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
       addJobId(newJobId, uploadToken);
       setJobId(newJobId);
       setLoading(false);
+      trackEvent("parse_started", {
+        source: "url",
+        domain: new URL(url).hostname,
+      });
 
       window.dispatchEvent(
         new CustomEvent("parse-job-created", { detail: { jobId: newJobId } }),
@@ -154,6 +161,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
 
   const handleSave = () => {
     if (!result) return;
+    trackEvent("parse_reviewed", undefined);
     if (onSuccess) {
       onSuccess(result);
       navigate.back();

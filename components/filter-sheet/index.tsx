@@ -8,6 +8,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
+import { trackEvent } from "@/lib/telemetry";
 
 interface FilterSheetProps {
   open: boolean;
@@ -107,11 +108,12 @@ export function FilterSheet({
                 <button
                   key={categoryOption}
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
                     onCategoryChange(
                       category === categoryOption ? null : categoryOption,
-                    )
-                  }
+                    );
+                    trackEvent("filter_applied", { kind: "category" });
+                  }}
                   className={chipClass(category === categoryOption)}
                 >
                   {categoryOption}
@@ -128,7 +130,10 @@ export function FilterSheet({
                 <button
                   key={value}
                   type="button"
-                  onClick={() => onStatusChange(toggleStatus(status, value))}
+                  onClick={() => {
+                    onStatusChange(toggleStatus(status, value));
+                    trackEvent("filter_applied", { kind: "status" });
+                  }}
                   className={chipClass(status.includes(value))}
                 >
                   {label}
@@ -150,7 +155,10 @@ export function FilterSheet({
                   <button
                     key={value}
                     type="button"
-                    onClick={() => onSortChange(value)}
+                    onClick={() => {
+                      onSortChange(value);
+                      trackEvent("filter_applied", { kind: "sort" });
+                    }}
                     className={`w-full flex items-center justify-between py-3.5 px-4 bg-transparent font-sans text-[15px] cursor-pointer text-left ${
                       index > 0
                         ? "border-t border-t-[rgba(255,200,100,0.1)]"
