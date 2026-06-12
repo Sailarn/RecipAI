@@ -1,11 +1,12 @@
 import posthog from "posthog-js";
+import { clientTelemetryEnabled } from "./environment";
 import type { EventName, TelemetryEvents } from "./events";
 
 let initialized = false;
 
 export function initPostHogClient(): void {
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  if (!key || initialized) return;
+  if (!key || initialized || !clientTelemetryEnabled()) return;
   posthog.init(key, {
     api_host: "/ingest",
     ui_host: "https://eu.posthog.com",

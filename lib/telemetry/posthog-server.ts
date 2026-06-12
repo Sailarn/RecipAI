@@ -1,11 +1,12 @@
 import { PostHog } from "posthog-node";
+import { serverTelemetryEnabled } from "./environment";
 import type { EventName, TelemetryEvents } from "./events";
 
 let client: PostHog | null = null;
 
 function getClient(): PostHog | null {
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  if (!key) return null;
+  if (!key || !serverTelemetryEnabled()) return null;
   if (!client) {
     const onVercel = Boolean(process.env.VERCEL);
     client = new PostHog(key, {
