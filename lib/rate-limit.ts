@@ -2,6 +2,7 @@ import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_RATE_LIMIT } from "@/lib/api-limits";
 import { redis } from "@/lib/redis";
+import { log, trackEvent } from "@/lib/telemetry";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -68,7 +69,12 @@ export async function enforceParseRateLimit(
       limit,
       windowSeconds,
     );
-    if (!result.allowed) return ApiError.rateLimited(result.resetSeconds);
+    if (!result.allowed) {
+      const callerType = userId ? "user" : "anon";
+      log("warn", "rate_limit_hit", { caller_type: callerType });
+      trackEvent("rate_limit_hit", { caller_type: callerType });
+      return ApiError.rateLimited(result.resetSeconds);
+    }
   } catch (error) {
     ApiError.capture(error, req);
   }

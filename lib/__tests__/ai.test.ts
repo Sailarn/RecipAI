@@ -10,6 +10,7 @@ vi.mock("@google/generative-ai", () => ({
   },
 }));
 
+import { log, trackEvent } from "@/lib/telemetry";
 import { callAiForRecipe } from "../ai";
 
 const mockRecipe = {
@@ -100,5 +101,71 @@ describe("OpenAI fallback", () => {
 
     await expect(callAiForRecipe("parse this")).rejects.toThrow("429");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("AI call logging", () => {
+  afterEach(() => {
+    delete process.env.OPENAI_API_KEY;
+    vi.unstubAllGlobals();
+  });
+
+  it("logs info ai_call on Gemini success", async () => {
+    mockGenerateContent.mockResolvedValue({
+      response: { text: () => JSON.stringify(mockRecipe) },
+    });
+
+    await callAiForRecipe("parse this recipe");
+
+    expect(log).toHaveBeenCalledWith(
+      "info",
+      "ai_call",
+      expect.objectContaining({
+        model: "gemini-2.5-flash",
+        success: true,
+        context: "recipe",
+      }),
+    );
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
+  it("logs warn ai_call on Gemini failure then info on success", async () => {
+    mockGenerateContent
+      .mockRejectedValueOnce(new Error("model overloaded"))
+      .mockResolvedValue({
+        response: { text: () => JSON.stringify(mockRecipe) },
+      });
+
+    await callAiForRecipe("parse this");
+
+    expect(log).toHaveBeenCalledWith(
+      "warn",
+      "ai_call",
+      expect.objectContaining({ model: "gemini-2.5-flash", success: false }),
+    );
+    expect(log).toHaveBeenCalledWith(
+      "info",
+      "ai_call",
+      expect.objectContaining({ model: "gemini-2.0-flash", success: true }),
+    );
+  });
+
+  it("fires ai_fallback_to_openai event when falling back", async () => {
+    mockGenerateContent.mockRejectedValue(new Error("all gemini down"));
+    process.env.OPENAI_API_KEY = "openai-key";
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          choices: [{ message: { content: JSON.stringify(mockRecipe) } }],
+        }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await callAiForRecipe("parse this");
+
+    expect(trackEvent).toHaveBeenCalledWith("ai_fallback_to_openai", {
+      context: "recipe",
+    });
   });
 });

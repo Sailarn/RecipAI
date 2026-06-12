@@ -6,6 +6,7 @@ import { callAiForIngredient } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
+import { log } from "@/lib/telemetry";
 
 function buildEnrichmentPrompt(
   rawText: string,
@@ -108,9 +109,9 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(ingredients.id, id));
 
+    log("info", "enrich_completed", { ingredientId: id });
     return NextResponse.json({ success: true, ingredient: enriched });
   } catch (error) {
-    ApiError.capture(error, req);
     const newRetryCount = (entry.retryCount ?? 0) + 1;
 
     await db
@@ -122,9 +123,6 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(ingredients.id, id));
 
-    return NextResponse.json(
-      { error: "Gemini enrichment failed" },
-      { status: 500 },
-    );
+    return ApiError.internal(error, req, "Gemini enrichment failed");
   }
 }

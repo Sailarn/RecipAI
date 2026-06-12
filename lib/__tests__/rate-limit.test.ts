@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/redis", () => ({
   redis: { incr: vi.fn(), expire: vi.fn(), ttl: vi.fn() },
 }));
-vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
 import { redis } from "@/lib/redis";
+import { trackEvent } from "@/lib/telemetry";
 import { clientKey, enforceParseRateLimit, rateLimit } from "../rate-limit";
 
 beforeEach(() => {
@@ -78,6 +78,9 @@ describe("enforceParseRateLimit", () => {
     const res = await enforceParseRateLimit(new Request("http://x"));
 
     expect(res?.status).toBe(429);
+    expect(trackEvent).toHaveBeenCalledWith("rate_limit_hit", {
+      caller_type: "anon",
+    });
   });
 
   it("fails open (allows) when Redis errors", async () => {

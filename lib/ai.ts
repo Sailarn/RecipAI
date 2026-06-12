@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { logger } from "@/lib/logger";
+import { log, trackEvent } from "@/lib/telemetry";
 
 // Try every free Gemini model in turn; only if they ALL fail do we fall back to
 // the paid OpenAI model — keeping cost on the free tier whenever possible.
@@ -10,6 +10,8 @@ const GEMINI_MODEL_CHAIN = [
   "gemini-2.5-flash-lite",
 ] as const;
 const OPENAI_MODEL = "gpt-4o-mini";
+
+type AiContext = "recipe" | "ingredient" | "photo";
 
 type GeminiContents =
   | string
@@ -86,24 +88,56 @@ async function callOpenAiJson<T>(messages: OpenAiMessage[]): Promise<T> {
 async function generateJson<T>(
   geminiContents: GeminiContents,
   openAiMessages: OpenAiMessage[],
+  context: AiContext,
 ): Promise<T> {
   let lastError: unknown;
 
-  for (const modelName of GEMINI_MODEL_CHAIN) {
+  for (const [fallbackIndex, modelName] of GEMINI_MODEL_CHAIN.entries()) {
+    const startedAt = Date.now();
     try {
-      return await callGeminiJson<T>(modelName, geminiContents);
+      const parsed = await callGeminiJson<T>(modelName, geminiContents);
+      log("info", "ai_call", {
+        model: modelName,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: true,
+        fallback_index: fallbackIndex,
+      });
+      return parsed;
     } catch (caughtError) {
       lastError = caughtError;
-      logger.warn(`[Gemini] ${modelName} failed, trying next model...`);
+      log("warn", "ai_call", {
+        model: modelName,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: false,
+        fallback_index: fallbackIndex,
+      });
     }
   }
 
   if (process.env.OPENAI_API_KEY) {
+    trackEvent("ai_fallback_to_openai", { context });
+    const startedAt = Date.now();
     try {
-      logger.warn("[AI] all Gemini models failed, falling back to OpenAI...");
-      return await callOpenAiJson<T>(openAiMessages);
+      const parsed = await callOpenAiJson<T>(openAiMessages);
+      log("info", "ai_call", {
+        model: OPENAI_MODEL,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: true,
+        fallback_index: GEMINI_MODEL_CHAIN.length,
+      });
+      return parsed;
     } catch (openAiError) {
       lastError = openAiError;
+      log("error", "ai_call", {
+        model: OPENAI_MODEL,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: false,
+        fallback_index: GEMINI_MODEL_CHAIN.length,
+      });
     }
   }
 
@@ -111,17 +145,21 @@ async function generateJson<T>(
 }
 
 export async function callAiForRecipe(prompt: string): Promise<ParsedRecipe> {
-  return generateJson<ParsedRecipe>(prompt, [
-    { role: "user", content: prompt },
-  ]);
+  return generateJson<ParsedRecipe>(
+    prompt,
+    [{ role: "user", content: prompt }],
+    "recipe",
+  );
 }
 
 export async function callAiForIngredient(
   prompt: string,
 ): Promise<Record<string, unknown>> {
-  return generateJson<Record<string, unknown>>(prompt, [
-    { role: "user", content: prompt },
-  ]);
+  return generateJson<Record<string, unknown>>(
+    prompt,
+    [{ role: "user", content: prompt }],
+    "ingredient",
+  );
 }
 
 export async function callAiForRecipePhoto(
@@ -143,5 +181,6 @@ export async function callAiForRecipePhoto(
         ],
       },
     ],
+    "photo",
   );
 }
