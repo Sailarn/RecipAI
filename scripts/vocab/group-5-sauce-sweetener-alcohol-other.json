@@ -822,5 +822,19 @@
       "паперових рушників",
       "паперовим рушником"
     ]
+  },
+  {
+    "id": "nori",
+    "en": "nori",
+    "ua": "норі",
+    "category": "other",
+    "aliasesEn": [
+      "nori sheets",
+      "nori seaweed",
+      "seaweed sheets",
+      "noris",
+      "nories"
+    ],
+    "aliasesUa": ["норі"]
   }
 ]
