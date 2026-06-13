@@ -53,6 +53,7 @@ export interface VocabularyIngredient {
   status?: IngredientStatus;
   retryCount?: number;
   lastAttemptAt?: Date | null;
+  embedding?: number[] | null;
 }
 
 export interface PantryItem {
