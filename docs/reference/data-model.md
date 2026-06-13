@@ -68,6 +68,7 @@ interface VocabularyIngredient {
   status?: "provisional" | "confirmed" | "failed";
   retryCount?: number;
   lastAttemptAt?: Date | null;
+  embedding?: number[] | null;   // e5 passage vector (384), delta-synced from Postgres
 }
 ```
 
@@ -163,7 +164,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 
 ### `ingredients`
 
-Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`.
+Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`, `embedding` (jsonb, nullable — the e5 `passage:` vector, delivered to clients in the `GET` delta sync and matched client-side; no pgvector). Migration `0014`.
 
 ### `pantry`
 
