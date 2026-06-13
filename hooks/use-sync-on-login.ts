@@ -18,6 +18,7 @@ import {
   type SyncNotification,
 } from "@/lib/db/schema";
 import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
+import { pullVocab } from "@/lib/db/sync-vocab";
 import { parseHistoryEntryFromServerJob } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
@@ -61,19 +62,7 @@ async function syncPantry(): Promise<void> {
 }
 
 async function syncIngredients(): Promise<void> {
-  const watermark = localStorage.getItem("ingredientsSyncedAt") ?? undefined;
-  const url = watermark
-    ? `${api.ingredients}?since=${encodeURIComponent(watermark)}`
-    : api.ingredients;
-  const res = await fetch(url);
-  if (!res.ok) return;
-  const { ingredients: data, serverMaxUpdatedAt } = await res.json();
-  if (data?.length) {
-    await db.ingredients.bulkPut(data);
-  }
-  if (serverMaxUpdatedAt) {
-    localStorage.setItem("ingredientsSyncedAt", serverMaxUpdatedAt);
-  }
+  await pullVocab();
 
   const stuckProvisionals = await db.ingredients
     .filter((entry) => entry.status === INGREDIENT_STATUS.PROVISIONAL)
