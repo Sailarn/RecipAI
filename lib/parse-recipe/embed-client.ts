@@ -1,7 +1,8 @@
 import { hasEmbedConsent } from "./embed-consent";
 import type { WorkerOutput } from "./embed-worker";
 
-type WorkerInput = { type: "embed"; texts: string[] };
+type EmbedPrefix = "query" | "passage";
+type WorkerInput = { type: "embed"; texts: string[]; prefix: EmbedPrefix };
 
 const TIMEOUT_MS = 120_000;
 
@@ -40,6 +41,7 @@ export function preWarmEmbedWorker(): void {
 
 export async function getIngredientEmbeddings(
   texts: string[],
+  prefix: EmbedPrefix = "query",
 ): Promise<number[][]> {
   if (!hasEmbedConsent()) throw new Error("EmbedConsentRequired");
   const workerInstance = getWorker();
@@ -79,7 +81,7 @@ export async function getIngredientEmbeddings(
     workerInstance.addEventListener("message", onMessage);
     workerInstance.addEventListener("error", onError);
 
-    const input: WorkerInput = { type: "embed", texts };
+    const input: WorkerInput = { type: "embed", texts, prefix };
     workerInstance.postMessage(input);
   });
 }

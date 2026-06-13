@@ -6,7 +6,8 @@ import {
   pipeline,
 } from "@huggingface/transformers";
 
-type WorkerInput = { type: "embed"; texts: string[] };
+type EmbedPrefix = "query" | "passage";
+type WorkerInput = { type: "embed"; texts: string[]; prefix?: EmbedPrefix };
 export type WorkerOutput =
   | { type: "embeddings"; data: number[][] }
   | { type: "error"; message: string }
@@ -39,7 +40,7 @@ async function loadModel(): Promise<FeatureExtractionPipeline> {
 }
 
 self.addEventListener("message", (event: MessageEvent<WorkerInput>) => {
-  const { type, texts } = event.data;
+  const { type, texts, prefix = "query" } = event.data;
 
   if (type !== "embed") return;
 
@@ -49,7 +50,7 @@ self.addEventListener("message", (event: MessageEvent<WorkerInput>) => {
       const embeddings: number[][] = [];
 
       for (const text of texts) {
-        const output = await model(`query: ${text}`, {
+        const output = await model(`${prefix}: ${text}`, {
           pooling: "mean",
           normalize: true,
         });
