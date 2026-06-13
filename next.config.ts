@@ -16,6 +16,21 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.50.143", "192.168.50.92"],
   skipTrailingSlashRedirect: true,
+  // The telemetry facade (`lib/telemetry`) is imported by client components but
+  // dynamically imports `posthog-server` only when running on the server. That
+  // server branch never executes in the browser, yet webpack still compiles its
+  // chunk for the client bundle — and posthog-node pulls node-only modules
+  // (`node:readline`), which the browser target can't resolve. Alias it to an
+  // empty module on the client build so the dead branch compiles cleanly.
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "posthog-node": false,
+      };
+    }
+    return config;
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
   },
