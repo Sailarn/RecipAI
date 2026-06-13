@@ -56,18 +56,30 @@ async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
 }
 
 type VocabEmbedding = { id: string; embedding: number[] };
-let embeddingCache: VocabEmbedding[] | null = null;
+let embeddingCache: { list: VocabEmbedding[]; size: number } | null = null;
 
-async function getVocabEmbeddings(): Promise<VocabEmbedding[] | null> {
-  if (embeddingCache) return embeddingCache;
-  try {
-    const res = await fetch("/vocab-embeddings.json");
-    if (!res.ok) return null;
-    embeddingCache = (await res.json()) as VocabEmbedding[];
-    return embeddingCache;
-  } catch {
-    return null;
-  }
+// Vocab embeddings now live on the Dexie ingredient rows (delta-synced from
+// the server), not in a static file. Read confirmed entries that carry an
+// embedding and cache them, keyed by count like the Fuse index above.
+async function getVocabEmbeddings(): Promise<VocabEmbedding[]> {
+  const vocab = await db.ingredients
+    .filter(
+      (ingredient) =>
+        !ingredient.status || ingredient.status === INGREDIENT_STATUS.CONFIRMED,
+    )
+    .toArray();
+  const withEmbedding = vocab.filter(
+    (ingredient) =>
+      Array.isArray(ingredient.embedding) && ingredient.embedding.length > 0,
+  );
+  if (embeddingCache && embeddingCache.size === withEmbedding.length)
+    return embeddingCache.list;
+  const list = withEmbedding.map((ingredient) => ({
+    id: ingredient.id,
+    embedding: ingredient.embedding as number[],
+  }));
+  embeddingCache = { list, size: withEmbedding.length };
+  return list;
 }
 
 // Embeddings are L2-normalized, so the dot product equals cosine similarity.
@@ -218,7 +230,7 @@ export async function normalizeRecipeIngredients(
     const vocabEmbs = await getVocabEmbeddings();
     let queryEmbs: number[][] | null = null;
 
-    if (vocabEmbs) {
+    if (vocabEmbs.length > 0) {
       try {
         queryEmbs = await getIngredientEmbeddings(
           pending.map((pendingItem) => pendingItem.item),
@@ -240,7 +252,7 @@ export async function normalizeRecipeIngredients(
       const pendingItem = pending[i];
       let matchedId: string | null = null;
 
-      if (queryEmbs && vocabEmbs) {
+      if (queryEmbs && vocabEmbs.length > 0) {
         matchedId = findBestEmbeddingMatch(queryEmbs[i], vocabEmbs);
       }
 

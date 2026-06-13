@@ -78,11 +78,8 @@ beforeEach(() => {
   mockDbIngredientsPut.mockResolvedValue(undefined);
   mockDbRecipesUpdate.mockResolvedValue(undefined);
 
-  // Default: no vocab embeddings (fetch 404 → embedding tier skipped entirely)
-  global.fetch = vi.fn().mockResolvedValue({
-    ok: false,
-    status: 404,
-  } as unknown as Response);
+  // Default vocab (garlic + onion) carries no embedding field, so the
+  // embedding tier is skipped — only the tests below opt in by adding one.
 
   // Enrich is fire-and-forget — default to resolving
   mockEnrichIngredient.mockResolvedValue(undefined);
@@ -253,17 +250,15 @@ describe("normalizeRecipeIngredients", () => {
     });
 
     it("sends all embedding-pending items to getIngredientEmbeddings in a single call", async () => {
-      // Provide vocab embeddings so the embedding code path is entered
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi
-          .fn()
-          .mockResolvedValue([{ id: "garlic", embedding: Array(384).fill(0) }]),
-      } as unknown as Response);
-      // Return vectors with near-zero similarity — both items fall to provisional
+      // Vocab carries an embedding so the embedding code path is entered
+      mockFilterResult.toArray.mockResolvedValue([
+        { ...GARLIC, embedding: [1, ...Array(383).fill(0)] },
+        ONION,
+      ]);
+      // Return vectors orthogonal to garlic — both items fall to provisional
       mockGetIngredientEmbeddings.mockResolvedValue([
-        Array(384).fill(0),
-        Array(384).fill(0),
+        [0, 1, ...Array(382).fill(0)],
+        [0, 1, ...Array(382).fill(0)],
       ]);
 
       await normalizeRecipeIngredients("recipe-1", [
@@ -311,16 +306,38 @@ describe("normalizeRecipeIngredients", () => {
     });
   });
 
-  // Embedding tests last — they populate embeddingCache (module-level), which
-  // must not affect the tests above (those skip the embedding tier via fetch 404).
-  describe("embedding tier error handling", () => {
+  // Embedding tests last — they populate embeddingCache (module-level), keyed
+  // by the count of embedded entries so the tests above (vocab without an
+  // embedding field → size 0) are unaffected.
+  describe("embedding tier", () => {
+    // Unit vector (L2-normalized): dot product with itself is 1.0.
+    const unitVector = [1, ...Array(383).fill(0)];
+    const GARLIC_WITH_EMBEDDING = {
+      ...GARLIC,
+      embedding: unitVector,
+    };
+
+    it("matches a pending ingredient to the closest vocab embedding", async () => {
+      mockFilterResult.toArray.mockResolvedValue([
+        GARLIC_WITH_EMBEDDING,
+        ONION,
+      ]);
+      // Query embedding identical to garlic's → cosine 1, far ahead of onion
+      // (which has no embedding and is absent from the vocab vectors).
+      mockGetIngredientEmbeddings.mockResolvedValue([unitVector]);
+
+      await normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]);
+
+      const updates = mockDbRecipesUpdate.mock.calls[0][1];
+      expect(updates.canonicalIngredientIds).toContain("garlic");
+      expect(mockEnrichIngredient).not.toHaveBeenCalled();
+    });
+
     it("falls through to provisional when EmbedConsentRequired is thrown — does not propagate", async () => {
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi
-          .fn()
-          .mockResolvedValue([{ id: "garlic", embedding: Array(384).fill(0) }]),
-      } as unknown as Response);
+      mockFilterResult.toArray.mockResolvedValue([
+        GARLIC_WITH_EMBEDDING,
+        ONION,
+      ]);
       mockGetIngredientEmbeddings.mockRejectedValue(
         new Error("EmbedConsentRequired"),
       );
@@ -333,12 +350,10 @@ describe("normalizeRecipeIngredients", () => {
     });
 
     it("falls through to provisional when the embedding client throws a generic error", async () => {
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi
-          .fn()
-          .mockResolvedValue([{ id: "garlic", embedding: Array(384).fill(0) }]),
-      } as unknown as Response);
+      mockFilterResult.toArray.mockResolvedValue([
+        GARLIC_WITH_EMBEDDING,
+        ONION,
+      ]);
       mockGetIngredientEmbeddings.mockRejectedValue(new Error("WASM crash"));
 
       await expect(
