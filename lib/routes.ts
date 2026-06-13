@@ -32,6 +32,7 @@ export const api = {
   collection: (id: string) => `/api/collections/${id}`,
   collectionsSync: "/api/collections/sync",
   ingredients: "/api/ingredients",
+  ingredient: (id: string) => `/api/ingredients/${id}`,
   ingredientsEnrich: "/api/ingredients/enrich",
   pantry: "/api/pantry",
   pushSubscribe: "/api/push/subscribe",
