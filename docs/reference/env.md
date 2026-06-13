@@ -119,3 +119,11 @@ PostHog and Axiom only send data when `NODE_ENV === "production"` (like Sentry).
 |---|---|---|
 | `TELEMETRY_DEV` | No | Set to `1` to enable the **server-side** vendors (Axiom, PostHog-node) in development. |
 | `NEXT_PUBLIC_TELEMETRY_DEV` | No | Set to `1` to enable the **client-side** PostHog browser SDK in development. |
+
+---
+
+## Development
+
+| Variable | Required | Description |
+|---|---|---|
+| `DEV_ORIGINS` | No | Comma-separated list of extra origins allowed to hit the Next.js dev server cross-origin (`allowedDevOrigins` in `next.config.ts`). Set to your machine's LAN IP(s) — e.g. `192.168.1.10,192.168.1.11` — to load the dev server from a phone or another device on the network. Dev-only; ignored in production builds. |

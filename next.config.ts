@@ -14,7 +14,8 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.50.143", "192.168.50.92"],
+  allowedDevOrigins:
+    process.env.DEV_ORIGINS?.split(",").map((origin) => origin.trim()) ?? [],
   skipTrailingSlashRedirect: true,
   // The telemetry facade (`lib/telemetry`) is imported by client components but
   // dynamically imports `posthog-server` only when running on the server. That
