@@ -25,7 +25,15 @@ import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {
   const navigate = useNavigate();
-  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Jobs that are already being polled (or have reached a terminal state).
+  // useNavigate() returns a fresh object every render, so this hook's effect
+  // re-runs on every re-render and re-polls all saved job IDs. Without this
+  // guard, a re-render mid-parse spawns a second concurrent poll loop for the
+  // same job — both reach "done" and fire handleDone twice (two toasts + two
+  // parsedRecipes rows). Job IDs are unique per parse, so once seen here a job
+  // is never polled again for the lifetime of the watcher.
+  const watchedJobs = useRef<Set<string>>(new Set());
+  const timeouts = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const handleDone = useCallback(
     async (id: string, result: ParsedRecipe) => {
@@ -98,6 +106,17 @@ export function useParseJobWatcher() {
 
   const poll = useCallback(
     (id: string) => {
+      if (watchedJobs.current.has(id)) return;
+      watchedJobs.current.add(id);
+
+      const scheduleRetry = (delayMs: number, run: () => void) => {
+        const timer = setTimeout(() => {
+          timeouts.current.delete(timer);
+          run();
+        }, delayMs);
+        timeouts.current.add(timer);
+      };
+
       const run = async () => {
         try {
           const res = await fetch(api.parseQueueJob(id));
@@ -131,10 +150,10 @@ export function useParseJobWatcher() {
               },
             });
           } else {
-            pollRef.current = setTimeout(run, 3000);
+            scheduleRetry(3000, run);
           }
         } catch {
-          pollRef.current = setTimeout(run, 5000); // retry on network error
+          scheduleRetry(5000, run); // retry on network error
         }
       };
       run();
@@ -158,7 +177,8 @@ export function useParseJobWatcher() {
 
     return () => {
       window.removeEventListener("parse-job-created", handler);
-      if (pollRef.current) clearTimeout(pollRef.current);
+      for (const timer of timeouts.current) clearTimeout(timer);
+      timeouts.current.clear();
     };
   }, [poll]);
 

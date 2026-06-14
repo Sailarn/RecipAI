@@ -320,6 +320,49 @@ describe("useParseJobWatcher", () => {
     });
   });
 
+  describe("deduplication", () => {
+    it("does not re-poll a job that is already being watched", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(doneResponse());
+
+      const { result } = renderHook(() => useParseJobWatcher());
+
+      await waitFor(() =>
+        expect(db.parsedRecipes.add).toHaveBeenCalledTimes(1),
+      );
+
+      act(() => {
+        result.current.poll("job-1");
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(db.parsedRecipes.add).toHaveBeenCalledTimes(1);
+      expect(toast).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not spawn a second poll loop when the effect re-runs mid-poll", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(pendingResponse());
+
+      const { rerender } = renderHook(() => useParseJobWatcher());
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      rerender();
+      rerender();
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("cleanup", () => {
     it("removes event listener on unmount", () => {
       vi.mocked(getJobIds).mockReturnValue([]);

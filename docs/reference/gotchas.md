@@ -38,6 +38,9 @@ Stack-pushed views (recipe detail, edit, create) must close with `navigate.back(
 **Never hardcode route strings.**
 Always import from `lib/routes.ts`. Bare strings like `"/recipes"` miss the locale prefix — `routes.recipes.list(locale)` yields `/<locale>/recipes`.
 
+**`useNavigate()` returns a fresh object every render.**
+`lib/transitions.ts` builds a new object literal on each call, so anything that lists `navigate` (or a callback closing over it) in a dependency array re-runs on *every* re-render. This bit `use-parse-job-watcher`: its polling effect re-ran on every re-render and re-polled all saved job IDs, spawning a *second* concurrent poll loop for an in-flight job — both reached `done` and fired `handleDone` twice (two toasts + two `parsedRecipes` rows). Fix pattern: make the work idempotent per key (a `useRef<Set>` guard), don't rely on the effect running exactly once.
+
 ---
 
 ## Styles
