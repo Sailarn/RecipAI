@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db/db";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import { getPendingUploadToken } from "@/lib/parse-job-storage";
+import { preWarmEmbedWorker } from "@/lib/parse-recipe/embed-client";
+import { grantEmbedConsent } from "@/lib/parse-recipe/embed-consent";
+import { isEmbedModelReady } from "@/lib/parse-recipe/embed-download-state";
 import { useEmbedDownload } from "@/lib/parse-recipe/use-embed-download";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -36,6 +39,17 @@ export function ParsedRecipesSheet() {
   const parsedCount = parsed?.length ?? 0;
   const totalCount = parsedCount + syncCount;
 
+  // Default to ready so users who already have the model never see a download
+  // prompt flash before the localStorage check runs. Re-checked when a download
+  // finishes so the prompt disappears.
+  const [modelReady, setModelReady] = useState(true);
+  useEffect(() => {
+    setModelReady(isEmbedModelReady() || download.phase === "done");
+  }, [download.phase]);
+  // Offer a manual download to anyone who skipped the consent prompt — the
+  // bell is the only in-app entry point back to it.
+  const canDownloadModel = !modelReady && !isDownloading;
+
   const navigate = useNavigate();
   const params = useParams();
   const locale = params.locale as string;
@@ -46,6 +60,11 @@ export function ParsedRecipesSheet() {
       toast.success("AI model ready — ingredient matching is now active");
     }
   }, [download.phase]);
+
+  const handleDownloadModel = () => {
+    grantEmbedConsent();
+    preWarmEmbedWorker();
+  };
 
   const handleSave = async (id: string) => {
     const entry = await db.parsedRecipes.get(id);
@@ -83,7 +102,7 @@ export function ParsedRecipesSheet() {
     await db.parsedRecipes.delete(id);
   };
 
-  if (totalCount === 0 && !isDownloading) {
+  if (totalCount === 0 && !isDownloading && !canDownloadModel) {
     return (
       <button
         type="button"
@@ -149,6 +168,22 @@ export function ParsedRecipesSheet() {
                   }}
                 />
               </div>
+            </div>
+          )}
+
+          {canDownloadModel && (
+            <div className="p-4 rounded-xl space-y-2 bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)]">
+              <p className="font-medium text-sm">🤖 AI Ingredient Matching</p>
+              <p className="text-xs text-muted-foreground">
+                ~117 MB · on-device, private
+              </p>
+              <Button
+                size="sm"
+                onClick={handleDownloadModel}
+                className="w-full mt-1"
+              >
+                Download model
+              </Button>
             </div>
           )}
 

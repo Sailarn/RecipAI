@@ -60,6 +60,7 @@ Embeddings are computed **client-side** — no API call, works offline once down
 
 - **Model:** `Xenova/multilingual-e5-small` via `@huggingface/transformers`, running in a Web Worker (`lib/parse-recipe/embed-worker.ts`) so the main thread never blocks. E5 convention: queries are embedded with a `query:` prefix, the vocabulary with `passage:` — the worker takes a `prefix` param so the same pipeline serves both.
 - **Consent first.** The model is a ~117 MB download, so it is gated behind an explicit opt-in: `EmbedConsentModal` (mounted in `client-shell`) asks once per device and stores the answer in `localStorage` (`embedModelConsent`). Without consent, `getIngredientEmbeddings` throws `EmbedConsentRequired` and the pipeline silently skips stage 3.
+- **Manual re-entry.** If the user declines ("Not now"), the notifications bell sheet (`ParsedRecipesSheet`) surfaces a "Download model" prompt whenever the model is not yet ready (`isEmbedModelReady()` is false). Tapping it grants consent and pre-warms the worker — the only in-app way back to the download after skipping the modal.
 - **Progress UX.** The worker reports download progress via `window` events; `use-embed-download.ts` exposes them as a hook (`idle` / `downloading` / `done`) for the notifications bell. After consent is granted the worker is pre-warmed so the download starts immediately.
 - Embeddings are L2-normalized, so the dot product *is* the cosine similarity. Worker calls time out after 120 s.
 
