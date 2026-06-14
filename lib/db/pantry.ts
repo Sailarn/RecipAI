@@ -30,6 +30,22 @@ async function syncPantryUpsert(item: PantryItem): Promise<void> {
 export async function addPantryItem(
   item: Omit<PantryItem, "id" | "addedAt">,
 ): Promise<string> {
+  // One row per (user, ingredient): if this ingredient is already in the
+  // pantry, update that row in place rather than inserting a duplicate. Items
+  // without an ingredientId (free text) are always added fresh.
+  if (item.ingredientId) {
+    const existing = await db.pantry
+      .where("ingredientId")
+      .equals(item.ingredientId)
+      .first();
+    if (existing) {
+      const merged: PantryItem = { ...existing, ...item, id: existing.id };
+      await db.pantry.put(merged);
+      await syncPantryUpsert(merged);
+      return existing.id;
+    }
+  }
+
   const id = crypto.randomUUID();
   const pantryItem: PantryItem = { ...item, id, addedAt: new Date() };
   await db.pantry.add(pantryItem);

@@ -85,7 +85,7 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 | Method | Route | Auth | Description |
 |---|---|---|---|
 | `GET` | `/api/pantry` | Session required | Fetch the user's pantry items with resolved ingredient names. |
-| `POST` | `/api/pantry` | Session required | Upsert pantry items (bulk). |
+| `POST` | `/api/pantry` | Session required | Upsert one pantry item. Updates the existing `(user, ingredient)` row in place if present (no duplicate), inserts otherwise. Upserts the ingredient first when `ingredientData` is supplied, to avoid FK violations. |
 | `DELETE` | `/api/pantry` | Session required | Delete a pantry item by id. |
 
 ---

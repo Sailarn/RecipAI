@@ -79,6 +79,31 @@ export async function POST(req: NextRequest) {
         .onConflictDoNothing();
     }
 
+    // Enforce one row per (user, ingredient): if this ingredient is already in
+    // the user's pantry, update that row in place so re-adding never creates a
+    // duplicate. The partial unique index is the hard backstop; this keeps the
+    // existing row's id stable for sync. Free-text items (no ingredientId) skip
+    // this and are inserted fresh.
+    if (ingredientId) {
+      const [existing] = await db
+        .select({ id: pantry.id })
+        .from(pantry)
+        .where(
+          and(
+            eq(pantry.userId, authed.session.user.id),
+            eq(pantry.ingredientId, ingredientId),
+          ),
+        );
+
+      if (existing) {
+        await db
+          .update(pantry)
+          .set({ name, qty, unit, cat, on })
+          .where(eq(pantry.id, existing.id));
+        return NextResponse.json({ ok: true });
+      }
+    }
+
     await db
       .insert(pantry)
       .values({

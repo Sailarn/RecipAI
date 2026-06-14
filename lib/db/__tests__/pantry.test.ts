@@ -21,6 +21,8 @@ vi.mock("../db", () => ({
   db: {
     pantry: {
       add: vi.fn(),
+      put: vi.fn(),
+      where: vi.fn(),
       toArray: vi.fn(),
       delete: vi.fn(),
       get: vi.fn(),
@@ -44,9 +46,18 @@ import {
   togglePantryItem,
 } from "../pantry";
 
+// Default: no existing pantry row for the looked-up ingredient.
+function mockExistingPantryRow(existing: unknown) {
+  const first = vi.fn().mockResolvedValue(existing);
+  const equals = vi.fn().mockReturnValue({ first });
+  vi.mocked(db.pantry.where).mockReturnValue({ equals } as never);
+  return { first, equals };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   fetchMock.mockResolvedValue(new Response());
+  mockExistingPantryRow(undefined);
 });
 
 describe("getPantryItems", () => {
@@ -159,6 +170,70 @@ describe("addPantryItem", () => {
     ) as { ingredientId: string; ingredientData: { id: string } };
     expect(body.ingredientId).toBe("vocab-123");
     expect(body.ingredientData).toMatchObject({ id: "vocab-123", en: "Milk" });
+  });
+
+  it("updates the existing row in place when the ingredient is already in the pantry", async () => {
+    const existing = {
+      id: "existing-id",
+      ingredientId: "vocab-123",
+      name: "Milk",
+      qty: 1,
+      unit: "l",
+      cat: "Dairy",
+      on: false,
+      addedAt: new Date("2020-01-01"),
+    };
+    mockExistingPantryRow(existing);
+
+    const id = await addPantryItem({
+      name: "Milk",
+      qty: 3,
+      unit: "l",
+      cat: "Dairy",
+      on: true,
+      ingredientId: "vocab-123",
+    });
+
+    expect(id).toBe("existing-id");
+    expect(db.pantry.add).not.toHaveBeenCalled();
+    expect(db.pantry.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "existing-id",
+        ingredientId: "vocab-123",
+        qty: 3,
+        on: true,
+        addedAt: existing.addedAt,
+      }),
+    );
+  });
+
+  it("adds a fresh row when the ingredient is not yet in the pantry", async () => {
+    mockExistingPantryRow(undefined);
+
+    await addPantryItem({
+      name: "Milk",
+      qty: 1,
+      unit: "l",
+      cat: "Dairy",
+      on: true,
+      ingredientId: "vocab-999",
+    });
+
+    expect(db.pantry.add).toHaveBeenCalledOnce();
+    expect(db.pantry.put).not.toHaveBeenCalled();
+  });
+
+  it("always adds a fresh row for free-text items with no ingredientId", async () => {
+    await addPantryItem({
+      name: "Grandma's secret spice",
+      qty: 1,
+      unit: "pcs",
+      cat: "Other",
+      on: true,
+    });
+
+    expect(db.pantry.where).not.toHaveBeenCalled();
+    expect(db.pantry.add).toHaveBeenCalledOnce();
   });
 
   it("Dexie write succeeds even when the server fetch throws", async () => {

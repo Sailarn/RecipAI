@@ -102,6 +102,36 @@ class RecipeDatabase extends Dexie {
       pantry: "id, ingredientId",
       parseHistory: "id, createdAt, status",
     });
+
+    // v12: collapse pre-existing duplicate pantry rows for the same ingredient.
+    // Schema is unchanged — the dedup runs in the upgrade callback. Going
+    // forward, addPantryItem upserts by ingredientId so duplicates never form.
+    this.version(12)
+      .stores({
+        recipes: "id, title, createdAt, updatedAt, status",
+        parsedRecipes: "id, createdAt",
+        collections: "id, name, createdAt",
+        notifications: "id, entityId, entityType, type, createdAt",
+        ingredients: "id, category",
+        pantry: "id, ingredientId",
+        parseHistory: "id, createdAt, status",
+      })
+      .upgrade(async (tx) => {
+        const rows = await tx.table("pantry").toArray();
+        const keptIdByIngredient = new Map<string, string>();
+        const duplicateIds: string[] = [];
+        for (const row of rows) {
+          if (!row.ingredientId) continue;
+          if (keptIdByIngredient.has(row.ingredientId)) {
+            duplicateIds.push(row.id);
+          } else {
+            keptIdByIngredient.set(row.ingredientId, row.id);
+          }
+        }
+        if (duplicateIds.length > 0) {
+          await tx.table("pantry").bulkDelete(duplicateIds);
+        }
+      });
   }
 }
 

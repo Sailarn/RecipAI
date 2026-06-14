@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
-  db: { select: vi.fn(), insert: vi.fn(), delete: vi.fn() },
+  db: { select: vi.fn(), insert: vi.fn(), update: vi.fn(), delete: vi.fn() },
 }));
 vi.mock("@/db/schema/pantry", () => ({ pantry: { id: "id-column" } }));
 vi.mock("drizzle-orm", () => ({ and: vi.fn(), eq: vi.fn() }));
@@ -26,6 +26,19 @@ function setupInsert() {
   const values = vi.fn().mockReturnValue({ onConflictDoUpdate });
   vi.mocked(db.insert).mockReturnValue({ values } as never);
   return { onConflictDoUpdate };
+}
+
+function setupSelect(rows: { id: string }[]) {
+  const where = vi.fn().mockResolvedValue(rows);
+  const from = vi.fn().mockReturnValue({ where });
+  vi.mocked(db.select).mockReturnValue({ from } as never);
+}
+
+function setupUpdate() {
+  const where = vi.fn().mockResolvedValue(undefined);
+  const set = vi.fn().mockReturnValue({ where });
+  vi.mocked(db.update).mockReturnValue({ set } as never);
+  return { set, where };
 }
 
 function setupDelete() {
@@ -113,6 +126,53 @@ describe("POST /api/pantry", () => {
     expect(onConflictDoUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ target: pantrySchema.id }),
     );
+  });
+
+  it("updates the existing row in place when (user, ingredient) already exists", async () => {
+    mockSession();
+    setupSelect([{ id: "existing-id" }]);
+    const { set } = setupUpdate();
+
+    const res = await POST(
+      makePostReq({
+        id: "new-id",
+        ingredientId: "vocab-1",
+        name: "Milk",
+        qty: 2,
+        unit: "l",
+        cat: "Dairy",
+        on: true,
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(set).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Milk", qty: 2, on: true }),
+    );
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("inserts a new row when (user, ingredient) is not present", async () => {
+    mockSession();
+    setupSelect([]);
+    setupUpdate();
+    const { onConflictDoUpdate } = setupInsert();
+
+    const res = await POST(
+      makePostReq({
+        id: "new-id",
+        ingredientId: "vocab-2",
+        name: "Flour",
+        qty: 1,
+        unit: "kg",
+        cat: "Pantry",
+        on: true,
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(onConflictDoUpdate).toHaveBeenCalled();
+    expect(db.update).not.toHaveBeenCalled();
   });
 });
 

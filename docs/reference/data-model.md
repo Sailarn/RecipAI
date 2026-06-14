@@ -127,6 +127,7 @@ interface SyncNotification {
 | 9 | Drop `pantry` to change its primary key in v10 |
 | 10 | Recreate `pantry` with `id` as primary key |
 | 11 | + `parseHistory` |
+| 12 | Dedup pantry rows by `ingredientId` (upgrade callback; schema unchanged) |
 
 To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-migration.md).
 
@@ -169,6 +170,8 @@ Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliase
 ### `pantry`
 
 `id`, `user_id` (FK → `user`), `ingredient_id` (nullable FK → `ingredients`, set null on delete), `name`, `qty`, `unit`, `cat`, `on` (boolean), `added_at`.
+
+One row per `(user_id, ingredient_id)`, enforced by a **partial unique index** `pantry_user_ingredient_uniq` (`WHERE ingredient_id IS NOT NULL`, so free-text items can coexist) — migration `0015`. `POST /api/pantry` updates an existing `(user, ingredient)` row in place rather than inserting a duplicate; `addPantryItem` mirrors this client-side by upserting on `ingredientId` in Dexie.
 
 ### `push_subscriptions`
 
