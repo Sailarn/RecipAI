@@ -34,6 +34,7 @@ vi.mock("@/lib/telegram-bot", () => ({
 
 import { db } from "@/db";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { captureError } from "@/lib/telemetry";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { sendPushNotification } from "@/lib/web-push";
@@ -198,6 +199,24 @@ describe("POST /api/parse-queue/process", () => {
       await POST(makeRequest({ jobId: "job-1" }));
       await flushMicrotasks();
 
+      expect(db.delete).not.toHaveBeenCalled();
+      expect(captureError).not.toHaveBeenCalled();
+    });
+
+    it("captures auth/VAPID failures instead of swallowing them", async () => {
+      setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        endpoint: "https://web.push.apple.com/abc",
+        pushEndpoint: "https://web.push.apple.com/abc",
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(sendPushNotification).mockRejectedValue({ statusCode: 403 });
+
+      await POST(makeRequest({ jobId: "job-1" }));
+      await flushMicrotasks();
+
+      expect(captureError).toHaveBeenCalled();
       expect(db.delete).not.toHaveBeenCalled();
     });
   });

@@ -6,6 +6,7 @@ import { pushSubscriptions } from "@/db/schema/push-subscriptions";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
+import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
@@ -15,18 +16,35 @@ import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;
 
-// Push services return 404 Not Found or 410 Gone once a subscription endpoint
-// has expired. Drop the dead row so we stop trying to reach it.
-async function pruneExpiredSubscription(endpoint: string, pushError: unknown) {
-  const statusCode =
-    pushError && typeof pushError === "object" && "statusCode" in pushError
-      ? (pushError as { statusCode?: number }).statusCode
-      : undefined;
-  if (statusCode !== 404 && statusCode !== 410) return;
-  await db
-    .delete(pushSubscriptions)
-    .where(eq(pushSubscriptions.endpoint, endpoint))
-    .catch(() => {});
+function pushErrorStatus(pushError: unknown): number | undefined {
+  return pushError && typeof pushError === "object" && "statusCode" in pushError
+    ? (pushError as { statusCode?: number }).statusCode
+    : undefined;
+}
+
+// Decide what to do with a failed web-push send instead of swallowing it.
+// Expired endpoints (404/410) are pruned. Auth/VAPID failures (401/403) are
+// captured to Sentry — they silently break push for *every* user until the keys
+// are fixed, so they must be visible. Anything else is logged, so transient 5xx
+// leave a trace without spamming Sentry.
+async function handlePushFailure(
+  endpoint: string,
+  pushError: unknown,
+  req: NextRequest,
+): Promise<void> {
+  const statusCode = pushErrorStatus(pushError);
+  if (statusCode === 404 || statusCode === 410) {
+    await db
+      .delete(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, endpoint))
+      .catch(() => {});
+    return;
+  }
+  if (statusCode === 401 || statusCode === 403) {
+    ApiError.capture(pushError, req);
+    return;
+  }
+  logger.error("Push send failed", pushError);
 }
 
 // A job whose PROCESSING row is newer than this is treated as in-flight, so a
@@ -97,7 +115,7 @@ export async function POST(req: NextRequest) {
           body: "Your recipe is ready — tap to review",
           url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
         }).catch((pushError: unknown) =>
-          pruneExpiredSubscription(sub.endpoint, pushError),
+          handlePushFailure(sub.endpoint, pushError, req),
         );
       }
     }
