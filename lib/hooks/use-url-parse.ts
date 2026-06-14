@@ -5,6 +5,7 @@ import { recordParseHistory } from "@/lib/db/parse-history";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { usePushSubscription } from "@/lib/hooks/use-push-subscription";
 import { logger } from "@/lib/logger";
+import { claimJobCompletion } from "@/lib/parse-job-completion";
 import {
   addJobId,
   getJobIds,
@@ -55,6 +56,15 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         const { status, result, error, url: jobUrl } = await statusRes.json();
 
         if (status === PARSE_JOB_STATUS.DONE) {
+          // The global watcher may have already handled this job (e.g. it
+          // completed in the background before this page resumed polling it).
+          // If so, bail without re-running side effects — the toast/bell entry
+          // it created is the single source of truth.
+          if (!claimJobCompletion(id)) {
+            setLoading(false);
+            setJobId(null);
+            return;
+          }
           const parsed = result as ParsedRecipe;
           const uploadToken = getUploadToken(id);
           if (uploadToken) storePendingUploadToken(uploadToken);
@@ -67,6 +77,11 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           setLoading(false);
           setJobId(null);
         } else if (status === PARSE_JOB_STATUS.FAILED) {
+          if (!claimJobCompletion(id)) {
+            setLoading(false);
+            setJobId(null);
+            return;
+          }
           const rawError: string = error || "Failed to parse recipe";
           recordParseHistory(
             failedParseHistoryEntry(id, jobUrl, rawError),

@@ -116,6 +116,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/telegram-bot.ts` | `sendTelegramMessage()`, `extractUrl()`. |
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
+| `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
 | `lib/categories.ts` | Recipe category constants. |
 | `lib/category-styles.ts` | Category badge colors (`getCategoryStyle()`) — single source of truth. |
 | `lib/utils.ts` | `generateId()` and other small utilities. |

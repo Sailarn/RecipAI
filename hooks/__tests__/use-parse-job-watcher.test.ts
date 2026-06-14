@@ -47,6 +47,9 @@ vi.mock("@/lib/transitions", () => ({
   useNavigate: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
 
+const claimJobCompletion = vi.hoisted(() => vi.fn().mockReturnValue(true));
+vi.mock("@/lib/parse-job-completion", () => ({ claimJobCompletion }));
+
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
@@ -87,6 +90,7 @@ const pendingResponse = () => makeResponse({ status: "pending" });
 beforeEach(() => {
   vi.clearAllMocks();
   mockFetch.mockReset();
+  claimJobCompletion.mockReturnValue(true);
   vi.stubGlobal("fetch", mockFetch);
   vi.mocked(getJobIds).mockReturnValue([]);
   vi.mocked(db.parsedRecipes.add).mockResolvedValue(undefined as any);
@@ -360,6 +364,24 @@ describe("useParseJobWatcher", () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("completion guard", () => {
+    it("does not save or toast when the inline page already handled the job", async () => {
+      claimJobCompletion.mockReturnValue(false);
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(doneResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
+      expect(toast).not.toHaveBeenCalled();
     });
   });
 

@@ -6,6 +6,7 @@ import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
+import { claimJobCompletion } from "@/lib/parse-job-completion";
 import {
   getJobIds,
   getPendingUploadToken,
@@ -123,6 +124,8 @@ export function useParseJobWatcher() {
           const { status, result, error, url: jobUrl } = await res.json();
 
           if (status === "done") {
+            // The inline parse page may have already handled this job.
+            if (!claimJobCompletion(id)) return;
             const parsed = result as ParsedRecipe;
             await handleDone(id, parsed);
             trackEvent("parse_succeeded", { source: "url" });
@@ -134,6 +137,7 @@ export function useParseJobWatcher() {
               ),
             ).catch(() => {});
           } else if (status === "failed") {
+            if (!claimJobCompletion(id)) return;
             const rawError: string = error || "Failed to parse recipe";
             removeJobId(id);
             trackEvent("parse_failed", { source: "url", reason: rawError });

@@ -37,6 +37,9 @@ vi.mock("@/lib/parse-recipe/parse-history-entry", () => ({
   failedParseHistoryEntry: vi.fn(() => ({ status: "failed" })),
 }));
 
+const claimJobCompletion = vi.hoisted(() => vi.fn().mockReturnValue(true));
+vi.mock("@/lib/parse-job-completion", () => ({ claimJobCompletion }));
+
 import { getJobIds } from "@/lib/parse-job-storage";
 
 const mockFetch = vi.fn();
@@ -52,6 +55,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockFetch.mockReset();
   vi.mocked(getJobIds).mockReturnValue([]);
+  claimJobCompletion.mockReturnValue(true);
   vi.stubGlobal("fetch", mockFetch);
 });
 
@@ -140,6 +144,32 @@ describe("useUrlParse", () => {
           source: "url",
           reason: "Could not parse page",
         });
+      });
+    });
+  });
+
+  describe("completion guard", () => {
+    it("does not re-run side effects when the watcher already handled the job", async () => {
+      claimJobCompletion.mockReturnValue(false);
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(
+        makeResponse({
+          status: "done",
+          result: { title: "Test Recipe", ingredients: [], instructions: [] },
+          url: "https://example.com/recipe",
+        }),
+      );
+
+      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(result.current.result).toBeNull();
+      expect(trackEvent).not.toHaveBeenCalledWith("parse_succeeded", {
+        source: "url",
       });
     });
   });
