@@ -1,4 +1,8 @@
 import { hasEmbedConsent } from "./embed-consent";
+import {
+  markEmbedDownloadStarted,
+  markEmbedModelReady,
+} from "./embed-download-state";
 import type { WorkerOutput } from "./embed-worker";
 
 type EmbedPrefix = "query" | "passage";
@@ -20,6 +24,7 @@ function setupWorker(workerInstance: Worker): void {
           }),
         );
       } else if (type === "loaded") {
+        markEmbedModelReady();
         window.dispatchEvent(new CustomEvent("embed-model-loaded"));
       }
     },
@@ -28,6 +33,7 @@ function setupWorker(workerInstance: Worker): void {
 
 function getWorker(): Worker {
   if (!worker) {
+    markEmbedDownloadStarted();
     worker = new Worker(new URL("./embed-worker.ts", import.meta.url));
     setupWorker(worker);
   }

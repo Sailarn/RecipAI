@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/telemetry";
+import { preWarmEmbedWorker } from "./embed-client";
+import { isEmbedDownloadInterrupted } from "./embed-download-state";
 
 export type EmbedDownloadPhase = "idle" | "downloading" | "done";
 
@@ -14,14 +16,25 @@ const DONE_AUTOCLEAR_MS = 1800;
 
 /**
  * Tracks the embed model download via the window events the embed worker
- * dispatches (`embed-model-progress` / `embed-model-loaded`). State is
- * session-only and ephemeral — intentionally not persisted, so a reload starts
- * clean rather than showing a stale "downloading". Returns idle until a
+ * dispatches (`embed-model-progress` / `embed-model-loaded`). Live progress is
+ * ephemeral (never persisted, so a reload starts visually clean), but the
+ * download *lifecycle* is persisted: if a previous download was interrupted by
+ * closing the app, this hook auto-resumes it on mount. Returns idle until a
  * download begins; after completion it shows "done" briefly then clears.
  */
 export function useEmbedDownload(): EmbedDownloadState {
   const [phase, setPhase] = useState<EmbedDownloadPhase>("idle");
   const [progress, setProgress] = useState(0);
+
+  // Resume a download the user interrupted by closing the app mid-way. The
+  // worker re-emits progress/loaded events, which the listeners below pick up.
+  // preWarmEmbedWorker self-guards on consent, so this no-ops without it.
+  useEffect(() => {
+    if (isEmbedDownloadInterrupted()) {
+      setPhase("downloading");
+      preWarmEmbedWorker();
+    }
+  }, []);
 
   useEffect(() => {
     const onProgress = (event: Event) => {
