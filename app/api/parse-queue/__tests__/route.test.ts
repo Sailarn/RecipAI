@@ -173,6 +173,20 @@ describe("POST /api/parse-queue", () => {
 
     expect(mintUploadToken).toHaveBeenCalledOnce();
   });
+
+  it("does not insert a job when minting the upload token fails", async () => {
+    vi.mocked(mintUploadToken).mockRejectedValue(new Error("redis down"));
+    const { db } = await import("@/db");
+    const req = {
+      url: "http://localhost/api/parse-queue",
+      json: () => Promise.resolve({ url: "https://example.com/recipe" }),
+    } as unknown as never;
+
+    const res = await POST(req);
+
+    expect(res.status).toBe(500);
+    expect(db.insert).not.toHaveBeenCalled();
+  });
 });
 
 describe("GET /api/parse-queue", () => {

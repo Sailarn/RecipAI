@@ -54,6 +54,12 @@ export async function POST(req: NextRequest) {
   const id = crypto.randomUUID();
 
   try {
+    // Mint the upload token first. It depends on Redis; minting *after* the
+    // insert means a Redis failure leaves an orphaned PENDING job the client
+    // never processes (it got an error and never called /process). Token-first
+    // keeps the enqueue atomic — a mint failure inserts nothing.
+    const uploadToken = await mintUploadToken();
+
     await db.insert(parseJobs).values({
       id,
       userId: session?.user.id || null,
@@ -63,7 +69,6 @@ export async function POST(req: NextRequest) {
       status: PARSE_JOB_STATUS.PENDING,
     });
 
-    const uploadToken = await mintUploadToken();
     return NextResponse.json({ jobId: id, uploadToken });
   } catch (error) {
     return ApiError.internal(error, req);
