@@ -19,7 +19,9 @@ beforeEach(() => {
   mockFetch.mockResolvedValue(new Response());
 });
 
-afterEach(() => {
+afterEach(async () => {
+  // Drain any in-flight create barriers so they don't leak into the next test.
+  await new Promise((resolve) => setTimeout(resolve, 0));
   vi.unstubAllGlobals();
 });
 
@@ -79,6 +81,35 @@ describe("syncUpdate", () => {
 
     expect(() => syncUpdate("recipe-1", { title: "X" })).not.toThrow();
     await vi.waitFor(() => expect(mockFetch).toHaveBeenCalled());
+  });
+});
+
+describe("create barrier (serialization)", () => {
+  it("delays a recipe's PATCH until its create POST resolves", async () => {
+    let resolveCreate: (value: Response) => void = () => {};
+    const createInFlight = new Promise<Response>((resolve) => {
+      resolveCreate = resolve;
+    });
+    mockFetch.mockReturnValueOnce(createInFlight);
+    mockFetch.mockResolvedValue(new Response());
+
+    syncCreate(mockRecipe);
+    syncUpdate("recipe-1", { title: "X" });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch.mock.calls[0][1]?.method).toBe("POST");
+
+    resolveCreate(new Response());
+
+    await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+    expect(mockFetch.mock.calls[1][1]?.method).toBe("PATCH");
+  });
+
+  it("sends a PATCH immediately when no create is pending", () => {
+    syncUpdate("no-create-recipe", { title: "X" });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch.mock.calls[0][1]?.method).toBe("PATCH");
   });
 });
 
