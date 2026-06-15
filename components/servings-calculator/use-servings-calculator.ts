@@ -3,7 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/lib/db/db";
-import { createProvisionalIngredient } from "@/lib/db/ingredients";
+import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
 import { addPantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
@@ -27,7 +27,7 @@ export function useServingsCalculator({
   const [canonicalNames, setCanonicalNames] = useState<Map<string, string>>(
     new Map(),
   );
-  const hasCanonical = (canonicalIngredientIds ?? []).length > 0;
+  const hasCanonical = (canonicalIngredientIds ?? []).some(Boolean);
   const ratio = servings / originalServings;
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -125,7 +125,7 @@ export function useServingsCalculator({
 
     let ingredientId = canonicalId;
     if (!ingredientId) {
-      ingredientId = await createProvisionalIngredient(ingredient.item);
+      ingredientId = await resolveOrCreateIngredient(ingredient.item);
     }
 
     await addPantryItem({

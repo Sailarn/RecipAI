@@ -91,7 +91,7 @@ describe("normalizeRecipeIngredients", () => {
       await normalizeRecipeIngredients("recipe-1", [{ item: "за смаком" }]);
 
       const updates = mockDbRecipesUpdate.mock.calls[0][1];
-      expect(updates.canonicalIngredientIds).toHaveLength(0);
+      expect(updates.canonicalIngredientIds.filter(Boolean)).toHaveLength(0);
       expect(updates.unrecognizedIngredients).toContain("за смаком");
     });
 
@@ -100,7 +100,7 @@ describe("normalizeRecipeIngredients", () => {
 
       const updates = mockDbRecipesUpdate.mock.calls[0][1];
       expect(updates.unrecognizedIngredients).toContain("to taste");
-      expect(updates.canonicalIngredientIds).toHaveLength(0);
+      expect(updates.canonicalIngredientIds.filter(Boolean)).toHaveLength(0);
     });
 
     it("puts 'optional' into unrecognizedIngredients", async () => {
@@ -301,7 +301,7 @@ describe("normalizeRecipeIngredients", () => {
       ]);
 
       const updates = mockDbRecipesUpdate.mock.calls[0][1];
-      expect(updates.canonicalIngredientIds).toHaveLength(0);
+      expect(updates.canonicalIngredientIds.filter(Boolean)).toHaveLength(0);
       expect(updates.unrecognizedIngredients).toHaveLength(2);
     });
   });

@@ -22,7 +22,7 @@ vi.mock("@/lib/db/db", () => ({
 }));
 
 vi.mock("@/lib/db/ingredients", () => ({
-  createProvisionalIngredient: vi.fn().mockResolvedValue("provisional-id"),
+  resolveOrCreateIngredient: vi.fn().mockResolvedValue("provisional-id"),
 }));
 
 vi.mock("@/lib/db/pantry", () => ({
@@ -31,7 +31,7 @@ vi.mock("@/lib/db/pantry", () => ({
 }));
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { createProvisionalIngredient } from "@/lib/db/ingredients";
+import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
 import { addPantryItem, togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
 import { ServingsCalculator } from "../index";
@@ -235,6 +235,29 @@ describe("ServingsCalculator", () => {
       );
     });
 
+    it("shows in-stock (green) across languages: recipe 'flour' matches pantry 'борошно' by shared canonical id", () => {
+      vi.mocked(useLiveQuery).mockReturnValue([
+        basePantryItem({
+          name: "борошно",
+          ingredientId: "canonical-flour",
+          on: true,
+        }),
+      ]);
+
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          ingredients={[baseIngredient({ item: "flour" })]}
+          canonicalIngredientIds={["canonical-flour"]}
+        />,
+      );
+
+      expect(screen.getByText(/flour/).previousElementSibling).toHaveAttribute(
+        "data-status",
+        "in",
+      );
+    });
+
     it("shows out-of-stock (red) when the ingredient is not in the pantry", () => {
       vi.mocked(useLiveQuery).mockReturnValue([]);
 
@@ -305,7 +328,7 @@ describe("ServingsCalculator", () => {
       );
 
       await waitFor(() => {
-        expect(createProvisionalIngredient).toHaveBeenCalledWith("truffle");
+        expect(resolveOrCreateIngredient).toHaveBeenCalledWith("truffle");
       });
     });
 
@@ -328,7 +351,7 @@ describe("ServingsCalculator", () => {
         expect(addPantryItem).toHaveBeenCalled();
       });
 
-      expect(createProvisionalIngredient).not.toHaveBeenCalled();
+      expect(resolveOrCreateIngredient).not.toHaveBeenCalled();
     });
   });
 

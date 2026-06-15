@@ -18,8 +18,10 @@ export function useRecipeMatcher() {
 
   const getMissing = useCallback(
     (recipe: Recipe): { missing: number; total: number } | null => {
-      const ids = recipe.canonicalIngredientIds;
-      if (!ids || ids.length === 0) return null;
+      // canonicalIngredientIds is index-aligned with ingredients, so drop the
+      // "" placeholder slots before counting.
+      const ids = (recipe.canonicalIngredientIds ?? []).filter(Boolean);
+      if (ids.length === 0) return null;
       return {
         missing: ids.filter((id) => !pantrySet.has(id)).length,
         total: ids.length,

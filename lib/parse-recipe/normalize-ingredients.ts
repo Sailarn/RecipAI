@@ -135,6 +135,9 @@ export async function normalizeRecipeIngredients(
   for (const ingredient of ingredients) {
     if (NULL_PATTERNS.some((pattern) => pattern.test(ingredient.item.trim()))) {
       unrecognizedIngredients.push(ingredient.item);
+      // Keep a slot so canonicalIngredientIds stays index-aligned with
+      // ingredients — per-ingredient consumers (the stock dot) rely on it.
+      canonicalIngredientIds.push("");
       continue;
     }
 
@@ -201,19 +204,22 @@ export async function normalizeRecipeIngredients(
     }
   }
 
-  const finalIds = canonicalIngredientIds.filter(Boolean);
+  // Store the array index-aligned with ingredients ("" where there's no
+  // canonical match). Set-style consumers (the recipe-card matcher) filter the
+  // empties; per-ingredient consumers (the stock dot) read by index.
+  const matchedCount = canonicalIngredientIds.filter(Boolean).length;
   const updatedAt = new Date();
 
   await db.recipes.update(recipeId, {
-    canonicalIngredientIds: finalIds,
+    canonicalIngredientIds,
     unrecognizedIngredients,
     updatedAt,
   });
   syncUpdate(recipeId, {
-    canonicalIngredientIds: finalIds,
+    canonicalIngredientIds,
     unrecognizedIngredients,
     updatedAt,
   });
 
-  return { matched: finalIds.length, total: ingredients.length };
+  return { matched: matchedCount, total: ingredients.length };
 }
