@@ -216,6 +216,41 @@ describe("ServingsCalculator", () => {
     });
   });
 
+  describe("stock dot", () => {
+    it("shows in-stock (green) when the ingredient matches a pantry item by name, even without canonical ids", () => {
+      vi.mocked(useLiveQuery).mockReturnValue([
+        basePantryItem({ name: "flour", on: true, ingredientId: "vocab-x" }),
+      ]);
+
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          ingredients={[baseIngredient({ item: "flour" })]}
+        />,
+      );
+
+      expect(screen.getByText(/flour/).previousElementSibling).toHaveAttribute(
+        "data-status",
+        "in",
+      );
+    });
+
+    it("shows out-of-stock (red) when the ingredient is not in the pantry", () => {
+      vi.mocked(useLiveQuery).mockReturnValue([]);
+
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          ingredients={[baseIngredient({ item: "saffron" })]}
+        />,
+      );
+
+      expect(
+        screen.getByText(/saffron/).previousElementSibling,
+      ).toHaveAttribute("data-status", "out");
+    });
+  });
+
   describe("pantry — add button", () => {
     it("shows add button when ingredient is not in pantry", () => {
       vi.mocked(useLiveQuery).mockReturnValue([]);

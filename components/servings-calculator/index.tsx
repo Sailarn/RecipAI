@@ -96,7 +96,7 @@ export function ServingsCalculator({
             ingredient={ingredient}
             isLast={index === ingredients.length - 1}
             scaledAmount={formatAmount(ingredient.amount)}
-            status={stockStatus(index)}
+            status={stockStatus(ingredient, index)}
             name={displayName(ingredient, index)}
             pantryItem={pantryItemFor(ingredient, index)}
             onAdd={() => addToPantry(ingredient, index)}

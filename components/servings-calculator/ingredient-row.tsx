@@ -39,6 +39,7 @@ export function IngredientRow({
       )}
     >
       <div
+        data-status={status}
         className="w-1.5 h-1.5 rounded-full shrink-0"
         style={{ background: BULLET_COLOR[status] }}
       />

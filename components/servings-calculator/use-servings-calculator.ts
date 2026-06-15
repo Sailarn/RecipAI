@@ -64,16 +64,6 @@ export function useServingsCalculator({
     [pantryItems],
   );
 
-  const pantrySet = useMemo(
-    () =>
-      new Set<string>(
-        [...pantryByIngredientId.values()]
-          .filter((item) => item.on)
-          .map((item) => item.ingredientId as string),
-      ),
-    [pantryByIngredientId],
-  );
-
   useEffect(() => {
     const ids = (canonicalIngredientIds ?? []).filter(Boolean);
     if (!ids.length) return;
@@ -97,12 +87,6 @@ export function useServingsCalculator({
     return scaled.toFixed(1).replace(/\.0$/, "");
   };
 
-  const stockStatus = (index: number): StockStatus => {
-    const id = canonicalIngredientIds?.[index];
-    if (!id) return "unknown";
-    return pantrySet.has(id) ? "in" : "out";
-  };
-
   const displayName = (ingredient: RecipeIngredient, index: number): string => {
     if (!useCanonical) return ingredient.item;
     const canonicalId = canonicalIngredientIds?.[index];
@@ -117,6 +101,19 @@ export function useServingsCalculator({
     const id = canonicalIngredientIds?.[index];
     if (id) return pantryByIngredientId.get(id);
     return pantryByName.get(ingredient.item.toLowerCase());
+  };
+
+  // Derive the stock dot from the same lookup as the add/toggle button so the
+  // two never disagree. canonicalIngredientIds is compacted (null-pattern
+  // ingredients get no slot), so a name fallback — not a raw [index] read — is
+  // what makes the dot show for newly added recipes.
+  const stockStatus = (
+    ingredient: RecipeIngredient,
+    index: number,
+  ): StockStatus => {
+    const item = pantryItemFor(ingredient, index);
+    if (!item) return "out";
+    return item.on ? "in" : "out";
   };
 
   const addToPantry = async (
