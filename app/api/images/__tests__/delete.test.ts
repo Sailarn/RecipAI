@@ -84,6 +84,20 @@ describe("DELETE /api/images/delete", () => {
       expect(body).toEqual({ success: true });
     });
 
+    it("does not 500 on ImageKit's transient internal error (best-effort cleanup)", async () => {
+      vi.mocked(imagekit.deleteFile).mockRejectedValue(
+        new Error(
+          "We have experienced an internal error while processing your request.",
+        ),
+      );
+
+      const res = await DELETE(makeRequest({ fileId: "file-123" }));
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ success: false });
+    });
+
     it("returns 500 for other errors", async () => {
       vi.mocked(imagekit.deleteFile).mockRejectedValue(
         new Error("Network timeout"),

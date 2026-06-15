@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
+import { logger } from "@/lib/logger";
 import { imagekit } from "@/lib/upload/imagekit";
 import { requireUploadAuth } from "@/lib/upload/upload-auth";
 
@@ -21,8 +22,16 @@ export async function DELETE(request: Request) {
     await imagekit.deleteFile(fileId);
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("does not exist")) {
+    const message = error instanceof Error ? error.message : "";
+    // Already-deleted is a no-op success.
+    if (message.includes("does not exist")) {
       return NextResponse.json({ success: true });
+    }
+    // ImageKit's own transient 5xx — deletion is best-effort cleanup, so don't
+    // fail the request or spam Sentry; an orphaned file is harmless.
+    if (message.includes("internal error")) {
+      logger.warn("[images/delete] ImageKit transient error", { fileId });
+      return NextResponse.json({ success: false });
     }
     return ApiError.internal(error, request);
   }
