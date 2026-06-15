@@ -1,4 +1,3 @@
-import Fuse from "fuse.js";
 import { db } from "@/lib/db/db";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
 import { syncUpdate } from "@/lib/db/supabase-sync";
@@ -7,10 +6,10 @@ import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
 import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
+import { matchVocabId } from "./vocab-match";
 
 const SIMILARITY_THRESHOLD = 0.82;
 const SIMILARITY_GAP = 0.08;
-const FUSE_THRESHOLD = 0.2;
 const NULL_PATTERNS = [
   /^за смаком$/i,
   /^за бажанням$/i,
@@ -20,40 +19,6 @@ const NULL_PATTERNS = [
   /^for garnish$/i,
   /^for serving$/i,
 ];
-
-let fuseCache: {
-  index: Fuse<{ id: string; text: string }>;
-  size: number;
-} | null = null;
-
-async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
-  const vocab = await db.ingredients
-    .filter(
-      (ingredient) =>
-        !ingredient.status || ingredient.status === INGREDIENT_STATUS.CONFIRMED,
-    )
-    .toArray();
-  if (fuseCache && fuseCache.size === vocab.length) return fuseCache.index;
-  const items = vocab.flatMap((vocabEntry) => [
-    { id: vocabEntry.id, text: vocabEntry.en },
-    ...(vocabEntry.ua ? [{ id: vocabEntry.id, text: vocabEntry.ua }] : []),
-    ...vocabEntry.aliasesEn.map((alias) => ({
-      id: vocabEntry.id,
-      text: alias,
-    })),
-    ...vocabEntry.aliasesUa.map((alias) => ({
-      id: vocabEntry.id,
-      text: alias,
-    })),
-  ]);
-  const index = new Fuse(items, {
-    keys: ["text"],
-    threshold: FUSE_THRESHOLD,
-    includeScore: true,
-  });
-  fuseCache = { index, size: vocab.length };
-  return index;
-}
 
 type VocabEmbedding = { id: string; embedding: number[] };
 let embeddingCache: { list: VocabEmbedding[]; size: number } | null = null;
@@ -115,44 +80,6 @@ function findBestEmbeddingMatch(
   return null;
 }
 
-function preprocessIngredient(text: string): string {
-  return text
-    .replace(/\(.*?\)/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function fuseHit(
-  fuse: Fuse<{ id: string; text: string }>,
-  text: string,
-): string | null {
-  const preprocessed = preprocessIngredient(text);
-
-  // Try the full preprocessed text first
-  const full = fuse.search(preprocessed);
-  if (full.length > 0) return full[0].item.id;
-
-  // Fall back to individual token search — handles multi-word phrases like
-  // "кетчупу Торчин для дітей" → token "кетчупу" → ketchup.
-  // Guard: only accept when the matched alias is ≤ 2 words, so a common word
-  // like "власному" doesn't hit a long alias phrase.
-  const tokens = preprocessed
-    .split(/\s+/)
-    .map((token) => token.replace(/[.,]/g, ""))
-    .filter((token) => token.length > 3);
-  for (const token of tokens) {
-    const fuseResults = fuse.search(token);
-    if (
-      fuseResults.length > 0 &&
-      fuseResults[0].item.text.trim().split(/\s+/).length <= 2
-    ) {
-      return fuseResults[0].item.id;
-    }
-  }
-
-  return null;
-}
-
 async function createProvisional(
   en: string,
   ua?: string | null,
@@ -198,8 +125,6 @@ export async function normalizeRecipeIngredients(
     category?: string | null;
   }>,
 ): Promise<{ matched: number; total: number }> {
-  const fuse = await getFuseIndex();
-
   type Pending = { item: string; ua?: string | null; category?: string | null };
 
   const canonicalIngredientIds: string[] = [];
@@ -213,9 +138,7 @@ export async function normalizeRecipeIngredients(
       continue;
     }
 
-    const hit =
-      fuseHit(fuse, ingredient.item) ??
-      (ingredient.ua ? fuseHit(fuse, ingredient.ua) : null);
+    const hit = await matchVocabId(ingredient.item, ingredient.ua);
     if (hit) {
       canonicalIngredientIds.push(hit);
       continue;

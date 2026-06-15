@@ -1,7 +1,21 @@
+import { matchVocabId } from "@/lib/parse-recipe/vocab-match";
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
 import { db } from "./db";
 import { INGREDIENT_STATUS } from "./schema";
+
+// Resolve raw text to an ingredient id for pantry/recipe use: prefer a
+// confirmed-vocab canonical match (cross-language — "борошно" and "flour" land
+// on the same id, so the pantry and a recipe agree), and only mint a
+// provisional when nothing matches.
+export async function resolveOrCreateIngredient(
+  rawText: string,
+): Promise<string> {
+  return (
+    (await matchVocabId(rawText)) ??
+    (await createProvisionalIngredient(rawText))
+  );
+}
 
 export async function createProvisionalIngredient(
   rawText: string,

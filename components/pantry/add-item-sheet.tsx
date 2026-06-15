@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
-import { createProvisionalIngredient } from "@/lib/db/ingredients";
+import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
 import { addPantryItem } from "@/lib/db/pantry";
 import type { VocabularyIngredient } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
@@ -53,7 +53,7 @@ export function AddItemSheet({ onClose }: { onClose: () => void }) {
 
     if (!resolvedIngredientId) {
       try {
-        resolvedIngredientId = await createProvisionalIngredient(trimmed);
+        resolvedIngredientId = await resolveOrCreateIngredient(trimmed);
       } catch {
         toast.error("Couldn't save ingredient");
         return;

@@ -26,13 +26,13 @@ vi.mock("@/components/ingredient-autocomplete", () => ({
 }));
 
 vi.mock("@/lib/db/ingredients", () => ({
-  createProvisionalIngredient: vi.fn().mockResolvedValue("provisional-id"),
+  resolveOrCreateIngredient: vi.fn().mockResolvedValue("provisional-id"),
 }));
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
-import { createProvisionalIngredient } from "@/lib/db/ingredients";
+import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
 import {
   addPantryItem,
   removePantryItem,
@@ -148,7 +148,7 @@ describe("AddItemSheet", () => {
   }
 
   describe("free-text submit (no vocab match)", () => {
-    it("calls createProvisionalIngredient with the trimmed name", async () => {
+    it("calls resolveOrCreateIngredient with the trimmed name", async () => {
       await openSheet();
 
       fireEvent.change(screen.getByTestId("item-name-input"), {
@@ -157,16 +157,14 @@ describe("AddItemSheet", () => {
       fireEvent.click(screen.getByTestId("add-item-submit"));
 
       await waitFor(() => {
-        expect(createProvisionalIngredient).toHaveBeenCalledWith(
+        expect(resolveOrCreateIngredient).toHaveBeenCalledWith(
           "Tajín seasoning",
         );
       });
     });
 
     it("passes the provisional id to addPantryItem", async () => {
-      vi.mocked(createProvisionalIngredient).mockResolvedValue(
-        "provisional-id",
-      );
+      vi.mocked(resolveOrCreateIngredient).mockResolvedValue("provisional-id");
       await openSheet();
 
       fireEvent.change(screen.getByTestId("item-name-input"), {
@@ -217,9 +215,7 @@ describe("AddItemSheet", () => {
       fireEvent.click(screen.getByTestId("add-item-submit"));
 
       await waitFor(() => {
-        expect(createProvisionalIngredient).toHaveBeenCalledWith(
-          "Tomato edited",
-        );
+        expect(resolveOrCreateIngredient).toHaveBeenCalledWith("Tomato edited");
       });
       expect(addPantryItem).toHaveBeenCalledWith(
         expect.objectContaining({ ingredientId: "provisional-id" }),
@@ -228,8 +224,8 @@ describe("AddItemSheet", () => {
   });
 
   describe("error handling", () => {
-    it("shows toast and keeps sheet open when createProvisionalIngredient throws", async () => {
-      vi.mocked(createProvisionalIngredient).mockRejectedValue(
+    it("shows toast and keeps sheet open when resolveOrCreateIngredient throws", async () => {
+      vi.mocked(resolveOrCreateIngredient).mockRejectedValue(
         new Error("QuotaExceeded"),
       );
       await openSheet();
@@ -246,9 +242,7 @@ describe("AddItemSheet", () => {
     });
 
     it("shows toast and keeps sheet open when addPantryItem throws", async () => {
-      vi.mocked(createProvisionalIngredient).mockResolvedValue(
-        "provisional-id",
-      );
+      vi.mocked(resolveOrCreateIngredient).mockResolvedValue("provisional-id");
       vi.mocked(addPantryItem).mockRejectedValue(new Error("QuotaExceeded"));
       await openSheet();
 
