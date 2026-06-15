@@ -73,7 +73,8 @@ export function PantryPage() {
               placeholder="Search pantry…"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-full py-2.5 pl-[34px] pr-3 bg-[rgba(255,200,100,0.06)] border border-[rgba(255,200,100,0.14)] rounded-xl text-[var(--fg-1)] font-sans text-sm outline-none box-border"
+              // text-base (16px) keeps iOS Safari from auto-zooming on focus
+              className="w-full py-2.5 pl-[34px] pr-3 bg-[rgba(255,200,100,0.06)] border border-[rgba(255,200,100,0.14)] rounded-xl text-[var(--fg-1)] font-sans text-base outline-none box-border"
             />
           </div>
         )}

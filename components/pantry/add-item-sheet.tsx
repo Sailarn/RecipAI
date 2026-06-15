@@ -16,8 +16,9 @@ import {
   type UnitOption,
 } from "./constants";
 
+// text-base (16px) keeps iOS Safari from auto-zooming inputs on focus
 const FIELD_CLASS =
-  "py-2.5 px-3 bg-[rgba(255,200,100,0.06)] border border-[rgba(255,200,100,0.2)] rounded-xl text-[var(--fg-1)] font-sans text-[15px]";
+  "py-2.5 px-3 bg-[rgba(255,200,100,0.06)] border border-[rgba(255,200,100,0.2)] rounded-xl text-[var(--fg-1)] font-sans text-base";
 
 export function AddItemSheet({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
