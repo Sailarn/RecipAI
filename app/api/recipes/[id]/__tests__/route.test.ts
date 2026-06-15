@@ -106,6 +106,22 @@ describe("PATCH /api/recipes/[id]", () => {
     );
   });
 
+  it("coerces a string createdAt to a Date so Drizzle never crashes (keep-mine snapshot)", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockSet } = setupUpdateChain();
+    const { req, params } = makePatchRequest("r1", {
+      title: "Kept",
+      createdAt: "2026-06-15T10:00:00.000Z",
+      updatedAt: "2026-06-15T10:05:00.000Z",
+    });
+
+    await PATCH(req, params);
+
+    const setArg = mockSet.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(typeof setArg.createdAt).not.toBe("string");
+    expect(setArg.updatedAt).toBeInstanceOf(Date);
+  });
+
   it("scopes update to the authenticated user", async () => {
     vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
     const { mockWhere } = setupUpdateChain();

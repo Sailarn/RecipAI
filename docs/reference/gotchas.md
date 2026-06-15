@@ -9,6 +9,9 @@ Non-obvious behaviours and hard-won lessons. If something acts weird, check here
 **Supabase dates are strings.**
 JSON from Supabase (`fetch` responses, `useSyncOnLogin`) has `createdAt`/`updatedAt` as ISO strings. Dexie expects `Date` objects. Always convert: `createdAt: new Date(row.createdAt)`. The `parseTimestamps` helper in `hooks/use-sync-on-login.ts` does this for recipes and collections.
 
+**The reverse also bites: client snapshots → Drizzle.**
+When a client sends a record back to an API route (e.g. sync-review "keep mine" PATCHes the full recipe snapshot), every date field is an ISO **string**. Drizzle's `timestamp` columns call `.toISOString()` on the value, so a string crashes the write with `TypeError: a.toISOString is not a function`. Revive **all** date fields to `Date` before `db.update(...).set(...)` / `.insert(...)`, not just the obvious `updatedAt`. See `app/api/recipes/[id]/route.ts` (PATCH) and the `recipes-sync` upsert.
+
 **Dexie `put` is an upsert.**
 `db.table.put(item)` inserts or replaces by primary key — it does not merge partial updates. Pass the full object or use `update` for partial changes.
 
