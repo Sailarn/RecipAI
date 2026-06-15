@@ -128,11 +128,24 @@ function parseTimestamps<T extends { createdAt: Date; updatedAt: Date }>(
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
+  const renormalized = useRef(false);
   const reviewedIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIsSignedIn(!!session);
   }, [session]);
+
+  // One-time upgrade of older recipes to the index-aligned
+  // canonicalIngredientIds format so per-ingredient pantry dots (including
+  // cross-language) work. Lazy import keeps the normalize pipeline off this
+  // hook's load path; self-limiting, so it's a cheap no-op once migrated.
+  useEffect(() => {
+    if (renormalized.current) return;
+    renormalized.current = true;
+    import("@/lib/db/renormalize-recipes")
+      .then((module) => module.renormalizeOutdatedRecipes())
+      .catch(() => {});
+  }, []);
   const navigate = useNavigate();
 
   const sync = useCallback(async () => {
