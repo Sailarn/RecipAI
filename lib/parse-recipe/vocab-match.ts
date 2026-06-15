@@ -45,6 +45,19 @@ function preprocessIngredient(text: string): string {
     .trim();
 }
 
+// When multiple fuse hits tie on score, pick the slug id (e.g. "salt",
+// "black-pepper") over a UUID provisional. UUIDs start with 8 lowercase hex
+// chars followed by a hyphen; anything else is treated as a slug.
+function pickBestId(
+  results: Array<{ item: { id: string; text: string }; score?: number }>,
+): string {
+  if (results.length === 1) return results[0].item.id;
+  const bestScore = results[0].score ?? 0;
+  const tied = results.filter((result) => (result.score ?? 0) === bestScore);
+  const slugHit = tied.find((result) => !/^[0-9a-f]{8}-/.test(result.item.id));
+  return (slugHit ?? tied[0]).item.id;
+}
+
 function fuseHit(
   fuse: Fuse<{ id: string; text: string }>,
   text: string,
@@ -53,7 +66,7 @@ function fuseHit(
 
   // Try the full preprocessed text first
   const full = fuse.search(preprocessed);
-  if (full.length > 0) return full[0].item.id;
+  if (full.length > 0) return pickBestId(full);
 
   // Fall back to individual token search — handles multi-word phrases like
   // "кетчупу Торчин для дітей" → token "кетчупу" → ketchup.
@@ -69,7 +82,7 @@ function fuseHit(
       fuseResults.length > 0 &&
       fuseResults[0].item.text.trim().split(/\s+/).length <= 2
     ) {
-      return fuseResults[0].item.id;
+      return pickBestId(fuseResults);
     }
   }
 

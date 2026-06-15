@@ -46,7 +46,9 @@ vi.mock("@/lib/db/pantry", () => ({
 }));
 
 vi.mock("@/lib/transitions", () => ({
-  useNavigate: vi.fn().mockReturnValue({ push: vi.fn(), back: vi.fn() }),
+  useNavigate: vi
+    .fn()
+    .mockReturnValue({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
 
 import { useLiveQuery } from "dexie-react-hooks";
@@ -234,6 +236,74 @@ describe("useSyncOnLogin", () => {
       expect(notifications[0].type).toBe("conflicted");
       expect(notifications[0].serverSnapshot).toContain("shared-1");
       expect(notifications[0].localSnapshot).toContain("shared-1");
+    });
+
+    it("suppresses conflicted notification for a recipe written within the grace window", async () => {
+      const recentUpdatedAt = new Date(Date.now() - 10_000);
+      const localRecipe = {
+        id: "recent-1",
+        title: "Fresh Recipe",
+        servings: 1,
+        ingredients: [],
+        instructions: [],
+        createdAt: new Date("2024-01-01"),
+        updatedAt: recentUpdatedAt,
+      };
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
+      setupFetch({
+        recipes: [
+          {
+            ...localRecipe,
+            createdAt: "2024-01-01T00:00:00.000Z",
+            updatedAt: "2024-01-02T00:00:00.000Z",
+          },
+        ],
+      });
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
+      expect(vi.mocked(replaceSyncNotifications).mock.calls[0][0]).toHaveLength(
+        0,
+      );
+      expect(toast.info).not.toHaveBeenCalled();
+    });
+
+    it("still emits conflicted notification for a recipe whose local write is outside the grace window", async () => {
+      const oldDate = new Date("2024-01-01");
+      const localRecipe = {
+        id: "old-1",
+        title: "Old Recipe",
+        servings: 1,
+        ingredients: [],
+        instructions: [],
+        createdAt: new Date("2024-01-01"),
+        updatedAt: oldDate,
+      };
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
+      setupFetch({
+        recipes: [
+          {
+            ...localRecipe,
+            createdAt: "2024-01-01T00:00:00.000Z",
+            updatedAt: "2024-01-02T00:00:00.000Z",
+          },
+        ],
+      });
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
+      const notifications = vi.mocked(replaceSyncNotifications).mock
+        .calls[0][0];
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0].type).toBe("conflicted");
     });
 
     it("does not write notification for identical items (same updatedAt)", async () => {

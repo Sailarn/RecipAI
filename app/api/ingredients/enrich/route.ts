@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { ingredients } from "@/db/schema/ingredients";
+import { pantry } from "@/db/schema/pantry";
 import { callAiForIngredient } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
@@ -97,6 +98,51 @@ export async function POST(req: NextRequest) {
       aliasesEn: result.aliasesEn as string[],
       aliasesUa: result.aliasesUa as string[],
     };
+
+    // If a confirmed canonical of the same name already exists, merge into it
+    // rather than confirming a second row. Prefer slug ids (non-UUID format)
+    // over UUID provisionals so the richest entry wins.
+    const existingCanonical = await db
+      .select({ id: ingredients.id })
+      .from(ingredients)
+      .where(
+        and(
+          sql`lower(trim(${ingredients.en})) = lower(trim(${enriched.en}))`,
+          eq(ingredients.status, INGREDIENT_STATUS.CONFIRMED),
+          ne(ingredients.id, id),
+        ),
+      )
+      .orderBy(sql`(${ingredients.id} ~ '^[a-zA-Z]') DESC`)
+      .limit(1);
+
+    if (existingCanonical.length > 0) {
+      const canonicalId = existingCanonical[0].id;
+      await db.transaction(async (tx) => {
+        await tx
+          .update(pantry)
+          .set({ ingredientId: canonicalId })
+          .where(eq(pantry.ingredientId, id));
+
+        await tx.execute(sql`
+          UPDATE recipes
+          SET canonical_ingredient_ids = (
+            SELECT jsonb_agg(
+              CASE WHEN elem #>> '{}' = ${id}
+              THEN to_jsonb(${canonicalId}::text)
+              ELSE elem
+              END
+            )
+            FROM jsonb_array_elements(canonical_ingredient_ids) elem
+          )
+          WHERE canonical_ingredient_ids @> ${JSON.stringify([id])}::jsonb
+        `);
+
+        await tx.delete(ingredients).where(eq(ingredients.id, id));
+      });
+
+      log("info", "enrich_merged", { provisionalId: id, canonicalId });
+      return NextResponse.json({ success: true, mergedInto: canonicalId });
+    }
 
     await db
       .update(ingredients)

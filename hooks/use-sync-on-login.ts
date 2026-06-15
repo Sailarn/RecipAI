@@ -24,6 +24,11 @@ import { api, routes } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
 import { useNavigate } from "@/lib/transitions";
 
+// Recipes written within this window are assumed to still be in-flight (the
+// normalize PATCH hasn't reached the server yet), so a diff conflict during
+// this period is transient and silently ignored.
+const GRACE_WINDOW_MS = 90_000;
+
 // Adopt this client's anonymous parse jobs into the account, then pull the
 // user's full server-side history into Dexie so it shows across devices.
 async function syncParseHistory(): Promise<void> {
@@ -146,6 +151,18 @@ export function useSyncOnLogin() {
       .then((module) => module.renormalizeOutdatedRecipes())
       .catch(() => {});
   }, []);
+
+  // One-time reconcile: clears stale duplicate vocab rows left over from the
+  // pre-merge-on-enrich era, resets the delta-sync watermark, re-pulls clean
+  // vocab, and re-normalizes all recipes against the surviving canonical ids.
+  // Guard key "vocabReconciled_v1" ensures this runs only once per device.
+  // Must be deployed after the server-side cleanup-dup-ingredients.sql script
+  // has been committed, otherwise the re-pull restores the old dupes.
+  useEffect(() => {
+    import("@/lib/db/reconcile-vocab")
+      .then((module) => module.reconcileVocab())
+      .catch(() => {});
+  }, []);
   const navigate = useNavigate();
 
   const sync = useCallback(async () => {
@@ -180,8 +197,16 @@ export function useSyncOnLogin() {
         serverCollections,
       );
 
+      const now = Date.now();
+      const stableRecipeDiff: SyncDiff<Recipe> = {
+        ...recipeDiff,
+        conflicted: recipeDiff.conflicted.filter(
+          ({ local }) => now - local.updatedAt.getTime() >= GRACE_WINDOW_MS,
+        ),
+      };
+
       const allNotifications = [
-        ...diffToNotifications(recipeDiff, "recipe"),
+        ...diffToNotifications(stableRecipeDiff, "recipe"),
         ...diffToNotifications(collectionDiff, "collection"),
       ];
 
