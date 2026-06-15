@@ -12,6 +12,7 @@ vi.mock("../db", () => ({
   db: {
     ingredients: {
       add: vi.fn(),
+      filter: vi.fn(),
     },
   },
 }));
@@ -31,6 +32,10 @@ vi.stubGlobal("fetch", fetchMock);
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(db.ingredients.add).mockResolvedValue("ignored" as never);
+  // Default: no existing match, so a fresh provisional is created.
+  vi.mocked(db.ingredients.filter).mockReturnValue({
+    first: vi.fn().mockResolvedValue(undefined),
+  } as never);
   fetchMock.mockResolvedValue(new Response());
 });
 
@@ -80,6 +85,21 @@ describe("createProvisionalIngredient", () => {
     expect(db.ingredients.add).toHaveBeenCalledWith(
       expect.objectContaining({ id }),
     );
+  });
+
+  it("reuses an existing ingredient id for the same normalized name — no duplicate provisional", async () => {
+    const rows = [{ id: "existing-salt", en: "Salt" }] as unknown as Parameters<
+      Parameters<typeof db.ingredients.filter>[0]
+    >[0][];
+    vi.mocked(db.ingredients.filter).mockImplementation(
+      (predicate) => ({ first: async () => rows.find(predicate) }) as never,
+    );
+
+    const id = await createProvisionalIngredient("  salt ");
+
+    expect(id).toBe("existing-salt");
+    expect(db.ingredients.add).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("swallows enrich fetch failure — still resolves with an id", async () => {
