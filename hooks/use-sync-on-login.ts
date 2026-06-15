@@ -128,6 +128,7 @@ function parseTimestamps<T extends { createdAt: Date; updatedAt: Date }>(
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
+  const reviewedIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIsSignedIn(!!session);
@@ -173,8 +174,18 @@ export function useSyncOnLogin() {
 
       await replaceSyncNotifications(allNotifications);
 
+      // Only announce review items that are new since the last sync, so a
+      // focus-triggered re-pull doesn't re-toast a review the user has already
+      // seen (or is mid-resolving).
+      const hasNewReviewItems = allNotifications.some(
+        (notification) => !reviewedIds.current.has(notification.entityId),
+      );
+      reviewedIds.current = new Set(
+        allNotifications.map((notification) => notification.entityId),
+      );
+
       const total = allNotifications.length;
-      if (total > 0) {
+      if (total > 0 && hasNewReviewItems) {
         const locale = window.location.pathname.split("/")[1] ?? "en";
         toast.info(
           `${total} item${total !== 1 ? "s" : ""} need${total === 1 ? "s" : ""} your review`,
@@ -196,6 +207,25 @@ export function useSyncOnLogin() {
     if (!session || hasSynced.current) return;
     hasSynced.current = true;
     sync();
+  }, [session, sync]);
+
+  // Re-pull when the app regains focus so recipes parsed elsewhere (e.g. the
+  // Telegram bot) surface without a manual reload. The in-flight guard avoids
+  // overlapping pulls; the new-items toast guard keeps repeat focus quiet.
+  useEffect(() => {
+    if (!session) return;
+    let running = false;
+    const onVisibility = async () => {
+      if (document.visibilityState !== "visible" || running) return;
+      running = true;
+      try {
+        await sync();
+      } finally {
+        running = false;
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [session, sync]);
 
   const triggerSync = useCallback(async () => {

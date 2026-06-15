@@ -351,6 +351,45 @@ describe("useSyncOnLogin", () => {
     });
   });
 
+  describe("re-pull on focus", () => {
+    const serverRecipe = {
+      id: "srv-1",
+      title: "Bot Recipe",
+      servings: 1,
+      ingredients: [],
+      instructions: [],
+      createdAt: "2024-01-01T00:00:00.000Z",
+      updatedAt: "2024-01-01T00:00:00.000Z",
+    };
+
+    it("re-pulls server state when the document becomes visible again", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      setupFetch();
+      renderHook(() => useSyncOnLogin());
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+    });
+
+    it("does not re-toast the same review items on a visibility re-pull", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      setupFetch({ recipes: [serverRecipe] });
+      renderHook(() => useSyncOnLogin());
+      await waitFor(() => expect(toast.info).toHaveBeenCalledTimes(1));
+
+      document.dispatchEvent(new Event("visibilitychange"));
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+      expect(toast.info).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("triggerSync", () => {
     it("re-runs sync when called manually after initial sync", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
