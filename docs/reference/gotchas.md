@@ -93,3 +93,10 @@ Never hand-roll `NextResponse.json({ error }, { status })`. Use `ApiError.unauth
 
 **`public/sw.js` is regenerated on every build.**
 It is gitignored. Do not commit it. Running `bun run build` will always overwrite it.
+
+**The cold-start splash uses two different mechanisms — don't unify them.**
+The iOS WKWebView white flash happens *before first paint* and cannot be fixed with CSS or a React component (both render too late). So the splash is split by context:
+- **Installed PWA** → `public/pwa-launch.html` is the manifest `start_url`. It is a zero-CSS static shell that paints `#0a0a0a` instantly; WebKit holds it visible until the real app's first paint, then it JS-redirects. It is intentionally excluded from the middleware matcher (`.html` extension), so it is served as-is.
+- **Browser tab** → the `LaunchSplash` React component (mounted in `app/[locale]/layout.tsx`). It runs a before-paint effect that no-ops when `display-mode: standalone` (i.e. inside the PWA, where `pwa-launch.html` already handled it).
+
+Theme changes reload to re-trigger the splash: `ThemeToggle` calls `location.replace('/pwa-launch.html?from=…')` in the PWA, but a plain `location.reload()` in the browser (so the component path fires). `pwa-launch.html` validates `?from=` is a single-leading-slash same-origin path before redirecting — it is a public file, so an unvalidated `from` would be an open redirect.

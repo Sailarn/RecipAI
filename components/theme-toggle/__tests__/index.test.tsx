@@ -11,17 +11,23 @@ import {
 import { ThemeToggle } from "../index";
 
 const reloadSpy = vi.fn();
+const replaceSpy = vi.fn();
 
 beforeAll(() => {
   Object.defineProperty(window, "location", {
     configurable: true,
-    value: { ...window.location, reload: reloadSpy },
+    value: { ...window.location, reload: reloadSpy, replace: replaceSpy },
+  });
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    value: vi.fn().mockReturnValue({ matches: false }),
   });
   vi.spyOn(Storage.prototype, "setItem");
 });
 
 beforeEach(() => {
   reloadSpy.mockClear();
+  replaceSpy.mockClear();
   vi.mocked(Storage.prototype.setItem).mockClear();
   document.documentElement.classList.remove("dark");
 });
@@ -77,12 +83,26 @@ describe("ThemeToggle", () => {
       );
     });
 
-    it("reloads the page after toggling", () => {
+    it("reloads the page after toggling in web mode", () => {
       render(<ThemeToggle />);
 
       fireEvent.click(screen.getByRole("button"));
 
       expect(reloadSpy).toHaveBeenCalledOnce();
+    });
+
+    it("navigates to splash page after toggling in PWA mode", () => {
+      vi.mocked(window.matchMedia).mockReturnValueOnce({
+        matches: true,
+      } as MediaQueryList);
+      render(<ThemeToggle />);
+
+      fireEvent.click(screen.getByRole("button"));
+
+      expect(replaceSpy).toHaveBeenCalledOnce();
+      expect(replaceSpy).toHaveBeenCalledWith(
+        expect.stringContaining("/pwa-launch.html?from="),
+      );
     });
   });
 });

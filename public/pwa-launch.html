@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uk" style="background:#0a0a0a;color-scheme:dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;background:#0a0a0a}
+    .s{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#0a0a0a}
+    .i{width:72px;height:72px;border-radius:18px}
+    .n{color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px}
+  </style>
+</head>
+<body>
+  <div class="s">
+    <img class="i" src="/icon-192x192.png" alt="">
+    <span class="n">RecipAI</span>
+  </div>
+  <script>
+    (()=> {
+      // Only accept a same-origin absolute path (single leading slash). This is
+      // a public file, so an attacker could otherwise pass ?from=https://evil
+      // and turn the redirect below into an open redirect.
+      const raw = new URLSearchParams(location.search).get('from');
+      const isSafePath = raw && raw[0] === '/' && raw[1] !== '/' && raw[1] !== '\\';
+
+      let target = isSafePath ? raw : null;
+      if (!target) {
+        const match = /NEXT_LOCALE=([^;]+)/.exec(document.cookie);
+        const locale = match && (match[1] === 'en' || match[1] === 'ua') ? match[1] : 'ua';
+        target = `/${locale}/recipes`;
+      }
+
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = target;
+      document.head.appendChild(link);
+
+      setTimeout(() => location.replace(target), 1000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isStandalonePwa } from "@/lib/pwa";
 import { trackEvent } from "@/lib/telemetry";
 import { THEME } from "@/lib/theme";
 import { TogglePill } from "./toggle-pill";
@@ -22,7 +23,15 @@ export function ThemeToggle() {
     localStorage.setItem("theme", themeName);
     // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
-    window.location.reload();
+    // Reload to re-trigger the splash. In the PWA that means routing through the
+    // static shell page; in the browser a plain reload lets <LaunchSplash> fire.
+    if (isStandalonePwa()) {
+      window.location.replace(
+        `/pwa-launch.html?from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+      );
+    } else {
+      window.location.reload();
+    }
   };
 
   return (

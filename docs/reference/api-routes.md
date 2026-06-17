@@ -116,3 +116,11 @@ The server sends a push notification via VAPID when a parse job completes (`POST
 | `POST` | `/api/telegram-bot` | Webhook secret (optional) | Receives Telegram messages. Extracts URLs and enqueues parse jobs linked to the user's Telegram account. |
 
 The webhook secret (`TELEGRAM_WEBHOOK_SECRET`) is verified if set; if not set the route accepts all requests. Only one instance should own the webhook.
+
+---
+
+## PWA manifest
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/manifest` | None (public) | Serves the web app manifest (`application/manifest+json`, `Cache-Control: no-cache`). `start_url` is `/pwa-launch.html` — a zero-CSS static shell that paints dark instantly and JS-redirects to the real app, giving PWA cold launches a native-feeling dark splash instead of a white flash. Referenced from root `app/layout.tsx` metadata. |

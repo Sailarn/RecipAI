@@ -1,5 +1,6 @@
 @layer base {
   :root {
+    color-scheme: light;
     --background: var(--color-background);
     --foreground: var(--color-foreground);
     --muted: var(--color-muted);
@@ -17,6 +18,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: var(--color-background-dark);
     --foreground: var(--color-foreground-dark);
     --muted: var(--color-muted-dark);
@@ -37,6 +39,13 @@
     @apply font-sans;
     background: var(--app-mesh);
     background-attachment: fixed;
+    /* All page content lives in position:fixed PageStack containers — neither
+       html nor body should ever scroll. clip avoids creating a scroll container
+       (unlike hidden, which breaks iOS fixed positioning). overscroll-behavior
+       kills the iOS elastic rubber-band bounce that can make the page feel
+       scrollable even when no content overflows. */
+    overflow: clip;
+    overscroll-behavior: none;
   }
 
   body {
@@ -44,6 +53,8 @@
     color: var(--fg-1);
     user-select: none;
     -webkit-user-select: none;
+    overflow: clip;
+    overscroll-behavior: none;
     @apply bg-background text-foreground;
   }
 
@@ -215,6 +226,16 @@
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* Sonner top-toast: on mobile, the default entrance sweeps upward through the
+   iOS status-bar area, briefly revealing the white UIKit backing and flashing
+   the notch. Setting --y to translateY(0) makes the toast appear purely via
+   the opacity transition — no vertical movement, no status-bar sweep. */
+@media (max-width: 600px) {
+  [data-sonner-toast][data-y-position="top"] {
+    --y: translateY(0px);
   }
 }
 

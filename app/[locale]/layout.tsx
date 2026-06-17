@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";
+import { LaunchSplash } from "@/components/launch-splash";
 import { ThemeColorSync } from "@/components/theme-color-sync";
 import { type Locale, locales } from "@/i18n/request";
 import { THEME } from "@/lib/theme";
@@ -54,6 +55,7 @@ export default async function LocaleLayout({
       </head>
       <body suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
+          <LaunchSplash />
           <ThemeColorSync />
           <ClientShell>{children}</ClientShell>
         </NextIntlClientProvider>
