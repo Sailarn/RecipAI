@@ -26,7 +26,7 @@ import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { BellProgressRing } from "./bell-progress-ring";
 
 const BELL_BUTTON_CLASS =
-  "relative p-2 rounded-full bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)]";
+  "relative p-2 rounded-full bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)] outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]";
 
 export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
@@ -128,11 +128,13 @@ export function ParsedRecipesSheet() {
             />
           )}
           <BellIcon size={18} className="text-[var(--fg-1)]" />
-          {totalCount > 0 && (
+          {totalCount > 0 ? (
             <span className="absolute -top-0.5 -right-0.5 bg-[var(--action-primary)] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
               {totalCount}
             </span>
-          )}
+          ) : canDownloadModel ? (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--download-accent)]" />
+          ) : null}
         </button>
       </SheetTrigger>
       <SheetContent
