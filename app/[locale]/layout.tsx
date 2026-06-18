@@ -52,6 +52,35 @@ export default async function LocaleLayout({
       className={`${inter.variable} ${fraunces.variable} ${theme}`}
     >
       <head>
+        <style>{`
+          html, body { background: ${theme === THEME.DARK ? "#0a0a0a" : "#ffffff"}; }
+          .launch-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #0a0a0a;
+            color: #fff;
+          }
+          .launch-splash img {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+          }
+          .launch-splash span {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+          }
+          @media (display-mode: standalone) {
+            .launch-splash { display: none !important; }
+          }
+        `}</style>
         <link rel="preconnect" href="https://ik.imagekit.io" />
       </head>
       <body suppressHydrationWarning>

@@ -1,28 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { isStandalonePwa } from "@/lib/pwa";
 
 const SPLASH_DURATION_MS = 1000;
 
-// useLayoutEffect runs before paint (so the splash covers content with no
-// flash), but warns when server-rendered. Fall back to useEffect on the server.
-const useBeforePaintEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
-
 export function LaunchSplash() {
-  const [bg, setBg] = useState("");
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
-  useBeforePaintEffect(() => {
-    if (isStandalonePwa()) return;
+  useEffect(() => {
+    if (isStandalonePwa()) {
+      setVisible(false);
+      return;
+    }
 
-    // Read the fully-resolved background color from body rather than relying on
-    // the 4-level CSS var chain (--color-background → --background → --bg-base →
-    // --neutral-*), which iOS Chrome WebKit may not resolve before first paint.
-    setBg(window.getComputedStyle(document.body).backgroundColor);
-    setVisible(true);
     const timer = setTimeout(() => setVisible(false), SPLASH_DURATION_MS);
     return () => clearTimeout(timer);
   }, []);
@@ -31,8 +23,9 @@ export function LaunchSplash() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-3 text-[var(--foreground)]"
-      style={{ backgroundColor: bg }}
+      data-launch-splash
+      aria-hidden
+      className="launch-splash fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-3 bg-[#0a0a0a] text-white"
     >
       <Image
         src="/icon-192x192.png"
