@@ -94,6 +94,24 @@ Never hand-roll `NextResponse.json({ error }, { status })`. Use `ApiError.unauth
 **`public/sw.js` is regenerated on every build.**
 It is gitignored. Do not commit it. Running `bun run build` will always overwrite it.
 
+**The push-notification toggle is hidden in dev — that's expected.**
+`usePushSubscription` only reports `isSupported: true` once `navigator.serviceWorker.ready` resolves *and* the context is secure (`window.isSecureContext`) *and* the three Push APIs exist *and* `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is set. Because the Turbopack dev server registers no service worker, `.ready` never resolves, so the row stays hidden (gating only on `"PushManager" in window` would show a toggle that hangs on click). To test push locally, run a production build (`bun run build && bun run start`) on `localhost`, or use an HTTPS tunnel (ngrok) / the Vercel deploy. On the Pi over plain `http://recipai.local` push is unavailable — service workers require a secure context. The toggle lives in its own component (`app/[locale]/profile/components/push-notification-toggle/`) which reads `push.isSupported`; do not re-derive a separate detection in the page.
+
+**Web Push platform support — especially iOS — is restrictive, and that's not a bug.**
+The toggle is correctly absent in contexts that genuinely cannot deliver push:
+
+| Platform / context | Web Push? |
+|---|---|
+| Desktop Chrome / Firefox / Edge (HTTPS) | ✅ Yes |
+| macOS Safari 16.1+ | ✅ Yes |
+| Android Chrome / Firefox (HTTPS) | ✅ Yes |
+| **iOS/iPadOS Safari — browser tab** | ❌ No |
+| **iOS Chrome / Firefox / Edge (any tab)** | ❌ No (all use WebKit; push isn't exposed) |
+| **iOS/iPadOS — installed PWA (Add to Home Screen, 16.4+)** | ✅ Yes |
+| Any non-secure origin (e.g. `http://`) | ❌ No |
+
+The key iOS rule (since iOS 16.4, March 2023): **Web Push works *only* in a web app installed to the Home Screen**, never in a Safari/Chrome browser tab. There is no API or library that can enable in-tab notifications on iOS — the only path for an iOS user is "Add to Home Screen" first. So an iOS user browsing in Safari sees no notifications row at all; they must install the PWA to get it.
+
 **The cold-start splash uses two different mechanisms — don't unify them.**
 The iOS WKWebView white flash happens *before first paint* and cannot be fixed with CSS or a React component (both render too late). So the splash is split by context:
 - **Installed PWA** → `public/pwa-launch.html` is the manifest `start_url`. It is a zero-CSS static shell that paints `#0a0a0a` instantly; WebKit holds it visible until the real app's first paint, then it JS-redirects. It is intentionally excluded from the middleware matcher (`.html` extension), so it is served as-is.

@@ -20,22 +20,17 @@ import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
-
-const ROW_ICON_SIZE = 15;
-const ROW_ICON_STROKE_WIDTH = 1.75;
-const CHEVRON_ICON_SIZE = 13;
-const CHEVRON_STROKE_WIDTH = 2;
-
-const ROW_CLASSES =
-  "flex items-center gap-2 py-3.5 px-4 bg-transparent border-none w-full text-left";
-
-const ROW_LABEL_CLASSES =
-  "flex-1 font-sans text-sm font-medium text-[var(--fg-1)]";
-const ROW_ICON_CLASSES = "shrink-0 text-[var(--fg-2)]";
-
-function RowDivider() {
-  return <div className="h-px mx-4 bg-[var(--border-subtle)]" />;
-}
+import { PushNotificationToggle } from "./components/push-notification-toggle";
+import { RowDivider } from "./components/row-divider";
+import {
+  CHEVRON_ICON_SIZE,
+  CHEVRON_STROKE_WIDTH,
+  ROW_CLASSES,
+  ROW_ICON_CLASSES,
+  ROW_ICON_SIZE,
+  ROW_ICON_STROKE_WIDTH,
+  ROW_LABEL_CLASSES,
+} from "./constants";
 
 export default function ProfilePage() {
   const t = useTranslations("profile");
@@ -110,6 +105,8 @@ export default function ProfilePage() {
               className="shrink-0 text-[var(--fg-3)]"
             />
           </button>
+
+          <PushNotificationToggle />
 
           <RowDivider />
 

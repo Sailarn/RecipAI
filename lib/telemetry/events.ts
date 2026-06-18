@@ -33,6 +33,7 @@ export type TelemetryEvents = {
   embed_consent_responded: { granted: boolean };
   embed_model_downloaded: undefined;
   push_subscribed: undefined;
+  push_unsubscribed: undefined;
   pwa_installed: undefined;
   parse_history_viewed: undefined;
   sync_review_resolved: { choice: string };
