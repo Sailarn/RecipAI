@@ -82,7 +82,7 @@ export function BottomNav() {
     );
 
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 bottom-[calc(env(safe-area-inset-bottom)+32px)]">
+    <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 bottom-[var(--bottom-nav-offset)]">
       {/* Left pill — main nav (260px) or recipes item (80px) in pantry mode */}
       <nav
         className={`glass-nav select-none touch-none ${PILL_BASE_CLASS}`}

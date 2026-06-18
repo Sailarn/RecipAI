@@ -44,7 +44,8 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <PageStack />
       <Toaster
         position="top-center"
-        swipeDirections={["top", "left", "right"]}
+        mobileOffset={{ top: "var(--mobile-toast-offset)" }}
+        swipeDirections={["left", "right"]}
       />
       <ParseJobWatcher />
       <EmbedConsentModal />

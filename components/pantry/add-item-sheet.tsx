@@ -92,7 +92,7 @@ export function AddItemSheet({ onClose }: { onClose: () => void }) {
         className="absolute inset-0 bg-black/50 border-none cursor-pointer"
       />
 
-      <div className="relative bg-[rgba(14,10,4,0.96)] border border-[rgba(255,200,100,0.2)] rounded-t-[24px] px-5 py-6 pb-[max(24px,env(safe-area-inset-bottom))] flex flex-col gap-4">
+      <div className="relative bg-[rgba(14,10,4,0.96)] border border-[rgba(255,200,100,0.2)] rounded-t-[24px] px-5 py-6 flex flex-col gap-4">
         <h2 className="font-sans text-xl font-bold text-[var(--fg-1)] m-0">
           Add to Pantry
         </h2>

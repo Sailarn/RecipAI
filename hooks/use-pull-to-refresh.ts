@@ -1,14 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 
 interface UsePullToRefreshOptions {
+  enabled: boolean;
   onRefresh: () => Promise<void>;
+  scrollRef: RefObject<HTMLElement | null>;
   threshold?: number;
 }
 
+const PULL_RESISTANCE = 0.4;
+const MINIMUM_REFRESH_FEEDBACK_MS = 350;
+
+function waitForRefreshFeedback() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, MINIMUM_REFRESH_FEEDBACK_MS);
+  });
+}
+
 export function usePullToRefresh({
+  enabled,
   onRefresh,
+  scrollRef,
   threshold = 80,
 }: UsePullToRefreshOptions) {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,15 +38,19 @@ export function usePullToRefresh({
   }, [onRefresh]);
 
   useEffect(() => {
+    if (!enabled) return;
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
     function setHeight(height: number, animated = false) {
       const element = indicatorRef.current;
       if (!element) return;
       element.style.transition = animated ? "height 0.25s ease-out" : "none";
-      element.style.height = `${height}px`;
+      element.style.setProperty("--pull-height", `${height}px`);
     }
 
     const onTouchStart = (event: TouchEvent) => {
-      if (window.scrollY !== 0) return;
+      if (scrollContainer.scrollTop > 0) return;
       startY.current = event.touches[0].clientY;
       isPulling.current = true;
     };
@@ -45,9 +62,9 @@ export function usePullToRefresh({
         isPulling.current = false;
         return;
       }
-      const next = Math.min(delta * 0.4, threshold);
-      pullDistanceRef.current = next;
-      setHeight(next);
+      const visualDistance = Math.min(delta * PULL_RESISTANCE, threshold);
+      pullDistanceRef.current = delta;
+      setHeight(visualDistance);
     };
 
     const onTouchEnd = async () => {
@@ -59,26 +76,33 @@ export function usePullToRefresh({
         pullDistanceRef.current = 0;
         isRefreshingRef.current = true;
         setIsRefreshing(true);
-        await onRefreshRef.current();
-        isRefreshingRef.current = false;
-        setIsRefreshing(false);
-        setHeight(0, true);
+        try {
+          await Promise.all([onRefreshRef.current(), waitForRefreshFeedback()]);
+        } finally {
+          isRefreshingRef.current = false;
+          setIsRefreshing(false);
+          setHeight(0, true);
+        }
       } else {
         pullDistanceRef.current = 0;
         setHeight(0, true);
       }
     };
 
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd);
+    scrollContainer.addEventListener("touchstart", onTouchStart, {
+      passive: true,
+    });
+    scrollContainer.addEventListener("touchmove", onTouchMove, {
+      passive: true,
+    });
+    scrollContainer.addEventListener("touchend", onTouchEnd);
 
     return () => {
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      scrollContainer.removeEventListener("touchstart", onTouchStart);
+      scrollContainer.removeEventListener("touchmove", onTouchMove);
+      scrollContainer.removeEventListener("touchend", onTouchEnd);
     };
-  }, [threshold]);
+  }, [enabled, scrollRef, threshold]);
 
   return { indicatorRef, isRefreshing };
 }

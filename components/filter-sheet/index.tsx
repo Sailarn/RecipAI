@@ -76,7 +76,7 @@ export function FilterSheet({
         side="bottom"
         aria-describedby={undefined}
         showCloseButton={false}
-        className="rounded-t-2xl z-[300] border-t border-l border-r border-[rgba(251,191,36,0.28)] pb-[max(24px,env(safe-area-inset-bottom))]"
+        className="rounded-t-2xl z-[300] border-t border-l border-r border-[rgba(251,191,36,0.28)] pb-6"
       >
         <div className="flex justify-center pt-2.5 pb-0.5">
           <div className="w-9 h-1 rounded-full bg-[rgba(255,200,100,0.28)]" />

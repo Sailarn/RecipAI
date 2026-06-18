@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ClientShell } from "@/components/client-shell";
 import { LaunchSplash } from "@/components/launch-splash";
+import { StatusBarScrim } from "@/components/status-bar-scrim";
 import { ThemeColorSync } from "@/components/theme-color-sync";
 import { type Locale, locales } from "@/i18n/request";
 import { THEME } from "@/lib/theme";
@@ -54,6 +55,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://ik.imagekit.io" />
       </head>
       <body suppressHydrationWarning>
+        <StatusBarScrim />
         <NextIntlClientProvider messages={messages}>
           <LaunchSplash />
           <ThemeColorSync />

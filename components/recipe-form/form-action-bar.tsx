@@ -29,12 +29,7 @@ export function FormActionBar({
   const isLastTab = activeTabIndex === TAB_KEYS.length - 1;
 
   return (
-    <div
-      className="shrink-0 pt-3 px-4 bg-[rgba(8,8,8,0.85)] backdrop-blur-[24px] border-t border-t-[rgba(255,200,100,0.12)] flex items-center"
-      style={{
-        paddingBottom: "max(28px, env(safe-area-inset-bottom, 28px))",
-      }}
-    >
+    <div className="shrink-0 pt-3 px-4 pb-7 bg-[rgba(8,8,8,0.85)] backdrop-blur-[24px] border-t border-t-[rgba(255,200,100,0.12)] flex items-center">
       <div className="flex gap-[10px] w-full">
         {activeTabIndex > 0 && (
           <button

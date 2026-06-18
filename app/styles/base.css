@@ -1,6 +1,8 @@
 @layer base {
   :root {
     color-scheme: light;
+    --bottom-nav-offset: 32px;
+    --mobile-toast-offset: 16px;
     --background: var(--color-background);
     --foreground: var(--color-foreground);
     --muted: var(--color-muted);
@@ -229,13 +231,26 @@
   }
 }
 
-/* Sonner top-toast: on mobile, the default entrance sweeps upward through the
-   iOS status-bar area, briefly revealing the white UIKit backing and flashing
-   the notch. Setting --y to translateY(0) makes the toast appear purely via
-   the opacity transition — no vertical movement, no status-bar sweep. */
+.status-bar-scrim {
+  display: none;
+}
+
+@media (display-mode: standalone) {
+  :root {
+    --mobile-toast-offset: calc(env(safe-area-inset-top) + 16px);
+  }
+
+  .status-bar-scrim {
+    display: block;
+  }
+}
+
+/* Sonner injects its toast transforms after the app stylesheet. The important
+   declaration keeps its top-toast entrance from sweeping through the iOS
+   status bar; opacity still provides the entrance and exit transition. */
 @media (max-width: 600px) {
   [data-sonner-toast][data-y-position="top"] {
-    --y: translateY(0px);
+    --y: translateY(0px) !important;
   }
 }
 

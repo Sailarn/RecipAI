@@ -138,3 +138,13 @@ describe("BottomNav — visibility", () => {
     expect(container.firstChild).not.toBeNull();
   });
 });
+
+describe("BottomNav — position", () => {
+  it("uses the CSS variable offset", () => {
+    const { container } = render(<BottomNav />);
+
+    expect(container.firstChild).toHaveClass(
+      "bottom-[var(--bottom-nav-offset)]",
+    );
+  });
+});

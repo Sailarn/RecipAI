@@ -2,7 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListError } from "@/components/recipe-list-error";
@@ -80,7 +86,9 @@ export default function RecipesPage() {
 
   const { triggerSync } = useSyncOnLogin();
   const { indicatorRef, isRefreshing } = usePullToRefresh({
+    enabled: recipes !== undefined && !recipesError,
     onRefresh: triggerSync,
+    scrollRef,
   });
 
   if (recipesError) return <RecipeListError />;
@@ -97,14 +105,14 @@ export default function RecipesPage() {
       {/* Pull-to-refresh indicator — height driven directly via DOM ref, no React re-renders during drag */}
       <div
         ref={indicatorRef}
-        className="flex justify-center items-center text-sm overflow-hidden text-[var(--fg-3)]"
-        style={{ height: 0 }}
+        className="flex box-border h-[calc(var(--pull-height)+env(safe-area-inset-top))] justify-center items-center pt-[env(safe-area-inset-top)] text-sm overflow-hidden text-[var(--fg-3)]"
+        style={{ "--pull-height": "0px" } as CSSProperties}
       >
         {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
       </div>
 
       {/* Greeting, title, notifications bell — always visible so parsed recipes are always reachable */}
-      <div className="pt-[max(20px,calc(env(safe-area-inset-top)+8px))] px-3.5">
+      <div className="pt-5 px-3.5">
         <div className="flex justify-between items-end mb-4">
           <div>
             <p className="text-[11px] font-semibold text-[var(--fg-3)] uppercase tracking-[0.1em] mb-[3px] font-sans">
