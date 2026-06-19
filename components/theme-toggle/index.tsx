@@ -1,10 +1,11 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { TogglePill } from "@/components/toggle-pill";
 import { isStandalonePwa } from "@/lib/pwa";
 import { trackEvent } from "@/lib/telemetry";
 import { THEME } from "@/lib/theme";
-import { TogglePill } from "./toggle-pill";
 
 const COOKIE_MAX_AGE_SECONDS = 31_536_000; // 1 year
 
@@ -41,7 +42,7 @@ export function ThemeToggle() {
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className="bg-transparent border-0 p-0 shrink-0 cursor-pointer"
     >
-      <TogglePill checked={isDark} />
+      <TogglePill checked={isDark} offIcon={Sun} onIcon={Moon} />
     </button>
   );
 }

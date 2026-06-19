@@ -37,17 +37,23 @@ describe("PushNotificationToggle", () => {
   it("exposes a switch that is unchecked without a subscription", () => {
     mockPush({ subscription: null });
 
-    render(<PushNotificationToggle />);
+    const { container } = render(<PushNotificationToggle />);
 
     expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
+    expect(
+      container.querySelector(".toggle-pill .lucide-bell-off"),
+    ).toBeInTheDocument();
   });
 
   it("marks the switch checked when subscribed", () => {
     mockPush({ subscription: {} as PushSubscription });
 
-    render(<PushNotificationToggle />);
+    const { container } = render(<PushNotificationToggle />);
 
     expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+    expect(
+      container.querySelector(".toggle-pill .lucide-bell"),
+    ).toBeInTheDocument();
   });
 
   it("disables the switch while an operation is pending", () => {

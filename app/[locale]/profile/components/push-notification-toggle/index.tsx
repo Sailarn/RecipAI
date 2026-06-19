@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, BellOff } from "lucide-react";
+import { TogglePill } from "@/components/toggle-pill";
 import { usePushSubscription } from "@/lib/hooks/use-push-subscription";
 import {
   ROW_CLASSES,
@@ -49,13 +50,7 @@ export function PushNotificationToggle() {
             className={ROW_ICON_CLASSES}
           />
           <span className={ROW_LABEL_CLASSES}>Push notifications</span>
-          <span
-            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${pushEnabled ? "bg-[var(--action-primary)]" : "bg-[var(--fg-3)]"}`}
-          >
-            <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${pushEnabled ? "translate-x-4" : "translate-x-0"}`}
-            />
-          </span>
+          <TogglePill checked={pushEnabled} offIcon={BellOff} onIcon={Bell} />
         </button>
       )}
     </>
