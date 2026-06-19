@@ -8,7 +8,7 @@ All routes live under `app/api/`. These routes are the server-sync layer — par
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/parse-queue` | Rate-limited (anon: 15/hr, user: 60/hr) | Create a parse job. Returns `{ jobId, uploadToken }`. |
+| `POST` | `/api/parse-queue` | Rate-limited (anon: 15/hr, user: 60/hr) | Create a parse job. Returns `{ jobId, uploadToken }`. On a **cache hit** (same normalized URL already parsed by the current `PARSER_VERSION`) the job is inserted already `done` with the cloned result and the response also carries `{ cached: true, result }`. |
 | `GET` | `/api/parse-queue` | Session required | List the signed-in user's parse jobs. |
 | `GET` | `/api/parse-queue/[id]` | None | Poll a job's status and result. |
 | `POST` | `/api/parse-queue/process` | None (internal) | Process a queued job. Idempotent — skips if job is `done` or `processing` within 90 s. `maxDuration: 60`. |

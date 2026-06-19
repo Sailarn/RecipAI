@@ -155,13 +155,17 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `id` | text PK | |
 | `user_id` | text | Nullable FK → `user`. `null` = anonymous job |
 | `url` | text | |
-| `user_comment` | text | Optional hint passed to AI |
+| `normalized_url` | text | Indexed cache key — `url` with tracking params stripped and Instagram `reel`/`reels`/`p`/`tv` collapsed to one media id (`normalizeSourceUrl`). Migration `0017` |
+| `parser_version` | text | Pipeline version that produced `result`; the cache only serves rows matching the current `PARSER_VERSION`. Migration `0017` |
+| `user_comment` | text | **Dormant** — the AI-hint input was removed; the column is retained for a one-line restore |
 | `telegram_chat_id` | text | Set when job originates from the Telegram bot |
 | `push_endpoint` | text | Nullable. The push subscription endpoint to notify when the job completes |
 | `status` | text | `pending` / `processing` / `done` / `failed` |
-| `result` | jsonb | `ParsedRecipe` payload when done |
+| `result` | jsonb | `ParsedRecipe` payload when done. The image is uploaded to ImageKit at parse time, so a cached result holds a stable URL |
 | `error` | text | Failure message when failed |
 | `created_at`, `updated_at` | timestamp | |
+
+**Result cache.** `POST /api/parse-queue` looks up a prior `done` job with the same `normalized_url` + current `parser_version` and a non-empty result; on a hit it clones that result into a new `done` job (no Gemini call). See [parse-pipeline](../explanation/parse-pipeline.md#parse-queue) and [gotchas](gotchas.md#database).
 
 ### `ingredients`
 

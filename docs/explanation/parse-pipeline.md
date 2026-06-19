@@ -121,16 +121,23 @@ sequenceDiagram
     participant Process as POST /parse-queue/process
     participant Poll as GET /parse-queue/[id]
 
-    Client->>Queue: { url, userComment }
+    Client->>Queue: { url }
     Queue->>Queue: Rate limit check
-    Queue-->>Client: { jobId, uploadToken }
+    Queue->>Queue: Cache lookup (normalized_url + PARSER_VERSION)
+    Queue-->>Client: { jobId, uploadToken } (+ cached, result on hit)
     Client->>Process: { jobId } (fire-and-forget)
     Client->>Poll: polling every 3s
     Process->>Process: Idempotency check (skip if done/in-flight)
-    Process->>Process: Parse recipe
+    Process->>Process: Parse recipe + upload image to ImageKit
     Process-->>Poll: status: done, result: ParsedRecipe
     Poll-->>Client: recipe ready
 ```
+
+**Result cache.** Before enqueuing, `POST /parse-queue` normalizes the URL (`normalizeSourceUrl` — strips tracking params, collapses Instagram `reel`/`reels`/`p`/`tv` to one media id) and looks for a prior `done` job with that `normalized_url`, the current `PARSER_VERSION`, and a non-empty result. On a hit it inserts the new job **already `done`** with the cloned result and returns `{ cached: true, result }`, so the client renders it inline and the fire-and-forget `process` call no-ops. Bump `PARSER_VERSION` (`lib/parse-recipe/parser-version.ts`) to invalidate the cache after a prompt/model change.
+
+**Image durability.** The process route uploads the recipe image to ImageKit at parse time (while the source URL is fresh) and stores the stable URL in `result`. Source CDN URLs — Instagram's especially — expire within hours, so without this a *cached* parse would render a broken image. Runs server-side, so anonymous parses get a durable image too.
+
+**Empty extractions fail.** A parse that yields 0 ingredients **and** 0 steps is treated as a failure (`status='failed'`), so it never caches a blank or fires a "recipe ready" toast for an empty recipe.
 
 **Idempotency:** if a job's `updatedAt` is less than 90 seconds old and its status is `processing`, a new `process` call is silently skipped. This prevents duplicate AI calls from repeated requests.
 
