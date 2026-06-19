@@ -6,7 +6,30 @@ interface StepSlideProps {
   totalSteps: number;
 }
 
+const SHORT_INSTRUCTION_MAX_LENGTH = 60;
+const MEDIUM_INSTRUCTION_MAX_LENGTH = 140;
+const LONG_INSTRUCTION_MAX_LENGTH = 260;
+
+function getInstructionTypographyClass(instruction: string): string {
+  const instructionLength = instruction.trim().length;
+
+  if (instructionLength <= SHORT_INSTRUCTION_MAX_LENGTH) {
+    return "text-[24px] leading-[1.45]";
+  }
+  if (instructionLength <= MEDIUM_INSTRUCTION_MAX_LENGTH) {
+    return "text-[20px] leading-[1.5]";
+  }
+  if (instructionLength <= LONG_INSTRUCTION_MAX_LENGTH) {
+    return "text-[17px] leading-[1.55]";
+  }
+  return "text-[14px] leading-[1.6]";
+}
+
 export function StepSlide({ step, totalSteps }: StepSlideProps) {
+  const instructionTypographyClass = getInstructionTypographyClass(
+    step.instruction,
+  );
+
   return (
     <div className="px-[14px] pb-5 h-full overflow-y-auto">
       <div className="relative w-full h-[190px] rounded-2xl overflow-hidden mb-3">
@@ -20,7 +43,7 @@ export function StepSlide({ step, totalSteps }: StepSlideProps) {
           Step {step.order}/{totalSteps}
         </div>
       </div>
-      <p className="text-[13px] text-[var(--fg-1)] leading-[1.6] px-1">
+      <p className={`${instructionTypographyClass} px-1 text-[var(--fg-1)]`}>
         {step.instruction}
       </p>
     </div>
