@@ -20,9 +20,11 @@ export function createRecipeSchema(t: (key: string) => string) {
           item: z.string().min(1, t("ingredientNameRequired")),
           amount: z
             .string()
-            .min(1, t("amountRequired"))
-            .transform((val) => parseFloat(val))
-            .refine((val) => !Number.isNaN(val) && val > 0, {
+            .transform((value) => {
+              const trimmedValue = value.trim();
+              return trimmedValue === "" ? undefined : Number(trimmedValue);
+            })
+            .refine((value) => value === undefined || value > 0, {
               message: t("amountRequired"),
             }),
           unit: z.string().optional(),

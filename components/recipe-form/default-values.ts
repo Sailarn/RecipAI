@@ -65,7 +65,7 @@ export function getDefaultValues(
       ingredients: initialData.ingredients?.length
         ? initialData.ingredients.map((ing) => ({
             item: ing.item || "",
-            amount: String(ing.amount || 1),
+            amount: ing.amount != null ? String(ing.amount) : "",
             unit: ing.unit || "",
           }))
         : [{ item: "", amount: "1", unit: "" }],

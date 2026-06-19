@@ -67,6 +67,18 @@ describe("createRecipeSchema", () => {
       expect(result.success).toBe(false);
     });
 
+    it("passes when ingredient amount is empty", () => {
+      const result = schema.safeParse({
+        ...validBase,
+        ingredients: [{ item: "salt", amount: "" }],
+      });
+
+      expect(result.success).toBe(true);
+      expect(
+        (result as { data: RecipeOutput }).data.ingredients[0].amount,
+      ).toBe(undefined);
+    });
+
     it("fails when ingredient amount is non-numeric", () => {
       const result = schema.safeParse({
         ...validBase,
@@ -206,6 +218,16 @@ describe("getDefaultValues", () => {
     expect(defaults.ingredients[0].item).toBe("pasta");
     expect(defaults.ingredients[0].amount).toBe("200");
     expect(defaults.instructions![0].instruction).toBe("Boil water");
+  });
+
+  it("keeps a missing parsed ingredient amount empty", () => {
+    const defaults = getDefaultValues(undefined, {
+      title: "Salt Water",
+      servings: 2,
+      ingredients: [{ item: "salt", amount: null, unit: null }],
+    });
+
+    expect(defaults.ingredients[0].amount).toBe("");
   });
 
   it("uses default ingredient placeholder when initialData has no ingredients", () => {
