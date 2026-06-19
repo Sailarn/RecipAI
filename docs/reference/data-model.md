@@ -165,7 +165,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 
 ### `ingredients`
 
-Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`, `embedding` (jsonb, nullable — the e5 `passage:` vector, delivered to clients in the `GET` delta sync and matched client-side; no pgvector). Migration `0014`.
+Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`, `embedding` (jsonb, nullable — the e5 `passage:` vector, delivered to clients in the `GET` delta sync and matched client-side; no pgvector). Migration `0014`. `created_at` / `updated_at` are `timestamptz` (migration `0016`) — the delta-sync watermark compares `updated_at`, so a timezone-naive column could skip a boundary row (see [gotchas](gotchas.md#database)).
 
 ### `pantry`
 

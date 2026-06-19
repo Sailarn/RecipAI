@@ -15,6 +15,10 @@ export const ingredients = pgTable("ingredients", {
   retryCount: integer("retry_count").notNull().default(0),
   lastAttemptAt: timestamp("last_attempt_at"),
   embedding: jsonb("embedding").$type<number[]>(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
