@@ -165,7 +165,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `error` | text | Failure message when failed |
 | `created_at`, `updated_at` | timestamp | |
 
-**Result cache.** `POST /api/parse-queue` looks up a prior `done` job with the same `normalized_url` + current `parser_version` and a non-empty result; on a hit it clones that result into a new `done` job (no Gemini call). See [parse-pipeline](../explanation/parse-pipeline.md#parse-queue) and [gotchas](gotchas.md#database).
+**Result cache.** `POST /api/parse-queue` looks up a prior `done` job with the same `normalized_url` + current `parser_version` and a complete result (at least one ingredient and one instruction); on a hit it clones that result into a new `done` job (no Gemini call). See [parse-pipeline](../explanation/parse-pipeline.md#parse-queue) and [gotchas](gotchas.md#database).
 
 ### `ingredients`
 

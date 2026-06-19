@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { ParsedRecipe } from "@/lib/db/schema";
+import type { RecipeExtractionResult } from "@/lib/parse-recipe/recipe-result";
 import { log, trackEvent } from "@/lib/telemetry";
 
 // Try every free Gemini model in turn; only if they ALL fail do we fall back to
@@ -144,8 +144,10 @@ async function generateJson<T>(
   throw lastError;
 }
 
-export async function callAiForRecipe(prompt: string): Promise<ParsedRecipe> {
-  return generateJson<ParsedRecipe>(
+export async function callAiForRecipe(
+  prompt: string,
+): Promise<RecipeExtractionResult> {
+  return generateJson<RecipeExtractionResult>(
     prompt,
     [{ role: "user", content: prompt }],
     "recipe",
@@ -166,8 +168,8 @@ export async function callAiForRecipePhoto(
   imageBase64: string,
   mimeType: string,
   prompt: string,
-): Promise<ParsedRecipe> {
-  return generateJson<ParsedRecipe>(
+): Promise<RecipeExtractionResult> {
+  return generateJson<RecipeExtractionResult>(
     [{ inlineData: { mimeType, data: imageBase64 } }, { text: prompt }],
     [
       {

@@ -22,8 +22,8 @@ import { POST } from "../photo/route";
 const mockRecipe = {
   title: "Pasta",
   servings: 2,
-  ingredients: [],
-  instructions: [],
+  ingredients: [{ amount: 200, unit: "g", item: "pasta" }],
+  instructions: [{ order: 1, instruction: "Boil the pasta" }],
 };
 
 function makeRequest(body: unknown): Request {
@@ -87,6 +87,47 @@ describe("POST /api/parse-recipe/photo", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual(mockRecipe);
+  });
+
+  it("rejects an explicit notRecipe response", async () => {
+    vi.mocked(callAiForRecipePhoto).mockResolvedValue({
+      notRecipe: true,
+    } as never);
+
+    const res = await POST(
+      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+    );
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({
+      error: "Couldn't extract a recipe from this photo",
+    });
+  });
+
+  it("rejects a result with no ingredients", async () => {
+    vi.mocked(callAiForRecipePhoto).mockResolvedValue({
+      ...mockRecipe,
+      ingredients: [],
+    } as never);
+
+    const res = await POST(
+      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+    );
+
+    expect(res.status).toBe(500);
+  });
+
+  it("rejects a result with no instructions", async () => {
+    vi.mocked(callAiForRecipePhoto).mockResolvedValue({
+      ...mockRecipe,
+      instructions: [],
+    } as never);
+
+    const res = await POST(
+      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+    );
+
+    expect(res.status).toBe(500);
   });
 
   it("preserves the raw error message and captures it in Sentry on failure", async () => {

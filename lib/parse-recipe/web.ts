@@ -12,6 +12,7 @@ import {
   extractStepImages,
 } from "./images";
 import { buildWebPrompt } from "./prompts";
+import { requireCompleteRecipe } from "./recipe-result";
 
 // Chrome-trim tuning: a "block" this large that is mostly link text is treated
 // as site navigation (menus, footers) and dropped, since recipe prose has low
@@ -92,7 +93,11 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
 
   // try schema.org first — instant if found
   const schemaRecipe = extractSchemaRecipe(html);
-  if (schemaRecipe && schemaRecipe.ingredients.length > 0) {
+  if (
+    schemaRecipe &&
+    schemaRecipe.ingredients.length > 0 &&
+    schemaRecipe.instructions.length > 0
+  ) {
     if (stepImages.length > 0) {
       schemaRecipe.instructions = schemaRecipe.instructions.map(
         (instruction, index) => ({
@@ -138,7 +143,10 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
     textContent = `Hero image URL: ${hero}\n\n${textContent}`;
   }
 
-  const recipe = await callAiForRecipe(buildWebPrompt(textContent));
+  const recipe = requireCompleteRecipe(
+    await callAiForRecipe(buildWebPrompt(textContent)),
+    "page",
+  );
   const aiResult = { ...recipe, sourceUrl: url };
   logParsePipeline(url, "ai", scraper, scrapeMs, startedAt, aiResult);
   return aiResult;

@@ -307,6 +307,56 @@ describe("POST /api/parse-queue/process", () => {
         expect.objectContaining({ status: "done" }),
       );
     });
+
+    it("marks a parse with no ingredients as failed", async () => {
+      const { updateChain } = setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        ...baseRecipe,
+        ingredients: [],
+      } as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+    });
+
+    it("marks a parse with no instructions as failed", async () => {
+      const { updateChain } = setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        ...baseRecipe,
+        instructions: [],
+      } as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+    });
+
+    it("marks an explicit notRecipe response as failed", async () => {
+      const { updateChain } = setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        notRecipe: true,
+      } as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+    });
   });
 
   describe("Telegram-triggered save — image upload", () => {

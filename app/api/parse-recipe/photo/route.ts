@@ -3,6 +3,7 @@ import { callAiForRecipePhoto } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
+import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { log } from "@/lib/telemetry";
 
@@ -27,7 +28,10 @@ export async function POST(request: Request) {
   const startedAt = Date.now();
   try {
     const prompt = buildPhotoPrompt();
-    const recipe = await callAiForRecipePhoto(imageBase64, mimeType, prompt);
+    const recipe = requireCompleteRecipe(
+      await callAiForRecipePhoto(imageBase64, mimeType, prompt),
+      "photo",
+    );
     log("info", "parse_pipeline", {
       source: "photo",
       path: "ai",

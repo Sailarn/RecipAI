@@ -76,11 +76,10 @@ export async function POST(req: NextRequest) {
           eq(parseJobs.status, PARSE_JOB_STATUS.DONE),
           eq(parseJobs.parserVersion, PARSER_VERSION),
           isNotNull(parseJobs.result),
-          // Never serve an empty parse (0 ingredients and 0 instructions) — a
-          // failed extraction shouldn't poison the cache for a URL.
+          // A complete recipe needs both ingredients and instructions.
           sql`(
             jsonb_array_length(coalesce(${parseJobs.result} -> 'ingredients', '[]'::jsonb)) > 0
-            OR jsonb_array_length(coalesce(${parseJobs.result} -> 'instructions', '[]'::jsonb)) > 0
+            AND jsonb_array_length(coalesce(${parseJobs.result} -> 'instructions', '[]'::jsonb)) > 0
           )`,
         ),
       )

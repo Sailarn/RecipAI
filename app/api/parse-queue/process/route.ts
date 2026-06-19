@@ -9,6 +9,7 @@ import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
+import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
@@ -87,17 +88,10 @@ export async function POST(req: NextRequest) {
     .where(eq(parseJobs.id, jobId));
 
   try {
-    const recipe = await parseWithRetry(parseRecipeFromUrl, job.url);
-
-    // An extraction with neither ingredients nor steps isn't a recipe — fail it
-    // (handled by the catch below) so the user gets an honest error and it never
-    // enters the result cache or fires a "recipe ready" toast for a blank.
-    if (
-      (recipe.ingredients?.length ?? 0) === 0 &&
-      (recipe.instructions?.length ?? 0) === 0
-    ) {
-      throw new Error("Couldn't extract a recipe from this page");
-    }
+    const recipe = requireCompleteRecipe(
+      await parseWithRetry(parseRecipeFromUrl, job.url),
+      "page",
+    );
 
     // Persist the recipe image to ImageKit while the source URL is still fresh,
     // so the stored result — and therefore the result cache — holds a stable

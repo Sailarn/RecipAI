@@ -1,5 +1,10 @@
+const NOT_RECIPE_RULE =
+  'FIRST determine whether the input contains an actual recipe. If not, return {"notRecipe": true} and nothing else.';
+
 export function buildWebPrompt(textContent: string): string {
   return `You are a strict recipe data extraction expert. Extract structured recipe data from the provided <webpage_content>.
+
+${NOT_RECIPE_RULE}
 
 RULES:
 - If a field cannot be logically found, output null — never guess or fabricate.
@@ -36,9 +41,11 @@ ${textContent}
 export function buildPhotoPrompt(): string {
   return `You are a recipe extraction expert. Extract a structured recipe from this photo of a handwritten or printed recipe card.
 
+${NOT_RECIPE_RULE}
+
 RULES:
 - The recipe may be in any language including Ukrainian, Russian, or English — extract text as-is, do NOT translate.
-- If handwriting is unclear, make your best-effort guess — never return empty ingredients.
+- If the image contains a recipe but some handwriting is unclear, make your best-effort guess.
 - times (prepTime, cookTime): extract as integers in minutes (e.g. "1 год 30 хв" → 90). null if not found.
 - servings: integer. Default to 4 if not stated.
 - category: pick the single best fit from: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
@@ -90,6 +97,8 @@ ${transcript}
         : "";
 
   return `Extract a recipe from this Instagram Reel.
+
+${NOT_RECIPE_RULE}
 
 ${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matching this exact schema:
 {

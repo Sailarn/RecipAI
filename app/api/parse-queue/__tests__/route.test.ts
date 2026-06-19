@@ -121,7 +121,7 @@ describe("POST /api/parse-queue", () => {
       expect.objectContaining({
         status: "done",
         result: { title: "Cached Pasta" },
-        parserVersion: "1",
+        parserVersion: "2",
       }),
     );
   });

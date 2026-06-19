@@ -31,7 +31,7 @@ graph LR
     B -->|fail| C[scrape.do fallback]
     B -->|ok| D[Schema.org extract]
     C --> D
-    D -->|found + has ingredients| E[Done - no AI needed]
+    D -->|found + has ingredients and steps| E[Done - no AI needed]
     D -->|not found| F[Strip script/style/svg]
     F --> G[Extract images]
     G --> H[trimChrome]
@@ -133,11 +133,11 @@ sequenceDiagram
     Poll-->>Client: recipe ready
 ```
 
-**Result cache.** Before enqueuing, `POST /parse-queue` normalizes the URL (`normalizeSourceUrl` — strips tracking params, collapses Instagram `reel`/`reels`/`p`/`tv` to one media id) and looks for a prior `done` job with that `normalized_url`, the current `PARSER_VERSION`, and a non-empty result. On a hit it inserts the new job **already `done`** with the cloned result and returns `{ cached: true, result }`, so the client renders it inline and the fire-and-forget `process` call no-ops. Bump `PARSER_VERSION` (`lib/parse-recipe/parser-version.ts`) to invalidate the cache after a prompt/model change.
+**Result cache.** Before enqueuing, `POST /parse-queue` normalizes the URL (`normalizeSourceUrl` — strips tracking params, collapses Instagram `reel`/`reels`/`p`/`tv` to one media id) and looks for a prior `done` job with that `normalized_url`, the current `PARSER_VERSION`, at least one ingredient, and at least one instruction. On a hit it inserts the new job **already `done`** with the cloned result and returns `{ cached: true, result }`, so the client renders it inline and the fire-and-forget `process` call no-ops. Bump `PARSER_VERSION` (`lib/parse-recipe/parser-version.ts`) to invalidate the cache after a prompt/model change.
 
 **Image durability.** The process route uploads the recipe image to ImageKit at parse time (while the source URL is fresh) and stores the stable URL in `result`. Source CDN URLs — Instagram's especially — expire within hours, so without this a *cached* parse would render a broken image. Runs server-side, so anonymous parses get a durable image too.
 
-**Empty extractions fail.** A parse that yields 0 ingredients **and** 0 steps is treated as a failure (`status='failed'`), so it never caches a blank or fires a "recipe ready" toast for an empty recipe.
+**Non-recipes and incomplete extractions fail.** Every AI prompt first asks the model to return only `{"notRecipe": true}` when the input is not a recipe. The server also validates every URL, video, and photo result: a recipe must contain at least one ingredient **and** at least one instruction. Invalid results are treated as failures, never cached, and never fire a "recipe ready" notification.
 
 **Idempotency:** if a job's `updatedAt` is less than 90 seconds old and its status is `processing`, a new `process` call is silently skipped. This prevents duplicate AI calls from repeated requests.
 

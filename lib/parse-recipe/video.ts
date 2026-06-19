@@ -4,6 +4,7 @@ import { fetchInstagramReel } from "@/lib/scrapers/apify";
 import { transcribeWithGroq } from "@/lib/transcribe/groq";
 import { isInstagramUrl } from "@/lib/video-url";
 import { buildTranscriptPrompt } from "./prompts";
+import { requireCompleteRecipe } from "./recipe-result";
 
 const MIN_TRANSCRIPT_LENGTH = 30;
 
@@ -34,7 +35,7 @@ export async function parseVideoRecipe(url: string): Promise<ParsedRecipe> {
   }
 
   const prompt = buildTranscriptPrompt(transcript, caption);
-  const recipe = await callAiForRecipe(prompt);
+  const recipe = requireCompleteRecipe(await callAiForRecipe(prompt), "page");
 
   if (!recipe.imageUrl) {
     recipe.imageUrl = thumbnailUrl;
