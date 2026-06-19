@@ -39,7 +39,6 @@ describe("parseRecipeFromUrl", () => {
 
     expect(parseVideoRecipe).toHaveBeenCalledWith(
       "https://www.instagram.com/reel/ABC/",
-      undefined,
     );
     expect(parseWebRecipe).not.toHaveBeenCalled();
     expect(result).toEqual(mockRecipe);
@@ -51,38 +50,8 @@ describe("parseRecipeFromUrl", () => {
 
     const result = await parseRecipeFromUrl("https://example.com/recipe");
 
-    expect(parseWebRecipe).toHaveBeenCalledWith(
-      "https://example.com/recipe",
-      undefined,
-    );
+    expect(parseWebRecipe).toHaveBeenCalledWith("https://example.com/recipe");
     expect(parseVideoRecipe).not.toHaveBeenCalled();
     expect(result).toEqual(mockRecipe);
-  });
-
-  it("passes userComment to the selected parser", async () => {
-    vi.mocked(isVideoUrl).mockReturnValue(false);
-    vi.mocked(parseWebRecipe).mockResolvedValue(mockRecipe as any);
-
-    await parseRecipeFromUrl("https://example.com/recipe", "make it vegan");
-
-    expect(parseWebRecipe).toHaveBeenCalledWith(
-      "https://example.com/recipe",
-      "make it vegan",
-    );
-  });
-
-  it("passes userComment to video parser", async () => {
-    vi.mocked(isVideoUrl).mockReturnValue(true);
-    vi.mocked(parseVideoRecipe).mockResolvedValue(mockRecipe as any);
-
-    await parseRecipeFromUrl(
-      "https://www.instagram.com/reel/ABC/",
-      "fewer carbs",
-    );
-
-    expect(parseVideoRecipe).toHaveBeenCalledWith(
-      "https://www.instagram.com/reel/ABC/",
-      "fewer carbs",
-    );
   });
 });

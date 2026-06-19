@@ -12,21 +12,21 @@ export async function POST(request: Request) {
   const limited = await enforceParseRateLimit(request, session?.user.id);
   if (limited) return limited;
 
-  let body: { imageBase64?: string; mimeType?: string; userComment?: string };
+  let body: { imageBase64?: string; mimeType?: string };
   try {
     body = await request.json();
   } catch {
     return ApiError.invalidBody();
   }
 
-  const { imageBase64, mimeType, userComment } = body;
+  const { imageBase64, mimeType } = body;
   if (!imageBase64 || !mimeType) {
     return ApiError.badRequest("imageBase64 and mimeType are required");
   }
 
   const startedAt = Date.now();
   try {
-    const prompt = buildPhotoPrompt(userComment);
+    const prompt = buildPhotoPrompt();
     const recipe = await callAiForRecipePhoto(imageBase64, mimeType, prompt);
     log("info", "parse_pipeline", {
       source: "photo",

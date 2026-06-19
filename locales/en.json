@@ -123,8 +123,7 @@
       "change": "Change Photo",
       "submit": "Parse Recipe",
       "parsing": "Reading recipe...",
-      "hint": "Works with handwritten and printed recipes in any language",
-      "comment_placeholder": "Optional hint (e.g. 'This is a dessert recipe')"
+      "hint": "Works with handwritten and printed recipes in any language"
     }
   }
 }

@@ -3,13 +3,10 @@
 import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ParseFormProps {
   url: string;
   onUrlChange: (value: string) => void;
-  userComment: string;
-  onCommentChange: (value: string) => void;
   loading: boolean;
   error: string | null;
   onSubmit: () => void;
@@ -21,8 +18,6 @@ const LABEL_CLASSES =
 export function ParseForm({
   url,
   onUrlChange,
-  userComment,
-  onCommentChange,
   loading,
   error,
   onSubmit,
@@ -41,23 +36,6 @@ export function ParseForm({
           onChange={(e) => onUrlChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSubmit()}
           disabled={loading}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="comment" className={LABEL_CLASSES}>
-          Hints for AI{" "}
-          <span className="text-[var(--fg-3)] font-normal">
-            optional — e.g. "Ingredients are in grams"
-          </span>
-        </label>
-        <Textarea
-          id="comment"
-          placeholder="Any hints to help parse correctly..."
-          value={userComment}
-          onChange={(e) => onCommentChange(e.target.value)}
-          disabled={loading}
-          rows={2}
         />
       </div>
 

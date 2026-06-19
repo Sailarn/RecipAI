@@ -74,10 +74,7 @@ function logParsePipeline(
   });
 }
 
-export async function parseWebRecipe(
-  url: string,
-  userComment?: string,
-): Promise<ParsedRecipe> {
+export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
   const startedAt = Date.now();
   let scraper: "phantomjs" | "scrape-do" = "phantomjs";
   let html: string;
@@ -141,9 +138,7 @@ export async function parseWebRecipe(
     textContent = `Hero image URL: ${hero}\n\n${textContent}`;
   }
 
-  const recipe = await callAiForRecipe(
-    buildWebPrompt(textContent, userComment),
-  );
+  const recipe = await callAiForRecipe(buildWebPrompt(textContent));
   const aiResult = { ...recipe, sourceUrl: url };
   logParsePipeline(url, "ai", scraper, scrapeMs, startedAt, aiResult);
   return aiResult;

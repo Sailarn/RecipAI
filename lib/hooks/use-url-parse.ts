@@ -43,7 +43,6 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     usePushSubscription();
 
   const [url, setUrl] = useState("");
-  const [userComment, setUserComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ParsedRecipe | null>(null);
@@ -144,7 +143,6 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url,
-          userComment: userComment || undefined,
           pushEndpoint,
         }),
       });
@@ -189,7 +187,6 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const handleReset = () => {
     setResult(null);
     setUrl("");
-    setUserComment("");
     setError(null);
     if (jobId) removeJobId(jobId);
     setJobId(null);
@@ -198,8 +195,6 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   return {
     url,
     setUrl,
-    userComment,
-    setUserComment,
     loading,
     error,
     result,

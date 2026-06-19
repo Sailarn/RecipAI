@@ -7,10 +7,7 @@ import { buildTranscriptPrompt } from "./prompts";
 
 const MIN_TRANSCRIPT_LENGTH = 30;
 
-export async function parseVideoRecipe(
-  url: string,
-  userComment?: string,
-): Promise<ParsedRecipe> {
+export async function parseVideoRecipe(url: string): Promise<ParsedRecipe> {
   if (!isInstagramUrl(url)) {
     throw new Error(
       "Unsupported video platform. Currently only Instagram Reels are supported.",
@@ -36,7 +33,7 @@ export async function parseVideoRecipe(
     transcript = "";
   }
 
-  const prompt = buildTranscriptPrompt(transcript, caption, userComment);
+  const prompt = buildTranscriptPrompt(transcript, caption);
   const recipe = await callAiForRecipe(prompt);
 
   if (!recipe.imageUrl) {

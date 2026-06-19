@@ -6,8 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
@@ -35,7 +33,6 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
   const mountedRef = useRef(true);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [userComment, setUserComment] = useState("");
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,7 +62,6 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     if (!file) return;
 
     const photoFile = file;
-    const comment = userComment || undefined;
     const capturedLocale = locale;
     const capturedOnResult = onResult;
 
@@ -73,14 +69,13 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     setFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
-    setUserComment("");
     if (inputRef.current) inputRef.current.value = "";
 
     setIsParsing(true);
     setError(null);
     trackEvent("parse_started", { source: "photo" });
 
-    parseRecipeFromPhoto(photoFile, comment)
+    parseRecipeFromPhoto(photoFile)
       .then(async (recipe) => {
         if (mountedRef.current) setIsParsing(false);
         trackEvent("parse_succeeded", { source: "photo" });
@@ -184,25 +179,6 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           </span>
         </button>
       )}
-
-      <div className="space-y-1.5">
-        <Label htmlFor="photo-comment">
-          Hints for AI
-          <span
-            className="ml-2 text-xs"
-            style={{ color: "var(--fg-3)", fontWeight: "var(--font-regular)" }}
-          >
-            optional
-          </span>
-        </Label>
-        <Textarea
-          id="photo-comment"
-          placeholder={t("photo.comment_placeholder")}
-          value={userComment}
-          onChange={(e) => setUserComment(e.target.value)}
-          rows={2}
-        />
-      </div>
 
       {error && (
         <Alert variant="destructive">

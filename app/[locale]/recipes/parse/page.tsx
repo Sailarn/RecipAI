@@ -21,8 +21,6 @@ export default function ParseRecipePage() {
   const {
     url,
     setUrl,
-    userComment,
-    setUserComment,
     loading,
     error,
     result,
@@ -64,8 +62,6 @@ export default function ParseRecipePage() {
           <ParseForm
             url={url}
             onUrlChange={setUrl}
-            userComment={userComment}
-            onCommentChange={setUserComment}
             loading={loading}
             error={error}
             onSubmit={handleParse}

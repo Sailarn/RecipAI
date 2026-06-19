@@ -82,13 +82,7 @@ describe("parseWithRetry", () => {
   it("returns result when parse succeeds on first attempt", async () => {
     const parseFn = vi.fn().mockResolvedValue({ title: "Pasta" });
 
-    const result = await parseWithRetry(
-      parseFn,
-      "https://example.com",
-      undefined,
-      2,
-      0,
-    );
+    const result = await parseWithRetry(parseFn, "https://example.com", 2, 0);
 
     expect(result).toEqual({ title: "Pasta" });
     expect(parseFn).toHaveBeenCalledTimes(1);
@@ -100,13 +94,7 @@ describe("parseWithRetry", () => {
       .mockRejectedValueOnce(new Error("PhantomJsCloud error: 504"))
       .mockResolvedValue({ title: "Pasta" });
 
-    const result = await parseWithRetry(
-      parseFn,
-      "https://example.com",
-      undefined,
-      2,
-      0,
-    );
+    const result = await parseWithRetry(parseFn, "https://example.com", 2, 0);
 
     expect(result).toEqual({ title: "Pasta" });
     expect(parseFn).toHaveBeenCalledTimes(2);
@@ -117,7 +105,7 @@ describe("parseWithRetry", () => {
     const parseFn = vi.fn().mockRejectedValue(err);
 
     await expect(
-      parseWithRetry(parseFn, "https://example.com", undefined, 2, 0),
+      parseWithRetry(parseFn, "https://example.com", 2, 0),
     ).rejects.toThrow("restricted");
 
     expect(parseFn).toHaveBeenCalledTimes(1);
@@ -130,26 +118,17 @@ describe("parseWithRetry", () => {
       .mockRejectedValueOnce(new Error("timeout attempt 2"));
 
     await expect(
-      parseWithRetry(parseFn, "https://example.com", undefined, 2, 0),
+      parseWithRetry(parseFn, "https://example.com", 2, 0),
     ).rejects.toThrow("timeout attempt 2");
 
     expect(parseFn).toHaveBeenCalledTimes(2);
   });
 
-  it("passes url and userComment through to parseFn", async () => {
+  it("passes the url through to parseFn", async () => {
     const parseFn = vi.fn().mockResolvedValue({ title: "Pasta" });
 
-    await parseWithRetry(
-      parseFn,
-      "https://example.com/reel",
-      "make it spicy",
-      2,
-      0,
-    );
+    await parseWithRetry(parseFn, "https://example.com/reel", 2, 0);
 
-    expect(parseFn).toHaveBeenCalledWith(
-      "https://example.com/reel",
-      "make it spicy",
-    );
+    expect(parseFn).toHaveBeenCalledWith("https://example.com/reel");
   });
 });

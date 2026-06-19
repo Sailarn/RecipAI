@@ -1,7 +1,4 @@
-export function buildWebPrompt(
-  textContent: string,
-  userComment?: string,
-): string {
+export function buildWebPrompt(textContent: string): string {
   return `You are a strict recipe data extraction expert. Extract structured recipe data from the provided <webpage_content>.
 
 RULES:
@@ -16,7 +13,6 @@ RULES:
 - cookTime: look for patterns like "35 хв", "1 год 30 хв", "45 minutes" near the recipe title. Convert to minutes.
 - category: pick the single best fit: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
 - instructions: match [STEP IMAGE] entries from PAGE IMAGES to steps by order. Set imageUrl if a match exists, otherwise null.
-${userComment ? `\nUSER OVERRIDE (CRITICAL): ${userComment}\n` : ""}
 OUTPUT this exact JSON:
 {
   "title": "string",
@@ -37,12 +33,8 @@ ${textContent}
 </webpage_content>`;
 }
 
-export function buildPhotoPrompt(userComment?: string): string {
-  const override = userComment
-    ? `USER OVERRIDE (CRITICAL — highest priority): ${userComment}\n\n`
-    : "";
-
-  return `${override}You are a recipe extraction expert. Extract a structured recipe from this photo of a handwritten or printed recipe card.
+export function buildPhotoPrompt(): string {
+  return `You are a recipe extraction expert. Extract a structured recipe from this photo of a handwritten or printed recipe card.
 
 RULES:
 - The recipe may be in any language including Ukrainian, Russian, or English — extract text as-is, do NOT translate.
@@ -73,12 +65,7 @@ Return ONLY valid JSON matching this exact schema:
 export function buildTranscriptPrompt(
   transcript: string,
   caption?: string,
-  userComment?: string,
 ): string {
-  const override = userComment
-    ? `USER OVERRIDE (CRITICAL — highest priority): ${userComment}\n\n`
-    : "";
-
   const captionSection = caption
     ? `<caption>
 ${caption}
@@ -102,7 +89,7 @@ ${transcript}
         ? "IMPORTANT: Caption often contains exact ingredient amounts — prioritize it for ingredients. Use transcript for cooking steps.\n\n"
         : "";
 
-  return `${override}Extract a recipe from this Instagram Reel.
+  return `Extract a recipe from this Instagram Reel.
 
 ${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matching this exact schema:
 {

@@ -86,11 +86,7 @@ export async function POST(req: NextRequest) {
     .where(eq(parseJobs.id, jobId));
 
   try {
-    const recipe = await parseWithRetry(
-      parseRecipeFromUrl,
-      job.url,
-      job.userComment ?? undefined,
-    );
+    const recipe = await parseWithRetry(parseRecipeFromUrl, job.url);
 
     await db
       .update(parseJobs)

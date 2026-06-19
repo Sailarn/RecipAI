@@ -33,16 +33,13 @@ export async function compressImage(
   });
 }
 
-export async function parseRecipeFromPhoto(
-  file: File,
-  userComment?: string,
-): Promise<ParsedRecipe> {
+export async function parseRecipeFromPhoto(file: File): Promise<ParsedRecipe> {
   const { base64, mimeType } = await compressImage(file);
 
   const res = await fetch(api.parseRecipePhoto, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageBase64: base64, mimeType, userComment }),
+    body: JSON.stringify({ imageBase64: base64, mimeType }),
   });
 
   if (!res.ok) {

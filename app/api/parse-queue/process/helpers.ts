@@ -43,16 +43,15 @@ export function classifyParseError(error: unknown): string {
  * Retryable errors are retried up to `attempts` total with `delayMs` between.
  */
 export async function parseWithRetry(
-  parseFn: (url: string, userComment?: string) => Promise<ParsedRecipe>,
+  parseFn: (url: string) => Promise<ParsedRecipe>,
   url: string,
-  userComment?: string,
   attempts = PARSE_RETRY_ATTEMPTS,
   delayMs = PARSE_RETRY_DELAY_MS,
 ): Promise<ParsedRecipe> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
-      return await parseFn(url, userComment);
+      return await parseFn(url);
     } catch (err) {
       lastError = err;
       if (!isRetryable(err) || attempt === attempts) break;
