@@ -3,7 +3,7 @@ import { removePantryItem, togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
 
-export function PantryRow({ item }: { item: PantryItem }) {
+export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
   return (
     <div className="flex items-center gap-3 py-3 px-4 border-b border-[rgba(255,200,100,0.08)]">
       {/* Checkbox toggle */}
@@ -31,7 +31,7 @@ export function PantryRow({ item }: { item: PantryItem }) {
             item.on ? "text-[var(--fg-1)]" : "text-[var(--fg-3)] line-through"
           }`}
         >
-          {item.name}
+          {name}
         </div>
         <div className="text-[11px] text-[var(--fg-3)] font-sans mt-px">
           {item.cat} · {item.qty} {item.unit}
@@ -44,9 +44,9 @@ export function PantryRow({ item }: { item: PantryItem }) {
         data-testid={`delete-${item.id}`}
         onClick={async () => {
           await removePantryItem(item.id);
-          toast.success(`${item.name} removed`);
+          toast.success(`${name} removed`);
         }}
-        aria-label={`Remove ${item.name}`}
+        aria-label={`Remove ${name}`}
         className="w-7 h-7 rounded-lg border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.08)] text-[var(--action-destructive)] cursor-pointer text-sm flex items-center justify-center shrink-0"
       >
         ×

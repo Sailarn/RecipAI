@@ -2,10 +2,12 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus, Search } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { db } from "@/lib/db/db";
 import type { PantryItem } from "@/lib/db/schema";
 import { AddItemSheet } from "./add-item-sheet";
+import { localizedPantryName } from "./localized-name";
 import { PantryRow } from "./pantry-row";
 
 // Subtitle: "N in stock · M to buy"
@@ -19,6 +21,8 @@ function subtitle(items: PantryItem[]): string {
 }
 
 export function PantryPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) ?? "en";
   const items = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
   const vocabItems = useLiveQuery(() => db.ingredients.toArray(), []);
   const vocabById = useMemo(
@@ -110,7 +114,11 @@ export function PantryPage() {
         {inStock.length > 0 && (
           <div className="glass-card mx-4 mb-3 rounded-[18px] overflow-hidden">
             {inStock.map((item) => (
-              <PantryRow key={item.id} item={item} />
+              <PantryRow
+                key={item.id}
+                item={item}
+                name={localizedPantryName(item, vocabById, locale)}
+              />
             ))}
           </div>
         )}
@@ -125,7 +133,11 @@ export function PantryPage() {
             )}
             <div className="glass-card mx-4 mb-3 rounded-[18px] overflow-hidden">
               {outOfStock.map((item) => (
-                <PantryRow key={item.id} item={item} />
+                <PantryRow
+                  key={item.id}
+                  item={item}
+                  name={localizedPantryName(item, vocabById, locale)}
+                />
               ))}
             </div>
           </>
