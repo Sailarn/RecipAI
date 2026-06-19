@@ -119,6 +119,7 @@ export interface ParsedRecipe {
   ingredients: ParsedIngredient[];
   instructions: Array<{ order: number; instruction: string }>;
   imageUrl?: string;
+  imageFileId?: string;
   sourceUrl: string;
   category?: RecipeCategory;
 }

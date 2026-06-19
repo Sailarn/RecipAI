@@ -5,6 +5,7 @@ import { account } from "@/db/schema/auth";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
+import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
 import { api } from "@/lib/routes";
 import { extractUrl, sendTelegramMessage } from "@/lib/telegram-bot";
 
@@ -62,6 +63,7 @@ async function enqueueParseJob(
     id: jobId,
     userId,
     url,
+    normalizedUrl: normalizeSourceUrl(url),
     telegramChatId: String(chatId),
     status: PARSE_JOB_STATUS.PENDING,
   });

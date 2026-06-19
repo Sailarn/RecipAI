@@ -258,6 +258,57 @@ describe("POST /api/parse-queue/process", () => {
     });
   });
 
+  describe("image persistence at parse time", () => {
+    it("uploads the recipe image to ImageKit and stores the stable URL in the result", async () => {
+      const { updateChain } = setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: null,
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        ...baseRecipe,
+        imageUrl: CDN_URL,
+      } as any);
+      vi.mocked(uploadImageServer).mockResolvedValue({
+        url: IMAGEKIT_URL,
+        fileId: "file-1",
+      });
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(uploadImageServer).toHaveBeenCalledWith(CDN_URL);
+      const doneCall = updateChain.set.mock.calls.find(
+        (call) => (call[0] as { status?: string }).status === "done",
+      );
+      expect((doneCall?.[0] as { result?: unknown }).result).toEqual(
+        expect.objectContaining({
+          imageUrl: IMAGEKIT_URL,
+          imageFileId: "file-1",
+        }),
+      );
+    });
+  });
+
+  describe("empty-extraction guard", () => {
+    it("marks a parse with no ingredients and no steps as failed, not done", async () => {
+      const { updateChain } = setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue({
+        title: "Nothing",
+        ingredients: [],
+        instructions: [],
+      } as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+    });
+  });
+
   describe("Telegram-triggered save — image upload", () => {
     it("uploads non-ImageKit imageUrl to ImageKit before saving", async () => {
       setupDb(baseJob);

@@ -48,6 +48,8 @@ beforeEach(() => {
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
   vi.mocked(mintUploadToken).mockResolvedValue("mock-upload-token");
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
+  // Default: cache miss (no prior parsed job for this URL).
+  selectLimit.mockResolvedValue([]);
 });
 
 describe("POST /api/parse-queue", () => {
@@ -88,6 +90,40 @@ describe("POST /api/parse-queue", () => {
     const body = await res.json();
     expect(typeof body.jobId).toBe("string");
     expect(body.uploadToken).toBe("mock-upload-token");
+  });
+
+  it("enqueues a PENDING job on a cache miss", async () => {
+    selectLimit.mockResolvedValue([]);
+    const { db } = await import("@/db");
+
+    const res = await POST(
+      makeRequest({ url: "https://example.com/recipe" }) as never,
+    );
+
+    expect((await res.json()).cached).toBe(false);
+    const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "pending" }),
+    );
+  });
+
+  it("clones the cached result into a DONE job on a cache hit", async () => {
+    selectLimit.mockResolvedValue([{ result: { title: "Cached Pasta" } }]);
+    const { db } = await import("@/db");
+
+    const res = await POST(
+      makeRequest({ url: "https://example.com/recipe" }) as never,
+    );
+
+    expect((await res.json()).cached).toBe(true);
+    const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "done",
+        result: { title: "Cached Pasta" },
+        parserVersion: "1",
+      }),
+    );
   });
 
   it("stores userId from session when user is logged in", async () => {

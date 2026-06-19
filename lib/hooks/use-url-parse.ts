@@ -148,14 +148,42 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
       });
 
       if (!res.ok) throw new Error("Failed to create parse job");
-      const { jobId: newJobId, uploadToken } = await res.json();
-      addJobId(newJobId, uploadToken);
-      setJobId(newJobId);
-      setLoading(false);
+      const {
+        jobId: newJobId,
+        uploadToken,
+        cached,
+        result: cachedResult,
+      } = await res.json();
       trackEvent("parse_started", {
         source: "url",
         domain: new URL(url).hostname,
       });
+
+      // Instant cache hit: the URL was already parsed, so the job is DONE
+      // immediately. Show the result inline now instead of the background
+      // banner + watcher handoff (which assumes a slow parse). Claim it so the
+      // global watcher won't also fire a toast, and don't register it for
+      // background polling.
+      if (cached && cachedResult) {
+        const parsed = cachedResult as ParsedRecipe;
+        claimJobCompletion(newJobId);
+        if (uploadToken) storePendingUploadToken(uploadToken);
+        recordParseHistory(
+          doneParseHistoryEntry(
+            newJobId,
+            parsed.title,
+            parsed.sourceUrl ?? url,
+          ),
+        ).catch(() => {});
+        trackEvent("parse_succeeded", { source: "url" });
+        setResult(parsed);
+        setLoading(false);
+        return;
+      }
+
+      addJobId(newJobId, uploadToken);
+      setJobId(newJobId);
+      setLoading(false);
 
       window.dispatchEvent(
         new CustomEvent("parse-job-created", { detail: { jobId: newJobId } }),

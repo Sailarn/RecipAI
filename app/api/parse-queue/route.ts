@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
@@ -7,6 +7,8 @@ import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
+import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
+import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { mintUploadToken } from "@/lib/upload/upload-token";
 
@@ -52,6 +54,7 @@ export async function POST(req: NextRequest) {
   if (!url) return ApiError.badRequest("URL required");
 
   const id = crypto.randomUUID();
+  const normalizedUrl = normalizeSourceUrl(url);
 
   try {
     // Mint the upload token first. It depends on Redis; minting *after* the
@@ -60,15 +63,51 @@ export async function POST(req: NextRequest) {
     // keeps the enqueue atomic — a mint failure inserts nothing.
     const uploadToken = await mintUploadToken();
 
+    // Result cache: if this URL was already parsed by the current pipeline,
+    // clone the stored result into a DONE job instead of re-running Gemini.
+    // The client flow is unchanged — its poll sees DONE immediately, and the
+    // fire-and-forget /process call no-ops on an already-done job.
+    const [cached] = await db
+      .select({ result: parseJobs.result })
+      .from(parseJobs)
+      .where(
+        and(
+          eq(parseJobs.normalizedUrl, normalizedUrl),
+          eq(parseJobs.status, PARSE_JOB_STATUS.DONE),
+          eq(parseJobs.parserVersion, PARSER_VERSION),
+          isNotNull(parseJobs.result),
+          // Never serve an empty parse (0 ingredients and 0 instructions) — a
+          // failed extraction shouldn't poison the cache for a URL.
+          sql`(
+            jsonb_array_length(coalesce(${parseJobs.result} -> 'ingredients', '[]'::jsonb)) > 0
+            OR jsonb_array_length(coalesce(${parseJobs.result} -> 'instructions', '[]'::jsonb)) > 0
+          )`,
+        ),
+      )
+      .orderBy(desc(parseJobs.createdAt))
+      .limit(1);
+
     await db.insert(parseJobs).values({
       id,
       userId: session?.user.id || null,
       url,
+      normalizedUrl,
       pushEndpoint: pushEndpoint ?? null,
-      status: PARSE_JOB_STATUS.PENDING,
+      ...(cached
+        ? {
+            status: PARSE_JOB_STATUS.DONE,
+            result: cached.result,
+            parserVersion: PARSER_VERSION,
+          }
+        : { status: PARSE_JOB_STATUS.PENDING }),
     });
 
-    return NextResponse.json({ jobId: id, uploadToken });
+    return NextResponse.json({
+      jobId: id,
+      uploadToken,
+      cached: Boolean(cached),
+      ...(cached ? { result: cached.result } : {}),
+    });
   } catch (error) {
     return ApiError.internal(error, req);
   }

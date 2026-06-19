@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
@@ -88,11 +89,41 @@ export async function POST(req: NextRequest) {
   try {
     const recipe = await parseWithRetry(parseRecipeFromUrl, job.url);
 
+    // An extraction with neither ingredients nor steps isn't a recipe — fail it
+    // (handled by the catch below) so the user gets an honest error and it never
+    // enters the result cache or fires a "recipe ready" toast for a blank.
+    if (
+      (recipe.ingredients?.length ?? 0) === 0 &&
+      (recipe.instructions?.length ?? 0) === 0
+    ) {
+      throw new Error("Couldn't extract a recipe from this page");
+    }
+
+    // Persist the recipe image to ImageKit while the source URL is still fresh,
+    // so the stored result — and therefore the result cache — holds a stable
+    // URL. Source CDN URLs (Instagram's especially) expire within hours, which
+    // is why a second, cached parse otherwise rendered a broken image. Runs
+    // server-side, so anonymous parses get a durable image too. Best-effort:
+    // keep the source URL if the upload fails.
+    let imageUrl = recipe.imageUrl;
+    let imageFileId = recipe.imageFileId;
+    if (imageUrl && !isImageKitUrl(imageUrl)) {
+      try {
+        const uploaded = await uploadImageServer(imageUrl);
+        imageUrl = uploaded.url;
+        imageFileId = uploaded.fileId;
+      } catch {
+        // keep the source URL on upload failure
+      }
+    }
+    const finalRecipe: ParsedRecipe = { ...recipe, imageUrl, imageFileId };
+
     await db
       .update(parseJobs)
       .set({
         status: PARSE_JOB_STATUS.DONE,
-        result: recipe as unknown as Record<string, unknown>,
+        result: finalRecipe as unknown as Record<string, unknown>,
+        parserVersion: PARSER_VERSION,
         updatedAt: new Date(),
       })
       .where(eq(parseJobs.id, jobId));
@@ -113,7 +144,7 @@ export async function POST(req: NextRequest) {
             .from(pushSubscriptions)
             .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
 
-      const parsedTitle = (recipe as ParsedRecipe).title;
+      const parsedTitle = finalRecipe.title;
       for (const sub of targets) {
         sendPushNotification(sub, {
           title: parsedTitle,
@@ -127,27 +158,15 @@ export async function POST(req: NextRequest) {
 
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
-      const parsedRecipe = recipe as ParsedRecipe;
-
-      let finalImageUrl = parsedRecipe.imageUrl ?? null;
-      let finalImageFileId: string | null = null;
-      if (finalImageUrl && !isImageKitUrl(finalImageUrl)) {
-        try {
-          const uploaded = await uploadImageServer(finalImageUrl);
-          finalImageUrl = uploaded.url;
-          finalImageFileId = uploaded.fileId;
-        } catch {
-          // keep original URL on failure
-        }
-      }
+      const parsedRecipe = finalRecipe;
 
       await db.insert(recipes).values({
         id: crypto.randomUUID(),
         userId: job.userId,
         title: parsedRecipe.title,
         description: parsedRecipe.description ?? null,
-        imageUrl: finalImageUrl,
-        imageFileId: finalImageFileId,
+        imageUrl: parsedRecipe.imageUrl ?? null,
+        imageFileId: parsedRecipe.imageFileId ?? null,
         prepTime: parsedRecipe.prepTime ?? null,
         cookTime: parsedRecipe.cookTime ?? null,
         totalTime:

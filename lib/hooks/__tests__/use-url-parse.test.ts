@@ -40,7 +40,7 @@ vi.mock("@/lib/parse-recipe/parse-history-entry", () => ({
 const claimJobCompletion = vi.hoisted(() => vi.fn().mockReturnValue(true));
 vi.mock("@/lib/parse-job-completion", () => ({ claimJobCompletion }));
 
-import { getJobIds } from "@/lib/parse-job-storage";
+import { addJobId, getJobIds } from "@/lib/parse-job-storage";
 
 const mockFetch = vi.fn();
 
@@ -144,6 +144,51 @@ describe("useUrlParse", () => {
           source: "url",
           reason: "Could not parse page",
         });
+      });
+    });
+  });
+
+  describe("cache hit", () => {
+    it("shows the result inline immediately without the background handoff", async () => {
+      const mockRecipe = {
+        title: "Cached Recipe",
+        ingredients: [],
+        instructions: [],
+        servings: 2,
+        sourceUrl: "https://example.com/recipe",
+      };
+      mockFetch.mockImplementation((requestUrl: string) => {
+        if (requestUrl === "/api/parse-queue") {
+          return Promise.resolve(
+            makeResponse({
+              jobId: "job-1",
+              uploadToken: null,
+              cached: true,
+              result: mockRecipe,
+            }),
+          );
+        }
+        return Promise.resolve(makeResponse({}));
+      });
+
+      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+
+      act(() => {
+        result.current.setUrl("https://example.com/recipe");
+      });
+      await act(async () => {
+        await result.current.handleParse();
+      });
+
+      expect(result.current.result).toEqual(mockRecipe);
+      expect(result.current.jobId).toBeNull();
+      expect(addJobId).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/parse-queue/process",
+        expect.anything(),
+      );
+      expect(trackEvent).toHaveBeenCalledWith("parse_succeeded", {
+        source: "url",
       });
     });
   });

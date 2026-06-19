@@ -60,7 +60,9 @@ export function useParseJobWatcher() {
       };
 
       let imageUrl = entry.imageUrl;
-      let imageFileId: string | undefined;
+      // The image is uploaded to ImageKit at parse time, so the result usually
+      // already carries a stable URL + fileId; only re-upload if it doesn't.
+      let imageFileId = result.imageFileId;
 
       if (imageUrl && !isImageKitUrl(imageUrl)) {
         try {
