@@ -2,13 +2,14 @@ import { liveQuery } from "dexie";
 import { startTransition, useEffect, useState } from "react";
 
 /**
- * Drop-in for useLiveQuery that wraps each data update in startTransition.
+ * Drop-in for useLiveQuery that defers *subsequent* data updates with
+ * startTransition.
  *
- * useLiveQuery fires urgent React state updates whenever Dexie resolves —
- * on first page mount these arrive in rapid succession and cause frame drops
- * that appear as nav/page stutter. startTransition marks them as non-urgent
- * so the browser can paint the skeleton between frames before committing the
- * content render.
+ * The first result is committed urgently — it's the critical "show the data"
+ * render, and deferring it lets boot-time work starve the transition for
+ * seconds, leaving the skeleton up long after the local Dexie read resolved.
+ * Later updates (a Dexie row changing) are marked non-urgent so a background
+ * change can't cause a janky urgent re-render mid-interaction.
  *
  * API mirrors useLiveQuery: same querier + deps signature, returns undefined
  * while the first result is pending.
@@ -21,8 +22,16 @@ export function useLiveQueryTransition<T>(
   const [state, setState] = useState<T | undefined>(undefined);
 
   useEffect(() => {
+    let hasResolved = false;
     const subscription = liveQuery(querier).subscribe({
-      next: (value) => startTransition(() => setState(value as T)),
+      next: (value) => {
+        if (hasResolved) {
+          startTransition(() => setState(value as T));
+        } else {
+          hasResolved = true;
+          setState(value as T);
+        }
+      },
       error: () => onError?.(),
     });
     return () => subscription.unsubscribe();
