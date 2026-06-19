@@ -160,6 +160,43 @@ describe("POST /api/parse-queue/process", () => {
       );
     });
 
+    it("sends to every current subscription of a signed-in user (by userId)", async () => {
+      const jobRow = {
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: "https://web.push.apple.com/enqueue-time",
+      };
+      setupDb(jobRow);
+      const jobSelect = {
+        from: vi.fn().mockReturnThis(),
+        where: vi.fn().mockResolvedValue([jobRow]),
+      };
+      const subsSelect = {
+        from: vi.fn().mockReturnThis(),
+        where: vi.fn().mockResolvedValue([
+          {
+            endpoint: "https://web.push.apple.com/device-a",
+            p256dh: "a",
+            auth: "a",
+          },
+          {
+            endpoint: "https://web.push.apple.com/device-b",
+            p256dh: "b",
+            auth: "b",
+          },
+        ]),
+      };
+      vi.mocked(db.select)
+        .mockReturnValueOnce(jobSelect as any)
+        .mockReturnValueOnce(subsSelect as any);
+      vi.mocked(sendPushNotification).mockResolvedValue(undefined);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendPushNotification).toHaveBeenCalledTimes(2);
+    });
+
     it("does not send a push when the job has no endpoint", async () => {
       setupDb({ ...baseJob, telegramChatId: null });
       vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);

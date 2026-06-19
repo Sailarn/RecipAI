@@ -101,15 +101,24 @@ export async function POST(req: NextRequest) {
       })
       .where(eq(parseJobs.id, jobId));
 
-    // send web push notification if the client subscribed
+    // Notify via web push if the client opted in when enqueuing. For a signed-in
+    // job we resolve every current subscription by userId at send time — so a
+    // device that subscribed after (or instead of) the enqueue-time endpoint
+    // still gets the push; anonymous jobs fall back to the single enqueue-time
+    // endpoint. Expired endpoints are pruned per-send by handlePushFailure.
     if (job.pushEndpoint) {
-      const [sub] = await db
-        .select()
-        .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
+      const targets = job.userId
+        ? await db
+            .select()
+            .from(pushSubscriptions)
+            .where(eq(pushSubscriptions.userId, job.userId))
+        : await db
+            .select()
+            .from(pushSubscriptions)
+            .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
 
-      if (sub) {
-        const parsedTitle = (recipe as ParsedRecipe).title;
+      const parsedTitle = (recipe as ParsedRecipe).title;
+      for (const sub of targets) {
         sendPushNotification(sub, {
           title: parsedTitle,
           body: "Your recipe is ready — tap to review",
