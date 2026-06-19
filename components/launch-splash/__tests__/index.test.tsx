@@ -22,14 +22,16 @@ describe("LaunchSplash", () => {
     vi.useRealTimers();
   });
 
-  it("is present in the server-rendered document", () => {
+  it("is not server-rendered (kept out of the SSR HTML to avoid a hydration mismatch)", () => {
     const markup = renderToString(<LaunchSplash />);
 
-    expect(markup).toContain("data-launch-splash");
+    expect(markup).not.toContain("data-launch-splash");
   });
 
-  it("is removed after its display duration in a browser tab", () => {
+  it("shows on mount then auto-hides after its duration in a browser tab", () => {
     const { container } = render(<LaunchSplash />);
+
+    expect(container.querySelector("[data-launch-splash]")).not.toBeNull();
 
     act(() => vi.advanceTimersByTime(1000));
 

@@ -3,6 +3,13 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 
+// Flips true after the first mount. The initial mount is the hydration pass and
+// must match the server (which always assumes a forward navigation), so we
+// ignore sessionStorage there — reading it could yield `true` on the client
+// only, changing the motion `initial` and causing a hydration mismatch. Later
+// mounts are client-side navigations, where reading the flag is safe.
+let hasHydrated = false;
+
 export default function PageTransition({
   children,
 }: {
@@ -10,6 +17,10 @@ export default function PageTransition({
 }) {
   const [isBack] = useState(() => {
     if (typeof window === "undefined") return false;
+    if (!hasHydrated) {
+      hasHydrated = true;
+      return false;
+    }
     const flag = sessionStorage.getItem("nav_back") === "1";
     if (flag) sessionStorage.removeItem("nav_back");
     return flag;

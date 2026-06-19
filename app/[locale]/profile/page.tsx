@@ -162,7 +162,13 @@ export default function ProfilePage() {
               className={ROW_ICON_CLASSES}
             />
             <span className={ROW_LABEL_CLASSES}>Version</span>
-            <span className="font-sans text-sm text-[var(--fg-3)]">
+            {/* Build metadata: server and client can momentarily disagree in dev
+                after a version bump (stale bundle). It always matches in a clean
+                prod build, so suppress the benign hydration warning. */}
+            <span
+              suppressHydrationWarning
+              className="font-sans text-sm text-[var(--fg-3)]"
+            >
               v{process.env.NEXT_PUBLIC_APP_VERSION}
             </span>
           </div>
