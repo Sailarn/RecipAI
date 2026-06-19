@@ -15,6 +15,9 @@ When a client sends a record back to an API route (e.g. sync-review "keep mine" 
 **Dexie `put` is an upsert.**
 `db.table.put(item)` inserts or replaces by primary key — it does not merge partial updates. Pass the full object or use `update` for partial changes.
 
+**Vocab delta-sync can strand a stale row (timezone-naive watermark).**
+`pullVocab` (`lib/db/sync-vocab.ts`) stores the max `updatedAt` it has seen in `localStorage["ingredientsSyncedAt"]` and re-pulls with `?since=<watermark>` → `gt(ingredients.updatedAt, since)`. Because `ingredients.updated_at` is `timestamp without time zone`, the `Date → toISOString() → new Date()` round-trip can drift by sub-second precision (or hours, if a non-UTC server writes it) and the strict `>` then **skips the boundary row**, which stays stale locally forever — the classic symptom is one ingredient that never picks up its translation until a full reset. Two guards mitigate it: the pull **overlaps** the watermark by `WATERMARK_OVERLAP_MS` (60s) so the boundary is always re-fetched, and a **change in `NEXT_PUBLIC_APP_VERSION` forces a full re-pull** (the version is tracked in `localStorage["ingredientsSyncedVersion"]`). The root fix is to migrate the columns to `timestamptz` (a Drizzle migration). `bulkPut` is an idempotent upsert, so re-fetching the overlap is free.
+
 ---
 
 ## Testing
