@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { createRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { RecipeVirtualList } from "../index";
+
+const virtualizerState = vi.hoisted(() => ({ hasMeasuredRows: true }));
 
 vi.mock("next-intl", () => ({
   useTranslations: vi.fn().mockReturnValue((key: string) => key),
@@ -24,14 +26,16 @@ vi.mock("@tanstack/react-virtual", () => ({
     return {
       getTotalSize: () => count * rowHeight,
       getVirtualItems: () =>
-        Array.from({ length: count }, (_, index) => ({
-          key: index,
-          index,
-          start: index * rowHeight,
-          end: (index + 1) * rowHeight,
-          size: rowHeight,
-          lane: 0,
-        })),
+        virtualizerState.hasMeasuredRows
+          ? Array.from({ length: count }, (_, index) => ({
+              key: index,
+              index,
+              start: index * rowHeight,
+              end: (index + 1) * rowHeight,
+              size: rowHeight,
+              lane: 0,
+            }))
+          : [],
       measureElement: () => {},
     };
   },
@@ -59,6 +63,10 @@ const mockCollection: Collection = {
 };
 
 describe("RecipeVirtualList", () => {
+  beforeEach(() => {
+    virtualizerState.hasMeasuredRows = true;
+  });
+
   describe("no results state", () => {
     it("shows noResults text when filtered is empty and search is active", () => {
       const scrollRef = createRef<HTMLDivElement>();
@@ -94,6 +102,24 @@ describe("RecipeVirtualList", () => {
   });
 
   describe("recipe cards", () => {
+    it("shows recipe skeletons until the virtualizer measures visible rows", () => {
+      virtualizerState.hasMeasuredRows = false;
+      const scrollRef = createRef<HTMLDivElement>();
+
+      render(
+        <RecipeVirtualList
+          filtered={[mockRecipe()]}
+          collections={[]}
+          getMissing={mockGetMissing}
+          scrollRef={scrollRef}
+          hasActiveSearch={false}
+        />,
+      );
+
+      expect(screen.getByTestId("recipe-grid-skeleton")).toBeInTheDocument();
+      expect(screen.queryByText("Borsch")).not.toBeInTheDocument();
+    });
+
     it("renders a card for each recipe", () => {
       const scrollRef = createRef<HTMLDivElement>();
       const recipes = [

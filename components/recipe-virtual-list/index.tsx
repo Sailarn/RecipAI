@@ -4,7 +4,10 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
 import { type RefObject, useMemo } from "react";
 import { RecipeCard } from "@/components/recipe-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Collection, Recipe } from "@/lib/db/schema";
+
+const skeletonCardIds = ["a", "b", "c", "d", "e", "f"];
 
 interface RecipeVirtualListProps {
   filtered: Recipe[];
@@ -12,6 +15,23 @@ interface RecipeVirtualListProps {
   getMissing: (recipe: Recipe) => { missing: number; total: number } | null;
   scrollRef: RefObject<HTMLDivElement | null>;
   hasActiveSearch: boolean;
+}
+
+function RecipeGridSkeleton() {
+  return (
+    <div
+      data-testid="recipe-grid-skeleton"
+      className="mt-3 grid grid-cols-2 gap-2.5 px-3.5"
+    >
+      {skeletonCardIds.map((id) => (
+        <div key={id} className="flex flex-col gap-2 rounded-xl bg-card p-2">
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function RecipeVirtualList({
@@ -43,6 +63,7 @@ export function RecipeVirtualList({
     estimateSize: () => 170,
     overscan: 5,
   });
+  const virtualRows = virtualizer.getVirtualItems();
 
   if (filtered.length === 0 && hasActiveSearch) {
     return (
@@ -52,12 +73,16 @@ export function RecipeVirtualList({
     );
   }
 
+  if (filtered.length > 0 && virtualRows.length === 0) {
+    return <RecipeGridSkeleton />;
+  }
+
   return (
     <div
       className="mt-3 relative"
       style={{ height: virtualizer.getTotalSize() }}
     >
-      {virtualizer.getVirtualItems().map((virtualRow) => {
+      {virtualRows.map((virtualRow) => {
         const rowItems = rows[virtualRow.index];
         return (
           <div
