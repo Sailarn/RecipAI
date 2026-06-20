@@ -1,5 +1,6 @@
 import { logger } from "@/lib/logger";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+import { trackEvent } from "@/lib/telemetry";
 import { isImageKitUrl, uploadImage } from "../upload/images";
 import { generateId } from "../utils";
 import { createRecipe, updateRecipe } from "./recipes";
@@ -34,6 +35,11 @@ export async function saveParsedRecipe(
     sourceUrl: entry.sourceUrl,
     category: entry.category,
   });
+
+  // Every parse-originated save funnels through here (parsed-recipes sheet,
+  // background watcher, photo save), so this is the single tracking point for
+  // them — the edit/form path tracks recipe_saved separately.
+  trackEvent("recipe_saved", { source: "parse" });
 
   normalizeRecipeIngredients(id, entry.ingredients).catch((error) => {
     logger.error("[normalize] top-level error:", error);

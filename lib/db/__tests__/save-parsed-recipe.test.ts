@@ -19,7 +19,10 @@ vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
     .mockResolvedValue({ matched: 0, total: 0 }),
 }));
 
+vi.mock("@/lib/telemetry", () => ({ trackEvent: vi.fn() }));
+
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+import { trackEvent } from "@/lib/telemetry";
 import { isImageKitUrl, uploadImage } from "../../upload/images";
 import { createRecipe, updateRecipe } from "../recipes";
 
@@ -62,6 +65,14 @@ describe("saveParsedRecipe", () => {
       expect(arg.servings).toBe(4);
       expect(arg.sourceUrl).toBe("https://example.com/recipe");
       expect(arg.category).toBe("main");
+    });
+
+    it("tracks recipe_saved with source parse", async () => {
+      await saveParsedRecipe(baseEntry);
+
+      expect(trackEvent).toHaveBeenCalledWith("recipe_saved", {
+        source: "parse",
+      });
     });
 
     it("computes totalTime as prepTime + cookTime", async () => {
