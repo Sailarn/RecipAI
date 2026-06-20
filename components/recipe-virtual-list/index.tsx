@@ -62,6 +62,12 @@ export function RecipeVirtualList({
     // that measureElement fires after first paint.
     estimateSize: () => 170,
     overscan: 5,
+    // On the very first render scrollRef.current is still null, so the default
+    // initialRect of { height: 0 } yields zero visible rows and flashes the
+    // skeleton for a frame before measurement. Seed a full-screen height so the
+    // first paint already includes the above-the-fold cards; the real rect
+    // corrects it right after mount.
+    initialRect: { width: 0, height: 1000 },
   });
   const virtualRows = virtualizer.getVirtualItems();
 
