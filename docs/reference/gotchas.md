@@ -143,6 +143,9 @@ The toggle is correctly absent in contexts that genuinely cannot deliver push:
 
 The key iOS rule (since iOS 16.4, March 2023): **Web Push works *only* in a web app installed to the Home Screen**, never in a Safari/Chrome browser tab. There is no API or library that can enable in-tab notifications on iOS — the only path for an iOS user is "Add to Home Screen" first. So an iOS user browsing in Safari sees no notifications row at all; they must install the PWA to get it.
 
+**`notificationclick` must focus *any* open window, not match the URL exactly.**
+In `app/sw.ts`, matching an existing client by `client.url === targetUrl` almost never holds — the open PWA sits at e.g. `/en/recipes` while the notification target is a recipe URL — so it falls through to `clients.openWindow()`, which on a standalone iOS/Android PWA opens the **default browser** instead of the installed app. Focus the first open app window and `client.navigate(targetUrl)` it; only `openWindow` when nothing is open. (If the PWA is fully closed at tap time, iOS WebKit can still route `openWindow` to Safari — that edge case is not fixable from the SW.)
+
 **The cold-start splash uses two different mechanisms — don't unify them.**
 The iOS WKWebView white flash happens *before first paint* and cannot be fixed with CSS or a React component (both render too late). So the splash is split by context:
 - **Installed PWA** → `public/pwa-launch.html` is the manifest `start_url`. It is a zero-CSS static shell that paints `#0a0a0a` instantly; WebKit holds it visible until the real app's first paint, then it JS-redirects. It is intentionally excluded from the middleware matcher (`.html` extension), so it is served as-is.

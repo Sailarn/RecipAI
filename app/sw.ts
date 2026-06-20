@@ -87,8 +87,16 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
         type: "window",
         includeUncontrolled: true,
       });
+      // Focus any already-open app window (the installed PWA) and navigate it
+      // to the target. The old exact-URL match (client.url === targetUrl)
+      // almost never held — the PWA sits at e.g. /en/recipes while the target
+      // is a recipe URL — so it fell through to openWindow, which on iOS/Android
+      // opens the default browser instead of the standalone PWA.
       for (const client of allClients) {
-        if (client.url === targetUrl && "focus" in client) {
+        if ("focus" in client) {
+          if ("navigate" in client && client.url !== targetUrl) {
+            await client.navigate(targetUrl).catch(() => {});
+          }
           return client.focus();
         }
       }
