@@ -113,6 +113,13 @@ Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-
 **`public/sw.js` is regenerated on every build.**
 It is gitignored. Do not commit it. Running `bun run build` will always overwrite it.
 
+**Env-dependent clients must not throw at module scope — `next build` evaluates them.**
+Next's page-data collection imports route modules during the production build, so any client instantiated at module top-level runs with the build environment, which often lacks runtime secrets. A bare `throw new Error("X is required")` or `new Client(process.env.X!)` at module scope will fail the build. Two safe patterns are already in use — match one when adding a new client:
+- **Lazy proxy** — defer construction (and the env check) to first property access. See `lib/redis.ts`: importing it never instantiates Redis; `REDIS_URL` is only required on the first actual call at request time.
+- **Empty-string fallback** — `process.env.X ?? ""` so the constructor never throws at import; the call fails later with a real error if the value is genuinely missing. See `db/index.ts` (`postgres(process.env.DATABASE_URL ?? "")`) and `lib/upload/imagekit.ts`.
+
+Never read a required secret with `!` or an unguarded `throw` at module scope.
+
 **The iOS status-bar scrim depends on `viewport-fit=cover`, which is inherited — not set on the app's own viewport.**
 Sonner notifications can repaint the Dynamic Island / notch area while they animate. In standalone mode, `StatusBarScrim` (gated by `@media (display-mode: standalone)`) owns that strip in `var(--background)` at a very high `z-index`, and the mobile toaster starts below it (`--mobile-toast-offset: calc(env(safe-area-inset-top) + 16px)`). All of that relies on `env(safe-area-inset-top)` being non-zero, which requires `viewport-fit=cover`. **Cover is declared only in `public/pwa-launch.html`** (the PWA `start_url`) and inherited by the standalone session — it is deliberately *not* on the app's Next `viewport` export, because setting it there introduced a persistent bottom gap. So the scrim works on the cold-launch-through-splash path; if a future WebKit stops persisting viewport-fit across the in-session navigation, the scrim height (and every `env(safe-area-inset-top)` padding) collapses to zero.
 
