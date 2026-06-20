@@ -18,10 +18,15 @@ import { StepSlide } from "./step-slide";
 
 interface CookingCarouselProps {
   recipe: Recipe;
+  locale: string;
   onClose: () => void;
 }
 
-export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
+export function CookingCarousel({
+  recipe,
+  locale,
+  onClose,
+}: CookingCarouselProps) {
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApiState] = useState<CarouselApi | null>(null);
@@ -80,7 +85,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
             style={{ height: "calc(100vh - 76px - 52px)" }}
           >
             <CarouselItem className="pl-4 h-full">
-              <OverviewSlide recipe={recipe} />
+              <OverviewSlide recipe={recipe} locale={locale} />
             </CarouselItem>
 
             {recipe.instructions.map((step) => (
@@ -108,6 +113,7 @@ export function CookingCarousel({ recipe, onClose }: CookingCarouselProps) {
       {ingredientsOpen && (
         <IngredientsSheet
           recipe={recipe}
+          locale={locale}
           onClose={() => setIngredientsOpen(false)}
         />
       )}

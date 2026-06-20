@@ -5,10 +5,15 @@ import type { Recipe } from "@/lib/db/schema";
 
 interface IngredientsSheetProps {
   recipe: Recipe;
+  locale: string;
   onClose: () => void;
 }
 
-export function IngredientsSheet({ recipe, onClose }: IngredientsSheetProps) {
+export function IngredientsSheet({
+  recipe,
+  locale,
+  onClose,
+}: IngredientsSheetProps) {
   return createPortal(
     <>
       <button
@@ -29,6 +34,8 @@ export function IngredientsSheet({ recipe, onClose }: IngredientsSheetProps) {
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
+          canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
+          locale={locale}
         />
       </div>
     </>,

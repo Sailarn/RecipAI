@@ -1,8 +1,14 @@
-import { IngredientsList } from "@/components/recipe-detail/ingredients-list";
 import { RecipeImage } from "@/components/recipe-image";
+import { ServingsCalculator } from "@/components/servings-calculator";
 import type { Recipe } from "@/lib/db/schema";
 
-export function OverviewSlide({ recipe }: { recipe: Recipe }) {
+export function OverviewSlide({
+  recipe,
+  locale,
+}: {
+  recipe: Recipe;
+  locale: string;
+}) {
   return (
     <div
       className="px-[14px] h-full overflow-y-auto"
@@ -30,7 +36,12 @@ export function OverviewSlide({ recipe }: { recipe: Recipe }) {
           <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,4,2,0.97)_0%,transparent_60%)]" />
         </div>
       )}
-      <IngredientsList ingredients={recipe.ingredients} />
+      <ServingsCalculator
+        originalServings={recipe.servings}
+        ingredients={recipe.ingredients}
+        canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
+        locale={locale}
+      />
     </div>
   );
 }

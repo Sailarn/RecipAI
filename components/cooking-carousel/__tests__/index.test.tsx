@@ -38,9 +38,6 @@ vi.mock("@/components/ui/carousel", () => {
   };
 });
 
-vi.mock("@/components/recipe-detail/ingredients-list", () => ({
-  IngredientsList: () => <div data-testid="ingredients-list" />,
-}));
 vi.mock("@/components/recipe-image", () => ({
   RecipeImage: () => <div data-testid="recipe-image" />,
 }));
@@ -83,7 +80,7 @@ afterEach(() => {
 describe("CookingCarousel", () => {
   it("calls onClose when the header close button is clicked", () => {
     const onClose = vi.fn();
-    render(<CookingCarousel recipe={recipe} onClose={onClose} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={onClose} />);
 
     fireEvent.click(screen.getByLabelText("Close cooking mode"));
 
@@ -91,20 +88,20 @@ describe("CookingCarousel", () => {
   });
 
   it("shows Next (not Done) on the overview slide", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
     expect(screen.getByText("Next")).toBeInTheDocument();
     expect(screen.queryByText("Done")).not.toBeInTheDocument();
   });
 
   it("hides Prev and Ingredients on the overview slide", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
     expect(screen.queryByText("Ingredients")).not.toBeInTheDocument();
   });
 
   it("shows Prev and Ingredients once past the overview slide", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
     goToSlide(1);
 
@@ -112,7 +109,7 @@ describe("CookingCarousel", () => {
   });
 
   it("shows Done on the last step slide", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
     goToSlide(recipe.instructions.length);
 
@@ -122,7 +119,7 @@ describe("CookingCarousel", () => {
 
   it("calls onClose when Done is clicked on the last slide", () => {
     const onClose = vi.fn();
-    render(<CookingCarousel recipe={recipe} onClose={onClose} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={onClose} />);
 
     goToSlide(recipe.instructions.length);
     fireEvent.click(screen.getByText("Done"));
@@ -131,7 +128,7 @@ describe("CookingCarousel", () => {
   });
 
   it("advances to the next slide when Next is clicked", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Next"));
 
@@ -139,11 +136,14 @@ describe("CookingCarousel", () => {
   });
 
   it("opens the ingredients sheet from a step slide", () => {
-    render(<CookingCarousel recipe={recipe} onClose={vi.fn()} />);
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
+
+    // The overview slide already renders one calculator; opening the sheet adds another.
+    expect(screen.getAllByTestId("servings-calculator")).toHaveLength(1);
 
     goToSlide(1);
     fireEvent.click(screen.getByText("Ingredients"));
 
-    expect(screen.getByTestId("servings-calculator")).toBeInTheDocument();
+    expect(screen.getAllByTestId("servings-calculator")).toHaveLength(2);
   });
 });
