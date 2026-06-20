@@ -100,6 +100,11 @@ interface ParseHistoryEntry {
 
 Capped at **100 entries** — oldest are pruned automatically. See `lib/db/parse-history.ts`.
 
+Photo imports use the same ID for their local history entry and server-side
+`parse_jobs` row. Their server row has `url = null`, allowing anonymous photo
+history to be claimed on login and pulled onto another device without retaining
+the uploaded image.
+
 #### SyncNotification
 ```ts
 interface SyncNotification {
@@ -154,7 +159,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 |---|---|---|
 | `id` | text PK | |
 | `user_id` | text | Nullable FK → `user`. `null` = anonymous job |
-| `url` | text | |
+| `url` | text | Nullable — `null` for photo imports (no source URL). Migration `0018` |
 | `normalized_url` | text | Indexed cache key — `url` with tracking params stripped and Instagram `reel`/`reels`/`p`/`tv` collapsed to one media id (`normalizeSourceUrl`). Migration `0017` |
 | `parser_version` | text | Pipeline version that produced `result`; the cache only serves rows matching the current `PARSER_VERSION`. Migration `0017` |
 | `user_comment` | text | **Dormant** — the AI-hint input was removed; the column is retained for a one-line restore |

@@ -5,12 +5,26 @@ import {
   CheckCircle2,
   ExternalLink,
   ImageIcon,
+  RotateCcw,
 } from "lucide-react";
 import { PARSE_HISTORY_STATUS, type ParseHistoryEntry } from "@/lib/db/schema";
+import { isRetriableFailure } from "@/lib/parse-recipe/friendly-parse-error";
 import { cn } from "@/lib/utils";
 
-export function ParseHistoryRow({ entry }: { entry: ParseHistoryEntry }) {
+interface ParseHistoryRowProps {
+  entry: ParseHistoryEntry;
+  isRetrying: boolean;
+  onRetry: (entry: ParseHistoryEntry) => void;
+}
+
+export function ParseHistoryRow({
+  entry,
+  isRetrying,
+  onRetry,
+}: ParseHistoryRowProps) {
   const isDone = entry.status === PARSE_HISTORY_STATUS.DONE;
+  const canRetry =
+    !isDone && Boolean(entry.url) && isRetriableFailure(entry.reason);
 
   return (
     <li className="glass-card rounded-2xl p-4 space-y-2">
@@ -54,9 +68,22 @@ export function ParseHistoryRow({ entry }: { entry: ParseHistoryEntry }) {
             Photo
           </span>
         )}
-        <span className="shrink-0 text-[11px] text-[var(--fg-3)]">
-          {entry.createdAt.toLocaleDateString()}
-        </span>
+        <div className="shrink-0 flex items-center gap-2">
+          {canRetry && (
+            <button
+              type="button"
+              disabled={isRetrying}
+              onClick={() => onRetry(entry)}
+              className="flex items-center gap-1 text-[11px] font-semibold text-[var(--food-accent)] disabled:opacity-50"
+            >
+              <RotateCcw size={12} />
+              {isRetrying ? "Retrying…" : "Retry"}
+            </button>
+          )}
+          <span className="text-[11px] text-[var(--fg-3)]">
+            {entry.createdAt.toLocaleDateString()}
+          </span>
+        </div>
       </div>
     </li>
   );

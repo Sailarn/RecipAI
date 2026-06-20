@@ -82,6 +82,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  const jobUrl = job.url;
+  if (!jobUrl) return ApiError.badRequest("URL job required");
+
   await db
     .update(parseJobs)
     .set({ status: PARSE_JOB_STATUS.PROCESSING, updatedAt: new Date() })
@@ -89,7 +92,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const recipe = requireCompleteRecipe(
-      await parseWithRetry(parseRecipeFromUrl, job.url),
+      await parseWithRetry(parseRecipeFromUrl, jobUrl),
       "page",
     );
 
@@ -170,7 +173,7 @@ export async function POST(req: NextRequest) {
         servings: parsedRecipe.servings ?? 1,
         ingredients: parsedRecipe.ingredients ?? [],
         instructions: parsedRecipe.instructions ?? [],
-        sourceUrl: job.url,
+        sourceUrl: jobUrl,
         category: parsedRecipe.category ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),

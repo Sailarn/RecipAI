@@ -2,8 +2,12 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getParseHistory } from "@/lib/db/parse-history";
+import type { ParseHistoryEntry } from "@/lib/db/schema";
+import { addJobId } from "@/lib/parse-job-storage";
+import { api } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { ParseHistoryRow } from "./entry-row";
@@ -11,10 +15,46 @@ import { ParseHistoryRow } from "./entry-row";
 export function ParseHistoryView() {
   const navigate = useNavigate();
   const entries = useLiveQuery(() => getParseHistory(), []);
+  const [retryingIds, setRetryingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     trackEvent("parse_history_viewed", undefined);
   }, []);
+
+  const retryImport = async (entry: ParseHistoryEntry) => {
+    if (!entry.url || retryingIds.has(entry.id)) return;
+
+    setRetryingIds((current) => new Set(current).add(entry.id));
+    try {
+      const enqueueResponse = await fetch(api.parseQueue, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: entry.url }),
+      });
+      if (!enqueueResponse.ok) throw new Error("Failed to retry import");
+
+      const { jobId, uploadToken } = await enqueueResponse.json();
+      addJobId(jobId, uploadToken);
+      window.dispatchEvent(
+        new CustomEvent("parse-job-created", { detail: { jobId } }),
+      );
+
+      const processResponse = await fetch(api.parseQueueProcess, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+      if (!processResponse.ok) throw new Error("Failed to process retry");
+    } catch {
+      toast.error("Failed to retry import");
+    } finally {
+      setRetryingIds((current) => {
+        const next = new Set(current);
+        next.delete(entry.id);
+        return next;
+      });
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-hidden">
@@ -42,7 +82,12 @@ export function ParseHistoryView() {
       ) : (
         <ul className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-[100px] space-y-3">
           {entries?.map((entry) => (
-            <ParseHistoryRow key={entry.id} entry={entry} />
+            <ParseHistoryRow
+              key={entry.id}
+              entry={entry}
+              isRetrying={retryingIds.has(entry.id)}
+              onRetry={retryImport}
+            />
           ))}
         </ul>
       )}

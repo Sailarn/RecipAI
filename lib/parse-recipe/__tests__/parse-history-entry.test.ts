@@ -56,17 +56,20 @@ describe("failedParseHistoryEntry", () => {
 
 describe("photo history entries", () => {
   it("builds a done photo entry with no url", () => {
-    const entry = donePhotoHistoryEntry("Grandma's Soup");
+    const entry = donePhotoHistoryEntry("photo-job", "Grandma's Soup");
 
-    expect(entry).toMatchObject({ title: "Grandma's Soup", status: "done" });
+    expect(entry).toMatchObject({
+      id: "photo-job",
+      title: "Grandma's Soup",
+      status: "done",
+    });
     expect(entry.url).toBeUndefined();
-    expect(typeof entry.id).toBe("string");
-    expect(entry.id.length).toBeGreaterThan(0);
   });
 
   it("builds a failed photo entry with a friendly reason and no url", () => {
-    const entry = failedPhotoHistoryEntry("503");
+    const entry = failedPhotoHistoryEntry("photo-job", "503");
 
+    expect(entry.id).toBe("photo-job");
     expect(entry.status).toBe("failed");
     expect(entry.title).toBe("Photo import");
     expect(entry.url).toBeUndefined();
@@ -109,6 +112,39 @@ describe("parseHistoryEntryFromServerJob", () => {
     expect(entry?.status).toBe("failed");
     expect(entry?.title).toBe("instagram.com");
     expect(entry?.reason).toContain("private or the content is restricted");
+  });
+
+  it("maps a done photo job without a url", () => {
+    const entry = parseHistoryEntryFromServerJob({
+      id: "photo-job",
+      url: null,
+      status: "done",
+      result: { title: "Recipe Card" },
+      error: null,
+      createdAt: "2026-01-03T00:00:00.000Z",
+    });
+
+    expect(entry).toMatchObject({
+      id: "photo-job",
+      title: "Recipe Card",
+      status: "done",
+    });
+    expect(entry?.url).toBeUndefined();
+  });
+
+  it("maps a failed photo job without a url", () => {
+    const entry = parseHistoryEntryFromServerJob({
+      id: "photo-job",
+      url: null,
+      status: "failed",
+      result: null,
+      error: "503",
+      createdAt: "2026-01-03T00:00:00.000Z",
+    });
+
+    expect(entry?.title).toBe("Photo import");
+    expect(entry?.reason).toContain("high demand");
+    expect(entry?.url).toBeUndefined();
   });
 
   it("returns null for a non-terminal job", () => {

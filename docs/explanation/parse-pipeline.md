@@ -71,19 +71,21 @@ Requires `GROQ_API_KEY`. If transcript is under 30 characters and no caption is 
 
 ## Photo pipeline (`app/api/parse-recipe/photo/route.ts`)
 
-Photos bypass the job queue entirely — parsing is synchronous.
+Photos bypass queue processing — parsing is synchronous — but the route records the outcome in `parse_jobs` for history sync.
 
 ```mermaid
 graph LR
     A[Client compresses image] --> B[POST /api/parse-recipe/photo]
     B --> C[Rate limit check]
-    C -->|ok| D[Build photo prompt]
-    D --> E[AI model chain - multimodal]
-    E --> F[ParsedRecipe]
-    F --> G[Saved to Dexie locally]
+    C -->|ok| D[Create processing history row]
+    D --> E[Build photo prompt]
+    E --> F[AI model chain - multimodal]
+    F --> G[Complete server history row]
+    G --> H[ParsedRecipe]
+    H --> I[Saved to Dexie locally]
 ```
 
-The image is sent as a base64-encoded string alongside a text prompt. Both Gemini (via `inlineData`) and OpenAI (via `image_url` with a data URI) support this format. Photo history is recorded locally in Dexie `parseHistory` without a `url` field.
+The image is sent as a base64-encoded string alongside a text prompt. Both Gemini (via `inlineData`) and OpenAI (via `image_url` with a data URI) support this format. Photo history is recorded locally in Dexie and server-side in `parse_jobs` without a `url`; the image itself is not retained.
 
 ---
 
@@ -163,6 +165,10 @@ The counter uses Redis `INCR` + `EXPIRE`. Rate limiting **fails open** — if Re
 ## Parse history (`lib/db/parse-history.ts`)
 
 Every finished parse (done or failed) is recorded locally in Dexie `parseHistory`. The table is capped at 100 entries (oldest pruned). On login, the client syncs its local history with the server via the claim + pull flow in `useSyncOnLogin`.
+
+Failed URL entries expose a **Retry** action. It creates a new queue job and hands it to the existing background watcher; the original failed entry remains as history. Retry is hidden for **permanent** failures — private/restricted accounts, unsupported platforms, and videos with no extractable content (classified by `isRetriableFailure` in `friendly-parse-error.ts`) — because re-running the same URL cannot succeed. Photo entries never expose Retry because the source image is not retained.
+
+Photo parsing remains synchronous, but each request also creates and completes a `parse_jobs` row with `url = null`. The client-generated job ID is reused for the local history entry, so anonymous photo parses can be claimed on login and later pulled on other devices just like URL/video history.
 
 ---
 

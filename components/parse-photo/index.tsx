@@ -18,6 +18,7 @@ import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
+import { generateId } from "@/lib/utils";
 import { ParseBackgroundBanner } from "../parse-background-banner";
 
 interface ParsePhotoProps {
@@ -62,6 +63,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     if (!file) return;
 
     const photoFile = file;
+    const parseJobId = generateId();
     const capturedLocale = locale;
     const capturedOnResult = onResult;
 
@@ -75,11 +77,13 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     setError(null);
     trackEvent("parse_started", { source: "photo" });
 
-    parseRecipeFromPhoto(photoFile)
+    parseRecipeFromPhoto(photoFile, parseJobId)
       .then(async (recipe) => {
         if (mountedRef.current) setIsParsing(false);
         trackEvent("parse_succeeded", { source: "photo" });
-        recordParseHistory(donePhotoHistoryEntry(recipe.title)).catch(() => {});
+        recordParseHistory(
+          donePhotoHistoryEntry(parseJobId, recipe.title),
+        ).catch(() => {});
 
         // Hand off only if still on-screen; otherwise fall through to DB+toast path.
         if (capturedOnResult && mountedRef.current) {
@@ -104,7 +108,9 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           source: "photo",
           reason: err instanceof Error ? err.message : String(err),
         });
-        recordParseHistory(failedPhotoHistoryEntry(msg)).catch(() => {});
+        recordParseHistory(failedPhotoHistoryEntry(parseJobId, msg)).catch(
+          () => {},
+        );
         if (mountedRef.current) {
           setIsParsing(false);
           setError(msg);

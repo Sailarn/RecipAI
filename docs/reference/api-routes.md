@@ -22,7 +22,7 @@ All routes live under `app/api/`. These routes are the server-sync layer — par
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/parse-recipe/photo` | Rate-limited (session optional) | Parse a recipe from a base64-encoded image. Body: `{ imageBase64, mimeType, userComment? }`. |
+| `POST` | `/api/parse-recipe/photo` | Rate-limited (session optional) | Parse a recipe from a base64-encoded image. Body: `{ imageBase64, mimeType, jobId? }`. The current client supplies `jobId` so the synchronous photo result is recorded in `parse_jobs` under the same ID as local history; omitted IDs are generated server-side for compatibility with older clients. |
 
 ---
 

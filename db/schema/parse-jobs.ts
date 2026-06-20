@@ -8,7 +8,7 @@ export const parseJobs = pgTable(
   {
     id: text("id").primaryKey(),
     userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
-    url: text("url").notNull(),
+    url: text("url"),
     // Stable cache key derived from `url` (see lib/parse-recipe/normalize-url).
     normalizedUrl: text("normalized_url"),
     // Pipeline version that produced `result`; set when the parse completes so a

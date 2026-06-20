@@ -13,6 +13,15 @@ vi.mock("@/lib/ai", () => ({
 vi.mock("@/lib/parse-recipe/prompts", () => ({
   buildPhotoPrompt: vi.fn().mockReturnValue("prompt"),
 }));
+const insertValues = vi.fn().mockResolvedValue(undefined);
+const updateWhere = vi.fn().mockResolvedValue(undefined);
+const updateSet = vi.fn(() => ({ where: updateWhere }));
+vi.mock("@/db", () => ({
+  db: {
+    insert: vi.fn(() => ({ values: insertValues })),
+    update: vi.fn(() => ({ set: updateSet })),
+  },
+}));
 
 import { callAiForRecipePhoto } from "@/lib/ai";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
@@ -81,12 +90,27 @@ describe("POST /api/parse-recipe/photo", () => {
     vi.mocked(callAiForRecipePhoto).mockResolvedValue(mockRecipe as never);
 
     const res = await POST(
-      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+      makeRequest({
+        imageBase64: "abc",
+        mimeType: "image/jpeg",
+        jobId: "photo-job",
+      }),
     );
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual(mockRecipe);
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "photo-job",
+        userId: null,
+        url: null,
+        status: "processing",
+      }),
+    );
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "done", result: mockRecipe }),
+    );
   });
 
   it("rejects an explicit notRecipe response", async () => {
@@ -135,7 +159,11 @@ describe("POST /api/parse-recipe/photo", () => {
     vi.mocked(callAiForRecipePhoto).mockRejectedValue(realError);
 
     const res = await POST(
-      makeRequest({ imageBase64: "abc", mimeType: "image/jpeg" }),
+      makeRequest({
+        imageBase64: "abc",
+        mimeType: "image/jpeg",
+        jobId: "photo-job",
+      }),
     );
 
     expect(res.status).toBe(500);
@@ -144,6 +172,12 @@ describe("POST /api/parse-recipe/photo", () => {
     expect(captureError).toHaveBeenCalledWith(
       realError,
       expect.objectContaining({ tags: expect.any(Object) }),
+    );
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "failed",
+        error: "503 Service Unavailable",
+      }),
     );
   });
 });

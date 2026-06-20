@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { friendlyParseError } from "../friendly-parse-error";
+import {
+  friendlyParseError,
+  isRetriableFailure,
+} from "../friendly-parse-error";
 
 describe("friendlyParseError", () => {
   it("maps 503 / Service Unavailable / high demand to a high-demand message", () => {
@@ -53,5 +56,32 @@ describe("friendlyParseError", () => {
     expect(friendlyParseError("503 quota")).toBe(
       "Gemini is experiencing high demand right now. Please try again in a moment.",
     );
+  });
+});
+
+describe("isRetriableFailure", () => {
+  it("marks private/restricted, unsupported platform and no-content as permanent", () => {
+    expect(isRetriableFailure(friendlyParseError("account is private"))).toBe(
+      false,
+    );
+    expect(
+      isRetriableFailure(friendlyParseError("Unsupported video platform")),
+    ).toBe(false);
+    expect(isRetriableFailure(friendlyParseError("No speech detected"))).toBe(
+      false,
+    );
+  });
+
+  it("marks transient and scraper-blocked failures as retriable", () => {
+    expect(isRetriableFailure(friendlyParseError("Error 503"))).toBe(true);
+    expect(isRetriableFailure(friendlyParseError("HTTP 429"))).toBe(true);
+    expect(
+      isRetriableFailure(friendlyParseError("Could not extract recipe")),
+    ).toBe(true);
+  });
+
+  it("treats unknown and missing reasons as retriable", () => {
+    expect(isRetriableFailure("Something unexpected")).toBe(true);
+    expect(isRetriableFailure(undefined)).toBe(true);
   });
 });

@@ -53,7 +53,7 @@ URL and video parses are enqueued as `parse_jobs` rows in Postgres rather than h
 - Vercel's `maxDuration: 60` per-invocation limit to be used without blocking the UI.
 - Idempotent retries (the process route skips re-parsing in-flight jobs).
 
-Photo parsing is synchronous (no queue) because photos are client-provided, smaller in scope, and don't require scraping.
+Photo parsing is synchronous (no queue) because photos are client-provided, smaller in scope, and don't require scraping. The route still records the terminal outcome in `parse_jobs` so photo history can sync across devices; the row is a history record, not queued work.
 
 ---
 

@@ -43,10 +43,10 @@ This is a **pull-on-login** model, not real-time sync. Changes made on another d
 ## Anonymous use
 
 Everything works without an account:
-- Parse jobs are created with `user_id = null` in `parse_jobs`.
+- URL/video and photo parse jobs are created with `user_id = null` in `parse_jobs`.
 - Results are saved to local Dexie only.
 - Parse history is recorded in Dexie `parseHistory` locally.
-- On login, anonymous jobs are **claimed** — `POST /api/parse-queue/claim` sets their `user_id` to the now-signed-in user, and the full server history is pulled into Dexie.
+- On login, anonymous jobs are **claimed** — `POST /api/parse-queue/claim` sets their `user_id` to the now-signed-in user, and the full server history is pulled into Dexie. Photo imports use the same job ID locally and on the server, so they participate in this flow even though their `url` is null.
 
 ### Ingredient vocabulary stays local for anonymous users
 

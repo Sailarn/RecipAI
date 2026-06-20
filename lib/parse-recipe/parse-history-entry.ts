@@ -3,7 +3,6 @@ import {
   PARSE_JOB_STATUS,
   type ParseHistoryEntry,
 } from "@/lib/db/schema";
-import { generateId } from "@/lib/utils";
 import { friendlyParseError } from "./friendly-parse-error";
 
 const PHOTO_IMPORT_TITLE = "Photo import";
@@ -46,19 +45,25 @@ export function failedParseHistoryEntry(
   };
 }
 
-// Photo imports have no job id (synchronous parse) and no source link.
-export function donePhotoHistoryEntry(title: string): ParseHistoryEntry {
+// Reuse the server history id so anonymous photo imports can be claimed later.
+export function donePhotoHistoryEntry(
+  id: string,
+  title: string,
+): ParseHistoryEntry {
   return {
-    id: generateId(),
+    id,
     title,
     status: PARSE_HISTORY_STATUS.DONE,
     createdAt: new Date(),
   };
 }
 
-export function failedPhotoHistoryEntry(rawError: string): ParseHistoryEntry {
+export function failedPhotoHistoryEntry(
+  id: string,
+  rawError: string,
+): ParseHistoryEntry {
   return {
-    id: generateId(),
+    id,
     title: PHOTO_IMPORT_TITLE,
     status: PARSE_HISTORY_STATUS.FAILED,
     reason: friendlyParseError(rawError),
@@ -68,7 +73,7 @@ export function failedPhotoHistoryEntry(rawError: string): ParseHistoryEntry {
 
 interface ServerParseJob {
   id: string;
-  url: string;
+  url: string | null;
   status: string;
   result: { title?: string; sourceUrl?: string } | null;
   error: string | null;
@@ -84,18 +89,20 @@ export function parseHistoryEntryFromServerJob(
   if (job.status === PARSE_JOB_STATUS.DONE) {
     return {
       id: job.id,
-      title: job.result?.title ?? hostLabel(job.url),
+      title:
+        job.result?.title ??
+        (job.url ? hostLabel(job.url) : PHOTO_IMPORT_TITLE),
       status: PARSE_HISTORY_STATUS.DONE,
-      url: job.result?.sourceUrl ?? job.url,
+      url: job.result?.sourceUrl ?? job.url ?? undefined,
       createdAt,
     };
   }
   if (job.status === PARSE_JOB_STATUS.FAILED) {
     return {
       id: job.id,
-      title: hostLabel(job.url),
+      title: job.url ? hostLabel(job.url) : PHOTO_IMPORT_TITLE,
       status: PARSE_HISTORY_STATUS.FAILED,
-      url: job.url,
+      url: job.url ?? undefined,
       reason: friendlyParseError(job.error ?? ""),
       createdAt,
     };
