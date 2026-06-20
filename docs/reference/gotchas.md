@@ -88,6 +88,16 @@ Never hand-roll `NextResponse.json({ error }, { status })`. Use `ApiError.unauth
 
 ---
 
+## Observability
+
+**`parse_pipeline` only logs *successful* completions — and historically logged `success: true` on empty results.**
+The `parse_pipeline` Axiom log fires after a recipe is accepted, so it is not the place to look for failures. Before the completeness guard (`requireCompleteRecipe`), a 0-ingredient / 0-instruction extraction still reached this log as `success: true` (real example in Axiom: an `instagram.com` parse with `ingredient_count=0`, `step_count=0`). The guard now rejects those before the success log, so going forward `parse_pipeline` means a genuinely complete parse.
+
+**Failed extractions are logged as `parse_incomplete`, not in Sentry.**
+Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-independent) with `source`, `reason` (`not_recipe` / `no_ingredients` / `no_instructions`), `url`, `jobId`, and the full partial `result` the model returned. A failed job never persists its `result`, so this log is the **only** record of what the model produced — query it to deep-dive a single bad parse, not just count them. Volume is low (single-operator app), so treat it as a forensic trail, not a trend dashboard.
+
+---
+
 ## Overflow detection
 
 **Use `getBoundingClientRect`, not `scrollHeight`.**

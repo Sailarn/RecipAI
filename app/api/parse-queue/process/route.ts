@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
     const recipe = requireCompleteRecipe(
       await parseWithRetry(parseRecipeFromUrl, jobUrl),
       "page",
+      { jobId, url: jobUrl },
     );
 
     // Persist the recipe image to ImageKit while the source URL is still fresh,

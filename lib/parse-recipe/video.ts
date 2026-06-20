@@ -35,7 +35,9 @@ export async function parseVideoRecipe(url: string): Promise<ParsedRecipe> {
   }
 
   const prompt = buildTranscriptPrompt(transcript, caption);
-  const recipe = requireCompleteRecipe(await callAiForRecipe(prompt), "page");
+  const recipe = requireCompleteRecipe(await callAiForRecipe(prompt), "page", {
+    url,
+  });
 
   if (!recipe.imageUrl) {
     recipe.imageUrl = thumbnailUrl;

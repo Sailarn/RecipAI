@@ -146,6 +146,7 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
   const recipe = requireCompleteRecipe(
     await callAiForRecipe(buildWebPrompt(textContent)),
     "page",
+    { url },
   );
   const aiResult = { ...recipe, sourceUrl: url };
   logParsePipeline(url, "ai", scraper, scrapeMs, startedAt, aiResult);

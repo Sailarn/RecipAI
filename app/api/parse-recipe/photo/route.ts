@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     const recipe = requireCompleteRecipe(
       await callAiForRecipePhoto(imageBase64, mimeType, prompt),
       "photo",
+      { jobId },
     );
     await db
       .update(parseJobs)
