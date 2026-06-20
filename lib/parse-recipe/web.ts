@@ -62,6 +62,8 @@ function logParsePipeline(
   } catch {
     domain = undefined;
   }
+  const ingredientCount = recipe.ingredients?.length ?? 0;
+  const stepCount = recipe.instructions?.length ?? 0;
   log("info", "parse_pipeline", {
     source: "url",
     domain,
@@ -69,9 +71,11 @@ function logParsePipeline(
     scraper,
     scrape_ms: scrapeMs,
     total_ms: Date.now() - startedAt,
-    ingredient_count: recipe.ingredients?.length ?? 0,
-    step_count: recipe.instructions?.length ?? 0,
-    success: true,
+    ingredient_count: ingredientCount,
+    step_count: stepCount,
+    // Reflect actual completeness rather than hardcoding true — requireCompleteRecipe
+    // already rejects 0/0 before this log, but keep the field honest as a backstop.
+    success: ingredientCount > 0 && stepCount > 0,
   });
 }
 
