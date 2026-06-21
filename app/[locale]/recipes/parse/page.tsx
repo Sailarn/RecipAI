@@ -31,7 +31,7 @@ export default function ParseRecipePage() {
   } = useUrlParse({ locale });
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto p-4 pb-[100px]">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-heading text-[22px] font-extrabold text-[var(--fg-1)]">
           Import Recipe
