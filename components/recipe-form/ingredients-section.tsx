@@ -1,23 +1,34 @@
 "use client";
 
+import { useLiveQuery } from "dexie-react-hooks";
 import { Plus, X } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import {
   type Control,
   Controller,
   type FieldErrors,
   type UseFormRegister,
+  type UseFormSetValue,
   useFieldArray,
+  useWatch,
 } from "react-hook-form";
-import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
+import { IngredientPicker } from "@/components/ingredient-picker";
+import { getIngredientDisplayName } from "@/components/ingredient-picker/display-name";
 import { Input } from "@/components/ui";
+import type { Locale } from "@/i18n/config";
+import { db } from "@/lib/db/db";
 import { cn } from "@/lib/utils";
+import { buildVocabNameIndex, localizeIngredientItem } from "./localize-item";
 import type { RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {
   register: UseFormRegister<RecipeFormData>;
   control: Control<RecipeFormData>;
   errors: FieldErrors<RecipeFormData>;
+  setValue: UseFormSetValue<RecipeFormData>;
+  locale: Locale;
 }
 
 const colLabelClass =
@@ -29,12 +40,41 @@ export function IngredientsSection({
   register,
   control,
   errors,
+  setValue,
+  locale,
 }: IngredientsSectionProps) {
   const t = useTranslations("recipeForm");
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
   });
+  const [pickerRow, setPickerRow] = useState<number | null>(null);
+
+  const vocab = useLiveQuery(() => db.ingredients.toArray(), []);
+  const vocabIndex = useMemo(() => buildVocabNameIndex(vocab ?? []), [vocab]);
+
+  // Vocab ids already used by a row in this recipe — the picker marks these as
+  // chosen (still pickable) so you can see what's already in the recipe.
+  const watchedIngredients = useWatch({ control, name: "ingredients" });
+  const chosenIngredientIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const ingredient of watchedIngredients ?? []) {
+      const entry = vocabIndex.get(
+        (ingredient.item ?? "").trim().toLowerCase(),
+      );
+      if (entry) ids.add(entry.id);
+    }
+    return ids;
+  }, [watchedIngredients, vocabIndex]);
+
+  function handlePick(displayName: string) {
+    if (pickerRow === null) return;
+    setValue(`ingredients.${pickerRow}.item`, displayName, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setPickerRow(null);
+  }
 
   return (
     <div>
@@ -94,13 +134,30 @@ export function IngredientsSection({
                 <Controller
                   control={control}
                   name={`ingredients.${index}.item`}
-                  render={({ field }) => (
-                    <IngredientAutocomplete
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      placeholder={t("ingredientName")}
-                      error={!!itemErr}
-                    />
+                  render={({ field: itemField }) => (
+                    <button
+                      type="button"
+                      aria-label={t("ingredientName")}
+                      data-testid={`ingredient-trigger-${index}`}
+                      onClick={() => setPickerRow(index)}
+                      className={cn(
+                        "w-full rounded-[14px] px-3 py-2 border text-left text-base font-[family-name:var(--font-sans)] truncate transition-colors bg-[rgba(255,170,50,0.07)] backdrop-blur-[12px]",
+                        itemErr
+                          ? "border-red-500"
+                          : "border-[rgba(255,200,100,0.15)]",
+                        itemField.value
+                          ? "text-[var(--fg-1)]"
+                          : "text-[var(--fg-3)]",
+                      )}
+                    >
+                      {itemField.value
+                        ? localizeIngredientItem(
+                            itemField.value,
+                            vocabIndex,
+                            locale,
+                          )
+                        : t("ingredientName")}
+                    </button>
                   )}
                 />
                 <p
@@ -142,6 +199,20 @@ export function IngredientsSection({
         <Plus size={14} className="text-[var(--fg-2)]" />
         {t("addIngredient")}
       </button>
+
+      <AnimatePresence>
+        {pickerRow !== null && (
+          <IngredientPicker
+            key="recipe-ingredient-picker"
+            title={t("ingredientName")}
+            onClose={() => setPickerRow(null)}
+            markedIngredientIds={chosenIngredientIds}
+            onPick={(ingredient) =>
+              handlePick(getIngredientDisplayName(ingredient, locale))
+            }
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

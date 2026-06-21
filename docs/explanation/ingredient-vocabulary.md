@@ -18,6 +18,8 @@ The vocabulary itself is the `ingredients` table — global, shared across all u
 
 The initial dataset is curated JSON in `scripts/vocab/*.json`, merged into `scripts/ingredients-seed.json` and seeded into Postgres with `scripts/seed-ingredients.ts`.
 
+The confirmed vocabulary is also the **only** thing users can pick from when adding ingredients by hand — both the pantry and the recipe form select from it through the shared `components/ingredient-picker/` (no free-text entry). See [Curated ingredient input](decisions.md#curated-ingredient-input-tap-dont-type). Parsing still produces free-text strings, which is what the rest of this page is about.
+
 ---
 
 ## The matching pipeline (`lib/parse-recipe/normalize-ingredients.ts`)

@@ -1,4 +1,4 @@
-import type { CatOption } from "../constants";
+import type { CatOption } from "./categories";
 
 export interface CategoryStyle {
   dot: string;

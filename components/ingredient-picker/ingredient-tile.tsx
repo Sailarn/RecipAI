@@ -27,7 +27,7 @@ export function IngredientTile({
       aria-pressed={isAdded || isSelected}
       className={`min-h-[50px] w-full rounded-[14px] px-[13px] py-3 flex items-center gap-[9px] font-sans text-sm font-medium text-left transition-all border-[1.5px] ${
         isAdded
-          ? "bg-[var(--glass-card-bg)] border-[var(--glass-card-border)] text-[var(--fg-1)] cursor-default"
+          ? "bg-[var(--glass-card-bg)] border-[var(--glass-card-border)] text-[var(--fg-1)] cursor-default opacity-50"
           : isSelected
             ? `${categoryStyle.selectedTile} text-[var(--fg-1)] cursor-pointer`
             : "bg-[var(--glass-card-bg)] border-[var(--glass-card-border)] text-[var(--fg-1)] cursor-pointer"

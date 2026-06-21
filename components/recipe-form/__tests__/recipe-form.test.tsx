@@ -19,6 +19,12 @@ vi.mock("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
 }));
 
+// The ingredient rows localize their display via a vocabulary live query; with
+// no vocab the stored text shows verbatim, which is what these tests assert.
+vi.mock("dexie-react-hooks", () => ({
+  useLiveQuery: () => undefined,
+}));
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -40,7 +46,48 @@ vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
     .mockResolvedValue({ matched: 0, total: 0 }),
 }));
 
+// Stub the fullscreen picker: changing its input picks a vocab entry whose
+// English name is the typed value, so tests choose an ingredient by name.
+vi.mock("@/components/ingredient-picker", () => ({
+  IngredientPicker: ({
+    onPick,
+  }: {
+    onPick: (ingredient: {
+      id: string;
+      en: string;
+      ua: null;
+      category: string;
+      aliasesEn: string[];
+      aliasesUa: string[];
+      status: string;
+    }) => void;
+  }) => (
+    <input
+      data-testid="mock-ingredient-search"
+      onChange={(event) =>
+        onPick({
+          id: event.target.value,
+          en: event.target.value,
+          ua: null,
+          category: "other",
+          aliasesEn: [],
+          aliasesUa: [],
+          status: "confirmed",
+        })
+      }
+    />
+  ),
+}));
+
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+
+/** Open the picker for a row and choose an ingredient by name. */
+function pickIngredient(rowIndex: number, name: string) {
+  fireEvent.click(screen.getByTestId(`ingredient-trigger-${rowIndex}`));
+  fireEvent.change(screen.getByTestId("mock-ingredient-search"), {
+    target: { value: name },
+  });
+}
 
 /** Fill required fields on the info tab so tab navigation is not blocked */
 function fillRequiredInfo(title?: string) {
@@ -105,8 +152,7 @@ describe("RecipeForm", () => {
       });
 
       // Fill in the default ingredient so we can navigate past this tab
-      const ingredientInput = screen.getByPlaceholderText(/ingredientName/i);
-      fireEvent.change(ingredientInput, { target: { value: "test" } });
+      pickIngredient(0, "test");
       const qtyInput = screen.getByLabelText(/qty/i);
       fireEvent.change(qtyInput, { target: { value: "1" } });
 
@@ -151,19 +197,15 @@ describe("RecipeForm", () => {
         await new Promise((r) => setTimeout(r, 50));
       });
 
-      // Initially has 1 ingredient field
-      const ingredientInputs =
-        screen.getAllByPlaceholderText(/ingredientName/i);
-      expect(ingredientInputs).toHaveLength(1);
+      // Initially has 1 ingredient row
+      expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(1);
 
       // Add ingredient
       fireEvent.click(screen.getByText("addIngredient"));
 
-      // Now has 2 ingredient fields
+      // Now has 2 ingredient rows
       await waitFor(() => {
-        expect(screen.getAllByPlaceholderText(/ingredientName/i)).toHaveLength(
-          2,
-        );
+        expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(2);
       });
 
       // Remove ingredient — find the remove button (X icon inside a button, not a tab/next/add/back button)
@@ -184,11 +226,9 @@ describe("RecipeForm", () => {
         fireEvent.click(removeBtn);
       }
 
-      // Back to 1 ingredient field
+      // Back to 1 ingredient row
       await waitFor(() => {
-        expect(screen.getAllByPlaceholderText(/ingredientName/i)).toHaveLength(
-          1,
-        );
+        expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(1);
       });
     });
 
@@ -266,11 +306,13 @@ describe("RecipeForm", () => {
         await new Promise((r) => setTimeout(r, 50));
       });
 
-      const ingredientInputs =
-        screen.getAllByPlaceholderText(/ingredientName/i);
-      expect(ingredientInputs).toHaveLength(2);
-      expect(ingredientInputs[0]).toHaveValue("Flour");
-      expect(ingredientInputs[1]).toHaveValue("Eggs");
+      expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(2);
+      expect(screen.getByTestId("ingredient-trigger-0")).toHaveTextContent(
+        "Flour",
+      );
+      expect(screen.getByTestId("ingredient-trigger-1")).toHaveTextContent(
+        "Eggs",
+      );
     });
 
     it("displays existing instructions", async () => {
@@ -310,9 +352,7 @@ describe("RecipeForm", () => {
       });
 
       // Fill in ingredient
-      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
-        target: { value: "flour" },
-      });
+      pickIngredient(0, "flour");
       fireEvent.change(screen.getByLabelText(/qty/i), {
         target: { value: "1" },
       });
@@ -413,9 +453,7 @@ describe("RecipeForm", () => {
         await new Promise((r) => setTimeout(r, 50));
       });
 
-      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
-        target: { value: "garlic" },
-      });
+      pickIngredient(0, "garlic");
       fireEvent.change(screen.getByLabelText(/qty/i), {
         target: { value: "3" },
       });
@@ -456,9 +494,7 @@ describe("RecipeForm", () => {
         await new Promise((r) => setTimeout(r, 50));
       });
 
-      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
-        target: { value: "bread flour" },
-      });
+      pickIngredient(0, "bread flour");
 
       // Navigate to last tab and save
       await act(async () => {
@@ -497,9 +533,7 @@ describe("RecipeForm", () => {
         await new Promise((r) => setTimeout(r, 50));
       });
 
-      fireEvent.change(screen.getByPlaceholderText(/ingredientName/i), {
-        target: { value: "salt" },
-      });
+      pickIngredient(0, "salt");
       fireEvent.change(screen.getByLabelText(/qty/i), {
         target: { value: "1" },
       });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapVocabCategory } from "../constants";
+import { mapVocabCategory } from "../categories";
 
 describe("mapVocabCategory", () => {
   it.each([

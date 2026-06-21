@@ -78,3 +78,18 @@ Upstash Redis provides the rate-limit counters (fixed-window INCR) and short-liv
 ## Raspberry Pi as secondary host
 
 The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel at `recipai.pp.ua` alongside the Vercel deployment. Both share the same Postgres database. The Pi is managed with PM2. Deployment is manual via SSH. The Telegram webhook can only point to one host — the Pi or Vercel, not both simultaneously.
+
+---
+
+## Curated ingredient input (tap, don't type)
+
+Both ingredient-entry surfaces — **Add to Pantry** and the **recipe review/edit form** — use a single shared fullscreen picker (`components/ingredient-picker/`) over the **confirmed vocabulary**. There is no free-text ingredient creation in the UI.
+
+The picker (`IngredientPicker`) is a portal-mounted slide-up grouped by category, with a single mode switch:
+
+- **Multi-select** (`commit` prop) — the pantry's thin wrapper (`components/pantry/add-pantry-picker/`) bulk-adds the selection; items already in the pantry render dimmed/disabled.
+- **Single-select** (`onPick` prop) — a recipe-form row taps to replace its ingredient; ingredients already used in the recipe render with the "selected" look but stay pickable (`markedIngredientIds`).
+
+**Why.** Leading with a browsable grid kills the keyboard-squeeze that plagued the old autocomplete-in-a-bottom-sheet, and curated-only selection dissolves three problems at once: no provisional-id fragmentation, no junk/non-food input, and consistent bilingual names.
+
+**What it deliberately does _not_ change.** Recipe ingredients still store `item` as free text, so parsed descriptive strings ("all-purpose flour, sifted") survive untouched; the picker only sets that string. Canonical linkage is unchanged — `canonicalIngredientIds` is still computed by `normalizeRecipeIngredients` **after save** (see [Ingredient Vocabulary](ingredient-vocabulary.md)), never in the form. The form **displays** each row localized to the active locale by resolving the stored text back through the vocabulary (`components/recipe-form/localize-item.ts`), matching the cooking view, while the stored value stays as-is until re-picked. Pantry `qty`/`unit`/`cat` became [dormant columns](../reference/data-model.md#pantry) written as defaults.

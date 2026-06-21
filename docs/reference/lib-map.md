@@ -41,7 +41,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/collections.ts` | CRUD for collections. |
 | `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
 | `lib/db/parse-history.ts` | `recordParseHistory`, `bulkPutParseHistory`, `getParseHistory`, `clearParseHistory`. |
-| `lib/db/pantry.ts` | `bulkPutPantry`, `clearPantry` and related pantry ops. |
+| `lib/db/pantry.ts` | `addPantryItem` (dedups by `ingredientId`, writes dormant `qty`/`unit`/`cat` defaults), `bulkPutPantry`, `clearPantry` and related pantry ops. |
 | `lib/db/supabase-sync.ts` | Fire-and-forget sync on writes: `syncCreate`, `syncUpdate`, `syncDelete`. |
 | `lib/db/sync-diff.ts` | Generic diff engine: `computeDiff<T>(local, server)`. |
 | `lib/db/save-parsed-recipe.ts` | Maps `ParsedRecipe` → Dexie recipe + triggers background image upload. |

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { Locale } from "@/i18n/config";
 import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -27,8 +28,7 @@ interface RecipeFormProps {
 export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   const t = useTranslations("recipeForm");
   const navigate = useNavigate();
-  const params = useParams();
-  const locale = (params.locale as string) ?? "en";
+  const { locale = "en" } = useParams<{ locale: Locale }>();
 
   const handleFormBack = () => navigate.back(routes.recipes.list(locale));
   const recipeSchema = createRecipeSchema(t);
@@ -136,6 +136,8 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
               register={register}
               control={control}
               errors={errors}
+              setValue={setValue}
+              locale={locale}
             />
           )}
 
