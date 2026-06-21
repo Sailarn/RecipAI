@@ -1,5 +1,6 @@
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
+import { generateId } from "@/lib/utils";
 import { db } from "./db";
 import type { PantryItem, VocabularyIngredient } from "./schema";
 
@@ -46,7 +47,7 @@ export async function addPantryItem(
     }
   }
 
-  const id = crypto.randomUUID();
+  const id = generateId();
   const pantryItem: PantryItem = { ...item, id, addedAt: new Date() };
   await db.pantry.add(pantryItem);
   await syncPantryUpsert(pantryItem);

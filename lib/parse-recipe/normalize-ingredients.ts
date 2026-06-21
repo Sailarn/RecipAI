@@ -4,6 +4,7 @@ import { syncUpdate } from "@/lib/db/supabase-sync";
 import { logger } from "@/lib/logger";
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
+import { generateId } from "@/lib/utils";
 import { getIngredientEmbeddings } from "./embed-client";
 import { enrichIngredient } from "./enrich-ingredient";
 import { matchVocabId } from "./vocab-match";
@@ -92,7 +93,7 @@ async function createProvisional(
     .first();
   if (existing) return existing.id;
 
-  const id = crypto.randomUUID();
+  const id = generateId();
   try {
     // Write locally first — works regardless of auth state
     await db.ingredients.put({

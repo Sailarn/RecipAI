@@ -1,6 +1,7 @@
 import { matchVocabId } from "@/lib/parse-recipe/vocab-match";
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
+import { generateId } from "@/lib/utils";
 import { db } from "./db";
 import { INGREDIENT_STATUS } from "./schema";
 
@@ -31,7 +32,7 @@ export async function createProvisionalIngredient(
     .first();
   if (existing) return existing.id;
 
-  const id = crypto.randomUUID();
+  const id = generateId();
   await db.ingredients.add({
     id,
     en: rawText,
