@@ -1,12 +1,3 @@
-export const UNIT_OPTIONS = [
-  "pcs",
-  "g",
-  "kg",
-  "ml",
-  "l",
-  "tbsp",
-  "tsp",
-] as const;
 export const CAT_OPTIONS = [
   "Produce",
   "Dairy",
@@ -16,28 +7,31 @@ export const CAT_OPTIONS = [
   "Other",
 ] as const;
 
-export type UnitOption = (typeof UNIT_OPTIONS)[number];
 export type CatOption = (typeof CAT_OPTIONS)[number];
 
 const VOCAB_CATEGORY_MAP: Record<string, CatOption> = {
-  Produce: "Produce",
-  Vegetable: "Produce",
-  Fruit: "Produce",
-  Dairy: "Dairy",
-  "Dairy & Eggs": "Dairy",
-  Meat: "Other",
-  Seafood: "Other",
-  Grain: "Pantry",
-  Legume: "Pantry",
-  Spice: "Spices",
-  Herb: "Spices",
-  Oil: "Pantry",
-  Sauce: "Pantry",
-  Sweetener: "Pantry",
-  Frozen: "Frozen",
-  Other: "Other",
+  produce: "Produce",
+  vegetable: "Produce",
+  fruit: "Produce",
+  dairy: "Dairy",
+  "dairy & eggs": "Dairy",
+  egg: "Dairy",
+  grain: "Pantry",
+  legume: "Pantry",
+  nut: "Pantry",
+  oil: "Pantry",
+  sauce: "Pantry",
+  seed: "Pantry",
+  sweetener: "Pantry",
+  spice: "Spices",
+  herb: "Spices",
+  frozen: "Frozen",
+  alcohol: "Other",
+  meat: "Other",
+  seafood: "Other",
+  other: "Other",
 };
 
-export function mapVocabCategory(vocabCat: string): CatOption | null {
-  return VOCAB_CATEGORY_MAP[vocabCat] ?? null;
+export function mapVocabCategory(vocabularyCategory: string): CatOption | null {
+  return VOCAB_CATEGORY_MAP[vocabularyCategory.trim().toLowerCase()] ?? null;
 }

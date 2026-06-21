@@ -29,8 +29,19 @@ async function syncPantryUpsert(item: PantryItem): Promise<void> {
 }
 
 export async function addPantryItem(
-  item: Omit<PantryItem, "id" | "addedAt">,
+  input: Omit<PantryItem, "id" | "addedAt" | "qty" | "unit" | "cat"> & {
+    qty?: number;
+    unit?: string;
+    cat?: string;
+  },
 ): Promise<string> {
+  const item: Omit<PantryItem, "id" | "addedAt"> = {
+    ...input,
+    qty: input.qty ?? 1,
+    unit: input.unit ?? "pcs",
+    cat: input.cat ?? "Other",
+  };
+
   // One row per (user, ingredient): if this ingredient is already in the
   // pantry, update that row in place rather than inserting a duplicate. Items
   // without an ingredientId (free text) are always added fresh.

@@ -83,6 +83,24 @@ describe("getPantryItems", () => {
 });
 
 describe("addPantryItem", () => {
+  it("defaults dormant quantity, unit, and category fields", async () => {
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+
+    await addPantryItem({
+      name: "Eggs",
+      on: true,
+    });
+
+    expect(db.pantry.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Eggs",
+        qty: 1,
+        unit: "pcs",
+        cat: "Other",
+      }),
+    );
+  });
+
   it("adds item with generated id and addedAt to Dexie", async () => {
     vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
 

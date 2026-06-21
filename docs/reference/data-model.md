@@ -182,6 +182,8 @@ Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliase
 
 One row per `(user_id, ingredient_id)`, enforced by a **partial unique index** `pantry_user_ingredient_uniq` (`WHERE ingredient_id IS NOT NULL`, so free-text items can coexist) — migration `0015`. `POST /api/pantry` updates an existing `(user, ingredient)` row in place rather than inserting a duplicate; `addPantryItem` mirrors this client-side by upserting on `ingredientId` in Dexie.
 
+**Dormant columns:** `qty`, `unit`, and `cat` are no longer user-editable. `addPantryItem` writes defaults (`qty=1`, `unit="pcs"`, `cat="Other"`) and the UI omits them — same treatment as `user_comment`. The DB columns and Postgres schema are unchanged; no migration needed.
+
 ### `push_subscriptions`
 
 Stores browser push subscriptions so the server can send notifications when a parse job completes.

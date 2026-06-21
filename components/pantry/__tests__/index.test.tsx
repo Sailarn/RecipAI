@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("dexie-react-hooks", () => ({
@@ -21,27 +15,38 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock("@/components/ingredient-autocomplete", () => ({
-  IngredientAutocomplete: vi.fn(),
+vi.mock("../add-pantry-picker", () => ({
+  AddPantryPicker: () => <div data-testid="add-pantry-picker" />,
 }));
 
-vi.mock("@/lib/db/ingredients", () => ({
-  resolveOrCreateIngredient: vi.fn().mockResolvedValue("provisional-id"),
+vi.mock("motion/react", () => ({
+  motion: {
+    div: ({
+      children,
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      onAnimationComplete: _onAnimationComplete,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      initial?: unknown;
+      animate?: unknown;
+      exit?: unknown;
+      transition?: unknown;
+      onAnimationComplete?: () => void;
+    }) => <div {...props}>{children}</div>,
+  },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { IngredientAutocomplete } from "@/components/ingredient-autocomplete";
-import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
-import {
-  addPantryItem,
-  removePantryItem,
-  togglePantryItem,
-} from "@/lib/db/pantry";
-import type { PantryItem, VocabularyIngredient } from "@/lib/db/schema";
+import { removePantryItem, togglePantryItem } from "@/lib/db/pantry";
+import type { PantryItem } from "@/lib/db/schema";
 import { PantryPage } from "../index";
-
-let capturedOnSelect: ((entry: VocabularyIngredient) => void) | undefined;
 
 const inStock: PantryItem = {
   id: "a1",
@@ -66,18 +71,6 @@ const outOfStock: PantryItem = {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(useLiveQuery).mockReturnValue([inStock, outOfStock]);
-  vi.mocked(IngredientAutocomplete).mockImplementation(
-    ({ value, onChange, onSelect }) => {
-      capturedOnSelect = onSelect;
-      return (
-        <input
-          data-testid="item-name-input"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      );
-    },
-  );
 });
 
 describe("PantryPage", () => {
@@ -101,11 +94,11 @@ describe("PantryPage", () => {
     expect(screen.getByTestId("add-pantry-item")).toBeInTheDocument();
   });
 
-  it("opens add sheet when add button is clicked", async () => {
+  it("opens picker when add button is clicked", async () => {
     render(<PantryPage />);
     fireEvent.click(screen.getByTestId("add-pantry-item"));
     await waitFor(() => {
-      expect(screen.getByTestId("add-item-sheet")).toBeInTheDocument();
+      expect(screen.getByTestId("add-pantry-picker")).toBeInTheDocument();
     });
   });
 
@@ -128,141 +121,12 @@ describe("PantryRow", () => {
     fireEvent.click(screen.getByTestId("delete-a1"));
     expect(removePantryItem).toHaveBeenCalledWith("a1");
   });
-});
 
-const TOMATO: VocabularyIngredient = {
-  id: "tomato-id",
-  en: "Tomato",
-  ua: null,
-  category: "Produce",
-  aliasesEn: [],
-  aliasesUa: [],
-  status: "confirmed",
-};
-
-describe("AddItemSheet", () => {
-  async function openSheet() {
+  it("shows toast on delete", async () => {
     render(<PantryPage />);
-    fireEvent.click(screen.getByTestId("add-pantry-item"));
-    await waitFor(() => screen.getByTestId("add-item-sheet"));
-  }
-
-  describe("free-text submit (no vocab match)", () => {
-    it("calls resolveOrCreateIngredient with the trimmed name", async () => {
-      await openSheet();
-
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "  Tajín seasoning  " },
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(resolveOrCreateIngredient).toHaveBeenCalledWith(
-          "Tajín seasoning",
-        );
-      });
-    });
-
-    it("passes the provisional id to addPantryItem", async () => {
-      vi.mocked(resolveOrCreateIngredient).mockResolvedValue("provisional-id");
-      await openSheet();
-
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "Tajín seasoning" },
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(addPantryItem).toHaveBeenCalledWith(
-          expect.objectContaining({ ingredientId: "provisional-id" }),
-        );
-      });
-    });
-  });
-
-  describe("vocab selection", () => {
-    it("passes ingredientId and auto-filled cat to addPantryItem on submit", async () => {
-      await openSheet();
-
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "Tomato" },
-      });
-      act(() => {
-        capturedOnSelect?.(TOMATO);
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(addPantryItem).toHaveBeenCalledWith(
-          expect.objectContaining({
-            name: "Tomato",
-            ingredientId: "tomato-id",
-            cat: "Produce",
-          }),
-        );
-      });
-    });
-
-    it("clears ingredientId when user edits name after selecting a vocab entry", async () => {
-      await openSheet();
-
-      act(() => {
-        capturedOnSelect?.(TOMATO);
-      });
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "Tomato edited" },
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(resolveOrCreateIngredient).toHaveBeenCalledWith("Tomato edited");
-      });
-      expect(addPantryItem).toHaveBeenCalledWith(
-        expect.objectContaining({ ingredientId: "provisional-id" }),
-      );
-    });
-  });
-
-  describe("error handling", () => {
-    it("shows toast and keeps sheet open when resolveOrCreateIngredient throws", async () => {
-      vi.mocked(resolveOrCreateIngredient).mockRejectedValue(
-        new Error("QuotaExceeded"),
-      );
-      await openSheet();
-
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "Anything" },
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith("Couldn't save ingredient");
-      });
-      expect(screen.getByTestId("add-item-sheet")).toBeInTheDocument();
-    });
-
-    it("shows toast and keeps sheet open when addPantryItem throws", async () => {
-      vi.mocked(resolveOrCreateIngredient).mockResolvedValue("provisional-id");
-      vi.mocked(addPantryItem).mockRejectedValue(new Error("QuotaExceeded"));
-      await openSheet();
-
-      fireEvent.change(screen.getByTestId("item-name-input"), {
-        target: { value: "Anything" },
-      });
-      fireEvent.click(screen.getByTestId("add-item-submit"));
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith("Couldn't save ingredient");
-      });
-      expect(screen.getByTestId("add-item-sheet")).toBeInTheDocument();
-    });
-  });
-
-  describe("validation", () => {
-    it("disables the submit button while name is empty", async () => {
-      await openSheet();
-
-      expect(screen.getByTestId("add-item-submit")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("delete-a1"));
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Flour removed");
     });
   });
 });

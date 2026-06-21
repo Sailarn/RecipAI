@@ -2,11 +2,12 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { Plus, Search } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { db } from "@/lib/db/db";
 import type { PantryItem } from "@/lib/db/schema";
-import { AddItemSheet } from "./add-item-sheet";
+import { AddPantryPicker } from "./add-pantry-picker";
 import { localizedPantryName } from "./localized-name";
 import { PantryRow } from "./pantry-row";
 
@@ -30,7 +31,7 @@ export function PantryPage() {
     [vocabItems],
   );
 
-  const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showAddPicker, setShowAddPicker] = useState(false);
   const [search, setSearch] = useState("");
 
   const query = search.trim().toLowerCase();
@@ -148,15 +149,22 @@ export function PantryPage() {
       <button
         type="button"
         data-testid="add-pantry-item"
-        onClick={() => setShowAddSheet(true)}
+        onClick={() => setShowAddPicker(true)}
         aria-label="Add pantry item"
         className="absolute right-5 bottom-25 w-13 h-13 rounded-full bg-[rgba(251,191,36,0.9)] border-none cursor-pointer flex items-center justify-center shadow-[0_4px_20px_rgba(251,191,36,0.35)] z-[100]"
       >
         <Plus size={22} className="text-[#1a0f00]" />
       </button>
 
-      {/* Add item sheet */}
-      {showAddSheet && <AddItemSheet onClose={() => setShowAddSheet(false)} />}
+      {/* Fullscreen picker */}
+      <AnimatePresence>
+        {showAddPicker && (
+          <AddPantryPicker
+            key="add-pantry-picker"
+            onClose={() => setShowAddPicker(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

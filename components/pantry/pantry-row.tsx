@@ -33,9 +33,6 @@ export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
         >
           {name}
         </div>
-        <div className="text-[11px] text-[var(--fg-3)] font-sans mt-px">
-          {item.cat} · {item.qty} {item.unit}
-        </div>
       </div>
 
       {/* Delete button */}
