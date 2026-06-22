@@ -7,6 +7,7 @@ import { callAiForIngredient } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS, type IngredientStatus } from "@/lib/db/schema";
+import { embed } from "@/lib/embed";
 import { log } from "@/lib/telemetry";
 
 function buildEnrichmentPrompt(
@@ -144,6 +145,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, mergedInto: canonicalId });
     }
 
+    let passageEmbedding: number[] | undefined;
+    try {
+      const [vector] = await embed([enriched.en], "passage");
+      passageEmbedding = vector;
+    } catch {
+      log("warn", "enrich_embed_skipped", { ingredientId: id });
+    }
+
     await db
       .update(ingredients)
       .set({
@@ -152,6 +161,7 @@ export async function POST(req: NextRequest) {
         retryCount: 0,
         lastAttemptAt: new Date(),
         updatedAt: new Date(),
+        ...(passageEmbedding ? { embedding: passageEmbedding } : {}),
       })
       .where(eq(ingredients.id, id));
 

@@ -48,11 +48,6 @@ vi.mock("@/lib/routes", () => ({
   api: { ingredientsEnrich: "/api/ingredients/enrich" },
 }));
 
-vi.mock("./embed-client", () => ({ getIngredientEmbeddings: vi.fn() }));
-vi.mock("./embed-consent", () => ({
-  hasEmbedConsent: vi.fn().mockReturnValue(false),
-}));
-
 import { enrichIngredient } from "../enrich-ingredient";
 
 const mockFetch = vi.fn();

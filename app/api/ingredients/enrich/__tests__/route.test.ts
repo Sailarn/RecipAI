@@ -51,10 +51,12 @@ vi.mock("drizzle-orm", () => ({
 
 vi.mock("@/lib/ai", () => ({ callAiForIngredient: vi.fn() }));
 vi.mock("@/lib/auth/require-session", () => ({ requireSession: vi.fn() }));
+vi.mock("@/lib/embed", () => ({ embed: vi.fn() }));
 vi.mock("@/lib/telemetry", () => ({ log: vi.fn() }));
 
 import { callAiForIngredient } from "@/lib/ai";
 import { requireSession } from "@/lib/auth/require-session";
+import { embed } from "@/lib/embed";
 import { POST } from "../route";
 
 function makeReq(body: object) {
@@ -87,6 +89,7 @@ beforeEach(() => {
   mockDeleteWhere.mockResolvedValue(undefined);
   mockExecute.mockResolvedValue(undefined);
   vi.mocked(callAiForIngredient).mockResolvedValue(enrichedIngredient as never);
+  vi.mocked(embed).mockResolvedValue([[...Array(384).fill(0.1)]]);
 });
 
 describe("POST /api/ingredients/enrich", () => {
