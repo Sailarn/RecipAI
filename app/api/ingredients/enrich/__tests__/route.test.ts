@@ -153,7 +153,49 @@ describe("POST /api/ingredients/enrich", () => {
       expect(res.status).toBe(200);
       expect(body).toEqual({ success: true, ingredient: enrichedIngredient });
       expect(mockTransaction).not.toHaveBeenCalled();
+      // Confirm update, then the best-effort passage-vector update.
+      expect(mockUpdateWhere).toHaveBeenCalledTimes(2);
+    });
+
+    it("confirms with a null vector when the embedding provider fails", async () => {
+      mockSelectWhere
+        .mockResolvedValueOnce([provisionalEntry])
+        .mockReturnValueOnce({
+          orderBy: vi.fn().mockReturnValue({ limit: mockSelectLimit }),
+        });
+      mockSelectLimit.mockResolvedValue([]);
+      vi.mocked(embed).mockRejectedValue(new Error("embed host down"));
+
+      const res = await POST(
+        makeReq({ id: "uuid-provisional", rawText: "newingredient" }),
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ success: true, ingredient: enrichedIngredient });
+      // Only the confirm update runs — no vector to persist.
       expect(mockUpdateWhere).toHaveBeenCalledOnce();
+    });
+
+    it("still confirms when the passage-vector write fails", async () => {
+      mockSelectWhere
+        .mockResolvedValueOnce([provisionalEntry])
+        .mockReturnValueOnce({
+          orderBy: vi.fn().mockReturnValue({ limit: mockSelectLimit }),
+        });
+      mockSelectLimit.mockResolvedValue([]);
+      mockUpdateWhere
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error("vector write failed"));
+
+      const res = await POST(
+        makeReq({ id: "uuid-provisional", rawText: "newingredient" }),
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ success: true, ingredient: enrichedIngredient });
+      expect(mockUpdateWhere).toHaveBeenCalledTimes(2);
     });
   });
 

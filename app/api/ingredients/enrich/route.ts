@@ -145,14 +145,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, mergedInto: canonicalId });
     }
 
-    let passageEmbedding: number[] | undefined;
-    try {
-      const [vector] = await embed([enriched.en], "passage");
-      passageEmbedding = vector;
-    } catch {
-      log("warn", "enrich_embed_skipped", { ingredientId: id });
-    }
-
+    // Confirm the enriched row first, without the vector, so a malformed vector
+    // or a vector-column write failure can never reject the confirm or bump
+    // enrichment retry state.
     await db
       .update(ingredients)
       .set({
@@ -161,9 +156,29 @@ export async function POST(req: NextRequest) {
         retryCount: 0,
         lastAttemptAt: new Date(),
         updatedAt: new Date(),
-        ...(passageEmbedding ? { embedding: passageEmbedding } : {}),
       })
       .where(eq(ingredients.id, id));
+
+    // The passage vector is a best-effort follow-up. On compute or write
+    // failure the row stays confirmed with a null embedding — a detectable gap
+    // a later repair pass fills — rather than failing enrichment.
+    let passageEmbedding: number[] | undefined;
+    try {
+      const [vector] = await embed([enriched.en], "passage");
+      passageEmbedding = vector;
+    } catch {
+      log("warn", "enrich_embed_skipped", { ingredientId: id });
+    }
+    if (passageEmbedding) {
+      try {
+        await db
+          .update(ingredients)
+          .set({ embedding: passageEmbedding, updatedAt: new Date() })
+          .where(eq(ingredients.id, id));
+      } catch {
+        log("warn", "enrich_embed_persist_failed", { ingredientId: id });
+      }
+    }
 
     log("info", "enrich_completed", { ingredientId: id });
     return NextResponse.json({ success: true, ingredient: enriched });
