@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
         status: ingredients.status,
         retryCount: ingredients.retryCount,
         lastAttemptAt: ingredients.lastAttemptAt,
-        embedding: ingredients.embedding,
         updatedAt: ingredients.updatedAt,
       })
       .from(ingredients)
