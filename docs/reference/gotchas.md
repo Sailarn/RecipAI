@@ -24,6 +24,9 @@ Row-Level Security is off on all 11 Postgres tables (no policies), yet the data 
 **The parse result cache keys on a *normalized* URL, and can't store an ephemeral image.**
 `POST /api/parse-queue` serves a prior parse for the same URL by matching `parse_jobs.normalized_url` (`normalizeSourceUrl`) + the current `PARSER_VERSION`. Three non-obvious rules: (1) **URL normalization must canonicalize Instagram** — `/reel/X`, `/reels/X`, `/p/X`, `/tv/X` are the same media, so they collapse to `instagram.com/reel/X`; without this, `/reels/` misses the `/reel/` cache and re-parses. (2) **Incomplete parses are failed, not cached** — both ingredients and instructions must be non-empty, and the lookup enforces the same condition so a failed extraction cannot poison the cache. (3) **The image is uploaded to ImageKit at parse time**, not at save time, because the stored `result.imageUrl` is what a *cached* hit serves and source CDN URLs (Instagram's especially) expire within hours. Bump `PARSER_VERSION` to invalidate the whole cache after a prompt/model change; to heal individual stale-image rows, clear their `parser_version` so they re-parse fresh on next import.
 
+**pgvector `<=>` is cosine distance, not similarity.**
+The nearest-vocabulary query converts it with `similarity = 1 - distance`. Do not compare the raw `<=>` result to the similarity threshold. The server fetches the top two confirmed neighbors and accepts the best only when its similarity is at least `0.82` and it leads the runner-up by at least `0.08`. At the current vocabulary size this is an exact scan; add an HNSW/IVFFlat index only after measuring a larger dataset.
+
 ---
 
 ## Testing
@@ -86,6 +89,9 @@ If you `.catch()` to set error state, always re-throw so Sentry's `unhandledreje
 **Use `ApiError` for all client error responses.**
 Never hand-roll `NextResponse.json({ error }, { status })`. Use `ApiError.unauthorized()`, `ApiError.badRequest(msg)`, `ApiError.notFound()`, `ApiError.rateLimited()`, and `ApiError.internal(error, req)` in catch blocks.
 
+**Embedding-provider failure is a normal degraded match, not a route error.**
+When every configured embedding host fails, `POST /api/ingredients/embed-match` returns HTTP 200 with `{ matches: [null, ...], degraded: true }`. The client then creates provisional ingredients as usual. Do not turn this into a 500 or hide the gap: provisional rows, confirmed rows with a null vector, and empty canonical-id slots are intentionally queryable so a later repair tool can find them.
+
 ---
 
 ## Observability
@@ -107,6 +113,9 @@ Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-
 
 ## PWA / Build
 
+**The Pi can load e5-small in-process under Bun, but deployment may need trusted postinstalls.**
+The Task 0 probe succeeded on the Pi with Bun 1.3.11 and produced a 384-dimensional vector through `@huggingface/transformers` / `onnxruntime-node`, so the Pi uses `EMBED_PROVIDERS=local`; no Node sidecar is required. Bun reported two blocked postinstall scripts during installation. If the native runtime fails after a fresh deploy, review them with `bun pm untrusted` and explicitly trust the required packages with `bun pm trust`, then reinstall. Do not introduce a sidecar unless the in-process probe actually fails on the deployed runtime.
+
 **Production builds must use webpack.**
 `bun run build` (which passes `--webpack`) is required for `@serwist/next`. The default Turbopack dev server is fine for local development but will not produce a valid service worker.
 
@@ -120,10 +129,10 @@ Next's page-data collection imports route modules during the production build, s
 
 Never read a required secret with `!` or an unguarded `throw` at module scope.
 
-**The iOS status-bar scrim depends on `viewport-fit=cover`, which is inherited — not set on the app's own viewport.**
-Sonner notifications can repaint the Dynamic Island / notch area while they animate. In standalone mode, `StatusBarScrim` (gated by `@media (display-mode: standalone)`) owns that strip in `var(--background)` at a very high `z-index`, and the mobile toaster starts below it (`--mobile-toast-offset: calc(env(safe-area-inset-top) + 16px)`). All of that relies on `env(safe-area-inset-top)` being non-zero, which requires `viewport-fit=cover`. **Cover is declared only in `public/pwa-launch.html`** (the PWA `start_url`) and inherited by the standalone session — it is deliberately *not* on the app's Next `viewport` export, because setting it there introduced a persistent bottom gap. So the scrim works on the cold-launch-through-splash path; if a future WebKit stops persisting viewport-fit across the in-session navigation, the scrim height (and every `env(safe-area-inset-top)` padding) collapses to zero.
+**The iOS status bar needs a full-bleed paint layer and separately inset UI.**
+Sonner notifications can repaint the Dynamic Island / notch area while they animate. The real application viewport therefore declares `viewport-fit=cover`; the declaration in `public/pwa-launch.html` applies only to that launch document and must not be treated as inherited after its redirect. Each PageStack entry has an opaque backdrop extended by the safe-area insets, while its scroll viewport retains the normal screen bounds. In standalone mode, `StatusBarScrim` uses that same full-screen background geometry at a higher `z-index` than Sonner so swipe layers cannot expose WebKit's white backing surface.
 
-All **bottom** spacing is fixed, never `env(safe-area-inset-bottom)`: the bottom nav uses `var(--bottom-nav-offset)` (32px), and sheets use fixed `pb-*`. This is intentional — adding bottom insets reintroduced an unwanted gap. Pull-to-refresh must attach only after its asynchronously rendered scroll container mounts, and its indicator carries `env(safe-area-inset-top)` padding so the scrim doesn't cover the label.
+Do not turn `viewport-fit=cover` into global safe-area padding. In particular, the bottom nav stays at the fixed `var(--bottom-nav-offset)` (32px). WebKit miscalculates inset-based viewport height in installed apps, so standalone `html` and `body` use `min-height: 100vh`; removing it recreates the persistent bottom gap. Top-level controls apply `env(safe-area-inset-top)` locally. Pull-to-refresh keeps that inset inside its reserved height and fades its label in only after enough pull height exists, preventing clipped text beneath the scrim.
 
 **The push-notification toggle is hidden in dev — that's expected.**
 `usePushSubscription` only reports `isSupported: true` once `navigator.serviceWorker.ready` resolves *and* the context is secure (`window.isSecureContext`) *and* the three Push APIs exist *and* `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is set. Because the Turbopack dev server registers no service worker, `.ready` never resolves, so the row stays hidden (gating only on `"PushManager" in window` would show a toggle that hangs on click). To test push locally, run a production build (`bun run build && bun run start`) on `localhost`, or use an HTTPS tunnel (ngrok) / the Vercel deploy. On the Pi over plain `http://recipai.local` push is unavailable — service workers require a secure context. The toggle lives in its own component (`app/[locale]/profile/components/push-notification-toggle/`) which reads `push.isSupported`; do not re-derive a separate detection in the page.

@@ -106,7 +106,12 @@ export default function RecipesPage() {
       <div
         ref={indicatorRef}
         className="flex box-border h-[calc(var(--pull-height)+env(safe-area-inset-top))] justify-center items-center pt-[env(safe-area-inset-top)] text-sm overflow-hidden text-[var(--fg-3)]"
-        style={{ "--pull-height": "0px" } as CSSProperties}
+        style={
+          {
+            "--pull-height": "0px",
+            opacity: 0,
+          } as CSSProperties
+        }
       >
         {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
       </div>

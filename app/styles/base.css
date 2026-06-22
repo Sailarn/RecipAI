@@ -42,10 +42,7 @@
     background: var(--app-mesh);
     background-attachment: fixed;
     /* All page content lives in position:fixed PageStack containers — neither
-       html nor body should ever scroll. clip avoids creating a scroll container
-       (unlike hidden, which breaks iOS fixed positioning). overscroll-behavior
-       kills the iOS elastic rubber-band bounce that can make the page feel
-       scrollable even when no content overflows. */
+       html nor body should ever scroll. */
     overflow: clip;
     overscroll-behavior: none;
   }
@@ -57,7 +54,7 @@
     -webkit-user-select: none;
     overflow: clip;
     overscroll-behavior: none;
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
 
   * {
@@ -231,8 +228,17 @@
   }
 }
 
+.app-full-bleed-background {
+  top: calc(0px - env(safe-area-inset-top));
+  right: calc(0px - env(safe-area-inset-right));
+  bottom: calc(0px - env(safe-area-inset-bottom));
+  left: calc(0px - env(safe-area-inset-left));
+  background: var(--app-mesh);
+}
+
 .status-bar-scrim {
   display: none;
+  clip-path: inset(0 0 calc(100% - env(safe-area-inset-top)) 0);
 }
 
 @media (display-mode: standalone) {
@@ -242,6 +248,11 @@
 
   .status-bar-scrim {
     display: block;
+  }
+
+  html,
+  body {
+    min-height: 100vh;
   }
 }
 

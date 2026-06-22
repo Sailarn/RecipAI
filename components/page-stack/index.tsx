@@ -99,6 +99,7 @@ export function PageStack() {
         return (
           <motion.div
             key={entry.id}
+            className="fixed inset-0 overflow-visible"
             initial={entry.status === "entering" ? { x: "100%" } : false}
             animate={entry.status === "leaving" ? { x: "100%" } : { x: 0 }}
             transition={TRANSITION}
@@ -118,15 +119,6 @@ export function PageStack() {
               }
             }}
             style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch" as never,
-              paddingBottom: 0,
-              background: "var(--app-mesh)",
               zIndex: isAnimating ? 100 + index : index + 1,
               visibility: visible ? "visible" : "hidden",
               pointerEvents:
@@ -136,7 +128,13 @@ export function PageStack() {
               willChange: isTop || isPrevious ? "transform" : "auto",
             }}
           >
-            {entry.element}
+            <div
+              aria-hidden
+              className="app-full-bleed-background pointer-events-none absolute z-0"
+            />
+            <div className="absolute inset-0 z-[1] overflow-y-auto pb-0 [-webkit-overflow-scrolling:touch]">
+              {entry.element}
+            </div>
           </motion.div>
         );
       })}

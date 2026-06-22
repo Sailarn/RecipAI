@@ -78,7 +78,7 @@ export function CookingCarousel({
       </div>
 
       {/* Carousel */}
-      <div className="flex-1 overflow-hidden pt-[55px]">
+      <div className="flex-1 overflow-hidden pt-[calc(env(safe-area-inset-top)+55px)]">
         <Carousel className="h-full" setApi={setApi}>
           <CarouselContent
             className="-ml-4"

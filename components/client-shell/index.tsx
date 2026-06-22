@@ -37,7 +37,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <Toaster
         position="top-center"
         mobileOffset={{ top: "var(--mobile-toast-offset)" }}
-        swipeDirections={["left", "right"]}
+        swipeDirections={["top", "left", "right"]}
       />
       <ParseJobWatcher />
       <BottomNav />

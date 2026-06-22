@@ -10,6 +10,8 @@ interface UsePullToRefreshOptions {
 }
 
 const PULL_RESISTANCE = 0.4;
+const PULL_LABEL_REVEAL_START = 12;
+const PULL_LABEL_REVEAL_DISTANCE = 8;
 const MINIMUM_REFRESH_FEEDBACK_MS = 350;
 
 function waitForRefreshFeedback() {
@@ -47,6 +49,13 @@ export function usePullToRefresh({
       if (!element) return;
       element.style.transition = animated ? "height 0.25s ease-out" : "none";
       element.style.setProperty("--pull-height", `${height}px`);
+      element.style.opacity = String(
+        Math.min(
+          Math.max(height - PULL_LABEL_REVEAL_START, 0) /
+            PULL_LABEL_REVEAL_DISTANCE,
+          1,
+        ),
+      );
     }
 
     const onTouchStart = (event: TouchEvent) => {

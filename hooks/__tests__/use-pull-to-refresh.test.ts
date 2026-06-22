@@ -32,6 +32,48 @@ describe("usePullToRefresh", () => {
     expect(indicator.style.getPropertyValue("--pull-height")).toBe("80px");
   });
 
+  it("keeps the pull label hidden during a shallow gesture", () => {
+    const scrollContainer = document.createElement("div");
+    const scrollRef = { current: scrollContainer };
+    const { result } = renderHook(() =>
+      usePullToRefresh({
+        enabled: true,
+        onRefresh: vi.fn().mockResolvedValue(undefined),
+        scrollRef,
+      }),
+    );
+    const indicator = document.createElement("div");
+    result.current.indicatorRef.current = indicator;
+
+    act(() => {
+      scrollContainer.dispatchEvent(createTouchEvent("touchstart", 100));
+      scrollContainer.dispatchEvent(createTouchEvent("touchmove", 120));
+    });
+
+    expect(indicator.style.opacity).toBe("0");
+  });
+
+  it("reveals the pull label once it has enough vertical space", () => {
+    const scrollContainer = document.createElement("div");
+    const scrollRef = { current: scrollContainer };
+    const { result } = renderHook(() =>
+      usePullToRefresh({
+        enabled: true,
+        onRefresh: vi.fn().mockResolvedValue(undefined),
+        scrollRef,
+      }),
+    );
+    const indicator = document.createElement("div");
+    result.current.indicatorRef.current = indicator;
+
+    act(() => {
+      scrollContainer.dispatchEvent(createTouchEvent("touchstart", 100));
+      scrollContainer.dispatchEvent(createTouchEvent("touchmove", 150));
+    });
+
+    expect(indicator.style.opacity).toBe("1");
+  });
+
   it("tracks a pull when iOS reports a negative rubber-band scroll position", () => {
     const scrollContainer = document.createElement("div");
     scrollContainer.scrollTop = -1;
