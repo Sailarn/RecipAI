@@ -11,7 +11,13 @@ function getExtractor(): Promise<FeatureExtractionPipeline> {
     extractorPromise = pipeline(
       "feature-extraction",
       "Xenova/multilingual-e5-small",
-    );
+    ).catch((error) => {
+      // Drop the rejected singleton so a later request retries the load instead
+      // of being wedged by one transient first-load/download failure until the
+      // process restarts. Concurrent successful loads still share one promise.
+      extractorPromise = null;
+      throw error;
+    });
   }
   return extractorPromise;
 }
