@@ -112,13 +112,26 @@ export async function normalizeRecipeIngredients(
       });
       if (res.ok) {
         const data = (await res.json()) as {
-          matches: Array<string | null>;
+          matches?: Array<string | null>;
           degraded?: boolean;
         };
-        matches = data.matches;
-        degraded = data.degraded ?? false;
+        if (
+          Array.isArray(data.matches) &&
+          data.matches.length === pending.length
+        ) {
+          matches = data.matches;
+          degraded = data.degraded ?? false;
+        } else {
+          // Malformed or misaligned response — fall back to provisionals.
+          degraded = true;
+        }
+      } else {
+        // Non-2xx (rate limited, server error) — a degraded fallback, not a hit.
+        degraded = true;
       }
     } catch (caughtError) {
+      // Network/parse failure — degrade to provisionals rather than report a hit.
+      degraded = true;
       logger.error("[normalize] embed-match error:", caughtError);
     }
 

@@ -368,6 +368,28 @@ describe("normalizeRecipeIngredients", () => {
       ).resolves.not.toThrow();
 
       expect(mockDbIngredientsPut).toHaveBeenCalled();
+      expect(mockTrackEvent).toHaveBeenCalledWith("embed_match", {
+        total: 1,
+        textMatched: 0,
+        embedMatched: 0,
+        provisionalCreated: 1,
+        degraded: true,
+      });
+    });
+
+    it("marks degraded and creates a provisional on a non-OK response", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
+
+      await normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]);
+
+      expect(mockDbIngredientsPut).toHaveBeenCalled();
+      expect(mockTrackEvent).toHaveBeenCalledWith("embed_match", {
+        total: 1,
+        textMatched: 0,
+        embedMatched: 0,
+        provisionalCreated: 1,
+        degraded: true,
+      });
     });
   });
 });
