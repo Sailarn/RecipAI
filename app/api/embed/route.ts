@@ -1,29 +1,33 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
 import { embedLocalOnly } from "@/lib/embed";
+import { embedRequestSchema } from "@/lib/embed/request-schemas";
 import { log } from "@/lib/telemetry";
 
 export async function POST(req: NextRequest) {
+  // Fail closed: an unset or empty secret rejects every caller rather than
+  // leaving the raw model endpoint public. The only legitimate caller is the
+  // http provider, which always sends the configured secret.
   const secret = process.env.EMBED_SHARED_SECRET ?? "";
-  if (secret && req.headers.get("x-embed-secret") !== secret) {
+  if (!secret || req.headers.get("x-embed-secret") !== secret) {
     return ApiError.unauthorized();
   }
 
-  let body: { texts?: string[]; prefix?: "query" | "passage" };
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
     return ApiError.invalidBody();
   }
-  if (!Array.isArray(body.texts) || body.texts.length === 0) {
-    return ApiError.badRequest("texts required");
-  }
+  const parsed = embedRequestSchema.safeParse(raw);
+  if (!parsed.success) return ApiError.invalidBody();
+  const { texts, prefix = "query" } = parsed.data;
 
   const startedAt = Date.now();
   try {
-    const vectors = await embedLocalOnly(body.texts, body.prefix ?? "query");
+    const vectors = await embedLocalOnly(texts, prefix);
     log("info", "embed_raw_served", {
-      count: body.texts.length,
+      count: texts.length,
       ms: Date.now() - startedAt,
     });
     return NextResponse.json({ vectors });

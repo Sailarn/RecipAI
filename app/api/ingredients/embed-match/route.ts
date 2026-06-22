@@ -1,22 +1,29 @@
+import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
+import { auth } from "@/lib/auth/auth";
 import { nearestVocab } from "@/lib/db/vocab-vector-search";
 import { EmbedUnavailable, embed } from "@/lib/embed";
+import { embedMatchRequestSchema } from "@/lib/embed/request-schemas";
+import { enforceEmbedRateLimit } from "@/lib/rate-limit";
 import { log } from "@/lib/telemetry";
 
-type Item = { item: string; ua?: string | null };
-
 export async function POST(req: NextRequest) {
-  let body: { items?: Item[] };
+  // Public route. Signed-in callers get the higher limit; everyone is capped so
+  // model inference + pgvector work can't be driven without bound.
+  const session = await auth.api.getSession({ headers: await headers() });
+  const limited = await enforceEmbedRateLimit(req, session?.user.id);
+  if (limited) return limited;
+
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
     return ApiError.invalidBody();
   }
-  const items = body.items;
-  if (!Array.isArray(items) || items.length === 0) {
-    return ApiError.badRequest("items required");
-  }
+  const parsed = embedMatchRequestSchema.safeParse(raw);
+  if (!parsed.success) return ApiError.invalidBody();
+  const { items } = parsed.data;
 
   const startedAt = Date.now();
   let vectors: number[][];

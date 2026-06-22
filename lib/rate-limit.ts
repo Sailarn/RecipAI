@@ -1,6 +1,6 @@
 import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { PARSE_RATE_LIMIT } from "@/lib/api-limits";
+import { EMBED_RATE_LIMIT, PARSE_RATE_LIMIT } from "@/lib/api-limits";
 import { redis } from "@/lib/redis";
 import { log, trackEvent } from "@/lib/telemetry";
 
@@ -66,6 +66,36 @@ export async function enforceParseRateLimit(
   try {
     const result = await rateLimit(
       `parse:${clientKey(req, userId)}`,
+      limit,
+      windowSeconds,
+    );
+    if (!result.allowed) {
+      const callerType = userId ? "user" : "anon";
+      log("warn", "rate_limit_hit", { caller_type: callerType });
+      trackEvent("rate_limit_hit", { caller_type: callerType });
+      return ApiError.rateLimited(result.resetSeconds);
+    }
+  } catch (error) {
+    ApiError.capture(error, req);
+  }
+  return null;
+}
+
+/**
+ * Enforce the embedding-match limit for the public embed routes. Returns a 429
+ * response when over the limit, or null to proceed. Fails open (allows) when
+ * Redis is unavailable, capturing the error — availability over strict limiting.
+ */
+export async function enforceEmbedRateLimit(
+  req: Request,
+  userId?: string,
+): Promise<NextResponse | null> {
+  const { limit, windowSeconds } = userId
+    ? EMBED_RATE_LIMIT.USER
+    : EMBED_RATE_LIMIT.ANON;
+  try {
+    const result = await rateLimit(
+      `embed:${clientKey(req, userId)}`,
       limit,
       windowSeconds,
     );
