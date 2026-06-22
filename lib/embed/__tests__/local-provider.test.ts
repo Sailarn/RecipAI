@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmbedProvider } from "../types";
 
 const { pipelineMock } = vi.hoisted(() => ({ pipelineMock: vi.fn() }));
-vi.mock("@huggingface/transformers", () => ({ pipeline: pipelineMock }));
+vi.mock("@huggingface/transformers", () => ({
+  pipeline: pipelineMock,
+  env: {},
+}));
 
 async function freshLocalProvider(): Promise<EmbedProvider> {
   vi.resetModules();

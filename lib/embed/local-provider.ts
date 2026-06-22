@@ -1,8 +1,17 @@
 import {
+  env,
   type FeatureExtractionPipeline,
   pipeline,
 } from "@huggingface/transformers";
 import type { EmbedPrefix, EmbedProvider } from "./types";
+
+// Cache the model outside node_modules when EMBED_MODEL_CACHE_DIR is set, so a
+// deploy's `bun install` (which rebuilds node_modules) doesn't wipe it and force
+// a ~50s re-download on the next cold load. Defaults to the package's in-package
+// cache when unset.
+if (process.env.EMBED_MODEL_CACHE_DIR) {
+  env.cacheDir = process.env.EMBED_MODEL_CACHE_DIR;
+}
 
 let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
 
