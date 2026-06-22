@@ -138,6 +138,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
               errors={errors}
               setValue={setValue}
               locale={locale}
+              canonicalIngredientIds={recipe?.canonicalIngredientIds}
             />
           )}
 

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { VocabularyIngredient } from "@/lib/db/schema";
-import { buildVocabNameIndex, localizeIngredientItem } from "../localize-item";
+import {
+  buildVocabIdIndex,
+  buildVocabNameIndex,
+  localizeIngredientItem,
+} from "../localize-item";
 
 const FLOUR: VocabularyIngredient = {
   id: "all-purpose-flour",
@@ -22,7 +26,17 @@ const SALT: VocabularyIngredient = {
   status: "confirmed",
 };
 
-const index = buildVocabNameIndex([FLOUR, SALT]);
+const WATER: VocabularyIngredient = {
+  id: "water",
+  en: "water",
+  ua: "вода",
+  category: "other",
+  aliasesEn: [],
+  aliasesUa: [],
+  status: "confirmed",
+};
+
+const index = buildVocabNameIndex([FLOUR, SALT, WATER]);
 
 describe("buildVocabNameIndex", () => {
   it("indexes the english name, ukrainian name, and aliases of both languages", () => {
@@ -61,5 +75,26 @@ describe("localizeIngredientItem", () => {
     expect(localizeIngredientItem("dragonfruit", index, "ua")).toBe(
       "dragonfruit",
     );
+  });
+
+  it("prefers the canonical entry for a descriptive phrase the string-match misses", () => {
+    expect(localizeIngredientItem("lukewarm water", index, "ua", WATER)).toBe(
+      "вода",
+    );
+  });
+
+  it("falls back to the string match when no canonical entry is given", () => {
+    expect(localizeIngredientItem("flour", index, "ua")).toBe(
+      "борошно універсальне",
+    );
+  });
+});
+
+describe("buildVocabIdIndex", () => {
+  it("indexes entries by their id", () => {
+    const byId = buildVocabIdIndex([FLOUR, WATER]);
+
+    expect(byId.get("all-purpose-flour")).toBe(FLOUR);
+    expect(byId.get("water")).toBe(WATER);
   });
 });

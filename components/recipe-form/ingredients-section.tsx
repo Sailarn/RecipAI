@@ -20,7 +20,11 @@ import { Input } from "@/components/ui";
 import type { Locale } from "@/i18n/config";
 import { db } from "@/lib/db/db";
 import { cn } from "@/lib/utils";
-import { buildVocabNameIndex, localizeIngredientItem } from "./localize-item";
+import {
+  buildVocabIdIndex,
+  buildVocabNameIndex,
+  localizeIngredientItem,
+} from "./localize-item";
 import type { RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {
@@ -29,6 +33,10 @@ interface IngredientsSectionProps {
   errors: FieldErrors<RecipeFormData>;
   setValue: UseFormSetValue<RecipeFormData>;
   locale: Locale;
+  // Resolved canonical id per ingredient (index-aligned with the recipe's
+  // ingredients on load), so descriptive phrases localize to their canonical
+  // name like the servings calculator does.
+  canonicalIngredientIds?: string[];
 }
 
 const colLabelClass =
@@ -42,6 +50,7 @@ export function IngredientsSection({
   errors,
   setValue,
   locale,
+  canonicalIngredientIds,
 }: IngredientsSectionProps) {
   const t = useTranslations("recipeForm");
   const { fields, append, remove } = useFieldArray({
@@ -52,6 +61,7 @@ export function IngredientsSection({
 
   const vocab = useLiveQuery(() => db.ingredients.toArray(), []);
   const vocabIndex = useMemo(() => buildVocabNameIndex(vocab ?? []), [vocab]);
+  const vocabById = useMemo(() => buildVocabIdIndex(vocab ?? []), [vocab]);
 
   // Vocab ids already used by a row in this recipe — the picker marks these as
   // chosen (still pickable) so you can see what's already in the recipe.
@@ -155,6 +165,9 @@ export function IngredientsSection({
                             itemField.value,
                             vocabIndex,
                             locale,
+                            vocabById.get(
+                              canonicalIngredientIds?.[index] ?? "",
+                            ),
                           )
                         : t("ingredientName")}
                     </button>
