@@ -15,6 +15,13 @@ export type TelemetryEvents = {
   parse_reviewed: undefined;
   recipe_saved: { source: "parse" | "edit" };
   ingredients_normalized: { matched: number; total: number };
+  embed_match: {
+    total: number;
+    textMatched: number;
+    embedMatched: number;
+    provisionalCreated: number;
+    degraded: boolean;
+  };
   // recipe lifecycle (recipe edits are recipe_saved {source:"edit"} — no separate event)
   recipe_viewed: { via: "list" | "search" | "collection" | "deep_link" };
   recipe_deleted: undefined;
