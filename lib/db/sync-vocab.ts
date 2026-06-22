@@ -22,8 +22,9 @@ function deltaSince(): string | undefined {
 
 // Pull the shared ingredient vocabulary (delta-synced via the public
 // GET /api/ingredients) into Dexie. Runs for everyone — anonymous users
-// included — so both Fuse and embedding matching have local vocab to work
-// with. Embeddings ride along in each row. No auth required; the GET is public.
+// included — so the client Fuse text-match has local names/aliases to work
+// with. Vectors are not synced; embedding matching runs server-side via
+// /api/ingredients/embed-match. No auth required; the GET is public.
 //
 // A new app release forces a full re-pull (the watermark is ignored): this
 // heals any vocab row that went stale under a previous build — e.g. a missed

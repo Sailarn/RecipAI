@@ -33,6 +33,7 @@ export async function runChain(
 ): Promise<number[][]> {
   for (let index = 0; index < providers.length; index++) {
     const provider = providers[index];
+    const startedAt = Date.now();
     try {
       const vectors = await provider.embed(texts, prefix);
       if (!isValidVectorBatch(vectors, texts.length)) {
@@ -44,12 +45,14 @@ export async function runChain(
         provider: provider.name,
         depth: index,
         count: texts.length,
+        ms: Date.now() - startedAt,
       });
       return vectors;
     } catch (caughtError) {
       log("warn", "embed_provider_failed", {
         provider: provider.name,
         depth: index,
+        ms: Date.now() - startedAt,
         error:
           caughtError instanceof Error
             ? caughtError.message

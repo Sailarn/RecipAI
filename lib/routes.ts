@@ -33,7 +33,6 @@ export const api = {
   collectionsSync: "/api/collections/sync",
   ingredients: "/api/ingredients",
   ingredientsEnrich: "/api/ingredients/enrich",
-  embed: "/api/embed",
   ingredientsEmbedMatch: "/api/ingredients/embed-match",
   pantry: "/api/pantry",
   pushSubscribe: "/api/push/subscribe",

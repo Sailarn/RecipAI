@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
     );
   } catch (caughtError) {
     if (caughtError instanceof EmbedUnavailable) {
-      log("warn", "embed_match_degraded", { count: items.length });
+      log("warn", "embed_match_degraded", {
+        count: items.length,
+        ms: Date.now() - startedAt,
+      });
       return NextResponse.json({
         matches: items.map(() => null),
         degraded: true,
