@@ -1,6 +1,6 @@
 # Ingredient Vocabulary
 
-How parsed ingredient strings are matched to a shared canonical vocabulary — fuzzy matching, on-device embeddings, and AI enrichment.
+How parsed ingredient strings are matched to a shared canonical vocabulary — local fuzzy matching, server-side embeddings, pgvector search, and AI enrichment.
 
 ---
 
@@ -32,7 +32,7 @@ graph TD
     B -->|yes| U[unrecognizedIngredients]
     B -->|no| C{Fuse.js fuzzy match<br/>en + ua + aliases}
     C -->|hit| ID[canonicalIngredientIds]
-    C -->|miss| D{Embedding match<br/>cosine vs vocab embeddings}
+    C -->|miss| D{Server embed-match<br/>pgvector top-2}
     D -->|hit| ID
     D -->|miss| E[Create provisional entry]
     E --> F[AI enrichment - signed-in only]
@@ -43,9 +43,9 @@ graph TD
 
 **2. Fuse.js fuzzy match.** A Fuse index (threshold 0.2) is built over every confirmed entry's `en`, `ua`, and both alias arrays, from the **local Dexie copy** of the vocabulary. Parenthesised text is stripped first. If the full string misses, each token longer than 3 chars is tried individually — handling phrases like "кетчупу Торчин для дітей" → "кетчупу" → ketchup — with a guard that the matched alias is at most 2 words, so a common word can't hit a long alias phrase.
 
-**3. Embedding match.** Strings that survive Fuse are embedded on-device (see below) and compared by cosine similarity against the vocabulary embeddings stored on the **local Dexie copy** of each entry (the `embedding` field, delta-synced from the server — see [delivery](#how-embeddings-are-delivered)). A match is accepted only when the best score is **≥ 0.82** and leads the runner-up by **≥ 0.08** — ambiguous matches fall through rather than guess.
+**3. Embedding match.** Fuse misses are batched to `POST /api/ingredients/embed-match`. The server embeds each query through the configured provider chain, then asks Postgres for the two nearest confirmed vocabulary vectors using pgvector cosine distance. A match is accepted only when the best similarity is **≥ 0.82** and leads the runner-up by **≥ 0.08** — ambiguous matches fall through rather than guess. If every embedding provider is unavailable, the route returns HTTP 200 with `degraded: true` and null matches so normalization continues through provisional creation.
 
-**4. Provisional + enrichment.** Anything still unmatched becomes a new provisional entry (deduplicated by raw text), written to Dexie immediately and upserted to Postgres via `POST /api/ingredients`. In parallel, `POST /api/ingredients/enrich` asks the AI to fill in the canonical name, Ukrainian translation, category, and aliases — on success the entry flips to `confirmed`.
+**4. Provisional + enrichment.** Anything still unmatched becomes a new provisional entry (deduplicated by raw text), written to Dexie immediately and upserted to Postgres via `POST /api/ingredients`. In parallel, `POST /api/ingredients/enrich` asks the AI to fill in the canonical name, Ukrainian translation, category, and aliases. Before confirming the entry, the route computes its `passage:` vector through the same server provider chain and stores it in Postgres. Embedding failure does not block enrichment: the row is confirmed with a null vector so a later repair pass can find it.
 
 The result is written to the recipe (`canonicalIngredientIds`, `unrecognizedIngredients`) in Dexie and fire-and-forget synced to Postgres.
 
@@ -56,24 +56,22 @@ The result is written to the recipe (`canonicalIngredientIds`, `unrecognizedIngr
 
 ---
 
-## The on-device embedding model
+## Server-side embedding and vector search
 
-Embeddings are computed **client-side** — no API call, works offline once downloaded:
+The browser no longer downloads or runs an embedding model. `lib/embed/` owns an ordered provider chain configured through `EMBED_PROVIDERS`:
 
-- **Model:** `Xenova/multilingual-e5-small` via `@huggingface/transformers`, running in a Web Worker (`lib/parse-recipe/embed-worker.ts`) so the main thread never blocks. E5 convention: queries are embedded with a `query:` prefix, the vocabulary with `passage:` — the worker takes a `prefix` param so the same pipeline serves both.
-- **Consent first.** The model is a ~117 MB download, so it is gated behind an explicit opt-in: `EmbedConsentModal` (mounted in `client-shell`) asks once per device and stores the answer in `localStorage` (`embedModelConsent`). Without consent, `getIngredientEmbeddings` throws `EmbedConsentRequired` and the pipeline silently skips stage 3.
-- **Manual re-entry.** If the user declines ("Not now"), the notifications bell sheet (`ParsedRecipesSheet`) surfaces a "Download model" prompt whenever the model is not yet ready (`isEmbedModelReady()` is false). Tapping it grants consent and pre-warms the worker — the only in-app way back to the download after skipping the modal.
-- **Progress UX.** The worker reports download progress via `window` events; `use-embed-download.ts` exposes them as a hook (`idle` / `downloading` / `done`) for the notifications bell. After consent is granted the worker is pre-warmed so the download starts immediately.
-- Embeddings are L2-normalized, so the dot product *is* the cosine similarity. Worker calls time out after 120 s.
+- `local` loads `Xenova/multilingual-e5-small` in-process through `@huggingface/transformers`. The Pi uses this provider.
+- `http:<base-url>` calls `<base-url>/api/embed` with `EMBED_SHARED_SECRET`. Vercel points to the Pi through the Cloudflare Tunnel.
+- Providers are tried in order. Each HTTP provider has a 10-second timeout; failures are logged before the chain advances.
+- If the chain is exhausted, `EmbedUnavailable` produces the explicit degraded normalization path described above.
 
-### How embeddings are delivered
+E5 prefixes remain strict: parsed ingredient strings use `query:`, while confirmed vocabulary names use `passage:`. Both produce normalized 384-dimensional vectors in the same vector space.
 
-Vocabulary embeddings live in the `embedding` (jsonb) column on the `ingredients` row — there is **no static file**. The DB is a dumb carrier: matching stays client-side, no pgvector. Each vector reaches the client inside the existing delta sync (`GET /api/ingredients?since=`) and is stored on the Dexie row, so `getVocabEmbeddings` reads them straight from Dexie.
+### Vector storage
 
-Vectors are produced two ways, both with e5 (`passage:` prefix) so they share a vector space with `query:`-embedded ingredient strings:
+Vocabulary embeddings live only in Postgres, in `ingredients.embedding` (`vector(384)`). `GET /api/ingredients` deliberately omits them, so the device sync contains names, aliases, categories, and statuses but not vectors. The optional Dexie `VocabularyIngredient.embedding` property is dormant and retained only to avoid a client schema migration.
 
-- **At runtime:** after a provisional is enriched to `confirmed`, the enriching device computes its `passage: <canonical en>` embedding on-device and writes it locally plus best-effort `PATCH /api/ingredients/[id]` (write-once — the server only sets the column when it is still null). Gated behind model consent; silently skipped otherwise.
-- **Backfill:** `bun scripts/backfill-embeddings.ts` runs e5 in Node over every confirmed row missing an embedding and writes the vector directly via Drizzle. Mechanical and deterministic (no AI). Required so pre-existing rows — which no client will ever re-enrich — gain vectors. `bun scripts/test-vocab-coverage.ts` checks Fuse/token match quality (it does not touch embeddings).
+`nearestVocab` performs an exact top-two pgvector search over confirmed, non-null rows. The `<=>` operator returns cosine **distance**, so the query converts it to similarity with `1 - distance` before applying the `0.82` threshold and `0.08` runner-up gap. No ANN index is needed at the current vocabulary size.
 
 ---
 
@@ -82,9 +80,9 @@ Vectors are produced two ways, both with e5 (`passage:` prefix) so they share a 
 | Capability | Anonymous | Signed in |
 |---|---|---|
 | Vocabulary in Dexie (Fuse matching) | ✓ — pulled on startup via public `GET /api/ingredients` | ✓ delta-synced via the same route |
-| Embedding matching | ✓ (after model consent) — embeddings ride along in the vocab rows | ✓ |
+| Server embedding matching | ✓ — public `embed-match` route | ✓ |
 | Provisional creation (local) | ✓ | ✓ |
 | Provisional upsert to server | ✗ | ✓ |
-| AI enrichment + embedding contribution | ✗ | ✓ (and stuck provisionals retry on login) |
+| AI enrichment + passage embedding | ✗ | ✓ (and stuck provisionals retry on login) |
 
-The vocab pull runs for everyone on startup (`useVocabSync` in `client-shell`), so anonymous users get both Fuse and embedding matching against the full confirmed vocabulary. What they still miss is server-side persistence of the provisionals they create and AI enrichment of new entries — those stay login-gated. The full rationale is in [Local Storage & Sync](local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
+The vocab pull runs for everyone on startup (`useVocabSync` in `client-shell`), so anonymous users get local Fuse matching and can use the public server embed-match route. What they still miss is server-side persistence of the provisionals they create and AI enrichment of new entries — those stay login-gated. The full rationale is in [Local Storage & Sync](local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).

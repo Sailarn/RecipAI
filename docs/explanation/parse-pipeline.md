@@ -174,4 +174,22 @@ Photo parsing remains synchronous, but each request also creates and completes a
 
 ## After parsing: ingredient normalization
 
-A `ParsedRecipe` is not the end of the line — when it is saved, every ingredient string is matched against the canonical vocabulary (fuzzy match → on-device embeddings → provisional creation + AI enrichment) to populate `canonicalIngredientIds`. That pipeline has its own page: [Ingredient Vocabulary](ingredient-vocabulary.md).
+A `ParsedRecipe` is not the end of the line. When it is saved, each ingredient is matched against the canonical vocabulary to populate `canonicalIngredientIds`:
+
+```mermaid
+graph LR
+    A[Parsed ingredient] --> B{Client Fuse text match}
+    B -->|hit| C[Canonical ingredient id]
+    B -->|miss| D[POST /api/ingredients/embed-match]
+    D --> E[Embedding provider chain]
+    E --> F[Postgres pgvector top-2 search]
+    F -->|confident match| C
+    F -->|no match or degraded| G[Create provisional]
+    G --> H[AI enrichment]
+    H --> I[Server passage embedding]
+    I --> J[Store vector in Postgres]
+```
+
+Fuse matching remains client-side against the confirmed names and aliases stored in Dexie. Only Fuse misses are sent to `POST /api/ingredients/embed-match`, where the server embeds the query through the configured provider chain and searches Postgres with pgvector. If every embedding provider is unavailable, the route returns a normal degraded response and the client continues through provisional creation instead of failing the recipe save.
+
+AI enrichment also computes the confirmed canonical name's `passage:` embedding server-side. The former on-device model, worker, download consent, and local cosine scan have been removed. See [Ingredient Vocabulary](ingredient-vocabulary.md) for the full matching and enrichment flow.

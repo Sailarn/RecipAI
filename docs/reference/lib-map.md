@@ -17,12 +17,13 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-recipe/images.ts` | Hero image and step image extraction from HTML. |
 | `lib/parse-recipe/parse-history-entry.ts` | Helpers to build `ParseHistoryEntry` from job results. |
 | `lib/parse-recipe/friendly-parse-error.ts` | Maps raw errors to user-facing strings. |
-| `lib/parse-recipe/normalize-ingredients.ts` | Ingredient normalization: Fuse.js fuzzy match → embedding match → provisional creation. |
+| `lib/parse-recipe/normalize-ingredients.ts` | Ingredient normalization: local Fuse.js match → server embed-match batch → provisional creation. |
 | `lib/parse-recipe/enrich-ingredient.ts` | Triggers server-side AI enrichment for provisional ingredients. |
-| `lib/parse-recipe/embed-client.ts` | Main-thread API for the embedding worker. Gated on download consent; relays progress via window events. |
-| `lib/parse-recipe/embed-worker.ts` | Web Worker that embeds ingredient text with `Xenova/multilingual-e5-small` (`@huggingface/transformers`). |
-| `lib/parse-recipe/embed-consent.ts` | localStorage consent flag for downloading the embedding model. |
-| `lib/parse-recipe/use-embed-download.ts` | Hook tracking embedding-model download progress (`idle` / `downloading` / `done`). |
+| `lib/embed/index.ts` | Server embedding entry point. Parses `EMBED_PROVIDERS`, assembles the ordered local/HTTP chain, and exposes `embed` / `embedLocalOnly`. |
+| `lib/embed/chain.ts` | Provider fallback loop and structured success/failure logs. |
+| `lib/embed/local-provider.ts` | Lazy in-process e5-small provider used on the Pi. |
+| `lib/embed/http-provider.ts` | Remote `/api/embed` provider with shared-secret header and per-host timeout. |
+| `lib/db/vocab-vector-search.ts` | Exact pgvector top-two search plus similarity threshold and runner-up-gap decision. |
 | `lib/parse-recipe/save-photo-result.ts` | Saves a photo parse result: history entry, Dexie save, image upload. |
 | `lib/scrapers/phantomjs.ts` | Primary scraper — JS-rendered HTML via PhantomJsCloud. |
 | `lib/scrapers/scrape-do.ts` | Fallback scraper via scrape.do. |

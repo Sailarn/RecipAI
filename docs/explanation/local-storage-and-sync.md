@@ -54,9 +54,9 @@ When a parsed ingredient has no match in the vocabulary, the app creates a **pro
 
 - The server upsert (`POST /api/ingredients`) goes through `syncFetch`, which is a no-op when signed out.
 - AI enrichment (`enrichIngredient` in `lib/parse-recipe/enrich-ingredient.ts`) early-returns when signed out, so the entry never gets translated, categorised, or aliased — it stays `provisional` with the raw parsed text as its name.
-- The write routes (`POST /api/ingredients`, `POST /api/ingredients/enrich`, `PATCH /api/ingredients/[id]`) require a session. Only `GET /api/ingredients` (confirmed vocabulary download, embeddings included) is public.
+- The write routes (`POST /api/ingredients`, `POST /api/ingredients/enrich`) require a session. `GET /api/ingredients` (confirmed vocabulary without vectors) and `POST /api/ingredients/embed-match` are public.
 
-This is **intentional**, not a bug: AI enrichment costs money per call, and the shared vocabulary is a curated dataset — both are reserved for signed-in users as a login incentive. Anonymous users **do** get the full vocabulary, though: the public `GET /api/ingredients` is pulled into Dexie on startup for everyone (`useVocabSync`), so both [Fuse fuzzy matching and embedding matching](ingredient-vocabulary.md#signed-in-vs-anonymous) work signed out (embeddings ride along in the vocab rows — no static file). What anonymous users miss is server-side persistence and enrichment of the new provisional entries they create.
+This is **intentional**, not a bug: AI enrichment costs money per call, and the shared vocabulary is a curated dataset — both are reserved for signed-in users as a login incentive. Anonymous users **do** get the confirmed vocabulary in Dexie for local Fuse matching, and Fuse misses can use the public [server-side embedding matcher](ingredient-vocabulary.md#signed-in-vs-anonymous). Vectors stay in Postgres and never sync to the browser. What anonymous users miss is server-side persistence and enrichment of the new provisional entries they create.
 
 The limitation heals on login: `syncIngredients` (`hooks/use-sync-on-login.ts`) re-submits stuck provisional entries to `/api/ingredients/enrich` (up to 3 retries, 5-minute backoff), so vocabulary created while anonymous gets enriched and confirmed once the user signs in.
 

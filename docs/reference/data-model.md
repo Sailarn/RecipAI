@@ -68,7 +68,7 @@ interface VocabularyIngredient {
   status?: "provisional" | "confirmed" | "failed";
   retryCount?: number;
   lastAttemptAt?: Date | null;
-  embedding?: number[] | null;   // e5 passage vector (384), delta-synced from Postgres
+  embedding?: number[] | null;   // dormant legacy field; vectors are server-only
 }
 ```
 
@@ -170,11 +170,13 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `error` | text | Failure message when failed |
 | `created_at`, `updated_at` | timestamp | |
 
-**Result cache.** `POST /api/parse-queue` looks up a prior `done` job with the same `normalized_url` + current `parser_version` and a complete result (at least one ingredient and one instruction); on a hit it clones that result into a new `done` job (no Gemini call). See [parse-pipeline](../explanation/parse-pipeline.md#parse-queue) and [gotchas](gotchas.md#database).
+**Result cache.** `POST /api/parse-queue` looks up a prior `done` job with the same `normalized_url` + current `parser_version` and a complete result (at least one ingredient and one instruction); on a hit it clones that result into a new `done` job (no Gemini call). See [parse-pipeline](../explanation/parse-pipeline.md#parse-queue-appapiparse-queue) and [gotchas](gotchas.md#database).
 
 ### `ingredients`
 
-Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`, `embedding` (jsonb, nullable — the e5 `passage:` vector, delivered to clients in the `GET` delta sync and matched client-side; no pgvector). Migration `0014`. `created_at` / `updated_at` are `timestamptz` (migration `0016`) — the delta-sync watermark compares `updated_at`, so a timezone-naive column could skip a boundary row (see [gotchas](gotchas.md#database)).
+Global vocabulary shared across all users. `id`, `en`, `ua`, `category`, `aliases_en` (jsonb), `aliases_ua` (jsonb), `status` (`provisional` / `confirmed` / `failed`), `retry_count`, `last_attempt_at`, and `embedding` (`vector(384)`, nullable — the e5 `passage:` vector used by server-side pgvector matching). The vector extension and column conversion are migration `0019`; existing JSON vectors are cast in place. No ANN index is used at the current vocabulary size, so matching performs an exact cosine-distance scan.
+
+Vectors are not returned by `GET /api/ingredients` and are not synced to Dexie. `VocabularyIngredient.embedding` remains as a dormant optional client field to avoid an IndexedDB schema migration, but runtime matching never reads it. `created_at` / `updated_at` are `timestamptz` (migration `0016`) — the delta-sync watermark compares `updated_at`, so a timezone-naive column could skip a boundary row (see [gotchas](gotchas.md#database)).
 
 ### `pantry`
 

@@ -69,10 +69,11 @@ Both routes accept either a valid session **or** a short-lived upload token (min
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary ingredients, including each entry's `embedding`. Supports `?since=<ISO>` for delta sync. |
+| `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary names, aliases, categories, and statuses. Vectors are server-only and omitted. Supports `?since=<ISO>` for delta sync. |
 | `POST` | `/api/ingredients` | Session required | Create a provisional vocabulary entry (`{ id, en, ua?, category? }`). Conflict-safe (`onConflictDoNothing`). |
-| `POST` | `/api/ingredients/enrich` | Session required | Enrich a provisional ingredient via AI (fills `en`, `ua`, `category`, aliases). |
-| `PATCH` | `/api/ingredients/[id]` | Session required | Contribute the on-device `embedding` for an entry (`{ embedding: number[384] }`). Write-once — only sets the column when it is still null. |
+| `POST` | `/api/ingredients/embed-match` | None (public) | Batch-match `{ items: [{ item, ua? }] }` through the embedding provider chain and pgvector. Returns `{ matches, degraded }`; provider exhaustion is HTTP 200 with null matches and `degraded: true`. |
+| `POST` | `/api/ingredients/enrich` | Session required | Enrich a provisional ingredient via AI, compute its server-side `passage:` vector, and confirm it. Embedding failure leaves a detectable null vector without blocking enrichment. |
+| `POST` | `/api/embed` | `x-embed-secret` | Raw e5-small compute endpoint used between embedding hosts. Accepts `{ texts, prefix }` and returns `{ vectors }`; it does not query or store application data. |
 
 For anonymous users the `POST` routes are skipped client-side — provisional entries stay in local Dexie only. See [Local storage & sync](../explanation/local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
 

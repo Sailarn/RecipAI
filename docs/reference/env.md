@@ -23,6 +23,19 @@ All variables live in `.env.local` (never committed). Copy `.env.example` as a s
 
 ---
 
+## Embeddings
+
+The e5-small model runs on server infrastructure, never in the browser. Every deployment that performs ingredient matching needs an ordered provider chain.
+
+| Variable | Required | Description |
+|---|---|---|
+| `EMBED_PROVIDERS` | Yes | Ordered comma-separated provider chain. `local` loads `Xenova/multilingual-e5-small` in-process; `http:<base-url>` calls `<base-url>/api/embed`, with a 10-second timeout before trying the next entry. Use `local` on the Pi and `http:https://recipai.pp.ua` on Vercel. |
+| `EMBED_SHARED_SECRET` | Yes | Shared secret sent as `x-embed-secret` between HTTP providers and `/api/embed`. Use the same strong value on the Pi and Vercel. |
+
+If the configured chain is empty or every provider fails, ingredient embed matching degrades to provisional creation. Restart the server after changing either variable.
+
+---
+
 ## Scraping
 
 | Variable | Required | Description |
