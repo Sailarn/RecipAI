@@ -8,8 +8,8 @@ const {
   mockDbIngredientsPut,
   mockDbRecipesUpdate,
   mockSyncUpdate,
-  mockGetIngredientEmbeddings,
   mockEnrichIngredient,
+  mockTrackEvent,
 } = vi.hoisted(() => {
   const filterResult = { toArray: vi.fn(), first: vi.fn() };
   return {
@@ -18,8 +18,8 @@ const {
     mockDbIngredientsPut: vi.fn(),
     mockDbRecipesUpdate: vi.fn(),
     mockSyncUpdate: vi.fn(),
-    mockGetIngredientEmbeddings: vi.fn(),
     mockEnrichIngredient: vi.fn(),
+    mockTrackEvent: vi.fn(),
   };
 });
 
@@ -39,12 +39,12 @@ vi.mock("@/lib/db/supabase-sync", () => ({
   syncUpdate: mockSyncUpdate,
 }));
 
-vi.mock("@/lib/parse-recipe/embed-client", () => ({
-  getIngredientEmbeddings: mockGetIngredientEmbeddings,
-}));
-
 vi.mock("@/lib/parse-recipe/enrich-ingredient", () => ({
   enrichIngredient: mockEnrichIngredient,
+}));
+
+vi.mock("@/lib/telemetry", () => ({
+  trackEvent: mockTrackEvent,
 }));
 
 // Vocab fixture — size 2, used to build the Fuse index.
@@ -78,8 +78,8 @@ beforeEach(() => {
   mockDbIngredientsPut.mockResolvedValue(undefined);
   mockDbRecipesUpdate.mockResolvedValue(undefined);
 
-  // Default vocab (garlic + onion) carries no embedding field, so the
-  // embedding tier is skipped — only the tests below opt in by adding one.
+  // Default fetch: non-ok response so pending items fall through to provisional
+  globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
 
   // Enrich is fire-and-forget — default to resolving
   mockEnrichIngredient.mockResolvedValue(undefined);
@@ -249,25 +249,25 @@ describe("normalizeRecipeIngredients", () => {
       expect(updates.canonicalIngredientIds).toHaveLength(3);
     });
 
-    it("sends all embedding-pending items to getIngredientEmbeddings in a single call", async () => {
-      // Vocab carries an embedding so the embedding code path is entered
-      mockFilterResult.toArray.mockResolvedValue([
-        { ...GARLIC, embedding: [1, ...Array(383).fill(0)] },
-        ONION,
-      ]);
-      // Return vectors orthogonal to garlic — both items fall to provisional
-      mockGetIngredientEmbeddings.mockResolvedValue([
-        [0, 1, ...Array(382).fill(0)],
-        [0, 1, ...Array(382).fill(0)],
-      ]);
+    it("sends all embedding-pending items to the embed-match route in a single fetch call", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          matches: [null, null],
+          degraded: false,
+        }),
+      });
 
       await normalizeRecipeIngredients("recipe-1", [
         { item: "xanthan gum" },
         { item: "carob powder" },
       ]);
 
-      expect(mockGetIngredientEmbeddings).toHaveBeenCalledOnce();
-      expect(mockGetIngredientEmbeddings.mock.calls[0][0]).toHaveLength(2);
+      expect(globalThis.fetch).toHaveBeenCalledOnce();
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
+      );
+      expect(body.items).toHaveLength(2);
     });
   });
 
@@ -306,55 +306,48 @@ describe("normalizeRecipeIngredients", () => {
     });
   });
 
-  // Embedding tests last — they populate embeddingCache (module-level), keyed
-  // by the count of embedded entries so the tests above (vocab without an
-  // embedding field → size 0) are unaffected.
-  describe("embedding tier", () => {
-    // Unit vector (L2-normalized): dot product with itself is 1.0.
-    const unitVector = [1, ...Array(383).fill(0)];
-    const GARLIC_WITH_EMBEDDING = {
-      ...GARLIC,
-      embedding: unitVector,
-    };
+  describe("embed-match route", () => {
+    it("uses the embed-match route for items that miss text-match", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          matches: ["garlic"],
+          degraded: false,
+        }),
+      });
 
-    it("matches a pending ingredient to the closest vocab embedding", async () => {
-      mockFilterResult.toArray.mockResolvedValue([
-        GARLIC_WITH_EMBEDDING,
-        ONION,
+      const result = await normalizeRecipeIngredients("recipe-1", [
+        { item: "xanthan gum" },
       ]);
-      // Query embedding identical to garlic's → cosine 1, far ahead of onion
-      // (which has no embedding and is absent from the vocab vectors).
-      mockGetIngredientEmbeddings.mockResolvedValue([unitVector]);
-
-      await normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]);
 
       const updates = mockDbRecipesUpdate.mock.calls[0][1];
       expect(updates.canonicalIngredientIds).toContain("garlic");
+      expect(result.matched).toBe(1);
+      expect(mockDbIngredientsPut).not.toHaveBeenCalled();
       expect(mockEnrichIngredient).not.toHaveBeenCalled();
     });
 
-    it("falls through to provisional when EmbedConsentRequired is thrown — does not propagate", async () => {
-      mockFilterResult.toArray.mockResolvedValue([
-        GARLIC_WITH_EMBEDDING,
-        ONION,
-      ]);
-      mockGetIngredientEmbeddings.mockRejectedValue(
-        new Error("EmbedConsentRequired"),
-      );
+    it("creates a provisional when the route degrades", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          matches: [null],
+          degraded: true,
+        }),
+      });
 
-      await expect(
-        normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]),
-      ).resolves.not.toThrow();
+      await normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]);
 
-      expect(mockDbIngredientsPut).toHaveBeenCalled();
+      // The route returned null — provisional is created and its id fills the slot
+      expect(mockDbIngredientsPut).toHaveBeenCalledOnce();
+      const entry = mockDbIngredientsPut.mock.calls[0][0];
+      expect(entry.status).toBe("provisional");
+      // enrichIngredient is fired for provisional items
+      expect(mockEnrichIngredient).toHaveBeenCalledOnce();
     });
 
-    it("falls through to provisional when the embedding client throws a generic error", async () => {
-      mockFilterResult.toArray.mockResolvedValue([
-        GARLIC_WITH_EMBEDDING,
-        ONION,
-      ]);
-      mockGetIngredientEmbeddings.mockRejectedValue(new Error("WASM crash"));
+    it("falls through to provisional when fetch throws", async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
       await expect(
         normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]),
