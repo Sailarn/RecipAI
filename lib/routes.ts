@@ -34,6 +34,8 @@ export const api = {
   ingredients: "/api/ingredients",
   ingredient: (id: string) => `/api/ingredients/${id}`,
   ingredientsEnrich: "/api/ingredients/enrich",
+  embed: "/api/embed",
+  ingredientsEmbedMatch: "/api/ingredients/embed-match",
   pantry: "/api/pantry",
   pushSubscribe: "/api/push/subscribe",
 } as const;
