@@ -325,6 +325,13 @@ describe("normalizeRecipeIngredients", () => {
       expect(result.matched).toBe(1);
       expect(mockDbIngredientsPut).not.toHaveBeenCalled();
       expect(mockEnrichIngredient).not.toHaveBeenCalled();
+      expect(mockTrackEvent).toHaveBeenCalledWith("embed_match", {
+        total: 1,
+        textMatched: 0,
+        embedMatched: 1,
+        provisionalCreated: 0,
+        degraded: false,
+      });
     });
 
     it("creates a provisional when the route degrades", async () => {
@@ -344,6 +351,13 @@ describe("normalizeRecipeIngredients", () => {
       expect(entry.status).toBe("provisional");
       // enrichIngredient is fired for provisional items
       expect(mockEnrichIngredient).toHaveBeenCalledOnce();
+      expect(mockTrackEvent).toHaveBeenCalledWith("embed_match", {
+        total: 1,
+        textMatched: 0,
+        embedMatched: 0,
+        provisionalCreated: 1,
+        degraded: true,
+      });
     });
 
     it("falls through to provisional when fetch throws", async () => {
