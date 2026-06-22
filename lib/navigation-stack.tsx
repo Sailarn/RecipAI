@@ -53,6 +53,7 @@ export function NavigationStackProvider({
 
   const entriesRef = useRef<StackEntry[]>([initialEntry]);
   const [entries, setEntries] = useState<StackEntry[]>([initialEntry]);
+  const programmaticPopPending = useRef(false);
 
   const updateEntries = useCallback((next: StackEntry[]) => {
     entriesRef.current = next;
@@ -113,7 +114,11 @@ export function NavigationStackProvider({
     const onPopState = () => {
       const prev = entriesRef.current;
       if (prev.length <= 1) return; // nothing to pop — let browser navigate
-      _nativePopPending = true;
+      if (programmaticPopPending.current) {
+        programmaticPopPending.current = false;
+      } else {
+        _nativePopPending = true;
+      }
       updateEntries(prev.slice(0, -1));
     };
     window.addEventListener("popstate", onPopState);
@@ -153,10 +158,9 @@ export function NavigationStackProvider({
   const pop = useCallback(() => {
     const prev = entriesRef.current;
     if (prev.length <= 1) return;
-    stackPushing.current = true;
-    history.pushState(null, "", prev[prev.length - 2].href);
-    updateEntries(prev.slice(0, -1));
-  }, [updateEntries]);
+    programmaticPopPending.current = true;
+    history.back();
+  }, []);
 
   const reset = useCallback(
     (href: string, element: React.ReactNode) => {

@@ -99,7 +99,7 @@ export function ParsedRecipesSheet() {
       </SheetTrigger>
       <SheetContent
         side="top"
-        className="max-h-[80vh] overflow-y-auto rounded-b-2xl"
+        className="max-h-[80vh] overflow-y-auto rounded-b-2xl pt-[env(safe-area-inset-top)] [&_[data-slot=sheet-close]]:top-[calc(env(safe-area-inset-top)+1rem)]"
         aria-describedby={undefined}
       >
         <SheetHeader className="mb-4">

@@ -142,6 +142,19 @@ describe("ParsedRecipesSheet", () => {
     expect(screen.getByRole("button", { name: /review/i })).toBeInTheDocument();
   });
 
+  it("keeps sheet content below the top safe area", async () => {
+    mockLiveQuery(0, 1);
+    render(<ParsedRecipesSheet />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button"));
+    });
+
+    expect(screen.getByRole("dialog")).toHaveClass(
+      "pt-[env(safe-area-inset-top)]",
+      "[&_[data-slot=sheet-close]]:top-[calc(env(safe-area-inset-top)+1rem)]",
+    );
+  });
+
   describe("action handlers", () => {
     const fakeEntry = {
       id: "p0",
