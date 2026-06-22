@@ -1,4 +1,5 @@
 import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { vector384 } from "@/lib/db/pg-vector";
 import type { IngredientStatus } from "@/lib/db/schema";
 
 export const ingredients = pgTable("ingredients", {
@@ -14,7 +15,7 @@ export const ingredients = pgTable("ingredients", {
     .default("confirmed"),
   retryCount: integer("retry_count").notNull().default(0),
   lastAttemptAt: timestamp("last_attempt_at"),
-  embedding: jsonb("embedding").$type<number[]>(),
+  embedding: vector384("embedding"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
