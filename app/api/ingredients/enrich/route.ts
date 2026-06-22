@@ -141,7 +141,11 @@ export async function POST(req: NextRequest) {
         await tx.delete(ingredients).where(eq(ingredients.id, id));
       });
 
-      log("info", "enrich_merged", { provisionalId: id, canonicalId });
+      log("info", "enrich_merged", {
+        provisionalId: id,
+        canonicalId,
+        userId: authed.session.user.id,
+      });
       return NextResponse.json({ success: true, mergedInto: canonicalId });
     }
 
@@ -180,7 +184,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    log("info", "enrich_completed", { ingredientId: id });
+    log("info", "enrich_completed", {
+      ingredientId: id,
+      userId: authed.session.user.id,
+    });
     return NextResponse.json({ success: true, ingredient: enriched });
   } catch (error) {
     const newRetryCount = (entry.retryCount ?? 0) + 1;

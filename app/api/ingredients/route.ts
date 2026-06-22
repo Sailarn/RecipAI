@@ -5,6 +5,7 @@ import { ingredients } from "@/db/schema/ingredients";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
+import { log } from "@/lib/telemetry";
 
 export async function GET(req: NextRequest) {
   const since = req.nextUrl.searchParams.get("since");
@@ -80,6 +81,10 @@ export async function POST(req: NextRequest) {
       })
       .onConflictDoNothing();
 
+    log("info", "ingredient_created", {
+      ingredientId: id,
+      userId: authed.session.user.id,
+    });
     return NextResponse.json({ id });
   } catch (error) {
     return ApiError.internal(error, req);
