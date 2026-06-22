@@ -54,22 +54,6 @@ vi.mock("@/lib/transitions", () => ({
   }),
 }));
 
-const useEmbedDownload = vi.hoisted(() =>
-  vi.fn().mockReturnValue({ phase: "idle", progress: 0 }),
-);
-vi.mock("@/lib/parse-recipe/use-embed-download", () => ({ useEmbedDownload }));
-
-const isEmbedModelReady = vi.hoisted(() => vi.fn().mockReturnValue(true));
-vi.mock("@/lib/parse-recipe/embed-download-state", () => ({
-  isEmbedModelReady,
-}));
-
-const grantEmbedConsent = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/parse-recipe/embed-consent", () => ({ grantEmbedConsent }));
-
-const preWarmEmbedWorker = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/parse-recipe/embed-client", () => ({ preWarmEmbedWorker }));
-
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
@@ -78,9 +62,9 @@ import { useNavigate } from "@/lib/transitions";
 import { ParsedRecipesSheet } from "../index";
 
 function mockLiveQuery(parsedCount: number, syncCount: number) {
-  const parsedItems = Array.from({ length: parsedCount }, (_, i) => ({
-    id: `p${i}`,
-    title: `Parsed ${i}`,
+  const parsedItems = Array.from({ length: parsedCount }, (_, index) => ({
+    id: `p${index}`,
+    title: `Parsed ${index}`,
     servings: 1,
     ingredients: [],
     instructions: [],
@@ -99,8 +83,6 @@ function mockLiveQuery(parsedCount: number, syncCount: number) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useEmbedDownload.mockReturnValue({ phase: "idle", progress: 0 });
-  isEmbedModelReady.mockReturnValue(true);
 });
 
 describe("ParsedRecipesSheet", () => {
@@ -110,74 +92,6 @@ describe("ParsedRecipesSheet", () => {
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
     expect(button).toBeDisabled();
-  });
-
-  it("enables the bell while downloading even with no notifications", () => {
-    mockLiveQuery(0, 0);
-    useEmbedDownload.mockReturnValue({ phase: "downloading", progress: 40 });
-    render(<ParsedRecipesSheet />);
-    expect(screen.getByRole("button")).not.toBeDisabled();
-  });
-
-  it("toasts when the model download completes", () => {
-    mockLiveQuery(0, 0);
-    useEmbedDownload.mockReturnValue({ phase: "done", progress: 100 });
-    render(<ParsedRecipesSheet />);
-    expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining("AI model ready"),
-    );
-  });
-
-  describe("manual model download", () => {
-    it("enables the bell when the model is not yet downloaded", () => {
-      mockLiveQuery(0, 0);
-      isEmbedModelReady.mockReturnValue(false);
-      render(<ParsedRecipesSheet />);
-      expect(screen.getByRole("button")).not.toBeDisabled();
-    });
-
-    it("shows a Download model button in the sheet when not ready", async () => {
-      mockLiveQuery(0, 0);
-      isEmbedModelReady.mockReturnValue(false);
-      render(<ParsedRecipesSheet />);
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button"));
-      });
-      expect(
-        screen.getByRole("button", { name: /download model/i }),
-      ).toBeInTheDocument();
-    });
-
-    it("grants consent and pre-warms the worker when Download model is tapped", async () => {
-      mockLiveQuery(0, 0);
-      isEmbedModelReady.mockReturnValue(false);
-      render(<ParsedRecipesSheet />);
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button"));
-      });
-
-      await act(async () => {
-        fireEvent.click(
-          screen.getByRole("button", { name: /download model/i }),
-        );
-      });
-
-      expect(grantEmbedConsent).toHaveBeenCalledOnce();
-      expect(preWarmEmbedWorker).toHaveBeenCalledOnce();
-    });
-
-    it("hides the download prompt while a download is in progress", async () => {
-      mockLiveQuery(0, 0);
-      isEmbedModelReady.mockReturnValue(false);
-      useEmbedDownload.mockReturnValue({ phase: "downloading", progress: 30 });
-      render(<ParsedRecipesSheet />);
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button"));
-      });
-      expect(
-        screen.queryByRole("button", { name: /download model/i }),
-      ).not.toBeInTheDocument();
-    });
   });
 
   it("renders the bell button when only parsedCount > 0", () => {

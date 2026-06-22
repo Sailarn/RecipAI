@@ -37,8 +37,6 @@ export type TelemetryEvents = {
   pantry_item_toggled: { have: boolean };
   theme_changed: { theme: string };
   language_changed: { locale: string };
-  embed_consent_responded: { granted: boolean };
-  embed_model_downloaded: undefined;
   push_subscribed: undefined;
   push_unsubscribed: undefined;
   pwa_installed: undefined;

@@ -25,14 +25,6 @@ const ParseJobWatcher = dynamic(
   { ssr: false },
 );
 
-const EmbedConsentModal = dynamic(
-  () =>
-    import("@/components/embed-consent-modal").then((module) => ({
-      default: module.EmbedConsentModal,
-    })),
-  { ssr: false },
-);
-
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   useVocabSync();
@@ -48,7 +40,6 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         swipeDirections={["left", "right"]}
       />
       <ParseJobWatcher />
-      <EmbedConsentModal />
       <BottomNav />
     </NavigationStackProvider>
   );
