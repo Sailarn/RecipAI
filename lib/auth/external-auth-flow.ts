@@ -31,7 +31,7 @@ export interface DeviceAuthClient {
       grant_type: "urn:ietf:params:oauth:grant-type:device_code";
       device_code: string;
       client_id: string;
-    }): AuthResponse<{ access_token: string }>;
+    }): AuthResponse<Record<string, unknown>>;
   };
 }
 
@@ -123,7 +123,7 @@ export async function pollDeviceAuthorization({
         if (isAbortError(error, signal)) return { status: "cancelled" };
         continue;
       }
-      if (response.data?.access_token) return { status: "authenticated" };
+      if (response.data) return { status: "authenticated" };
 
       const errorCode = response.error?.error;
       if (errorCode === "access_denied") return { status: "denied" };
@@ -147,4 +147,24 @@ export function openExternalAuth(url: string): boolean {
 
 export async function copyExternalAuthUrl(url: string): Promise<void> {
   await navigator.clipboard.writeText(url);
+}
+
+export async function copyAndOpenExternalAuthUrl(
+  url: string,
+): Promise<boolean> {
+  await copyExternalAuthUrl(url);
+  return openExternalAuth(url);
+}
+
+export function canShareExternalAuthUrl(): boolean {
+  return (
+    typeof navigator !== "undefined" && typeof navigator.share === "function"
+  );
+}
+
+export async function shareExternalAuthUrl(url: string): Promise<void> {
+  await navigator.share({
+    title: "RecipAI Google sign-in",
+    url,
+  });
 }

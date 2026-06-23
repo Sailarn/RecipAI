@@ -10,7 +10,10 @@ import { LoginView } from "../index";
 const isStandalonePwa = vi.hoisted(() => vi.fn(() => false));
 const requestDeviceAuthorization = vi.hoisted(() => vi.fn());
 const pollDeviceAuthorization = vi.hoisted(() => vi.fn());
-const openExternalAuth = vi.hoisted(() => vi.fn());
+const copyAndOpenExternalAuthUrl = vi.hoisted(() => vi.fn());
+const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
+const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
+const copyExternalAuthUrl = vi.hoisted(() => vi.fn());
 const navigatePush = vi.hoisted(() => vi.fn());
 const savePendingDeviceAuth = vi.hoisted(() => vi.fn());
 const loadPendingDeviceAuth = vi.hoisted(() =>
@@ -33,7 +36,10 @@ vi.mock("@/lib/pwa", () => ({ isStandalonePwa }));
 vi.mock("@/lib/auth/external-auth-flow", () => ({
   requestDeviceAuthorization,
   pollDeviceAuthorization,
-  openExternalAuth,
+  copyAndOpenExternalAuthUrl,
+  canShareExternalAuthUrl,
+  shareExternalAuthUrl,
+  copyExternalAuthUrl,
   toDeviceAuthClient: (client: unknown) => client,
 }));
 
@@ -160,6 +166,34 @@ describe("LoginView", () => {
     await waitFor(() => {
       expect(screen.getByText("Continue with Google")).toBeVisible();
     });
+  });
+
+  it("keeps pending device auth when the login view unmounts during polling", async () => {
+    isStandalonePwa.mockReturnValue(true);
+    let resolvePolling: ((result: { status: "cancelled" }) => void) | undefined;
+    requestDeviceAuthorization.mockResolvedValue({
+      deviceCode: "device-code",
+      userCode: "ABCD",
+      verificationUrl: "https://auth.example/device",
+      expiresAt: Date.now() + 300_000,
+      intervalMs: 5_000,
+    });
+    pollDeviceAuthorization.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePolling = resolve;
+        }),
+    );
+    const { unmount } = render(<LoginView locale="en" />);
+    fireEvent.click(screen.getByText("Continue with Google"));
+
+    await screen.findByText("Waiting for Google");
+    unmount();
+    resolvePolling?.({ status: "cancelled" });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(clearPendingDeviceAuth).not.toHaveBeenCalled();
   });
 
   it("tracks login when signing in with Passkey", async () => {

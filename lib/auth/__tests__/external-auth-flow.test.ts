@@ -4,9 +4,12 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  canShareExternalAuthUrl,
+  copyAndOpenExternalAuthUrl,
   type DeviceAuthClient,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
+  shareExternalAuthUrl,
 } from "../external-auth-flow";
 
 function createClient({
@@ -15,7 +18,7 @@ function createClient({
 }: {
   codeData?: Record<string, unknown>;
   tokenResponses?: Array<{
-    data: { access_token: string } | null;
+    data: Record<string, unknown> | null;
     error: { error: string } | null;
   }>;
 } = {}) {
@@ -83,6 +86,36 @@ describe("external device authentication", () => {
     vi.useFakeTimers();
     const client = createClient({
       tokenResponses: [{ data: { access_token: "access-token" }, error: null }],
+    });
+    const result = pollDeviceAuthorization({
+      client,
+      authorization: {
+        deviceCode: "device-code",
+        userCode: "ABCD-EFGH",
+        verificationUrl: "https://auth.example/device",
+        expiresAt: Date.now() + 60_000,
+        intervalMs: 5_000,
+      },
+      signal: new AbortController().signal,
+    });
+
+    await vi.advanceTimersByTimeAsync(5_000);
+
+    await expect(result).resolves.toEqual({ status: "authenticated" });
+  });
+
+  it("returns authenticated when Better Auth creates a session", async () => {
+    vi.useFakeTimers();
+    const client = createClient({
+      tokenResponses: [
+        {
+          data: {
+            session: { id: "session-1" },
+            user: { id: "user-1" },
+          },
+          error: null,
+        },
+      ],
     });
     const result = pollDeviceAuthorization({
       client,
@@ -176,5 +209,44 @@ describe("external device authentication", () => {
 
     await expect(result).resolves.toEqual({ status: "authenticated" });
     expect(client.device.token).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("external auth browser helpers", () => {
+  it("copies the auth URL before opening it", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const open = vi.fn().mockReturnValue({});
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    vi.stubGlobal("open", open);
+
+    await expect(
+      copyAndOpenExternalAuthUrl("https://auth.example/request"),
+    ).resolves.toBe(true);
+
+    expect(writeText).toHaveBeenCalledWith("https://auth.example/request");
+    expect(open).toHaveBeenCalledWith(
+      "https://auth.example/request",
+      "_blank",
+      "noopener,noreferrer",
+    );
+  });
+
+  it("shares the auth URL when Web Share is available", async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: share,
+    });
+
+    expect(canShareExternalAuthUrl()).toBe(true);
+    await shareExternalAuthUrl("https://auth.example/request");
+
+    expect(share).toHaveBeenCalledWith({
+      title: "RecipAI Google sign-in",
+      url: "https://auth.example/request",
+    });
   });
 });

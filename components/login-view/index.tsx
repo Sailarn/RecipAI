@@ -71,8 +71,7 @@ export function LoginView({ locale }: { locale: string }) {
           setExternalUrl(undefined);
           navigate.push(routes.recipes.list(locale));
         } else if (result.status === "cancelled") {
-          clearPendingDeviceAuth();
-          setExternalUrl(undefined);
+          return;
         } else {
           clearPendingDeviceAuth();
           setExternalUrl(undefined);
