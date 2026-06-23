@@ -8,5 +8,8 @@ export default createMiddleware({
 });
 
 export const config = {
-  matcher: ["/((?!api|ingest|_next|_vercel|.*\\..*).*)"],
+  // `external-auth` is excluded: those pages live outside the [locale] tree
+  // (no locale prefix), so the i18n middleware must not redirect them to
+  // /<locale>/external-auth, which 404s.
+  matcher: ["/((?!api|ingest|_next|_vercel|external-auth|.*\\..*).*)"],
 };
