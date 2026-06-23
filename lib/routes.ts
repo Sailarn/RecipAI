@@ -12,6 +12,14 @@ export const routes = {
   login: (locale: string) => `/${locale}/login`,
   syncReview: (locale: string) => `/${locale}/sync-review`,
   parseHistory: (locale: string) => `/${locale}/parse-history`,
+  externalAuth: {
+    device: (userCode: string, locale: string) =>
+      `/external-auth/device?user_code=${encodeURIComponent(userCode)}&locale=${encodeURIComponent(locale)}`,
+    link: (locale: string) =>
+      `/external-auth/link?locale=${encodeURIComponent(locale)}`,
+    linkComplete: (locale: string) =>
+      `/external-auth/link/complete?locale=${encodeURIComponent(locale)}`,
+  },
 } as const;
 
 export const api = {

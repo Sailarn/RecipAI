@@ -141,6 +141,13 @@
       "when": 1782143730997,
       "tag": "0019_fresh_post",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782171439310,
+      "tag": "0020_legal_maverick",
+      "breakpoints": true
     }
   ]
 }

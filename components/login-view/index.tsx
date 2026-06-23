@@ -2,7 +2,16 @@
 
 import { KeyRound, Send } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { authClient } from "@/lib/auth/auth-client";
+import {
+  openExternalAuth,
+  pollDeviceAuthorization,
+  requestDeviceAuthorization,
+  toDeviceAuthClient,
+} from "@/lib/auth/external-auth-flow";
+import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -35,9 +44,49 @@ const CHIP_CLASS =
 
 export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
+  const [externalUrl, setExternalUrl] = useState<string>();
+  const [externalError, setExternalError] = useState<string>();
+  const abortController = useRef<AbortController | undefined>(undefined);
+
+  useEffect(
+    () => () => {
+      abortController.current?.abort();
+    },
+    [],
+  );
 
   const handleGoogleSignIn = async () => {
     trackEvent("login", { method: "google" });
+    if (isStandalonePwa()) {
+      setExternalError(undefined);
+      try {
+        const client = toDeviceAuthClient(authClient);
+        const authorization = await requestDeviceAuthorization(client);
+        const controller = new AbortController();
+        abortController.current = controller;
+        setExternalUrl(authorization.verificationUrl);
+        openExternalAuth(authorization.verificationUrl);
+        const result = await pollDeviceAuthorization({
+          client,
+          authorization,
+          signal: controller.signal,
+        });
+        setExternalUrl(undefined);
+        if (result.status === "authenticated") {
+          navigate.push(routes.recipes.list(locale));
+        } else if (result.status !== "cancelled") {
+          setExternalError(
+            `Authentication ${result.status}. Please try again.`,
+          );
+        }
+      } catch {
+        setExternalUrl(undefined);
+        setExternalError("Could not start Google authentication.");
+      } finally {
+        abortController.current = undefined;
+      }
+      return;
+    }
     await authClient.signIn.social({
       provider: "google",
       callbackURL: routes.recipes.list(locale),
@@ -85,39 +134,55 @@ export function LoginView({ locale }: { locale: string }) {
           </p>
         </div>
 
-        {/* Auth buttons */}
-        <div className="flex flex-col gap-2.5">
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="signin-btn"
-          >
-            <div className={CHIP_CLASS}>
-              <GoogleLogo />
-            </div>
-            <span>Continue with Google</span>
-          </button>
-          <button
-            type="button"
-            onClick={handlePasskeySignIn}
-            className="signin-btn"
-          >
-            <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
-              <KeyRound size={14} strokeWidth={2} />
-            </div>
-            <span>Continue with Passkey</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleTelegramSignIn}
-            className="signin-btn"
-          >
-            <div className={`${CHIP_CLASS} text-[#229ED9]`}>
-              <Send size={14} strokeWidth={2} />
-            </div>
-            <span>Continue with Telegram</span>
-          </button>
-        </div>
+        {externalUrl ? (
+          <ExternalAuthWaiting
+            url={externalUrl}
+            title="Waiting for Google"
+            onCancel={() => {
+              abortController.current?.abort();
+              setExternalUrl(undefined);
+            }}
+          />
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="signin-btn"
+            >
+              <div className={CHIP_CLASS}>
+                <GoogleLogo />
+              </div>
+              <span>Continue with Google</span>
+            </button>
+            <button
+              type="button"
+              onClick={handlePasskeySignIn}
+              className="signin-btn"
+            >
+              <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
+                <KeyRound size={14} strokeWidth={2} />
+              </div>
+              <span>Continue with Passkey</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleTelegramSignIn}
+              className="signin-btn"
+            >
+              <div className={`${CHIP_CLASS} text-[#229ED9]`}>
+                <Send size={14} strokeWidth={2} />
+              </div>
+              <span>Continue with Telegram</span>
+            </button>
+          </div>
+        )}
+
+        {externalError && (
+          <p className="text-center text-xs text-red-400 mt-3">
+            {externalError}
+          </p>
+        )}
 
         <p className="text-center text-[11px] text-[var(--fg-3)] mt-[18px] leading-[1.6]">
           By continuing, you agree to our terms of service and privacy policy

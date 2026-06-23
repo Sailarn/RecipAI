@@ -2,9 +2,18 @@
 
 import { User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { LoginView } from "@/components/login-view";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
+import {
+  assertSeparateAuthOrigins,
+  EXTERNAL_AUTH_TTL_MS,
+  getExternalAuthUrl,
+} from "@/lib/auth/external-auth-config";
+import { openExternalAuth } from "@/lib/auth/external-auth-flow";
+import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -17,8 +26,38 @@ export function ProfileAuth() {
   const router = useRouter();
   const navigate = useNavigate();
   const { locale } = useParams<{ locale: string }>();
-  const { linkedProviders, telegramLinked, passkeyAdded, isLoading } =
-    useLinkedAccounts(!!session);
+  const {
+    linkedProviders,
+    telegramLinked,
+    passkeyAdded,
+    isLoading,
+    refreshLinkedAccounts,
+  } = useLinkedAccounts(!!session);
+  const [externalLinkUrl, setExternalLinkUrl] = useState<string>();
+  const [externalLinkError, setExternalLinkError] = useState<string>();
+  const linkPolling = useRef<number | undefined>(undefined);
+  const linkTimeout = useRef<number | undefined>(undefined);
+
+  const stopLinkPolling = useCallback(() => {
+    if (linkPolling.current) window.clearInterval(linkPolling.current);
+    if (linkTimeout.current) window.clearTimeout(linkTimeout.current);
+    linkPolling.current = undefined;
+    linkTimeout.current = undefined;
+  }, []);
+
+  useEffect(
+    () => () => {
+      stopLinkPolling();
+    },
+    [stopLinkPolling],
+  );
+
+  useEffect(() => {
+    if (!externalLinkUrl) return;
+    const refreshOnFocus = () => void refreshLinkedAccounts();
+    window.addEventListener("focus", refreshOnFocus);
+    return () => window.removeEventListener("focus", refreshOnFocus);
+  }, [externalLinkUrl, refreshLinkedAccounts]);
 
   const handleSignIn = () =>
     navigate.push(routes.login(locale), <LoginView locale={locale} />);
@@ -31,6 +70,39 @@ export function ProfileAuth() {
 
   const handleLinkGoogle = async () => {
     trackEvent("account_linked", { provider: "google" });
+    if (isStandalonePwa()) {
+      setExternalLinkError(undefined);
+      try {
+        const externalOrigin = getExternalAuthUrl({
+          configuredUrl: process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL,
+        });
+        assertSeparateAuthOrigins(window.location.origin, externalOrigin);
+        const response = await authClient.externalLink.generate();
+        if (!response.data?.token) {
+          throw new Error("Missing account-link token");
+        }
+        const url = `${externalOrigin}${routes.externalAuth.link(locale)}#token=${encodeURIComponent(response.data.token)}`;
+        setExternalLinkUrl(url);
+        openExternalAuth(url);
+        linkPolling.current = window.setInterval(async () => {
+          const providers = await refreshLinkedAccounts();
+          if (providers.includes("google")) {
+            stopLinkPolling();
+            setExternalLinkUrl(undefined);
+          }
+        }, 5000);
+        linkTimeout.current = window.setTimeout(() => {
+          stopLinkPolling();
+          setExternalLinkUrl(undefined);
+          setExternalLinkError("Account linking expired. Please try again.");
+        }, EXTERNAL_AUTH_TTL_MS);
+      } catch {
+        stopLinkPolling();
+        setExternalLinkUrl(undefined);
+        setExternalLinkError("Could not start Google account linking.");
+      }
+      return;
+    }
     await authClient.linkSocial({
       provider: "google",
       callbackURL: routes.profile(locale),
@@ -80,6 +152,23 @@ export function ProfileAuth() {
           telegramLinked={telegramLinked}
           onSignOut={handleSignOut}
         />
+        {externalLinkUrl && (
+          <div className="glass-card mb-3 rounded-3xl p-5">
+            <ExternalAuthWaiting
+              url={externalLinkUrl}
+              title="Waiting for Google"
+              onCancel={() => {
+                stopLinkPolling();
+                setExternalLinkUrl(undefined);
+              }}
+            />
+          </div>
+        )}
+        {externalLinkError && (
+          <p className="mb-3 text-center text-xs text-red-400">
+            {externalLinkError}
+          </p>
+        )}
         <LinkedAccounts
           isLoading={isLoading}
           linkedProviders={linkedProviders}

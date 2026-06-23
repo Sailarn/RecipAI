@@ -2,10 +2,16 @@
  * @vitest-environment happy-dom
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "@/lib/telemetry";
 import { LoginView } from "../index";
+
+const isStandalonePwa = vi.hoisted(() => vi.fn(() => false));
+const requestDeviceAuthorization = vi.hoisted(() => vi.fn());
+const pollDeviceAuthorization = vi.hoisted(() => vi.fn());
+const openExternalAuth = vi.hoisted(() => vi.fn());
+const navigatePush = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
@@ -15,6 +21,19 @@ vi.mock("@/lib/auth/auth-client", () => ({
     },
     signInWithTelegramOIDC: vi.fn().mockResolvedValue(undefined),
   },
+}));
+
+vi.mock("@/lib/pwa", () => ({ isStandalonePwa }));
+
+vi.mock("@/lib/auth/external-auth-flow", () => ({
+  requestDeviceAuthorization,
+  pollDeviceAuthorization,
+  openExternalAuth,
+  toDeviceAuthClient: (client: unknown) => client,
+}));
+
+vi.mock("@/lib/transitions", () => ({
+  useNavigate: () => ({ push: navigatePush }),
 }));
 
 vi.mock("next/image", () => ({
@@ -30,6 +49,11 @@ vi.mock("next/image", () => ({
 }));
 
 describe("LoginView", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    isStandalonePwa.mockReturnValue(false);
+  });
+
   it("renders the Google sign-in button", () => {
     render(<LoginView locale="en" />);
     expect(screen.getByText("Continue with Google")).toBeInTheDocument();
@@ -41,6 +65,71 @@ describe("LoginView", () => {
     fireEvent.click(screen.getByText("Continue with Google"));
 
     expect(trackEvent).toHaveBeenCalledWith("login", { method: "google" });
+  });
+
+  it("keeps the standard Google redirect in a browser tab", async () => {
+    const { authClient } = await import("@/lib/auth/auth-client");
+    render(<LoginView locale="en" />);
+
+    fireEvent.click(screen.getByText("Continue with Google"));
+
+    await waitFor(() => {
+      expect(authClient.signIn.social).toHaveBeenCalledWith({
+        provider: "google",
+        callbackURL: "/en/recipes",
+      });
+    });
+    expect(requestDeviceAuthorization).not.toHaveBeenCalled();
+  });
+
+  it("uses device authorization in a standalone PWA", async () => {
+    isStandalonePwa.mockReturnValue(true);
+    requestDeviceAuthorization.mockResolvedValue({
+      deviceCode: "device-code",
+      userCode: "ABCD",
+      verificationUrl: "https://auth.example/device",
+      expiresAt: Date.now() + 300_000,
+      intervalMs: 5_000,
+    });
+    pollDeviceAuthorization.mockResolvedValue({ status: "authenticated" });
+    render(<LoginView locale="uk" />);
+
+    fireEvent.click(screen.getByText("Continue with Google"));
+
+    await waitFor(() => {
+      expect(requestDeviceAuthorization).toHaveBeenCalledOnce();
+      expect(openExternalAuth).toHaveBeenCalledWith(
+        "https://auth.example/device",
+      );
+      expect(navigatePush).toHaveBeenCalledWith("/uk/recipes");
+    });
+  });
+
+  it("aborts standalone polling when cancelled", async () => {
+    isStandalonePwa.mockReturnValue(true);
+    requestDeviceAuthorization.mockResolvedValue({
+      deviceCode: "device-code",
+      userCode: "ABCD",
+      verificationUrl: "https://auth.example/device",
+      expiresAt: Date.now() + 300_000,
+      intervalMs: 5_000,
+    });
+    pollDeviceAuthorization.mockImplementation(
+      ({ signal }: { signal: AbortSignal }) =>
+        new Promise((resolve) => {
+          signal.addEventListener("abort", () =>
+            resolve({ status: "cancelled" }),
+          );
+        }),
+    );
+    render(<LoginView locale="en" />);
+    fireEvent.click(screen.getByText("Continue with Google"));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Continue with Google")).toBeVisible();
+    });
   });
 
   it("tracks login when signing in with Passkey", async () => {

@@ -10,6 +10,7 @@ All variables live in `.env.local` (never committed). Copy `.env.example` as a s
 |---|---|---|
 | `DATABASE_URL` | Yes | Supabase Postgres connection string. Use the **pooler** URL for serverless (port 6543), not the direct connection. |
 | `NEXT_PUBLIC_BETTER_AUTH_URL` | Yes | Full base URL of the app (`https://recipai.pp.ua`). Used by better-auth for redirect and cookie domain. |
+| `NEXT_PUBLIC_EXTERNAL_AUTH_URL` | Yes | Public external-auth base URL. In production it must use a different origin from the app (`https://auth.recipai.pp.ua`). The Google callback is `https://auth.recipai.pp.ua/api/auth/callback/google`. |
 | `BETTER_AUTH_SECRET` | Yes | Random secret for signing sessions. Generate with `openssl rand -hex 32`. Read directly by the `better-auth` library from the environment — not referenced in app code, but required. Without it, sessions are re-keyed on every server restart. |
 
 ---

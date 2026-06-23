@@ -12,15 +12,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRefresh = vi.hoisted(() => vi.fn());
 const mockPush = vi.hoisted(() => vi.fn());
+const mockRefreshLinkedAccounts = vi.hoisted(() => vi.fn());
+const isStandalonePwa = vi.hoisted(() => vi.fn(() => false));
+const openExternalAuth = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     useSession: vi.fn(),
     signOut: vi.fn().mockResolvedValue(undefined),
     linkSocial: vi.fn().mockResolvedValue(undefined),
+    externalLink: { generate: vi.fn() },
     passkey: { addPasskey: vi.fn().mockResolvedValue(undefined) },
   },
 }));
+
+vi.mock("@/lib/pwa", () => ({ isStandalonePwa }));
+
+vi.mock("@/lib/auth/external-auth-flow", () => ({ openExternalAuth }));
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
@@ -37,11 +45,18 @@ vi.mock("../use-linked-accounts", () => ({
     telegramLinked: false,
     passkeyAdded: false,
     isLoading: false,
+    refreshLinkedAccounts: mockRefreshLinkedAccounts,
   }),
 }));
 
 vi.mock("../linked-accounts", () => ({
-  LinkedAccounts: () => <div data-testid="linked-accounts" />,
+  LinkedAccounts: ({ onLinkGoogle }: { onLinkGoogle: () => void }) => (
+    <div data-testid="linked-accounts">
+      <button type="button" onClick={onLinkGoogle}>
+        Link Google test
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("@/components/login-view", () => ({
@@ -60,6 +75,8 @@ const sessionUser = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  isStandalonePwa.mockReturnValue(false);
+  process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
 });
 
 describe("ProfileAuth", () => {
@@ -130,6 +147,38 @@ describe("ProfileAuth", () => {
     it("renders linked-accounts panel", () => {
       render(<ProfileAuth />);
       expect(screen.getByTestId("linked-accounts")).toBeInTheDocument();
+    });
+
+    it("keeps normal Google linking in a browser tab", async () => {
+      render(<ProfileAuth />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
+
+      await waitFor(() => {
+        expect(authClient.linkSocial).toHaveBeenCalledWith({
+          provider: "google",
+          callbackURL: "/en/profile",
+        });
+      });
+      expect(authClient.externalLink.generate).not.toHaveBeenCalled();
+    });
+
+    it("puts the standalone handoff token only in the URL fragment", async () => {
+      isStandalonePwa.mockReturnValue(true);
+      vi.mocked(authClient.externalLink.generate).mockResolvedValue({
+        data: { token: "one-time-token" },
+        error: null,
+      } as never);
+      render(<ProfileAuth />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
+
+      await waitFor(() => {
+        expect(openExternalAuth).toHaveBeenCalledWith(
+          "https://auth.example/external-auth/link?locale=en#token=one-time-token",
+        );
+      });
+      expect(screen.getByText("Waiting for Google")).toBeVisible();
     });
 
     it("calls signOut and router.refresh on sign-out click", async () => {

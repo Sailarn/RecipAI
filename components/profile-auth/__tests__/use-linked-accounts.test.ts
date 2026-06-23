@@ -68,6 +68,26 @@ describe("useLinkedAccounts", () => {
     });
   });
 
+  it("deduplicates overlapping account refreshes", async () => {
+    let resolveAccounts: (value: { data: never[] }) => void = () => {};
+    listAccounts.mockReturnValue(
+      new Promise((resolve) => {
+        resolveAccounts = resolve;
+      }),
+    );
+    listUserPasskeys.mockResolvedValue({ data: [] });
+
+    const { useLinkedAccounts } = await import("../use-linked-accounts");
+    const { result } = renderHook(() => useLinkedAccounts(true));
+    const firstRefresh = result.current.refreshLinkedAccounts();
+    const secondRefresh = result.current.refreshLinkedAccounts();
+
+    expect(firstRefresh).toBe(secondRefresh);
+    expect(listAccounts).toHaveBeenCalledOnce();
+    resolveAccounts({ data: [] });
+    await firstRefresh;
+  });
+
   describe("telegram detection", () => {
     it("detects telegram via 'telegram' providerId", async () => {
       listAccounts.mockResolvedValue({ data: [{ providerId: "telegram" }] });
