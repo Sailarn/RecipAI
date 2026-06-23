@@ -16,6 +16,7 @@ const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
 const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
 const copyExternalAuthUrl = vi.hoisted(() => vi.fn());
 const completeDeviceSignIn = vi.hoisted(() => vi.fn());
+const establishDeviceSession = vi.hoisted(() => vi.fn());
 const navigatePush = vi.hoisted(() => vi.fn());
 const savePendingDeviceAuth = vi.hoisted(() => vi.fn());
 const loadPendingDeviceAuth = vi.hoisted(() =>
@@ -43,7 +44,9 @@ vi.mock("@/lib/auth/external-auth-flow", () => ({
   shareExternalAuthUrl,
   copyExternalAuthUrl,
   completeDeviceSignIn,
+  establishDeviceSession,
   toDeviceAuthClient: (client: unknown) => client,
+  toDeviceSessionClient: (client: unknown) => client,
 }));
 
 vi.mock("@/lib/auth/pending-device-auth", () => ({
@@ -112,7 +115,10 @@ describe("LoginView", () => {
       expiresAt: Date.now() + 300_000,
       intervalMs: 5_000,
     });
-    pollDeviceAuthorization.mockResolvedValue({ status: "authenticated" });
+    pollDeviceAuthorization.mockResolvedValue({
+      status: "authenticated",
+      accessToken: "access-token",
+    });
     render(<LoginView locale="uk" />);
 
     fireEvent.click(screen.getByText("Continue with Google"));
@@ -120,6 +126,10 @@ describe("LoginView", () => {
     await waitFor(() => {
       expect(requestDeviceAuthorization).toHaveBeenCalledOnce();
       expect(savePendingDeviceAuth).toHaveBeenCalled();
+      expect(establishDeviceSession).toHaveBeenCalledWith(
+        expect.anything(),
+        "access-token",
+      );
       expect(completeDeviceSignIn).toHaveBeenCalledWith("/uk/recipes");
     });
   });
@@ -133,12 +143,19 @@ describe("LoginView", () => {
       expiresAt: Date.now() + 300_000,
       intervalMs: 5_000,
     });
-    pollDeviceAuthorization.mockResolvedValue({ status: "authenticated" });
+    pollDeviceAuthorization.mockResolvedValue({
+      status: "authenticated",
+      accessToken: "access-token",
+    });
 
     render(<LoginView locale="uk" />);
 
     await waitFor(() => {
       expect(pollDeviceAuthorization).toHaveBeenCalled();
+      expect(establishDeviceSession).toHaveBeenCalledWith(
+        expect.anything(),
+        "access-token",
+      );
       expect(completeDeviceSignIn).toHaveBeenCalledWith("/uk/recipes");
     });
     expect(requestDeviceAuthorization).not.toHaveBeenCalled();

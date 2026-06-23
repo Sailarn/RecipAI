@@ -8,6 +8,8 @@ import {
   completeDeviceSignIn,
   copyAndOpenExternalAuthUrl,
   type DeviceAuthClient,
+  type DeviceSessionClient,
+  establishDeviceSession,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
   shareExternalAuthUrl,
@@ -102,20 +104,18 @@ describe("external device authentication", () => {
 
     await vi.advanceTimersByTimeAsync(5_000);
 
-    await expect(result).resolves.toEqual({ status: "authenticated" });
+    await expect(result).resolves.toEqual({
+      status: "authenticated",
+      accessToken: "access-token",
+    });
   });
 
-  it("returns authenticated when Better Auth creates a session", async () => {
+  it("keeps polling when the grant response carries no access token", async () => {
     vi.useFakeTimers();
     const client = createClient({
       tokenResponses: [
-        {
-          data: {
-            session: { id: "session-1" },
-            user: { id: "user-1" },
-          },
-          error: null,
-        },
+        { data: {}, error: null },
+        { data: { access_token: "access-token" }, error: null },
       ],
     });
     const result = pollDeviceAuthorization({
@@ -130,9 +130,13 @@ describe("external device authentication", () => {
       signal: new AbortController().signal,
     });
 
-    await vi.advanceTimersByTimeAsync(5_000);
+    await vi.advanceTimersByTimeAsync(10_000);
 
-    await expect(result).resolves.toEqual({ status: "authenticated" });
+    await expect(result).resolves.toEqual({
+      status: "authenticated",
+      accessToken: "access-token",
+    });
+    expect(client.device.token).toHaveBeenCalledTimes(2);
   });
 
   it.each([
@@ -208,7 +212,10 @@ describe("external device authentication", () => {
 
     await vi.advanceTimersByTimeAsync(10_000);
 
-    await expect(result).resolves.toEqual({ status: "authenticated" });
+    await expect(result).resolves.toEqual({
+      status: "authenticated",
+      accessToken: "access-token",
+    });
     expect(client.device.token).toHaveBeenCalledTimes(2);
   });
 });
@@ -233,6 +240,33 @@ describe("external auth browser helpers", () => {
       "_blank",
       "noopener,noreferrer",
     );
+  });
+
+  it("exchanges the device access token for a session cookie", async () => {
+    const deviceSession = vi
+      .fn()
+      .mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+    const client = {
+      externalLink: { deviceSession },
+    } as unknown as DeviceSessionClient;
+
+    await establishDeviceSession(client, "access-token");
+
+    expect(deviceSession).toHaveBeenCalledWith({ token: "access-token" });
+  });
+
+  it("throws when the session exchange fails", async () => {
+    const client = {
+      externalLink: {
+        deviceSession: vi
+          .fn()
+          .mockResolvedValue({ data: null, error: { message: "nope" } }),
+      },
+    } as unknown as DeviceSessionClient;
+
+    await expect(
+      establishDeviceSession(client, "access-token"),
+    ).rejects.toThrow("nope");
   });
 
   it("finishes a device sign-in with a full-page navigation", () => {

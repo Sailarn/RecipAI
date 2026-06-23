@@ -31,8 +31,25 @@ export interface DeviceAuthClient {
       grant_type: "urn:ietf:params:oauth:grant-type:device_code";
       device_code: string;
       client_id: string;
-    }): AuthResponse<Record<string, unknown>>;
+    }): AuthResponse<{ access_token?: string }>;
   };
+}
+
+// The PWA's auth client also carries the external-link plugin, whose
+// device-session endpoint turns the device access_token into a real cookie.
+export interface DeviceSessionClient {
+  externalLink: {
+    deviceSession(input: { token: string }): AuthResponse<unknown>;
+  };
+}
+
+export function toDeviceSessionClient(client: {
+  externalLink?: unknown;
+}): DeviceSessionClient {
+  if (!client.externalLink) {
+    throw new Error("Auth client is missing the external-link plugin");
+  }
+  return client as DeviceSessionClient;
 }
 
 // better-auth's device-authorization client is structurally compatible with
@@ -49,7 +66,7 @@ export function toDeviceAuthClient(client: {
 }
 
 export type DeviceFlowResult =
-  | { status: "authenticated" }
+  | { status: "authenticated"; accessToken: string }
   | { status: "denied" | "expired" | "cancelled" };
 
 function isAbortError(error: unknown, signal: AbortSignal): boolean {
@@ -123,7 +140,12 @@ export async function pollDeviceAuthorization({
         if (isAbortError(error, signal)) return { status: "cancelled" };
         continue;
       }
-      if (response.data) return { status: "authenticated" };
+      if (response.data?.access_token) {
+        return {
+          status: "authenticated",
+          accessToken: response.data.access_token,
+        };
+      }
 
       const errorCode = response.error?.error;
       if (errorCode === "access_denied") return { status: "denied" };
@@ -169,10 +191,25 @@ export async function shareExternalAuthUrl(url: string): Promise<void> {
   });
 }
 
-// A device sign-in establishes the session through a Set-Cookie on the
-// /device/token response. Finish with a full-page navigation, not a client-side
-// push: the better-auth session atom doesn't know a cookie was just set, so a
-// soft transition keeps the stale signed-out state and lands on the login card.
+// The device-authorization /device/token response hands back a session token
+// but sets no cookie (it's a bearer-token grant). Exchange that token for an
+// actual session cookie so the cookie-based app recognises the PWA as signed
+// in; without this the user lands on the recipes page still signed out.
+export async function establishDeviceSession(
+  client: DeviceSessionClient,
+  accessToken: string,
+): Promise<void> {
+  const result = await client.externalLink.deviceSession({
+    token: accessToken,
+  });
+  if (result.error) {
+    throw new Error(result.error.message ?? "Could not finish signing in");
+  }
+}
+
+// Finish a device sign-in with a full-page navigation, not a client-side push:
+// the better-auth session atom doesn't know the cookie was just set, so a soft
+// transition keeps the stale signed-out state and lands on the login card.
 // Reloading re-bootstraps the app and reads the fresh session cookie.
 export function completeDeviceSignIn(destinationUrl: string): void {
   window.location.assign(destinationUrl);

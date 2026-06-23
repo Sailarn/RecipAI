@@ -8,9 +8,11 @@ import { authClient } from "@/lib/auth/auth-client";
 import {
   completeDeviceSignIn,
   type DeviceAuthorization,
+  establishDeviceSession,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
   toDeviceAuthClient,
+  toDeviceSessionClient,
 } from "@/lib/auth/external-auth-flow";
 import {
   clearPendingDeviceAuth,
@@ -68,6 +70,10 @@ export function LoginView({ locale }: { locale: string }) {
           signal: controller.signal,
         });
         if (result.status === "authenticated") {
+          await establishDeviceSession(
+            toDeviceSessionClient(authClient),
+            result.accessToken,
+          );
           clearPendingDeviceAuth();
           completeDeviceSignIn(routes.recipes.list(locale));
         } else if (result.status === "cancelled") {

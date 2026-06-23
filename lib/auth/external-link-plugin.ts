@@ -95,6 +95,31 @@ export function externalLink() {
           });
         },
       ),
+      externalDeviceSession: createAuthEndpoint(
+        "/external-link/device-session",
+        {
+          method: "POST",
+          body: z.object({ token: z.string().min(1) }),
+        },
+        async (context) => {
+          // The device-authorization grant returns a session token as its
+          // access_token but never sets a browser cookie (it is a bearer-token
+          // grant). Set the session cookie for that already-created session so
+          // the installed PWA actually becomes signed in. Possession of the
+          // session token is the authorization, exactly like the redeem handoff.
+          const sessionWithUser =
+            await context.context.internalAdapter.findSession(
+              context.body.token,
+            );
+          if (!sessionWithUser) {
+            throw context.error("UNAUTHORIZED", {
+              message: "Invalid or expired device session",
+            });
+          }
+          await setSessionCookie(context, sessionWithUser);
+          return context.json({ user: sessionWithUser.user });
+        },
+      ),
       externalLinkCleanup: createAuthEndpoint(
         "/external-link/cleanup",
         { method: "POST", use: [sessionMiddleware] },
