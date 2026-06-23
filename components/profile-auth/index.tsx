@@ -12,7 +12,6 @@ import {
   EXTERNAL_AUTH_TTL_MS,
   getExternalAuthUrl,
 } from "@/lib/auth/external-auth-config";
-import { openExternalAuth } from "@/lib/auth/external-auth-flow";
 import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
@@ -83,7 +82,6 @@ export function ProfileAuth() {
         }
         const url = `${externalOrigin}${routes.externalAuth.link(locale)}#token=${encodeURIComponent(response.data.token)}`;
         setExternalLinkUrl(url);
-        openExternalAuth(url);
         linkPolling.current = window.setInterval(async () => {
           const providers = await refreshLinkedAccounts();
           if (providers.includes("google")) {

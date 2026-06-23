@@ -173,12 +173,13 @@ describe("ProfileAuth", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
 
-      await waitFor(() => {
-        expect(openExternalAuth).toHaveBeenCalledWith(
-          "https://auth.example/external-auth/link?locale=en#token=one-time-token",
-        );
-      });
-      expect(screen.getByText("Waiting for Google")).toBeVisible();
+      await screen.findByText("Waiting for Google");
+      fireEvent.click(
+        screen.getByRole("button", { name: "Try opening in browser" }),
+      );
+      expect(openExternalAuth).toHaveBeenCalledWith(
+        "https://auth.example/external-auth/link?locale=en#token=one-time-token",
+      );
     });
 
     it("calls signOut and router.refresh on sign-out click", async () => {

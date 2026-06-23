@@ -2,15 +2,20 @@
 
 import { KeyRound, Send } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { authClient } from "@/lib/auth/auth-client";
 import {
-  openExternalAuth,
+  type DeviceAuthorization,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
   toDeviceAuthClient,
 } from "@/lib/auth/external-auth-flow";
+import {
+  clearPendingDeviceAuth,
+  loadPendingDeviceAuth,
+  savePendingDeviceAuth,
+} from "@/lib/auth/pending-device-auth";
 import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
@@ -47,43 +52,72 @@ export function LoginView({ locale }: { locale: string }) {
   const [externalUrl, setExternalUrl] = useState<string>();
   const [externalError, setExternalError] = useState<string>();
   const abortController = useRef<AbortController | undefined>(undefined);
+  const resumedRef = useRef(false);
 
-  useEffect(
-    () => () => {
-      abortController.current?.abort();
-    },
-    [],
-  );
-
-  const handleGoogleSignIn = async () => {
-    trackEvent("login", { method: "google" });
-    if (isStandalonePwa()) {
+  const runDevicePolling = useCallback(
+    async (authorization: DeviceAuthorization) => {
       setExternalError(undefined);
+      setExternalUrl(authorization.verificationUrl);
+      const controller = new AbortController();
+      abortController.current = controller;
       try {
-        const client = toDeviceAuthClient(authClient);
-        const authorization = await requestDeviceAuthorization(client);
-        const controller = new AbortController();
-        abortController.current = controller;
-        setExternalUrl(authorization.verificationUrl);
-        openExternalAuth(authorization.verificationUrl);
         const result = await pollDeviceAuthorization({
-          client,
+          client: toDeviceAuthClient(authClient),
           authorization,
           signal: controller.signal,
         });
-        setExternalUrl(undefined);
         if (result.status === "authenticated") {
+          clearPendingDeviceAuth();
+          setExternalUrl(undefined);
           navigate.push(routes.recipes.list(locale));
-        } else if (result.status !== "cancelled") {
+        } else if (result.status === "cancelled") {
+          clearPendingDeviceAuth();
+          setExternalUrl(undefined);
+        } else {
+          clearPendingDeviceAuth();
+          setExternalUrl(undefined);
           setExternalError(
             `Authentication ${result.status}. Please try again.`,
           );
         }
       } catch {
+        clearPendingDeviceAuth();
         setExternalUrl(undefined);
         setExternalError("Could not start Google authentication.");
       } finally {
-        abortController.current = undefined;
+        if (abortController.current === controller) {
+          abortController.current = undefined;
+        }
+      }
+    },
+    [locale, navigate],
+  );
+
+  // Resume a device sign-in left pending by a PWA reload (e.g. returning from
+  // the system browser), so the poll completes instead of dropping to login.
+  useEffect(() => {
+    if (resumedRef.current) return;
+    resumedRef.current = true;
+    const pending = loadPendingDeviceAuth();
+    if (pending) void runDevicePolling(pending);
+  }, [runDevicePolling]);
+
+  useEffect(() => () => abortController.current?.abort(), []);
+
+  const handleGoogleSignIn = async () => {
+    trackEvent("login", { method: "google" });
+    if (isStandalonePwa()) {
+      setExternalError(undefined);
+      abortController.current?.abort();
+      abortController.current = undefined;
+      try {
+        const authorization = await requestDeviceAuthorization(
+          toDeviceAuthClient(authClient),
+        );
+        savePendingDeviceAuth(authorization);
+        void runDevicePolling(authorization);
+      } catch {
+        setExternalError("Could not start Google authentication.");
       }
       return;
     }
@@ -140,6 +174,7 @@ export function LoginView({ locale }: { locale: string }) {
             title="Waiting for Google"
             onCancel={() => {
               abortController.current?.abort();
+              clearPendingDeviceAuth();
               setExternalUrl(undefined);
             }}
           />

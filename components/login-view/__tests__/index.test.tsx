@@ -12,6 +12,11 @@ const requestDeviceAuthorization = vi.hoisted(() => vi.fn());
 const pollDeviceAuthorization = vi.hoisted(() => vi.fn());
 const openExternalAuth = vi.hoisted(() => vi.fn());
 const navigatePush = vi.hoisted(() => vi.fn());
+const savePendingDeviceAuth = vi.hoisted(() => vi.fn());
+const loadPendingDeviceAuth = vi.hoisted(() =>
+  vi.fn<() => unknown>(() => null),
+);
+const clearPendingDeviceAuth = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
@@ -30,6 +35,12 @@ vi.mock("@/lib/auth/external-auth-flow", () => ({
   pollDeviceAuthorization,
   openExternalAuth,
   toDeviceAuthClient: (client: unknown) => client,
+}));
+
+vi.mock("@/lib/auth/pending-device-auth", () => ({
+  savePendingDeviceAuth,
+  loadPendingDeviceAuth,
+  clearPendingDeviceAuth,
 }));
 
 vi.mock("@/lib/transitions", () => ({
@@ -52,6 +63,7 @@ describe("LoginView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     isStandalonePwa.mockReturnValue(false);
+    loadPendingDeviceAuth.mockReturnValue(null);
   });
 
   it("renders the Google sign-in button", () => {
@@ -98,11 +110,29 @@ describe("LoginView", () => {
 
     await waitFor(() => {
       expect(requestDeviceAuthorization).toHaveBeenCalledOnce();
-      expect(openExternalAuth).toHaveBeenCalledWith(
-        "https://auth.example/device",
-      );
+      expect(savePendingDeviceAuth).toHaveBeenCalled();
       expect(navigatePush).toHaveBeenCalledWith("/uk/recipes");
     });
+  });
+
+  it("resumes a pending device flow on mount (after a PWA reload)", async () => {
+    isStandalonePwa.mockReturnValue(true);
+    loadPendingDeviceAuth.mockReturnValue({
+      deviceCode: "device-code",
+      userCode: "ABCD",
+      verificationUrl: "https://auth.example/device",
+      expiresAt: Date.now() + 300_000,
+      intervalMs: 5_000,
+    });
+    pollDeviceAuthorization.mockResolvedValue({ status: "authenticated" });
+
+    render(<LoginView locale="uk" />);
+
+    await waitFor(() => {
+      expect(pollDeviceAuthorization).toHaveBeenCalled();
+      expect(navigatePush).toHaveBeenCalledWith("/uk/recipes");
+    });
+    expect(requestDeviceAuthorization).not.toHaveBeenCalled();
   });
 
   it("aborts standalone polling when cancelled", async () => {

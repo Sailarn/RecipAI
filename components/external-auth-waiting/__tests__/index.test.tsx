@@ -28,7 +28,9 @@ describe("ExternalAuthWaiting", () => {
     );
 
     expect(screen.getByText("Waiting for Google")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open browser" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Try opening in browser" }),
+    ).toBeVisible();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
   });
@@ -43,14 +45,16 @@ describe("ExternalAuthWaiting", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open browser" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Try opening in browser" }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
 
     expect(openExternalAuth).toHaveBeenCalledWith(
       "https://auth.example/request",
     );
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Link copied" })).toBeVisible();
+      expect(screen.getByRole("button", { name: /Link copied/ })).toBeVisible();
     });
   });
 

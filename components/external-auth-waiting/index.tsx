@@ -34,21 +34,25 @@ export function ExternalAuthWaiting({
         {title}
       </p>
       <p className="text-sm text-[var(--fg-2)]">
-        Complete Google authentication in your browser, then return here.
+        Copy this link and open it in your browser (Safari / Chrome), where
+        you're signed in to Google. Approve there, then return here — the in-app
+        browser won't show your saved accounts.
       </p>
-      <button
-        type="button"
-        className="signin-btn"
-        onClick={() => openExternalAuth(url)}
-      >
-        Open browser
-      </button>
       <button type="button" className="signin-btn" onClick={copyLink}>
-        {copyStatus === "copied" ? "Link copied" : "Copy link"}
+        {copyStatus === "copied"
+          ? "Link copied — open it in your browser"
+          : "Copy link"}
       </button>
       {copyStatus === "error" && (
         <p className="text-xs text-red-400">Could not copy the link.</p>
       )}
+      <button
+        type="button"
+        className="text-sm text-[var(--fg-3)] py-2"
+        onClick={() => openExternalAuth(url)}
+      >
+        Try opening in browser
+      </button>
       <button
         type="button"
         className="text-sm text-[var(--fg-3)] py-2"
