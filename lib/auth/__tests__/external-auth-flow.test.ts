@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   canShareExternalAuthUrl,
+  completeDeviceSignIn,
   copyAndOpenExternalAuthUrl,
   type DeviceAuthClient,
   pollDeviceAuthorization,
@@ -232,6 +233,18 @@ describe("external auth browser helpers", () => {
       "_blank",
       "noopener,noreferrer",
     );
+  });
+
+  it("finishes a device sign-in with a full-page navigation", () => {
+    const assign = vi.fn();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { assign },
+    });
+
+    completeDeviceSignIn("/en/recipes");
+
+    expect(assign).toHaveBeenCalledWith("/en/recipes");
   });
 
   it("shares the auth URL when Web Share is available", async () => {

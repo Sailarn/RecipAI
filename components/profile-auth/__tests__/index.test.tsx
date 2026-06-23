@@ -14,6 +14,7 @@ const mockRefresh = vi.hoisted(() => vi.fn());
 const mockPush = vi.hoisted(() => vi.fn());
 const mockRefreshLinkedAccounts = vi.hoisted(() => vi.fn());
 const isStandalonePwa = vi.hoisted(() => vi.fn(() => false));
+const isIos = vi.hoisted(() => vi.fn(() => false));
 const copyAndOpenExternalAuthUrl = vi.hoisted(() => vi.fn());
 const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
 const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
@@ -29,7 +30,7 @@ vi.mock("@/lib/auth/auth-client", () => ({
   },
 }));
 
-vi.mock("@/lib/pwa", () => ({ isStandalonePwa }));
+vi.mock("@/lib/pwa", () => ({ isStandalonePwa, isIos }));
 
 vi.mock("@/lib/auth/external-auth-flow", () => ({
   copyAndOpenExternalAuthUrl,
@@ -182,9 +183,7 @@ describe("ProfileAuth", () => {
       fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
 
       await screen.findByText("Waiting for Google");
-      fireEvent.click(
-        screen.getByRole("button", { name: "Copy and open browser" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "Open in browser" }));
       expect(copyAndOpenExternalAuthUrl).toHaveBeenCalledWith(
         "https://auth.example/external-auth/link?locale=en#token=one-time-token",
       );

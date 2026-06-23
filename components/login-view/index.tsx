@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { authClient } from "@/lib/auth/auth-client";
 import {
+  completeDeviceSignIn,
   type DeviceAuthorization,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
@@ -68,8 +69,7 @@ export function LoginView({ locale }: { locale: string }) {
         });
         if (result.status === "authenticated") {
           clearPendingDeviceAuth();
-          setExternalUrl(undefined);
-          navigate.push(routes.recipes.list(locale));
+          completeDeviceSignIn(routes.recipes.list(locale));
         } else if (result.status === "cancelled") {
           return;
         } else {
@@ -89,7 +89,7 @@ export function LoginView({ locale }: { locale: string }) {
         }
       }
     },
-    [locale, navigate],
+    [locale],
   );
 
   // Resume a device sign-in left pending by a PWA reload (e.g. returning from

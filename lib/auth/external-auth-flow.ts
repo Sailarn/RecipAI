@@ -168,3 +168,12 @@ export async function shareExternalAuthUrl(url: string): Promise<void> {
     url,
   });
 }
+
+// A device sign-in establishes the session through a Set-Cookie on the
+// /device/token response. Finish with a full-page navigation, not a client-side
+// push: the better-auth session atom doesn't know a cookie was just set, so a
+// soft transition keeps the stale signed-out state and lands on the login card.
+// Reloading re-bootstraps the app and reads the fresh session cookie.
+export function completeDeviceSignIn(destinationUrl: string): void {
+  window.location.assign(destinationUrl);
+}

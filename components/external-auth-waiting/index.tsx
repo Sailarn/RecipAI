@@ -7,6 +7,7 @@ import {
   copyExternalAuthUrl,
   shareExternalAuthUrl,
 } from "@/lib/auth/external-auth-flow";
+import { isIos } from "@/lib/pwa";
 
 export function ExternalAuthWaiting({
   url,
@@ -24,6 +25,11 @@ export function ExternalAuthWaiting({
     "idle",
   );
   const [shareStatus, setShareStatus] = useState<"idle" | "error">("idle");
+
+  // iOS keeps window.open inside the in-app browser, which has none of the
+  // user's saved Google accounts — the system Share sheet is the only reliable
+  // way out to Safari/Chrome. Everywhere else, opening a real browser tab works.
+  const shareFirst = isIos() && canShareExternalAuthUrl();
 
   const copyLink = async () => {
     try {
@@ -58,44 +64,57 @@ export function ExternalAuthWaiting({
         {title}
       </p>
       <p className="text-sm text-[var(--fg-2)]">
-        Open this in Safari / Chrome, where you're signed in to Google. We'll
-        copy the link first, so if iOS keeps it inside the app you can paste it
-        into the browser.
+        {shareFirst
+          ? "Tap Share, then open the link in Safari or Chrome — that's where you're signed in to Google. Approve there and come back."
+          : "Open this in your browser, where you're signed in to Google. Approve there, then come back."}
       </p>
-      <button type="button" className="signin-btn" onClick={copyAndOpen}>
-        {openStatus === "copied"
-          ? "Copied — opening browser"
-          : "Copy and open browser"}
-      </button>
-      {openStatus === "error" && (
-        <p className="text-xs text-red-400">
-          Could not copy and open the link.
-        </p>
+
+      {shareFirst ? (
+        <>
+          <button type="button" className="signin-btn" onClick={shareLink}>
+            Share link
+          </button>
+          {shareStatus === "error" && (
+            <p className="text-xs text-red-400">Could not share the link.</p>
+          )}
+          <button
+            type="button"
+            className="text-sm text-[var(--fg-3)] py-2"
+            onClick={copyLink}
+          >
+            {copyStatus === "copied"
+              ? "Link copied — open it in your browser"
+              : "Copy link instead"}
+          </button>
+          {copyStatus === "error" && (
+            <p className="text-xs text-red-400">Could not copy the link.</p>
+          )}
+        </>
+      ) : (
+        <>
+          <button type="button" className="signin-btn" onClick={copyAndOpen}>
+            {openStatus === "copied" ? "Opening browser…" : "Open in browser"}
+          </button>
+          {openStatus === "error" && (
+            <p className="text-xs text-red-400">
+              Could not open the link. Copy it instead.
+            </p>
+          )}
+          <button
+            type="button"
+            className="text-sm text-[var(--fg-3)] py-2"
+            onClick={copyLink}
+          >
+            {copyStatus === "copied"
+              ? "Link copied — open it in your browser"
+              : "Copy link"}
+          </button>
+          {copyStatus === "error" && (
+            <p className="text-xs text-red-400">Could not copy the link.</p>
+          )}
+        </>
       )}
-      {canShareExternalAuthUrl() && (
-        <button
-          type="button"
-          className="text-sm text-[var(--fg-3)] py-2"
-          onClick={shareLink}
-        >
-          Share link
-        </button>
-      )}
-      {shareStatus === "error" && (
-        <p className="text-xs text-red-400">Could not share the link.</p>
-      )}
-      <button
-        type="button"
-        className="text-sm text-[var(--fg-3)] py-2"
-        onClick={copyLink}
-      >
-        {copyStatus === "copied"
-          ? "Link copied — open it in your browser"
-          : "Copy link"}
-      </button>
-      {copyStatus === "error" && (
-        <p className="text-xs text-red-400">Could not copy the link.</p>
-      )}
+
       <button
         type="button"
         className="text-sm text-[var(--fg-3)] py-2"

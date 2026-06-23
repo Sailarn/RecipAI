@@ -10,6 +10,7 @@ const copyExternalAuthUrl = vi.hoisted(() => vi.fn());
 const copyAndOpenExternalAuthUrl = vi.hoisted(() => vi.fn());
 const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
 const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
+const isIos = vi.hoisted(() => vi.fn(() => false));
 
 vi.mock("@/lib/auth/external-auth-flow", () => ({
   openExternalAuth,
@@ -19,15 +20,18 @@ vi.mock("@/lib/auth/external-auth-flow", () => ({
   shareExternalAuthUrl,
 }));
 
+vi.mock("@/lib/pwa", () => ({ isIos }));
+
 import { ExternalAuthWaiting } from "../index";
 
 describe("ExternalAuthWaiting", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     canShareExternalAuthUrl.mockReturnValue(false);
+    isIos.mockReturnValue(false);
   });
 
-  it("offers browser, clipboard, and cancel actions", () => {
+  it("offers browser, clipboard, and cancel actions on non-iOS", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
@@ -38,7 +42,7 @@ describe("ExternalAuthWaiting", () => {
 
     expect(screen.getByText("Waiting for Google")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Copy and open browser" }),
+      screen.getByRole("button", { name: "Open in browser" }),
     ).toBeVisible();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
@@ -54,16 +58,14 @@ describe("ExternalAuthWaiting", () => {
       />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Copy and open browser" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Open in browser" }));
 
     await waitFor(() => {
       expect(copyAndOpenExternalAuthUrl).toHaveBeenCalledWith(
         "https://auth.example/request",
       );
       expect(
-        screen.getByRole("button", { name: /Copied — opening/ }),
+        screen.getByRole("button", { name: /Opening browser/ }),
       ).toBeVisible();
     });
   });
@@ -85,7 +87,8 @@ describe("ExternalAuthWaiting", () => {
     });
   });
 
-  it("shows a share fallback when supported", async () => {
+  it("makes Share the primary action on an iOS PWA", async () => {
+    isIos.mockReturnValue(true);
     canShareExternalAuthUrl.mockReturnValue(true);
     shareExternalAuthUrl.mockResolvedValue(undefined);
     render(
@@ -96,6 +99,10 @@ describe("ExternalAuthWaiting", () => {
       />,
     );
 
+    expect(screen.getByText(/Tap Share/)).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Open in browser" }),
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Share link" }));
 
     await waitFor(() => {
@@ -103,6 +110,25 @@ describe("ExternalAuthWaiting", () => {
         "https://auth.example/request",
       );
     });
+  });
+
+  it("falls back to copy-and-open when iOS cannot share", () => {
+    isIos.mockReturnValue(true);
+    canShareExternalAuthUrl.mockReturnValue(false);
+    render(
+      <ExternalAuthWaiting
+        url="https://auth.example/request"
+        title="Waiting for Google"
+        onCancel={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Open in browser" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Share link" }),
+    ).not.toBeInTheDocument();
   });
 
   it("reports clipboard failure and allows cancellation", async () => {

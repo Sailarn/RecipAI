@@ -10,3 +10,15 @@ export function isStandalonePwa(): boolean {
     (navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
+
+/**
+ * True on iOS (iPhone/iPad/iPod). iPadOS 13+ reports as desktop Safari, so a
+ * touch-capable Mac is treated as iOS too. Client-only — guards against SSR.
+ */
+export function isIos(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const isAppleMobileUa = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIpadOs =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return isAppleMobileUa || isIpadOs;
+}

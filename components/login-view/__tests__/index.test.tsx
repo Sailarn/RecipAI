@@ -8,12 +8,14 @@ import { trackEvent } from "@/lib/telemetry";
 import { LoginView } from "../index";
 
 const isStandalonePwa = vi.hoisted(() => vi.fn(() => false));
+const isIos = vi.hoisted(() => vi.fn(() => false));
 const requestDeviceAuthorization = vi.hoisted(() => vi.fn());
 const pollDeviceAuthorization = vi.hoisted(() => vi.fn());
 const copyAndOpenExternalAuthUrl = vi.hoisted(() => vi.fn());
 const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
 const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
 const copyExternalAuthUrl = vi.hoisted(() => vi.fn());
+const completeDeviceSignIn = vi.hoisted(() => vi.fn());
 const navigatePush = vi.hoisted(() => vi.fn());
 const savePendingDeviceAuth = vi.hoisted(() => vi.fn());
 const loadPendingDeviceAuth = vi.hoisted(() =>
@@ -31,7 +33,7 @@ vi.mock("@/lib/auth/auth-client", () => ({
   },
 }));
 
-vi.mock("@/lib/pwa", () => ({ isStandalonePwa }));
+vi.mock("@/lib/pwa", () => ({ isStandalonePwa, isIos }));
 
 vi.mock("@/lib/auth/external-auth-flow", () => ({
   requestDeviceAuthorization,
@@ -40,6 +42,7 @@ vi.mock("@/lib/auth/external-auth-flow", () => ({
   canShareExternalAuthUrl,
   shareExternalAuthUrl,
   copyExternalAuthUrl,
+  completeDeviceSignIn,
   toDeviceAuthClient: (client: unknown) => client,
 }));
 
@@ -117,7 +120,7 @@ describe("LoginView", () => {
     await waitFor(() => {
       expect(requestDeviceAuthorization).toHaveBeenCalledOnce();
       expect(savePendingDeviceAuth).toHaveBeenCalled();
-      expect(navigatePush).toHaveBeenCalledWith("/uk/recipes");
+      expect(completeDeviceSignIn).toHaveBeenCalledWith("/uk/recipes");
     });
   });
 
@@ -136,7 +139,7 @@ describe("LoginView", () => {
 
     await waitFor(() => {
       expect(pollDeviceAuthorization).toHaveBeenCalled();
-      expect(navigatePush).toHaveBeenCalledWith("/uk/recipes");
+      expect(completeDeviceSignIn).toHaveBeenCalledWith("/uk/recipes");
     });
     expect(requestDeviceAuthorization).not.toHaveBeenCalled();
   });
