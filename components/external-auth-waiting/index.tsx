@@ -6,7 +6,7 @@ import {
   copyAndOpenExternalAuthUrl,
   copyExternalAuthUrl,
   shareExternalAuthUrl,
-} from "@/lib/auth/external-auth-flow";
+} from "@/lib/auth/external-browser";
 import { isIos } from "@/lib/pwa";
 
 export function ExternalAuthWaiting({

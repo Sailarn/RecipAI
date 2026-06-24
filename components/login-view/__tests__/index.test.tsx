@@ -39,14 +39,17 @@ vi.mock("@/lib/pwa", () => ({ isStandalonePwa, isIos }));
 vi.mock("@/lib/auth/external-auth-flow", () => ({
   requestDeviceAuthorization,
   pollDeviceAuthorization,
+  establishDeviceSession,
+  toDeviceAuthClient: (client: unknown) => client,
+  toDeviceSessionClient: (client: unknown) => client,
+}));
+
+vi.mock("@/lib/auth/external-browser", () => ({
   copyAndOpenExternalAuthUrl,
   canShareExternalAuthUrl,
   shareExternalAuthUrl,
   copyExternalAuthUrl,
   completeDeviceSignIn,
-  establishDeviceSession,
-  toDeviceAuthClient: (client: unknown) => client,
-  toDeviceSessionClient: (client: unknown) => client,
 }));
 
 vi.mock("@/lib/auth/pending-device-auth", () => ({

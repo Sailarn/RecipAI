@@ -4,15 +4,11 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  canShareExternalAuthUrl,
-  completeDeviceSignIn,
-  copyAndOpenExternalAuthUrl,
   type DeviceAuthClient,
   type DeviceSessionClient,
   establishDeviceSession,
   pollDeviceAuthorization,
   requestDeviceAuthorization,
-  shareExternalAuthUrl,
 } from "../external-auth-flow";
 
 function createClient({
@@ -220,28 +216,7 @@ describe("external device authentication", () => {
   });
 });
 
-describe("external auth browser helpers", () => {
-  it("copies the auth URL before opening it", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    const open = vi.fn().mockReturnValue({});
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
-    vi.stubGlobal("open", open);
-
-    await expect(
-      copyAndOpenExternalAuthUrl("https://auth.example/request"),
-    ).resolves.toBe(true);
-
-    expect(writeText).toHaveBeenCalledWith("https://auth.example/request");
-    expect(open).toHaveBeenCalledWith(
-      "https://auth.example/request",
-      "_blank",
-      "noopener,noreferrer",
-    );
-  });
-
+describe("device session establishment", () => {
   it("exchanges the device access token for a session cookie", async () => {
     const deviceSession = vi
       .fn()
@@ -267,33 +242,5 @@ describe("external auth browser helpers", () => {
     await expect(
       establishDeviceSession(client, "access-token"),
     ).rejects.toThrow("nope");
-  });
-
-  it("finishes a device sign-in with a full-page navigation", () => {
-    const assign = vi.fn();
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { assign },
-    });
-
-    completeDeviceSignIn("/en/recipes");
-
-    expect(assign).toHaveBeenCalledWith("/en/recipes");
-  });
-
-  it("shares the auth URL when Web Share is available", async () => {
-    const share = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "share", {
-      configurable: true,
-      value: share,
-    });
-
-    expect(canShareExternalAuthUrl()).toBe(true);
-    await shareExternalAuthUrl("https://auth.example/request");
-
-    expect(share).toHaveBeenCalledWith({
-      title: "RecipAI Google sign-in",
-      url: "https://auth.example/request",
-    });
   });
 });

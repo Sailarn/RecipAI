@@ -32,7 +32,7 @@ vi.mock("@/lib/auth/auth-client", () => ({
 
 vi.mock("@/lib/pwa", () => ({ isStandalonePwa, isIos }));
 
-vi.mock("@/lib/auth/external-auth-flow", () => ({
+vi.mock("@/lib/auth/external-browser", () => ({
   copyAndOpenExternalAuthUrl,
   canShareExternalAuthUrl,
   shareExternalAuthUrl,

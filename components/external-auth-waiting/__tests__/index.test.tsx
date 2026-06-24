@@ -12,7 +12,7 @@ const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
 const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
 const isIos = vi.hoisted(() => vi.fn(() => false));
 
-vi.mock("@/lib/auth/external-auth-flow", () => ({
+vi.mock("@/lib/auth/external-browser", () => ({
   openExternalAuth,
   copyExternalAuthUrl,
   copyAndOpenExternalAuthUrl,
