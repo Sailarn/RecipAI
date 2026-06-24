@@ -26,7 +26,7 @@ OUTPUT this exact JSON:
   "cookTime": "number | null",
   "servings": "number | null",
   "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "en": "string — canonical English HEAD noun for matching only: singular, no quantity/size/prep/brand words ("shredded mozzarella"→"mozzarella", "2 small zucchini"→"zucchini", "розтоплене масло"→"butter"); use the generic head when nothing specific fits ("shredded cheese"→"cheese"). Keep item verbatim for display.", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "number", "instruction": "string", "imageUrl": "string | null" }],
   "imageUrl": "string | null"
 }
@@ -62,7 +62,7 @@ Return ONLY valid JSON matching this exact schema:
   "cookTime": "integer | null",
   "servings": "integer",
   "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "en": "string — canonical English HEAD noun for matching only: singular, no quantity/size/prep/brand words ("shredded mozzarella"→"mozzarella", "2 small zucchini"→"zucchini", "розтоплене масло"→"butter"); use the generic head when nothing specific fits ("shredded cheese"→"cheese"). Keep item verbatim for display.", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "integer", "instruction": "string", "imageUrl": null }],
   "imageUrl": null,
   "sourceUrl": null
@@ -108,7 +108,7 @@ ${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matchin
   "cookTime": "integer minutes | null",
   "servings": "integer — lower bound if range | null",
   "category": "one of: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other",
-  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
+  "ingredients": [{ "amount": "number | null", "unit": "string | null", "item": "string", "ua": "string | null — Ukrainian translation of the ingredient name", "en": "string — canonical English HEAD noun for matching only: singular, no quantity/size/prep/brand words ("shredded mozzarella"→"mozzarella", "2 small zucchini"→"zucchini", "розтоплене масло"→"butter"); use the generic head when nothing specific fits ("shredded cheese"→"cheese"). Keep item verbatim for display.", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }],
   "instructions": [{ "order": "integer", "instruction": "string", "imageUrl": null }],
   "imageUrl": null
 }

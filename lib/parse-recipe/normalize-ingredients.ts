@@ -61,10 +61,16 @@ export async function normalizeRecipeIngredients(
   ingredients: Array<{
     item: string;
     ua?: string | null;
+    en?: string | null;
     category?: string | null;
   }>,
 ): Promise<{ matched: number; total: number }> {
-  type Pending = { item: string; ua?: string | null; category?: string | null };
+  type Pending = {
+    item: string;
+    ua?: string | null;
+    en?: string | null;
+    category?: string | null;
+  };
 
   const canonicalIngredientIds: string[] = [];
   const unrecognizedIngredients: string[] = [];
@@ -81,7 +87,11 @@ export async function normalizeRecipeIngredients(
       continue;
     }
 
-    const hit = await matchVocabId(ingredient.item, ingredient.ua);
+    const hit = await matchVocabId(
+      ingredient.item,
+      ingredient.ua,
+      ingredient.en,
+    );
     if (hit) {
       textMatched++;
       canonicalIngredientIds.push(hit);
@@ -107,6 +117,7 @@ export async function normalizeRecipeIngredients(
           items: pending.map((pendingItem) => ({
             item: pendingItem.item,
             ua: pendingItem.ua ?? null,
+            en: pendingItem.en ?? null,
           })),
         }),
       });
@@ -141,8 +152,11 @@ export async function normalizeRecipeIngredients(
       if (matchedId) {
         embedMatched++;
       } else {
+        // Seed the provisional with the English head when present — it
+        // dedupes "2 small zucchini"/"zucchini" to one clean entry.
+        const seed = pendingItem.en?.trim() || pendingItem.item;
         matchedId = await createProvisional(
-          pendingItem.item,
+          seed,
           pendingItem.ua,
           pendingItem.category,
         );
@@ -150,7 +164,7 @@ export async function normalizeRecipeIngredients(
           provisionalCreated++;
           enrichIngredient(
             matchedId,
-            pendingItem.item,
+            seed,
             pendingItem.ua,
             pendingItem.category,
           ).catch(() => {});

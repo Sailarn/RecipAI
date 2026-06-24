@@ -92,12 +92,19 @@ function fuseHit(
 // Resolve raw ingredient text to a confirmed-vocab canonical id via fuzzy
 // match across en/ua names and aliases, or null when nothing matches. This is
 // the cross-language bridge: "flour" and "борошно" both resolve to the same id.
+// `en` is the AI's normalized English head ("shredded mozzarella" -> "mozzarella")
+// and is tried first — it sidesteps modifier dilution and cross-lingual noise.
 // Read-only and synchronous-fast (cached in-memory index) — safe to call from
 // the pantry add path and per-ingredient UI.
 export async function matchVocabId(
   text: string,
   ua?: string | null,
+  en?: string | null,
 ): Promise<string | null> {
   const fuse = await getFuseIndex();
-  return fuseHit(fuse, text) ?? (ua ? fuseHit(fuse, ua) : null);
+  return (
+    (en ? fuseHit(fuse, en) : null) ??
+    fuseHit(fuse, text) ??
+    (ua ? fuseHit(fuse, ua) : null)
+  );
 }

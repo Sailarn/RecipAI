@@ -51,6 +51,25 @@ describe("POST /api/ingredients/embed-match", () => {
     expect(json).toEqual({ matches: ["garlic", null], degraded: false });
   });
 
+  it("embeds the en head in preference to item when supplied", async () => {
+    vi.mocked(embed).mockResolvedValue([[0.1], [0.2]]);
+    vi.mocked(nearestVocab).mockResolvedValue(null);
+
+    await POST(
+      post({
+        items: [
+          { item: "2 small zucchini", en: "zucchini" },
+          { item: "latticini freschi" },
+        ],
+      }),
+    );
+
+    expect(embed).toHaveBeenCalledWith(
+      ["zucchini", "latticini freschi"],
+      "query",
+    );
+  });
+
   it("degrades to all-null (200) when no host is reachable", async () => {
     vi.mocked(embed).mockRejectedValue(new EmbedUnavailable());
 

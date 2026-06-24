@@ -97,4 +97,26 @@ describe("matchVocabId", () => {
       expect(result).toBe("pepper");
     });
   });
+
+  describe("en head key", () => {
+    it("resolves via the en head when the item string itself does not match", async () => {
+      // 6 entries — bust cache
+      mockToArray.mockResolvedValue([
+        makeEntry("salt", "salt", "сіль"),
+        makeEntry("garlic", "garlic", "часник"),
+        makeEntry("butter", "butter", "вершкове масло"),
+        makeEntry("egg", "egg", "яйце"),
+        makeEntry("pepper", "pepper", "перець"),
+        makeEntry("mozzarella", "mozzarella", "моцарела"),
+      ]);
+
+      const result = await matchVocabId(
+        "latticini freschi grattugiati",
+        null,
+        "mozzarella",
+      );
+
+      expect(result).toBe("mozzarella");
+    });
+  });
 });

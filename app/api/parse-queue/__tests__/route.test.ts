@@ -33,6 +33,7 @@ vi.mock("@/lib/upload/upload-token", () => ({
 
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
+import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { mintUploadToken } from "@/lib/upload/upload-token";
 import { GET, POST } from "../route";
@@ -121,7 +122,7 @@ describe("POST /api/parse-queue", () => {
       expect.objectContaining({
         status: "done",
         result: { title: "Cached Pasta" },
-        parserVersion: "2",
+        parserVersion: PARSER_VERSION,
       }),
     );
   });

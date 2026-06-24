@@ -107,6 +107,9 @@ export interface ParsedIngredient {
   unit?: string;
   item: string;
   ua?: string | null;
+  // Canonical English head noun for vocab matching only (never displayed):
+  // "shredded mozzarella" -> "mozzarella". Keeps `item` verbatim for display.
+  en?: string | null;
   category?: string | null;
 }
 

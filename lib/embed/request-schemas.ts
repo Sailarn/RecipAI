@@ -17,6 +17,8 @@ export const embedMatchRequestSchema = z.object({
       z.object({
         item: boundedText,
         ua: z.string().max(EMBED_MAX_TEXT_LENGTH).nullish(),
+        // Normalized English head; the route embeds this in preference to `item`.
+        en: z.string().max(EMBED_MAX_TEXT_LENGTH).nullish(),
       }),
     )
     .min(1)

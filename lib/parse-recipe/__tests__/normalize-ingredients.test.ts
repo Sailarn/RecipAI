@@ -174,6 +174,45 @@ describe("normalizeRecipeIngredients", () => {
     });
   });
 
+  describe("en head match key", () => {
+    it("matches via the en head when the item string itself doesn't match", async () => {
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: "freshly minced ail", en: "garlic" },
+      ]);
+
+      const updates = mockDbRecipesUpdate.mock.calls[0][1];
+      expect(updates.canonicalIngredientIds).toContain("garlic");
+    });
+
+    it("sends the en head in the embed-match payload", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ matches: [null], degraded: false }),
+      });
+
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: "2 small zucchini", en: "zucchini" },
+      ]);
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
+      );
+      expect(body.items[0]).toMatchObject({
+        item: "2 small zucchini",
+        en: "zucchini",
+      });
+    });
+
+    it("seeds the provisional with the en head, not the raw item", async () => {
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: "2 small zucchini", en: "zucchini" },
+      ]);
+
+      const entry = mockDbIngredientsPut.mock.calls[0][0];
+      expect(entry.en).toBe("zucchini");
+    });
+  });
+
   describe("provisional creation", () => {
     it("creates a provisional Dexie entry for unrecognized ingredients", async () => {
       await normalizeRecipeIngredients("recipe-1", [{ item: "xanthan gum" }]);

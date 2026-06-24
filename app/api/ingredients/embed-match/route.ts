@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
   let vectors: number[][];
   try {
     vectors = await embed(
-      items.map((entry) => entry.item),
+      // Embed the normalized English head when the client supplies it — it
+      // matches the EN-embedded vocab same-language; `item` is the fallback.
+      items.map((entry) => entry.en?.trim() || entry.item),
       "query",
     );
   } catch (caughtError) {
