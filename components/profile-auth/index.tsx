@@ -78,7 +78,13 @@ export function ProfileAuth() {
         assertSeparateAuthOrigins(window.location.origin, externalOrigin);
         const response = await authClient.externalLink.generate();
         if (!response.data?.token) {
-          throw new Error("Missing account-link token");
+          // generate() returns no token on failure — most commonly the
+          // /external-link/generate rate limit after repeated taps. Surface a
+          // retry hint instead of a dead-end "could not start".
+          setExternalLinkError(
+            "Could not start Google linking. If you just tried, wait a minute and try again.",
+          );
+          return;
         }
         const url = `${externalOrigin}${routes.externalAuth.link(locale)}#token=${encodeURIComponent(response.data.token)}`;
         setExternalLinkUrl(url);

@@ -189,6 +189,22 @@ describe("ProfileAuth", () => {
       );
     });
 
+    it("shows a retry hint when handoff generation returns no token", async () => {
+      isStandalonePwa.mockReturnValue(true);
+      vi.mocked(authClient.externalLink.generate).mockResolvedValue({
+        data: null,
+        error: { status: 429 },
+      } as never);
+      render(<ProfileAuth />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
+
+      expect(
+        await screen.findByText(/wait a minute and try again/i),
+      ).toBeVisible();
+      expect(screen.queryByText("Waiting for Google")).not.toBeInTheDocument();
+    });
+
     it("calls signOut and router.refresh on sign-out click", async () => {
       render(<ProfileAuth />);
 

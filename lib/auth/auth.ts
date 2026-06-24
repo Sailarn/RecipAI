@@ -54,7 +54,7 @@ export const auth = betterAuth({
     customRules: {
       "/device/code": { window: 60, max: 10 },
       "/device/token": { window: 60, max: 20 },
-      "/external-link/generate": { window: 60, max: 5 },
+      "/external-link/generate": { window: 60, max: 20 },
       "/external-link/redeem": { window: 60, max: 10 },
       "/external-link/device-session": { window: 60, max: 20 },
     },
