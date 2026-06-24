@@ -57,6 +57,11 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/auth/auth-client.ts` | Client-side auth client (`authClient.useSession()`, etc.). |
 | `lib/auth/require-session.ts` | `requireSession()` — gates API routes, returns `{ session }` or `{ response: 401 }`. |
 | `lib/auth/session-state.ts` | Module-level `isSignedIn()` flag — updated by `useSyncOnLogin`, read by `syncFetch`. |
+| `lib/auth/external-auth-flow.ts` | PWA device-authorization protocol (request/poll device code) + `establishDeviceSession` cookie exchange. |
+| `lib/auth/external-browser.ts` | Get the user out to a real browser — open / copy / share a URL, and full-reload after sign-in. |
+| `lib/auth/pending-device-auth.ts` | Persist the pending device auth to `localStorage` so it survives the iOS PWA reload-on-foreground. |
+| `lib/auth/external-link-plugin.ts` + `external-link-client.ts` | Server + client for the handoff endpoints (`generate`/`redeem`/`device-session`/`cleanup`). Client `pathMethods` are required. |
+| `lib/auth/external-auth-config.ts` | External-auth origin/host helpers, `assertSeparateAuthOrigins`. |
 
 ---
 

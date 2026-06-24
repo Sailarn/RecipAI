@@ -111,6 +111,25 @@ Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-
 
 ---
 
+## Auth (PWA external-browser sign-in & linking)
+
+**`/device/token` returns a bearer token, not a cookie.**
+The device-authorization grant creates a session row and returns its token as `access_token` with no `Set-Cookie`. The PWA must exchange it via `POST /external-link/device-session` (`establishDeviceSession`) for a real session cookie, then do a full-page reload. A soft client-side nav keeps the stale signed-out session atom and lands on the login card even though the user is "signed in" server-side.
+
+**better-auth client plugins need `pathMethods`.**
+The client proxy infers the HTTP method from the request *body*; a no-argument call (`externalLink.generate()`, `cleanup()`) has no body, defaults to **GET**, and POST-only routes return **404**. Declare every route's method in the client plugin (`lib/auth/external-link-client.ts`). This silently broke PWA linking until fixed.
+
+**Account linking requires app origin ≠ external-auth origin.**
+The linking handoff sets a temporary session cookie on the external origin; if that equals the app origin and the cookie jar is shared (Android installed-PWA ↔ Chrome) it clobbers the real session, and the cleanup delete then signs the user out. `assertSeparateAuthOrigins` enforces this for linking (not sign-in). So linking works on `recipai.pp.ua` but not when the app is served from the external-auth origin itself.
+
+**Duplicate accounts can't be merged through the UI.**
+Telegram OIDC uses a synthetic `<id>@telegram.oidc` email that never matches Google's, so signing in with the second provider standalone forks a new user; `linkSocial` can only attach an *unowned* provider, not merge two owned identities. Resolution is a manual DB merge (move user-scoped rows, delete the dupe — all FKs to `user` are `ON DELETE CASCADE`). A self-service in-app merge is tracked on the board.
+
+**iOS PWA reloads when it returns to the foreground.**
+Coming back from the system browser wipes in-memory state, so the pending device authorization is persisted to `localStorage` (`lib/auth/pending-device-auth.ts`) and polling resumes on mount. `window.open` also can't escape the in-app browser on iOS — the Share sheet is the only reliable way out, so it's the primary action there.
+
+---
+
 ## PWA / Build
 
 **The Pi can load e5-small in-process under Bun, but deployment may need trusted postinstalls.**

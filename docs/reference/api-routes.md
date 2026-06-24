@@ -104,9 +104,20 @@ The server sends a push notification via VAPID when a parse job completes (`POST
 
 ## Auth
 
-| Route | Description |
-|---|---|
-| `/api/auth/[...all]` | better-auth catch-all handler. Manages sessions, OAuth callbacks, passkey registration, Telegram OIDC. |
+`/api/auth/[...all]` is the better-auth catch-all (sessions, OAuth callbacks, passkey, Telegram OIDC). Notable plugin routes used by the PWA external-browser sign-in and linking flows:
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/device/code` | Client id | Start a device-authorization grant for PWA Google sign-in. |
+| `GET` | `/api/auth/device` | None | Verify a `user_code`'s status. |
+| `POST` | `/api/auth/device/approve`, `/device/deny` | Session | Approve/deny a device code (run in the user's real browser). |
+| `POST` | `/api/auth/device/token` | None | Poll the grant; once approved returns a session token (no cookie). |
+| `POST` | `/api/auth/external-link/device-session` | Token | Exchange the device session token for a real session cookie. |
+| `POST` | `/api/auth/external-link/generate` | Session | Issue a one-time account-link handoff token. |
+| `POST` | `/api/auth/external-link/redeem` | None | Redeem the handoff token → temporary session cookie. |
+| `POST` | `/api/auth/external-link/cleanup` | Session | Delete the temporary linking session. |
+
+See [Auth & Sync](../explanation/auth-and-sync.md) for the full flows. Custom client calls **must** declare their method in the client plugin's `pathMethods` — a body-less call otherwise defaults to GET and POST-only routes 404 (see gotchas).
 
 ---
 

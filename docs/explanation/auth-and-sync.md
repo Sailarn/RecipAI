@@ -38,6 +38,27 @@ Never inline `auth.api.getSession` + a manual null check. Routes that intentiona
 
 `lib/auth/session-state.ts` exports `isSignedIn()` — a module-level boolean updated by `useSyncOnLogin` whenever the session changes. This lets `syncFetch` skip fire-and-forget calls when the user is not signed in, avoiding 401 noise from local-only writes.
 
+### PWA Google sign-in & linking (external browser)
+
+An installed PWA's in-app browser has none of the user's saved Google accounts, so signing in or linking Google *inside* the PWA shows an empty account picker. Both flows route the user out to their **real** browser and reconcile through the shared Postgres DB. The app origin **must differ** from `NEXT_PUBLIC_EXTERNAL_AUTH_URL` (the external-auth origin) — see [gotchas](../reference/gotchas.md).
+
+**Files:** `components/login-view` (sign-in) · `components/profile-auth` (linking) · `lib/auth/external-auth-flow.ts` (device protocol + session exchange) · `lib/auth/external-browser.ts` (open / copy / share / full-reload helpers) · `lib/auth/pending-device-auth.ts` (reload survival) · `lib/auth/external-link-plugin.ts` + `external-link-client.ts` (handoff endpoints) · `app/external-auth/*` (pages opened in the real browser).
+
+**Sign-in — device authorization grant**
+
+1. PWA calls `/device/code` → `device_code` + `user_code`, saved to `localStorage` so it survives the iOS PWA reload-on-foreground.
+2. User opens the verification URL in their real browser (**Share** on iOS — `window.open` can't escape the in-app browser), signs in with Google, and approves (`/device/approve` sets `status = approved` + `user_id`).
+3. PWA polls `/device/token`. On approval better-auth deletes the row and returns the session token as `access_token` — **but sets no cookie** (bearer grant).
+4. PWA exchanges that token for a real cookie via `POST /external-link/device-session` (`establishDeviceSession`), then does a **full-page reload** to recipes (`completeDeviceSignIn`) so the app re-reads the fresh cookie. A soft client-side nav would keep the stale signed-out state and land on the login card.
+
+**Linking — one-time handoff token**
+
+1. Signed-in PWA calls `POST /external-link/generate` → a hashed one-time token (stored in `verification`, tied to the current user).
+2. User opens the link page in their real browser; it redeems the token (`/external-link/redeem` → temporary session cookie on the external origin), runs `linkSocial({ provider: "google" })`, then `/external-link/cleanup` deletes the temp session.
+3. PWA polls `listAccounts()` until Google appears.
+
+`linkSocial` can only attach an **unowned** provider. If the user already signed in with that provider as a separate standalone account, linking fails — see the duplicate-account note in [gotchas](../reference/gotchas.md).
+
 ---
 
 ## Sync on login (`hooks/use-sync-on-login.ts`)
