@@ -1,9 +1,19 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 
-// Match thresholds — carried over verbatim from the former on-device matcher.
-const SIMILARITY_THRESHOLD = 0.82;
-const SIMILARITY_GAP = 0.08;
+// Match thresholds — calibrated for Xenova/multilingual-e5-small from a labeled
+// probe sweep (scripts/local/admin/calibrate). The vocab is embedded on the EN
+// `en` field, so this matcher's real job is English items Fuse missed on
+// modifiers ("small zucchini" 0.89, "boneless skinless chicken breast" 0.89);
+// Cyrillic stays Fuse's job via UA aliases (cross-lingual sims are unreliable —
+// "кабачок"→cabbage-red 0.83). Same-language correct matches cluster ≥0.89
+// (median 0.93); generic "should-reject" queries top out at 0.875 ("fresh
+// herbs"→turmeric-fresh) — so 0.88 cleanly separates them. The old 0.08 gap
+// wrongly rejected correct matches with a close sibling (tomato/tomato-cherry
+// 0.027, bell-pepper-red/green 0.046); 0.02 sits below the smallest correct gap
+// (0.022) so it only declines genuine dead-heats.
+const SIMILARITY_THRESHOLD = 0.88;
+const SIMILARITY_GAP = 0.02;
 
 export type Neighbor = { id: string; sim: number };
 

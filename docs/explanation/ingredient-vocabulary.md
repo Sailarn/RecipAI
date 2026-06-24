@@ -43,7 +43,7 @@ graph TD
 
 **2. Fuse.js fuzzy match.** A Fuse index (threshold 0.2) is built over every confirmed entry's `en`, `ua`, and both alias arrays, from the **local Dexie copy** of the vocabulary. Parenthesised text is stripped first. If the full string misses, each token longer than 3 chars is tried individually — handling phrases like "кетчупу Торчин для дітей" → "кетчупу" → ketchup — with a guard that the matched alias is at most 2 words, so a common word can't hit a long alias phrase.
 
-**3. Embedding match.** Fuse misses are batched to `POST /api/ingredients/embed-match`. The server embeds each query through the configured provider chain, then asks Postgres for the two nearest confirmed vocabulary vectors using pgvector cosine distance. A match is accepted only when the best similarity is **≥ 0.82** and leads the runner-up by **≥ 0.08** — ambiguous matches fall through rather than guess. If every embedding provider is unavailable, the route returns HTTP 200 with `degraded: true` and null matches so normalization continues through provisional creation.
+**3. Embedding match.** Fuse misses are batched to `POST /api/ingredients/embed-match`. The server embeds each query through the configured provider chain, then asks Postgres for the two nearest confirmed vocabulary vectors using pgvector cosine distance. A match is accepted only when the best similarity is **≥ 0.88** and leads the runner-up by **≥ 0.02** — ambiguous matches fall through rather than guess. (These are calibrated for `multilingual-e5-small`; see the matcher comment in `lib/db/vocab-vector-search.ts` and `scripts/local/admin/calibrate`.) If every embedding provider is unavailable, the route returns HTTP 200 with `degraded: true` and null matches so normalization continues through provisional creation.
 
 **4. Provisional + enrichment.** Anything still unmatched becomes a new provisional entry (deduplicated by raw text), written to Dexie immediately and upserted to Postgres via `POST /api/ingredients`. In parallel, `POST /api/ingredients/enrich` asks the AI to fill in the canonical name, Ukrainian translation, category, and aliases. Before confirming the entry, the route computes its `passage:` vector through the same server provider chain and stores it in Postgres. Embedding failure does not block enrichment: the row is confirmed with a null vector so a later repair pass can find it.
 
@@ -71,7 +71,7 @@ E5 prefixes remain strict: parsed ingredient strings use `query:`, while confirm
 
 Vocabulary embeddings live only in Postgres, in `ingredients.embedding` (`vector(384)`). `GET /api/ingredients` deliberately omits them, so the device sync contains names, aliases, categories, and statuses but not vectors. The optional Dexie `VocabularyIngredient.embedding` property is dormant and retained only to avoid a client schema migration.
 
-`nearestVocab` performs an exact top-two pgvector search over confirmed, non-null rows. The `<=>` operator returns cosine **distance**, so the query converts it to similarity with `1 - distance` before applying the `0.82` threshold and `0.08` runner-up gap. No ANN index is needed at the current vocabulary size.
+`nearestVocab` performs an exact top-two pgvector search over confirmed, non-null rows. The `<=>` operator returns cosine **distance**, so the query converts it to similarity with `1 - distance` before applying the `0.88` threshold and `0.02` runner-up gap. No ANN index is needed at the current vocabulary size.
 
 ---
 
