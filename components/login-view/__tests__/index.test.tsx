@@ -216,6 +216,13 @@ describe("LoginView", () => {
     expect(clearPendingDeviceAuth).not.toHaveBeenCalled();
   });
 
+  it("hints that passkey needs an existing account", () => {
+    render(<LoginView locale="en" />);
+    expect(
+      screen.getByText(/Passkey only works once you've added one/i),
+    ).toBeVisible();
+  });
+
   it("tracks login when signing in with Passkey", async () => {
     render(<LoginView locale="en" />);
 

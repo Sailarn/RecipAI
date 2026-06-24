@@ -66,7 +66,7 @@ export function ExternalLinkComplete() {
       }
       setMessage(
         linkingFailed
-          ? "Google account was not linked. Return to RecipAI and try again."
+          ? "Couldn't link Google — it may already be a separate RecipAI account. Sign in with it directly instead. Return to RecipAI."
           : "Google account linked. Return to RecipAI.",
       );
     });

@@ -215,6 +215,10 @@ export function LoginView({ locale }: { locale: string }) {
               </div>
               <span>Continue with Telegram</span>
             </button>
+            <p className="text-center text-[11px] text-[var(--fg-3)] mt-1 leading-[1.5]">
+              New here? Use Google or Telegram — Passkey only works once you've
+              added one to your account.
+            </p>
           </div>
         )}
 

@@ -91,9 +91,7 @@ describe("ExternalLinkComplete", () => {
     render(<ExternalLinkComplete />);
 
     expect(
-      await screen.findByText(
-        "Google account was not linked. Return to RecipAI and try again.",
-      ),
+      await screen.findByText(/it may already be a separate RecipAI account/),
     ).toBeVisible();
   });
 });
