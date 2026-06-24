@@ -189,7 +189,7 @@ describe("ProfileAuth", () => {
       );
     });
 
-    it("shows a retry hint when handoff generation returns no token", async () => {
+    it("shows a wait hint when handoff generation is rate limited", async () => {
       isStandalonePwa.mockReturnValue(true);
       vi.mocked(authClient.externalLink.generate).mockResolvedValue({
         data: null,
@@ -203,6 +203,19 @@ describe("ProfileAuth", () => {
         await screen.findByText(/wait a minute and try again/i),
       ).toBeVisible();
       expect(screen.queryByText("Waiting for Google")).not.toBeInTheDocument();
+    });
+
+    it("surfaces the failure status when handoff generation returns no token", async () => {
+      isStandalonePwa.mockReturnValue(true);
+      vi.mocked(authClient.externalLink.generate).mockResolvedValue({
+        data: null,
+        error: { status: 401 },
+      } as never);
+      render(<ProfileAuth />);
+
+      fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
+
+      expect(await screen.findByText(/error 401/i)).toBeVisible();
     });
 
     it("calls signOut and router.refresh on sign-out click", async () => {

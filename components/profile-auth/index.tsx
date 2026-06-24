@@ -78,11 +78,14 @@ export function ProfileAuth() {
         assertSeparateAuthOrigins(window.location.origin, externalOrigin);
         const response = await authClient.externalLink.generate();
         if (!response.data?.token) {
-          // generate() returns no token on failure — most commonly the
-          // /external-link/generate rate limit after repeated taps. Surface a
-          // retry hint instead of a dead-end "could not start".
+          // Surface the real reason instead of a dead-end "could not start":
+          // 429 is the generate rate limit; any other status is shown so the
+          // failure is diagnosable on-device.
+          const status = response.error?.status;
           setExternalLinkError(
-            "Could not start Google linking. If you just tried, wait a minute and try again.",
+            status === 429
+              ? "Too many attempts. Wait a minute and try again."
+              : `Could not start Google linking (error ${status ?? "unknown"}). Please try again.`,
           );
           return;
         }
