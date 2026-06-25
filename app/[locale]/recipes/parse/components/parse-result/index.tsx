@@ -3,20 +3,33 @@
 import {
   CATEGORY_VISUAL_STYLES,
   DEFAULT_CATEGORY_VISUAL_STYLE,
+  RECIPE_CATEGORIES,
+  type RecipeCategory,
 } from "@/lib/categories";
-import type { ParsedRecipe } from "@/lib/db/schema";
+import type { ParsedRecipeEntry } from "@/lib/db/schema";
 import { CategoryBadge } from "../category-badge";
 import { IngredientsPreview } from "../ingredients-preview";
 
 interface ParseResultProps {
-  result: ParsedRecipe;
+  result: ParsedRecipeEntry;
   onSave: () => void;
   onReset: () => void;
 }
 
+function isRecipeCategory(
+  category: string | undefined,
+): category is RecipeCategory {
+  return RECIPE_CATEGORIES.some(
+    (recipeCategory) => recipeCategory === category,
+  );
+}
+
 export function ParseResult({ result, onSave, onReset }: ParseResultProps) {
-  const categoryStyle = result.category
-    ? (CATEGORY_VISUAL_STYLES[result.category] ?? DEFAULT_CATEGORY_VISUAL_STYLE)
+  const category = isRecipeCategory(result.category)
+    ? result.category
+    : undefined;
+  const categoryStyle = category
+    ? CATEGORY_VISUAL_STYLES[category]
     : DEFAULT_CATEGORY_VISUAL_STYLE;
 
   const metaParts: string[] = [];
@@ -43,9 +56,7 @@ export function ParseResult({ result, onSave, onReset }: ParseResultProps) {
           <p className="font-heading text-[14px] font-bold text-[var(--fg-1)] flex-1 mr-2">
             {result.title}
           </p>
-          {result.category && (
-            <CategoryBadge label={result.category} style={categoryStyle} />
-          )}
+          {category && <CategoryBadge label={category} style={categoryStyle} />}
         </div>
 
         {/* Meta */}

@@ -13,7 +13,7 @@ import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
-import { sendPushNotification } from "@/lib/web-push";
+import { type PushPayload, sendPushNotification } from "@/lib/web-push";
 import { classifyParseError, parseWithRetry } from "./helpers";
 
 export const maxDuration = 60;
@@ -52,6 +52,41 @@ async function handlePushFailure(
 // A job whose PROCESSING row is newer than this is treated as in-flight, so a
 // replayed call won't kick off a second Gemini parse for the same job.
 const IN_FLIGHT_SECONDS = 90;
+
+interface ParseJobPushSource {
+  userId: string | null;
+  pushEndpoint: string | null;
+}
+
+interface NotifyParseJobSubscribersOptions {
+  job: ParseJobPushSource;
+  payload: PushPayload;
+  req: NextRequest;
+}
+
+async function notifyParseJobSubscribers({
+  job,
+  payload,
+  req,
+}: NotifyParseJobSubscribersOptions): Promise<void> {
+  if (!job.pushEndpoint) return;
+
+  const targets = job.userId
+    ? await db
+        .select()
+        .from(pushSubscriptions)
+        .where(eq(pushSubscriptions.userId, job.userId))
+    : await db
+        .select()
+        .from(pushSubscriptions)
+        .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
+
+  for (const target of targets) {
+    sendPushNotification(target, payload).catch((pushError: unknown) =>
+      handlePushFailure(target.endpoint, pushError, req),
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   let body: { jobId?: string };
@@ -131,28 +166,15 @@ export async function POST(req: NextRequest) {
     // device that subscribed after (or instead of) the enqueue-time endpoint
     // still gets the push; anonymous jobs fall back to the single enqueue-time
     // endpoint. Expired endpoints are pruned per-send by handlePushFailure.
-    if (job.pushEndpoint) {
-      const targets = job.userId
-        ? await db
-            .select()
-            .from(pushSubscriptions)
-            .where(eq(pushSubscriptions.userId, job.userId))
-        : await db
-            .select()
-            .from(pushSubscriptions)
-            .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
-
-      const parsedTitle = finalRecipe.title;
-      for (const sub of targets) {
-        sendPushNotification(sub, {
-          title: parsedTitle,
-          body: "Your recipe is ready — tap to review",
-          url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
-        }).catch((pushError: unknown) =>
-          handlePushFailure(sub.endpoint, pushError, req),
-        );
-      }
-    }
+    await notifyParseJobSubscribers({
+      job,
+      req,
+      payload: {
+        title: finalRecipe.title,
+        body: "Your recipe is ready — tap to review",
+        url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
+      },
+    });
 
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
@@ -202,6 +224,16 @@ export async function POST(req: NextRequest) {
     if (job.telegramChatId) {
       await sendTelegramMessage(job.telegramChatId, classifyParseError(error));
     }
+
+    await notifyParseJobSubscribers({
+      job,
+      req,
+      payload: {
+        title: "Recipe parse failed",
+        body: classifyParseError(error),
+        url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
+      },
+    });
 
     return NextResponse.json({ ok: false });
   }

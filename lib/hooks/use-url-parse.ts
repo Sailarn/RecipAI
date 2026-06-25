@@ -1,11 +1,22 @@
 "use client";
 
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
-import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
+import { addParsedRecipeResult } from "@/lib/db/parsed-recipes";
+import {
+  PARSE_JOB_STATUS,
+  type ParsedRecipe,
+  type ParsedRecipeEntry,
+} from "@/lib/db/schema";
 import { usePushSubscription } from "@/lib/hooks/use-push-subscription";
 import { logger } from "@/lib/logger";
 import { claimJobCompletion } from "@/lib/parse-job-completion";
+import {
+  PARSED_RECIPE_CREATED_EVENT,
+  parseParsedRecipeCreatedEvent,
+} from "@/lib/parse-job-events";
 import {
   addJobId,
   getJobIds,
@@ -24,7 +35,7 @@ import { useNavigate } from "@/lib/transitions";
 
 interface UseUrlParseOptions {
   locale: string;
-  onSuccess?: (data: ParsedRecipe) => void;
+  onSuccess?: (data: ParsedRecipeEntry) => void;
 }
 
 function isValidUrl(value: string): boolean {
@@ -45,8 +56,19 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ParsedRecipe | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [activeParsedRecipeId, setActiveParsedRecipeId] = useState<
+    string | null
+  >(null);
+
+  const parsedRecipe = useLiveQuery(async () => {
+    if (activeParsedRecipeId) {
+      return db.parsedRecipes.get(activeParsedRecipeId);
+    }
+    if (loading || jobId) return undefined;
+    return db.parsedRecipes.orderBy("createdAt").reverse().first();
+  }, [activeParsedRecipeId, loading, jobId]);
+  const result = parsedRecipe ?? null;
 
   const poll = useCallback((id: string) => {
     const run = async () => {
@@ -68,11 +90,12 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           const uploadToken = getUploadToken(id);
           if (uploadToken) storePendingUploadToken(uploadToken);
           removeJobId(id);
+          const entry = await addParsedRecipeResult(parsed);
+          setActiveParsedRecipeId(entry.id);
           recordParseHistory(
             doneParseHistoryEntry(id, parsed.title, parsed.sourceUrl ?? jobUrl),
           ).catch(() => {});
           trackEvent("parse_succeeded", { source: "url" });
-          setResult(parsed);
           setLoading(false);
           setJobId(null);
         } else if (status === PARSE_JOB_STATUS.FAILED) {
@@ -115,6 +138,21 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     };
   }, []);
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = parseParsedRecipeCreatedEvent(event);
+      if (!detail || detail.jobId !== jobId) return;
+      setActiveParsedRecipeId(detail.entryId);
+      setLoading(false);
+      setJobId(null);
+    };
+
+    window.addEventListener(PARSED_RECIPE_CREATED_EVENT, handler);
+    return () => {
+      window.removeEventListener(PARSED_RECIPE_CREATED_EVENT, handler);
+    };
+  }, [jobId]);
+
   const handleParse = async () => {
     if (!isValidUrl(url)) {
       setError("Please enter a valid URL including https://");
@@ -122,7 +160,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     }
     setLoading(true);
     setError(null);
-    setResult(null);
+    setActiveParsedRecipeId(null);
 
     try {
       // Subscribe to push notifications if not yet subscribed.
@@ -168,6 +206,8 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         const parsed = cachedResult as ParsedRecipe;
         claimJobCompletion(newJobId);
         if (uploadToken) storePendingUploadToken(uploadToken);
+        const entry = await addParsedRecipeResult(parsed);
+        setActiveParsedRecipeId(entry.id);
         recordParseHistory(
           doneParseHistoryEntry(
             newJobId,
@@ -176,7 +216,6 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           ),
         ).catch(() => {});
         trackEvent("parse_succeeded", { source: "url" });
-        setResult(parsed);
         setLoading(false);
         return;
       }
@@ -200,20 +239,27 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!result) return;
     trackEvent("parse_reviewed", undefined);
     if (onSuccess) {
       onSuccess(result);
+      await db.parsedRecipes.delete(result.id);
+      setActiveParsedRecipeId(null);
       navigate.back();
     } else {
       localStorage.setItem("parsedRecipe", JSON.stringify(result));
+      await db.parsedRecipes.delete(result.id);
+      setActiveParsedRecipeId(null);
       navigate.push(routes.recipes.new(locale));
     }
   };
 
-  const handleReset = () => {
-    setResult(null);
+  const handleReset = async () => {
+    if (result) {
+      await db.parsedRecipes.delete(result.id);
+    }
+    setActiveParsedRecipeId(null);
     setUrl("");
     setError(null);
     if (jobId) removeJobId(jobId);

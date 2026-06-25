@@ -98,7 +98,7 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 | `POST` | `/api/push/subscribe` | None (session optional) | Upsert a push subscription (`{ endpoint, keys: { p256dh, auth } }`). If a session is present the subscription is linked to the user. |
 | `DELETE` | `/api/push/subscribe` | None | Remove a push subscription by `{ endpoint }`. |
 
-The server sends a push notification via VAPID when a parse job completes (`POST /api/parse-queue/process`). The client passes its subscription endpoint when creating a job, but at completion a **signed-in** job is delivered to *all* of the user's current subscriptions — resolved by `userId` at send time, so a device that subscribed after (or instead of) the enqueue-time endpoint still gets the push. Anonymous jobs fall back to the single enqueue-time endpoint. Expired endpoints (`404`/`410`) are pruned per send.
+The server sends a push notification via VAPID when a parse job finishes (`POST /api/parse-queue/process`): success sends "recipe ready", and failure sends a parse-failed notification. The client passes its subscription endpoint when creating a job, but at completion a **signed-in** job is delivered to *all* of the user's current subscriptions — resolved by `userId` at send time, so a device that subscribed after (or instead of) the enqueue-time endpoint still gets the push. Anonymous jobs fall back to the single enqueue-time endpoint. Expired endpoints (`404`/`410`) are pruned per send.
 
 ---
 

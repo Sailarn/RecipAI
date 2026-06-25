@@ -167,6 +167,24 @@ describe("useParseJobWatcher", () => {
       expect(entry.createdAt).toBeInstanceOf(Date);
     });
 
+    it("notifies the parse page when a durable parsedRecipe entry is created", async () => {
+      const listener = vi.fn();
+      window.addEventListener("parsed-recipe-created", listener);
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(doneResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await waitFor(() => expect(listener).toHaveBeenCalled());
+      expect(listener.mock.calls[0][0]).toMatchObject({
+        detail: {
+          jobId: "job-1",
+          entryId: expect.any(String),
+        },
+      });
+      window.removeEventListener("parsed-recipe-created", listener);
+    });
+
     it("records a done parse-history entry", async () => {
       vi.mocked(getJobIds).mockReturnValue(["job-1"]);
       mockFetch.mockResolvedValue(doneResponse());

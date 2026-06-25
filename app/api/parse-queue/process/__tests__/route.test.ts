@@ -103,6 +103,7 @@ function flushMicrotasks() {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(isImageKitUrl).mockReturnValue(false);
+  vi.mocked(sendPushNotification).mockResolvedValue(undefined);
 });
 
 describe("POST /api/parse-queue/process", () => {
@@ -204,6 +205,27 @@ describe("POST /api/parse-queue/process", () => {
       await POST(makeRequest({ jobId: "job-1" }));
 
       expect(sendPushNotification).not.toHaveBeenCalled();
+    });
+
+    it("sends a failure push when parsing fails and the job has a subscribed endpoint", async () => {
+      setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: "https://web.push.apple.com/abc",
+      });
+      vi.mocked(parseRecipeFromUrl).mockRejectedValue(
+        new Error("Could not extract enough text from page"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendPushNotification).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          title: "Recipe parse failed",
+          body: expect.stringContaining("Couldn't read the page"),
+        }),
+      );
     });
 
     it("prunes the subscription when the push service reports it expired", async () => {

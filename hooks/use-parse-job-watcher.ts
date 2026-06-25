@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
+import { createParsedRecipeEntry } from "@/lib/db/parsed-recipes";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
-import type { ParsedRecipe, ParsedRecipeEntry } from "@/lib/db/schema";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import { claimJobCompletion } from "@/lib/parse-job-completion";
+import { dispatchParsedRecipeCreated } from "@/lib/parse-job-events";
 import {
   getJobIds,
   getPendingUploadToken,
@@ -22,7 +24,6 @@ import { api, routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
-import { generateId } from "@/lib/utils";
 
 export function useParseJobWatcher() {
   const navigate = useNavigate();
@@ -43,21 +44,7 @@ export function useParseJobWatcher() {
       if (uploadToken) storePendingUploadToken(uploadToken);
       removeJobId(id);
 
-      // save to parsedRecipes table
-      const entry: ParsedRecipeEntry = {
-        id: generateId(),
-        title: result.title,
-        description: result.description,
-        prepTime: result.prepTime,
-        cookTime: result.cookTime,
-        servings: result.servings ?? 1,
-        ingredients: result.ingredients,
-        instructions: result.instructions,
-        imageUrl: result.imageUrl,
-        sourceUrl: result.sourceUrl,
-        category: result.category,
-        createdAt: new Date(),
-      };
+      const entry = createParsedRecipeEntry(result);
 
       let imageUrl = entry.imageUrl;
       // The image is uploaded to ImageKit at parse time, so the result usually
@@ -76,6 +63,7 @@ export function useParseJobWatcher() {
 
       const updatedEntry = { ...entry, imageUrl, imageFileId };
       await db.parsedRecipes.add(updatedEntry);
+      dispatchParsedRecipeCreated({ jobId: id, entryId: updatedEntry.id });
 
       toast(result.title, {
         description: "Recipe parsed — tap to review",

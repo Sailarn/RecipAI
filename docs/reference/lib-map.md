@@ -41,6 +41,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/recipes.ts` | CRUD: `createRecipe`, `updateRecipe`, `deleteRecipe`. |
 | `lib/db/collections.ts` | CRUD for collections. |
 | `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
+| `lib/db/parsed-recipes.ts` | Builds and stores durable parsed-recipe notification rows shared by the parse page and bell sheet. |
 | `lib/db/parse-history.ts` | `recordParseHistory`, `bulkPutParseHistory`, `getParseHistory`, `clearParseHistory`. |
 | `lib/db/pantry.ts` | `addPantryItem` (dedups by `ingredientId`, writes dormant `qty`/`unit`/`cat` defaults), `bulkPutPantry`, `clearPantry` and related pantry ops. |
 | `lib/db/supabase-sync.ts` | Fire-and-forget sync on writes: `syncCreate`, `syncUpdate`, `syncDelete`. |
@@ -123,6 +124,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
 | `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
+| `lib/parse-job-events.ts` | Browser events that hand completed parse-job rows from the global watcher back to the parse page. |
 | `lib/categories.ts` | Recipe category constants. |
 | `lib/category-styles.ts` | Category badge colors (`getCategoryStyle()`) — single source of truth. |
 | `lib/utils.ts` | `generateId()` and other small utilities. |
@@ -137,7 +139,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | File | Purpose |
 |---|---|
 | `hooks/use-sync-on-login.ts` | Runs on session change — diffs recipes/collections, syncs ingredients, pantry, and parse history. |
-| `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, shows toast. |
+| `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, and creates parsed-recipe bell entries for background completions. |
 | `hooks/` (rest) | UI hooks: long press, pull to refresh, recipe filter/matcher, recipes page state, live-query transition. |
 | `lib/hooks/` | `use-pwa-install` (install prompt), `use-push-subscription` (push lifecycle), `use-normalize-on-startup`, `use-url-parse`. |
 
