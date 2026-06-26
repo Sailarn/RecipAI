@@ -50,6 +50,7 @@ function isValidUrl(value: string): boolean {
 export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
   const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
   const { subscription, subscribe, isSupported, permission } =
     usePushSubscription();
 
@@ -77,11 +78,9 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         const { status, result, error, url: jobUrl } = await statusRes.json();
 
         if (status === PARSE_JOB_STATUS.DONE) {
-          // The global watcher may have already handled this job (e.g. it
-          // completed in the background before this page resumed polling it).
-          // If so, bail without re-running side effects — the toast/bell entry
-          // it created is the single source of truth.
-          if (!claimJobCompletion(id)) {
+          // If we've navigated away, don't claim — let the global watcher show
+          // the toast instead. If the watcher already claimed, also bail.
+          if (!isMountedRef.current || !claimJobCompletion(id)) {
             setLoading(false);
             setJobId(null);
             return;
@@ -99,7 +98,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
           setLoading(false);
           setJobId(null);
         } else if (status === PARSE_JOB_STATUS.FAILED) {
-          if (!claimJobCompletion(id)) {
+          if (!isMountedRef.current || !claimJobCompletion(id)) {
             setLoading(false);
             setJobId(null);
             return;
@@ -134,6 +133,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       if (pollRef.current) clearTimeout(pollRef.current);
     };
   }, []);

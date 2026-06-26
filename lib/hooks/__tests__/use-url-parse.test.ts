@@ -402,5 +402,36 @@ describe("useUrlParse", () => {
         source: "url",
       });
     });
+
+    it("does not claim completion when unmounted before the job finishes", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+
+      let resolveFetch!: (res: Response) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+
+      const { unmount } = renderHook(() => useUrlParse({ locale: "en" }));
+
+      unmount();
+
+      resolveFetch(
+        makeResponse({
+          status: "done",
+          result: { title: "Test Recipe", ingredients: [], instructions: [] },
+          url: "https://example.com/recipe",
+        }),
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(claimJobCompletion).not.toHaveBeenCalled();
+      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
+    });
   });
 });
