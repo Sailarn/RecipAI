@@ -42,6 +42,19 @@ describe("requireCompleteRecipe", () => {
     });
   });
 
+  it("logs source 'social' and throws with social wording for social not-recipe", () => {
+    expect(() =>
+      requireCompleteRecipe({ notRecipe: true }, "social", {
+        url: "https://youtu.be/abc",
+      }),
+    ).toThrow("Couldn't extract a recipe from this social post");
+    expect(log).toHaveBeenCalledWith("warn", "parse_incomplete", {
+      source: "social",
+      reason: "not_recipe",
+      url: "https://youtu.be/abc",
+    });
+  });
+
   it("logs the partial result when ingredients are missing", () => {
     const partial = { ...completeRecipe, ingredients: [] };
 

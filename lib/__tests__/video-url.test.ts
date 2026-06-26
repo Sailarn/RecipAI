@@ -1,21 +1,24 @@
 import { describe, expect, it } from "vitest";
 import {
+  getSocialPlatform,
   getYouTubeThumbnail,
   isInstagramUrl,
-  isUnsupportedVideoUrl,
-  isVideoUrl,
+  isSocialUrl,
 } from "../video-url";
 
-describe("isVideoUrl", () => {
+describe("isSocialUrl", () => {
   it.each([
     "https://www.instagram.com/reel/ABC123/",
     "https://www.instagram.com/p/ABC123/",
+    "https://www.instagram.com/tv/ABC123/",
     "https://www.tiktok.com/@user/video/123",
     "https://www.youtube.com/shorts/abc123",
     "https://www.youtube.com/watch?v=abc123",
     "https://youtu.be/abc123",
+    "https://x.com/user/status/1234567890",
+    "https://twitter.com/user/status/1234567890",
   ])("returns true for %s", (url) => {
-    expect(isVideoUrl(url)).toBe(true);
+    expect(isSocialUrl(url)).toBe(true);
   });
 
   it.each([
@@ -23,8 +26,26 @@ describe("isVideoUrl", () => {
     "https://example.com/recipe",
     "https://www.youtube.com/channel/UCabc",
     "https://www.youtube.com/playlist?list=abc",
+    "https://x.com/user",
   ])("returns false for %s", (url) => {
-    expect(isVideoUrl(url)).toBe(false);
+    expect(isSocialUrl(url)).toBe(false);
+  });
+});
+
+describe("getSocialPlatform", () => {
+  it.each([
+    ["https://www.instagram.com/p/ABC123/", "instagram"],
+    ["https://www.tiktok.com/@user/video/123", "tiktok"],
+    ["https://www.youtube.com/shorts/dQw4w9WgXcQ", "youtube"],
+    ["https://youtu.be/dQw4w9WgXcQ", "youtube"],
+    ["https://x.com/user/status/1234567890", "x"],
+    ["https://twitter.com/user/status/1234567890", "x"],
+  ] as const)("detects %s as %s", (url, platform) => {
+    expect(getSocialPlatform(url)).toBe(platform);
+  });
+
+  it("returns null for non-social recipe pages", () => {
+    expect(getSocialPlatform("https://example.com/recipe")).toBeNull();
   });
 });
 
@@ -74,23 +95,6 @@ describe("isInstagramUrl", () => {
   it("returns false for non-instagram URLs", () => {
     expect(isInstagramUrl("https://www.youtube.com/watch?v=abc")).toBe(false);
     expect(isInstagramUrl("https://www.tiktok.com/@user/video/123")).toBe(
-      false,
-    );
-  });
-});
-
-describe("isUnsupportedVideoUrl", () => {
-  it("returns true for TikTok URLs", () => {
-    expect(
-      isUnsupportedVideoUrl("https://www.tiktok.com/@user/video/123"),
-    ).toBe(true);
-  });
-
-  it("returns false for supported platforms", () => {
-    expect(isUnsupportedVideoUrl("https://www.instagram.com/reel/ABC/")).toBe(
-      false,
-    );
-    expect(isUnsupportedVideoUrl("https://www.youtube.com/watch?v=abc")).toBe(
       false,
     );
   });

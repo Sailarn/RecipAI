@@ -11,9 +11,9 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/ai.ts` | Multi-provider AI client. Tries the Gemini model chain, then OpenAI as last resort. Model names are defined here — this is the source of truth. Exports `callAiForRecipe`, `callAiForRecipePhoto`, `callAiForIngredient`. |
 | `lib/parse-recipe/index.ts` | Entry point — routes to `web.ts` or `video.ts` based on URL type. |
 | `lib/parse-recipe/web.ts` | Web recipe parsing. Schema.org short-circuit → `trimChrome` → AI fallback. |
-| `lib/parse-recipe/video.ts` | Instagram Reel parsing. Apify → Groq Whisper → AI. |
+| `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |
 | `lib/parse-recipe/photo.ts` | Client-side image compression and API call for photo parsing. |
-| `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildTranscriptPrompt`. |
+| `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildSocialPrompt`. |
 | `lib/parse-recipe/images.ts` | Hero image and step image extraction from HTML. |
 | `lib/parse-recipe/parse-history-entry.ts` | Helpers to build `ParseHistoryEntry` from job results. |
 | `lib/parse-recipe/friendly-parse-error.ts` | Maps raw errors to user-facing strings. |
@@ -27,8 +27,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-recipe/save-photo-result.ts` | Saves a photo parse result: history entry, Dexie save, image upload. |
 | `lib/scrapers/phantomjs.ts` | Primary scraper — JS-rendered HTML via PhantomJsCloud. |
 | `lib/scrapers/scrape-do.ts` | Fallback scraper via scrape.do. |
-| `lib/scrapers/apify.ts` | Instagram Reel downloader via Apify. |
-| `lib/transcribe/groq.ts` | Groq Whisper transcription for video audio. |
+| `lib/scrapers/apify.ts` | Social-content scraper via Apify actors for Instagram, TikTok, YouTube, and X/Twitter. |
+| `lib/transcribe/groq.ts` | Groq Whisper transcription for social video/audio when actor transcripts are unavailable. |
 
 ---
 
@@ -119,7 +119,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/video-url.ts` | `isVideoUrl()`, `isInstagramUrl()` — URL type detection. |
+| `lib/video-url.ts` | `isSocialUrl()`, `getSocialPlatform()`, `isInstagramUrl()` — social URL type detection. |
 | `lib/telegram-bot.ts` | `sendTelegramMessage()`, `extractUrl()`. |
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |

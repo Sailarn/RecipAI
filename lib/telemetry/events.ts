@@ -12,6 +12,25 @@ export type TelemetryEvents = {
   parse_started: { source: "url" | "photo"; domain?: string };
   parse_succeeded: { source: "url" | "photo" };
   parse_failed: { source: "url" | "photo"; reason: string };
+  social_parse_started: {
+    platform: "instagram" | "tiktok" | "youtube" | "x";
+  };
+  social_parse_succeeded: {
+    platform: "instagram" | "tiktok" | "youtube" | "x";
+    path: "actor_transcript" | "media_transcription" | "caption_image";
+    duration_seconds?: number;
+  };
+  social_parse_failed: {
+    platform: "instagram" | "tiktok" | "youtube" | "x" | "unknown";
+    reason:
+      | "duration_limit"
+      | "media_too_large"
+      | "unsupported_platform"
+      | "restricted"
+      | "not_found"
+      | "no_content"
+      | "unexpected";
+  };
   parse_reviewed: undefined;
   recipe_saved: { source: "parse" | "edit" };
   ingredients_normalized: { matched: number; total: number };

@@ -1,11 +1,11 @@
 # RecipAI
 
-AI-powered recipe management app. Import from any URL, Instagram Reel, or photo — recipes are parsed by AI and saved to your device. No account required; sign in to sync across devices.
+AI-powered recipe management app. Import from any recipe URL, supported social post, or photo — recipes are parsed by AI and saved to your device. No account required; sign in to sync across devices.
 
 ## Features
 
 - **AI import** — paste a URL or upload a photo; the app extracts title, ingredients, steps, and images automatically
-- **Instagram Reels** — video audio is transcribed and parsed into a recipe
+- **Social imports** — Instagram posts/Reels, TikTok, YouTube videos/Shorts, and X/Twitter posts are parsed through caption, transcript, media, and image context
 - **Collections** — organise recipes into named groups
 - **Ingredient vocabulary** — ingredients are normalised to a shared vocabulary across your recipes
 - **Pantry** — track what you have at home

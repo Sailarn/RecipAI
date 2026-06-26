@@ -26,15 +26,45 @@ describe("friendlyParseError", () => {
     expect(friendlyParseError("restricted_page")).toBe(expected);
   });
 
-  it("maps an unsupported platform to an Instagram-only message", () => {
-    expect(friendlyParseError("Unsupported video platform")).toBe(
-      "Only Instagram Reels are supported. Try an Instagram link.",
+  it("maps an unsupported platform to a supported-socials message", () => {
+    const expected =
+      "This social platform is not supported. Try an Instagram, TikTok, YouTube, or X link.";
+
+    expect(friendlyParseError("Unsupported video platform")).toBe(expected);
+    expect(friendlyParseError("Unsupported social platform")).toBe(expected);
+  });
+
+  it("maps missing social content to a no-recipe message", () => {
+    expect(
+      friendlyParseError("No caption, transcript, images, or video available"),
+    ).toBe(
+      "No recipe found — the post has no caption, transcript, images, or video to extract from.",
+    );
+  });
+
+  it("maps long social videos to a duration-limit message", () => {
+    expect(
+      friendlyParseError("Social videos must be 30 minutes or shorter"),
+    ).toBe(
+      "This video is too long to parse. Social videos must be 30 minutes or shorter.",
+    );
+  });
+
+  it("maps oversized media to a permanent size-limit message", () => {
+    expect(friendlyParseError("Video file too large for transcription")).toBe(
+      "This video file is too large to transcribe. Try a shorter clip.",
+    );
+  });
+
+  it("maps missing social posts to a not-found message", () => {
+    expect(friendlyParseError("This social post could not be found")).toBe(
+      "This social post could not be found. It may have been deleted or the link is invalid.",
     );
   });
 
   it("maps missing speech/caption to a no-recipe message", () => {
     const expected =
-      "No recipe found — the video has no speech or caption to extract from.";
+      "No recipe found — the post has no caption, transcript, images, or video to extract from.";
     expect(friendlyParseError("No speech detected")).toBe(expected);
     expect(friendlyParseError("no caption available")).toBe(expected);
   });
@@ -44,6 +74,17 @@ describe("friendlyParseError", () => {
       "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source.";
     expect(friendlyParseError("Could not extract recipe")).toBe(expected);
     expect(friendlyParseError("too little HTML returned")).toBe(expected);
+  });
+
+  it("maps AI not-recipe responses from page and social parses to a no-recipe message", () => {
+    const expected =
+      "No recipe found — the AI couldn't detect a recipe in this content. Try a link that goes directly to a recipe.";
+    expect(friendlyParseError("Couldn't extract a recipe from this page")).toBe(
+      expected,
+    );
+    expect(
+      friendlyParseError("Couldn't extract a recipe from this social post"),
+    ).toBe(expected);
   });
 
   it("passes through an unrecognized error unchanged", () => {
@@ -67,9 +108,30 @@ describe("isRetriableFailure", () => {
     expect(
       isRetriableFailure(friendlyParseError("Unsupported video platform")),
     ).toBe(false);
+    expect(
+      isRetriableFailure(friendlyParseError("30 minutes or shorter")),
+    ).toBe(false);
+    expect(isRetriableFailure(friendlyParseError("Video file too large"))).toBe(
+      false,
+    );
+    expect(
+      isRetriableFailure(
+        friendlyParseError("This social post could not be found"),
+      ),
+    ).toBe(false);
     expect(isRetriableFailure(friendlyParseError("No speech detected"))).toBe(
       false,
     );
+    expect(
+      isRetriableFailure(
+        friendlyParseError("Couldn't extract a recipe from this social post"),
+      ),
+    ).toBe(false);
+    expect(
+      isRetriableFailure(
+        friendlyParseError("Couldn't extract a recipe from this page"),
+      ),
+    ).toBe(false);
   });
 
   it("marks transient and scraper-blocked failures as retriable", () => {

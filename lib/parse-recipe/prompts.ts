@@ -1,3 +1,5 @@
+import type { SocialContent } from "@/lib/scrapers/apify";
+
 const NOT_RECIPE_RULE =
   'FIRST determine whether the input contains an actual recipe. If not, return {"notRecipe": true} and nothing else.';
 
@@ -69,13 +71,13 @@ Return ONLY valid JSON matching this exact schema:
 }`;
 }
 
-export function buildTranscriptPrompt(
+export function buildSocialPrompt(
+  content: Pick<SocialContent, "platform" | "caption" | "imageUrls">,
   transcript: string,
-  caption?: string,
 ): string {
-  const captionSection = caption
+  const captionSection = content.caption
     ? `<caption>
-${caption}
+${content.caption}
 </caption>
 
 `
@@ -89,18 +91,26 @@ ${transcript}
 `
     : "";
 
+  const imageSection = content.imageUrls.length
+    ? `<post_images>
+${content.imageUrls.map((imageUrl) => `- ${imageUrl}`).join("\n")}
+</post_images>
+
+`
+    : "";
+
   const sourceNote =
-    !transcript && caption
-      ? "Note: No speech was detected in this video. Extract the recipe entirely from the caption.\n\n"
-      : transcript && caption
+    !transcript && content.caption
+      ? "Note: No transcript was available. Extract the recipe from the caption and post images.\n\n"
+      : transcript && content.caption
         ? "IMPORTANT: Caption often contains exact ingredient amounts — prioritize it for ingredients. Use transcript for cooking steps.\n\n"
         : "";
 
-  return `Extract a recipe from this Instagram Reel.
+  return `Extract a recipe from this ${content.platform} social post.
 
 ${NOT_RECIPE_RULE}
 
-${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matching this exact schema:
+${sourceNote}${captionSection}${transcriptSection}${imageSection}Return ONLY valid JSON matching this exact schema:
 {
   "title": "string — infer from content if not stated explicitly",
   "description": "string | null",
@@ -115,7 +125,7 @@ ${sourceNote}${captionSection}${transcriptSection}Return ONLY valid JSON matchin
 
 Rules:
 - ingredients: use caption amounts if available, transcript as fallback. Fractions to decimals (1½ → 1.5, ¼ → 0.25). If an ingredient string is not a food item (equipment, paper towels, etc.), omit it from the ingredients array entirely.
-- instructions: from transcript steps. If no transcript, infer logical steps from caption
+- instructions: from transcript steps. If no transcript, infer logical steps from caption and post image context
 - title: infer from what dish is being made
 - times: integers in minutes. null if not mentioned
 - servings: lower bound if range. null if not mentioned

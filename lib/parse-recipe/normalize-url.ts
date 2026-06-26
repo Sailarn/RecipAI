@@ -1,11 +1,4 @@
-// Query params that never identify recipe content — safe to drop so the same
-// recipe URL shared through different channels collapses to one cache key.
-//
-// Deliberately conservative: a *missed* param only lowers the cache-hit rate
-// (harmless — you just re-parse), but dropping a *content-bearing* param would
-// collapse two different recipes onto one key and serve the wrong one. So this
-// list holds only params that are never content, and the path/host are left
-// case-sensitive where a host might encode an id (e.g. Instagram reel slugs).
+// Only tracking-only params — dropping a content-bearing param would collapse different recipes onto the same cache key.
 const TRACKING_PARAMS = new Set([
   "igshid",
   "igsh",
@@ -18,6 +11,9 @@ const TRACKING_PARAMS = new Set([
   "mc_cid",
   "mc_eid",
   "si",
+  "s",
+  "t",
+  "_r",
   "_ga",
 ]);
 
@@ -25,11 +21,6 @@ function isTrackingParam(key: string): boolean {
   return key.startsWith("utm_") || TRACKING_PARAMS.has(key.toLowerCase());
 }
 
-// Normalize a recipe source URL into a stable cache key: lowercase host (with
-// `www.`/`m.` folded off), tracking params stripped, remaining params sorted,
-// trailing slash and fragment dropped, scheme forced to https. Path case is
-// preserved (slugs can be case-sensitive). Returns the trimmed input unchanged
-// if it doesn't parse as a URL, so it still works as a key.
 export function normalizeSourceUrl(rawUrl: string): string {
   let parsed: URL;
   try {
@@ -42,12 +33,31 @@ export function normalizeSourceUrl(rawUrl: string): string {
     .toLowerCase()
     .replace(/^(www\.|m\.|mobile\.)/, "");
 
-  // Instagram serves the same media (a globally-unique shortcode) under
-  // /reel/, /reels/, /p/ and /tv/ — collapse them to one key and drop the
-  // all-tracking query so every share of a reel hits the same cache entry.
+  // Instagram: /reel/, /reels/, /p/, /tv/ all share the same shortcode — collapse to one key.
   if (host === "instagram.com") {
     const media = parsed.pathname.match(/^\/(?:reel|reels|p|tv)\/([^/]+)/);
     if (media) return `https://instagram.com/reel/${media[1]}`;
+  }
+
+  if (host === "youtube.com") {
+    const short = parsed.pathname.match(/^\/shorts\/([^/]+)/);
+    const videoId = short?.[1] ?? parsed.searchParams.get("v");
+    if (videoId) return `https://youtube.com/watch?v=${videoId}`;
+  }
+
+  if (host === "youtu.be") {
+    const videoId = parsed.pathname.match(/^\/([^/]+)/)?.[1];
+    if (videoId) return `https://youtube.com/watch?v=${videoId}`;
+  }
+
+  if (host === "tiktok.com" && parsed.pathname.includes("/video/")) {
+    const path = parsed.pathname.replace(/\/+$/, "");
+    return `https://tiktok.com${path}`;
+  }
+
+  if (host === "x.com" || host === "twitter.com") {
+    const status = parsed.pathname.match(/^\/([^/]+)\/status\/([^/]+)/);
+    if (status) return `https://x.com/${status[1]}/status/${status[2]}`;
   }
 
   const params = new URLSearchParams();

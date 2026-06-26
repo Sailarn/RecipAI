@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPhotoPrompt,
-  buildTranscriptPrompt,
+  buildSocialPrompt,
   buildWebPrompt,
 } from "../prompts";
 
@@ -11,7 +11,13 @@ describe("recipe extraction prompts", () => {
   it.each([
     ["web", buildWebPrompt("page content")],
     ["photo", buildPhotoPrompt()],
-    ["video", buildTranscriptPrompt("recipe transcript")],
+    [
+      "social",
+      buildSocialPrompt(
+        { platform: "youtube", imageUrls: [] },
+        "recipe transcript",
+      ),
+    ],
   ])("instructs the %s extractor to reject non-recipe input", (_, prompt) => {
     expect(prompt).toContain(NOT_RECIPE_RESPONSE);
     expect(prompt).toContain("nothing else");

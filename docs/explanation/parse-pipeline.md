@@ -10,8 +10,8 @@ There are three entry paths:
 
 ```mermaid
 graph TD
-    A[User pastes URL] --> B{Video URL?}
-    B -->|Yes - Instagram| C[Video pipeline]
+    A[User pastes URL] --> B{Social URL?}
+    B -->|Yes - Instagram/TikTok/YouTube/X| C[Social pipeline]
     B -->|No| D[Web pipeline]
     E[User uploads photo] --> F[Photo pipeline]
 
@@ -49,23 +49,28 @@ graph LR
 
 ---
 
-## Video pipeline (`lib/parse-recipe/video.ts`)
+## Social pipeline (`lib/parse-recipe/video.ts`)
 
-Currently supports **Instagram Reels only**.
+Supports Instagram posts/Reels, TikTok videos, YouTube videos/Shorts, and X/Twitter status posts.
 
 ```mermaid
 graph LR
-    A[Instagram URL] --> B[Apify - download reel]
-    B --> C[Fetch video buffer]
-    C --> D[Groq Whisper transcription]
-    D -->|transcript too short| E[Use caption only]
-    D -->|ok| F[Build transcript prompt]
+    A[Social URL] --> B[Apify actor for platform]
+    B --> L{Duration <= 30 min?}
+    L -->|no| X[Fail permanent]
+    L -->|yes/unknown| C{Transcript available?}
+    C -->|yes| F[Build social prompt]
+    C -->|no + video URL| D[Fetch media buffer]
+    D --> E[Groq Whisper transcription]
     E --> F
-    F --> G[AI model chain]
-    G --> H[ParsedRecipe]
+    C -->|no video| G[Use caption/images]
+    E -->|transcript too short| G
+    G --> F
+    F --> H[AI model chain]
+    H --> I[ParsedRecipe]
 ```
 
-Requires `GROQ_API_KEY`. If transcript is under 30 characters and no caption is available, parsing fails.
+Requires `APIFY_TOKEN`. `GROQ_API_KEY` is only required when a social actor returns downloadable video/audio without a transcript. Static posts can parse from caption and image context. Social videos with actor-reported duration over 30 minutes fail before transcription or AI; downloadable media with `Content-Length` over 24 MB fails before buffering. If a post has no caption, transcript, images, or video media, parsing fails.
 
 ---
 
@@ -114,7 +119,7 @@ All Gemini models use `responseMimeType: "application/json"`. OpenAI uses `respo
 
 ## Parse queue (`app/api/parse-queue/`)
 
-URL and video parses go through a job queue backed by Supabase `parse_jobs`.
+URL and social parses go through a job queue backed by Supabase `parse_jobs`.
 
 ```mermaid
 sequenceDiagram

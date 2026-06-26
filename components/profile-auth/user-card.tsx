@@ -51,8 +51,8 @@ export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
             <span>Open Recipe Bot</span>
           </a>
           <p className="font-sans text-[11px] text-[var(--fg-3)] text-center leading-[1.6] mb-3.5 px-1">
-            Send any recipe URL or Instagram Reel to your bot — it'll save it to
-            your account automatically.
+            Send any recipe URL or supported social post to your bot — it'll
+            save it to your account automatically.
           </p>
         </>
       )}

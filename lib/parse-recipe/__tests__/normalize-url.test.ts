@@ -27,6 +27,38 @@ describe("normalizeSourceUrl", () => {
     );
   });
 
+  it("normalizes YouTube watch, shorts, and youtu.be links to the same video key", () => {
+    const canonical = "https://youtube.com/watch?v=dQw4w9WgXcQ";
+
+    expect(
+      normalizeSourceUrl(
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=share",
+      ),
+    ).toBe(canonical);
+    expect(
+      normalizeSourceUrl("https://youtube.com/shorts/dQw4w9WgXcQ?si=abc"),
+    ).toBe(canonical);
+    expect(normalizeSourceUrl("https://youtu.be/dQw4w9WgXcQ?t=12")).toBe(
+      canonical,
+    );
+  });
+
+  it("strips TikTok tracking while preserving the post path", () => {
+    expect(
+      normalizeSourceUrl(
+        "https://www.tiktok.com/@cook/video/1234567890?_r=1&utm_campaign=x",
+      ),
+    ).toBe("https://tiktok.com/@cook/video/1234567890");
+  });
+
+  it("normalizes Twitter status links to x.com", () => {
+    expect(
+      normalizeSourceUrl(
+        "https://mobile.twitter.com/cook/status/1234567890?s=20&utm_source=x",
+      ),
+    ).toBe("https://x.com/cook/status/1234567890");
+  });
+
   it("sorts remaining query params so order does not matter", () => {
     expect(normalizeSourceUrl("https://example.com/r?b=2&a=1")).toBe(
       "https://example.com/r?a=1&b=2",

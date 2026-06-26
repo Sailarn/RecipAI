@@ -1,13 +1,51 @@
-const VIDEO_PATTERNS = [
-  /instagram\.com\/(reel|p)\//i,
-  /tiktok\.com\//i,
-  /youtube\.com\/shorts\//i,
-  /youtube\.com\/watch/i,
-  /youtu\.be\//i,
-];
+export type SocialPlatform = "instagram" | "tiktok" | "youtube" | "x";
 
-export function isVideoUrl(url: string): boolean {
-  return VIDEO_PATTERNS.some((pattern) => pattern.test(url));
+function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch {
+    return null;
+  }
+}
+
+function normalizedHost(parsedUrl: URL): string {
+  return parsedUrl.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, "");
+}
+
+export function getSocialPlatform(url: string): SocialPlatform | null {
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) return null;
+
+  const host = normalizedHost(parsedUrl);
+  const path = parsedUrl.pathname;
+
+  if (host === "instagram.com" && /^\/(?:reel|reels|p|tv)\//i.test(path)) {
+    return "instagram";
+  }
+  if (host === "tiktok.com" && path.includes("/video/")) {
+    return "tiktok";
+  }
+  if (
+    host === "youtube.com" &&
+    (/^\/shorts\/[^/]+/i.test(path) || parsedUrl.searchParams.has("v"))
+  ) {
+    return "youtube";
+  }
+  if (host === "youtu.be" && /^\/[^/]+/i.test(path)) {
+    return "youtube";
+  }
+  if (
+    (host === "x.com" || host === "twitter.com") &&
+    /\/status\//i.test(path)
+  ) {
+    return "x";
+  }
+
+  return null;
+}
+
+export function isSocialUrl(url: string): boolean {
+  return getSocialPlatform(url) !== null;
 }
 
 // YouTube only — Instagram/TikTok thumbnails require auth
@@ -21,9 +59,5 @@ export function getYouTubeThumbnail(url: string): string | null {
 }
 
 export function isInstagramUrl(url: string): boolean {
-  return /instagram\.com\/(reel|p)\//i.test(url);
-}
-
-export function isUnsupportedVideoUrl(url: string): boolean {
-  return /tiktok\.com\//i.test(url);
+  return getSocialPlatform(url) === "instagram";
 }

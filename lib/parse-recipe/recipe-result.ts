@@ -7,7 +7,7 @@ export interface NotRecipeResult {
 
 export type RecipeExtractionResult = ParsedRecipe | NotRecipeResult;
 
-type RecipeSource = "page" | "photo";
+type RecipeSource = "page" | "photo" | "social";
 
 type IncompleteReason = "not_recipe" | "no_ingredients" | "no_instructions";
 
@@ -29,8 +29,9 @@ function rejectIncomplete(
   reason: IncompleteReason,
   fields: Record<string, unknown>,
 ): never {
+  const sourceLabel = source === "social" ? "social post" : source;
   log("warn", "parse_incomplete", { source, reason, ...fields });
-  throw new Error(`Couldn't extract a recipe from this ${source}`);
+  throw new Error(`Couldn't extract a recipe from this ${sourceLabel}`);
 }
 
 export function requireCompleteRecipe(

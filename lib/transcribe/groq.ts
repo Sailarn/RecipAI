@@ -1,4 +1,4 @@
-const GROQ_MAX_BYTES = 24 * 1024 * 1024;
+export const GROQ_MAX_BYTES = 24 * 1024 * 1024;
 
 export async function transcribeWithGroq(
   audio: ArrayBuffer,

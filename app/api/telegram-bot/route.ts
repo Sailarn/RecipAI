@@ -13,17 +13,12 @@ type TelegramAccount = typeof account.$inferSelect;
 
 const WEBHOOK_SECRET_HEADER = "x-telegram-bot-api-secret-token";
 
-/** Verify the request really came from Telegram via the shared secret token
- *  (set when registering the webhook). Open the route only if no secret is
- *  configured, to avoid locking out a not-yet-configured deployment. */
 function isAuthenticTelegramRequest(req: NextRequest): boolean {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (!expected) return true;
   return req.headers.get(WEBHOOK_SECRET_HEADER) === expected;
 }
 
-/** Telegram OIDC accounts store the Telegram user id in the JWT `sub`/`id`
- *  claim. Decode the idToken payload and match it against the sender. */
 function accountMatchesTelegramId(
   candidate: TelegramAccount,
   telegramId: string,
@@ -68,8 +63,7 @@ async function enqueueParseJob(
     status: PARSE_JOB_STATUS.PENDING,
   });
 
-  // Trigger processing without blocking the webhook response. A failure here
-  // would otherwise leave the user stuck on "Parsing…", so capture it.
+  // Fire-and-forget: a failure would leave the user stuck on "Parsing…", so capture it.
   fetch(`${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}${api.parseQueueProcess}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -113,7 +107,7 @@ export async function POST(req: NextRequest) {
     const firstName = message.from.first_name ?? "there";
     await sendTelegramMessage(
       chatId,
-      `👋 Hi ${firstName}! Send me any recipe URL or Instagram Reel and I'll save it to your RecipAI account.`,
+      `👋 Hi ${firstName}! Send me any recipe URL or supported social post and I'll save it to your RecipAI account.`,
     );
     return NextResponse.json({ ok: true });
   }
@@ -122,7 +116,7 @@ export async function POST(req: NextRequest) {
   if (!url) {
     await sendTelegramMessage(
       chatId,
-      "Send me a recipe URL or Instagram Reel link and I'll parse it for you.",
+      "Send me a recipe URL or supported social post link and I'll parse it for you.",
     );
     return NextResponse.json({ ok: true });
   }

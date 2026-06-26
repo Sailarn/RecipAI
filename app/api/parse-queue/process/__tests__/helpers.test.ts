@@ -12,23 +12,50 @@ describe("classifyParseError", () => {
     expect(classifyParseError(err)).toContain("private");
   });
 
-  it("returns platform message for unsupported video platform", () => {
+  it("returns platform message for unsupported social platform", () => {
     const err = new Error(
-      "Unsupported video platform. Currently only Instagram Reels are supported.",
+      "Unsupported social platform. Use an Instagram, TikTok, YouTube, or X link.",
     );
-    expect(classifyParseError(err)).toContain("Instagram");
+    expect(classifyParseError(err)).toContain("TikTok");
   });
 
   it("returns speech message when no transcript and no caption", () => {
     const err = new Error(
       "No speech detected in video and no caption available.",
     );
-    expect(classifyParseError(err)).toContain("speech");
+    expect(classifyParseError(err)).toContain("caption");
+  });
+
+  it("returns duration-limit message for long social videos", () => {
+    const err = new Error(
+      "This video is too long to parse. Social videos must be 30 minutes or shorter.",
+    );
+    expect(classifyParseError(err)).toContain("30 minutes");
+  });
+
+  it("returns size-limit message for oversized media", () => {
+    const err = new Error("Video file too large for transcription.");
+    expect(classifyParseError(err)).toContain("too large");
+  });
+
+  it("returns not-found message for missing social posts", () => {
+    const err = new Error("This social post could not be found.");
+    expect(classifyParseError(err)).toContain("could not be found");
   });
 
   it("returns page message when text extraction fails", () => {
     const err = new Error("Could not extract enough text from page");
     expect(classifyParseError(err)).toContain("page");
+  });
+
+  it("returns no-recipe message when the AI couldn't find a recipe in the content", () => {
+    const errPage = new Error("Couldn't extract a recipe from this page");
+    expect(classifyParseError(errPage)).toContain("No recipe found");
+
+    const errSocial = new Error(
+      "Couldn't extract a recipe from this social post",
+    );
+    expect(classifyParseError(errSocial)).toContain("No recipe found");
   });
 
   it("returns generic message for unknown errors", () => {
@@ -50,8 +77,17 @@ describe("isRetryable", () => {
     expect(isRetryable(new Error("Account is private"))).toBe(false);
   });
 
-  it("returns false for unsupported video platform", () => {
+  it("returns false for unsupported social platform", () => {
     expect(isRetryable(new Error("Unsupported video platform"))).toBe(false);
+    expect(isRetryable(new Error("Unsupported social platform"))).toBe(false);
+  });
+
+  it("returns false for long or missing social posts", () => {
+    expect(isRetryable(new Error("30 minutes or shorter"))).toBe(false);
+    expect(isRetryable(new Error("Video file too large"))).toBe(false);
+    expect(isRetryable(new Error("This social post could not be found"))).toBe(
+      false,
+    );
   });
 
   it("returns false when no speech and no caption", () => {
@@ -59,6 +95,15 @@ describe("isRetryable", () => {
       isRetryable(
         new Error("No speech detected in video and no caption available."),
       ),
+    ).toBe(false);
+  });
+
+  it("returns false when the AI couldn't find a recipe in the content", () => {
+    expect(
+      isRetryable(new Error("Couldn't extract a recipe from this page")),
+    ).toBe(false);
+    expect(
+      isRetryable(new Error("Couldn't extract a recipe from this social post")),
     ).toBe(false);
   });
 

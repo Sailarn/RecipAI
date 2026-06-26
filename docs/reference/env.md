@@ -43,8 +43,8 @@ If the configured chain is empty or every provider fails, ingredient embed match
 |---|---|---|
 | `PHANTOMJS_API_KEY` | Yes | [PhantomJsCloud](https://phantomjscloud.com) key. Primary HTML scraper — renders JavaScript so SPA recipe pages are readable. |
 | `SCRAPE_DO_TOKEN` | No | [scrape.do](https://scrape.do) token. Fallback scraper used when PhantomJsCloud fails. Omit to disable the fallback. |
-| `APIFY_TOKEN` | No | [Apify](https://apify.com) token for the Instagram Reel scraper. Required for video parsing. Omit to disable. |
-| `GROQ_API_KEY` | No | Groq API key for Whisper transcription. Required only for video (Instagram Reel) parsing. Omit to disable video parsing. |
+| `APIFY_TOKEN` | No | [Apify](https://apify.com) token for social parsing actors (Instagram, TikTok, YouTube, X/Twitter). Required for social URL parsing. Omit to disable. |
+| `GROQ_API_KEY` | No | Groq API key for Whisper transcription. Required only when a social actor returns downloadable video/audio without a transcript. Static posts, actor-provided transcripts, and videos rejected by the 30-minute duration cap do not need it. |
 
 ---
 

@@ -76,9 +76,11 @@ PostHog session replay is on with `maskAllInputs: true`. Replay is initialized a
 |---|---|
 | `ai_call` | `model`, `context` (recipe/ingredient/photo), `duration_ms`, `success`, `fallback_index` |
 | `parse_pipeline` | `source` (url/photo), `domain`, `path` (schema/ai), `scraper` (phantomjs/scrape-do), `scrape_ms`, `total_ms`, `ingredient_count`, `step_count`, `success` |
+| `social_parse_pipeline` | `source` (social), `platform`, `path` (actor_transcript/media_transcription/caption_image), `duration_seconds`, `has_caption`, `has_transcript`, `has_video`, `image_count`, `ingredient_count`, `step_count`, `total_ms`, `success` |
+| `social_parse_failed` | `platform`, `url`, `reason` (duration_limit/media_too_large/unsupported_platform/restricted/not_found/no_content/unexpected), `duration_seconds`, `total_ms`, `error_message` |
 | `rate_limit_hit` | `caller_type` (user/anon) |
 | `enrich_completed` | `ingredientId` |
 
-`parse_pipeline` is logged once per successful parse (in `lib/parse-recipe/web.ts` for URLs, the photo route for photos). It answers the operational questions PostHog can't: schema-vs-AI ratio, scraper fallback rate, per-step latency (`scrape_ms` / `total_ms`; AI time is in `ai_call`), and which domains are slow or need AI. `domain` is the hostname only — never the full URL, which can carry tokens.
+`parse_pipeline` is logged once per successful web/photo parse (in `lib/parse-recipe/web.ts` for URLs, the photo route for photos). `social_parse_pipeline` is the equivalent successful social parse record, and `social_parse_failed` logs permanent source failures and unexpected platform/transcription failures. These records answer the operational questions PostHog can't: schema-vs-AI ratio, scraper fallback rate, social platform/path mix, per-step latency (`scrape_ms` / `total_ms`; AI time is in `ai_call`), and which domains/platforms are slow or need AI. `domain` is the hostname only for web parses; social logs include the source URL because social URLs are the reproducible media key.
 
 On Vercel, Axiom flushes per call (frozen functions can't batch). On the Pi, the client batches normally. The client's `onError` routes ingest failures to the dev/server logger so a bad token or dataset isn't silently dropped.
