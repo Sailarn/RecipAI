@@ -224,6 +224,38 @@ describe("getPublicRecipe", () => {
     });
   });
 
+  it("keeps ingredients and steps that omit an id, synthesizing one", async () => {
+    setupSelectQuery([
+      {
+        ...publicRecipeRow,
+        ingredients: [
+          { item: "water", unit: "g", amount: 305 },
+          { item: "flour", unit: "g", amount: 430 },
+        ],
+        instructions: [
+          { order: 1, instruction: "Mix water and yeast." },
+          { order: 2, instruction: "Add flour." },
+        ],
+      },
+    ]);
+
+    const recipe = await getPublicRecipe("recipe-1");
+
+    expect({
+      ingredients: recipe?.ingredients,
+      instructions: recipe?.instructions,
+    }).toEqual({
+      ingredients: [
+        { id: "ing-0", item: "water", unit: "g", amount: 305 },
+        { id: "ing-1", item: "flour", unit: "g", amount: 430 },
+      ],
+      instructions: [
+        { id: "step-0", order: 1, instruction: "Mix water and yeast." },
+        { id: "step-1", order: 2, instruction: "Add flour." },
+      ],
+    });
+  });
+
   it("uses empty lists for malformed ingredient and instruction arrays", async () => {
     setupSelectQuery([
       {

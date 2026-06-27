@@ -18,17 +18,19 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
-function sanitizeIngredient(value: unknown): RecipeIngredient | null {
-  if (
-    !isJsonRecord(value) ||
-    typeof value.id !== "string" ||
-    typeof value.item !== "string"
-  ) {
+function sanitizeIngredient(
+  value: unknown,
+  index: number,
+): RecipeIngredient | null {
+  // Persisted ingredients don't always carry an `id` (older/parsed rows omit
+  // it), so synthesize a stable one rather than dropping the whole item — the
+  // id is only a render key here and is regenerated on save (clonePublicRecipe).
+  if (!isJsonRecord(value) || typeof value.item !== "string") {
     return null;
   }
 
   const ingredient: RecipeIngredient = {
-    id: value.id,
+    id: typeof value.id === "string" ? value.id : `ing-${index}`,
     item: value.item,
   };
 
@@ -42,10 +44,11 @@ function sanitizeIngredient(value: unknown): RecipeIngredient | null {
   return ingredient;
 }
 
-function sanitizeStep(value: unknown): Step | null {
+function sanitizeStep(value: unknown, index: number): Step | null {
+  // Same as ingredients: tolerate a missing `id` by synthesizing one instead of
+  // dropping the step. `order` and `instruction` remain required.
   if (
     !isJsonRecord(value) ||
-    typeof value.id !== "string" ||
     !isFiniteNumber(value.order) ||
     typeof value.instruction !== "string"
   ) {
@@ -53,7 +56,7 @@ function sanitizeStep(value: unknown): Step | null {
   }
 
   const step: Step = {
-    id: value.id,
+    id: typeof value.id === "string" ? value.id : `step-${index}`,
     order: value.order,
     instruction: value.instruction,
   };
@@ -67,11 +70,13 @@ function sanitizeStep(value: unknown): Step | null {
 
 function sanitizeJsonArray<T>(
   value: unknown,
-  sanitizeItem: (item: unknown) => T | null,
+  sanitizeItem: (item: unknown, index: number) => T | null,
 ): T[] {
   if (!Array.isArray(value)) return [];
 
-  return value.map(sanitizeItem).filter((item): item is T => item !== null);
+  return value
+    .map((item, index) => sanitizeItem(item, index))
+    .filter((item): item is T => item !== null);
 }
 
 function sanitizeStringArray(value: unknown): string[] | undefined {
