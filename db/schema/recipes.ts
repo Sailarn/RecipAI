@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm";
-import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const recipes = pgTable("recipes", {
@@ -28,6 +35,7 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   category: text("category"),
   status: text("status"),
+  isPublic: boolean("is_public").default(false).notNull(),
   collectionIds: jsonb("collection_ids").notNull().default([]),
   canonicalIngredientIds: jsonb("canonical_ingredient_ids").$type<string[]>(),
   unrecognizedIngredients: jsonb("unrecognized_ingredients").$type<string[]>(),

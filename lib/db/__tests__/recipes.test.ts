@@ -62,6 +62,18 @@ describe("Recipe CRUD Operations", () => {
     expect(recipe?.updatedAt.getTime()).toBeLessThanOrEqual(after.getTime());
   });
 
+  it("should store new recipes as private when visibility is omitted", async () => {
+    const id = await createRecipe({
+      title: "Private Recipe",
+      servings: 1,
+      ingredients: [],
+      instructions: [],
+    });
+
+    const recipe = await getRecipe(id);
+    expect(recipe?.isPublic).toBe(false);
+  });
+
   it("should call syncCreate after creating a recipe", async () => {
     await createRecipe({
       title: "Sync Test",

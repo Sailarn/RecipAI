@@ -4,9 +4,6 @@ import { db } from "./db";
 import type { Recipe } from "./schema";
 import { syncCreate, syncDelete, syncUpdate } from "./supabase-sync";
 
-/**
- * Create a new recipe
- */
 export async function createRecipe(
   recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
@@ -16,6 +13,7 @@ export async function createRecipe(
   const newRecipe: Recipe = {
     ...recipe,
     id,
+    isPublic: recipe.isPublic === true,
     createdAt: now,
     updatedAt: now,
   };

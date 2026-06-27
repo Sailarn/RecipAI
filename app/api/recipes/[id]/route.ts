@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
+import { pickRecipeContent } from "../recipe-write-fields";
 
 export async function PATCH(
   req: NextRequest,
@@ -25,7 +26,7 @@ export async function PATCH(
     await db
       .update(recipes)
       .set({
-        ...updates,
+        ...pickRecipeContent(updates),
         // Snapshots from the client (e.g. sync-review "keep mine") carry
         // createdAt/updatedAt as ISO strings; Drizzle's timestamp columns call
         // .toISOString() on the value, so a string crashes the write. Revive

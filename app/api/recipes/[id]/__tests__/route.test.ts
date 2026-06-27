@@ -132,6 +132,16 @@ describe("PATCH /api/recipes/[id]", () => {
     // .where() must be called (scopes by id AND userId)
     expect(mockWhere).toHaveBeenCalled();
   });
+
+  it("ignores public visibility from normal updates", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockSet } = setupUpdateChain();
+    const { req, params } = makePatchRequest("r1", { isPublic: true });
+
+    await PATCH(req, params);
+
+    expect(mockSet.mock.calls[0]?.[0]).not.toHaveProperty("isPublic");
+  });
 });
 
 describe("DELETE /api/recipes/[id]", () => {

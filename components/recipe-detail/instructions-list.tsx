@@ -17,7 +17,7 @@ export function InstructionsList({ instructions }: InstructionsListProps) {
         {t("instructions")}
       </h2>
       <div className="flex flex-col gap-[10px]">
-        {instructions
+        {[...instructions]
           .sort((a, b) => a.order - b.order)
           .map((step) => (
             <div

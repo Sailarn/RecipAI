@@ -26,6 +26,7 @@ export const api = {
   recipesSync: "/api/recipes/sync",
   recipes: "/api/recipes",
   recipe: (id: string) => `/api/recipes/${id}`,
+  recipeVisibility: (id: string) => `/api/recipes/${id}/visibility`,
   images: {
     upload: "/api/images/upload",
     delete: "/api/images/delete",

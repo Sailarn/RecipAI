@@ -4,6 +4,7 @@ import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import type { Recipe } from "@/lib/db/schema";
+import { pickRecipeContent } from "./recipe-write-fields";
 
 export async function POST(req: NextRequest) {
   const authed = await requireSession();
@@ -20,8 +21,10 @@ export async function POST(req: NextRequest) {
     const inserted = await db
       .insert(recipes)
       .values({
-        ...recipe,
+        ...pickRecipeContent(recipe),
+        id: recipe.id,
         userId: authed.session.user.id,
+        isPublic: false,
         createdAt: new Date(recipe.createdAt),
         updatedAt: new Date(recipe.updatedAt),
       })

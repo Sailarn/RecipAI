@@ -189,6 +189,33 @@ describe("POST /api/recipes/sync", () => {
     expect(body).toEqual({ synced: 0 });
     expect(db.insert).not.toHaveBeenCalled();
   });
+
+  it("imports new recipes as private regardless of client visibility", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    setupSelectChain([]);
+    const { mockValues } = setupInsertChain();
+
+    await POST(
+      makePostRequest({
+        recipes: [
+          {
+            id: "new-1",
+            title: "New",
+            servings: 1,
+            ingredients: [],
+            instructions: [],
+            isPublic: true,
+            createdAt: "2024-01-01T00:00:00.000Z",
+            updatedAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    expect(mockValues.mock.calls[0]?.[0][0]).toEqual(
+      expect.objectContaining({ isPublic: false }),
+    );
+  });
 });
 
 describe("GET /api/recipes/sync", () => {

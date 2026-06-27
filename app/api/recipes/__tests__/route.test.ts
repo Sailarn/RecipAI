@@ -130,4 +130,26 @@ describe("POST /api/recipes", () => {
       }),
     );
   });
+
+  it("ignores public visibility from normal creates", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockValues } = setupInsertChain();
+
+    await POST(
+      makeRequest({
+        id: "r1",
+        title: "Test",
+        servings: 1,
+        ingredients: [],
+        instructions: [],
+        isPublic: true,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
+      }),
+    );
+
+    expect(mockValues.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ isPublic: false }),
+    );
+  });
 });

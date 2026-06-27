@@ -6,7 +6,7 @@ RecipAI keeps two stores in sync: **Dexie.js** (IndexedDB, local working store �
 
 ## Dexie (local / offline)
 
-**File:** `lib/db/db.ts` — database name `RecipeAppDB`, current version **11**.
+**File:** `lib/db/db.ts` — database name `RecipeAppDB`, current version **12**.
 
 ### Tables
 
@@ -37,6 +37,7 @@ interface Recipe {
   sourceUrl?: string;
   category?: string;
   status?: "tried" | null;
+  isPublic?: boolean;
   collectionIds?: string[];
   canonicalIngredientIds?: string[];
   unrecognizedIngredients?: string[];
@@ -44,6 +45,9 @@ interface Recipe {
   updatedAt: Date;
 }
 ```
+
+`isPublic` is optional for backward compatibility with legacy Dexie rows. A
+missing value is treated as private; only `isPublic === true` means public.
 
 #### Collection
 ```ts
@@ -147,7 +151,7 @@ To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-
 
 ### `recipes`
 
-Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), `ingredients` / `instructions` / `collection_ids` / `canonical_ingredient_ids` stored as jsonb.
+Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), `ingredients` / `instructions` / `collection_ids` / `canonical_ingredient_ids` stored as jsonb. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
 
 ### `collections`
 

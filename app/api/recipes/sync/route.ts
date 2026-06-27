@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api-errors";
 import { MAX_SYNC_BATCH_SIZE, RECIPE_SYNC_ERRORS } from "@/lib/api-limits";
 import { requireSession } from "@/lib/auth/require-session";
 import type { Recipe } from "@/lib/db/schema";
+import { pickRecipeContent } from "../recipe-write-fields";
 
 export async function POST(req: NextRequest) {
   const authed = await requireSession();
@@ -45,8 +46,10 @@ export async function POST(req: NextRequest) {
         .insert(recipes)
         .values(
           newRecipes.map((recipe: Recipe) => ({
-            ...recipe,
+            ...pickRecipeContent(recipe),
+            id: recipe.id,
             userId: authed.session.user.id,
+            isPublic: false,
             createdAt: new Date(recipe.createdAt),
             updatedAt: new Date(recipe.updatedAt),
           })),

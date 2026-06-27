@@ -3,12 +3,15 @@
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { RecipeEditView } from "@/components/recipe-edit-view";
+import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
+import { ShareAction } from "./share-action";
 
 interface RecipeHeaderProps {
   locale: string;
   recipeId: string;
+  recipe: Recipe;
   onDeleteClick: () => void;
 }
 
@@ -18,6 +21,7 @@ const glassPillClass =
 export function RecipeHeader({
   locale,
   recipeId,
+  recipe,
   onDeleteClick,
 }: RecipeHeaderProps) {
   const t = useTranslations("common");
@@ -28,13 +32,14 @@ export function RecipeHeader({
     <div className="relative z-[20] shrink-0 pt-[max(16px,calc(env(safe-area-inset-top)+4px))] px-[14px] pb-2 flex justify-between items-center">
       <button
         type="button"
-        onClick={() => navigate.back()}
+        onClick={() => navigate.back(routes.recipes.list(locale))}
         className={`${glassPillClass} py-[7px] pr-[14px] pl-[10px] flex items-center gap-1`}
       >
         <ChevronLeft size={13} className="text-[rgba(255,255,255,0.75)]" />
         {tRecipes("backToRecipes")}
       </button>
       <div className="flex gap-2 items-center">
+        <ShareAction key={recipe.id} locale={locale} recipe={recipe} />
         <button
           type="button"
           onClick={() =>

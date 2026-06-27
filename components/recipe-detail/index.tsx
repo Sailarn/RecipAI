@@ -1,15 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-import { routes } from "@/lib/routes";
+import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { CookingCarousel } from "../cooking-carousel";
 import { ServingsCalculator } from "../servings-calculator";
-import { TransitionLink } from "../transition-link";
+import { SharedRecipeDetail } from "../shared-recipe-detail";
+import { PrivateRecipeGuard } from "../shared-recipe-detail/private-recipe-guard";
 import { CategoryBadge } from "./category-badge";
 import { DeleteDialog } from "./delete-dialog";
 import { InstructionsList } from "./instructions-list";
@@ -22,12 +22,15 @@ import { RecipeSkeleton } from "./recipe-skeleton";
 interface RecipeDetailProps {
   recipeId: string;
   locale: string;
+  publicRecipe?: PublicRecipe | null;
 }
 
-export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
+export function RecipeDetail({
+  recipeId,
+  locale,
+  publicRecipe,
+}: RecipeDetailProps) {
   const navigate = useNavigate();
-  const tRecipes = useTranslations("recipes");
-
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -53,19 +56,9 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
   }
 
   if (!recipe) {
-    return (
-      <div className="text-center py-12">
-        <p className="mb-4 text-muted-foreground">
-          {tRecipes("recipeNotFound")}
-        </p>
-        <TransitionLink
-          href={routes.recipes.list(locale)}
-          className="text-primary hover:underline"
-        >
-          {tRecipes("backToRecipes")}
-        </TransitionLink>
-      </div>
-    );
+    if (publicRecipe)
+      return <SharedRecipeDetail locale={locale} recipe={publicRecipe} />;
+    return <PrivateRecipeGuard locale={locale} />;
   }
 
   return (
@@ -74,6 +67,7 @@ export function RecipeDetail({ recipeId, locale }: RecipeDetailProps) {
         <RecipeHeader
           locale={locale}
           recipeId={recipeId}
+          recipe={recipe}
           onDeleteClick={() => setShowDeleteConfirm(true)}
         />
       </div>

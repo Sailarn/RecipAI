@@ -14,7 +14,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { RecipeDetail } from "../index";
+
+const navigation = vi.hoisted(() => ({
+  replace: vi.fn(),
+}));
 
 // Wire onOpenChange through cancel so closing can be tested
 vi.mock("@/components/ui/alert-dialog", () => {
@@ -43,7 +48,25 @@ vi.mock("@/components/ui/alert-dialog", () => {
 });
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: navigation.replace,
+    back: vi.fn(),
+  }),
+}));
+
+vi.mock("@/lib/transitions", () => ({
+  useNavigate: () => ({
+    push: vi.fn(),
+    replace: navigation.replace,
+    back: vi.fn(),
+  }),
+}));
+
+vi.mock("@/lib/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({ data: { user: { id: "user-1" } } }),
+  },
 }));
 
 vi.mock("next-intl", () => ({
@@ -57,6 +80,7 @@ vi.mock("next/image", () => ({
 }));
 
 vi.mock("@/lib/db/recipes", () => ({
+  createRecipe: vi.fn(),
   getRecipe: vi.fn(),
   deleteRecipe: vi.fn(),
 }));
@@ -84,12 +108,22 @@ const mockRecipe: Recipe = {
   updatedAt: new Date(),
 };
 
+const publicRecipe: PublicRecipe = {
+  id: "shared-1",
+  title: "Shared Soup",
+  servings: 2,
+  ingredients: [{ id: "shared-ing", item: "Water" }],
+  instructions: [{ id: "shared-step", order: 1, instruction: "Boil" }],
+  owner: { name: "Olena" },
+};
+
 describe("RecipeDetail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default: recipe loads successfully
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
     vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);
+    vi.mocked(recipesModule.createRecipe).mockResolvedValue("copied-1");
   });
 
   it("shows loading state while fetching recipe", async () => {
@@ -102,13 +136,13 @@ describe("RecipeDetail", () => {
     expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
   });
 
-  it("displays recipe not found when recipe does not exist", async () => {
+  it("displays the private guard when recipe does not exist", async () => {
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
 
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => {
-      expect(screen.getByText(/recipeNotFound/i)).toBeInTheDocument();
+      expect(screen.getByText("This recipe is private")).toBeInTheDocument();
     });
   });
 
@@ -192,5 +226,60 @@ describe("RecipeDetail", () => {
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
     expect(recipesModule.deleteRecipe).not.toHaveBeenCalled();
+  });
+
+  it("renders a public fallback as read-only when no local recipe exists", async () => {
+    vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+
+    render(
+      <RecipeDetail
+        recipeId="shared-1"
+        locale="en"
+        publicRecipe={publicRecipe}
+      />,
+    );
+
+    expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
+    expect(screen.getByText("Shared by Olena")).toBeInTheDocument();
+    expect(screen.getByText("View only")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^edit$/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("saves an independent local copy and opens it", async () => {
+    vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+    render(
+      <RecipeDetail
+        recipeId="shared-1"
+        locale="en"
+        publicRecipe={publicRecipe}
+      />,
+    );
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: /save to my recipes/i }),
+    );
+
+    expect(recipesModule.createRecipe).toHaveBeenCalledWith(
+      expect.objectContaining({ isPublic: false }),
+    );
+    await waitFor(() => {
+      expect(navigation.replace).toHaveBeenCalledWith("/en/recipes/copied-1");
+    });
+  });
+
+  it("shows the private guard when neither local nor public data exists", async () => {
+    vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+    render(
+      <RecipeDetail recipeId="private-1" locale="en" publicRecipe={null} />,
+    );
+
+    expect(
+      await screen.findByText("This recipe is private"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /back to recipes/i }),
+    ).toBeInTheDocument();
   });
 });

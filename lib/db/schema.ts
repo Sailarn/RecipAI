@@ -95,6 +95,7 @@ export interface Recipe {
   sourceUrl?: string;
   category?: string;
   status?: RecipeStatus | null;
+  isPublic?: boolean;
   collectionIds?: string[];
   canonicalIngredientIds?: string[];
   unrecognizedIngredients?: string[];
