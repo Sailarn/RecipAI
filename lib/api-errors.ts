@@ -8,7 +8,11 @@ export const API_ERROR_MESSAGES = {
   INVALID_BODY: "Invalid request body",
   TOO_MANY_REQUESTS:
     "Too many requests — please slow down and try again later.",
+  MAINTENANCE: "Service maintenance in progress",
 } as const;
+
+export const MAINTENANCE_MODE_CODE = "MAINTENANCE_MODE";
+const MAINTENANCE_RETRY_AFTER_SECONDS = 30;
 
 function captureWithContext(error: unknown, req?: Request) {
   captureError(error, {
@@ -43,6 +47,14 @@ export const ApiError = {
         headers: retryAfterSeconds
           ? { "Retry-After": String(retryAfterSeconds) }
           : undefined,
+      },
+    ),
+  maintenance: (message: string = API_ERROR_MESSAGES.MAINTENANCE) =>
+    NextResponse.json(
+      { error: message, code: MAINTENANCE_MODE_CODE },
+      {
+        status: 503,
+        headers: { "Retry-After": String(MAINTENANCE_RETRY_AFTER_SECONDS) },
       },
     ),
   /** Capture an error in Sentry without changing the response — use when the

@@ -74,6 +74,20 @@ describe("ApiError", () => {
     });
   });
 
+  describe("maintenance()", () => {
+    it("returns 503 with MAINTENANCE_MODE code and Retry-After", async () => {
+      const response = ApiError.maintenance("Maintenance window");
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get("Retry-After")).toBe("30");
+      const body = await response.json();
+      expect(body).toEqual({
+        error: "Maintenance window",
+        code: "MAINTENANCE_MODE",
+      });
+    });
+  });
+
   describe("internal()", () => {
     it("returns 500 with generic message and calls captureError when error is provided", async () => {
       const error = new Error("DB connection failed");

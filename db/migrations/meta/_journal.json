@@ -155,6 +155,13 @@
       "when": 1782516250858,
       "tag": "0021_spooky_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782765810007,
+      "tag": "0022_luxuriant_deathbird",
+      "breakpoints": true
     }
   ]
 }
