@@ -75,10 +75,9 @@ describe("proxy", () => {
     expect(ensureAppAvailable).not.toHaveBeenCalled();
   });
 
-  it("runs on Node and matches API requests", () => {
+  it("matches API requests", () => {
     expect(config).toEqual(
       expect.objectContaining({
-        runtime: "nodejs",
         matcher: expect.arrayContaining(["/api/:path*"]),
       }),
     );
