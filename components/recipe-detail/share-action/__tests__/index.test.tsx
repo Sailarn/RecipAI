@@ -2,6 +2,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MaintenanceError } from "@/lib/api/api-fetch";
 import type { Recipe } from "@/lib/db/schema";
 import { ShareAction } from "..";
 
@@ -116,6 +117,22 @@ describe("ShareAction", () => {
     expect(
       screen.queryByRole("button", { name: "Copy link" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps the global maintenance message as the only publication error", async () => {
+    setRecipeVisibility.mockRejectedValue(new MaintenanceError("Back soon"));
+    renderShareAction();
+    await openSharePopover();
+    await userEvent.click(
+      screen.getByRole("switch", { name: "Public recipe" }),
+    );
+
+    await waitFor(() => expect(setRecipeVisibility).toHaveBeenCalled());
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(updateRecipe).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("switch", { name: "Public recipe" }),
+    ).not.toBeChecked();
   });
 
   it("revokes access before hiding share actions", async () => {

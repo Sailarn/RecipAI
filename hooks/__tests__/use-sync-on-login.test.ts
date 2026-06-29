@@ -69,6 +69,16 @@ function makeJsonResponse(body: object, ok = true) {
   return { ok, json: () => Promise.resolve(body) } as unknown as Response;
 }
 
+function maintenanceResponse() {
+  return new Response(
+    JSON.stringify({
+      error: "Maintenance window",
+      code: "MAINTENANCE_MODE",
+    }),
+    { status: 503 },
+  );
+}
+
 function setupFetch({
   recipes = [] as unknown[],
   collections = [] as unknown[],
@@ -418,6 +428,45 @@ describe("useSyncOnLogin", () => {
         "Sync failed — check your connection",
       );
       expect(replaceSyncNotifications).not.toHaveBeenCalled();
+    });
+
+    it("stops quietly when the sync pull is blocked by maintenance", async () => {
+      const localRecipe = {
+        id: "local-1",
+        title: "Local Recipe",
+        servings: 2,
+        ingredients: [],
+        instructions: [],
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      };
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
+      mockFetch.mockImplementation((url: string) => {
+        if (String(url).startsWith("/api/ingredients")) {
+          return Promise.resolve(
+            makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
+          );
+        }
+        if (String(url) === "/api/pantry") {
+          return Promise.resolve(makeJsonResponse({ items: [] }));
+        }
+        if (String(url) === "/api/recipes/sync") {
+          return Promise.resolve(maintenanceResponse());
+        }
+        return Promise.resolve(makeJsonResponse({ collections: [] }));
+      });
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync"),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(replaceSyncNotifications).not.toHaveBeenCalled();
+      expect(toast.error).not.toHaveBeenCalled();
     });
   });
 

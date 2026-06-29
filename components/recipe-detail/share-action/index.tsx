@@ -3,6 +3,7 @@
 import { Share2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { isMaintenanceError } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
@@ -50,8 +51,10 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
       await setRecipeVisibility(recipe, nextVisibility);
       await updateRecipe(recipe.id, { isPublic: nextVisibility });
       setConfirmedIsPublic(nextVisibility);
-    } catch {
-      toast.error("Could not update recipe visibility.");
+    } catch (error) {
+      if (!isMaintenanceError(error)) {
+        toast.error("Could not update recipe visibility.");
+      }
     } finally {
       setIsUpdating(false);
     }

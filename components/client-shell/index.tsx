@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
+import { MaintenanceListener } from "@/components/maintenance-listener";
 import { PageStack } from "@/components/page-stack";
 import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
@@ -34,6 +35,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <NavigationStackProvider initialHref={pathname} currentPage={children}>
       <PageStack />
+      <MaintenanceListener />
       <Toaster
         position="top-center"
         mobileOffset={{ top: "var(--mobile-toast-offset)" }}

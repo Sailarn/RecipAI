@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { apiFetch, isMaintenanceError } from "@/lib/api/api-fetch";
 import { getParseHistory } from "@/lib/db/parse-history";
 import type { ParseHistoryEntry } from "@/lib/db/schema";
 import { addJobId } from "@/lib/parse-job-storage";
@@ -26,7 +27,7 @@ export function ParseHistoryView() {
 
     setRetryingIds((current) => new Set(current).add(entry.id));
     try {
-      const enqueueResponse = await fetch(api.parseQueue, {
+      const enqueueResponse = await apiFetch(api.parseQueue, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: entry.url }),
@@ -39,14 +40,16 @@ export function ParseHistoryView() {
         new CustomEvent("parse-job-created", { detail: { jobId } }),
       );
 
-      const processResponse = await fetch(api.parseQueueProcess, {
+      const processResponse = await apiFetch(api.parseQueueProcess, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId }),
       });
       if (!processResponse.ok) throw new Error("Failed to process retry");
-    } catch {
-      toast.error("Failed to retry import");
+    } catch (error) {
+      if (!isMaintenanceError(error)) {
+        toast.error("Failed to retry import");
+      }
     } finally {
       setRetryingIds((current) => {
         const next = new Set(current);

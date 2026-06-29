@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api/api-fetch";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 
@@ -39,7 +40,7 @@ export async function parseRecipeFromPhoto(
 ): Promise<ParsedRecipe> {
   const { base64, mimeType } = await compressImage(file);
 
-  const res = await fetch(api.parseRecipePhoto, {
+  const res = await apiFetch(api.parseRecipePhoto, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ imageBase64: base64, mimeType, jobId }),

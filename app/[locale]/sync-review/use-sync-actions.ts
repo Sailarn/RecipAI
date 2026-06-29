@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { announceIfMaintenance } from "@/lib/api/api-fetch";
 import { db } from "@/lib/db/db";
 import {
   clearSyncNotifications,
@@ -84,6 +85,7 @@ export function useSyncActions(locale: string) {
     const endpoint = getDeleteEndpoint(notif.entityType, notif.entityId);
     const res = await fetch(endpoint, { method: "DELETE" });
     if (!res.ok) {
+      if (await announceIfMaintenance(res)) return;
       toast.error("Failed to delete from server — check your connection");
       return;
     }
@@ -102,6 +104,7 @@ export function useSyncActions(locale: string) {
       body: JSON.stringify({ [bodyKey]: [item] }),
     });
     if (!res.ok) {
+      if (await announceIfMaintenance(res)) return;
       toast.error("Upload failed — check your connection");
       return;
     }
@@ -132,6 +135,7 @@ export function useSyncActions(locale: string) {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
+      if (await announceIfMaintenance(res)) return;
       toast.error("Failed to push your version — check your connection");
       return;
     }
@@ -164,6 +168,7 @@ export function useSyncActions(locale: string) {
       if (res.ok) {
         await resolveNotification(notification.id);
       } else {
+        if (await announceIfMaintenance(res)) return;
         failed++;
       }
     }

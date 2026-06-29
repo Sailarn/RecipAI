@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { announceIfMaintenance } from "@/lib/api/api-fetch";
 import { api } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 
@@ -95,6 +96,7 @@ export function usePushSubscription(): UsePushSubscriptionResult {
         // The browser is now subscribed but the server never stored it — roll
         // the browser sub back so browser, server, and UI stay consistent.
         await sub.unsubscribe().catch(() => {});
+        if (await announceIfMaintenance(response)) return null;
         throw new Error(`Push subscribe request failed: ${response.status}`);
       }
 
@@ -129,6 +131,7 @@ export function usePushSubscription(): UsePushSubscriptionResult {
         body: JSON.stringify({ endpoint: subscription.endpoint }),
       });
       if (!response.ok) {
+        if (await announceIfMaintenance(response)) return;
         throw new Error(`Push unsubscribe request failed: ${response.status}`);
       }
 

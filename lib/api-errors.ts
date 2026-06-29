@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
+import {
+  DEFAULT_MAINTENANCE_MESSAGE,
+  MAINTENANCE_MODE_CODE,
+} from "@/lib/maintenance-constants";
 import { captureError } from "@/lib/telemetry";
+
+export { MAINTENANCE_MODE_CODE };
 
 export const API_ERROR_MESSAGES = {
   UNAUTHORIZED: "Unauthorized",
@@ -8,10 +14,9 @@ export const API_ERROR_MESSAGES = {
   INVALID_BODY: "Invalid request body",
   TOO_MANY_REQUESTS:
     "Too many requests — please slow down and try again later.",
-  MAINTENANCE: "Service maintenance in progress",
+  MAINTENANCE: DEFAULT_MAINTENANCE_MESSAGE,
 } as const;
 
-export const MAINTENANCE_MODE_CODE = "MAINTENANCE_MODE";
 const MAINTENANCE_RETRY_AFTER_SECONDS = 30;
 
 function captureWithContext(error: unknown, req?: Request) {

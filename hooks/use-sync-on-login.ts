@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { maintenanceErrorFromResponse } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
@@ -130,6 +131,10 @@ function parseTimestamps<T extends { createdAt: Date; updatedAt: Date }>(
   })) as T[];
 }
 
+async function isMaintenanceBlocked(response: Response): Promise<boolean> {
+  return (await maintenanceErrorFromResponse(response)) !== null;
+}
+
 export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
@@ -177,6 +182,16 @@ export function useSyncOnLogin() {
         fetch(api.recipesSync),
         fetch(api.collections),
       ]);
+
+      if (
+        (await isMaintenanceBlocked(recipesRes)) ||
+        (await isMaintenanceBlocked(collectionsRes))
+      )
+        return;
+
+      if (!recipesRes.ok || !collectionsRes.ok) {
+        throw new Error("Server sync failed");
+      }
 
       const { recipes: rawServerRecipes } = await recipesRes.json();
       const { collections: rawServerCollections } = await collectionsRes.json();

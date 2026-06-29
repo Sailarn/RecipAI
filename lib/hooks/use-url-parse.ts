@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { apiFetch, isMaintenanceError } from "@/lib/api/api-fetch";
 import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import { addParsedRecipeResult } from "@/lib/db/parsed-recipes";
@@ -176,7 +177,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         pushEndpoint = sub?.endpoint;
       }
 
-      const res = await fetch(api.parseQueue, {
+      const res = await apiFetch(api.parseQueue, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -233,8 +234,12 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId: newJobId }),
       }).catch((caughtError) => logger.error("process error:", caughtError));
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (caughtError) {
+      setError(
+        isMaintenanceError(caughtError)
+          ? caughtError.message
+          : "Network error. Please try again.",
+      );
       setLoading(false);
     }
   };

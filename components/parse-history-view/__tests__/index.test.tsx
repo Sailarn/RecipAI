@@ -8,9 +8,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PARSE_HISTORY_STATUS } from "@/lib/db/schema";
 import { ParseHistoryView } from "../index";
 
-const { addJobId, fetchMock } = vi.hoisted(() => ({
+const { addJobId, fetchMock, toastError } = vi.hoisted(() => ({
   addJobId: vi.fn(),
   fetchMock: vi.fn(),
+  toastError: vi.fn(),
 }));
 
 vi.mock("dexie-react-hooks", () => ({
@@ -40,6 +41,7 @@ vi.mock("@/lib/telemetry", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/lib/transitions", () => ({
   useNavigate: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
 }));
+vi.mock("sonner", () => ({ toast: { error: toastError } }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -81,5 +83,24 @@ describe("ParseHistoryView", () => {
     render(<ParseHistoryView />);
 
     expect(screen.getAllByRole("button", { name: "Retry" })).toHaveLength(1);
+  });
+
+  it("does not replace maintenance with a generic retry error", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: "Back after lunch",
+          code: "MAINTENANCE_MODE",
+        }),
+        { status: 503 },
+      ),
+    );
+    render(<ParseHistoryView />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(toastError).not.toHaveBeenCalledWith("Failed to retry import");
+    expect(addJobId).not.toHaveBeenCalled();
   });
 });

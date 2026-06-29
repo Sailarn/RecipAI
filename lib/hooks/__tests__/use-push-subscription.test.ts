@@ -58,6 +58,16 @@ function setupPushEnv(options: PushEnvOptions = {}) {
   return { subscribeMock, getSubscriptionMock, fetchMock };
 }
 
+function maintenanceResponse() {
+  return new Response(
+    JSON.stringify({
+      error: "Maintenance window",
+      code: "MAINTENANCE_MODE",
+    }),
+    { status: 503 },
+  );
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -131,6 +141,22 @@ describe("usePushSubscription", () => {
       expect(result.current.subscription).toBeNull();
     });
 
+    it("rolls back and resolves without a generic error during maintenance", async () => {
+      const { fetchMock } = setupPushEnv();
+      fetchMock.mockResolvedValueOnce(maintenanceResponse());
+      const { result } = renderHook(() => usePushSubscription());
+      await waitFor(() => expect(result.current.isSupported).toBe(true));
+
+      let returned: PushSubscription | null = fakeSubscription;
+      await act(async () => {
+        returned = await result.current.subscribe();
+      });
+
+      expect(returned).toBeNull();
+      expect(fakeSubscription.unsubscribe).toHaveBeenCalledOnce();
+      expect(result.current.subscription).toBeNull();
+    });
+
     it("sets permission to denied without throwing when the user blocks", async () => {
       const { subscribeMock } = setupPushEnv();
       const notAllowed = new Error("blocked");
@@ -195,6 +221,24 @@ describe("usePushSubscription", () => {
 
       await act(async () => {
         await expect(result.current.unsubscribe()).rejects.toThrow();
+      });
+
+      expect(fakeSubscription.unsubscribe).not.toHaveBeenCalled();
+      expect(result.current.subscription).toBe(fakeSubscription);
+    });
+
+    it("keeps the subscription enabled and resolves during maintenance", async () => {
+      const { fetchMock } = setupPushEnv({
+        existingSubscription: fakeSubscription,
+      });
+      fetchMock.mockResolvedValueOnce(maintenanceResponse());
+      const { result } = renderHook(() => usePushSubscription());
+      await waitFor(() =>
+        expect(result.current.subscription).toBe(fakeSubscription),
+      );
+
+      await act(async () => {
+        await result.current.unsubscribe();
       });
 
       expect(fakeSubscription.unsubscribe).not.toHaveBeenCalled();
