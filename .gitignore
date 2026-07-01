@@ -57,9 +57,17 @@ next-env.d.ts
 *.md
 !README.md
 !docs/**
+!graphify-out/GRAPH_REPORT.md
 # One-off / ad-hoc scripts live here and are NOT committed. Only reusable
 # tooling (e.g. check.sh) stays tracked directly under scripts/.
 scripts/local/
 
 # MkDocs build output
 /site/
+
+# graphify — commit graph.json/GRAPH_REPORT.md/graph.html so the map ships
+# with the repo; everything else is local build/intermediate state
+graphify-out/manifest.json
+graphify-out/cache/
+graphify-out/.graphify_*
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
