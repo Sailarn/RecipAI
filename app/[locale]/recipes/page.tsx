@@ -19,6 +19,7 @@ import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipesPageState } from "@/hooks/use-recipes-page-state";
 import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getGreeting } from "@/lib/greeting";
+import { prewarmRecipeImages } from "@/lib/prewarm-recipe-images";
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -83,6 +84,12 @@ export default function RecipesPage() {
     container.addEventListener("scroll", check, { passive: true });
     return () => container.removeEventListener("scroll", check);
   }, [loading]);
+
+  // Prewarm every recipe's detail hero image into the SW cache during idle time
+  // so opening a recipe shows its photo instantly. Deduped across remounts.
+  useEffect(() => {
+    if (recipes) prewarmRecipeImages(recipes);
+  }, [recipes]);
 
   const { triggerSync } = useSyncOnLogin();
   const { indicatorRef, isRefreshing } = usePullToRefresh({
