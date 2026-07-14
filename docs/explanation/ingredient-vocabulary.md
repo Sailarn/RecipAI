@@ -16,7 +16,7 @@ The vocabulary itself is the `ingredients` table — global, shared across all u
 | `provisional` | Just created from an unmatched string — raw text, no aliases yet |
 | `failed` | AI enrichment gave up (or the string isn't food) |
 
-The initial dataset is curated JSON in `scripts/vocab/*.json`, merged into `scripts/ingredients-seed.json` and seeded into Postgres with `scripts/seed-ingredients.ts`.
+The initial dataset was curated JSON, seeded into Postgres once. That tooling no longer lives in this repo — per this project's "no one-off scripts committed" rule, vocabulary curation and backfill tooling now live in the separate `RecipAI-Admin` repo (`steps/vocab/`).
 
 The confirmed vocabulary is also the **only** thing users can pick from when adding ingredients by hand — both the pantry and the recipe form select from it through the shared `components/ingredient-picker/` (no free-text entry). See [Curated ingredient input](decisions.md#curated-ingredient-input-tap-dont-type). Parsing still produces free-text strings, which is what the rest of this page is about.
 
@@ -41,7 +41,7 @@ graph TD
 
 **1. Null patterns.** Phrases like "to taste" / "за смаком" / "for garnish" are not ingredients — they go straight to `unrecognizedIngredients`.
 
-**2. Fuse.js fuzzy match.** A Fuse index (threshold 0.2) is built over every confirmed entry's `en`, `ua`, and both alias arrays, from the **local Dexie copy** of the vocabulary. Each parsed ingredient also carries an AI-normalized English head (`en`, e.g. "shredded mozzarella" → "mozzarella"), which is matched **first** — sidestepping modifier dilution and cross-lingual misses — then the raw `item`, then the `ua` hint. Parenthesised text is stripped first. If the full string misses, each token longer than 3 chars is tried individually — handling phrases like "кетчупу Торчин для дітей" → "кетчупу" → ketchup — with a guard that the matched alias is at most 2 words, so a common word can't hit a long alias phrase.
+**2. Fuse.js fuzzy match** (`lib/parse-recipe/vocab-match.ts`, `matchVocabId`). A Fuse index (threshold 0.2) is built over every confirmed entry's `en`, `ua`, and both alias arrays, from the **local Dexie copy** of the vocabulary. Each parsed ingredient also carries an AI-normalized English head (`en`, e.g. "shredded mozzarella" → "mozzarella"), which is matched **first** — sidestepping modifier dilution and cross-lingual misses — then the raw `item`, then the `ua` hint. Parenthesised text is stripped first. If the full string misses, each token longer than 3 chars is tried individually — handling phrases like "кетчупу Торчин для дітей" → "кетчупу" → ketchup — with a guard that the matched alias is at most 2 words, so a common word can't hit a long alias phrase.
 
 **3. Embedding match.** Fuse misses are batched to `POST /api/ingredients/embed-match`. The server embeds each query (the normalized `en` head when supplied, else `item`) through the configured provider chain, then asks Postgres for the two nearest confirmed vocabulary vectors using pgvector cosine distance. A match is accepted only when the best similarity is **≥ 0.88** and leads the runner-up by **≥ 0.02** — ambiguous matches fall through rather than guess. (These are calibrated for `multilingual-e5-small`; see the matcher comment in `lib/db/vocab-vector-search.ts` and `scripts/local/admin/calibrate`.) If every embedding provider is unavailable, the route returns HTTP 200 with `degraded: true` and null matches so normalization continues through provisional creation.
 
