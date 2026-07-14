@@ -23,7 +23,6 @@ export function RecipeHero({ recipe }: RecipeHeroProps) {
           imageUrl={recipe.imageUrl}
           title={recipe.title}
           width={800}
-          sizes="100vw"
           priority
           objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
           imageCropX={recipe.imageCropX}

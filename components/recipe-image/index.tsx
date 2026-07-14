@@ -1,20 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import { getOptimizedUrl } from "@/lib/imagekit-url";
 
-const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
 const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL ?? "";
-
-function getOptimizedUrl(url: string, width: number): string {
-  if (!url || !url.startsWith(IMAGEKIT_URL)) return url;
-  return `${url}?tr=w-${width},f-webp,q-80`;
-}
 
 interface RecipeImageProps {
   imageUrl?: string;
   title: string;
-  sizes?: string;
   width?: number;
   priority?: boolean;
   objectPosition?: string;
@@ -27,7 +20,6 @@ interface RecipeImageProps {
 export const RecipeImage = ({
   imageUrl,
   title,
-  sizes = "100vw",
   width = 800,
   priority = false,
   objectPosition = "50% 50%",
@@ -39,6 +31,11 @@ export const RecipeImage = ({
   const [errored, setErrored] = useState(false);
   const src = errored || !imageUrl ? PLACEHOLDER_URL : imageUrl;
   const optimizedSrc = getOptimizedUrl(src, width);
+  // Direct <img> (not next/image) so requests hit ImageKit's CDN and are cached
+  // by the service worker. priority drives eager+high for the above-the-fold
+  // hero; everything else lazy-loads.
+  const loading = priority ? "eager" : "lazy";
+  const fetchPriority = priority ? "high" : "auto";
 
   const hasCrop =
     imageCropWidth != null &&
@@ -77,13 +74,14 @@ export const RecipeImage = ({
           }}
         >
           <div className="relative w-full h-full">
-            <Image
+            {/* biome-ignore lint/performance/noImgElement: direct ImageKit CDN URL so the service worker caches it; next/image would route via /_next/image and defeat caching + prewarming */}
+            <img
               src={optimizedSrc}
               alt={title}
-              fill
-              priority={priority}
-              className="object-cover"
-              sizes={sizes}
+              loading={loading}
+              fetchPriority={fetchPriority}
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover"
               onError={() => setErrored(true)}
               style={{
                 objectPosition: `${relativeFocalX}% ${relativeFocalY}%`,
@@ -97,13 +95,14 @@ export const RecipeImage = ({
 
   return (
     <div className="relative w-full h-full bg-muted">
-      <Image
+      {/* biome-ignore lint/performance/noImgElement: direct ImageKit CDN URL so the service worker caches it; next/image would route via /_next/image and defeat caching + prewarming */}
+      <img
         src={optimizedSrc}
         alt={title}
-        fill
-        priority={priority}
-        className="object-cover"
-        sizes={sizes}
+        loading={loading}
+        fetchPriority={fetchPriority}
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
         onError={() => setErrored(true)}
         style={{ objectPosition }}
       />

@@ -147,19 +147,11 @@ describe("RecipesPage", () => {
     expect(screen.getByText(/12 servings/i)).toBeInTheDocument();
   });
 
-  it("displays recipe images with ImageKit transform URL", async () => {
+  it("passes non-ImageKit image URLs through unchanged", async () => {
     render(<RecipesPage />);
 
-    await waitFor(() => {
-      const images = screen.getAllByRole("img");
-      expect(images.length).toBeGreaterThan(0);
-    });
-
-    const cakeImage = screen.getByAltText("Chocolate Cake");
-    expect(cakeImage).toHaveAttribute(
-      "src",
-      "https://example.com/cake.jpg?tr=w-300,f-webp,q-80",
-    );
+    const cakeImage = await screen.findByAltText("Chocolate Cake");
+    expect(cakeImage).toHaveAttribute("src", "https://example.com/cake.jpg");
   });
 
   it("does not render create recipe button (moved to parse page)", async () => {

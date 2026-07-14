@@ -29,7 +29,6 @@ export function CardThumbnail({
       <RecipeImage
         imageUrl={recipe.imageUrl}
         title={recipe.title}
-        sizes="(max-width: 768px) 50vw, 33vw"
         width={300}
         priority={priority}
         objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
