@@ -1,16 +1,10 @@
 import * as cheerio from "cheerio";
-import { extractSchemaRecipe } from "@/app/api/parse-recipe/schema-parser";
 import { callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchHtmlWithPhantomJs } from "@/lib/scrapers/phantomjs";
 import { fetchHtmlWithScrapeDo } from "@/lib/scrapers/scrape-do";
 import { log } from "@/lib/telemetry";
-import {
-  buildImagesText,
-  extractAllImages,
-  extractHeroImage,
-  extractStepImages,
-} from "./images";
+import { buildImagesText, extractAllImages, extractHeroImage } from "./images";
 import { buildWebPrompt } from "./prompts";
 import { requireCompleteRecipe } from "./recipe-result";
 
@@ -21,6 +15,7 @@ const CHROME_MIN_BLOCK_CHARS = 200;
 const CHROME_LINK_RATIO = 0.6;
 const MIN_TRIMMED_CHARS = 300;
 const MIN_TRIMMED_RATIO = 0.1;
+const MAX_JSON_LD_CONTEXT_CHARS = 12000;
 
 function bodyText($: cheerio.CheerioAPI): string {
   return $("body").text().replace(/\s+/g, " ").trim();
@@ -45,12 +40,47 @@ export function trimChrome($: cheerio.CheerioAPI): void {
   });
 }
 
+function hasRecipeType(value: unknown): boolean {
+  if (typeof value === "string") return value === "Recipe";
+  return Array.isArray(value) && value.includes("Recipe");
+}
+
+function collectRecipeNodes(value: unknown, recipes: object[]): void {
+  if (Array.isArray(value)) {
+    for (const item of value) collectRecipeNodes(item, recipes);
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+
+  const record = value as Record<string, unknown>;
+  if (hasRecipeType(record["@type"])) {
+    recipes.push(record);
+    return;
+  }
+  for (const nested of Object.values(record))
+    collectRecipeNodes(nested, recipes);
+}
+
+export function extractJsonLdContext($: cheerio.CheerioAPI): string {
+  const recipes: object[] = [];
+  $('script[type="application/ld+json"]').each((_, element) => {
+    try {
+      collectRecipeNodes(JSON.parse($(element).text()), recipes);
+    } catch {
+      // Ignore malformed metadata and keep parsing the visible page.
+    }
+  });
+  return recipes
+    .map((recipe) => JSON.stringify(recipe))
+    .join("\n")
+    .slice(0, MAX_JSON_LD_CONTEXT_CHARS);
+}
+
 // Structured per-parse record for Axiom: which path served the recipe (instant
 // schema vs. paid AI), which scraper fired, and how long each took. Powers the
 // pipeline performance/cost dashboard — see docs/explanation/observability.md.
 function logParsePipeline(
   url: string,
-  path: "schema" | "ai",
   scraper: "phantomjs" | "scrape-do",
   scrapeMs: number,
   startedAt: number,
@@ -67,7 +97,9 @@ function logParsePipeline(
   log("info", "parse_pipeline", {
     source: "url",
     domain,
-    path,
+    // Every URL parse goes through the AI now; the schema.org fast path was
+    // removed because its structured data silently dropped ingredients.
+    path: "ai",
     scraper,
     scrape_ms: scrapeMs,
     total_ms: Date.now() - startedAt,
@@ -93,29 +125,11 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
   const scrapeMs = Date.now() - scrapeStartedAt;
 
   const $ = cheerio.load(html);
-  const stepImages = extractStepImages($);
+  const jsonLdContext = extractJsonLdContext($);
 
-  // try schema.org first — instant if found
-  const schemaRecipe = extractSchemaRecipe(html);
-  if (
-    schemaRecipe &&
-    schemaRecipe.ingredients.length > 0 &&
-    schemaRecipe.instructions.length > 0
-  ) {
-    if (stepImages.length > 0) {
-      schemaRecipe.instructions = schemaRecipe.instructions.map(
-        (instruction, index) => ({
-          ...instruction,
-          imageUrl: stepImages[index] || undefined,
-        }),
-      );
-    }
-    const schemaResult = { ...schemaRecipe, sourceUrl: url } as ParsedRecipe;
-    logParsePipeline(url, "schema", scraper, scrapeMs, startedAt, schemaResult);
-    return schemaResult;
-  }
-
-  // AI fallback path
+  // All URL parses go through the AI: the schema.org fast path was removed
+  // because a site's structured data can silently omit ingredients (a wrong
+  // recipe is worse than a slower one), and the AI reads the whole page.
   $("script, style, noscript, svg").remove();
 
   // Pull images from the full page before trimming chrome away.
@@ -146,6 +160,9 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
   if (hero) {
     textContent = `Hero image URL: ${hero}\n\n${textContent}`;
   }
+  if (jsonLdContext) {
+    textContent = `SCHEMA.ORG RECIPE CONTEXT (reference only; verify against page text):\n${jsonLdContext}\n\n${textContent}`;
+  }
 
   const recipe = requireCompleteRecipe(
     await callAiForRecipe(buildWebPrompt(textContent)),
@@ -153,6 +170,6 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
     { url },
   );
   const aiResult = { ...recipe, sourceUrl: url };
-  logParsePipeline(url, "ai", scraper, scrapeMs, startedAt, aiResult);
+  logParsePipeline(url, scraper, scrapeMs, startedAt, aiResult);
   return aiResult;
 }

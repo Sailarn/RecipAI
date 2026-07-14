@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { describe, expect, it } from "vitest";
-import { trimChrome } from "../web";
+import { extractJsonLdContext, trimChrome } from "../web";
 
 const clean = (text: string) => text.replace(/\s+/g, " ").trim();
 
@@ -38,5 +38,31 @@ describe("trimChrome", () => {
     trimChrome($);
 
     expect($("#crumbs").length).toBe(1);
+  });
+});
+
+describe("extractJsonLdContext", () => {
+  it("keeps recipe JSON-LD as AI context without trusting it as output", () => {
+    const $ = cheerio.load(`
+      <body>
+        <script type="application/ld+json">
+          {"@type":"Recipe","recipeIngredient":["flour","water"]}
+        </script>
+        <script type="application/ld+json">
+          {"@type":"BreadcrumbList","itemListElement":[]}
+        </script>
+      </body>
+    `);
+
+    expect(extractJsonLdContext($)).toContain('"@type":"Recipe"');
+    expect(extractJsonLdContext($)).not.toContain("BreadcrumbList");
+  });
+
+  it("ignores malformed JSON-LD", () => {
+    const $ = cheerio.load(
+      '<script type="application/ld+json">not valid json</script>',
+    );
+
+    expect(extractJsonLdContext($)).toBe("");
   });
 });
