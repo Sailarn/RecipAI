@@ -25,10 +25,11 @@ graph LR
     D -->|isSignedIn = false| E[No-op]
     D -->|isSignedIn = true| F[POST/PATCH/DELETE to Supabase]
     F -->|network error| G[Silently swallowed]
-    F -->|HTTP error| H[Captured by Sentry]
+    F -->|maintenance / transient 5xx| I[Silently swallowed]
+    F -->|other HTTP error| H[Captured by Sentry]
 ```
 
-The Dexie write always happens first. `syncFetch` (`lib/sync-fetch.ts`) checks `isSignedIn()` before sending — if the user is not logged in, the call is skipped entirely. If they are logged in but offline, the fetch fails silently.
+The Dexie write always happens first. `syncFetch` (`lib/sync-fetch.ts`) checks `isSignedIn()` before sending — if the user is not logged in, the call is skipped entirely. If they are logged in but offline, the fetch fails silently. Maintenance 503s and transient upstream blips (502/503/504 — deploys, Pi restarts) are swallowed too; only other non-ok statuses reach Sentry.
 
 ---
 
