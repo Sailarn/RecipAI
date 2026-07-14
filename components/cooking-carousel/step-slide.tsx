@@ -1,9 +1,11 @@
 import { RecipeImage } from "@/components/recipe-image";
-import type { Step } from "@/lib/db/schema";
+import { sectionName } from "@/lib/db/recipe-sections";
+import type { RecipeSection, Step } from "@/lib/db/schema";
 
 interface StepSlideProps {
   step: Step;
   totalSteps: number;
+  sections?: RecipeSection[];
 }
 
 const SHORT_INSTRUCTION_MAX_LENGTH = 60;
@@ -25,10 +27,11 @@ function getInstructionTypographyClass(instruction: string): string {
   return "text-[14px] leading-[1.6]";
 }
 
-export function StepSlide({ step, totalSteps }: StepSlideProps) {
+export function StepSlide({ step, totalSteps, sections }: StepSlideProps) {
   const instructionTypographyClass = getInstructionTypographyClass(
     step.instruction,
   );
+  const stepSectionName = sectionName(step.sectionId ?? null, sections);
 
   return (
     <div className="px-[14px] pb-5 h-full overflow-y-auto">
@@ -43,6 +46,11 @@ export function StepSlide({ step, totalSteps }: StepSlideProps) {
           Step {step.order}/{totalSteps}
         </div>
       </div>
+      {stepSectionName && (
+        <div className="px-1 mb-1 text-[12px] font-semibold uppercase tracking-wide text-[var(--fg-2)]">
+          {stepSectionName}
+        </div>
+      )}
       <p className={`${instructionTypographyClass} px-1 text-[var(--fg-1)]`}>
         {step.instruction}
       </p>

@@ -32,4 +32,27 @@ describe("StepSlide", () => {
 
     expect(screen.getByText(step.instruction)).toHaveClass(expectedClass);
   });
+
+  it("shows the section label when the step's sectionId resolves", () => {
+    const step: Step = {
+      id: "s1",
+      order: 1,
+      instruction: "Whisk the eggs",
+      sectionId: "sec-1",
+    };
+    const sections = [{ id: "sec-1", name: "Sauce", order: 0 }];
+
+    render(<StepSlide step={step} totalSteps={3} sections={sections} />);
+
+    expect(screen.getByText("Sauce")).toBeInTheDocument();
+  });
+
+  it("renders no section label when the step has none", () => {
+    const step: Step = { id: "s1", order: 1, instruction: "Whisk the eggs" };
+
+    render(<StepSlide step={step} totalSteps={3} />);
+
+    expect(screen.getByText("Whisk the eggs")).toBeInTheDocument();
+    expect(screen.queryByText("Sauce")).not.toBeInTheDocument();
+  });
 });

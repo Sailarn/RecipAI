@@ -34,6 +34,7 @@ export function IngredientsSheet({
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
+          sections={recipe.sections}
           canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
           locale={locale}
         />

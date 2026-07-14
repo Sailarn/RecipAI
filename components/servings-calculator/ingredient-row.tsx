@@ -1,8 +1,10 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
+import type { Locale } from "@/i18n/config";
 import { togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
+import { modifierLabel } from "@/lib/parse-recipe/modifiers";
 import { cn } from "@/lib/utils";
 import type { StockStatus } from "./use-servings-calculator";
 
@@ -18,6 +20,8 @@ interface IngredientRowProps {
   scaledAmount: string | null;
   status: StockStatus;
   name: string;
+  locale: Locale;
+  showOriginal: boolean;
   pantryItem: PantryItem | undefined;
   onAdd: () => Promise<void>;
 }
@@ -28,6 +32,8 @@ export function IngredientRow({
   scaledAmount,
   status,
   name,
+  locale,
+  showOriginal,
   pantryItem,
   onAdd,
 }: IngredientRowProps) {
@@ -44,12 +50,31 @@ export function IngredientRow({
         style={{ background: BULLET_COLOR[status] }}
       />
       <span
-        className="flex-1 text-[13px] text-[var(--fg-1)] transition-[opacity] duration-200"
+        className="flex-1 flex flex-col gap-0.5 text-[13px] text-[var(--fg-1)] transition-[opacity] duration-200"
         style={{ opacity: status === "out" ? 0.45 : 1 }}
       >
-        {scaledAmount && <span className="font-semibold">{scaledAmount} </span>}
-        {ingredient.unit && <span>{ingredient.unit} </span>}
-        {name}
+        <span>
+          {scaledAmount && (
+            <span className="font-semibold">{scaledAmount} </span>
+          )}
+          {ingredient.unit && <span>{ingredient.unit} </span>}
+          {name}
+          {ingredient.modifiers?.map((modifier) => (
+            <span
+              key={modifier}
+              className="ml-2 inline-flex items-center rounded-full bg-[color-mix(in_oklch,var(--food-accent)_13%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--food-accent)]"
+            >
+              {modifierLabel(modifier, locale)}
+            </span>
+          ))}
+        </span>
+        {showOriginal &&
+          ingredient.original &&
+          ingredient.original !== name && (
+            <span className="text-[11px] text-[var(--fg-2)]">
+              {ingredient.original}
+            </span>
+          )}
       </span>
 
       {pantryItem ? (

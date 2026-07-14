@@ -74,9 +74,15 @@ export function SharedRecipeDetail({
           totalTime={recipe.totalTime}
         />
         <div className="mb-4">
-          <IngredientsList ingredients={recipe.ingredients} />
+          <IngredientsList
+            ingredients={recipe.ingredients}
+            sections={recipe.sections}
+          />
         </div>
-        <InstructionsList instructions={recipe.instructions} />
+        <InstructionsList
+          instructions={recipe.instructions}
+          sections={recipe.sections}
+        />
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-30 bg-[linear-gradient(to_top,var(--bg-base)_70%,transparent)] px-[18px] pb-[max(30px,env(safe-area-inset-bottom))] pt-8">

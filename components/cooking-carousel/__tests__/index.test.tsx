@@ -42,7 +42,12 @@ vi.mock("@/components/recipe-image", () => ({
   RecipeImage: () => <div data-testid="recipe-image" />,
 }));
 vi.mock("@/components/servings-calculator", () => ({
-  ServingsCalculator: () => <div data-testid="servings-calculator" />,
+  ServingsCalculator: ({ sections }: { sections?: Recipe["sections"] }) => (
+    <div
+      data-testid="servings-calculator"
+      data-sections={sections?.map((section) => section.name).join(",") ?? ""}
+    />
+  ),
 }));
 
 import { CookingCarousel } from "../index";
@@ -53,6 +58,7 @@ const recipe = {
   description: "Tasty",
   servings: 2,
   ingredients: [],
+  sections: [{ id: "main", name: "Main", order: 0 }],
   instructions: [
     { id: "s1", order: 1, instruction: "Boil water" },
     { id: "s2", order: 2, instruction: "Add pasta" },
@@ -145,5 +151,20 @@ describe("CookingCarousel", () => {
     fireEvent.click(screen.getByText("Ingredients"));
 
     expect(screen.getAllByTestId("servings-calculator")).toHaveLength(2);
+  });
+
+  it("passes recipe sections to both ingredient calculators", () => {
+    render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
+    expect(screen.getByTestId("servings-calculator")).toHaveAttribute(
+      "data-sections",
+      "Main",
+    );
+
+    goToSlide(1);
+    fireEvent.click(screen.getByText("Ingredients"));
+
+    for (const calculator of screen.getAllByTestId("servings-calculator")) {
+      expect(calculator).toHaveAttribute("data-sections", "Main");
+    }
   });
 });

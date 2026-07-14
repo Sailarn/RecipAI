@@ -102,10 +102,14 @@ export function RecipeDetail({
         <ServingsCalculator
           originalServings={recipe.servings}
           ingredients={recipe.ingredients}
+          sections={recipe.sections}
           canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
           locale={locale}
         />
-        <InstructionsList instructions={recipe.instructions} />
+        <InstructionsList
+          instructions={recipe.instructions}
+          sections={recipe.sections}
+        />
 
         {cookingMode && (
           <CookingCarousel

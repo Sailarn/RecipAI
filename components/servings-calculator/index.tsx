@@ -1,14 +1,40 @@
 "use client";
 
 import { MinusIcon, PlusIcon } from "lucide-react";
-import type { RecipeIngredient } from "@/lib/db/schema";
+import { useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/config";
+import {
+  groupBySectionId,
+  sectionName,
+  shouldShowSections,
+} from "@/lib/db/recipe-sections";
+import type { RecipeIngredient, RecipeSection } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 import { IngredientRow } from "./ingredient-row";
 import { useServingsCalculator } from "./use-servings-calculator";
 
+function groupWithIndex(
+  ingredients: RecipeIngredient[],
+  sections: RecipeSection[] | undefined,
+): {
+  sectionId: string | null;
+  items: { ingredient: RecipeIngredient; index: number }[];
+}[] {
+  const indexed = ingredients.map((ingredient, index) => ({
+    ingredient,
+    index,
+    sectionId: ingredient.sectionId,
+  }));
+  return groupBySectionId(indexed, sections).map((group) => ({
+    sectionId: group.sectionId,
+    items: group.items.map(({ ingredient, index }) => ({ ingredient, index })),
+  }));
+}
+
 interface ServingsCalculatorProps {
   originalServings: number;
   ingredients: RecipeIngredient[];
+  sections?: RecipeSection[];
   canonicalIngredientIds?: string[];
   locale?: string;
 }
@@ -16,9 +42,11 @@ interface ServingsCalculatorProps {
 export function ServingsCalculator({
   originalServings,
   ingredients,
+  sections,
   canonicalIngredientIds,
   locale,
 }: ServingsCalculatorProps) {
+  const t = useTranslations("recipes");
   const {
     servings,
     setServings,
@@ -89,20 +117,42 @@ export function ServingsCalculator({
         </div>
       </div>
 
-      <ul>
-        {ingredients.map((ingredient, index) => (
-          <IngredientRow
-            key={ingredient.id || `ing-${index}`}
-            ingredient={ingredient}
-            isLast={index === ingredients.length - 1}
-            scaledAmount={formatAmount(ingredient.amount)}
-            status={stockStatus(ingredient, index)}
-            name={displayName(ingredient, index)}
-            pantryItem={pantryItemFor(ingredient, index)}
-            onAdd={() => addToPantry(ingredient, index)}
-          />
-        ))}
-      </ul>
+      {(() => {
+        const groups = groupWithIndex(ingredients, sections);
+        const showSections = shouldShowSections(
+          ingredients.map((ingredient) => ingredient.sectionId),
+        );
+        return groups.map((group, groupIndex) => {
+          const name = group.sectionId
+            ? sectionName(group.sectionId, sections)
+            : t("mainSection");
+          return (
+            <div key={group.sectionId ?? `group-${groupIndex}`}>
+              {showSections && name && (
+                <div className="px-[14px] pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--fg-2)]">
+                  {name}
+                </div>
+              )}
+              <ul>
+                {group.items.map(({ ingredient, index }) => (
+                  <IngredientRow
+                    key={ingredient.id || `ing-${index}`}
+                    ingredient={ingredient}
+                    isLast={index === ingredients.length - 1}
+                    scaledAmount={formatAmount(ingredient.amount)}
+                    status={stockStatus(ingredient, index)}
+                    name={displayName(ingredient, index)}
+                    locale={(locale === "ua" ? "ua" : "en") as Locale}
+                    showOriginal={!useCanonical}
+                    pantryItem={pantryItemFor(ingredient, index)}
+                    onAdd={() => addToPantry(ingredient, index)}
+                  />
+                ))}
+              </ul>
+            </div>
+          );
+        });
+      })()}
     </div>
   );
 }

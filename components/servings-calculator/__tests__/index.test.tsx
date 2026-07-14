@@ -10,6 +10,10 @@ import {
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: vi.fn(),
 }));
@@ -229,10 +233,9 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      expect(screen.getByText(/flour/).previousElementSibling).toHaveAttribute(
-        "data-status",
-        "in",
-      );
+      expect(
+        screen.getByText(/flour/).closest("li")?.querySelector("[data-status]"),
+      ).toHaveAttribute("data-status", "in");
     });
 
     it("shows in-stock (green) across languages: recipe 'flour' matches pantry 'борошно' by shared canonical id", () => {
@@ -252,10 +255,9 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      expect(screen.getByText(/flour/).previousElementSibling).toHaveAttribute(
-        "data-status",
-        "in",
-      );
+      expect(
+        screen.getByText(/flour/).closest("li")?.querySelector("[data-status]"),
+      ).toHaveAttribute("data-status", "in");
     });
 
     it("shows out-of-stock (red) when the ingredient is not in the pantry", () => {
@@ -269,7 +271,10 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.getByText(/saffron/).previousElementSibling,
+        screen
+          .getByText(/saffron/)
+          .closest("li")
+          ?.querySelector("[data-status]"),
       ).toHaveAttribute("data-status", "out");
     });
   });
@@ -479,6 +484,110 @@ describe("ServingsCalculator", () => {
       });
 
       expect(screen.getByText(/plain flour/)).toBeInTheDocument();
+    });
+  });
+
+  describe("modifiers and sections", () => {
+    it("renders a modifier chip with the localized label", () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          locale="ua"
+          ingredients={[
+            baseIngredient({ item: "Mozzarella", modifiers: ["GRATED"] }),
+          ]}
+        />,
+      );
+
+      expect(screen.getByText("тертий")).toBeInTheDocument();
+    });
+
+    it("renders one chip per modifier", () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          ingredients={[
+            baseIngredient({ item: "Butter", modifiers: ["COLD", "SLICED"] }),
+          ]}
+        />,
+      );
+
+      expect(screen.getByText("cold")).toBeInTheDocument();
+      expect(screen.getByText("sliced")).toBeInTheDocument();
+    });
+
+    it("shows the original wording only in the 'original' toggle mode", async () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          canonicalIngredientIds={["vocab-x"]}
+          ingredients={[
+            baseIngredient({
+              item: "Mozzarella",
+              modifiers: ["GRATED"],
+              original: "Grated Mozzarella",
+            }),
+          ]}
+        />,
+      );
+
+      expect(screen.queryByText("Grated Mozzarella")).not.toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "original" }));
+      });
+
+      expect(screen.getByText("Grated Mozzarella")).toBeInTheDocument();
+    });
+
+    it("renders section headers when there is more than one section", () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          sections={[
+            { id: "s1", name: "For the base", order: 0 },
+            { id: "s2", name: "Sauce", order: 1 },
+          ]}
+          ingredients={[
+            baseIngredient({ id: "i1", item: "flour", sectionId: "s1" }),
+            baseIngredient({ id: "i2", item: "tomato", sectionId: "s2" }),
+          ]}
+        />,
+      );
+
+      expect(screen.getByText("For the base")).toBeInTheDocument();
+      expect(screen.getByText("Sauce")).toBeInTheDocument();
+    });
+
+    it("renders no section header for a single section", () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          sections={[{ id: "s1", name: "For the base", order: 0 }]}
+          ingredients={[
+            baseIngredient({ id: "i1", item: "flour", sectionId: "s1" }),
+            baseIngredient({ id: "i2", item: "water", sectionId: "s1" }),
+          ]}
+        />,
+      );
+
+      expect(screen.queryByText("For the base")).not.toBeInTheDocument();
+    });
+
+    it("labels ungrouped ingredients under a Main header when sections exist", () => {
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          sections={[{ id: "s1", name: "For the base", order: 0 }]}
+          ingredients={[
+            baseIngredient({ id: "i1", item: "flour", sectionId: "s1" }),
+            baseIngredient({ id: "i2", item: "salt" }),
+          ]}
+        />,
+      );
+
+      expect(screen.getByText("For the base")).toBeInTheDocument();
+      expect(screen.getByText("mainSection")).toBeInTheDocument();
     });
   });
 });

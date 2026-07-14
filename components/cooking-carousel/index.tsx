@@ -93,6 +93,7 @@ export function CookingCarousel({
                 <StepSlide
                   step={step}
                   totalSteps={recipe.instructions.length}
+                  sections={recipe.sections}
                 />
               </CarouselItem>
             ))}
