@@ -10,10 +10,11 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 |---|---|
 | `lib/ai.ts` | Multi-provider AI client. Tries the Gemini model chain, then OpenAI as last resort. Model names are defined here — this is the source of truth. Exports `callAiForRecipe`, `callAiForRecipePhoto`, `callAiForIngredient`. |
 | `lib/parse-recipe/index.ts` | Entry point — routes to `web.ts` or `video.ts` based on URL type. |
-| `lib/parse-recipe/web.ts` | Web recipe parsing. Schema.org short-circuit → `trimChrome` → AI fallback. |
+| `lib/parse-recipe/web.ts` | Web recipe parsing. Scrape → retain Recipe JSON-LD as reference context → `trimChrome` → AI. |
 | `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |
 | `lib/parse-recipe/photo.ts` | Client-side image compression and API call for photo parsing. |
 | `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildSocialPrompt`. |
+| `lib/parse-recipe/parsed-recipe-shape.ts` | Shared parsed-label → saved `sections`/`sectionId`/`modifiers[]` mapping used by local and Telegram saves. |
 | `lib/parse-recipe/images.ts` | Hero image and step image extraction from HTML. |
 | `lib/parse-recipe/parse-history-entry.ts` | Helpers to build `ParseHistoryEntry` from job results. |
 | `lib/parse-recipe/friendly-parse-error.ts` | Maps raw errors to user-facing strings. |

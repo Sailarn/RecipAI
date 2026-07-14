@@ -29,10 +29,9 @@ graph TD
 graph LR
     A[Fetch HTML] --> B{PhantomJsCloud}
     B -->|fail| C[scrape.do fallback]
-    B -->|ok| D[Schema.org extract]
+    B -->|ok| D[Extract Recipe JSON-LD context]
     C --> D
-    D -->|found + has ingredients and steps| E[Done - no AI needed]
-    D -->|not found| F[Strip script/style/svg]
+    D --> F[Strip script/style/svg]
     F --> G[Extract images]
     G --> H[trimChrome]
     H --> I{Enough text left?}
@@ -42,6 +41,8 @@ graph LR
     K --> L
     L --> M[ParsedRecipe]
 ```
+
+Every URL parse goes through the AI. The former schema.org JSON-LD fast path was removed: a site's structured data can silently omit ingredients (14 of 16 on a real recipe), and a wrong recipe is worse than a slightly slower one. Recipe JSON-LD is retained only as labeled reference context beside the visible page text; it is never accepted directly as the result.
 
 **HTML trimming (`trimChrome`):** walks every `ul`, `ol`, `nav`, `header`, `footer`, and `div`. Blocks larger than 200 chars where more than 60% of the text is link text are removed as site chrome (menus, footers). A safety floor prevents gutting pages where the recipe content itself is link-dense: if the trimmed result is less than 300 chars or less than 10% of the original, the full text is used instead.
 
@@ -176,6 +177,15 @@ Failed URL entries expose a **Retry** action. It creates a new queue job and han
 Photo parsing remains synchronous, but each request also creates and completes a `parse_jobs` row with `url = null`. The client-generated job ID is reused for the local history entry, so anonymous photo parses can be claimed on login and later pulled on other devices just like URL/video history.
 
 ---
+
+## Modifier & section extraction
+
+All three prompts (`lib/parse-recipe/prompts.ts`) share one ingredient/instruction schema block and extract two display-only annotations alongside the recipe:
+
+- **Modifiers.** The prompt lists the curated `PREPARATION_MODIFIERS` keys (`lib/parse-recipe/modifiers.ts`, injected via `modifierPromptList()` so prompt and enum never drift). The model chooses zero or one key, moves that preparation/state phrase out of `item`, and keeps the verbatim source in `original`. Saved ingredients use `modifiers[]`; users may add more keys in the edit form.
+- **Sections.** The model emits short free-form labels (`"For the base"`, `"Sauce"`) with exact label reuse across ingredients and steps. `buildSavedRecipeShape()` converts those labels once into `Recipe.sections` and row-level `sectionId` references. Telegram-triggered saves and local parsed-recipe saves use the same helper.
+
+Both are metadata for rendering only and are excluded from search, pantry, and vocabulary matching. Ingredient and step metadata lives in their existing JSON arrays, while the structured catalog uses the `recipes.sections` jsonb column added by migration `0023`. All parse paths produce the annotations in their single extraction call. Bump `PARSER_VERSION` (`parser-version.ts`) whenever the prompt changes so the result cache invalidates.
 
 ## After parsing: ingredient normalization
 

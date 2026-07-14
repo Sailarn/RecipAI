@@ -40,9 +40,15 @@ Photo parsing uses the same chain with multimodal input (Gemini `inlineData`, Op
 
 ---
 
-## Schema.org short-circuit
+## Schema.org short-circuit (removed)
 
-Before calling the AI, the web parser attempts to extract `@type: Recipe` JSON-LD from the page. If found with at least one ingredient, it is used directly — no AI call, no cost, near-instant. This works on most major recipe sites. The AI path is the fallback for SPAs and sites without structured data.
+The web parser once extracted `@type: Recipe` JSON-LD and used it directly when present — no AI call, near-instant. **This was removed.** A site's structured data is frequently incomplete: one real recipe's JSON-LD listed 14 of the 16 ingredients shown on its page. All URL parses now go through the AI. Recipe JSON-LD remains useful as labeled reference context alongside visible page text, but it is never trusted as the final result.
+
+---
+
+## Structured recipe sections and multi-select modifiers
+
+Parsed ingredients emit zero or one curated modifier key, while saved ingredients use `modifiers[]` so users can add multiple preparation states. Parsed section labels are converted at the save boundary into one recipe-level `{ id, name, order }` catalog with `sectionId` references on ingredients and steps. This makes rename stable, lets step grouping be edited without rewriting ingredient metadata, and keeps matching/search independent of display annotations.
 
 ---
 

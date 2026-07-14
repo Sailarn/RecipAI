@@ -34,6 +34,7 @@ interface Recipe {
   servings: number;
   ingredients: RecipeIngredient[];
   instructions: Step[];
+  sections?: RecipeSection[];
   sourceUrl?: string;
   category?: string;
   status?: "tried" | null;
@@ -48,6 +49,42 @@ interface Recipe {
 
 `isPublic` is optional for backward compatibility with legacy Dexie rows. A
 missing value is treated as private; only `isPublic === true` means public.
+
+#### RecipeIngredient / Step
+```ts
+interface RecipeIngredient {
+  id: string;
+  amount?: number;
+  unit?: string;
+  item: string;                        // cleaned display noun ("Mozzarella")
+  modifiers?: PreparationModifier[];   // curated enum KEYs, display-only
+  sectionId?: string | null;           // references Recipe.sections
+  original?: string;                   // verbatim source ("Grated Mozzarella"),
+                                       // present only when item was cleaned
+}
+
+interface Step {
+  id: string;
+  order: number;
+  instruction: string;
+  imageUrl?: string;
+  sectionId?: string | null;           // references Recipe.sections
+}
+
+interface RecipeSection {
+  id: string;
+  name: string;
+  order: number;
+}
+```
+
+`modifiers`, `sectionId`, and `original` remain display-only metadata inside the
+ingredient/step JSON arrays. `modifiers` stores language-agnostic keys from
+`PREPARATION_MODIFIERS`; the parser supplies zero or one key and the edit form
+allows multiple. `sectionId` points into the recipe-level `sections` catalog, so
+renaming a group changes one catalog entry instead of rewriting every row.
+Search, pantry, and vocabulary matching still use the hidden `en` head noun and
+`canonicalIngredientIds`.
 
 #### Collection
 ```ts
@@ -151,7 +188,7 @@ To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-
 
 ### `recipes`
 
-Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), `ingredients` / `instructions` / `collection_ids` / `canonical_ingredient_ids` stored as jsonb. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
+Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), `ingredients` / `instructions` / `sections` / `collection_ids` / `canonical_ingredient_ids` stored as jsonb. `sections` is added by migration `0023_clear_vanisher.sql`; apply that additive migration before deploying code that selects or writes the column. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
 
 ### `collections`
 

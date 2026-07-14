@@ -130,6 +130,27 @@ Coming back from the system browser wipes in-memory state, so the pending device
 
 ---
 
+## Recipe ingredients & steps
+
+**`item` no longer contains the preparation word.**
+Since curated modifiers shipped, the parser strips the prep/state word out of `item` (`"Grated Mozzarella"` → `item: "Mozzarella"`) and stores a curated KEY in `modifiers[]`. The verbatim source is kept in `original` (present only when it differs from `item`). Do not assume `item` holds the full source phrase; read `original` for that.
+
+**Modifiers store KEYs, not labels.** Each member of `modifiers[]` is a `PREPARATION_MODIFIERS` key (`GRATED`), resolved to an `en`/`ua` chip label via `modifierLabel()`. The parser is restricted to zero or one key; the edit UI is intentionally multi-select.
+
+**Modifiers and sections are display-only.** They are excluded from search, pantry, and vocab matching — those still key off the hidden `en` head noun and `canonicalIngredientIds`. When adding a surface that serializes recipes, remember `lib/public-recipes/server.ts` **field-picks** ingredients/steps: any new ingredient/step field must be added to `sanitizeIngredient`/`sanitizeStep` or it silently drops from the public share page. (`clonePublicRecipe` spreads, so it needs no change.)
+
+**Recipe-form metadata is row-bound.** `components/recipe-form/schema.ts` explicitly validates `rowId`, `modifiers`, `sectionId`, and `original`. Field-array removal and reordering therefore move metadata with the row; do not reintroduce positional merging in `use-recipe-save.ts`.
+
+**There are TWO ingredient render paths — update both.** The private recipe detail renders ingredients through **`components/servings-calculator/`** (`recipe-detail/index.tsx` uses `ServingsCalculator`, not `IngredientsList`). `IngredientsList` (`recipe-detail/ingredients-list.tsx`) is only used by the **public share page** via `shared-recipe-detail`. Any ingredient-display change (like the modifier chip / section grouping) must be made in **both** — the servings calculator for the owner's view, and `IngredientsList` for the public view. Steps have one path (`InstructionsList`, reused by both). The servings calculator's `displayName` may show the localized canonical vocab name in "parsed" mode, so its rows carry the chip + `original` separately from `item`.
+
+**Ingredients and steps group by section differently — use the right helper.** `lib/db/recipe-sections.ts` exports two groupers. Ingredients use **`groupBySectionId`** (catalog order, every member of a section coalesced into one group, ungrouped items last) — safe because ingredient order carries no meaning, and it survives legacy rows whose section members are interleaved. Steps use **`groupBySectionRuns`** (consecutive runs, order preserved, never reordered) because `step.order` is the cooking sequence; regrouping steps into buckets scrambles the recipe (that was a real bug: the detail list showed 1,4,2,3 while the cooking carousel stayed 1,2,3). A section that recurs later correctly yields a second run. Ungrouped ingredients render under a localized **"Main"** (`recipes.mainSection`) header when the recipe has sections; ungrouped steps get no header (they are just the main flow, matching `StepSlide`'s per-step eyebrow).
+
+**The admin backfill and forced reconciliation are not part of this release.** Normal sync never auto-overwrites a locally present recipe; a DB-side edit appears as a conflict. Implement and enable a versioned server-adoption pass only after the reviewed admin backfill has completed. Keep the operational plan local because `plans/` is intentionally gitignored.
+
+**URL parsing has no schema.org fast path.** `parseWebRecipe` always sends the page through the AI. Recipe JSON-LD is included only as labeled reference context and is checked against visible text; it is never returned directly. The AI emits `modifiers` and section labels in the same call. Bump `PARSER_VERSION` when the prompt changes so cached URLs re-parse.
+
+**Apply migration `0023` before deploying this shape.** The Drizzle schema, public recipe reads, sync reads, Telegram saves, and normal recipe writes reference `recipes.sections`. Adding the nullable column first is backward-compatible with the old app; deploying the new app first causes `column sections does not exist` failures.
+
 ## PWA / Build
 
 **The Pi can load e5-small in-process under Bun, but deployment may need trusted postinstalls.**
