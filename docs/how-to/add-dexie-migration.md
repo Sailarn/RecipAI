@@ -4,11 +4,11 @@ Dexie uses versioned migrations. Any schema change — new table, new index, dro
 
 ## 1. Add the new version in `lib/db/db.ts`
 
-Always add after the existing versions. Never modify a past version:
+Always add after the existing versions (currently v12 — check `lib/db/db.ts` for the actual latest before picking a number). Never modify a past version:
 
 ```ts
-// v12: add bookmarks table
-this.version(12).stores({
+// v13: add bookmarks table
+this.version(13).stores({
   recipes: "id, title, createdAt, updatedAt, status",
   parsedRecipes: "id, createdAt",
   collections: "id, name, createdAt",
@@ -47,14 +47,14 @@ class RecipeDatabase extends Dexie {
 IndexedDB does not support changing a store's keyPath in place. To drop and recreate (or just drop):
 
 ```ts
-// v12: drop bookmarks
-this.version(12).stores({
+// v13: drop bookmarks
+this.version(13).stores({
   // ...all other tables
   bookmarks: null,   // null = drop
 });
 
-// v13: recreate with new key
-this.version(13).stores({
+// v14: recreate with new key
+this.version(14).stores({
   // ...all other tables
   bookmarks: "id, recipeId, createdAt",
 });

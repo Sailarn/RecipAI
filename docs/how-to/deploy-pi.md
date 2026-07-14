@@ -19,6 +19,14 @@ ssh pi@<pi-local-ip>
 
 ## Deploy (pull + rebuild)
 
+The Pi has a `~/deploy.sh` wrapper that runs the full pull/build/restart sequence in one shot:
+
+```bash
+ssh recipai@recipai.local '~/deploy.sh'
+```
+
+That's the recommended path day-to-day. What it does under the hood (useful for troubleshooting a failed deploy step-by-step):
+
 ```bash
 cd ~/recipai
 git pull
