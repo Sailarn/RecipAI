@@ -239,6 +239,19 @@ Stores browser push subscriptions so the server can send notifications when a pa
 | `user_id` | text | Nullable FK → `user`. Linked when the subscribing browser has an active session |
 | `created_at` | timestamp | |
 
+### `app_config`
+
+Single-row global kill switch, read by the maintenance-mode middleware (`proxy.ts` / `lib/maintenance.ts`) before every `/api/*` request except `/api/auth` and `/api/manifest`. See [api-routes](api-routes.md#maintenance-mode).
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | text PK | Always `"global"` (`GLOBAL_APP_CONFIG_ID`) — single row |
+| `maintenance_enabled` | boolean | Default `false`. When `true`, gated routes return `503` |
+| `maintenance_message` | text | Nullable — shown to the client; falls back to a default string when unset |
+| `updated_at` | timestamp | |
+
+Toggled directly via the Supabase dashboard — no admin UI.
+
 ### Auth tables
 
 Managed by better-auth. Schema in `db/schema/auth.ts` — includes `user`, `session`, `account`, `verification`. Do not edit manually.

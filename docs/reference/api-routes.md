@@ -4,6 +4,14 @@ All routes live under `app/api/`. These routes are the server-sync layer — par
 
 ---
 
+## Maintenance mode
+
+`proxy.ts` (Next.js middleware) gates every `/api/*` request except `/api/auth/*` and `/api/manifest` behind a DB-backed kill switch, before any route handler runs. `ensureAppAvailable()` (`lib/maintenance.ts`) reads the single-row `app_config` Postgres table (see [data model](data-model.md#app_config)); if `maintenance_enabled` is true — or if that read itself throws — the request is short-circuited with `503 { error, code: "MAINTENANCE_MODE" }` and a `Retry-After: 30` header. This **fails closed** (a DB outage looks like maintenance to every caller), the opposite of the rate limiter below, which fails open on a Redis outage.
+
+The client detects this via `maintenanceErrorFromResponse` (`lib/api/api-fetch.ts`) — `status === 503` and `body.code === MAINTENANCE_MODE_CODE` — and surfaces the server-supplied message as a toast (`MaintenanceListener`). `syncFetch` swallows it without reporting to Sentry (see [gotchas](gotchas.md)). Toggle via the Supabase dashboard directly — no admin UI yet.
+
+---
+
 ## Parse queue
 
 | Method | Route | Auth | Description |
