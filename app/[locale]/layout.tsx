@@ -23,7 +23,10 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  // 300 omitted — Fraunces is never rendered below 400 (headings use 400-800),
+  // so loading the light weight was dead cold-start payload. Inter
+  // (--font-sans) is a variable font, so light sans text is unaffected.
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export default async function LocaleLayout({
