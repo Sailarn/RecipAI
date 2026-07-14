@@ -8,17 +8,22 @@ import { isSignedIn } from "@/lib/auth/session-state";
  * - No-ops when the user is not signed in (avoids 401 noise from offline-first flows).
  * - Network errors (offline, aborted) are silently swallowed — expected in an offline-first app.
  * - Maintenance 503s are expected (admin-initiated) and swallowed without noise.
+ * - Transient upstream-availability blips (502/503/504) are swallowed too — they
+ *   fire during deploys, Pi restarts, and cold starts, not from payload bugs.
  * - Other HTTP errors (non-ok responses) are captured by Sentry — these indicate server or payload bugs.
  *
  * Returns a promise that always resolves (never rejects) once the request
  * settles, so callers can sequence dependent syncs without handling errors.
  */
+const TRANSIENT_STATUSES = new Set([502, 503, 504]);
+
 export function syncFetch(url: string, init?: RequestInit): Promise<void> {
   if (!isSignedIn()) return Promise.resolve();
   return fetch(url, init)
     .then(async (res) => {
       if (res.ok) return;
       if (await maintenanceErrorFromResponse(res)) return;
+      if (TRANSIENT_STATUSES.has(res.status)) return;
       Sentry.captureException(
         new Error(`Sync ${init?.method ?? "GET"} ${url} → ${res.status}`),
       );

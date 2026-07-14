@@ -81,6 +81,18 @@ describe("syncFetch", () => {
       expect(error.message).toContain("/api/test");
     });
 
+    it("does not capture transient upstream statuses (502/503/504)", async () => {
+      for (const status of [502, 503, 504]) {
+        fetchMock.mockResolvedValueOnce(new Response(null, { status }));
+        syncFetch("/api/test", { method: "POST" });
+      }
+
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(Sentry.captureException).not.toHaveBeenCalled();
+    });
+
     it("does not call Sentry when the response is ok", async () => {
       fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
 
