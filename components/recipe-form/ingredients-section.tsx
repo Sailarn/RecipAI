@@ -47,7 +47,7 @@ interface IngredientsSectionProps {
 const colLabelClass =
   "text-[10px] font-semibold font-[family-name:var(--font-sans)] text-[var(--fg-3)] uppercase tracking-[0.06em] pl-[3px]";
 const errorRowClass =
-  "text-[10px] text-[rgba(239,68,68,0.85)] mt-[3px] pl-[2px] min-h-4 leading-[1.3]";
+  "text-[10px] text-[rgba(239,68,68,0.85)] mt-[3px] pl-[2px] leading-[1.3]";
 
 export function IngredientsSection({
   register,
@@ -136,7 +136,7 @@ export function IngredientsSection({
 
           return (
             <div key={field.id}>
-              <div className="flex gap-[6px] items-start">
+              <div className="flex gap-[6px] items-center">
                 <div className="w-[56px] shrink-0">
                   <Input
                     {...register(`ingredients.${index}.amount`)}
@@ -145,14 +145,9 @@ export function IngredientsSection({
                     aria-label="qty"
                     error={!!amountErr}
                   />
-                  <p
-                    className={cn(
-                      errorRowClass,
-                      amountErr ? "visible" : "invisible",
-                    )}
-                  >
-                    {amountErr?.message ?? " "}
-                  </p>
+                  {amountErr && (
+                    <p className={errorRowClass}>{amountErr.message}</p>
+                  )}
                 </div>
 
                 <div className="w-[68px] shrink-0">
@@ -160,7 +155,6 @@ export function IngredientsSection({
                     {...register(`ingredients.${index}.unit`)}
                     placeholder={t("unit")}
                   />
-                  <div className="min-h-4 mt-[3px]" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -196,14 +190,9 @@ export function IngredientsSection({
                       </button>
                     )}
                   />
-                  <p
-                    className={cn(
-                      errorRowClass,
-                      itemErr ? "visible" : "invisible",
-                    )}
-                  >
-                    {itemErr?.message ?? " "}
-                  </p>
+                  {itemErr && (
+                    <p className={errorRowClass}>{itemErr.message}</p>
+                  )}
                 </div>
 
                 <button
@@ -218,7 +207,7 @@ export function IngredientsSection({
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 pl-[2px]">
+              <div className="flex flex-wrap items-center gap-2 pl-[2px] py-2">
                 {modifiers.length ? (
                   <>
                     <button

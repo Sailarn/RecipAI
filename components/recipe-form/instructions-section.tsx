@@ -54,13 +54,29 @@ function instructionRowId(field: InstructionFieldIdentity): string {
   return field.rowId ?? field.fieldId;
 }
 
-function DropTarget({ id }: { id: string }) {
+// Combines the drag-and-drop target for this group with a tap-to-add
+// affordance, so dropping a step here and tapping "Add step here" both work
+// on the same dashed control instead of two separate, disconnected elements.
+function AddStepDropTarget({
+  id,
+  label,
+  onClick,
+}: {
+  id: string;
+  label: string;
+  onClick: () => void;
+}) {
   const { setNodeRef } = useDroppable({ id });
   return (
-    <div
+    <button
       ref={setNodeRef}
-      className="min-h-3 rounded border border-dashed border-[rgba(255,200,100,0.25)]"
-    />
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-center gap-1 rounded-[14px] border border-dashed border-[rgba(255,200,100,0.25)] p-[10px] text-[12px] text-[var(--fg-3)]"
+    >
+      <Plus size={12} />
+      {label}
+    </button>
   );
 }
 
@@ -296,14 +312,11 @@ export function InstructionsSection({
                   deleteLabel={t("deleteSection")}
                 >
                   {renderSteps(groupStepIds(state, section.id), true)}
-                  <DropTarget id={`drop-${section.id}`} />
-                  <button
-                    type="button"
+                  <AddStepDropTarget
+                    id={`drop-${section.id}`}
+                    label={t("addStepHere")}
                     onClick={() => addStep(section.id)}
-                    className="text-left text-[12px] text-[var(--fg-3)]"
-                  >
-                    {t("addStepHere")}
-                  </button>
+                  />
                 </SectionContainer>
               ))
             : renderSteps(state.stepIds)}
@@ -312,8 +325,14 @@ export function InstructionsSection({
               <p className="mb-2 text-[11px] font-semibold uppercase text-[var(--fg-3)]">
                 {t("ungrouped")}
               </p>
-              {renderSteps(groupStepIds(state))}
-              <DropTarget id="drop-" />
+              <div className="mt-3 flex flex-col gap-2">
+                {renderSteps(groupStepIds(state))}
+                <AddStepDropTarget
+                  id="drop-"
+                  label={t("addStepHere")}
+                  onClick={() => addStep()}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -323,14 +342,16 @@ export function InstructionsSection({
           {errors.instructions.message}
         </p>
       )}
-      <button
-        type="button"
-        onClick={() => addStep()}
-        className="mt-3 flex w-full items-center justify-center gap-1 rounded-[14px] border border-dashed border-[rgba(255,200,100,0.25)] p-[10px] text-[13px] text-[var(--fg-2)]"
-      >
-        <Plus size={14} />
-        {t("addStep")}
-      </button>
+      {!hasSections && (
+        <button
+          type="button"
+          onClick={() => addStep()}
+          className="mt-3 flex w-full items-center justify-center gap-1 rounded-[14px] border border-dashed border-[rgba(255,200,100,0.25)] p-[10px] text-[13px] text-[var(--fg-2)]"
+        >
+          <Plus size={14} />
+          {t("addStep")}
+        </button>
+      )}
       <button
         type="button"
         onClick={addSection}
