@@ -103,10 +103,14 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 |---|---|
 | `lib/rate-limit.ts` | `enforceParseRateLimit()` — Redis fixed-window counter, fail-open. |
 | `lib/api-limits.ts` | Shared limit constants: `PARSE_RATE_LIMIT` (15 anon / 60 user per hour), collection/sync batch sizes. |
-| `lib/api-errors.ts` | `ApiError` — typed error responses (`unauthorized`, `badRequest`, `notFound`, `rateLimited`, `internal`). |
+| `lib/api-errors.ts` | `ApiError` — typed error responses (`unauthorized`, `badRequest`, `notFound`, `rateLimited`, `internal`, `maintenance`). |
 | `lib/redis.ts` | ioredis client singleton (lazy connect). |
 | `lib/sync-fetch.ts` | `syncFetch()` — fire-and-forget fetch gated on `isSignedIn()`. Captures unexpected HTTP errors to Sentry; swallows maintenance 503s and transient 502/503/504 blips without reporting. |
 | `lib/logger.ts` | `logger.debug/info/warn/error` — prints in dev, silent in production. |
+| `proxy.ts` | Next.js middleware (root-level, matches `/api/:path*` + non-API pages). Runs the maintenance-mode gate (`ensureAppAvailable()`) before every `/api/*` request except `/api/auth` and `/api/manifest`, then hands non-API requests to `next-intl`'s locale middleware. |
+| `lib/maintenance.ts` | `ensureAppAvailable()` — reads the single-row `app_config` Postgres table; returns a 503 (or fails closed on a DB error) when `maintenance_enabled` is true. |
+| `lib/maintenance-constants.ts` | Client-safe constants shared between the server gate and browser code: `MAINTENANCE_MODE_CODE`, `DEFAULT_MAINTENANCE_MESSAGE`. |
+| `lib/api/api-fetch.ts` | `apiFetch()` / `announceIfMaintenance()` / `maintenanceErrorFromResponse()` — client-side detection of a maintenance 503, dispatches a `window` event so `MaintenanceListener` can toast the message anywhere. |
 
 ---
 

@@ -254,4 +254,4 @@ Toggled directly via the Supabase dashboard — no admin UI.
 
 ### Auth tables
 
-Managed by better-auth. Schema in `db/schema/auth.ts` — includes `user`, `session`, `account`, `verification`. Do not edit manually.
+Managed by better-auth. Schema in `db/schema/auth.ts` — includes `user`, `session`, `account`, `verification`, `passkey`, and `device_code` (the PWA device-authorization grant — see [Auth & Sync](../explanation/auth-and-sync.md)). Do not edit manually.
