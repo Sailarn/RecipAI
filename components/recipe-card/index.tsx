@@ -75,7 +75,11 @@ export const RecipeCard = memo(function RecipeCard({
           }
           navigate.push(
             routes.recipes.detail(locale, recipe.id),
-            <RecipeDetail recipeId={recipe.id} locale={locale} />,
+            <RecipeDetail
+              recipeId={recipe.id}
+              locale={locale}
+              initialRecipe={recipe}
+            />,
           );
         }}
         onPointerEnter={(event) => {

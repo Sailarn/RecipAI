@@ -23,27 +23,37 @@ interface RecipeDetailProps {
   recipeId: string;
   locale: string;
   publicRecipe?: PublicRecipe | null;
+  initialRecipe?: Recipe;
 }
 
 export function RecipeDetail({
   recipeId,
   locale,
   publicRecipe,
+  initialRecipe,
 }: RecipeDetailProps) {
   const navigate = useNavigate();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [recipe, setRecipe] = useState<Recipe | null>(initialRecipe ?? null);
+  const [loading, setLoading] = useState(initialRecipe === undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cookingMode, setCookingMode] = useState(false);
 
+  // When opened from a list card, initialRecipe seeds the view so it paints
+  // instantly with no skeleton. Still re-read from Dexie in the background so
+  // edits made elsewhere reconcile; keep the seed if the row is gone locally so
+  // only the deep-link/no-seed path falls through to the private guard.
   useEffect(() => {
     getRecipe(recipeId)
       .then((result) => {
-        setRecipe(result ?? null);
-        if (result) trackEvent("recipe_viewed", { via: "list" });
+        if (result) {
+          setRecipe(result);
+          trackEvent("recipe_viewed", { via: "list" });
+        } else if (initialRecipe === undefined) {
+          setRecipe(null);
+        }
       })
       .finally(() => setLoading(false));
-  }, [recipeId]);
+  }, [recipeId, initialRecipe]);
 
   const handleDelete = async () => {
     trackEvent("recipe_deleted", undefined);

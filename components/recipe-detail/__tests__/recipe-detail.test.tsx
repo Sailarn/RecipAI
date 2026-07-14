@@ -137,6 +137,43 @@ describe("RecipeDetail", () => {
     expect(screen.queryByText("Chocolate Cake")).not.toBeInTheDocument();
   });
 
+  it("renders immediately without a skeleton when seeded with initialRecipe", () => {
+    vi.mocked(recipesModule.getRecipe).mockImplementation(
+      () => new Promise(() => {}),
+    );
+
+    render(
+      <RecipeDetail
+        recipeId="recipe-1"
+        locale="en"
+        initialRecipe={mockRecipe}
+      />,
+    );
+
+    expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+  });
+
+  it("keeps the seeded recipe when the background Dexie read finds nothing", async () => {
+    vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+
+    render(
+      <RecipeDetail
+        recipeId="recipe-1"
+        locale="en"
+        initialRecipe={mockRecipe}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(recipesModule.getRecipe).toHaveBeenCalledWith("recipe-1"),
+    );
+
+    expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+    expect(
+      screen.queryByText("This recipe is private"),
+    ).not.toBeInTheDocument();
+  });
+
   it("displays the private guard when recipe does not exist", async () => {
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
 
