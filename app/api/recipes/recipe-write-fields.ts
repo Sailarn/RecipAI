@@ -17,6 +17,7 @@ const RECIPE_CONTENT_FIELDS = [
   "servings",
   "ingredients",
   "instructions",
+  "sections",
   "sourceUrl",
   "category",
   "status",

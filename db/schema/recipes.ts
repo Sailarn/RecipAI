@@ -30,6 +30,12 @@ export const recipes = pgTable("recipes", {
   servings: integer("servings").notNull(),
   ingredients: jsonb("ingredients").notNull().default([]),
   instructions: jsonb("instructions").notNull().default([]),
+  // Named groups referenced by ingredient/step `sectionId` (see lib/db/schema.ts
+  // RecipeSection). Existing rows remain null after the additive column migration.
+  sections:
+    jsonb("sections").$type<
+      Array<{ id: string; name: string; order: number }>
+    >(),
   sourceUrl: text("source_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

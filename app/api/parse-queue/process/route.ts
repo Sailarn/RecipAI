@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { buildSavedRecipeShape } from "@/lib/parse-recipe/parsed-recipe-shape";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
@@ -179,6 +180,7 @@ export async function POST(req: NextRequest) {
     // notify via Telegram if triggered from bot
     if (job.telegramChatId && job.userId) {
       const parsedRecipe = finalRecipe;
+      const savedShape = buildSavedRecipeShape(parsedRecipe);
 
       await db.insert(recipes).values({
         id: crypto.randomUUID(),
@@ -190,12 +192,11 @@ export async function POST(req: NextRequest) {
         prepTime: parsedRecipe.prepTime ?? null,
         cookTime: parsedRecipe.cookTime ?? null,
         totalTime:
-          parsedRecipe.prepTime && parsedRecipe.cookTime
-            ? parsedRecipe.prepTime + parsedRecipe.cookTime
-            : null,
+          (parsedRecipe.prepTime || 0) + (parsedRecipe.cookTime || 0) || null,
         servings: parsedRecipe.servings ?? 1,
-        ingredients: parsedRecipe.ingredients ?? [],
-        instructions: parsedRecipe.instructions ?? [],
+        ingredients: savedShape.ingredients,
+        instructions: savedShape.instructions,
+        sections: savedShape.sections,
         sourceUrl: jobUrl,
         category: parsedRecipe.category ?? null,
         createdAt: new Date(),

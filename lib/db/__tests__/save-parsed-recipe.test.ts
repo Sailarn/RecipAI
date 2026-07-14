@@ -102,6 +102,63 @@ describe("saveParsedRecipe", () => {
       expect(arg.ingredients[1].amount).toBe(3);
     });
 
+    it("persists modifiers, sectionId, and original on ingredients and sectionId on steps", async () => {
+      await saveParsedRecipe({
+        ...baseEntry,
+        ingredients: [
+          {
+            item: "Mozzarella",
+            modifiers: ["GRATED"],
+            section: "For the base",
+            original: "Grated Mozzarella",
+          },
+          { item: "Water" },
+        ],
+        instructions: [
+          { order: 1, instruction: "Mix", section: "For the base" },
+        ],
+      });
+
+      const arg = vi.mocked(createRecipe).mock.calls[0][0];
+      expect(arg.sections).toEqual([
+        { id: expect.any(String), name: "For the base", order: 0 },
+      ]);
+      const sectionId = arg.sections?.[0]?.id;
+      expect(arg.ingredients[0]).toMatchObject({
+        item: "Mozzarella",
+        modifiers: ["GRATED"],
+        sectionId,
+        original: "Grated Mozzarella",
+      });
+      expect(arg.ingredients[1].modifiers).toEqual([]);
+      expect(arg.ingredients[1].sectionId).toBeNull();
+      expect(arg.ingredients[1].original).toBeUndefined();
+      expect(arg.instructions[0].sectionId).toBe(sectionId);
+    });
+
+    it("drops unknown modifier keys at the parsed-recipe boundary", async () => {
+      await saveParsedRecipe({
+        ...baseEntry,
+        ingredients: [
+          {
+            item: "Butter",
+            modifiers: ["COLD", "NOT_A_MODIFIER"] as unknown as ["COLD"],
+          },
+        ],
+      });
+
+      const arg = vi.mocked(createRecipe).mock.calls[0][0];
+      expect(arg.ingredients[0].modifiers).toEqual(["COLD"]);
+    });
+
+    it("builds an empty sections list when no ingredient or step has a section label", async () => {
+      await saveParsedRecipe(baseEntry);
+
+      const arg = vi.mocked(createRecipe).mock.calls[0][0];
+      expect(arg.sections).toEqual([]);
+      expect(arg.ingredients[0].sectionId).toBeNull();
+    });
+
     it("maps instructions with 1-based order", async () => {
       await saveParsedRecipe(baseEntry);
 

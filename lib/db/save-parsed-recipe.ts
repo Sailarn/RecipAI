@@ -1,8 +1,8 @@
 import { logger } from "@/lib/logger";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+import { buildSavedRecipeShape } from "@/lib/parse-recipe/parsed-recipe-shape";
 import { trackEvent } from "@/lib/telemetry";
 import { isImageKitUrl, uploadImage } from "../upload/images";
-import { generateId } from "../utils";
 import { createRecipe, updateRecipe } from "./recipes";
 import type { ParsedRecipeEntry, Recipe } from "./schema";
 
@@ -10,6 +10,8 @@ export async function saveParsedRecipe(
   entry: ParsedRecipeEntry,
   uploadToken?: string,
 ): Promise<void> {
+  const savedShape = buildSavedRecipeShape(entry);
+
   // save immediately with original URLs
   const id = await createRecipe({
     title: entry.title,
@@ -20,18 +22,7 @@ export async function saveParsedRecipe(
     cookTime: entry.cookTime,
     totalTime: (entry.prepTime || 0) + (entry.cookTime || 0) || undefined,
     servings: entry.servings,
-    ingredients: entry.ingredients.map((ingredient) => ({
-      id: generateId(),
-      item: ingredient.item,
-      amount: ingredient.amount,
-      unit: ingredient.unit,
-    })),
-    instructions: entry.instructions.map((instruction, index) => ({
-      id: generateId(),
-      order: index + 1,
-      instruction: instruction.instruction,
-      imageUrl: instruction.imageUrl || undefined,
-    })),
+    ...savedShape,
     sourceUrl: entry.sourceUrl,
     category: entry.category,
   });
@@ -62,13 +53,7 @@ export async function saveParsedRecipe(
     }
 
     const updatedInstructions = await Promise.all(
-      entry.instructions.map(async (instruction, index) => {
-        const step = {
-          id: generateId(),
-          order: index + 1,
-          instruction: instruction.instruction,
-          imageUrl: instruction.imageUrl || undefined,
-        };
+      savedShape.instructions.map(async (step) => {
         if (step.imageUrl && !isImageKitUrl(step.imageUrl)) {
           try {
             const uploaded = await uploadImage(step.imageUrl, uploadOptions);

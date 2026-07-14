@@ -1,4 +1,5 @@
 import type { RecipeCategory } from "@/lib/categories";
+import type { PreparationModifier } from "@/lib/parse-recipe/modifiers";
 
 export const RECIPE_STATUSES = ["tried"] as const;
 export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
@@ -36,11 +37,24 @@ export interface Collection {
   updatedAt: Date;
 }
 
+/** Recipe-level named group. Ingredients/steps reference one by `sectionId`. */
+export interface RecipeSection {
+  id: string;
+  name: string;
+  order: number;
+}
+
 export interface RecipeIngredient {
   id: string;
   amount?: number;
   unit?: string;
   item: string;
+  /** Curated preparation/state modifiers, multi-select (display-only). */
+  modifiers?: PreparationModifier[];
+  /** References a `Recipe.sections` entry; null/absent = ungrouped. */
+  sectionId?: string | null;
+  /** Verbatim source item text; present only when `item` was cleaned. */
+  original?: string;
 }
 
 export interface VocabularyIngredient {
@@ -72,6 +86,8 @@ export interface Step {
   order: number;
   instruction: string;
   imageUrl?: string;
+  /** References a `Recipe.sections` entry; null/absent = ungrouped. */
+  sectionId?: string | null;
 }
 
 export interface Recipe {
@@ -92,6 +108,8 @@ export interface Recipe {
   servings: number;
   ingredients: RecipeIngredient[];
   instructions: Step[];
+  /** Named groups referenced by ingredient/step `sectionId`. Empty/absent = flat recipe. */
+  sections?: RecipeSection[];
   sourceUrl?: string;
   category?: string;
   status?: RecipeStatus | null;
@@ -112,6 +130,11 @@ export interface ParsedIngredient {
   // "shredded mozzarella" -> "mozzarella". Keeps `item` verbatim for display.
   en?: string | null;
   category?: string | null;
+  /** Curated preparation/state modifiers, multi-select. */
+  modifiers?: PreparationModifier[];
+  /** Free-form section label; converted to Recipe.sections + sectionId at save. */
+  section?: string | null;
+  original?: string | null;
 }
 
 export interface ParsedRecipe {
@@ -121,7 +144,11 @@ export interface ParsedRecipe {
   cookTime?: number;
   servings: number;
   ingredients: ParsedIngredient[];
-  instructions: Array<{ order: number; instruction: string }>;
+  instructions: Array<{
+    order: number;
+    instruction: string;
+    section?: string | null;
+  }>;
   imageUrl?: string;
   imageFileId?: string;
   sourceUrl: string;
@@ -140,6 +167,7 @@ export interface ParsedRecipeEntry {
     order: number;
     instruction: string;
     imageUrl?: string;
+    section?: string | null;
   }>;
   imageUrl?: string;
   imageFileId?: string;

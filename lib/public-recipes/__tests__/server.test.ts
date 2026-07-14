@@ -41,6 +41,7 @@ vi.mock("@/db/schema/recipes", () => ({
     imageUrl: "recipes.imageUrl",
     ingredients: "recipes.ingredients",
     instructions: "recipes.instructions",
+    sections: "recipes.sections",
     isPublic: "recipes.isPublic",
     prepTime: "recipes.prepTime",
     servings: "recipes.servings",
@@ -122,6 +123,7 @@ describe("getPublicRecipe", () => {
       servings: 2,
       ingredients: [{ id: "ingredient-1", item: "Water" }],
       instructions: [{ id: "step-1", order: 1, instruction: "Boil" }],
+      sections: [],
       sourceUrl: undefined,
       category: "Soup",
       canonicalIngredientIds: ["water"],
@@ -186,6 +188,48 @@ describe("getPublicRecipe", () => {
         },
       ],
     });
+  });
+
+  it("preserves modifiers, sectionId, sections, and original, dropping an invalid modifier", async () => {
+    setupSelectQuery([
+      {
+        ...publicRecipeRow,
+        ingredients: [
+          {
+            id: "ingredient-1",
+            item: "Mozzarella",
+            modifiers: ["GRATED", "NOT_A_REAL_KEY"],
+            sectionId: "s1",
+            original: "Grated Mozzarella",
+          },
+          { id: "ingredient-2", item: "Salt", modifiers: ["NOT_A_REAL_KEY"] },
+        ],
+        instructions: [
+          {
+            id: "step-1",
+            order: 1,
+            instruction: "Mix",
+            sectionId: "s1",
+          },
+        ],
+        sections: [{ id: "s1", name: "For the base", order: 0 }],
+      },
+    ]);
+
+    const recipe = await getPublicRecipe("recipe-1");
+
+    expect(recipe?.ingredients[0]).toEqual({
+      id: "ingredient-1",
+      item: "Mozzarella",
+      modifiers: ["GRATED"],
+      sectionId: "s1",
+      original: "Grated Mozzarella",
+    });
+    expect(recipe?.ingredients[1].modifiers).toBeUndefined();
+    expect(recipe?.instructions[0].sectionId).toBe("s1");
+    expect(recipe?.sections).toEqual([
+      { id: "s1", name: "For the base", order: 0 },
+    ]);
   });
 
   it("drops malformed entries and invalid optional values", async () => {
@@ -308,6 +352,7 @@ describe("getPublicRecipe", () => {
       servings: "recipes.servings",
       ingredients: "recipes.ingredients",
       instructions: "recipes.instructions",
+      sections: "recipes.sections",
       sourceUrl: "recipes.sourceUrl",
       category: "recipes.category",
       canonicalIngredientIds: "recipes.canonicalIngredientIds",

@@ -139,6 +139,7 @@ export function useSyncOnLogin() {
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
   const renormalized = useRef(false);
+  const shapeMigrated = useRef(false);
   const reviewedIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -154,6 +155,19 @@ export function useSyncOnLogin() {
     renormalized.current = true;
     import("@/lib/db/renormalize-recipes")
       .then((module) => module.renormalizeOutdatedRecipes())
+      .catch(() => {});
+  }, []);
+
+  // One-time upgrade from the legacy single-`modifier`/string-`section` recipe
+  // shape to `modifiers[]` + structured `sections`/`sectionId`. Self-limiting:
+  // migrateLegacyRecipeShapes() itself skips any recipe that already has a
+  // `sections` array, so a repeat run (or one on a recipe with no legacy
+  // fields at all) is a cheap no-op.
+  useEffect(() => {
+    if (shapeMigrated.current) return;
+    shapeMigrated.current = true;
+    import("@/lib/db/migrate-recipe-shape")
+      .then((module) => module.migrateLegacyRecipeShapes())
       .catch(() => {});
   }, []);
 
@@ -207,6 +221,7 @@ export function useSyncOnLogin() {
       ]);
 
       const recipeDiff = computeDiff<Recipe>(localRecipes, serverRecipes);
+
       const collectionDiff = computeDiff<Collection>(
         localCollections,
         serverCollections,

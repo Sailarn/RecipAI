@@ -162,6 +162,13 @@
       "when": 1782765810007,
       "tag": "0022_luxuriant_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1783944121150,
+      "tag": "0023_clear_vanisher",
+      "breakpoints": true
     }
   ]
 }

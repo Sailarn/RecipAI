@@ -5,7 +5,11 @@ import { cache } from "react";
 import { db } from "@/db";
 import { user } from "@/db/schema/auth";
 import { recipes } from "@/db/schema/recipes";
-import type { RecipeIngredient, Step } from "@/lib/db/schema";
+import type { RecipeIngredient, RecipeSection, Step } from "@/lib/db/schema";
+import {
+  isPreparationModifier,
+  type PreparationModifier,
+} from "@/lib/parse-recipe/modifiers";
 import type { PublicRecipe } from "./types";
 
 type JsonRecord = Record<string, unknown>;
@@ -40,6 +44,19 @@ function sanitizeIngredient(
   if (typeof value.unit === "string") {
     ingredient.unit = value.unit;
   }
+  if (Array.isArray(value.modifiers)) {
+    const modifiers = value.modifiers.filter(
+      (modifier): modifier is PreparationModifier =>
+        typeof modifier === "string" && isPreparationModifier(modifier),
+    );
+    if (modifiers.length > 0) ingredient.modifiers = modifiers;
+  }
+  if (typeof value.sectionId === "string") {
+    ingredient.sectionId = value.sectionId;
+  }
+  if (typeof value.original === "string") {
+    ingredient.original = value.original;
+  }
 
   return ingredient;
 }
@@ -64,8 +81,23 @@ function sanitizeStep(value: unknown, index: number): Step | null {
   if (typeof value.imageUrl === "string") {
     step.imageUrl = value.imageUrl;
   }
+  if (typeof value.sectionId === "string") {
+    step.sectionId = value.sectionId;
+  }
 
   return step;
+}
+
+function sanitizeSection(value: unknown): RecipeSection | null {
+  if (
+    !isJsonRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.name !== "string" ||
+    !isFiniteNumber(value.order)
+  ) {
+    return null;
+  }
+  return { id: value.id, name: value.name, order: value.order };
 }
 
 function sanitizeJsonArray<T>(
@@ -106,6 +138,7 @@ export const getPublicRecipe = cache(
         servings: recipes.servings,
         ingredients: recipes.ingredients,
         instructions: recipes.instructions,
+        sections: recipes.sections,
         sourceUrl: recipes.sourceUrl,
         category: recipes.category,
         canonicalIngredientIds: recipes.canonicalIngredientIds,
@@ -136,6 +169,7 @@ export const getPublicRecipe = cache(
       servings: row.servings,
       ingredients: sanitizeJsonArray(row.ingredients, sanitizeIngredient),
       instructions: sanitizeJsonArray(row.instructions, sanitizeStep),
+      sections: sanitizeJsonArray(row.sections, sanitizeSection),
       sourceUrl: row.sourceUrl ?? undefined,
       category: row.category ?? undefined,
       canonicalIngredientIds: sanitizeStringArray(row.canonicalIngredientIds),

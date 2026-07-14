@@ -142,6 +142,19 @@ describe("PATCH /api/recipes/[id]", () => {
 
     expect(mockSet.mock.calls[0]?.[0]).not.toHaveProperty("isPublic");
   });
+
+  it("updates the section catalog atomically with recipe content", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockSet } = setupUpdateChain();
+    const sections = [{ id: "dough", name: "Dough", order: 0 }];
+    const { req, params } = makePatchRequest("r1", { sections });
+
+    await PATCH(req, params);
+
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({ sections, updatedAt: expect.any(Date) }),
+    );
+  });
 });
 
 describe("DELETE /api/recipes/[id]", () => {

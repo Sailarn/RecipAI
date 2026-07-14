@@ -1,4 +1,4 @@
-import type { RecipeIngredient, Step } from "@/lib/db/schema";
+import type { RecipeIngredient, RecipeSection, Step } from "@/lib/db/schema";
 
 export interface PublicRecipeOwner {
   name: string;
@@ -22,6 +22,7 @@ export interface PublicRecipe {
   servings: number;
   ingredients: RecipeIngredient[];
   instructions: Step[];
+  sections?: RecipeSection[];
   sourceUrl?: string;
   category?: string;
   canonicalIngredientIds?: string[];

@@ -152,4 +152,29 @@ describe("POST /api/recipes", () => {
       expect.objectContaining({ isPublic: false }),
     );
   });
+
+  it("writes the section catalog with its ingredient and step references", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockValues } = setupInsertChain();
+    const sections = [{ id: "dough", name: "Dough", order: 0 }];
+
+    await POST(
+      makeRequest({
+        id: "r1",
+        title: "Test",
+        servings: 1,
+        ingredients: [{ id: "i1", item: "Flour", sectionId: "dough" }],
+        instructions: [
+          { id: "s1", order: 1, instruction: "Mix", sectionId: "dough" },
+        ],
+        sections,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        updatedAt: "2024-01-01T00:00:00.000Z",
+      }),
+    );
+
+    expect(mockValues.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ sections }),
+    );
+  });
 });
