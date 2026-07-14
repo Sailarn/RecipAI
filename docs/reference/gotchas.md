@@ -164,6 +164,12 @@ The Task 0 probe succeeded on the Pi with Bun 1.3.11 and produced a 384-dimensio
 **`public/sw.js` is regenerated on every build.**
 It is gitignored. Do not commit it. Running `bun run build` will always overwrite it.
 
+**Recipe images deliberately bypass `next/image`.**
+`RecipeImage` renders a plain `<img>` on a direct ImageKit CDN URL (`getOptimizedUrl` in `lib/imagekit-url.ts` → `?tr=w-…,f-webp,q-80`) instead of `next/image`. If it went through `/_next/image`, requests would hit Vercel's optimizer (cold-optimize latency + image-unit billing) and the service worker's `recipe-images` `CacheFirst` rule would never match — so the images could not be cached or prewarmed, and would double-optimize (ImageKit *then* Vercel). Consequence: the `biome-ignore lint/performance/noImgElement` on those `<img>` tags is intentional; don't "fix" it back to `next/image`. Other images (avatars, etc.) still use `next/image`.
+
+**Recipe-image cache invalidation is automatic via unique URLs.**
+Each ImageKit upload is uniquely named (`recipe-${Date.now()}` + ImageKit's unique suffix), so a recipe's `imageUrl` is immutable — changing a photo yields a *new* URL, orphaning the old `recipe-images` cache entry (swept by the 30-day / 400-entry `ExpirationPlugin`). The SW cache keys on the **full** URL including `?tr=` size params, so thumbnail (`w-300`) and hero (`w-800`) are separate entries and never collide. `prewarmRecipeImages` warms the exact hero URL (`HERO_IMAGE_WIDTH`) so opening a recipe hits a warm cache. Never re-add a cache-key plugin that strips the query string — it would collapse sizes and serve a blurry hero or oversized thumbnail.
+
 **Env-dependent clients must not throw at module scope — `next build` evaluates them.**
 Next's page-data collection imports route modules during the production build, so any client instantiated at module top-level runs with the build environment, which often lacks runtime secrets. A bare `throw new Error("X is required")` or `new Client(process.env.X!)` at module scope will fail the build. Two safe patterns are already in use — match one when adding a new client:
 - **Lazy proxy** — defer construction (and the env check) to first property access. See `lib/redis.ts`: importing it never instantiates Redis; `REDIS_URL` is only required on the first actual call at request time.
