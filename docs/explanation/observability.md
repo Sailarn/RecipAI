@@ -22,6 +22,7 @@ The routing rule: **PostHog** answers *what/who* — top-N lists, funnels, trend
 - Unhandled server errors via `ApiError.capture` / `ApiError.internal`, client errors via the re-throw pattern (`captureError`).
 - 20% performance trace sampling (`tracesSampleRate`).
 - Production only (`NODE_ENV === "production"`).
+- `ignoreErrors` (`instrumentation-client.ts`) filters non-actionable noise from `@serwist/next`'s auto-injected service-worker registration (`"Rejected"`, `reading 'waiting'`), which only fails for crawlers/headless browsers that never run a service worker. Separately, `syncFetch` (`lib/sync-fetch.ts`) never reports maintenance 503s or transient 502/503/504 upstream blips — see [Auth & Sync](auth-and-sync.md#fire-and-forget-sync-on-writes-libdbsupabase-syncts).
 
 ### PostHog — product analytics
 - **Autocapture:** pageviews (`$pageview`, SPA-aware), `$pageleave` (time on page), click autocapture, **session replay** (inputs masked).

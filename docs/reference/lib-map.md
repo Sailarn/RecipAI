@@ -14,6 +14,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |
 | `lib/parse-recipe/photo.ts` | Client-side image compression and API call for photo parsing. |
 | `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildSocialPrompt`. |
+| `lib/parse-recipe/modifiers.ts` | `PREPARATION_MODIFIERS` curated enum (31 keys) + `modifierLabel`/`modifierPromptList`/`isPreparationModifier`. Source of truth for the additive picker and the parse prompt's key list. |
+| `lib/parse-recipe/build-sections.ts` | `buildSectionsFromLabels()` — turns free-form parsed section labels into a `RecipeSection[]` catalog + label→id map, first-appearance order. Shared by save and the legacy-shape migration. |
 | `lib/parse-recipe/parsed-recipe-shape.ts` | Shared parsed-label → saved `sections`/`sectionId`/`modifiers[]` mapping used by local and Telegram saves. |
 | `lib/parse-recipe/images.ts` | Hero image and step image extraction from HTML. |
 | `lib/parse-recipe/parse-history-entry.ts` | Helpers to build `ParseHistoryEntry` from job results. |
@@ -37,9 +39,11 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/db/db.ts` | Dexie instance + all version migrations (currently v11). |
+| `lib/db/db.ts` | Dexie instance + all version migrations (currently v12). |
 | `lib/db/schema.ts` | TypeScript types for all Dexie entities. |
 | `lib/db/recipes.ts` | CRUD: `createRecipe`, `updateRecipe`, `deleteRecipe`. |
+| `lib/db/recipe-sections.ts` | `groupBySectionId` (ingredients — catalog order, coalesced), `groupBySectionRuns` (steps — consecutive runs, order preserved), `sectionName`, `shouldShowSections`. Display-side grouping helpers; see [gotchas](../reference/gotchas.md). |
+| `lib/db/migrate-recipe-shape.ts` | `migrateLegacyRecipeShapes()` — one-time-per-recipe upgrade from legacy single-`modifier`/string-`section` to `modifiers[]` + structured `sections`/`sectionId`. Run from `use-sync-on-login.ts`. |
 | `lib/db/collections.ts` | CRUD for collections. |
 | `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
 | `lib/db/parsed-recipes.ts` | Builds and stores durable parsed-recipe notification rows shared by the parse page and bell sheet. |
@@ -101,7 +105,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/api-limits.ts` | Shared limit constants: `PARSE_RATE_LIMIT` (15 anon / 60 user per hour), collection/sync batch sizes. |
 | `lib/api-errors.ts` | `ApiError` — typed error responses (`unauthorized`, `badRequest`, `notFound`, `rateLimited`, `internal`). |
 | `lib/redis.ts` | ioredis client singleton (lazy connect). |
-| `lib/sync-fetch.ts` | `syncFetch()` — fire-and-forget fetch gated on `isSignedIn()`, captures HTTP errors to Sentry. |
+| `lib/sync-fetch.ts` | `syncFetch()` — fire-and-forget fetch gated on `isSignedIn()`. Captures unexpected HTTP errors to Sentry; swallows maintenance 503s and transient 502/503/504 blips without reporting. |
 | `lib/logger.ts` | `logger.debug/info/warn/error` — prints in dev, silent in production. |
 
 ---

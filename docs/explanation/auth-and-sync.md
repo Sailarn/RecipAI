@@ -127,7 +127,7 @@ Conflict resolution strategy: **last-write-wins is not applied automatically** �
 
 Every local recipe write calls `syncCreate`, `syncUpdate`, or `syncDelete` via `syncFetch`. These are non-blocking — they fire and the UI doesn't wait.
 
-`syncFetch` (`lib/sync-fetch.ts`) gates the call on `isSignedIn()`. If the user is not signed in, the call is skipped entirely. Network errors are silently swallowed (expected when offline). HTTP errors are captured by Sentry.
+`syncFetch` (`lib/sync-fetch.ts`) gates the call on `isSignedIn()`. If the user is not signed in, the call is skipped entirely. Network errors are silently swallowed (expected when offline). Maintenance 503s and transient upstream blips (502/503/504 — deploys, Pi restarts, cold starts) are swallowed too; only other non-ok HTTP statuses are captured by Sentry, since those indicate a real server or payload bug.
 
 ---
 
