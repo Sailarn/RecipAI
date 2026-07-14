@@ -58,6 +58,7 @@ next-env.d.ts
 !README.md
 !docs/**
 !graphify-out/GRAPH_REPORT.md
+/plans/
 # One-off / ad-hoc scripts live here and are NOT committed. Only reusable
 # tooling (e.g. check.sh) stays tracked directly under scripts/.
 scripts/local/

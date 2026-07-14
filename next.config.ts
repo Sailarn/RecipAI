@@ -50,6 +50,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.fbcdn.net",
       },
+      {
+        protocol: "https",
+        hostname: "klopotenko.com",
+      },
     ],
   },
   async rewrites() {
