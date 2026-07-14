@@ -61,7 +61,10 @@ export function RecipeVirtualList({
     // Keeping the estimate close to real height minimises the correction render
     // that measureElement fires after first paint.
     estimateSize: () => 170,
-    overscan: 5,
+    // Keep overscan tight: only row 0 gets priority/eager image loading (see
+    // RecipeCard), every other card lazy-loads, so a large overscan would
+    // eagerly mount rows that aren't near the viewport.
+    overscan: 3,
     // On the very first render scrollRef.current is still null, so the default
     // initialRect of { height: 0 } yields zero visible rows and flashes the
     // skeleton for a frame before measurement. Seed a full-screen height so the

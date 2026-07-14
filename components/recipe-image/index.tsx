@@ -84,7 +84,6 @@ export const RecipeImage = ({
               priority={priority}
               className="object-cover"
               sizes={sizes}
-              loading="eager"
               onError={() => setErrored(true)}
               style={{
                 objectPosition: `${relativeFocalX}% ${relativeFocalY}%`,
@@ -105,7 +104,6 @@ export const RecipeImage = ({
         priority={priority}
         className="object-cover"
         sizes={sizes}
-        loading="eager"
         onError={() => setErrored(true)}
         style={{ objectPosition }}
       />
