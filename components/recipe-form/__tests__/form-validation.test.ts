@@ -79,6 +79,15 @@ describe("createRecipeSchema", () => {
       ).toBe(undefined);
     });
 
+    it("accepts a null AI original field", () => {
+      const result = schema.safeParse({
+        ...validBase,
+        ingredients: [{ ...validIngredient, original: null }],
+      });
+
+      expect(result.success).toBe(true);
+    });
+
     it("fails when ingredient amount is non-numeric", () => {
       const result = schema.safeParse({
         ...validBase,
@@ -111,6 +120,41 @@ describe("createRecipeSchema", () => {
       expect(result.success).toBe(true);
       const output = (result as { data: RecipeOutput }).data;
       expect(output.ingredients[0].amount).toBe(1.5);
+    });
+
+    it("preserves additive and grouping metadata on the same ingredient row", () => {
+      const result = schema.safeParse({
+        ...validBase,
+        ingredients: [
+          {
+            ...validIngredient,
+            rowId: "ingredient-1",
+            modifiers: ["COLD", "GRATED"],
+            sectionId: "dough",
+            original: "cold grated flour",
+          },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+      expect((result as { data: RecipeOutput }).data.ingredients[0]).toEqual({
+        item: "flour",
+        amount: 2,
+        unit: "cups",
+        rowId: "ingredient-1",
+        modifiers: ["COLD", "GRATED"],
+        sectionId: "dough",
+        original: "cold grated flour",
+      });
+    });
+
+    it("rejects unknown additive keys", () => {
+      const result = schema.safeParse({
+        ...validBase,
+        ingredients: [{ ...validIngredient, modifiers: ["NOT_A_MODIFIER"] }],
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 
@@ -164,6 +208,34 @@ describe("createRecipeSchema", () => {
       expect(output.instructions).toHaveLength(1);
       expect(output.instructions![0].instruction).toBe("Mix well");
     });
+
+    it("preserves row and section identity while filtering blank steps", () => {
+      const result = schema.safeParse({
+        ...validBase,
+        sections: [{ id: "dough", name: "Dough", order: 0 }],
+        instructions: [
+          {
+            rowId: "step-1",
+            instruction: "Mix well",
+            sectionId: "dough",
+          },
+          { rowId: "step-2", instruction: " ", sectionId: null },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+      const output = (result as { data: RecipeOutput }).data;
+      expect(output.sections).toEqual([
+        { id: "dough", name: "Dough", order: 0 },
+      ]);
+      expect(output.instructions).toEqual([
+        {
+          rowId: "step-1",
+          instruction: "Mix well",
+          sectionId: "dough",
+        },
+      ]);
+    });
   });
 });
 
@@ -203,6 +275,8 @@ describe("getDefaultValues", () => {
     expect(defaults.ingredients[0].amount).toBe("3");
     expect(defaults.ingredients[0].unit).toBe("pcs");
     expect(defaults.instructions![0].instruction).toBe("Boil beets");
+    expect(defaults.ingredients[0].rowId).toBe("i1");
+    expect(defaults.instructions![0].rowId).toBe("s1");
   });
 
   it("maps initialData to form values", () => {
@@ -218,6 +292,66 @@ describe("getDefaultValues", () => {
     expect(defaults.ingredients[0].item).toBe("pasta");
     expect(defaults.ingredients[0].amount).toBe("200");
     expect(defaults.instructions![0].instruction).toBe("Boil water");
+  });
+
+  it("maps existing additives and section references into form rows", () => {
+    const defaults = getDefaultValues(undefined, {
+      title: "Dough",
+      servings: 2,
+      sections: [{ id: "dough", name: "Dough", order: 0 }],
+      ingredients: [
+        {
+          item: "butter",
+          modifiers: ["COLD"],
+          sectionId: "dough",
+          original: "cold butter",
+        },
+      ],
+      instructions: [{ instruction: "Mix.", order: 1, sectionId: "dough" }],
+    });
+
+    expect(defaults.sections).toEqual([
+      { id: "dough", name: "Dough", order: 0 },
+    ]);
+    expect(defaults.ingredients[0]).toMatchObject({
+      modifiers: ["COLD"],
+      sectionId: "dough",
+      original: "cold butter",
+    });
+    expect(defaults.instructions?.[0]).toMatchObject({ sectionId: "dough" });
+    expect(defaults.ingredients[0].rowId).toBeTruthy();
+    expect(defaults.instructions?.[0].rowId).toBeTruthy();
+  });
+
+  it("builds shared form sections from AI label fields", () => {
+    const parsedData = {
+      title: "Flatbread",
+      servings: 4,
+      ingredients: [{ item: "flour", section: "Dough" }],
+      instructions: [{ instruction: "Mix.", section: "Dough" }],
+    } as unknown as Parameters<typeof getDefaultValues>[1];
+
+    const defaults = getDefaultValues(undefined, parsedData);
+
+    expect(defaults.sections).toEqual([
+      expect.objectContaining({ name: "Dough", order: 0 }),
+    ]);
+    expect(defaults.ingredients[0].sectionId).toBe(defaults.sections?.[0].id);
+    expect(defaults.instructions?.[0].sectionId).toBe(
+      defaults.sections?.[0].id,
+    );
+  });
+
+  it("drops unknown AI modifier keys before form validation", () => {
+    const parsedData = {
+      title: "Butter",
+      servings: 2,
+      ingredients: [{ item: "butter", modifiers: ["COLD", "INVENTED"] }],
+    } as unknown as Parameters<typeof getDefaultValues>[1];
+
+    const defaults = getDefaultValues(undefined, parsedData);
+
+    expect(defaults.ingredients[0].modifiers).toEqual(["COLD"]);
   });
 
   it("keeps a missing parsed ingredient amount empty", () => {

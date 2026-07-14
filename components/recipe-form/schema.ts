@@ -1,4 +1,21 @@
 import { z } from "zod";
+import {
+  PREPARATION_MODIFIERS,
+  type PreparationModifier,
+} from "@/lib/parse-recipe/modifiers";
+
+const preparationModifierSchema = z.enum(
+  Object.keys(PREPARATION_MODIFIERS) as [
+    PreparationModifier,
+    ...PreparationModifier[],
+  ],
+);
+
+const recipeSectionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  order: z.number().int().nonnegative(),
+});
 
 export function createRecipeSchema(t: (key: string) => string) {
   return z.object({
@@ -17,6 +34,7 @@ export function createRecipeSchema(t: (key: string) => string) {
     ingredients: z
       .array(
         z.object({
+          rowId: z.string().optional(),
           item: z.string().min(1, t("ingredientNameRequired")),
           amount: z
             .string()
@@ -28,6 +46,9 @@ export function createRecipeSchema(t: (key: string) => string) {
               message: t("amountRequired"),
             }),
           unit: z.string().optional(),
+          modifiers: z.array(preparationModifierSchema).optional(),
+          sectionId: z.string().nullish(),
+          original: z.string().nullish(),
         }),
       )
       .min(1)
@@ -38,14 +59,19 @@ export function createRecipeSchema(t: (key: string) => string) {
     instructions: z
       .array(
         z.object({
+          rowId: z.string().optional(),
           instruction: z.string(),
           imageUrl: z.string().optional(),
+          sectionId: z.string().nullish(),
         }),
       )
-      .transform((val) =>
-        val.filter((inst) => inst.instruction.trim().length > 0),
+      .transform((instructions) =>
+        instructions.filter(
+          (instruction) => instruction.instruction.trim().length > 0,
+        ),
       )
       .optional(),
+    sections: z.array(recipeSectionSchema).default([]),
     sourceUrl: z.string().url().or(z.literal("")).optional(),
     category: z.string().optional(),
     imageFocusX: z.number().min(0).max(100).nullish(),

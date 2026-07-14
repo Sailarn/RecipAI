@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, X } from "lucide-react";
+import { Check, Pencil, Plus, X } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -19,7 +19,12 @@ import { getIngredientDisplayName } from "@/components/ingredient-picker/display
 import { Input } from "@/components/ui";
 import type { Locale } from "@/i18n/config";
 import { db } from "@/lib/db/db";
-import { cn } from "@/lib/utils";
+import {
+  modifierLabel,
+  type PreparationModifier,
+} from "@/lib/parse-recipe/modifiers";
+import { cn, generateId } from "@/lib/utils";
+import { AdditivePicker } from "./ingredients-section/additive-picker";
 import {
   buildVocabIdIndex,
   buildVocabNameIndex,
@@ -58,6 +63,9 @@ export function IngredientsSection({
     name: "ingredients",
   });
   const [pickerRow, setPickerRow] = useState<number | null>(null);
+  const [additivePickerRow, setAdditivePickerRow] = useState<string | null>(
+    null,
+  );
 
   const vocab = useLiveQuery(() => db.ingredients.toArray(), []);
   const vocabIndex = useMemo(() => buildVocabNameIndex(vocab ?? []), [vocab]);
@@ -86,6 +94,17 @@ export function IngredientsSection({
     setPickerRow(null);
   }
 
+  function toggleModifier(index: number, modifier: PreparationModifier) {
+    const modifiers = watchedIngredients?.[index]?.modifiers ?? [];
+    const nextModifiers = modifiers.includes(modifier)
+      ? modifiers.filter((item) => item !== modifier)
+      : [...modifiers, modifier];
+    setValue(`ingredients.${index}.modifiers`, nextModifiers, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
   return (
     <div>
       <div className="flex justify-between items-baseline mb-1">
@@ -111,88 +130,153 @@ export function IngredientsSection({
         {fields.map((field, index) => {
           const amountErr = errors.ingredients?.[index]?.amount;
           const itemErr = errors.ingredients?.[index]?.item;
+          const additivePickerId = `ingredient-state-picker-${field.id}`;
+          const isAdditivePickerOpen = additivePickerRow === field.id;
+          const modifiers = watchedIngredients?.[index]?.modifiers ?? [];
 
           return (
-            <div key={field.id} className="flex gap-[6px] items-start">
-              <div className="w-[56px] shrink-0">
-                <Input
-                  {...register(`ingredients.${index}.amount`)}
-                  type="text"
-                  inputMode="decimal"
-                  aria-label="qty"
-                  error={!!amountErr}
-                />
-                <p
+            <div key={field.id}>
+              <div className="flex gap-[6px] items-start">
+                <div className="w-[56px] shrink-0">
+                  <Input
+                    {...register(`ingredients.${index}.amount`)}
+                    type="text"
+                    inputMode="decimal"
+                    aria-label="qty"
+                    error={!!amountErr}
+                  />
+                  <p
+                    className={cn(
+                      errorRowClass,
+                      amountErr ? "visible" : "invisible",
+                    )}
+                  >
+                    {amountErr?.message ?? " "}
+                  </p>
+                </div>
+
+                <div className="w-[68px] shrink-0">
+                  <Input
+                    {...register(`ingredients.${index}.unit`)}
+                    placeholder={t("unit")}
+                  />
+                  <div className="min-h-4 mt-[3px]" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <Controller
+                    control={control}
+                    name={`ingredients.${index}.item`}
+                    render={({ field: itemField }) => (
+                      <button
+                        type="button"
+                        aria-label={t("ingredientName")}
+                        data-testid={`ingredient-trigger-${index}`}
+                        onClick={() => setPickerRow(index)}
+                        className={cn(
+                          "w-full rounded-[14px] px-3 py-2 border text-left text-base font-[family-name:var(--font-sans)] truncate transition-colors bg-[rgba(255,170,50,0.07)] backdrop-blur-[12px]",
+                          itemErr
+                            ? "border-red-500"
+                            : "border-[rgba(255,200,100,0.15)]",
+                          itemField.value
+                            ? "text-[var(--fg-1)]"
+                            : "text-[var(--fg-3)]",
+                        )}
+                      >
+                        {itemField.value
+                          ? localizeIngredientItem(
+                              itemField.value,
+                              vocabIndex,
+                              locale,
+                              vocabById.get(
+                                canonicalIngredientIds?.[index] ?? "",
+                              ),
+                            )
+                          : t("ingredientName")}
+                      </button>
+                    )}
+                  />
+                  <p
+                    className={cn(
+                      errorRowClass,
+                      itemErr ? "visible" : "invisible",
+                    )}
+                  >
+                    {itemErr?.message ?? " "}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
                   className={cn(
-                    errorRowClass,
-                    amountErr ? "visible" : "invisible",
+                    "w-8 h-9 rounded-[10px] shrink-0 bg-[rgba(239,68,68,0.10)] border border-[rgba(239,68,68,0.20)] flex items-center justify-center cursor-pointer transition-all duration-150 ease",
+                    fields.length > 1 ? "visible" : "invisible",
                   )}
                 >
-                  {amountErr?.message ?? " "}
-                </p>
+                  <X size={13} className="text-[var(--action-destructive)]" />
+                </button>
               </div>
 
-              <div className="w-[68px] shrink-0">
-                <Input
-                  {...register(`ingredients.${index}.unit`)}
-                  placeholder={t("unit")}
-                />
-                <div className="min-h-4 mt-[3px]" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <Controller
-                  control={control}
-                  name={`ingredients.${index}.item`}
-                  render={({ field: itemField }) => (
+              <div className="flex flex-wrap items-center gap-2 pl-[2px]">
+                {modifiers.length ? (
+                  <>
                     <button
                       type="button"
-                      aria-label={t("ingredientName")}
-                      data-testid={`ingredient-trigger-${index}`}
-                      onClick={() => setPickerRow(index)}
-                      className={cn(
-                        "w-full rounded-[14px] px-3 py-2 border text-left text-base font-[family-name:var(--font-sans)] truncate transition-colors bg-[rgba(255,170,50,0.07)] backdrop-blur-[12px]",
-                        itemErr
-                          ? "border-red-500"
-                          : "border-[rgba(255,200,100,0.15)]",
-                        itemField.value
-                          ? "text-[var(--fg-1)]"
-                          : "text-[var(--fg-3)]",
-                      )}
+                      data-testid={`additive-applied-${index}`}
+                      aria-label={t("editIngredientStates")}
+                      aria-controls={additivePickerId}
+                      aria-expanded={isAdditivePickerOpen}
+                      onClick={() => setAdditivePickerRow(field.id)}
+                      className="flex flex-wrap gap-2 text-left"
                     >
-                      {itemField.value
-                        ? localizeIngredientItem(
-                            itemField.value,
-                            vocabIndex,
-                            locale,
-                            vocabById.get(
-                              canonicalIngredientIds?.[index] ?? "",
-                            ),
-                          )
-                        : t("ingredientName")}
+                      {modifiers.map((modifier) => (
+                        <span
+                          key={modifier}
+                          className="flex items-center gap-1 rounded-full border border-[rgba(74,222,128,0.5)] bg-[rgba(74,222,128,0.16)] px-3 py-[5px] text-[12.5px] font-semibold text-[rgba(74,222,128,0.98)]"
+                        >
+                          <Check size={12} />
+                          {modifierLabel(modifier, locale)}
+                        </span>
+                      ))}
                     </button>
-                  )}
-                />
-                <p
-                  className={cn(
-                    errorRowClass,
-                    itemErr ? "visible" : "invisible",
-                  )}
-                >
-                  {itemErr?.message ?? " "}
-                </p>
+                    <button
+                      type="button"
+                      aria-label={t("editIngredientStates")}
+                      aria-controls={additivePickerId}
+                      aria-expanded={isAdditivePickerOpen}
+                      onClick={() => setAdditivePickerRow(field.id)}
+                      className="flex size-[30px] items-center justify-center rounded-[8px] border border-[rgba(255,200,100,0.22)] text-[var(--fg-2)]"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    data-testid={`additive-empty-${index}`}
+                    aria-controls={additivePickerId}
+                    aria-expanded={isAdditivePickerOpen}
+                    onClick={() => setAdditivePickerRow(field.id)}
+                    className="flex items-center gap-1 rounded-full border border-dashed border-[rgba(251,146,60,0.38)] bg-[rgba(251,146,60,0.05)] px-3 py-[5px] text-[12.5px] font-semibold text-[rgba(251,146,60,0.95)]"
+                  >
+                    <Plus size={12} />
+                    {t("addState")}
+                  </button>
+                )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => remove(index)}
-                className={cn(
-                  "w-8 h-9 rounded-[10px] shrink-0 bg-[rgba(239,68,68,0.10)] border border-[rgba(239,68,68,0.20)] flex items-center justify-center cursor-pointer transition-all duration-150 ease",
-                  fields.length > 1 ? "visible" : "invisible",
-                )}
-              >
-                <X size={13} className="text-[var(--action-destructive)]" />
-              </button>
+              {additivePickerRow === field.id && (
+                <AdditivePicker
+                  id={additivePickerId}
+                  modifiers={modifiers}
+                  locale={locale}
+                  title={t("ingredientStatePickerTitle")}
+                  closeLabel={t("closeIngredientStatePicker")}
+                  onClose={() => setAdditivePickerRow(null)}
+                  onToggle={(modifier) => toggleModifier(index, modifier)}
+                />
+              )}
             </div>
           );
         })}
@@ -206,7 +290,16 @@ export function IngredientsSection({
 
       <button
         type="button"
-        onClick={() => append({ item: "", amount: "", unit: "" })}
+        onClick={() =>
+          append({
+            rowId: generateId(),
+            item: "",
+            amount: "",
+            unit: "",
+            modifiers: [],
+            sectionId: null,
+          })
+        }
         className="mt-[6px] p-[10px] rounded-[14px] max-h-[37.5px] border border-dashed border-[rgba(255,200,100,0.25)] bg-[rgba(255,170,50,0.05)] text-[13px] font-medium font-[family-name:var(--font-sans)] text-[var(--fg-2)] flex items-center justify-center gap-[6px] cursor-pointer w-full transition-all duration-150 ease"
       >
         <Plus size={14} className="text-[var(--fg-2)]" />

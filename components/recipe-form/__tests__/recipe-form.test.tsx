@@ -14,9 +14,11 @@ import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { RecipeForm } from "../index";
 
+let activeLocale = "en";
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
-  useParams: () => ({ locale: "en" }),
+  useParams: () => ({ locale: activeLocale }),
 }));
 
 // The ingredient rows localize their display via a vocabulary live query; with
@@ -131,6 +133,7 @@ function getSubmitButton() {
 
 describe("RecipeForm", () => {
   beforeEach(() => {
+    activeLocale = "en";
     vi.clearAllMocks();
   });
 
@@ -172,6 +175,31 @@ describe("RecipeForm", () => {
       // Now the submit button should be "Create"
       expect(getSubmitButton()).toBeTruthy();
       expect(getSubmitButton()?.textContent).toBe("Create");
+    });
+
+    it("navigates past AI ingredients whose unchanged original is null", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "AI recipe",
+            servings: 2,
+            ingredients: [
+              {
+                item: "salt",
+                amount: null,
+                unit: null,
+                original: null,
+              },
+            ],
+            instructions: [{ instruction: "Season." }],
+          }}
+        />,
+      );
+
+      await clickNext();
+      await clickNext();
+
+      expect(getSubmitButton()).toBeTruthy();
     });
 
     it("shows validation errors when trying to navigate with empty required fields", async () => {
@@ -230,6 +258,80 @@ describe("RecipeForm", () => {
       await waitFor(() => {
         expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(1);
       });
+    });
+
+    it("shows an add-state ghost control when an ingredient has no modifiers", async () => {
+      render(<RecipeForm />);
+      fillRequiredInfo();
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(screen.getByTestId("additive-empty-0")).toHaveTextContent(
+        "addState",
+      );
+      expect(
+        screen.queryByTestId("additive-applied-0"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("toggles a modifier from the additive picker", async () => {
+      render(<RecipeForm />);
+      fillRequiredInfo();
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      const additiveTrigger = screen.getByTestId("additive-empty-0");
+      expect(additiveTrigger).toHaveAttribute("aria-expanded", "false");
+
+      fireEvent.click(additiveTrigger);
+      expect(additiveTrigger).toHaveAttribute("aria-expanded", "true");
+
+      const pickerId = additiveTrigger.getAttribute("aria-controls");
+      expect(pickerId).not.toBeNull();
+      const picker = document.getElementById(pickerId ?? "");
+      expect(picker?.tagName).toBe("FIELDSET");
+      expect(picker).toHaveAccessibleName("ingredientStatePickerTitle");
+      fireEvent.click(screen.getByTestId("additive-option-COLD"));
+
+      expect(screen.getByTestId("additive-applied-0")).toHaveTextContent(
+        "cold",
+      );
+      expect(
+        screen
+          .getByTestId("additive-applied-0")
+          .querySelector("svg.lucide-check"),
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId("additive-option-COLD"));
+      expect(screen.getByTestId("additive-empty-0")).toBeInTheDocument();
+    });
+
+    it("renders applied modifier labels in the active locale", async () => {
+      activeLocale = "ua";
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Тест",
+            servings: 2,
+            ingredients: [{ item: "Сир", modifiers: ["GRATED"] }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(screen.getByTestId("additive-applied-0")).toHaveTextContent(
+        "тертий",
+      );
     });
 
     it("can add and remove instruction steps", async () => {
@@ -333,6 +435,264 @@ describe("RecipeForm", () => {
     });
   });
 
+  describe("Step sections", () => {
+    it("keeps a recipe without sections as a flat step list", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Flat recipe",
+            servings: 2,
+            instructions: [{ instruction: "Whisk" }, { instruction: "Bake" }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(screen.getAllByTestId(/^step-card-/)).toHaveLength(2);
+      expect(screen.queryByTestId("section-container")).not.toBeInTheDocument();
+    });
+
+    it("creates, renames, and deletes a section without deleting its steps", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Section recipe",
+            servings: 2,
+            instructions: [{ instruction: "Whisk" }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      fireEvent.click(screen.getByText("splitIntoSections"));
+      const sectionName = screen.getByDisplayValue("newSection");
+      fireEvent.change(sectionName, { target: { value: "Sauce" } });
+      fireEvent.blur(sectionName);
+      expect(screen.getByText("Sauce")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId("delete-section"));
+      expect(screen.queryByText("Sauce")).not.toBeInTheDocument();
+      expect(screen.getAllByTestId(/^step-card-/)).toHaveLength(1);
+    });
+
+    it("flattens populated section steps and toggles the section body", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Populated section",
+            servings: 2,
+            instructions: [{ instruction: "Make sauce", sectionId: "sauce" }],
+            sections: [{ id: "sauce", name: "Sauce", order: 0 }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      expect(screen.queryByTitle("sectionOrderFixed")).not.toBeInTheDocument();
+      expect(screen.queryByDisplayValue("Make sauce")).not.toBeInTheDocument();
+      fireEvent.click(screen.getByText("editStep"));
+      expect(screen.getByDisplayValue("Make sauce")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "toggleSection" }));
+      expect(screen.queryByDisplayValue("Make sauce")).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "toggleSection" }));
+      fireEvent.click(screen.getByTestId("delete-section"));
+
+      expect(screen.queryByTestId("section-container")).not.toBeInTheDocument();
+      expect(screen.getByDisplayValue("Make sauce")).toBeInTheDocument();
+    });
+
+    it("saves the live section membership and grouped step order", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Organized recipe",
+            servings: 2,
+            ingredients: [{ item: "Flour", amount: 1 }],
+            instructions: [
+              { instruction: "Ungrouped" },
+              { instruction: "Sauce step", sectionId: "sauce" },
+            ],
+            sections: [{ id: "sauce", name: "Sauce", order: 0 }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
+      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(saved.sections).toEqual([
+        { id: "sauce", name: "Sauce", order: 0 },
+      ]);
+      expect(
+        saved.instructions.map(
+          (step: { instruction: string }) => step.instruction,
+        ),
+      ).toEqual(["Sauce step", "Ungrouped"]);
+      expect(saved.instructions[0].sectionId).toBe("sauce");
+      expect(saved.instructions[1].sectionId).toBeUndefined();
+    });
+
+    it("keeps step section identities when blank rows are removed at save", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Blank row recipe",
+            servings: 2,
+            ingredients: [{ item: "Flour", amount: 1 }],
+            instructions: [
+              { instruction: "Make sauce", sectionId: "sauce" },
+              { instruction: "", sectionId: "sauce" },
+              { instruction: "Serve", sectionId: "finish" },
+            ],
+            sections: [
+              { id: "sauce", name: "Sauce", order: 0 },
+              { id: "finish", name: "Finish", order: 1 },
+            ],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
+      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(saved.instructions).toEqual([
+        expect.objectContaining({
+          instruction: "Make sauce",
+          order: 1,
+          sectionId: "sauce",
+        }),
+        expect.objectContaining({
+          instruction: "Serve",
+          order: 2,
+          sectionId: "finish",
+        }),
+      ]);
+    });
+
+    it("keeps section edits after switching away from the steps tab", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Persistent section",
+            servings: 2,
+            ingredients: [{ item: "Flour", amount: 1 }],
+            instructions: [{ instruction: "Mix", sectionId: "dough" }],
+            sections: [{ id: "dough", name: "Dough", order: 0 }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(screen.getByRole("button", { name: "renameSection" }));
+      const nameInput = screen.getByDisplayValue("Dough");
+      fireEvent.change(nameInput, { target: { value: "Main dough" } });
+      fireEvent.blur(nameInput);
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /tabInfo/ }));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      expect(screen.getByText("Main dough")).toBeInTheDocument();
+
+      fireEvent.click(getSubmitButton()!);
+      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
+      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(saved.sections).toEqual([
+        { id: "dough", name: "Main dough", order: 0 },
+      ]);
+    });
+
+    it("keeps an ingredient section catalog entry when its step group is deleted", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Shared section",
+            servings: 2,
+            ingredients: [{ item: "Flour", amount: 1, sectionId: "dough" }],
+            instructions: [{ instruction: "Mix", sectionId: "dough" }],
+            sections: [{ id: "dough", name: "Dough", order: 0 }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(screen.getByTestId("delete-section"));
+      expect(screen.queryByTestId("section-container")).not.toBeInTheDocument();
+
+      fireEvent.click(getSubmitButton()!);
+      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
+      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(saved.sections).toEqual([
+        { id: "dough", name: "Dough", order: 0 },
+      ]);
+      expect(saved.ingredients[0].sectionId).toBe("dough");
+      expect(saved.instructions[0].sectionId).toBeUndefined();
+    });
+
+    it("prunes sections without ingredient or saved-step references", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Pruned sections",
+            servings: 2,
+            ingredients: [{ item: "Flour", sectionId: "ingredient-only" }],
+            instructions: [{ instruction: "Mix", sectionId: "step-section" }],
+            sections: [
+              { id: "empty", name: "Empty", order: 0 },
+              { id: "ingredient-only", name: "Dough", order: 1 },
+              { id: "step-section", name: "Method", order: 2 },
+            ],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
+      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(saved.sections).toEqual([
+        { id: "ingredient-only", name: "Dough", order: 0 },
+        { id: "step-section", name: "Method", order: 1 },
+      ]);
+    });
+  });
+
   describe("Form Submission", () => {
     it("calls createRecipe when create form is submitted with valid data", async () => {
       render(<RecipeForm />);
@@ -378,6 +738,122 @@ describe("RecipeForm", () => {
       expect(callArg.ingredients[0].item).toBe("flour");
     });
 
+    it("saves live additive edits as a modifiers array", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Modifier test",
+            servings: 2,
+            ingredients: [{ item: "Butter", modifiers: ["GRATED"] }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      fireEvent.click(screen.getByTestId("additive-applied-0"));
+      fireEvent.click(screen.getByTestId("additive-option-GRATED"));
+      fireEvent.click(screen.getByTestId("additive-option-COLD"));
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(createRecipe).toHaveBeenCalledOnce();
+      });
+
+      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0][0];
+      expect(callArg.ingredients[0].modifiers).toEqual(["COLD"]);
+    });
+
+    it("keeps modifiers with their ingredient after removing and adding rows", async () => {
+      const mockRecipe: Recipe = {
+        id: "modifier-rows",
+        title: "Modifier rows",
+        servings: 2,
+        ingredients: [
+          {
+            id: "first",
+            item: "First",
+            modifiers: ["GRATED"],
+            sectionId: "first-section",
+            original: "grated First",
+          },
+          {
+            id: "second",
+            item: "Second",
+            modifiers: ["COLD"],
+            sectionId: "second-section",
+            original: "cold Second",
+          },
+        ],
+        sections: [
+          { id: "first-section", name: "First", order: 0 },
+          { id: "second-section", name: "Second", order: 1 },
+        ],
+        instructions: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      render(<RecipeForm recipe={mockRecipe} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabIngredients"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      const removeButtons = screen
+        .getAllByRole("button")
+        .filter((button) => button.querySelector("svg.lucide-x"));
+      fireEvent.click(removeButtons[0]);
+      fireEvent.click(screen.getByText("addIngredient"));
+      pickIngredient(1, "Third");
+      fireEvent.change(screen.getAllByLabelText(/qty/i)[1], {
+        target: { value: "1" },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("ingredient-trigger-1")).toHaveTextContent(
+          "Third",
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("tabSteps"));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledOnce();
+      });
+
+      const [, calledData] = (updateRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0];
+      expect(calledData.ingredients).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            item: "Second",
+            modifiers: ["COLD"],
+            sectionId: "second-section",
+            original: "cold Second",
+          }),
+          expect.objectContaining({ item: "Third" }),
+        ]),
+      );
+      expect(calledData.ingredients[1].modifiers).toBeUndefined();
+      expect(calledData.ingredients[1].sectionId).toBeUndefined();
+      expect(calledData.ingredients[1].original).toBeUndefined();
+    });
+
     it("calls updateRecipe when edit form is submitted", async () => {
       const mockRecipe: Recipe = {
         id: "existing-id",
@@ -419,6 +895,115 @@ describe("RecipeForm", () => {
         .mock.calls[0];
       expect(calledId).toBe("existing-id");
       expect(calledData.title).toBe("Updated Title");
+    });
+
+    it("preserves display-only modifiers/sectionId/sections/original through an edit save", async () => {
+      const mockRecipe: Recipe = {
+        id: "meta-id",
+        title: "Meta Recipe",
+        servings: 2,
+        sections: [{ id: "sec-1", name: "For the base", order: 0 }],
+        ingredients: [
+          {
+            id: "i1",
+            item: "Mozzarella",
+            amount: 1,
+            unit: "",
+            modifiers: ["GRATED"],
+            sectionId: "sec-1",
+            original: "Grated Mozzarella",
+          },
+        ],
+        instructions: [
+          {
+            id: "s1",
+            order: 1,
+            instruction: "Mix",
+            sectionId: "sec-1",
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      render(<RecipeForm recipe={mockRecipe} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledOnce();
+      });
+
+      const [, calledData] = (updateRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0];
+      expect(calledData.ingredients[0]).toMatchObject({
+        item: "Mozzarella",
+        modifiers: ["GRATED"],
+        sectionId: "sec-1",
+        original: "Grated Mozzarella",
+      });
+      expect(calledData.instructions[0].sectionId).toBe("sec-1");
+      expect(calledData.sections).toEqual([
+        { id: "sec-1", name: "For the base", order: 0 },
+      ]);
+    });
+
+    it("preserves parsed modifiers/sectionId/sections through review → save of a new recipe", async () => {
+      render(
+        <RecipeForm
+          initialData={{
+            title: "Rhubarb Pie",
+            servings: 4,
+            sections: [{ id: "sec-1", name: "For the base", order: 0 }],
+            ingredients: [
+              {
+                item: "Mozzarella",
+                modifiers: ["GRATED"],
+                sectionId: "sec-1",
+                original: "Grated Mozzarella",
+              },
+            ],
+            instructions: [{ instruction: "Mix", sectionId: "sec-1" }],
+          }}
+        />,
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(createRecipe).toHaveBeenCalledOnce();
+      });
+
+      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0][0];
+      expect(callArg.ingredients[0]).toMatchObject({
+        item: "Mozzarella",
+        modifiers: ["GRATED"],
+        sectionId: "sec-1",
+        original: "Grated Mozzarella",
+      });
+      expect(callArg.instructions[0].sectionId).toBe("sec-1");
+      expect(callArg.sections).toEqual([
+        { id: "sec-1", name: "For the base", order: 0 },
+      ]);
     });
 
     it("does not submit when required fields are missing", async () => {

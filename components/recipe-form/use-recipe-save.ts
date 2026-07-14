@@ -16,12 +16,12 @@ import type { RecipeOutput } from "./schema";
 
 export type SaveState = "idle" | "saving" | "saved";
 
-export function useRecipeSave(recipe: Recipe | undefined) {
+export function useRecipeSave(recipe?: Recipe) {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const pendingImageFile = useRef<File | null>(null);
-  const pendingStepFiles = useRef<Record<number, File>>({});
+  const pendingStepFiles = useRef<Record<string, File>>({});
 
   const onSubmit = async (data: RecipeOutput) => {
     setImageError(null);
@@ -29,24 +29,51 @@ export function useRecipeSave(recipe: Recipe | undefined) {
 
     const totalTime = (data.prepTime || 0) + (data.cookTime || 0) || undefined;
 
-    const instructions = (data.instructions || []).map(
-      (instruction, index) => ({
-        id: generateId(),
+    const instructionRows = (data.instructions || [])
+      .map((instruction) => {
+        const { rowId, sectionId, ...instructionData } = instruction;
+        const id = rowId ?? generateId();
+        return {
+          stepId: id,
+          id,
+          ...instructionData,
+          imageUrl: instructionData.imageUrl || undefined,
+          ...(sectionId ? { sectionId } : {}),
+        };
+      })
+      .filter((instruction) => instruction.instruction.trim().length > 0);
+    const instructions = instructionRows.map(
+      ({ stepId: _, ...instruction }, index) => ({
+        ...instruction,
         order: index + 1,
-        instruction: instruction.instruction,
-        imageUrl: instruction.imageUrl || undefined,
       }),
     );
+    const referencedSectionIds = new Set(
+      [...data.ingredients, ...instructions]
+        .map((item) => item.sectionId)
+        .filter((sectionId): sectionId is string => Boolean(sectionId)),
+    );
+    const sections = data.sections
+      .filter((section) => referencedSectionIds.has(section.id))
+      .map((section, order) => ({ ...section, order }));
 
     const recipeData = {
       ...data,
       imageUrl: data.imageUrl || "",
       imageFileId: recipe?.imageFileId,
       totalTime,
-      ingredients: data.ingredients.map((ingredient) => ({
-        id: generateId(),
-        ...ingredient,
-      })),
+      sections,
+      ingredients: data.ingredients.map((ingredient) => {
+        const { rowId, modifiers, sectionId, original, ...ingredientData } =
+          ingredient;
+        return {
+          id: rowId ?? generateId(),
+          ...(modifiers?.length ? { modifiers } : {}),
+          ...(sectionId ? { sectionId } : {}),
+          ...(original ? { original } : {}),
+          ...ingredientData,
+        };
+      }),
       instructions,
       imageFocusX: data.imageFocusX ?? undefined,
       imageFocusY: data.imageFocusY ?? undefined,
@@ -125,7 +152,8 @@ export function useRecipeSave(recipe: Recipe | undefined) {
       const updatedInstructions = [];
       for (const instruction of instructions) {
         const stepIndex = instruction.order - 1;
-        const stepFile = pendingStepFiles.current[stepIndex];
+        const stepId = instructionRows[stepIndex]?.stepId;
+        const stepFile = stepId ? pendingStepFiles.current[stepId] : undefined;
         if (stepFile) {
           try {
             const uploaded = await uploadImage(stepFile, uploadOptions);

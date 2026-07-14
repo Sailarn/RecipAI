@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { Locale } from "@/i18n/config";
@@ -32,6 +33,10 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
 
   const handleFormBack = () => navigate.back(routes.recipes.list(locale));
   const recipeSchema = createRecipeSchema(t);
+  const defaultValues = useMemo(
+    () => getDefaultValues(recipe, initialData),
+    [initialData, recipe],
+  );
 
   const {
     register,
@@ -45,7 +50,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
     resolver: zodResolver(recipeSchema) as any,
     mode: "onSubmit",
-    defaultValues: getDefaultValues(recipe, initialData),
+    defaultValues,
   });
 
   const {
@@ -98,7 +103,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
           onSubmit={handleSubmit(onSubmit as any)}
           className="overflow-hidden"
         >
-          {activeTab === "info" && (
+          <div hidden={activeTab !== "info"}>
             <BasicInfo
               register={register}
               control={control}
@@ -129,9 +134,9 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
                 setValue("imageCropHeight", crop?.h);
               }}
             />
-          )}
+          </div>
 
-          {activeTab === "ingredients" && (
+          <div hidden={activeTab !== "ingredients"}>
             <IngredientsSection
               register={register}
               control={control}
@@ -140,19 +145,20 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
               locale={locale}
               canonicalIngredientIds={recipe?.canonicalIngredientIds}
             />
-          )}
+          </div>
 
-          {activeTab === "steps" && (
+          <div hidden={activeTab !== "steps"}>
             <InstructionsSection
               register={register}
               control={control}
               errors={errors}
-              onStepFileSelect={(index, file) => {
-                if (file) pendingStepFiles.current[index] = file;
-                else delete pendingStepFiles.current[index];
+              setValue={setValue}
+              onStepFileSelect={(stepId, file) => {
+                if (file) pendingStepFiles.current[stepId] = file;
+                else delete pendingStepFiles.current[stepId];
               }}
             />
-          )}
+          </div>
 
           {imageError && (
             <Alert variant="destructive">
