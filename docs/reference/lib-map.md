@@ -78,7 +78,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/upload/imagekit.ts` | ImageKit SDK instance + `uploadImageServer()`. |
 | `lib/upload/images.ts` | `isImageKitUrl()` helper (server-side upload path). |
 | `lib/imagekit-url.ts` | `getOptimizedUrl()` — builds the direct ImageKit CDN URL (`?tr=w-…`) that `RecipeImage` renders, bypassing `/_next/image`. Also `isImageKitUrl()` + `HERO_IMAGE_WIDTH`. |
-| `lib/prewarm-recipe-images.ts` | `prewarmRecipeImages()` — idle-time warms each recipe's detail hero image into the SW cache so detail opens instantly. `selectPrewarmUrls()` is its pure core. |
+| `lib/prewarm-recipe-images.ts` | `prewarmRecipeImages()` — idle-time warms a capped batch of recipe hero images into the SW cache; `prewarmRecipeImage()` warms one on pointer intent. `selectPrewarmUrls()` is its pure core. |
+| `lib/schedule-idle.ts` | `scheduleIdle()` — shared `requestIdleCallback`/`setTimeout` fallback wrapper. Used by the image prewarm above and `BottomNav`'s tab-route prefetch. |
 | `components/recipe-image/index.tsx` | Renders a recipe image as a plain `<img>` on a direct ImageKit URL (not `next/image`), so the service worker caches it. |
 | `lib/upload/upload-auth.ts` | `requireUploadAuth()` — accepts session or upload token. |
 | `lib/upload/upload-token.ts` | `mintUploadToken()` / `verifyUploadToken()` via Redis (30 min TTL). |
