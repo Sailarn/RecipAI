@@ -17,9 +17,9 @@ import { RecipeVirtualList } from "@/components/recipe-virtual-list";
 import { RecipesPageOverlays } from "@/components/recipes-page-overlays";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipesPageState } from "@/hooks/use-recipes-page-state";
-import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
 import { getGreeting } from "@/lib/greeting";
 import { prewarmRecipeImages } from "@/lib/prewarm-recipe-images";
+import { useTriggerSync } from "@/lib/sync-context";
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -91,7 +91,7 @@ export default function RecipesPage() {
     if (recipes) prewarmRecipeImages(recipes);
   }, [recipes]);
 
-  const { triggerSync } = useSyncOnLogin();
+  const triggerSync = useTriggerSync();
   const { indicatorRef, isRefreshing } = usePullToRefresh({
     enabled: recipes !== undefined && !recipesError,
     onRefresh: triggerSync,

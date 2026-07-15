@@ -70,8 +70,8 @@ vi.mock("@tanstack/react-virtual", () => ({
 }));
 
 // Prevents real auth HTTP calls during page render
-vi.mock("@/hooks/use-sync-on-login", () => ({
-  useSyncOnLogin: () => ({ triggerSync: vi.fn() }),
+vi.mock("@/lib/sync-context", () => ({
+  useTriggerSync: () => vi.fn(),
 }));
 
 const mockRecipes: Recipe[] = [

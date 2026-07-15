@@ -9,6 +9,7 @@ import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
 import { useVocabSync } from "@/lib/hooks/use-vocab-sync";
 import { NavigationStackProvider } from "@/lib/navigation-stack";
+import { SyncProvider } from "@/lib/sync-context";
 
 const BottomNav = dynamic(
   () =>
@@ -34,15 +35,19 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <NavigationStackProvider initialHref={pathname} currentPage={children}>
-      <PageStack />
-      <MaintenanceListener />
-      <Toaster
-        position="top-center"
-        mobileOffset={{ top: "var(--mobile-toast-offset)" }}
-        swipeDirections={["top", "left", "right"]}
-      />
-      <ParseJobWatcher />
-      <BottomNav />
+      {/* Sibling to PageStack, not inside it — sync/migration lifecycle must
+          survive tab switches, not remount with whichever page is showing. */}
+      <SyncProvider>
+        <PageStack />
+        <MaintenanceListener />
+        <Toaster
+          position="top-center"
+          mobileOffset={{ top: "var(--mobile-toast-offset)" }}
+          swipeDirections={["top", "left", "right"]}
+        />
+        <ParseJobWatcher />
+        <BottomNav />
+      </SyncProvider>
     </NavigationStackProvider>
   );
 }

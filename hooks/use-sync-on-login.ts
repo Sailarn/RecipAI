@@ -183,18 +183,24 @@ export function useSyncOnLogin() {
       .catch(() => {});
   }, []);
   const navigate = useNavigate();
+  const inFlightRef = useRef<Promise<void> | null>(null);
 
-  const sync = useCallback(async () => {
+  const runSync = useCallback(async () => {
     if (!session) return;
 
-    syncIngredients().catch(() => {});
-    syncPantry().catch(() => {});
-    syncParseHistory().catch(() => {});
-
     try {
+      // All five branches are covered by this one Promise.all so a caller
+      // awaiting sync() (triggerSync, the focus re-pull) only resolves once
+      // every branch has settled — not just the recipes/collections diff.
+      // ingredients/pantry/parse-history already swallow their own errors, so
+      // they can never reject this Promise.all; only recipes/collections
+      // failures reach the catch below.
       const [recipesRes, collectionsRes] = await Promise.all([
         fetch(api.recipesSync),
         fetch(api.collections),
+        syncIngredients().catch(() => {}),
+        syncPantry().catch(() => {}),
+        syncParseHistory().catch(() => {}),
       ]);
 
       if (
@@ -270,6 +276,20 @@ export function useSyncOnLogin() {
       hasSynced.current = false;
     }
   }, [session, navigate]);
+
+  // Single-flight: a caller that invokes sync() while one is already running
+  // (initial mount racing a manual pull-to-refresh, or a focus re-pull racing
+  // either) gets back the same in-flight promise instead of starting a second,
+  // overlapping run — the fire-and-forget branches above would otherwise fire
+  // twice (e.g. duplicate ingredients-enrich POSTs).
+  const sync = useCallback(() => {
+    if (inFlightRef.current) return inFlightRef.current;
+    const promise = runSync().finally(() => {
+      inFlightRef.current = null;
+    });
+    inFlightRef.current = promise;
+    return promise;
+  }, [runSync]);
 
   useEffect(() => {
     if (!session || hasSynced.current) return;

@@ -29,6 +29,10 @@ vi.mock("@/lib/hooks/use-vocab-sync", () => ({
   useVocabSync: vi.fn(),
 }));
 
+vi.mock("@/hooks/use-sync-on-login", () => ({
+  useSyncOnLogin: () => ({ triggerSync: vi.fn() }),
+}));
+
 vi.mock("@/lib/navigation-stack", () => ({
   NavigationStackProvider: ({ children }: { children: React.ReactNode }) =>
     children,

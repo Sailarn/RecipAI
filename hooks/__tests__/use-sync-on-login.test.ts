@@ -523,4 +523,47 @@ describe("useSyncOnLogin", () => {
       expect(mockFetch).toHaveBeenCalledTimes(8);
     });
   });
+
+  describe("single-flight sync", () => {
+    it("does not start a second sync while one is already in flight", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as any);
+
+      let resolveRecipes: (value: Response) => void = () => {};
+      const recipesPromise = new Promise<Response>((resolve) => {
+        resolveRecipes = resolve;
+      });
+      mockFetch.mockImplementation((url: string) => {
+        if (String(url).startsWith("/api/ingredients")) {
+          return Promise.resolve(
+            makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
+          );
+        }
+        if (String(url) === "/api/pantry") {
+          return Promise.resolve(makeJsonResponse({ items: [] }));
+        }
+        if (String(url) === "/api/recipes/sync") return recipesPromise;
+        return Promise.resolve(makeJsonResponse({ collections: [] }));
+      });
+
+      const { result } = renderHook(() => useSyncOnLogin());
+
+      // Initial mount effect has started sync(); recipes/sync is still pending.
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync"),
+      );
+
+      // A manual trigger while that sync is still in flight should piggyback
+      // on it rather than starting a second, overlapping round.
+      const manualCall = result.current.triggerSync();
+      resolveRecipes(makeJsonResponse({ recipes: [] }));
+      await manualCall;
+
+      const recipesSyncCalls = mockFetch.mock.calls.filter(
+        ([url]) => url === "/api/recipes/sync",
+      );
+      expect(recipesSyncCalls).toHaveLength(1);
+    });
+  });
 });
