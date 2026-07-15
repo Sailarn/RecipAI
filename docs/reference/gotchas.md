@@ -71,6 +71,9 @@ Theme is now resolved **client-side before first paint**, not server-side: the `
 **`border-none` suppresses single-side borders.**
 In Tailwind v4, `border-none` sets `border-style: none` which overrides any `border-t`/`border-b` width on the same element. For a single-side border, use `border-t-2` alone — preflight's `border: 0 solid` default makes it render correctly.
 
+**Every text `<input>`/`<textarea>` must compute to `font-size: 16px` (`text-base`) or larger.**
+iOS Safari auto-zooms the viewport on focus for any native form control (`input`, `textarea`, `select`) with a computed font-size under 16px — a real, recurring bug, not a one-off (found independently in the search bar, the shared `Textarea` component, and an inline section-name editor). The shared `Input`/`Textarea` components (`components/ui/`) already default to `--text-base`; if you add a new raw `<input>`/`<textarea>` (or override one of those two with a `style` prop), it must stay at `text-base` or above — never `text-sm`/`text-xs`/`text-[Npx]` under 16 on a focusable field. Radix's `Select` is exempt: `Select.Trigger` renders a `<button role="combobox">`, not a native `<select>`, so it isn't subject to this at all regardless of font size.
+
 ---
 
 ## Animation
@@ -139,6 +142,9 @@ Coming back from the system browser wipes in-memory state, so the pending device
 ---
 
 ## Recipe ingredients & steps
+
+**Parsed ingredient amounts are always metric — units are converted at parse time, not stored as-is.**
+`lib/parse-recipe/prompts.ts`'s `METRIC_UNITS_RULE` instructs the AI to convert any imperial/US customary unit in the source (cups, oz, lb, fl oz, pints, quarts, gallons) to grams or milliliters before output — weight/volume units convert by a fixed factor, but cups/tbsp/tsp used for a *solid* (flour, sugar, butter, etc.) require an ingredient-density estimate, which is left to the model's own knowledge rather than a hardcoded table (there's no practical way to hardcode every ingredient's density). There is no schema-level enforcement (`unit` is a free `string` throughout `lib/db/schema.ts`, and the AI call has no Zod/JSON-schema validation) — the prompt text is the only lever. `tsp`/`tbsp` are intentionally still allowed output units (common in European/Ukrainian recipes too, not considered "imperial" for this rule); only cup/oz/lb/fl-oz/pint/quart/gallon are disallowed. Shared across all three prompt builders (web/photo/social) via one constant — don't duplicate the rule text back into each prompt if editing it.
 
 **`item` no longer contains the preparation word.**
 Since curated modifiers shipped, the parser strips the prep/state word out of `item` (`"Grated Mozzarella"` → `item: "Mozzarella"`) and stores a curated KEY in `modifiers[]`. The verbatim source is kept in `original` (present only when it differs from `item`). Do not assume `item` holds the full source phrase; read `original` for that.
