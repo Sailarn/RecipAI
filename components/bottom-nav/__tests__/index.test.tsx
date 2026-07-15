@@ -1,9 +1,18 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { routerPrefetch } = vi.hoisted(() => ({ routerPrefetch: vi.fn() }));
+
 vi.mock("next/navigation", () => ({
   useParams: vi.fn().mockReturnValue({ locale: "en" }),
   usePathname: vi.fn().mockReturnValue("/en/recipes"),
+  useRouter: vi.fn().mockReturnValue({ prefetch: routerPrefetch }),
+}));
+
+// Idle scheduling runs synchronously in tests so prefetch assertions don't
+// need to wait on requestIdleCallback/setTimeout.
+vi.mock("@/lib/schedule-idle", () => ({
+  scheduleIdle: (callback: () => void) => callback(),
 }));
 
 vi.mock("next-intl", () => ({
@@ -146,5 +155,26 @@ describe("BottomNav — position", () => {
     expect(container.firstChild).toHaveClass(
       "bottom-[var(--bottom-nav-offset)]",
     );
+  });
+});
+
+describe("BottomNav — prefetch", () => {
+  it("idle-prefetches the other tabs' routes on mount, not the active one", () => {
+    vi.mocked(usePathname).mockReturnValue("/en/recipes");
+    render(<BottomNav />);
+
+    expect(routerPrefetch).toHaveBeenCalledWith("/en/recipes/parse");
+    expect(routerPrefetch).toHaveBeenCalledWith("/en/profile");
+    expect(routerPrefetch).not.toHaveBeenCalledWith("/en/recipes");
+  });
+
+  it("re-fires prefetch for a tab on pointer-down", () => {
+    vi.mocked(usePathname).mockReturnValue("/en/recipes");
+    render(<BottomNav />);
+    routerPrefetch.mockClear();
+
+    fireEvent.pointerDown(screen.getByText("profile"));
+
+    expect(routerPrefetch).toHaveBeenCalledWith("/en/profile");
   });
 });

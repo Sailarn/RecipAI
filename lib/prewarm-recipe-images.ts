@@ -4,6 +4,7 @@ import {
   HERO_IMAGE_WIDTH,
   isImageKitUrl,
 } from "@/lib/imagekit-url";
+import { scheduleIdle } from "@/lib/schedule-idle";
 
 /**
  * Hero-size ImageKit URLs for the given recipes: deduped, with non-ImageKit and
@@ -46,14 +47,6 @@ function isSlowConnection(): boolean {
     connection.effectiveType === "slow-2g" ||
     connection.effectiveType === "2g"
   );
-}
-
-function scheduleIdle(callback: () => void): void {
-  if (typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(callback, { timeout: 2000 });
-  } else {
-    window.setTimeout(callback, 200);
-  }
 }
 
 function warmOne(url: string, onSettled: () => void): void {

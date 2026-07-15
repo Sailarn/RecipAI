@@ -1,10 +1,11 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { prefetchRecipesPage } from "@/lib/recipes-prefetch";
 import { routes } from "@/lib/routes";
+import { scheduleIdle } from "@/lib/schedule-idle";
 import { useNavigate } from "@/lib/transitions";
 import { NavColumn } from "./nav-column";
 import { AINavIcon, ProfileIcon, RecipesIcon } from "./nav-icons";
@@ -34,6 +35,7 @@ export function BottomNav() {
   const tNav = useTranslations("navigation");
   const navigate = useNavigate();
   const pathname = usePathname();
+  const router = useRouter();
 
   const { shouldHide, isPantryMode, activeHref } = getBottomNavState(
     pathname,
@@ -66,6 +68,27 @@ export function BottomNav() {
     staticActiveIndex,
     shouldHide: shouldHide || isPantryMode,
   });
+
+  // Warm the other tabs' RSC payload during idle time — router.prefetch is a
+  // different cache from prefetchRecipesPage's Dexie warm below, and now that
+  // the locale layout is statically rendered this delivers the full payload,
+  // not just a shared-layout shell. onPointerDown below re-fires it as a
+  // fast-path in case idle warming hasn't completed yet; prefetch itself
+  // dedupes, so calling it twice for the same href is a safe no-op. Hrefs are
+  // computed directly (not from `items`, a fresh array every render) so this
+  // effect only depends on stable primitives.
+  useEffect(() => {
+    if (shouldHide) return;
+    const tabHrefs = [
+      routes.recipes.list(locale),
+      routes.recipes.parse(locale),
+      routes.profile(locale),
+    ];
+    for (const href of tabHrefs) {
+      if (href === activeHref) continue;
+      scheduleIdle(() => router.prefetch(href));
+    }
+  }, [locale, activeHref, shouldHide, router]);
 
   if (shouldHide) return null;
 
@@ -114,9 +137,16 @@ export function BottomNav() {
             {items.map((item, index) => (
               <div
                 key={item.href}
-                // Recipes tab (index 0): seed cache as soon as the finger
-                // touches, giving Dexie a head-start before navigation fires.
-                onPointerDown={index === 0 ? prefetchRecipesPage : undefined}
+                onPointerDown={() => {
+                  // Fast-path re-fire in case the idle prefetch above hasn't
+                  // completed yet; router.prefetch dedupes internally.
+                  router.prefetch(item.href);
+                  // Recipes tab (index 0): also seed the Dexie cache — a
+                  // separate cache from the RSC payload above — as soon as
+                  // the finger touches, giving it a head-start before
+                  // navigation fires.
+                  if (index === 0) prefetchRecipesPage();
+                }}
                 className="relative flex flex-1 z-[4]"
               >
                 <NavItem
