@@ -22,7 +22,9 @@ export function Textarea({ className = "", error, ...props }: TextareaProps) {
         WebkitBackdropFilter: "blur(12px)",
         color: "var(--fg-1)",
         fontFamily: "var(--font-sans)",
-        fontSize: "var(--text-sm)",
+        // text-base (16px), not --text-sm (14px) — keeps iOS Safari from
+        // auto-zooming on focus.
+        fontSize: "var(--text-base)",
       }}
       {...props}
     />

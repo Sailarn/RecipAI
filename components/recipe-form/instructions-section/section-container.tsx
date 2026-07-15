@@ -53,7 +53,8 @@ export function SectionContainer({
             defaultValue={section.name}
             aria-label={sectionNamePlaceholder}
             placeholder={sectionNamePlaceholder}
-            className="min-w-0 flex-1 rounded-[8px] border border-[var(--action-primary)] bg-transparent px-2 py-1 text-[13px] text-[var(--fg-1)] outline-none"
+            // text-base (16px) keeps iOS Safari from auto-zooming on focus
+            className="min-w-0 flex-1 rounded-[8px] border border-[var(--action-primary)] bg-transparent px-2 py-1 text-base text-[var(--fg-1)] outline-none"
             onBlur={(event) => onRename(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") event.currentTarget.blur();

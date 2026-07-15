@@ -78,7 +78,8 @@ export function RecipeFilterBar({
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full font-[family-name:var(--font-sans)] bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.15)] backdrop-blur-[12px] rounded-[14px] py-[9px] pr-3 pl-8 text-[13px] text-[var(--fg-1)] outline-none transition-colors"
+            // text-base (16px) keeps iOS Safari from auto-zooming on focus
+            className="w-full font-[family-name:var(--font-sans)] bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.15)] backdrop-blur-[12px] rounded-[14px] py-[9px] pr-3 pl-8 text-base text-[var(--fg-1)] outline-none transition-colors"
           />
         </div>
 
