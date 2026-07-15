@@ -39,4 +39,20 @@ describe("recipe extraction prompts", () => {
       "choose zero or more modifiers per ingredient",
     );
   });
+
+  it.each([
+    ["web", buildWebPrompt("page content")],
+    ["photo", buildPhotoPrompt()],
+    [
+      "social",
+      buildSocialPrompt(
+        { platform: "youtube", imageUrls: [] },
+        "recipe transcript",
+      ),
+    ],
+  ])("instructs the %s extractor to convert units to metric and forbids imperial units", (_, prompt) => {
+    expect(prompt).toContain("metric only, mandatory");
+    expect(prompt).toContain("oz -> g");
+    expect(prompt).toContain("NEVER cup, oz, lb, fl oz, pint, quart");
+  });
 });
