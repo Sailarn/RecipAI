@@ -8,6 +8,7 @@ import { RecipeDetail } from "@/components/recipe-detail";
 import { useLongPress } from "@/hooks/use-long-press";
 import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
+import { prewarmRecipeImage } from "@/lib/prewarm-recipe-images";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -89,7 +90,13 @@ export const RecipeCard = memo(function RecipeCard({
           if (event.pointerType === "mouse") setHovered(false);
           longPressHandlers.onPointerLeave();
         }}
-        onPointerDown={longPressHandlers.onPointerDown}
+        onPointerDown={(event) => {
+          // Warm the detail hero the instant a tap starts, so it's ready
+          // before RecipeDetail mounts — same intent-based idea as the
+          // bottom nav's onPointerDown Dexie prefetch for the Recipes tab.
+          prewarmRecipeImage(recipe);
+          longPressHandlers.onPointerDown(event);
+        }}
         onPointerUp={longPressHandlers.onPointerUp}
         onPointerCancel={longPressHandlers.onPointerCancel}
         onPointerMove={longPressHandlers.onPointerMove}
