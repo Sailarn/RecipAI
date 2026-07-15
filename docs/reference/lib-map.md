@@ -150,7 +150,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `hooks/use-sync-on-login.ts` | Runs on session change — diffs recipes/collections, syncs ingredients, pantry, and parse history. |
+| `hooks/use-sync-on-login.ts` | Runs on session change — diffs recipes/collections, syncs ingredients, pantry, and parse history. Single-flight; mounted app-lifetime via `lib/sync-context.tsx`, not per-page. |
+| `lib/sync-context.tsx` | `SyncProvider` (mounts `useSyncOnLogin` once in `ClientShell`) + `useTriggerSync()` (pull-to-refresh consumes this, not the hook directly). |
 | `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, and creates parsed-recipe bell entries for background completions. |
 | `hooks/` (rest) | UI hooks: long press, pull to refresh, recipe filter/matcher, recipes page state, live-query transition. |
 | `lib/hooks/` | `use-pwa-install` (install prompt), `use-push-subscription` (push lifecycle), `use-normalize-on-startup`, `use-url-parse`. |

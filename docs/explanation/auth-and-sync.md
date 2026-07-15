@@ -63,6 +63,19 @@ An installed PWA's in-app browser has none of the user's saved Google accounts, 
 
 ## Sync on login (`hooks/use-sync-on-login.ts`)
 
+`useSyncOnLogin` is mounted **once, for the app's lifetime**, by `SyncProvider`
+(`lib/sync-context.tsx`) in `ClientShell` — as a sibling of `PageStack`, not inside any single
+page's subtree. This matters: mounting it from a page component (as it used to be, directly in
+`RecipesPage`) would re-run the whole reconciliation — and the one-time migrations below it —
+every time that page remounts (e.g. leaving and returning to the Recipes tab). Pages that need a
+manual trigger (pull-to-refresh) call `useTriggerSync()` from the same file, which reads
+`triggerSync` off context rather than re-invoking the hook.
+
+`sync()` itself is single-flight: a call that arrives while one is already running (the initial
+mount, a focus re-pull, and a manual `triggerSync()` can all race) returns the existing in-flight
+promise instead of starting an overlapping second run — covering all five branches below, not just
+the recipes/collections diff.
+
 When a session appears, `useSyncOnLogin` runs a full reconciliation:
 
 ```mermaid
