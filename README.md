@@ -7,6 +7,7 @@ AI-powered recipe management app. Import from any recipe URL, supported social p
 - **AI import** — paste a URL or upload a photo; the app extracts title, ingredients, steps, and images automatically
 - **Social imports** — Instagram posts/Reels, TikTok, YouTube videos/Shorts, and X/Twitter posts are parsed through caption, transcript, media, and image context
 - **Collections** — organise recipes into named groups
+- **Sharing** — publish a recipe with a shareable link or save a copy of someone else's public recipe
 - **Ingredient vocabulary** — ingredients are normalised to a shared vocabulary across your recipes
 - **Pantry** — track what you have at home
 - **Sync** — sign in to back up and access recipes across devices
@@ -34,11 +35,11 @@ AI-powered recipe management app. Import from any recipe URL, supported social p
 ```bash
 bun install
 cp .env.example .env.local   # fill in required vars
-bun run db:migrate
+DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate
 bun run dev
 ```
 
-See [docs/tutorial/getting-started.md](docs/tutorial/getting-started.md) for the full setup guide including required environment variables.
+Use a direct Supabase connection (port 5432), or its session pooler from an IPv4-only host, for `SUPABASE_MIGRATION_URL`. See [docs/tutorial/getting-started.md](docs/tutorial/getting-started.md) for the full setup guide including required environment variables.
 
 ## Commands
 
@@ -48,7 +49,9 @@ bun run build         # production build (webpack — required for PWA)
 bun run test          # Vitest (watch mode)
 bun run test --run    # Vitest (single run, CI)
 bun run check:ci      # Biome lint + format check (warnings = errors)
+bun run typecheck     # TypeScript without emitting files
 bun run docs          # MkDocs preview (localhost:8000)
+bun run docs:build    # strict documentation build
 ```
 
 ## Docs

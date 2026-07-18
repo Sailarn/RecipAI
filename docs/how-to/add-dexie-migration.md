@@ -42,9 +42,9 @@ class RecipeDatabase extends Dexie {
 }
 ```
 
-## 4. Dropping a table requires two versions
+## 4. Changing a primary key requires two versions
 
-IndexedDB does not support changing a store's keyPath in place. To drop and recreate (or just drop):
+IndexedDB does not support changing a store's keyPath in place. To replace a table with a different primary key, drop it in one version and recreate it in the next:
 
 ```ts
 // v13: drop bookmarks
@@ -59,6 +59,8 @@ this.version(14).stores({
   bookmarks: "id, recipeId, createdAt",
 });
 ```
+
+If the table is being removed permanently, stop after the first version; a permanent drop does not need an empty follow-up version.
 
 ## 5. Add CRUD helpers in `lib/db/`
 

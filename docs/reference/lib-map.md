@@ -48,8 +48,13 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
 | `lib/db/parsed-recipes.ts` | Builds and stores durable parsed-recipe notification rows shared by the parse page and bell sheet. |
 | `lib/db/parse-history.ts` | `recordParseHistory`, `bulkPutParseHistory`, `getParseHistory`, `clearParseHistory`. |
+| `lib/db/ingredients.ts` | Resolve a raw ingredient against the local vocabulary or create a deduplicated provisional entry. |
+| `lib/db/sync-vocab.ts` | Pull confirmed vocabulary deltas into Dexie, with watermark overlap and version-based full refresh. |
+| `lib/db/reconcile-vocab.ts` | Guarded one-time cleanup that clears stale local vocabulary rows, re-pulls, and re-normalizes recipes. |
+| `lib/db/renormalize-recipes.ts` | Repairs older recipes whose canonical ingredient id array is not index-aligned. |
 | `lib/db/pantry.ts` | `addPantryItem` (dedups by `ingredientId`, writes dormant `qty`/`unit`/`cat` defaults), `bulkPutPantry`, `clearPantry` and related pantry ops. |
 | `lib/db/supabase-sync.ts` | Fire-and-forget sync on writes: `syncCreate`, `syncUpdate`, `syncDelete`. |
+| `lib/db/supabase-sync-collections.ts` | Fire-and-forget create/update/delete sync for collections. |
 | `lib/db/sync-diff.ts` | Generic diff engine: `computeDiff<T>(local, server)`. |
 | `lib/db/save-parsed-recipe.ts` | Maps `ParsedRecipe` → Dexie recipe + triggers background image upload. |
 
@@ -83,8 +88,19 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `components/recipe-image/index.tsx` | Renders a recipe image as a plain `<img>` on a direct ImageKit URL (not `next/image`), so the service worker caches it. |
 | `lib/upload/upload-auth.ts` | `requireUploadAuth()` — accepts session or upload token. |
 | `lib/upload/upload-token.ts` | `mintUploadToken()` / `verifyUploadToken()` via Redis (30 min TTL). |
-| `lib/upload/upload-image-source.ts` | Resolves upload body — URL or base64. |
+| `lib/upload/upload-image-source.ts` | Resolves multipart, remote-URL, or base64 upload bodies into one validated source shape. |
 | `lib/upload/upload-limits.ts` | Upload size and type constraints. |
+
+---
+
+## Public recipe sharing
+
+| File | Purpose |
+|---|---|
+| `lib/public-recipes/server.ts` | Fetches public recipe snapshots and sanitizes persisted JSON before rendering. |
+| `lib/public-recipes/visibility-client.ts` | Publishes or revokes an owned recipe through the dedicated visibility route. |
+| `lib/public-recipes/clone.ts` | Converts a public snapshot into a new private local recipe with fresh row ids. |
+| `lib/public-recipes/types.ts` | Public recipe and owner shapes shared by the public page and clone flow. |
 
 ---
 
@@ -105,8 +121,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/rate-limit.ts` | `enforceParseRateLimit()` — Redis fixed-window counter, fail-open. |
-| `lib/api-limits.ts` | Shared limit constants: `PARSE_RATE_LIMIT` (15 anon / 60 user per hour), collection/sync batch sizes. |
+| `lib/rate-limit.ts` | Redis fixed-window counter plus fail-open parse and embed-match enforcement. |
+| `lib/api-limits.ts` | Shared parse/embed rate and request limits plus collection/sync batch sizes. |
 | `lib/api-errors.ts` | `ApiError` — typed error responses (`unauthorized`, `badRequest`, `notFound`, `rateLimited`, `internal`, `maintenance`). |
 | `lib/redis.ts` | ioredis client singleton (lazy connect). |
 | `lib/sync-fetch.ts` | `syncFetch()` — fire-and-forget fetch gated on `isSignedIn()`. Captures unexpected HTTP errors to Sentry; swallows maintenance 503s and transient 502/503/504 blips without reporting. |
@@ -122,7 +138,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/routes.ts` | All route and API URL constants. Always import from here — never hardcode strings. |
+| `lib/routes.ts` | Shared UI and app-client route/API URL constants. Use these at feature call sites; framework and internal-only endpoints are not all exported. |
 | `lib/transitions.ts` | `useNavigate()` — wraps `router.push` and the navigation stack. |
 | `lib/navigation-stack.tsx` | Navigation stack context (iOS-style page overlays). |
 
@@ -133,6 +149,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | File | Purpose |
 |---|---|
 | `lib/video-url.ts` | `isSocialUrl()`, `getSocialPlatform()`, `isInstagramUrl()` — social URL type detection. |
+| `lib/pwa.ts` | Installed-PWA and iOS environment detection. |
 | `lib/telegram-bot.ts` | `sendTelegramMessage()`, `extractUrl()`. |
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
@@ -151,11 +168,11 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `hooks/use-sync-on-login.ts` | Runs on session change — diffs recipes/collections, syncs ingredients, pantry, and parse history. Single-flight; mounted app-lifetime via `lib/sync-context.tsx`, not per-page. |
+| `hooks/use-sync-on-login.ts` | Owns single-flight reconciliation on sign-in, foreground return, and manual refresh: diffs recipes/collections and syncs ingredients, pantry, and parse history. Mounted app-lifetime via `lib/sync-context.tsx`, not per-page. |
 | `lib/sync-context.tsx` | `SyncProvider` (mounts `useSyncOnLogin` once in `ClientShell`) + `useTriggerSync()` (pull-to-refresh consumes this, not the hook directly). |
 | `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, and creates parsed-recipe bell entries for background completions. |
 | `hooks/` (rest) | UI hooks: long press, pull to refresh, recipe filter/matcher, recipes page state, live-query transition. |
-| `lib/hooks/` | `use-pwa-install` (install prompt), `use-push-subscription` (push lifecycle), `use-normalize-on-startup`, `use-url-parse`. |
+| `lib/hooks/` | PWA install/push, telemetry identity, public vocabulary sync, startup normalization, and URL-parse hooks. |
 
 ---
 

@@ -1,6 +1,6 @@
 # Environment Variables
 
-All variables live in `.env.local` (never committed). Copy `.env.example` as a starting point.
+Developer-supplied variables live in `.env.local` (never committed). Copy `.env.example` as a starting point. Platform-provided variables such as `NODE_ENV`, `CI`, and `VERCEL` are not listed here.
 
 ---
 
@@ -8,9 +8,9 @@ All variables live in `.env.local` (never committed). Copy `.env.example` as a s
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | Yes | Supabase Postgres connection string. Use the **pooler** URL for serverless (port 6543), not the direct connection. |
+| `DATABASE_URL` | Yes | Runtime Supabase Postgres connection string. Use the transaction pooler (port 6543) on Vercel. For `bun run db:migrate`, override this variable with the direct connection (port 5432), or the Supavisor session pooler (port 5432) from an IPv4-only migration host. |
 | `NEXT_PUBLIC_BETTER_AUTH_URL` | Yes | Full base URL of the app (`https://recipai.pp.ua`). Used by better-auth for redirect and cookie domain. |
-| `NEXT_PUBLIC_EXTERNAL_AUTH_URL` | Yes | Public external-auth base URL. In production it must use a different origin from the app (`https://auth.recipai.pp.ua`). The Google callback is `https://auth.recipai.pp.ua/api/auth/callback/google`. |
+| `NEXT_PUBLIC_EXTERNAL_AUTH_URL` | Production | Public external-auth base URL. `http://localhost:3000` is sufficient for ordinary local development, but account linking requires a different origin in every environment. Production uses `https://auth.recipai.pp.ua`; its Google callback is `https://auth.recipai.pp.ua/api/auth/callback/google`. |
 | `BETTER_AUTH_SECRET` | Yes | Random secret for signing sessions. Generate with `openssl rand -hex 32`. Read directly by the `better-auth` library from the environment — not referenced in app code, but required. Without it, sessions are re-keyed on every server restart. |
 
 ---
@@ -30,11 +30,13 @@ The e5-small model runs on server infrastructure, never in the browser. Every de
 
 | Variable | Required | Description |
 |---|---|---|
-| `EMBED_PROVIDERS` | Yes | Ordered comma-separated provider chain. `local` loads `Xenova/multilingual-e5-small` in-process; `http:<base-url>` calls `<base-url>/api/embed`, with a 10-second timeout before trying the next entry. Use `local` on the Pi and `http:https://recipai.pp.ua` on Vercel. |
-| `EMBED_SHARED_SECRET` | Yes | Shared secret sent as `x-embed-secret` between HTTP providers and `/api/embed`. Use the same strong value on the Pi and Vercel. |
+| `EMBED_PROVIDERS` | Yes* | Ordered comma-separated provider chain. `local` loads `Xenova/multilingual-e5-small` in-process; `http:<base-url>` calls `<base-url>/api/embed`, with a 10-second timeout before trying the next entry. Use `local` on the Pi and `http:https://recipai.pp.ua` on Vercel. |
+| `EMBED_SHARED_SECRET` | HTTP only** | Shared secret sent as `x-embed-secret` between HTTP providers and `/api/embed`. Use the same strong value on the caller and embedding host. A local-only chain that does not expose `/api/embed` can omit it. |
 | `EMBED_MODEL_CACHE_DIR` | No | Only relevant with a `local` provider. Caches the downloaded model outside `node_modules`, so a redeploy's `bun install` doesn't wipe it and force a ~50s re-download on the next cold load. Defaults to the package's in-package cache when unset. |
 
-If the configured chain is empty or every provider fails, ingredient embed matching degrades to provisional creation. Restart the server after changing either variable.
+\*`EMBED_PROVIDERS` is required on deployments that call the provider chain for ingredient matching or enrichment. If the chain is empty or every provider fails, matching degrades to provisional creation.
+
+\**`EMBED_SHARED_SECRET` is required when the chain contains an `http:` provider and on the host serving `/api/embed`. Restart the server after changing embedding variables.
 
 ---
 
@@ -55,8 +57,8 @@ All image uploads go through [ImageKit](https://imagekit.io).
 
 | Variable | Required | Description |
 |---|---|---|
-| `IMAGEKIT_PUBLIC_KEY` | Yes | ImageKit public key — used client-side for upload authentication. |
-| `IMAGEKIT_PRIVATE_KEY` | Yes | ImageKit private key — used server-side to generate upload tokens. |
+| `IMAGEKIT_PUBLIC_KEY` | Yes | ImageKit public key supplied to the server-side ImageKit SDK alongside the private key. It is not read by browser code. |
+| `IMAGEKIT_PRIVATE_KEY` | Yes | ImageKit private key used by the server-side SDK to upload and delete images. |
 | `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` | Yes | ImageKit CDN endpoint URL (e.g. `https://ik.imagekit.io/yourname`). |
 | `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` | Yes | Fallback image URL shown when a recipe has no image. Should be an ImageKit URL. |
 
@@ -106,7 +108,7 @@ VAPID keys are required to send web push notifications when a recipe parse compl
 
 | Variable | Required | Description |
 |---|---|---|
-| `REDIS_URL` | Yes | Redis connection URL (Upstash or self-hosted). Used for AI parse rate limiting — anonymous: 15 req/hour, signed-in: 60 req/hour — and the public embed-match rate limit. The client (`lib/redis.ts`) is a lazy proxy, so a missing var does **not** block app startup or the build; the first Redis call throws, `enforceParseRateLimit`/`enforceEmbedRateLimit` catch it and fail open (request proceeds unlimited, error captured to Sentry). |
+| `REDIS_URL` | Yes | Redis connection URL (Upstash or self-hosted). Used for anonymous upload tokens, AI parse rate limiting (15 req/hour anonymous, 60 req/hour signed-in), and public embed-match limiting. The client (`lib/redis.ts`) is a lazy proxy, so a missing var does **not** block app startup or the build. Rate limiting fails open on the first Redis error, but parse-job creation still needs Redis to mint its upload token. |
 | `NEXT_PUBLIC_SENTRY_DSN` | No | Sentry DSN for error reporting. Omit to disable Sentry. |
 
 ---
@@ -142,3 +144,11 @@ PostHog and Axiom only send data when `NODE_ENV === "production"` (like Sentry).
 | Variable | Required | Description |
 |---|---|---|
 | `DEV_ORIGINS` | No | Comma-separated list of extra origins allowed to hit the Next.js dev server cross-origin (`allowedDevOrigins` in `next.config.ts`). Set to your machine's LAN IP(s) — e.g. `192.168.1.10,192.168.1.11` — to load the dev server from a phone or another device on the network. Dev-only; ignored in production builds. |
+
+---
+
+## Build-provided
+
+| Variable | Source | Description |
+|---|---|---|
+| `NEXT_PUBLIC_APP_VERSION` | `next.config.ts` | Injected from `package.json`; displayed in the profile and used to force a full vocabulary refresh after an app release. Do not set it manually. |

@@ -7,9 +7,14 @@ How to run RecipAI locally from scratch.
 ## Prerequisites
 
 - [Bun](https://bun.sh) (runtime + package manager)
-- [Python 3](https://python.org) (optional — only needed for `bun run docs`)
+- [Python 3](https://python.org) (optional — only needed for the documentation commands)
 - A Supabase project (for Postgres + auth)
 - A Google Gemini API key
+- A PhantomJsCloud key (web-page scraping)
+- A Redis instance (rate limiting and anonymous upload tokens)
+- An ImageKit account (durable recipe images)
+
+Social imports additionally need Apify; Groq is only needed when a social source has downloadable media but no transcript.
 
 ---
 
@@ -32,8 +37,9 @@ cp .env.example .env.local
 Open `.env.local` and fill in at minimum:
 
 ```bash
-DATABASE_URL=             # Supabase pooler URL (port 6543)
+DATABASE_URL=             # runtime URL; transaction pooler (6543) on Vercel
 NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_EXTERNAL_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=       # openssl rand -hex 32
 GEMINI_API_KEY=           # Google AI Studio
 PHANTOMJS_API_KEY=        # PhantomJsCloud (free tier available)
@@ -51,10 +57,10 @@ See [Environment Variables](../reference/env.md) for the full list and optional 
 ## 3. Run database migrations
 
 ```bash
-bun run db:migrate
+DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate
 ```
 
-This applies all Drizzle migrations to your Supabase Postgres database.
+Load `SUPABASE_MIGRATION_URL` into your shell from your secret manager using Supabase's direct connection (port 5432). If your local network cannot reach the direct IPv6 endpoint, use the Supavisor **session** pooler (port 5432). The one-command override takes precedence over the runtime `DATABASE_URL` in `.env.local` and applies all Drizzle migrations without making the transaction-pooler URL the migration connection.
 
 ---
 
@@ -83,6 +89,7 @@ No account is required for parsing and saving. Recipes are stored locally in Ind
 
 ```bash
 bun run check:ci    # lint + format check
+bun run typecheck   # TypeScript
 bun run test --run  # full test suite, all should pass
 ```
 
@@ -104,5 +111,6 @@ Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.
 
 ```bash
 pip3 install -r docs-requirements.txt
+bun run docs:build  # strict build and link check
 bun run docs       # opens localhost:8000
 ```

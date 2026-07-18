@@ -61,7 +61,7 @@ An installed PWA's in-app browser has none of the user's saved Google accounts, 
 
 ---
 
-## Sync on login (`hooks/use-sync-on-login.ts`)
+## Reconciliation (`hooks/use-sync-on-login.ts`)
 
 `useSyncOnLogin` is mounted **once, for the app's lifetime**, by `SyncProvider`
 (`lib/sync-context.tsx`) in `ClientShell` — as a sibling of `PageStack`, not inside any single
@@ -76,11 +76,11 @@ mount, a focus re-pull, and a manual `triggerSync()` can all race) returns the e
 promise instead of starting an overlapping second run — covering all five branches below, not just
 the recipes/collections diff.
 
-When a session appears, `useSyncOnLogin` runs a full reconciliation:
+When a session appears, and again on the foreground/manual triggers described above, `useSyncOnLogin` runs a full reconciliation:
 
 ```mermaid
 graph TD
-    A[Session detected] --> B[syncIngredients]
+    A[Sync triggered with session] --> B[syncIngredients]
     A --> C[syncPantry]
     A --> D[syncParseHistory]
     A --> E[Fetch server recipes + collections]
@@ -91,7 +91,7 @@ graph TD
     C --> C1[Replace local pantry with server copy]
 
     D --> D1[Claim anonymous jobs]
-    D --> D2[Pull full server history into Dexie]
+    D --> D2[Pull latest 100 server jobs into Dexie]
 
     E --> F[computeDiff - recipes]
     E --> G[computeDiff - collections]
@@ -108,7 +108,7 @@ graph TD
 
 **Pantry** — replaces the local pantry entirely with the server copy (no diff — server is authoritative for pantry).
 
-**Parse history** — first claims any anonymous parse jobs into the user's account, then pulls the full server-side job list and merges into Dexie `parseHistory`.
+**Parse history** — first claims any anonymous parse jobs into the user's account, then pulls the latest 100 server-side jobs and merges them into Dexie `parseHistory`.
 
 **Recipes + collections** — fetches both sides and runs `computeDiff` (from `lib/db/sync-diff.ts`). Conflicts are where `updatedAt` differs between local and server. All diffs (server-only, local-only, conflicted) are written to Dexie `notifications` and the user is shown a toast to review them.
 

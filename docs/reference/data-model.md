@@ -30,7 +30,15 @@ interface Recipe {
   description?: string;
   imageUrl?: string;
   imageFileId?: string;
-  prepTime?: number; cookTime?: number; totalTime?: number;
+  imageFocusX?: number;       // focal point, 0–100%
+  imageFocusY?: number;
+  imageCropX?: number;        // crop origin, 0–100%
+  imageCropY?: number;
+  imageCropWidth?: number;    // crop size, 0–100%
+  imageCropHeight?: number;
+  prepTime?: number;
+  cookTime?: number;
+  totalTime?: number;
   servings: number;
   ingredients: RecipeIngredient[];
   instructions: Step[];
@@ -188,7 +196,7 @@ To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-
 
 ### `recipes`
 
-Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), `ingredients` / `instructions` / `sections` / `collection_ids` / `canonical_ingredient_ids` stored as jsonb. `sections` is added by migration `0023_clear_vanisher.sql`; apply that additive migration before deploying code that selects or writes the column. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
+Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), focal/crop percentages in `image_focus_*` and `image_crop_*`, and `ingredients` / `instructions` / `sections` / `collection_ids` / `canonical_ingredient_ids` / `unrecognized_ingredients` stored as jsonb. `sections` is added by migration `0023_clear_vanisher.sql`; apply that additive migration before deploying code that selects or writes the column. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
 
 ### `collections`
 
@@ -207,7 +215,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `telegram_chat_id` | text | Set when job originates from the Telegram bot |
 | `push_endpoint` | text | Nullable. The push subscription endpoint to notify when the job completes |
 | `status` | text | `pending` / `processing` / `done` / `failed` |
-| `result` | jsonb | `ParsedRecipe` payload when done. The image is uploaded to ImageKit at parse time, so a cached result holds a stable URL |
+| `result` | jsonb | `ParsedRecipe` payload when done. The process route attempts an ImageKit upload at parse time; on upload failure the cached result retains the original source URL |
 | `error` | text | Failure message when failed |
 | `created_at`, `updated_at` | timestamp | |
 

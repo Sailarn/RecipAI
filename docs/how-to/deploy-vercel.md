@@ -1,16 +1,16 @@
 # Deploy to Vercel
 
-The app auto-deploys to Vercel on every push to `main` that passes CI.
+Application changes pushed to `main` run CI. A successful `main` CI run triggers the release and Vercel deployment workflow. Pushes that change only `package.json` and/or `CHANGELOG.md` are ignored, which prevents the automated version-bump commit from starting another release.
 
 ---
 
 ## CI pipeline (`.github/workflows/ci.yml`)
 
-Runs on push to `main` and on pull requests:
+Runs on pull requests to `main` and on pushes to `main` unless every changed path is `package.json` or `CHANGELOG.md`:
 
 1. `bun tsc --noEmit` — TypeScript check
 2. `bun biome ci .` — Biome lint + format (warnings = errors)
-3. `bun run test --run` — all Vitest tests
+3. `bun run test -- --run` — all Vitest tests
 
 If all three pass, the release workflow triggers.
 
@@ -20,25 +20,37 @@ If all three pass, the release workflow triggers.
 
 Runs after CI succeeds on `main`:
 
-1. `release-it` bumps the version in `package.json`, generates a changelog entry, and creates a GitHub release tag.
+1. `release-it` derives the semantic version from conventional commits, updates `package.json`, commits the release bump, and creates a Git tag. This project does not generate a tracked changelog or GitHub Release.
 2. The deploy job pulls the production env (`vercel pull`), builds (`vercel build --prod`), then ships the prebuilt output (`vercel deploy --prebuilt --prod`).
 
 The release uses conventional commits (`feat:`, `fix:`, `chore:`, etc.) to determine the version bump.
+
+The workflow does **not** run Drizzle migrations. Before merging or deploying code that reads or writes a new schema, apply the migration once from that release checkout:
+
+```bash
+DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate
+```
+
+Use the direct Supabase URL (port 5432) for `SUPABASE_MIGRATION_URL`, or the Supavisor session pooler (port 5432) when the machine running migrations cannot reach the direct IPv6 endpoint. Keep Vercel's runtime `DATABASE_URL` on the transaction pooler (port 6543). Pi and Vercel share the database, so do not run the same migration independently for both hosts.
+
+## GitHub Actions secrets
+
+The repository must define `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub Actions secrets. `GITHUB_TOKEN` is provided by GitHub and is used for the release commit and tag.
 
 ---
 
 ## Environment variables on Vercel
 
-Set all variables from `.env.example` in the Vercel project settings under **Settings → Environment Variables**. The required ones for a working production deploy:
+Set the production values from `.env.example` in the Vercel project settings under **Settings → Environment Variables**. The core application needs:
 
 | Category | Variables |
 |---|---|
-| Core | `DATABASE_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` |
-| AI | `GEMINI_API_KEY` (+ optionally `OPENAI_API_KEY`) |
-| Scraping | `PHANTOMJS_API_KEY` |
+| Core | `DATABASE_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `NEXT_PUBLIC_EXTERNAL_AUTH_URL`, `BETTER_AUTH_SECRET` |
+| AI and web parsing | `GEMINI_API_KEY`, `PHANTOMJS_API_KEY`, `REDIS_URL` |
+| Embeddings | `EMBED_PROVIDERS`, `EMBED_SHARED_SECRET` |
 | Images | `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`, `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` |
-| Auth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, Telegram vars |
-| Infrastructure | `REDIS_URL`, `NEXT_PUBLIC_SENTRY_DSN` |
+
+Add the variables for each optional feature you enable: `OPENAI_API_KEY` and `SCRAPE_DO_TOKEN` for fallbacks; `APIFY_TOKEN` and `GROQ_API_KEY` for social imports; Google/Telegram credentials for those sign-in providers; VAPID keys for push; and Sentry, PostHog, or Axiom keys for observability.
 
 See [Environment Variables](../reference/env.md) for the full list.
 

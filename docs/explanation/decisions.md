@@ -16,7 +16,7 @@ Turbopack is used for local dev (`bun run dev`). The production build uses webpa
 
 IndexedDB via Dexie gives a typed, async API with full offline capability. Alternatives like SQLite WASM were considered but added complexity with no meaningful benefit for the data shapes here (JSON documents, not relational queries).
 
-Dexie is the **local working store** — the UI reads and writes through it exclusively, so it never waits on the network. Supabase is read only on login (to reconcile changes from other devices) and written opportunistically in the background.
+Dexie is the **local working store** — the recipe UI reads and writes through it exclusively, so it never waits on the network. The server-backed recipe and collection copies are read during reconciliation (initial sign-in, manual pull-to-refresh, and when the app returns to the foreground) and written opportunistically in the background. Parsing, public vocabulary, and other server-only capabilities still use their API routes directly.
 
 ---
 
@@ -84,6 +84,14 @@ Upstash Redis provides the rate-limit counters (fixed-window INCR) and short-liv
 ## Raspberry Pi as secondary host
 
 The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel at `recipai.pp.ua` alongside the Vercel deployment. Both share the same Postgres database. The Pi is managed with PM2. Deployment is manual via SSH. The Telegram webhook can only point to one host — the Pi or Vercel, not both simultaneously.
+
+---
+
+## Snapshot-based public recipe sharing
+
+Publishing uses the dedicated `PUT /api/recipes/[id]/visibility` boundary. It upserts the signed-in owner's current local recipe snapshot and marks it public, so even a recipe whose background sync has not completed can be shared immediately. Normal create, update, and bulk-sync routes cannot change visibility; revocation goes through the same dedicated route and is synchronous.
+
+The public page reads only rows with `is_public = true` and sanitizes the persisted ingredient, step, and section JSON before rendering. Saving someone else's recipe creates a new private local recipe with fresh ingredient/step ids rather than linking the two records. This keeps ownership, later edits, and visibility independent.
 
 ---
 

@@ -6,7 +6,7 @@ How local data is stored in Dexie and reconciled with the server.
 
 ## The core idea
 
-Dexie (IndexedDB) is the **local working store** — every read and write goes through it, so the UI never waits for the network and the app is usable without a session. Supabase Postgres is the **source of truth when signed in**: written opportunistically on each change and pulled on login to reconcile changes from other devices.
+Dexie (IndexedDB) is the **local working store** — every recipe/collection read and write goes through it, so the UI never waits for the network and the app is usable without a session. Supabase Postgres is the **source of truth when signed in**: written opportunistically on each change and pulled by the reconciliation triggers below.
 
 This means:
 - Parsing a recipe works with no account (anonymous parse jobs, local-only save).
@@ -33,11 +33,11 @@ The Dexie write always happens first. `syncFetch` (`lib/sync-fetch.ts`) checks `
 
 ---
 
-## Read path (on login)
+## Read path (reconciliation)
 
-When a session appears, `useSyncOnLogin` pulls the server state and compares it to local Dexie state using `computeDiff`. Discrepancies become `SyncNotification` rows in Dexie, shown to the user via the Sync Review page.
+When a session appears, `useSyncOnLogin` pulls the server state and compares it to local Dexie state using `computeDiff`. The same single-flight reconciliation runs on manual pull-to-refresh and whenever the signed-in app returns to the foreground. Discrepancies become `SyncNotification` rows in Dexie, shown to the user via the Sync Review page.
 
-This is a **pull-on-login** model, not real-time sync. Changes made on another device appear the next time the user signs in on this device.
+This is event-triggered pull reconciliation, not real-time sync. Changes made on another device appear after sign-in, a foreground refresh, or a manual pull-to-refresh; they do not stream between those triggers.
 
 ---
 
@@ -47,7 +47,7 @@ Everything works without an account:
 - URL/video and photo parse jobs are created with `user_id = null` in `parse_jobs`.
 - Results are saved to local Dexie only.
 - Parse history is recorded in Dexie `parseHistory` locally.
-- On login, anonymous jobs are **claimed** — `POST /api/parse-queue/claim` sets their `user_id` to the now-signed-in user, and the full server history is pulled into Dexie. Photo imports use the same job ID locally and on the server, so they participate in this flow even though their `url` is null.
+- On login, anonymous jobs are **claimed** — `POST /api/parse-queue/claim` sets their `user_id` to the now-signed-in user, and the latest 100 server jobs are pulled into Dexie. Photo imports use the same job ID locally and on the server, so they participate in this flow even though their `url` is null.
 
 ### Ingredient vocabulary stays local for anonymous users
 
@@ -77,4 +77,4 @@ The service worker (`app/sw.ts`, compiled to `public/sw.js`) caches:
 
 ## Key constraint
 
-**No real-time sync.** Changes on device A do not appear on device B until device B signs in. This is a deliberate trade-off: simpler code, no WebSocket dependency, works offline. If real-time sync is needed in the future it would require a Supabase Realtime subscription layer.
+**No real-time sync.** Changes on device A do not stream immediately to device B; device B must run one of the reconciliation triggers above. This is a deliberate trade-off: simpler code, no WebSocket dependency, works offline. If real-time sync is needed in the future it would require a Supabase Realtime subscription layer.

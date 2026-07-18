@@ -74,9 +74,9 @@ try {
 if (!body.name) return ApiError.badRequest("name required");
 ```
 
-## 5. Register the URL in `lib/routes.ts`
+## 5. Register reusable client URLs in `lib/routes.ts`
 
-Add the route to the `api` object so it can be imported everywhere:
+If feature or browser code calls the route, add it to the `api` object so those call sites share one URL:
 
 ```ts
 export const api = {
@@ -85,6 +85,8 @@ export const api = {
   myFeatureItem: (id: string) => `/api/my-feature/${id}`,
 };
 ```
+
+Framework-owned routes and internal server-only endpoints do not need an entry when no app-client call site imports them.
 
 ## 6. Write a test
 

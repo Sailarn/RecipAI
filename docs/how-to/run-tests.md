@@ -69,3 +69,12 @@ bun run test --run  # All tests must be green
 ```
 
 For a quick local pass, `bun run check:all` (uses `scripts/check.sh`) runs typecheck + lint + tests. Note it runs `biome lint` rather than `biome ci`, so it skips the format check and does not treat warnings as errors — `bun run check:ci` is the authoritative pre-push gate that matches CI.
+
+For documentation changes, install the docs dependencies once and run the strict build:
+
+```bash
+pip3 install -r docs-requirements.txt
+bun run docs:build
+```
+
+The strict build catches invalid MkDocs configuration, missing navigation targets, and broken internal links.

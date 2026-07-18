@@ -1,6 +1,6 @@
 # Observability
 
-RecipAI uses a thin vendor-agnostic facade (`lib/telemetry/`) so that the rest of the app never imports PostHog, Sentry, or Axiom directly. All three vendors are optional: omit their env keys and they no-op silently.
+RecipAI uses a thin vendor-agnostic facade (`lib/telemetry/`) for product events, structured logs, identity, and most manual error capture. The PostHog and Axiom integrations live under `lib/telemetry/`, with PostHog initialized from `instrumentation-client.ts`. Sentry also has framework-required entry points (`next.config.ts`, `instrumentation.ts`, `instrumentation-client.ts`, the Sentry config files, and `app/global-error.tsx`); `lib/sync-fetch.ts` imports it directly to report unexpected sync status codes. All three vendors are optional: omit their env keys and they no-op silently.
 
 **Production only.** PostHog and Axiom initialize only when `NODE_ENV === "production"`, so local development and tests never send data — even with the keys present in `.env.local`. The gate lives at each vendor's SDK boundary (`initPostHogClient`, the PostHog-node `getClient`, and Axiom's `getClient`) via `lib/telemetry/environment.ts`, mirroring the `NODE_ENV` check in the Sentry config files.
 
@@ -19,7 +19,8 @@ To verify the pipeline locally without a production build, set the escape-hatch 
 The routing rule: **PostHog** answers *what/who* — top-N lists, funnels, trends sliced by user or time (product questions). **Axiom** answers *how/how-long/how-much* — per-event server detail with numeric fields, queried for performance, cost, and debugging (operational questions). **Sentry** answers *what broke*.
 
 ### Sentry — errors & tracing
-- Unhandled server errors via `ApiError.capture` / `ApiError.internal`, client errors via the re-throw pattern (`captureError`).
+- Request instrumentation via `onRequestError`, route errors via `ApiError.capture` / `ApiError.internal`, the root client error boundary, and handled exceptions explicitly passed to `captureError`.
+- `syncFetch` reports non-transient, non-maintenance HTTP failures directly; expected offline errors and 502/503/504 availability blips remain silent.
 - 20% performance trace sampling (`tracesSampleRate`).
 - Production only (`NODE_ENV === "production"`).
 - `ignoreErrors` (`instrumentation-client.ts`) filters non-actionable noise from `@serwist/next`'s auto-injected service-worker registration (`"Rejected"`, `reading 'waiting'`), which only fails for crawlers/headless browsers that never run a service worker. Separately, `syncFetch` (`lib/sync-fetch.ts`) never reports maintenance 503s or transient 502/503/504 upstream blips — see [Auth & Sync](auth-and-sync.md#fire-and-forget-sync-on-writes-libdbsupabase-syncts).
@@ -27,7 +28,7 @@ The routing rule: **PostHog** answers *what/who* — top-N lists, funnels, trend
 ### PostHog — product analytics
 - **Autocapture:** pageviews (`$pageview`, SPA-aware), `$pageleave` (time on page), click autocapture, **session replay** (inputs masked).
 - **Identity:** `identifyUser` on login attaches `email` / `name` / `image` (when the provider supplies them) and `locale`; `resetIdentity` on logout.
-- **Named events** (the full taxonomy lives in `lib/telemetry/events.ts`): auth (`login`, `logout`, `account_linked`), the parse funnel (`parse_started` with `source`+`domain`, `parse_succeeded`, `parse_failed`, `parse_reviewed`, `recipe_saved`, `ingredients_normalized`), recipe lifecycle (`recipe_viewed`, `recipe_deleted`, `recipe_tried_toggled`, `step_images_viewed`, `servings_adjusted`), engagement (`search_performed`, `filter_applied`, collections, pantry, `theme_changed`, `language_changed`), and lifecycle signals (`embed_*`, `push_subscribed`, `pwa_installed`, `parse_history_viewed`, `sync_review_resolved`).
+- **Named events** (the full taxonomy lives in `lib/telemetry/events.ts`): auth (`login`, `logout`, `account_linked`), the parse funnel (`parse_started` with `source`+`domain`, `parse_succeeded`, `parse_failed`, `parse_reviewed`, `recipe_saved`, `ingredients_normalized`), recipe lifecycle (`recipe_viewed`, `recipe_deleted`, `recipe_tried_toggled`, `step_images_viewed`, `servings_adjusted`), engagement (`search_performed`, `filter_applied`, collections, pantry, `theme_changed`, `language_changed`), and lifecycle signals (`embed_match`, `push_subscribed`, `push_unsubscribed`, `pwa_installed`, `parse_history_viewed`, `sync_review_resolved`).
 - This is where you build "top parsed domains," the parse conversion funnel, retention, and DAU/WAU. Insights are computed retroactively over stored events, so they can be built at any time without losing prior data.
 
 ### Axiom — server logs
@@ -47,7 +48,7 @@ See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-recor
 
 **Never-throw guarantee.** Every function wraps its work in `safely()` — a sync/async error swallow. A vendor outage costs data, never a render or a request.
 
-**Exception:** `instrumentation-client.ts` imports `initPostHogClient` from `lib/telemetry/posthog-client` directly. This is the one sanctioned internal import — PostHog must be initialized before the first event fires, which happens at page load before any user interaction.
+`instrumentation-client.ts` imports `initPostHogClient` from `lib/telemetry/posthog-client` directly so PostHog initializes before the first page-load event. The Sentry integration points named above are the other intentional vendor imports; ordinary feature code should use the facade.
 
 ## Events
 
@@ -76,12 +77,21 @@ PostHog session replay is on with `maskAllInputs: true`. Replay is initialized a
 | Message | Fields |
 |---|---|
 | `ai_call` | `model`, `context` (recipe/ingredient/photo), `duration_ms`, `success`, `fallback_index` |
-| `parse_pipeline` | `source` (url/photo), `domain`, `path` (always `ai` — the schema.org fast path was removed), `scraper` (phantomjs/scrape-do), `scrape_ms`, `total_ms`, `ingredient_count`, `step_count`, `success` |
+| `parse_pipeline` | Common: `source` (url/photo), `path` (always `ai`), `total_ms`, counts, `success`. Web parses also include `domain`, `scraper`, and `scrape_ms`. |
+| `parse_incomplete` | `source` (page/social/photo), `reason`, source `url` when available, optional `jobId`; under-extractions also include title, counts, and the partial `result` |
 | `social_parse_pipeline` | `source` (social), `platform`, `path` (actor_transcript/media_transcription/caption_image), `duration_seconds`, `has_caption`, `has_transcript`, `has_video`, `image_count`, `ingredient_count`, `step_count`, `total_ms`, `success` |
 | `social_parse_failed` | `platform`, `url`, `reason` (duration_limit/media_too_large/unsupported_platform/restricted/not_found/no_content/unexpected), `duration_seconds`, `total_ms`, `error_message` |
 | `rate_limit_hit` | `caller_type` (user/anon) |
-| `enrich_completed` | `ingredientId` |
+| `embed_provider_served` / `embed_provider_failed` | `provider`, fallback `depth`, `ms`; success adds `count`, failure adds `error` |
+| `embed_match_served` / `embed_match_degraded` | `count`, `ms`; success also includes `matched` |
+| `embed_raw_served` | `count`, `ms` |
+| `ingredient_created` | `ingredientId`, `userId` |
+| `enrich_merged` | `provisionalId`, `canonicalId`, `userId` |
+| `enrich_completed` | `ingredientId`, `userId` |
+| `enrich_embed_skipped` / `enrich_embed_persist_failed` | `ingredientId` |
 
-`parse_pipeline` is logged once per successful web/photo parse (in `lib/parse-recipe/web.ts` for URLs, the photo route for photos). `social_parse_pipeline` is the equivalent successful social parse record, and `social_parse_failed` logs permanent source failures and unexpected platform/transcription failures. These records answer the operational questions PostHog can't: scraper fallback rate, social platform/path mix, per-step latency (`scrape_ms` / `total_ms`; AI time is in `ai_call`), and which domains/platforms are slow or need AI. `domain` is the hostname only for web parses; social logs include the source URL because social URLs are the reproducible media key.
+`parse_pipeline` is logged once per successful web/photo parse (in `lib/parse-recipe/web.ts` for URLs, the photo route for photos). `parse_incomplete` records every rejected AI extraction, including social results, before the error propagates. `social_parse_pipeline` is the successful social record, and `social_parse_failed` classifies the outer platform/transcription failure. These records answer the operational questions PostHog can't: scraper fallback rate, social platform/path mix, per-step latency (`scrape_ms` / `total_ms`; AI time is in `ai_call`), and which domains/platforms are slow or need AI. `domain` is the hostname only for web parses; social logs include the source URL because social URLs are the reproducible media key.
+
+The embedding records separate provider fallback health from matcher outcomes: `embed_provider_*` describes each host attempt, `embed_match_*` describes the public pgvector request, and `embed_raw_served` describes successful shared-secret model-host requests. Ingredient lifecycle records make provisional creation, canonical merging, confirmation, and best-effort vector gaps queryable.
 
 On Vercel, Axiom flushes per call (frozen functions can't batch). On the Pi, the client batches normally. The client's `onError` routes ingest failures to the dev/server logger so a bad token or dataset isn't silently dropped.

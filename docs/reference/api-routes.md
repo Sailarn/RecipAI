@@ -69,7 +69,7 @@ Both routes accept either a valid session **or** a short-lived upload token (min
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/images/upload` | Session or upload token | Upload an image to ImageKit. Accepts URL or base64. Returns `{ url, fileId }`. |
+| `POST` | `/api/images/upload` | Session or upload token | Upload an image to ImageKit. Accepts multipart file data or JSON containing a remote `url` or base64 `file`; the 10 MB cap applies to every source. Multipart and fetched images must be JPEG, PNG, WebP, or GIF. Returns `{ url, fileId }`. |
 | `DELETE` | `/api/images/delete` | Session or upload token | Delete an image from ImageKit by `fileId`. |
 
 ---
@@ -80,11 +80,13 @@ Both routes accept either a valid session **or** a short-lived upload token (min
 |---|---|---|---|
 | `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary names, aliases, categories, and statuses. Vectors are server-only and omitted. Supports `?since=<ISO>` for delta sync. |
 | `POST` | `/api/ingredients` | Session required | Create a provisional vocabulary entry (`{ id, en, ua?, category? }`). Conflict-safe (`onConflictDoNothing`). |
-| `POST` | `/api/ingredients/embed-match` | None (public) | Batch-match `{ items: [{ item, ua? }] }` through the embedding provider chain and pgvector. Returns `{ matches, degraded }`; provider exhaustion is HTTP 200 with null matches and `degraded: true`. |
-| `POST` | `/api/ingredients/enrich` | Session required | Enrich a provisional ingredient via AI, compute its server-side `passage:` vector, and confirm it. Embedding failure leaves a detectable null vector without blocking enrichment. |
-| `POST` | `/api/embed` | `x-embed-secret` | Raw e5-small compute endpoint used between embedding hosts. Accepts `{ texts, prefix }` and returns `{ vectors }`; it does not query or store application data. |
+| `POST` | `/api/ingredients/embed-match` | Rate-limited public | Batch-match `{ items: [{ item, en?, ua? }] }` through the embedding provider chain and pgvector. Returns `{ matches, degraded }`; provider exhaustion is HTTP 200 with null matches and `degraded: true`. |
+| `POST` | `/api/ingredients/enrich` | Session required | Enrich and confirm a provisional ingredient via AI, then best-effort compute its server-side `passage:` vector. Embedding failure leaves a detectable null vector without blocking enrichment. |
+| `POST` | `/api/embed` | `x-embed-secret` | Raw e5-small compute endpoint used between embedding hosts. Accepts `{ texts, prefix? }` and returns `{ vectors }`; it does not query or store application data. |
 
-For anonymous users the `POST` routes are skipped client-side — provisional entries stay in local Dexie only. See [Local storage & sync](../explanation/local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
+For anonymous users, the client skips provisional persistence and enrichment (`POST /api/ingredients` and `/api/ingredients/enrich`), so new entries stay in local Dexie. The public embed-match route remains available. See [Local storage & sync](../explanation/local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
+
+The public embed-match route accepts 1–64 items with strings up to 200 characters and is limited to 120 requests/minute per anonymous IP or 600 requests/minute per signed-in user. Like parse limiting, it fails open if Redis is unavailable. The shared-secret `/api/embed` endpoint uses the same batch and text bounds but is not publicly rate-limited.
 
 ---
 

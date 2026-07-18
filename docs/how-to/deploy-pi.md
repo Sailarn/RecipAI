@@ -12,20 +12,22 @@ The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel. Both the Pi and Ver
 ## SSH in
 
 ```bash
-ssh pi@<pi-local-ip>
+ssh recipai@recipai.local
 ```
+
+If mDNS is unavailable, replace `recipai.local` with the Pi's local IP.
 
 ---
 
 ## Deploy (pull + rebuild)
 
-The Pi has a `~/deploy.sh` wrapper that runs the full pull/build/restart sequence in one shot:
+The Pi has a `~/deploy.sh` wrapper for releases that do not contain a database migration:
 
 ```bash
 ssh recipai@recipai.local '~/deploy.sh'
 ```
 
-That's the recommended path day-to-day. What it does under the hood (useful for troubleshooting a failed deploy step-by-step):
+That's the recommended path day-to-day. Before using it, check whether the release adds a file under `db/migrations/`. If it does, use the safe manual sequence below and run the migration before starting the new application code. The wrapper's ordinary pull/build/restart sequence is:
 
 ```bash
 cd ~/recipai
@@ -35,10 +37,18 @@ bun run build
 pm2 restart recipai
 ```
 
-If there are Drizzle migrations to run:
+For a release with a Drizzle migration, load a direct Supabase connection URL (port 5432) into `SUPABASE_MIGRATION_URL`. If the Pi cannot reach the direct IPv6 endpoint, use the Supavisor **session** pooler (port 5432). Then deploy in this order:
+
 ```bash
-bun run db:migrate
+cd ~/recipai
+git pull
+bun install --frozen-lockfile
+DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate
+bun run build
+pm2 restart recipai
 ```
+
+The command-level `DATABASE_URL` overrides the transaction-pooler runtime value in `.env.local`. Because Pi and Vercel share one database, apply each migration once, before either deployment starts code that depends on it.
 
 ---
 
@@ -61,7 +71,7 @@ PM2 may not have Bun in its PATH. Check the ecosystem config:
 ```bash
 cat ~/recipai/ecosystem.config.js
 ```
-The `interpreter` field should point to the full Bun path (e.g. `/home/pi/.bun/bin/bun`).
+The `interpreter` field should point to the full Bun path (e.g. `/home/recipai/.bun/bin/bun`).
 
 **Port conflict**  
 The app listens on port `3000` by default. Check with `lsof -i :3000`.
@@ -72,11 +82,14 @@ Tunnel config lives in `~/.cloudflared/config.yml`. Restart with:
 sudo systemctl restart cloudflared
 ```
 
-**Git conflicts on pull**  
-`public/sw.js` is regenerated on every build and is gitignored, but if it somehow got committed upstream, reset it:
+**Generated service worker appears in Git output**
+
+`public/sw.js` is regenerated on every build and should remain ignored. Confirm whether it is unexpectedly tracked:
 ```bash
-git checkout -- public/sw.js
+git ls-files public/sw.js
 ```
+
+No output is the expected result. If it is tracked, fix that in the repository rather than forcing the deployment checkout past it.
 
 ---
 
