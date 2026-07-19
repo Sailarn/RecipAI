@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { MaintenanceListener } from "@/components/maintenance-listener";
 import { PageStack } from "@/components/page-stack";
+import { TelegramBackButton } from "@/components/telegram-back-button";
 import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
 import { useVocabSync } from "@/lib/hooks/use-vocab-sync";
@@ -39,6 +40,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           survive tab switches, not remount with whichever page is showing. */}
       <SyncProvider>
         <PageStack />
+        <TelegramBackButton />
         <MaintenanceListener />
         <Toaster
           position="top-center"

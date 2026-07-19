@@ -17,6 +17,10 @@ vi.mock("@/components/page-stack", () => ({
   PageStack: vi.fn(() => null),
 }));
 
+vi.mock("@/components/telegram-back-button", () => ({
+  TelegramBackButton: vi.fn(() => null),
+}));
+
 vi.mock("@/lib/hooks/use-normalize-on-startup", () => ({
   useNormalizeOnStartup: vi.fn(),
 }));
