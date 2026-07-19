@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { GoogleLogo } from "@/components/google-logo";
+import { useTelegram } from "@/components/telegram-provider";
 import { authClient } from "@/lib/auth/auth-client";
 import {
   type DeviceAuthorization,
@@ -30,6 +31,7 @@ const CHIP_CLASS =
 
 export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
+  const { isTelegram, authStatus } = useTelegram();
   const [externalUrl, setExternalUrl] = useState<string>();
   const [externalError, setExternalError] = useState<string>();
   const abortController = useRef<AbortController | undefined>(undefined);
@@ -125,6 +127,73 @@ export function LoginView({ locale }: { locale: string }) {
     });
   };
 
+  // Inside Telegram, sign-in is silent (initData → session). Show the auto
+  // sign-in status instead of the web OAuth options, which don't work in the
+  // WebView and are redundant with the Telegram identity.
+  let signInSection: React.ReactNode;
+  if (isTelegram) {
+    signInSection = (
+      <div className="flex flex-col items-center gap-2 text-center">
+        <p className="font-sans text-sm leading-[1.5] text-[var(--fg-2)]">
+          {authStatus === "failed"
+            ? "We couldn't sign you in automatically. Reopen RecipAI from your Telegram chat to try again."
+            : "Signing you in with Telegram…"}
+        </p>
+      </div>
+    );
+  } else if (externalUrl) {
+    signInSection = (
+      <ExternalAuthWaiting
+        url={externalUrl}
+        title="Waiting for Google"
+        onCancel={() => {
+          abortController.current?.abort();
+          clearPendingDeviceAuth();
+          setExternalUrl(undefined);
+        }}
+      />
+    );
+  } else {
+    signInSection = (
+      <div className="flex flex-col gap-2.5">
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="signin-btn"
+        >
+          <div className={CHIP_CLASS}>
+            <GoogleLogo />
+          </div>
+          <span>Continue with Google</span>
+        </button>
+        <button
+          type="button"
+          onClick={handlePasskeySignIn}
+          className="signin-btn"
+        >
+          <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
+            <KeyRound size={14} strokeWidth={2} />
+          </div>
+          <span>Continue with Passkey</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleTelegramSignIn}
+          className="signin-btn"
+        >
+          <div className={`${CHIP_CLASS} text-[#229ED9]`}>
+            <Send size={14} strokeWidth={2} />
+          </div>
+          <span>Continue with Telegram</span>
+        </button>
+        <p className="text-center text-[11px] text-[var(--fg-3)] mt-1 leading-[1.5]">
+          New here? Use Google or Telegram — Passkey only works once you've
+          added one to your account.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <main className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div
@@ -151,54 +220,7 @@ export function LoginView({ locale }: { locale: string }) {
           </p>
         </div>
 
-        {externalUrl ? (
-          <ExternalAuthWaiting
-            url={externalUrl}
-            title="Waiting for Google"
-            onCancel={() => {
-              abortController.current?.abort();
-              clearPendingDeviceAuth();
-              setExternalUrl(undefined);
-            }}
-          />
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="signin-btn"
-            >
-              <div className={CHIP_CLASS}>
-                <GoogleLogo />
-              </div>
-              <span>Continue with Google</span>
-            </button>
-            <button
-              type="button"
-              onClick={handlePasskeySignIn}
-              className="signin-btn"
-            >
-              <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
-                <KeyRound size={14} strokeWidth={2} />
-              </div>
-              <span>Continue with Passkey</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleTelegramSignIn}
-              className="signin-btn"
-            >
-              <div className={`${CHIP_CLASS} text-[#229ED9]`}>
-                <Send size={14} strokeWidth={2} />
-              </div>
-              <span>Continue with Telegram</span>
-            </button>
-            <p className="text-center text-[11px] text-[var(--fg-3)] mt-1 leading-[1.5]">
-              New here? Use Google or Telegram — Passkey only works once you've
-              added one to your account.
-            </p>
-          </div>
-        )}
+        {signInSection}
 
         {externalError && (
           <p className="text-center text-xs text-red-400 mt-3">

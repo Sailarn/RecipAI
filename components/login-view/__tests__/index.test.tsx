@@ -62,6 +62,17 @@ vi.mock("@/lib/transitions", () => ({
   useNavigate: () => ({ push: navigatePush }),
 }));
 
+const telegramState = vi.hoisted(() => ({
+  isTelegram: false,
+  authStatus: "pending" as string,
+  webApp: undefined,
+  user: undefined,
+}));
+
+vi.mock("@/components/telegram-provider", () => ({
+  useTelegram: () => telegramState,
+}));
+
 vi.mock("next/image", () => ({
   default: ({
     src,
@@ -79,11 +90,38 @@ describe("LoginView", () => {
     vi.clearAllMocks();
     isStandalonePwa.mockReturnValue(false);
     loadPendingDeviceAuth.mockReturnValue(null);
+    telegramState.isTelegram = false;
+    telegramState.authStatus = "pending";
   });
 
   it("renders the Google sign-in button", () => {
     render(<LoginView locale="en" />);
     expect(screen.getByText("Continue with Google")).toBeInTheDocument();
+  });
+
+  it("hides the OAuth options and shows a status inside Telegram", () => {
+    telegramState.isTelegram = true;
+
+    render(<LoginView locale="en" />);
+
+    expect(screen.queryByText("Continue with Google")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Continue with Telegram"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Signing you in with Telegram…"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a retry hint when Telegram auto sign-in failed", () => {
+    telegramState.isTelegram = true;
+    telegramState.authStatus = "failed";
+
+    render(<LoginView locale="en" />);
+
+    expect(
+      screen.getByText(/couldn't sign you in automatically/i),
+    ).toBeInTheDocument();
   });
 
   it("tracks login when signing in with Google", async () => {
