@@ -8,17 +8,23 @@ import {
   type TelegramUser,
   type TelegramWebApp,
 } from "@/lib/telegram/webapp";
+import {
+  type AutoSignInStatus,
+  useTelegramAutoSignIn,
+} from "./use-auto-sign-in";
 
 type TelegramContextValue = {
   isTelegram: boolean;
   webApp: TelegramWebApp | undefined;
   user: TelegramUser | undefined;
+  authStatus: AutoSignInStatus;
 };
 
 const TelegramContext = createContext<TelegramContextValue>({
   isTelegram: false,
   webApp: undefined,
   user: undefined,
+  authStatus: "idle",
 });
 
 // The app's fixed dark background. Matching Telegram's own chrome to this
@@ -51,8 +57,14 @@ function initializeWebApp(webApp: TelegramWebApp): void {
   unregisterServiceWorkers();
 }
 
+type TelegramState = {
+  isTelegram: boolean;
+  webApp: TelegramWebApp | undefined;
+  user: TelegramUser | undefined;
+};
+
 export function TelegramProvider({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = useState<TelegramContextValue>({
+  const [state, setState] = useState<TelegramState>({
     isTelegram: false,
     webApp: undefined,
     user: undefined,
@@ -66,7 +78,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
       const resolved = webApp ?? getTelegramWebApp();
       if (cancelled || !resolved) return;
       initializeWebApp(resolved);
-      setValue({
+      setState({
         isTelegram: true,
         webApp: resolved,
         user: resolved.initDataUnsafe.user,
@@ -78,8 +90,10 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const authStatus = useTelegramAutoSignIn(state.webApp);
+
   return (
-    <TelegramContext.Provider value={value}>
+    <TelegramContext.Provider value={{ ...state, authStatus }}>
       {children}
     </TelegramContext.Provider>
   );

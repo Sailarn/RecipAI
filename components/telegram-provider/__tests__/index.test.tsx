@@ -3,6 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { TelegramProvider, useTelegram } from "@/components/telegram-provider";
 import type { TelegramWebApp } from "@/lib/telegram/webapp";
 
+vi.mock("@/lib/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({ data: { user: { id: "u1" } }, isPending: false }),
+    signInWithMiniApp: vi.fn().mockResolvedValue({ error: null }),
+    getSession: vi.fn().mockResolvedValue({}),
+  },
+}));
+
 type TelegramWindow = Window & {
   Telegram?: { WebApp?: Partial<TelegramWebApp> };
 };
