@@ -89,9 +89,15 @@ export const auth = betterAuth({
         // the Mini App path looks up an existing user by `telegramId` before
         // creating a new one. Without this, OIDC users have a null telegramId
         // and would be duplicated on first Mini App launch.
-        mapOIDCProfileToUser: (claims) => ({
-          telegramId: String(claims.sub),
-        }),
+        //
+        // Use the id_token's `id` claim (the real numeric Telegram user id,
+        // matching initData), NOT `sub` — Telegram's `sub` is an opaque
+        // pairwise identifier that does not match the Mini App id. The lib's
+        // TelegramOIDCClaims type omits `id`, so read it via a narrowed cast.
+        mapOIDCProfileToUser: (claims) => {
+          const telegramId = (claims as { id?: string | number }).id;
+          return telegramId ? { telegramId: String(telegramId) } : {};
+        },
       },
     }),
   ],

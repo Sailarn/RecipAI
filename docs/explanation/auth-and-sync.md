@@ -23,7 +23,7 @@ RecipAI uses [better-auth](https://better-auth.com) with a Drizzle/Postgres adap
 
 Account linking is enabled with `allowDifferentEmails: true` — a user can link multiple providers to one account.
 
-**Unified Telegram identity.** OIDC (`telegram-oidc`) and Mini App (`telegram`) sign-ins resolve to one user: the Mini App path looks up an existing user by `user.telegramId`, and `oidc.mapOIDCProfileToUser` stamps `telegramId = claims.sub` onto OIDC users. The bot webhook (`/api/telegram-bot`) matches both providers.
+**Unified Telegram identity.** OIDC (`telegram-oidc`) and Mini App (`telegram`) sign-ins resolve to one user: the Mini App path looks up an existing user by `user.telegramId`, and `oidc.mapOIDCProfileToUser` stamps `telegramId = claims.id` (the id_token's real numeric Telegram id — **not** the opaque `sub`) onto OIDC users. The bot webhook (`/api/telegram-bot`) matches both providers.
 
 ### Session gating in API routes
 

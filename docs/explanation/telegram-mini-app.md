@@ -46,8 +46,11 @@ Google/Passkey/device-authorization flows are not used in the WebView.
 A web **OIDC** login (`providerId "telegram-oidc"`) and a Mini App **sign-in**
 (`providerId "telegram"`) must resolve to one user. The Mini App path looks up an existing user
 by `user.telegramId` before creating one, so `oidc.mapOIDCProfileToUser` stamps
-`telegramId = claims.sub` onto OIDC users. The bot webhook matches **both** providers (by
-`accountId` for Mini App accounts, by the id-token `sub` for OIDC).
+`telegramId = claims.id` onto OIDC users. **Use the id_token's `id` claim, not `sub`** —
+Telegram's `sub` is an opaque pairwise identifier that does *not* equal the Mini App's `initData`
+user id; only `id` (the real numeric Telegram id, e.g. `316693380`) matches. The bot webhook
+matches **both** providers (by `accountId` for Mini App accounts, by the id-token `id` claim for
+OIDC).
 
 !!! note "Legacy backfill"
     A user who signed in via OIDC **before** `mapOIDCProfileToUser` was added has
