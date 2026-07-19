@@ -223,3 +223,15 @@ The iOS WKWebView white flash happens *before first paint* and cannot be fixed w
 - **Browser tab** → the `LaunchSplash` React component (mounted in `app/[locale]/layout.tsx`). It runs a before-paint effect that no-ops when `display-mode: standalone` (i.e. inside the PWA, where `pwa-launch.html` already handled it).
 
 Theme changes reload to re-trigger the splash: `ThemeToggle` calls `location.replace('/pwa-launch.html?from=…')` in the PWA, but a plain `location.reload()` in the browser (so the component path fires). `pwa-launch.html` validates `?from=` is a single-leading-slash same-origin path before redirecting — it is a public file, so an unvalidated `from` would be an open redirect.
+
+## Telegram Mini App
+
+See [Telegram Mini App](../explanation/telegram-mini-app.md) for the full picture. Hard-won points:
+
+**The Telegram WebView is not a PWA — trim, don't reuse.** No install prompt, no Web Push, and service workers are unreliable (iOS especially). `TelegramProvider` unregisters service workers on launch; PWA install, the push toggle, and the OAuth login buttons are all gated off in Telegram and replaced with native equivalents (`addToHomeScreen()`, bot-chat alerts, silent `initData` sign-in). Dexie/IndexedDB still works — it is the local store either way.
+
+**OIDC and Mini App sign-ins are two different providers.** Web login is `telegram-oidc`, the Mini App is `telegram`. They only resolve to one user because `mapOIDCProfileToUser` stamps `user.telegramId` and the Mini App path looks users up by it. A user who signed in via OIDC **before** that mapping existed has `telegram_id = null` and will be duplicated on first Mini App launch — backfill that one row once (gitignored `scripts/local/` script). Don't remove the `mapOIDCProfileToUser` mapping.
+
+**Detect Telegram from the launch hash, not just the SDK.** `isTelegramEnvironment()` also checks the `tgWebAppData` URL param, so gating works before `telegram-web-app.js` finishes loading. `getTelegramWebApp()` deliberately returns `undefined` when `initData` is empty — the SDK object also exists (empty) in a normal browser tab, which must not count as "in Telegram".
+
+**Telegram Web uses an iframe; native clients don't.** On native clients the WebView loads the URL directly, so the session cookie is first-party. `web.telegram.org` embeds the Mini App in an iframe — verify cookie/`SameSite` behaviour there separately.

@@ -64,7 +64,10 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/auth/auth.ts` | better-auth server config (Google, Passkey, Telegram OIDC, Drizzle adapter). |
+| `lib/auth/auth.ts` | better-auth server config (Google, Passkey, Telegram OIDC + Mini App, Drizzle adapter). |
+| `lib/telegram/webapp.ts` | SSR-safe wrapper over `window.Telegram.WebApp` — `isTelegramEnvironment()`, `getTelegramWebApp()`, `loadTelegramSdk()`. |
+| `components/telegram-provider/` | Detects the Telegram WebView, runs SDK lifecycle + auto sign-in (`use-auto-sign-in.ts`); exposes `useTelegram()`/`useIsTelegram()`. |
+| `components/telegram-back-button/`, `components/telegram-deep-link/` | Native BackButton wiring; `start_param` → route (`resolveStartParamHref`). |
 | `lib/auth/auth-client.ts` | Client-side auth client (`authClient.useSession()`, etc.). |
 | `lib/auth/require-session.ts` | `requireSession()` — gates API routes, returns `{ session }` or `{ response: 401 }`. |
 | `lib/auth/session-state.ts` | Module-level `isSignedIn()` flag — updated by `useSyncOnLogin`, read by `syncFetch`. |

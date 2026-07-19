@@ -56,6 +56,7 @@ nav:
     - Ingredient Vocabulary: explanation/ingredient-vocabulary.md
     - Observability: explanation/observability.md
     - Auth & Sync: explanation/auth-and-sync.md
+    - Telegram Mini App: explanation/telegram-mini-app.md
     - Local Storage & Sync: explanation/local-storage-and-sync.md
     - Architecture Decisions: explanation/decisions.md
   - How-To:

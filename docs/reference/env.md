@@ -87,6 +87,8 @@ All image uploads go through [ImageKit](https://imagekit.io).
 
 \*Required for Telegram sign-in.
 
+The **Telegram Mini App** (see [Telegram Mini App](../explanation/telegram-mini-app.md)) needs **no additional env vars** — `TELEGRAM_BOT_TOKEN` is the `initData` validation secret. Register the Mini App URL in @BotFather (Menu Button → Web App, or `/newapp`).
+
 ---
 
 ## Web Push

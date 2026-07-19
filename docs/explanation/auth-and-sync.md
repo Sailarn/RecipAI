@@ -18,9 +18,12 @@ RecipAI uses [better-auth](https://better-auth.com) with a Drizzle/Postgres adap
 |---|---|
 | **Google OAuth** | Requires `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`. |
 | **Passkey (WebAuthn)** | Via `@better-auth/passkey`. |
-| **Telegram OIDC** | Via `better-auth-telegram`. Requires bot token + OIDC credentials. |
+| **Telegram OIDC** | Via `better-auth-telegram` (`providerId "telegram-oidc"`). Web login widget flow. Requires bot token + OIDC credentials. |
+| **Telegram Mini App** | Via `better-auth-telegram` `miniApp` (`providerId "telegram"`). Silent `initData` sign-in inside the Telegram WebView — see [Telegram Mini App](telegram-mini-app.md). |
 
 Account linking is enabled with `allowDifferentEmails: true` — a user can link multiple providers to one account.
+
+**Unified Telegram identity.** OIDC (`telegram-oidc`) and Mini App (`telegram`) sign-ins resolve to one user: the Mini App path looks up an existing user by `user.telegramId`, and `oidc.mapOIDCProfileToUser` stamps `telegramId = claims.sub` onto OIDC users. The bot webhook (`/api/telegram-bot`) matches both providers.
 
 ### Session gating in API routes
 
