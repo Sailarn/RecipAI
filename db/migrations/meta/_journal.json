@@ -169,6 +169,13 @@
       "when": 1783944121150,
       "tag": "0023_clear_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784498622696,
+      "tag": "0024_same_lionheart",
+      "breakpoints": true
     }
   ]
 }

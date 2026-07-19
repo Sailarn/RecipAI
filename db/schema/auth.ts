@@ -59,6 +59,11 @@ export const account = pgTable(
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
+    // Written by better-auth-telegram on Mini App / login-widget sign-in (the
+    // OIDC path does not set them). Without these columns the account insert
+    // 500s. Mirror of the same fields on `user`.
+    telegramId: text("telegram_id"),
+    telegramUsername: text("telegram_username"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => /* @__PURE__ */ new Date())

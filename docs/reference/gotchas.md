@@ -234,4 +234,6 @@ See [Telegram Mini App](../explanation/telegram-mini-app.md) for the full pictur
 
 **Detect Telegram from the launch hash, not just the SDK.** `isTelegramEnvironment()` also checks the `tgWebAppData` URL param, so gating works before `telegram-web-app.js` finishes loading. `getTelegramWebApp()` deliberately returns `undefined` when `initData` is empty — the SDK object also exists (empty) in a normal browser tab, which must not count as "in Telegram".
 
+**The `account` table needs `telegram_id` + `telegram_username` columns.** `better-auth-telegram` writes those two fields onto the account row it creates on Mini App (and login-widget) sign-in — the OIDC path does not. If the columns are missing, initData `/validate` still returns 200 but `/signin` **500s** (validation passes, the account INSERT fails), and the Mini App shows "couldn't sign you in". Both `user` and `account` need the telegram columns; `user` had them, `account` didn't (fixed in migration `0024`). Diagnostic heuristic: validate-OK but signin-500 = a missing DB column on `account`, not a token/origin problem.
+
 **Telegram Web uses an iframe; native clients don't.** On native clients the WebView loads the URL directly, so the session cookie is first-party. `web.telegram.org` embeds the Mini App in an iframe — verify cookie/`SameSite` behaviour there separately.
