@@ -1,16 +1,16 @@
-# Graph Report - offline-recipes-app  (2026-07-18)
+# Graph Report - offline-recipes-app  (2026-07-19)
 
 ## Corpus Check
-- 580 files · ~212,019 words
+- 591 files · ~216,403 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2251 nodes · 5436 edges · 162 communities (104 shown, 58 thin omitted)
+- 2310 nodes · 5583 edges · 175 communities (114 shown, 61 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.73)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aa6f211f`
+- Built from commit: `9aee7d9d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -169,15 +169,28 @@
 - [[_COMMUNITY_Web Pipeline|Web Pipeline]]
 - [[_COMMUNITY_index.test.tsx|index.test.tsx]]
 - [[_COMMUNITY_route.ts|route.ts]]
+- [[_COMMUNITY_route.ts|route.ts]]
+- [[_COMMUNITY_route.ts|route.ts]]
+- [[_COMMUNITY_parse-history.ts|parse-history.ts]]
+- [[_COMMUNITY_sync-context.tsx|sync-context.tsx]]
+- [[_COMMUNITY_external-auth-config.ts|external-auth-config.ts]]
+- [[_COMMUNITY_recipe-result.ts|recipe-result.ts]]
+- [[_COMMUNITY_index.test.tsx|index.test.tsx]]
 - [[_COMMUNITY_index.tsx|index.tsx]]
+- [[_COMMUNITY_sync-diff.test.ts|sync-diff.test.ts]]
+- [[_COMMUNITY_register|register]]
+- [[_COMMUNITY_pending-device-auth.test.ts|pending-device-auth.test.ts]]
+- [[_COMMUNITY_external-auth-client.ts|external-auth-client.ts]]
+- [[_COMMUNITY_useParseJobWatcher|useParseJobWatcher]]
+- [[_COMMUNITY_FakeImage|FakeImage]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `React 19` - 153 edges
-2. `Vitest` - 153 edges
+1. `React 19` - 161 edges
+2. `Vitest` - 158 edges
 3. `cn()` - 69 edges
 4. `Recipe` - 61 edges
-5. `trackEvent()` - 48 edges
-6. `useNavigate()` - 44 edges
+5. `trackEvent()` - 50 edges
+6. `useNavigate()` - 48 edges
 7. `db` - 39 edges
 8. `Collection` - 36 edges
 9. `db` - 35 edges
@@ -186,14 +199,14 @@
 ## Surprising Connections (you probably didn't know these)
 - `savePhotoParseResult()` --calls--> `toast`  [INFERRED]
   lib/parse-recipe/save-photo-result.ts → components/recipe-detail/share-action/__tests__/index.test.tsx
-- `ParseResultProps` --references--> `ParsedRecipeEntry`  [EXTRACTED]
-  app/[locale]/recipes/parse/components/parse-result/index.tsx → lib/db/schema.ts
 - `CookingCarouselProps` --references--> `Recipe`  [EXTRACTED]
   components/cooking-carousel/index.tsx → lib/db/schema.ts
 - `IngredientsSheetProps` --references--> `Recipe`  [EXTRACTED]
   components/cooking-carousel/ingredients-sheet.tsx → lib/db/schema.ts
 - `EditCollectionModalProps` --references--> `Collection`  [EXTRACTED]
   components/edit-collection-modal/index.tsx → lib/db/schema.ts
+- `CardThumbnailProps` --references--> `Recipe`  [EXTRACTED]
+  components/recipe-card/card-thumbnail.tsx → lib/db/schema.ts
 
 ## Import Cycles
 - 1-file cycle: `lib/web-push.ts -> lib/web-push.ts`
@@ -203,27 +216,27 @@
 - **Sync & Auth Flow Components** — sync_on_login, diff_engine, sync_review, device_auth_flow, external_browser_flow, better_auth, lib_sync_fetch, lib_db_supabase_sync [EXTRACTED 1.00]
 - **Ingredient Matching Pipeline** — fuse_match, embedding_match, provisional_creation, enrichment, lib_parse_recipe_normalize_ingredients, lib_embed_index, lib_db_vocab_vector_search [EXTRACTED 1.00]
 
-## Communities (162 total, 58 thin omitted)
+## Communities (175 total, 61 thin omitted)
 
 ### Community 0 - "Parse History UI"
-Cohesion: 0.12
-Nodes (24): ParseJobWatcher(), claimJobCompletion, doneResponse(), failedResponse(), makeResponse(), mockFetch, mockParsedRecipe, pendingResponse() (+16 more)
+Cohesion: 0.11
+Nodes (22): claimJobCompletion, doneResponse(), failedResponse(), makeResponse(), mockFetch, mockParsedRecipe, pendingResponse(), claimJobCompletion (+14 more)
 
 ### Community 1 - "Route Layout & Auth"
-Cohesion: 0.07
-Nodes (28): POST(), POST(), BasicInfo(), register(), shouldPrewarmLocalEmbed(), nearestVocab(), Neighbor, pickMatchFromNeighbors() (+20 more)
+Cohesion: 0.11
+Nodes (24): POST(), POST(), COLLECTION_ERRORS, EMBED_RATE_LIMIT, PARSE_RATE_LIMIT, RECIPE_SYNC_ERRORS, nearestVocab(), Neighbor (+16 more)
 
 ### Community 2 - "Schema Recipe Parsing"
-Cohesion: 0.09
-Nodes (11): { GET, POST }, GET(), POST(), params, recipe, mockSession, client, db (+3 more)
+Cohesion: 0.11
+Nodes (11): { GET, POST }, DELETE(), POST(), SubscribeBody, { onConflictDoUpdate, insertValues, deleteWhere }, validBody, POST(), mockSession (+3 more)
 
 ### Community 3 - "Action Buttons & Cards"
-Cohesion: 0.08
-Nodes (37): ActionButton(), ActionButtonProps, ActionButtonVariant, VARIANT_CLASSES, buildConflictMeta(), ConflictedSection(), ConflictedSectionProps, getDisplayName() (+29 more)
+Cohesion: 0.15
+Nodes (21): ActionButton(), ActionButtonProps, ActionButtonVariant, VARIANT_CLASSES, buildConflictMeta(), ConflictedSection(), ConflictedSectionProps, getDisplayName() (+13 more)
 
 ### Community 4 - "Upload & Delete API"
-Cohesion: 0.06
-Nodes (36): DELETE(), mockUploadResult, POST(), classifyParseError(), isRetryable(), parseWithRetry(), notifyParseJobSubscribers(), POST() (+28 more)
+Cohesion: 0.08
+Nodes (29): DELETE(), mockUploadResult, POST(), classifyParseError(), isRetryable(), parseWithRetry(), notifyParseJobSubscribers(), POST() (+21 more)
 
 ### Community 5 - "Biome & Lint Config"
 Cohesion: 0.04
@@ -231,107 +244,107 @@ Nodes (45): recommended, source, assist, actions, enabled, noBannedTypes, noExtr
 
 ### Community 6 - "Session & Delete API"
 Cohesion: 0.10
-Nodes (16): DELETE(), PATCH(), mockSession, isCompleteRecipe(), isValidDate(), PUT(), RecipeSnapshot, VisibilityBody (+8 more)
+Nodes (16): DELETE(), PATCH(), mockSession, pickRecipeContent(), RequiredRecipeContent, GET(), POST(), mockSession (+8 more)
 
 ### Community 7 - "Enrichment & AI Prompt"
-Cohesion: 0.12
-Nodes (13): POST(), DELETE(), GET(), POST(), POST(), { updateWhere }, ingredients, pantry (+5 more)
+Cohesion: 0.10
+Nodes (20): IncomingCollection, isValidIncomingCollection(), POST(), buildEnrichmentPrompt(), POST(), POST(), DELETE(), GET() (+12 more)
 
 ### Community 8 - "External Device Auth"
-Cohesion: 0.14
-Nodes (20): Card(), CardAction(), CardContent(), CardDescription(), CardFooter(), CardHeader(), CardTitle(), Select() (+12 more)
+Cohesion: 0.16
+Nodes (15): RecipeCardContextMenu(), RecipeCardContextMenuProps, baseProps, Select(), SelectContent(), SelectGroup(), SelectItem(), SelectLabel() (+7 more)
 
 ### Community 9 - "Dependencies & Libraries"
 Cohesion: 0.05
-Nodes (41): dependencies, @axiomhq/js, @better-auth/passkey, better-auth-telegram, cheerio, class-variance-authority, clsx, dexie-react-hooks (+33 more)
+Nodes (42): dependencies, @axiomhq/js, @better-auth/passkey, better-auth-telegram, cheerio, class-variance-authority, clsx, dexie-react-hooks (+34 more)
 
 ### Community 10 - "Collection CRUD API"
-Cohesion: 0.15
-Nodes (10): DELETE(), PATCH(), IncomingCollection, isValidIncomingCollection(), POST(), user, collections, collectionsRelations (+2 more)
+Cohesion: 0.12
+Nodes (10): DELETE(), PATCH(), GET(), POST(), client, db, collections, collectionsRelations (+2 more)
 
 ### Community 11 - "Photo AI & Recipe"
-Cohesion: 0.11
-Nodes (21): captureWithContext(), EMBED_RATE_LIMIT, PARSE_RATE_LIMIT, SessionResult, BeforeInstallPromptEvent, LogArgs, logger, clientKey() (+13 more)
+Cohesion: 0.05
+Nodes (39): canShareExternalAuthUrl, clearPendingDeviceAuth, completeDeviceSignIn, copyAndOpenExternalAuthUrl, copyExternalAuthUrl, establishDeviceSession, isIos, isStandalonePwa (+31 more)
 
 ### Community 12 - "Home & Parse Forms"
-Cohesion: 0.21
-Nodes (12): CarouselApi, CarouselContent(), CarouselContext, CarouselContextProps, CarouselItem(), CarouselNext(), CarouselOptions, CarouselPlugin (+4 more)
+Cohesion: 0.12
+Nodes (19): CookingNavBar(), CookingNavBarProps, CookingCarousel(), CookingCarouselProps, carouselState, recipe, Carousel(), CarouselApi (+11 more)
 
 ### Community 13 - "Recipe Form UI"
 Cohesion: 0.18
 Nodes (11): ParseForm(), ParseFormProps, AiButton(), AiButtonProps, Alert(), AlertAction(), AlertDescription(), AlertTitle() (+3 more)
 
 ### Community 14 - "Pantry Ingredient Picker"
-Cohesion: 0.22
-Nodes (11): getClient(), sendLog(), clientTelemetryEnabled(), serverTelemetryEnabled(), EventName, TelemetryEvents, captureClientEvent(), identifyClient() (+3 more)
+Cohesion: 0.09
+Nodes (26): resolveStartParamHref(), TelegramDeepLink(), { telegramState, navigatePush }, initializeWebApp(), TelegramContext, TelegramContextValue, TelegramProvider(), TelegramState (+18 more)
 
 ### Community 15 - "Recipe Detail & Badges"
 Cohesion: 0.11
-Nodes (17): CATEGORY_COLORS, CategoryBadge(), CategoryBadgeProps, RecipeDetail(), RecipeDetailProps, iconMap, RecipeMeta(), RecipeMetaProps (+9 more)
+Nodes (21): CATEGORY_COLORS, CategoryBadge(), CategoryBadgeProps, RecipeDetail(), RecipeDetailProps, RecipeHero(), RecipeHeroProps, iconMap (+13 more)
 
 ### Community 16 - "Push Notifications & Profile"
 Cohesion: 0.19
 Nodes (13): DeleteDialog(), DeleteDialogProps, AlertDialog(), AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter() (+5 more)
 
 ### Community 17 - "Ingredients List & Localization"
-Cohesion: 0.16
-Nodes (14): generateMetadata(), RecipePage(), RecipePageProps, params, publicRecipe, getPublicRecipe, isFiniteNumber(), isJsonRecord() (+6 more)
+Cohesion: 0.39
+Nodes (6): generateMetadata(), RecipePage(), RecipePageProps, params, publicRecipe, getPublicRecipe
 
 ### Community 18 - "Apify Social Content"
 Cohesion: 0.15
 Nodes (27): ActorInput, addUnique(), ApifyItem, cleanCaption(), collectMediaImages(), collectSubtitleField(), collectTextFromArray(), extractActorTranscript() (+19 more)
 
 ### Community 19 - "Pantry Navigation"
-Cohesion: 0.06
-Nodes (35): BottomNav(), PantryPage, NavColumn(), NavColumnProps, AINavIcon(), PantryIcon(), PARTICLES, ProfileIcon() (+27 more)
+Cohesion: 0.11
+Nodes (22): BottomNav(), PantryPage, NavColumn(), NavColumnProps, AINavIcon(), PantryIcon(), PARTICLES, ProfileIcon() (+14 more)
 
 ### Community 20 - "Filter & Sort UI"
-Cohesion: 0.13
-Nodes (18): CompactFilterBar(), CompactFilterBarProps, SORT_LABELS, STATUS_LABELS, collections, defaultProps, FilterSheetProps, defaultProps (+10 more)
+Cohesion: 0.14
+Nodes (20): CompactFilterBar(), CompactFilterBarProps, SORT_LABELS, STATUS_LABELS, collections, defaultProps, chipClass(), FilterSheet() (+12 more)
 
 ### Community 21 - "Recipe Card & Save"
-Cohesion: 0.10
-Nodes (22): GET(), handlePushFailure(), NotifyParseJobSubscribersOptions, ParseJobPushSource, pushErrorStatus(), GET(), POST(), { selectLimit } (+14 more)
+Cohesion: 0.17
+Nodes (13): GET(), handlePushFailure(), NotifyParseJobSubscribersOptions, ParseJobPushSource, pushErrorStatus(), user, parseJobs, parseJobsRelations (+5 more)
 
 ### Community 22 - "Recipe Matching & Filter"
-Cohesion: 0.19
-Nodes (13): mockGetMissing, useLiveQueryTransition(), useRecipeMatcher(), createCollection(), deleteCollection(), getAllCollections(), renameCollection(), getAllRecipes() (+5 more)
+Cohesion: 0.18
+Nodes (13): RecipeHeaderProps, mockRecipes, mockGetMissing, useLiveQueryTransition(), useRecipeFilter(), useRecipeMatcher(), RecipesPageState, useRecipesPageState() (+5 more)
 
 ### Community 23 - "Linked Accounts & Auth"
 Cohesion: 0.17
 Nodes (20): ParsePhotoProps, callAiForRecipe(), ParsedRecipe, parsedRecipe, enforceDurationLimit(), failureReason(), getTranscript(), hasPromptContent() (+12 more)
 
 ### Community 24 - "Sync & Diff Engine"
-Cohesion: 0.13
-Nodes (12): GoogleLogo(), ProfileAuth(), LinkedAccounts(), LinkedAccountsProps, defaultProps, AccountsCache, useLinkedAccounts(), UserCard() (+4 more)
+Cohesion: 0.10
+Nodes (22): GoogleLogo(), LoginView(), ProfileAuth(), LinkedAccounts(), LinkedAccountsProps, canShareExternalAuthUrl, copyAndOpenExternalAuthUrl, copyExternalAuthUrl (+14 more)
 
 ### Community 25 - "Dev Dependencies & Tools"
 Cohesion: 0.06
 Nodes (34): serwist, WorkerGlobalScope, husky.sh script, devDependencies, autoprefixer, @biomejs/biome, @commitlint/cli, @commitlint/config-conventional (+26 more)
 
 ### Community 26 - "Subscribe & Delete API"
-Cohesion: 0.18
-Nodes (13): inStock, outOfStock, BULLET_COLOR, IngredientRowProps, StockStatus, UseServingsCalculatorProps, addPantryItem(), getPantryItems() (+5 more)
+Cohesion: 0.16
+Nodes (17): inStock, outOfStock, BULLET_COLOR, IngredientRowProps, StockStatus, UseServingsCalculatorProps, syncPantry(), addPantryItem() (+9 more)
 
 ### Community 27 - "Parse Job Notifications"
-Cohesion: 0.13
-Nodes (15): ExternalDeviceApproval(), approve, deny, signInSocial, signOut, useSession, verifyDevice, assertSeparateAuthOrigins() (+7 more)
+Cohesion: 0.19
+Nodes (8): ExternalDeviceApproval(), approve, deny, signInSocial, signOut, useSession, verifyDevice, getExternalAuthUrl()
 
 ### Community 28 - "Device Auth Flow"
-Cohesion: 0.17
-Nodes (18): abortableDelay(), AuthResponse, code(), DeviceAuthClient, DeviceAuthorization, DeviceFlowResult, deviceSession(), DeviceSessionClient (+10 more)
+Cohesion: 0.19
+Nodes (14): abortableDelay(), AuthResponse, code(), DeviceAuthClient, DeviceFlowResult, deviceSession(), DeviceSessionClient, establishDeviceSession() (+6 more)
 
 ### Community 29 - "Cooking Carousel & Nav"
-Cohesion: 0.07
-Nodes (23): parseCollectionSnapshot(), parseRecipeSnapshot(), putSnapshotToStore(), BottomNavState, syncIngredients(), syncPantry(), syncParseHistory(), bulkPutPantry() (+15 more)
+Cohesion: 0.15
+Nodes (10): mockFetch, mockSession, syncIngredients(), db, reconcileVocab(), deltaSince(), pullVocab(), { mockClear, mockToArray, mockPullVocab, mockNormalize } (+2 more)
 
 ### Community 30 - "Session & Supabase Sync"
-Cohesion: 0.20
-Nodes (13): getIngredientDisplayName(), IngredientsSectionProps, buildVocabIdIndex(), buildVocabNameIndex(), localizeIngredientItem(), FLOUR, index, SALT (+5 more)
+Cohesion: 0.15
+Nodes (20): getIngredientDisplayName(), IngredientPicker(), AdditivePicker(), AdditivePickerProps, modifierKeys, IngredientsSectionProps, buildVocabIdIndex(), buildVocabNameIndex() (+12 more)
 
 ### Community 31 - "Recipes List & Skeleton"
 Cohesion: 0.14
-Nodes (10): ParsedRecipesSheet, RecipesPage(), mockRecipes, RecipeEmptyState(), RecipeFilterBar(), RecipeListError(), usePullToRefresh(), UsePullToRefreshOptions (+2 more)
+Nodes (10): ParsedRecipesSheet, RecipesPage(), RecipeEmptyState(), RecipeFilterBar(), RecipeListError(), RecipeListSkeleton(), skeletonIds, usePullToRefresh() (+2 more)
 
 ### Community 32 - "Video & Social Parse"
 Cohesion: 0.18
@@ -346,8 +359,8 @@ Cohesion: 0.09
 Nodes (22): scripts, build, check, check:all, check:ci, db:generate, db:migrate, db:push (+14 more)
 
 ### Community 35 - "Rate Limiting API"
-Cohesion: 0.17
-Nodes (9): CollectionsShelf(), CollectionTab(), tabClass(), mockCollections, RecipeCardContextMenu(), RecipeCardContextMenuProps, baseProps, useLongPress() (+1 more)
+Cohesion: 0.15
+Nodes (7): metadata, viewport, listAccounts, listUserPasskeys, .github/workflows/ci.yml, { redisConstructor, redisGet, redisOn }, Vitest
 
 ### Community 36 - "Bottom Sheet & Collection Modal"
 Cohesion: 0.15
@@ -358,36 +371,36 @@ Cohesion: 0.23
 Nodes (6): PantryPage(), subtitle(), localizedPantryName(), PantryRow(), tomato, vocabById
 
 ### Community 38 - "Ingredient Display & Localization"
-Cohesion: 0.38
-Nodes (4): RecipeSkeleton(), RecipeListSkeleton(), skeletonIds, Skeleton()
+Cohesion: 0.10
+Nodes (20): SyncReviewPage(), parseCollectionSnapshot(), parseRecipeSnapshot(), putSnapshotToStore(), conflictedRecipe, localOnlyCollection, mockFetch, renderActions() (+12 more)
 
 ### Community 39 - "Telemetry & Analytics"
-Cohesion: 0.11
-Nodes (23): db, RecipeDatabase, createProvisionalIngredient(), resolveOrCreateIngredient(), bulkPutParseHistory(), clearParseHistory(), getParseHistory(), pruneParseHistory() (+15 more)
+Cohesion: 0.24
+Nodes (9): createProvisionalIngredient(), resolveOrCreateIngredient(), fetchMock, { mockToArray }, fuseHit(), getFuseIndex(), matchVocabId(), pickBestId() (+1 more)
 
 ### Community 40 - "TypeScript Config"
 Cohesion: 0.10
 Nodes (20): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+12 more)
 
 ### Community 41 - "Telegram Auth API"
-Cohesion: 0.18
-Nodes (11): enqueueParseJob(), findLinkedAccount(), isAuthenticTelegramRequest(), POST(), TelegramAccount, { selectWhere, insertValues }, isTrackingParam(), normalizeSourceUrl() (+3 more)
+Cohesion: 0.24
+Nodes (8): enqueueParseJob(), findLinkedAccount(), isAuthenticTelegramRequest(), POST(), TelegramAccount, { selectWhere, insertValues }, extractUrl(), sendTelegramMessage()
 
 ### Community 42 - "Recipe Virtual List"
-Cohesion: 0.10
-Nodes (26): CategoryBadge(), CategoryBadgeProps, IngredientsPreview(), IngredientsPreviewProps, isRecipeCategory(), ParseResult(), ParseResultProps, BasicInfoProps (+18 more)
+Cohesion: 0.16
+Nodes (14): BasicInfoProps, FocalPointPicker(), FocalPointPickerProps, CropRect, EMPTY_CROP, ImageCropPicker(), ImageCropPickerProps, toPercentCrop() (+6 more)
 
 ### Community 43 - "App Config & Maintenance"
-Cohesion: 0.08
-Nodes (27): CAT_OPTIONS, CatOption, mapVocabCategory(), VOCAB_CATEGORY_MAP, CATEGORY_STYLES, CategoryStyle, CommitConfig, CONTENT_FADE (+19 more)
+Cohesion: 0.10
+Nodes (20): CAT_OPTIONS, CatOption, mapVocabCategory(), VOCAB_CATEGORY_MAP, CATEGORY_STYLES, CategoryStyle, CommitConfig, CONTENT_FADE (+12 more)
 
 ### Community 44 - "Auth Database Schema"
 Cohesion: 0.14
 Nodes (14): account, accountRelations, deviceCode, passkey, passkeyRelations, session, sessionRelations, userRelations (+6 more)
 
 ### Community 45 - "Login Page & Device Auth"
-Cohesion: 0.11
-Nodes (15): LoginView(), canShareExternalAuthUrl, clearPendingDeviceAuth, completeDeviceSignIn, copyAndOpenExternalAuthUrl, copyExternalAuthUrl, establishDeviceSession, isIos (+7 more)
+Cohesion: 0.17
+Nodes (11): isValidVectorBatch(), runChain(), makeHttpProvider(), configuredProviders(), lazyLocalProvider, parseProviders(), localProvider, freshLocalProvider() (+3 more)
 
 ### Community 46 - "External Auth Waiting"
 Cohesion: 0.20
@@ -402,32 +415,32 @@ Cohesion: 0.12
 Nodes (16): AI, Analytics, Auth providers, Build-provided, Core, Development, Embeddings, Environment Variables (+8 more)
 
 ### Community 49 - "Recipe Form Test & Normalize"
-Cohesion: 0.13
-Nodes (29): addParsedRecipeResult(), createParsedRecipeEntry(), createRecipe(), deleteRecipe(), updateRecipe(), saveParsedRecipe(), ParsedRecipeEntry, afterCreate() (+21 more)
+Cohesion: 0.12
+Nodes (32): ParseResultProps, addParsedRecipeResult(), createParsedRecipeEntry(), createRecipe(), deleteRecipe(), updateRecipe(), renormalizeOutdatedRecipes(), saveParsedRecipe() (+24 more)
 
 ### Community 50 - "Shadcn Select & Separator"
 Cohesion: 0.15
-Nodes (18): chipClass(), FilterSheet(), SORT_OPTIONS, STATUS_OPTIONS, Button(), buttonVariants, Label(), LabelProps (+10 more)
+Nodes (21): Button(), buttonVariants, Card(), CardAction(), CardContent(), CardDescription(), CardFooter(), CardHeader() (+13 more)
 
 ### Community 51 - "use-bottom-nav.ts"
 Cohesion: 0.16
-Nodes (12): InstructionsSectionProps, StepCard(), StepCardProps, createRecipeSchema(), dummySchema, preparationModifierSchema, RecipeFormData, RecipeOutput (+4 more)
+Nodes (11): InstructionsSectionProps, StepCard(), StepCardProps, dummySchema, preparationModifierSchema, RecipeFormData, RecipeOutput, recipeSectionSchema (+3 more)
 
 ### Community 53 - "Cooking Steps UI"
-Cohesion: 0.18
-Nodes (12): appConfig, AppConfigRow, ensureAppAvailable(), getAppConfig(), getMaintenanceMessage(), { select, limit }, config, intlMiddleware (+4 more)
+Cohesion: 0.16
+Nodes (13): appConfig, API_ERROR_MESSAGES, AppConfigRow, ensureAppAvailable(), getAppConfig(), getMaintenanceMessage(), { select, limit }, config (+5 more)
 
 ### Community 54 - "Navigation Stack"
-Cohesion: 0.06
-Nodes (24): fraunces, inter, PushNotificationToggle(), PushState, RowDivider(), ProfilePage(), InstallPwaSheet(), InstallPwaSheetProps (+16 more)
+Cohesion: 0.09
+Nodes (15): PushNotificationToggle(), { isTelegram }, PushState, RowDivider(), ProfilePage(), InstallPwaSheet(), InstallPwaSheetProps, useIsTelegram() (+7 more)
 
 ### Community 55 - "Card Footer & Badge"
 Cohesion: 0.14
-Nodes (16): PageCentered(), ParsedRecipeData, FormActionBar(), FormActionBarProps, FormHeader(), FormHeaderProps, RecipeForm(), RecipeFormProps (+8 more)
+Nodes (17): PageCentered(), ParsedRecipeData, FormActionBar(), FormActionBarProps, FormHeader(), FormHeaderProps, RecipeForm(), RecipeFormProps (+9 more)
 
 ### Community 56 - "Recipe Actions & Video URL"
-Cohesion: 0.18
-Nodes (14): getInstructionTypographyClass(), StepSlide(), StepSlideProps, IngredientsListProps, InstructionsListProps, SectionContainer(), SectionContainerProps, ServingsCalculatorProps (+6 more)
+Cohesion: 0.13
+Nodes (20): getInstructionTypographyClass(), StepSlide(), StepSlideProps, IngredientsList(), IngredientsListProps, InstructionsList(), InstructionsListProps, localeState (+12 more)
 
 ### Community 57 - "Card & Label Components"
 Cohesion: 0.50
@@ -442,12 +455,12 @@ Nodes (3): GARLIC, {
 }, ONION
 
 ### Community 58 - "Ingredient DB & Vocabulary"
-Cohesion: 0.17
-Nodes (7): ExternalLink(), ExternalLinkComplete(), cleanup, linkSocial, redeem, externalAuthClient, externalLinkClient()
+Cohesion: 0.23
+Nodes (5): ExternalLink(), ExternalLinkComplete(), cleanup, linkSocial, redeem
 
 ### Community 59 - "sync-context.tsx"
-Cohesion: 0.16
-Nodes (10): CookingNavBar(), CookingNavBarProps, CookingCarousel(), CookingCarouselProps, IngredientsSheet(), IngredientsSheetProps, OverviewSlide(), carouselState (+2 more)
+Cohesion: 0.14
+Nodes (10): fraunces, inter, StatusBarScrim(), ThemeColorSync(), ThemeToggle(), reloadSpy, replaceSpy, TogglePill() (+2 more)
 
 ### Community 60 - "prewarm-recipe-images.test.ts"
 Cohesion: 0.30
@@ -458,24 +471,24 @@ Cohesion: 0.19
 Nodes (13): buildImagesText(), extractAllImages(), extractHeroImage(), ImageEntry, bodyText(), collectRecipeNodes(), extractJsonLdContext(), hasRecipeType() (+5 more)
 
 ### Community 62 - "Global Error & Collections"
-Cohesion: 0.34
-Nodes (7): IngredientsList(), InstructionsList(), localeState, groupBySectionId(), groupBySectionRuns(), sectionName(), shouldShowSections()
+Cohesion: 0.19
+Nodes (10): getOptimizedUrl(), imagekitEndpoint(), isImageKitUrl(), isSlowConnection(), prewarmRecipeImage(), prewarmRecipeImages(), selectPrewarmUrls(), succeeded (+2 more)
 
 ### Community 63 - "Edit/New Recipe Page"
-Cohesion: 0.15
-Nodes (16): ParseHistoryRow(), ParseHistoryRowProps, ParseHistoryView(), { addJobId, fetchMock, toastError }, PARSE_HISTORY_STATUS, friendlyParseError(), isRetriableFailure(), PARSE_ERROR_MESSAGES (+8 more)
+Cohesion: 0.17
+Nodes (16): ParseHistoryRow(), ParseHistoryRowProps, RecipeDatabase, PARSE_HISTORY_STATUS, ParseHistoryEntry, friendlyParseError(), isRetriableFailure(), PARSE_ERROR_MESSAGES (+8 more)
 
 ### Community 64 - "Next Config & Package"
 Cohesion: 0.15
 Nodes (11): nextConfig, withNextIntl, withSerwist, ignoreScripts, name, overrides, @types/react, @types/react-dom (+3 more)
 
 ### Community 66 - "Bottom Nav & Startups"
-Cohesion: 0.18
-Nodes (10): canShareExternalAuthUrl, copyAndOpenExternalAuthUrl, copyExternalAuthUrl, isIos, isStandalonePwa, mockPush, mockRefresh, mockRefreshLinkedAccounts (+2 more)
+Cohesion: 0.21
+Nodes (12): CategoryBadge(), CategoryBadgeProps, IngredientsPreview(), IngredientsPreviewProps, isRecipeCategory(), ParseResult(), CATEGORY_COLORS, CATEGORY_VISUAL_STYLES (+4 more)
 
 ### Community 67 - "Share Action & Visibility"
-Cohesion: 0.18
-Nodes (11): ParseInfoBanner(), ParseRecipePage(), Tab, ParseBackgroundBanner(), ParseBackgroundBannerProps, ParsePhoto(), ParsedRecipesSheet(), PrivateRecipeGuard() (+3 more)
+Cohesion: 0.09
+Nodes (22): ParseInfoBanner(), ParseRecipePage(), Tab, BottomNavState, navigate, { routerPrefetch }, ParseBackgroundBanner(), ParseBackgroundBannerProps (+14 more)
 
 ### Community 68 - "Release Config"
 Cohesion: 0.17
@@ -486,11 +499,11 @@ Cohesion: 0.13
 Nodes (15): Architecture Decisions, better-auth, Curated ingredient input (tap, don't type), Custom navigation stack, Dexie.js for local storage, Multi-provider AI chain, Next.js 16 App Router, Parse queue (job-based, not synchronous) (+7 more)
 
 ### Community 71 - "route.test.ts"
-Cohesion: 0.23
-Nodes (8): RecipeHero(), RecipeHeroProps, RecipeImage(), RecipeImageProps, groupWithIndex(), ServingsCalculator(), IngredientRow(), useServingsCalculator()
+Cohesion: 0.19
+Nodes (10): IngredientsSheet(), IngredientsSheetProps, OverviewSlide(), RecipeImage(), RecipeImageProps, groupWithIndex(), ServingsCalculator(), ServingsCalculatorProps (+2 more)
 
 ### Community 73 - "Collection Sheet & Row"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (12): Axiom — server logs, Events, How to add an event, Observability, PostHog — product analytics, PostHog proxy, Sentry — errors & tracing, Server logs in Axiom (+4 more)
 
 ### Community 74 - "PWA Manifest"
@@ -498,20 +511,20 @@ Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, orientation, short_name, start_url (+1 more)
 
 ### Community 75 - "Share Action Test"
-Cohesion: 0.08
-Nodes (23): ShareAction(), ShareActionProps, ShareLinks(), ShareLinksProps, privateRecipe, session, setRecipeVisibility, toast (+15 more)
+Cohesion: 0.09
+Nodes (21): ShareAction(), ShareActionProps, ShareLinks(), ShareLinksProps, privateRecipe, session, setRecipeVisibility, telegram (+13 more)
 
 ### Community 76 - "Public Recipe Page"
 Cohesion: 0.15
 Nodes (13): API Routes, Auth, Collections, Images, Ingredients, Maintenance mode, Pantry, Parse queue (+5 more)
 
 ### Community 77 - "index.test.tsx"
-Cohesion: 0.17
-Nodes (9): ONE_SECTION, TWO_SECTIONS, ParseHistoryStatus, ParseJobStatus, RECIPE_STATUSES, RecipeStatus, SYNC_ENTITY_TYPES, SYNC_NOTIFICATION_TYPES (+1 more)
+Cohesion: 0.15
+Nodes (12): mockRecipes, RecipeEditView(), RecipeEditViewProps, mockRecipe, getRecipe(), ParseHistoryStatus, ParseJobStatus, RECIPE_STATUSES (+4 more)
 
 ### Community 78 - "Database & Parsed Recipes"
-Cohesion: 0.17
-Nodes (12): Animation, API routes, Auth (PWA external-browser sign-in & linking), Database, Gotchas, Navigation, Observability, Overflow detection (+4 more)
+Cohesion: 0.15
+Nodes (13): Animation, API routes, Auth (PWA external-browser sign-in & linking), Database, Gotchas, Navigation, Observability, Overflow detection (+5 more)
 
 ### Community 82 - "Recipe Card Context Menu"
 Cohesion: 0.28
@@ -530,15 +543,15 @@ Cohesion: 0.29
 Nodes (7): Build notes, CI pipeline (`.github/workflows/ci.yml`), Deploy to Vercel, Environment variables on Vercel, GitHub Actions secrets, Manual deploy (without release-it), Release workflow (`.github/workflows/release.yml`)
 
 ### Community 104 - "Recipe"
-Cohesion: 0.38
-Nodes (5): Badge(), BadgeProps, CATEGORY_STYLES, CategoryStyle, getCategoryStyle()
+Cohesion: 0.27
+Nodes (7): CardThumbnail(), CardThumbnailProps, Badge(), BadgeProps, CATEGORY_STYLES, CategoryStyle, getCategoryStyle()
 
 ### Community 105 - "Auth & Sync"
 Cohesion: 0.18
 Nodes (11): Auth & Sync, Authentication, Diff engine (`lib/db/sync-diff.ts`), Fire-and-forget sync on writes (`lib/db/supabase-sync.ts`), Providers, PWA Google sign-in & linking (external browser), Reconciliation (`hooks/use-sync-on-login.ts`), Session gating in API routes (+3 more)
 
 ### Community 106 - "Library Map"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (12): AI & parsing, Auth, Database (local — Dexie), Drizzle / Postgres, Hooks, Infrastructure, Library Map, Misc (+4 more)
 
 ### Community 107 - "parse-history.ts"
@@ -546,11 +559,11 @@ Cohesion: 0.29
 Nodes (6): Commands, Docs, Features, Getting started, RecipAI, Stack
 
 ### Community 108 - "route.test.ts"
-Cohesion: 0.09
-Nodes (27): BottomNav, ClientShell(), ParseJobWatcher, MaintenanceListener(), { error }, DisplayEntry, PageStack(), Status (+19 more)
+Cohesion: 0.08
+Nodes (25): BottomNav, ClientShell(), ParseJobWatcher, LaunchSplash(), MaintenanceListener(), { error }, DisplayEntry, PageStack() (+17 more)
 
 ### Community 109 - "Local Storage & Sync"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Anonymous use, Ingredient vocabulary stays local for anonymous users, Key constraint, Local Storage & Sync, Read path (reconciliation), Service worker (`@serwist/next`), The core idea, Write path
 
 ### Community 110 - "Add an API Route"
@@ -562,8 +575,8 @@ Cohesion: 0.10
 Nodes (21): `app_config`, Auth tables, Collection, `collections`, Data Model, Dexie (local / offline), `ingredients`, Key types (`lib/db/schema.ts`) (+13 more)
 
 ### Community 112 - "index.test.tsx"
-Cohesion: 0.07
-Nodes (34): buildEnrichmentPrompt(), POST(), enrichedIngredient, {
+Cohesion: 0.10
+Nodes (22): enrichedIngredient, {
   mockInsertOnConflict,
   mockSelectWhere,
   mockSelectLimit,
@@ -571,7 +584,7 @@ Nodes (34): buildEnrichmentPrompt(), POST(), enrichedIngredient, {
   mockTransaction,
   mockDeleteWhere,
   mockExecute,
-}, mockSession, provisionalEntry, POST(), insertValues (+26 more)
+}, mockSession, provisionalEntry, POST(), insertValues, mockRecipe, updateSet (+14 more)
 
 ### Community 113 - "linked-accounts.tsx"
 Cohesion: 0.47
@@ -594,48 +607,80 @@ Cohesion: 0.29
 Nodes (6): Before pushing, Commands, Conventions, Run Tests, Stack, Test file locations
 
 ### Community 118 - "use-sync-actions.ts"
-Cohesion: 0.23
-Nodes (9): isSignedIn(), setIsSignedIn(), enrichIngredient(), EnrichResponse, mockFetch, {
-  mockIsSignedIn,
-  mockPantryModify,
-  mockRecipesToArray,
-  mockRecipesUpdate,
-  mockIngredientsDelete,
-  mockIngredientsUpdate,
-  mockSyncUpdate,
-}, syncFetch(), TRANSIENT_STATUSES (+1 more)
+Cohesion: 0.18
+Nodes (15): isSignedIn(), setIsSignedIn(), createCollection(), deleteCollection(), renameCollection(), syncCreateCollection(), syncDeleteCollection(), syncUpdateCollection() (+7 more)
 
 ### Community 119 - "index.tsx"
 Cohesion: 0.08
-Nodes (25): CardFooter(), CardFooterProps, CardThumbnail(), CardThumbnailProps, clampMenuPos(), RecipeCard, RecipeCardProps, baseProps (+17 more)
+Nodes (26): CollectionRow(), CollectionRowProps, AddToCollectionSheet(), AddToCollectionSheetProps, collections, CollectionsShelf(), CollectionsShelfProps, CollectionTab() (+18 more)
+
+### Community 160 - "route.ts"
+Cohesion: 0.19
+Nodes (7): isCompleteRecipe(), isValidDate(), PUT(), RecipeSnapshot, VisibilityBody, params, recipe
 
 ### Community 161 - "route.ts"
-Cohesion: 0.16
-Nodes (17): buildInitialSections(), getDefaultValues(), AdditivePicker(), AdditivePickerProps, modifierKeys, hasLegacyShape(), LegacyRecord, migratedIngredient() (+9 more)
+Cohesion: 0.18
+Nodes (14): buildInitialSections(), getDefaultValues(), hasLegacyShape(), LegacyRecord, migratedIngredient(), migratedStep(), migrateLegacyRecipeShapes(), { mockToArray, mockUpdateRecipe } (+6 more)
+
+### Community 162 - "route.ts"
+Cohesion: 0.27
+Nodes (6): GET(), POST(), { selectLimit }, isTrackingParam(), normalizeSourceUrl(), TRACKING_PARAMS
+
+### Community 163 - "parse-history.ts"
+Cohesion: 0.33
+Nodes (8): syncParseHistory(), bulkPutParseHistory(), clearParseHistory(), getParseHistory(), pruneParseHistory(), recordParseHistory(), entry, { toArray, primaryKeys, reverse, limit, orderBy }
+
+### Community 164 - "sync-context.tsx"
+Cohesion: 0.33
+Nodes (7): useSyncOnLogin(), SyncContext, SyncContextValue, SyncProvider(), useTriggerSync(), Consumer(), mockTriggerSync
+
+### Community 165 - "external-auth-config.ts"
+Cohesion: 0.31
+Nodes (7): assertSeparateAuthOrigins(), AuthEnvironment, DEVELOPMENT_AUTH_HOSTS, ExternalAuthUrlOptions, getAllowedAuthHosts(), PRODUCTION_AUTH_HOSTS, validatePwaClient()
+
+### Community 166 - "recipe-result.ts"
+Cohesion: 0.28
+Nodes (7): IncompleteContext, IncompleteReason, NotRecipeResult, RecipeSource, rejectIncomplete(), requireCompleteRecipe(), completeRecipe
+
+### Community 167 - "index.test.tsx"
+Cohesion: 0.25
+Nodes (6): AddPantryPicker(), commitLabel(), MILK, milkPantryItem, onClose, TOMATO
 
 ### Community 168 - "index.tsx"
+Cohesion: 0.25
+Nodes (8): Auth — silent sign-in, Environment detection & lifecycle, How it launches, Navigation, One identity across web and Telegram, Setup (BotFather / ops), Telegram Mini App, What changes inside Telegram
+
+### Community 169 - "sync-diff.test.ts"
 Cohesion: 0.29
-Nodes (8): CollectionRow(), CollectionRowProps, AddToCollectionSheet(), AddToCollectionSheetProps, collections, CollectionsShelfProps, RecipesPageState, Collection
+Nodes (6): computeDiff(), SyncDiff, SyncItem, d1, d2, Item
+
+### Community 170 - "register"
+Cohesion: 0.38
+Nodes (3): BasicInfo(), register(), shouldPrewarmLocalEmbed()
+
+### Community 171 - "pending-device-auth.test.ts"
+Cohesion: 0.52
+Nodes (4): DeviceAuthorization, clearPendingDeviceAuth(), loadPendingDeviceAuth(), savePendingDeviceAuth()
 
 ## Knowledge Gaps
-- **749 isolated node(s):** `husky.sh script`, `intlMiddleware`, `inter`, `fraunces`, `PushState` (+744 more)
+- **772 isolated node(s):** `husky.sh script`, `intlMiddleware`, `inter`, `fraunces`, `{ isTelegram }` (+767 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **58 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **61 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `React 19` connect `Rate Limiting API` to `Parse History UI`, `Action Buttons & Cards`, `Upload & Delete API`, `External Device Auth`, `Dependencies & Libraries`, `Photo AI & Recipe`, `Home & Parse Forms`, `Recipe Form UI`, `Recipe Detail & Badges`, `Push Notifications & Profile`, `Ingredients List & Localization`, `Pantry Navigation`, `Filter & Sort UI`, `Recipe Matching & Filter`, `Sync & Diff Engine`, `Subscribe & Delete API`, `Parse Job Notifications`, `Device Auth Flow`, `Cooking Carousel & Nav`, `Session & Supabase Sync`, `Recipes List & Skeleton`, `Bottom Sheet & Collection Modal`, `Category Styles & Picker`, `index.tsx`, `Recipe Virtual List`, `App Config & Maintenance`, `Login Page & Device Auth`, `External Auth Waiting`, `Recipe Form Test & Normalize`, `Shadcn Select & Separator`, `use-bottom-nav.ts`, `Navigation Stack`, `Card Footer & Badge`, `Recipe Actions & Video URL`, `Ingredient DB & Vocabulary`, `sync-context.tsx`, `prewarm-recipe-images.test.ts`, `Global Error & Collections`, `Edit/New Recipe Page`, `Page Transition Template`, `Bottom Nav & Startups`, `Share Action & Visibility`, `route.test.ts`, `Share Action Test`, `index.test.tsx`, `Recipe`, `route.test.ts`, `linked-accounts.tsx`, `index.tsx`?**
-  _High betweenness centrality (0.214) - this node is a cross-community bridge._
-- **Why does `Vitest` connect `Upload & Delete API` to `Parse History UI`, `Route Layout & Auth`, `Schema Recipe Parsing`, `Action Buttons & Cards`, `Session & Delete API`, `Enrichment & AI Prompt`, `External Device Auth`, `Collection CRUD API`, `Photo AI & Recipe`, `Recipe Detail & Badges`, `Ingredients List & Localization`, `Apify Social Content`, `Pantry Navigation`, `Filter & Sort UI`, `Recipe Card & Save`, `Recipe Matching & Filter`, `Linked Accounts & Auth`, `Sync & Diff Engine`, `Dev Dependencies & Tools`, `Subscribe & Delete API`, `Parse Job Notifications`, `Device Auth Flow`, `Cooking Carousel & Nav`, `Session & Supabase Sync`, `Recipes List & Skeleton`, `route.ts`, `Rate Limiting API`, `Bottom Sheet & Collection Modal`, `Category Styles & Picker`, `Telemetry & Analytics`, `index.tsx`, `Telegram Auth API`, `Recipe Virtual List`, `App Config & Maintenance`, `Auth Database Schema`, `Login Page & Device Auth`, `External Auth Waiting`, `API Fetch & Maintenance`, `Recipe Form Test & Normalize`, `use-bottom-nav.ts`, `Cooking Steps UI`, `Navigation Stack`, `Recipe Actions & Video URL`, `Card & Label Components`, `Ingredient DB & Vocabulary`, `sync-context.tsx`, `prewarm-recipe-images.test.ts`, `Launch Splash & Theme Toggle`, `Global Error & Collections`, `Edit/New Recipe Page`, `Bottom Nav & Startups`, `Share Action & Visibility`, `Share Action Test`, `index.test.tsx`, `Recipe Card Context Menu`, `route.test.ts`, `index.test.tsx`, `linked-accounts.tsx`, `use-sync-actions.ts`, `index.tsx`?**
-  _High betweenness centrality (0.209) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `Dependencies & Libraries` to `Next Config & Package`, `Upload & Delete API`, `Project Documentation & Stack`, `index.tsx`, `ImageKit Integration`, `index.test.tsx`?**
-  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Why does `React 19` connect `route.test.ts` to `Parse History UI`, `Action Buttons & Cards`, `Session & Delete API`, `External Device Auth`, `Dependencies & Libraries`, `Photo AI & Recipe`, `Home & Parse Forms`, `Recipe Form UI`, `Pantry Ingredient Picker`, `Recipe Detail & Badges`, `Push Notifications & Profile`, `Ingredients List & Localization`, `Pantry Navigation`, `Filter & Sort UI`, `Recipe Matching & Filter`, `Sync & Diff Engine`, `Subscribe & Delete API`, `Parse Job Notifications`, `Cooking Carousel & Nav`, `Session & Supabase Sync`, `Recipes List & Skeleton`, `Rate Limiting API`, `Bottom Sheet & Collection Modal`, `Category Styles & Picker`, `Ingredient Display & Localization`, `index.test.tsx`, `sync-context.tsx`, `Recipe Virtual List`, `App Config & Maintenance`, `external-auth-client.ts`, `External Auth Waiting`, `Recipe Form Test & Normalize`, `Shadcn Select & Separator`, `use-bottom-nav.ts`, `Navigation Stack`, `Card Footer & Badge`, `Recipe Actions & Video URL`, `Ingredient DB & Vocabulary`, `sync-context.tsx`, `prewarm-recipe-images.test.ts`, `Page Transition Template`, `Share Action & Visibility`, `route.test.ts`, `Share Action Test`, `index.test.tsx`, `Recipe`, `linked-accounts.tsx`, `index.tsx`?**
+  _High betweenness centrality (0.212) - this node is a cross-community bridge._
+- **Why does `Vitest` connect `Rate Limiting API` to `Parse History UI`, `Route Layout & Auth`, `Schema Recipe Parsing`, `Action Buttons & Cards`, `Upload & Delete API`, `Session & Delete API`, `Enrichment & AI Prompt`, `External Device Auth`, `Collection CRUD API`, `Photo AI & Recipe`, `Home & Parse Forms`, `Pantry Ingredient Picker`, `Recipe Detail & Badges`, `Ingredients List & Localization`, `Apify Social Content`, `Filter & Sort UI`, `Recipe Card & Save`, `Recipe Matching & Filter`, `Linked Accounts & Auth`, `Sync & Diff Engine`, `Dev Dependencies & Tools`, `Subscribe & Delete API`, `Parse Job Notifications`, `Device Auth Flow`, `Cooking Carousel & Nav`, `Session & Supabase Sync`, `Recipes List & Skeleton`, `route.ts`, `route.ts`, `route.ts`, `parse-history.ts`, `Bottom Sheet & Collection Modal`, `Category Styles & Picker`, `Ingredient Display & Localization`, `index.test.tsx`, `external-auth-config.ts`, `Telegram Auth API`, `Telemetry & Analytics`, `App Config & Maintenance`, `Auth Database Schema`, `external-auth-client.ts`, `External Auth Waiting`, `pending-device-auth.test.ts`, `sync-diff.test.ts`, `Recipe Form Test & Normalize`, `Login Page & Device Auth`, `use-bottom-nav.ts`, `API Fetch & Maintenance`, `Cooking Steps UI`, `Navigation Stack`, `Recipe Actions & Video URL`, `Card & Label Components`, `Ingredient DB & Vocabulary`, `sync-context.tsx`, `prewarm-recipe-images.test.ts`, `Launch Splash & Theme Toggle`, `Global Error & Collections`, `Edit/New Recipe Page`, `sync-context.tsx`, `Bottom Nav & Startups`, `Share Action & Visibility`, `recipe-result.ts`, `Share Action Test`, `index.test.tsx`, `Recipe Card Context Menu`, `register`, `route.test.ts`, `index.test.tsx`, `linked-accounts.tsx`, `use-sync-actions.ts`, `index.tsx`?**
+  _High betweenness centrality (0.187) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `Dependencies & Libraries` to `Next Config & Package`, `Upload & Delete API`, `Project Documentation & Stack`, `ImageKit Integration`, `index.test.tsx`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **What connects `husky.sh script`, `intlMiddleware`, `inter` to the rest of the system?**
-  _749 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _772 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Parse History UI` be split into smaller, more focused modules?**
-  _Cohesion score 0.11587301587301588 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11290322580645161 - nodes in this community are weakly interconnected._
 - **Should `Route Layout & Auth` be split into smaller, more focused modules?**
-  _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Schema Recipe Parsing` be split into smaller, more focused modules?**
-  _Cohesion score 0.0946969696969697 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11231884057971014 - nodes in this community are weakly interconnected._
