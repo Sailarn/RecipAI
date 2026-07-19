@@ -27,6 +27,13 @@ vi.mock("@/lib/public-recipes/visibility-client", () => ({
 }));
 vi.mock("sonner", () => ({ toast }));
 
+const telegram = vi.hoisted(() => ({
+  webApp: undefined as { openTelegramLink: (url: string) => void } | undefined,
+}));
+vi.mock("@/components/telegram-provider", () => ({
+  useTelegram: () => telegram,
+}));
+
 const privateRecipe: Recipe = {
   id: "recipe-1",
   title: "Soup",
@@ -57,6 +64,7 @@ describe("ShareAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     session.data = { user: { id: "user-1" } };
+    telegram.webApp = undefined;
     setRecipeVisibility.mockResolvedValue(undefined);
     updateRecipe.mockResolvedValue(undefined);
     setNavigatorProperty("share", undefined);
@@ -179,6 +187,21 @@ describe("ShareAction", () => {
     expect(
       screen.queryByRole("dialog", { name: "Share recipe" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shares via Telegram's native sheet when in the Mini App", async () => {
+    const openTelegramLink = vi.fn();
+    telegram.webApp = { openTelegramLink };
+    const nativeShare = vi.fn();
+    setNavigatorProperty("share", nativeShare);
+    renderShareAction({ ...privateRecipe, isPublic: true });
+    await openSharePopover();
+    await userEvent.click(screen.getByRole("button", { name: "More options" }));
+
+    expect(openTelegramLink).toHaveBeenCalledWith(
+      expect.stringContaining("https://t.me/share/url?url="),
+    );
+    expect(nativeShare).not.toHaveBeenCalled();
   });
 
   it("closes when the user presses outside the popover", async () => {

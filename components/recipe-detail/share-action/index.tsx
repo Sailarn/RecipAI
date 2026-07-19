@@ -3,6 +3,7 @@
 import { Share2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useTelegram } from "@/components/telegram-provider";
 import { isMaintenanceError } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { updateRecipe } from "@/lib/db/recipes";
@@ -23,6 +24,7 @@ const triggerClass =
 
 export function ShareAction({ locale, recipe }: ShareActionProps) {
   const { data: session } = authClient.useSession();
+  const { webApp } = useTelegram();
   const rootRef = useRef<HTMLDivElement>(null);
   const recipePath = routes.recipes.detail(locale, recipe.id);
   const [shareUrl, setShareUrl] = useState(recipePath);
@@ -72,6 +74,13 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
 
   async function shareMoreOptions() {
     setIsOpen(false);
+    // Inside Telegram, hand off to the native share-to-chat sheet instead of
+    // the Web Share API (which is unavailable in the WebView).
+    if (webApp?.openTelegramLink) {
+      const shareLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(recipe.title)}`;
+      webApp.openTelegramLink(shareLink);
+      return;
+    }
     try {
       if (navigator.share) {
         await navigator.share({ title: recipe.title, url: shareUrl });
