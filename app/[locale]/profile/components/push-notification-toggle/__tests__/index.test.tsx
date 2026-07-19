@@ -7,6 +7,11 @@ vi.mock("@/lib/hooks/use-push-subscription", () => ({
   usePushSubscription: vi.fn(),
 }));
 
+const { isTelegram } = vi.hoisted(() => ({ isTelegram: { value: false } }));
+vi.mock("@/components/telegram-provider", () => ({
+  useIsTelegram: () => isTelegram.value,
+}));
+
 type PushState = ReturnType<typeof usePushSubscription>;
 
 function mockPush(overrides: Partial<PushState>): void {
@@ -22,10 +27,20 @@ function mockPush(overrides: Partial<PushState>): void {
 }
 
 afterEach(() => {
+  isTelegram.value = false;
   vi.clearAllMocks();
 });
 
 describe("PushNotificationToggle", () => {
+  it("renders nothing inside Telegram", () => {
+    isTelegram.value = true;
+    mockPush({ isSupported: true });
+
+    const { container } = render(<PushNotificationToggle />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("renders nothing when push is unsupported", () => {
     mockPush({ isSupported: false });
 
