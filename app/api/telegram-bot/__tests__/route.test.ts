@@ -147,6 +147,15 @@ describe("POST /api/telegram-bot", () => {
     expect(greeting).toContain("there");
   });
 
+  it("recognises a Mini App account matched by accountId", async () => {
+    selectWhere.mockResolvedValue([{ accountId: "42", userId: "user-3" }]);
+
+    await POST(makeRequest(telegramMessage({ text: "/start" })));
+
+    const [, greeting] = vi.mocked(sendTelegramMessage).mock.calls[0];
+    expect(greeting).toContain("Alex");
+  });
+
   it("asks for a link when the message has no URL", async () => {
     selectWhere.mockResolvedValue([accountWithTelegramId("42")]);
     vi.mocked(extractUrl).mockReturnValue(null);

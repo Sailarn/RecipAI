@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { account } from "@/db/schema/auth";
@@ -19,10 +19,15 @@ function isAuthenticTelegramRequest(req: NextRequest): boolean {
   return req.headers.get(WEBHOOK_SECRET_HEADER) === expected;
 }
 
+// Both Telegram sign-in paths store the Telegram user id, but differently:
+// Mini App accounts (providerId "telegram") set `accountId` to the id directly,
+// while OIDC accounts ("telegram-oidc") carry it as the `sub` claim of the
+// id token. Match either so the bot reaches users from both entry points.
 function accountMatchesTelegramId(
   candidate: TelegramAccount,
   telegramId: string,
 ): boolean {
+  if (candidate.accountId === telegramId) return true;
   if (!candidate.idToken) return false;
   try {
     const payload = JSON.parse(
@@ -42,7 +47,7 @@ async function findLinkedAccount(
   const telegramAccounts = await db
     .select()
     .from(account)
-    .where(eq(account.providerId, "telegram-oidc"));
+    .where(inArray(account.providerId, ["telegram-oidc", "telegram"]));
   return telegramAccounts.find((candidate) =>
     accountMatchesTelegramId(candidate, telegramId),
   );

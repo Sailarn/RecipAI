@@ -57,6 +57,7 @@ export const auth = betterAuth({
       "/external-link/generate": { window: 60, max: 20 },
       "/external-link/redeem": { window: 60, max: 10 },
       "/external-link/device-session": { window: 60, max: 20 },
+      "/telegram/miniapp/signin": { window: 60, max: 10 },
     },
   },
   plugins: [
@@ -70,7 +71,12 @@ export const auth = betterAuth({
     passkey(),
     telegram({
       miniApp: {
-        enabled: false,
+        // Mini App sign-in: the WebView launches with a signed `initData`
+        // payload which the plugin validates (HMAC-SHA256 with the bot token)
+        // before issuing a session. See specs/telegram-mini-app.md.
+        enabled: true,
+        validateInitData: true,
+        allowAutoSignin: true,
       },
       botToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
       botUsername: process.env.TELEGRAM_BOT_USERNAME ?? "",
@@ -78,6 +84,14 @@ export const auth = betterAuth({
       oidc: {
         enabled: true,
         clientSecret: process.env.TELEGRAM_OIDC_CLIENT_SECRET ?? "",
+        // Stamp the Telegram id onto the user so an OIDC (web) login and a
+        // Mini App sign-in for the same Telegram account resolve to ONE user:
+        // the Mini App path looks up an existing user by `telegramId` before
+        // creating a new one. Without this, OIDC users have a null telegramId
+        // and would be duplicated on first Mini App launch.
+        mapOIDCProfileToUser: (claims) => ({
+          telegramId: String(claims.sub),
+        }),
       },
     }),
   ],
