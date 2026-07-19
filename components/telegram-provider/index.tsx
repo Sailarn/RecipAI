@@ -8,6 +8,7 @@ import {
   type TelegramUser,
   type TelegramWebApp,
 } from "@/lib/telegram/webapp";
+import { trackEvent } from "@/lib/telemetry";
 import {
   type AutoSignInStatus,
   useTelegramAutoSignIn,
@@ -55,6 +56,9 @@ function initializeWebApp(webApp: TelegramWebApp): void {
   webApp.disableVerticalSwipes?.();
   document.documentElement.classList.add("telegram");
   unregisterServiceWorkers();
+  trackEvent("telegram_mini_app_launched", {
+    hasStartParam: Boolean(webApp.initDataUnsafe.start_param),
+  });
 }
 
 type TelegramState = {

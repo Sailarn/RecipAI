@@ -59,6 +59,7 @@ export type TelemetryEvents = {
   push_subscribed: undefined;
   push_unsubscribed: undefined;
   pwa_installed: undefined;
+  telegram_mini_app_launched: { hasStartParam: boolean };
   parse_history_viewed: undefined;
   sync_review_resolved: { choice: string };
   // server-side mirrors (cost/abuse alerting)
