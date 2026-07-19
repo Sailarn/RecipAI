@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { isStandalonePwa } from "@/lib/pwa";
+import { isTelegramEnvironment } from "@/lib/telegram/webapp";
 
 const SPLASH_DURATION_MS = 1000;
 
@@ -19,8 +20,9 @@ export function LaunchSplash() {
   const [visible, setVisible] = useState(false);
 
   useBeforePaintEffect(() => {
-    // The installed PWA already shows its splash via public/pwa-launch.html.
-    if (isStandalonePwa()) return;
+    // The installed PWA already shows its splash via public/pwa-launch.html;
+    // Telegram shows its own launch UI until webApp.ready() fires.
+    if (isStandalonePwa() || isTelegramEnvironment()) return;
 
     setVisible(true);
     const timer = setTimeout(() => setVisible(false), SPLASH_DURATION_MS);
