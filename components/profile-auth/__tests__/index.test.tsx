@@ -72,6 +72,11 @@ vi.mock("@/components/login-view", () => ({
   LoginView: () => null,
 }));
 
+const telegram = vi.hoisted(() => ({ isTelegram: false }));
+vi.mock("@/components/telegram-provider", () => ({
+  useIsTelegram: () => telegram.isTelegram,
+}));
+
 import { authClient } from "@/lib/auth/auth-client";
 import { routes } from "@/lib/routes";
 import { ProfileAuth } from "../index";
@@ -85,6 +90,7 @@ const sessionUser = {
 beforeEach(() => {
   vi.clearAllMocks();
   isStandalonePwa.mockReturnValue(false);
+  telegram.isTelegram = false;
   process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
 });
 
@@ -156,6 +162,15 @@ describe("ProfileAuth", () => {
     it("renders linked-accounts panel", () => {
       render(<ProfileAuth />);
       expect(screen.getByTestId("linked-accounts")).toBeInTheDocument();
+    });
+
+    it("hides the linked-accounts panel inside Telegram", () => {
+      telegram.isTelegram = true;
+
+      render(<ProfileAuth />);
+
+      expect(screen.getByText("Jane Doe")).toBeInTheDocument();
+      expect(screen.queryByTestId("linked-accounts")).not.toBeInTheDocument();
     });
 
     it("keeps normal Google linking in a browser tab", async () => {

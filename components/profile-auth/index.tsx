@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { LoginView } from "@/components/login-view";
+import { useIsTelegram } from "@/components/telegram-provider";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
 import {
@@ -22,6 +23,7 @@ import { UserCard } from "./user-card";
 
 export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
+  const isTelegram = useIsTelegram();
   const router = useRouter();
   const navigate = useNavigate();
   const { locale } = useParams<{ locale: string }>();
@@ -139,14 +141,16 @@ export function ProfileAuth() {
             <Skeleton className="h-11 w-full rounded-[14px]" />
           </div>
         </div>
-        <LinkedAccounts
-          isLoading
-          linkedProviders={[]}
-          telegramLinked={false}
-          passkeyAdded={false}
-          onLinkGoogle={() => {}}
-          onAddPasskey={() => {}}
-        />
+        {!isTelegram && (
+          <LinkedAccounts
+            isLoading
+            linkedProviders={[]}
+            telegramLinked={false}
+            passkeyAdded={false}
+            onLinkGoogle={() => {}}
+            onAddPasskey={() => {}}
+          />
+        )}
       </>
     );
   }
@@ -176,14 +180,18 @@ export function ProfileAuth() {
             {externalLinkError}
           </p>
         )}
-        <LinkedAccounts
-          isLoading={isLoading}
-          linkedProviders={linkedProviders}
-          telegramLinked={telegramLinked}
-          passkeyAdded={passkeyAdded}
-          onLinkGoogle={handleLinkGoogle}
-          onAddPasskey={handleAddPasskey}
-        />
+        {/* Account linking (Google/Passkey/Telegram) is broken in the Telegram
+            WebView and redundant with the Telegram identity — hide it there. */}
+        {!isTelegram && (
+          <LinkedAccounts
+            isLoading={isLoading}
+            linkedProviders={linkedProviders}
+            telegramLinked={telegramLinked}
+            passkeyAdded={passkeyAdded}
+            onLinkGoogle={handleLinkGoogle}
+            onAddPasskey={handleAddPasskey}
+          />
+        )}
       </div>
     );
   }
