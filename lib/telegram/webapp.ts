@@ -41,6 +41,20 @@ export type TelegramMainButton = {
   offClick: (handler: () => void) => void;
 };
 
+export type TelegramHapticStyle =
+  | "light"
+  | "medium"
+  | "heavy"
+  | "rigid"
+  | "soft";
+export type TelegramHapticNotification = "error" | "success" | "warning";
+
+export type TelegramHapticFeedback = {
+  impactOccurred: (style: TelegramHapticStyle) => void;
+  notificationOccurred: (type: TelegramHapticNotification) => void;
+  selectionChanged: () => void;
+};
+
 export type TelegramHomeScreenStatus =
   | "unsupported"
   | "unknown"
@@ -73,6 +87,7 @@ export type TelegramWebApp = {
   ) => void;
   BackButton: TelegramBackButton;
   MainButton: TelegramMainButton;
+  HapticFeedback?: TelegramHapticFeedback;
 };
 
 type TelegramWindow = Window & {

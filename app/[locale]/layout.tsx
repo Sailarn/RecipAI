@@ -10,6 +10,7 @@ import { StatusBarScrim } from "@/components/status-bar-scrim";
 import { TelegramProvider } from "@/components/telegram-provider";
 import { ThemeColorSync } from "@/components/theme-color-sync";
 import { type Locale, locales } from "@/i18n/request";
+import { PlatformProvider } from "@/lib/platform";
 import { THEME } from "@/lib/theme";
 import "../globals.css";
 
@@ -109,9 +110,11 @@ export default async function LocaleLayout({
         <StatusBarScrim />
         <NextIntlClientProvider messages={messages}>
           <TelegramProvider>
-            <LaunchSplash />
-            <ThemeColorSync />
-            <ClientShell>{children}</ClientShell>
+            <PlatformProvider>
+              <LaunchSplash />
+              <ThemeColorSync />
+              <ClientShell>{children}</ClientShell>
+            </PlatformProvider>
           </TelegramProvider>
         </NextIntlClientProvider>
         <Analytics />
