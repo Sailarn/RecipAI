@@ -72,9 +72,17 @@ vi.mock("@/components/login-view", () => ({
   LoginView: () => null,
 }));
 
-const telegram = vi.hoisted(() => ({ isTelegram: false }));
-vi.mock("@/components/telegram-provider", () => ({
-  useIsTelegram: () => telegram.isTelegram,
+const platform = vi.hoisted(() => ({
+  features: { accountLinking: true } as Record<string, boolean>,
+}));
+vi.mock("@/lib/platform", () => ({
+  Capability: ({
+    name,
+    children,
+  }: {
+    name: string;
+    children: React.ReactNode;
+  }) => (platform.features[name] ? children : null),
 }));
 
 import { authClient } from "@/lib/auth/auth-client";
@@ -90,7 +98,7 @@ const sessionUser = {
 beforeEach(() => {
   vi.clearAllMocks();
   isStandalonePwa.mockReturnValue(false);
-  telegram.isTelegram = false;
+  platform.features.accountLinking = true;
   process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
 });
 
@@ -164,8 +172,8 @@ describe("ProfileAuth", () => {
       expect(screen.getByTestId("linked-accounts")).toBeInTheDocument();
     });
 
-    it("hides the linked-accounts panel inside Telegram", () => {
-      telegram.isTelegram = true;
+    it("hides the linked-accounts panel when linking is unavailable", () => {
+      platform.features.accountLinking = false;
 
       render(<ProfileAuth />);
 

@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { LoginView } from "@/components/login-view";
-import { useIsTelegram } from "@/components/telegram-provider";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
 import {
@@ -13,6 +12,7 @@ import {
   EXTERNAL_AUTH_TTL_MS,
   getExternalAuthUrl,
 } from "@/lib/auth/external-auth-config";
+import { Capability } from "@/lib/platform";
 import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
@@ -23,7 +23,6 @@ import { UserCard } from "./user-card";
 
 export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
-  const isTelegram = useIsTelegram();
   const router = useRouter();
   const navigate = useNavigate();
   const { locale } = useParams<{ locale: string }>();
@@ -141,7 +140,7 @@ export function ProfileAuth() {
             <Skeleton className="h-11 w-full rounded-[14px]" />
           </div>
         </div>
-        {!isTelegram && (
+        <Capability name="accountLinking">
           <LinkedAccounts
             isLoading
             linkedProviders={[]}
@@ -150,7 +149,7 @@ export function ProfileAuth() {
             onLinkGoogle={() => {}}
             onAddPasskey={() => {}}
           />
-        )}
+        </Capability>
       </>
     );
   }
@@ -180,9 +179,9 @@ export function ProfileAuth() {
             {externalLinkError}
           </p>
         )}
-        {/* Account linking (Google/Passkey/Telegram) is broken in the Telegram
-            WebView and redundant with the Telegram identity — hide it there. */}
-        {!isTelegram && (
+        {/* Account linking (Google/Passkey/Telegram) is unsupported in the
+            Telegram WebView and redundant with the Telegram identity. */}
+        <Capability name="accountLinking">
           <LinkedAccounts
             isLoading={isLoading}
             linkedProviders={linkedProviders}
@@ -191,7 +190,7 @@ export function ProfileAuth() {
             onLinkGoogle={handleLinkGoogle}
             onAddPasskey={handleAddPasskey}
           />
-        )}
+        </Capability>
       </div>
     );
   }
