@@ -14,10 +14,10 @@ import { useState } from "react";
 import { InstallPwaSheet } from "@/components/install-pwa-sheet";
 import { ParseHistoryView } from "@/components/parse-history-view";
 import { ProfileAuth } from "@/components/profile-auth";
-import { useIsTelegram, useTelegram } from "@/components/telegram-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
+import { useFeature } from "@/lib/platform";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -42,8 +42,7 @@ export default function ProfilePage() {
     locales.find((candidateLocale) => candidateLocale !== locale) ?? locales[0];
   const { showInstallOption, install, isIOS } = usePwaInstall();
   const [showInstallSheet, setShowInstallSheet] = useState(false);
-  const isTelegram = useIsTelegram();
-  const { webApp } = useTelegram();
+  const canInstall = useFeature("pwaInstall");
 
   const handleInstall = async () => {
     if (isIOS) {
@@ -52,11 +51,6 @@ export default function ProfilePage() {
     }
     const prompted = await install();
     if (!prompted) setShowInstallSheet(true);
-  };
-
-  const handleAddToTelegramHomeScreen = () => {
-    trackEvent("pwa_installed", undefined);
-    webApp?.addToHomeScreen?.();
   };
 
   const toggleLanguage = (e: React.MouseEvent) => {
@@ -140,55 +134,28 @@ export default function ProfilePage() {
 
           <RowDivider />
 
-          {isTelegram
-            ? webApp?.addToHomeScreen && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleAddToTelegramHomeScreen}
-                    className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
-                  >
-                    <Smartphone
-                      size={ROW_ICON_SIZE}
-                      strokeWidth={ROW_ICON_STROKE_WIDTH}
-                      className={ROW_ICON_CLASSES}
-                    />
-                    <span className={ROW_LABEL_CLASSES}>
-                      Add to Home Screen
-                    </span>
-                    <ChevronRight
-                      size={CHEVRON_ICON_SIZE}
-                      strokeWidth={CHEVRON_STROKE_WIDTH}
-                      className="shrink-0 text-[var(--fg-3)]"
-                    />
-                  </button>
-                  <RowDivider />
-                </>
-              )
-            : showInstallOption && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleInstall}
-                    className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
-                  >
-                    <Smartphone
-                      size={ROW_ICON_SIZE}
-                      strokeWidth={ROW_ICON_STROKE_WIDTH}
-                      className={ROW_ICON_CLASSES}
-                    />
-                    <span className={ROW_LABEL_CLASSES}>
-                      Add to Home Screen
-                    </span>
-                    <ChevronRight
-                      size={CHEVRON_ICON_SIZE}
-                      strokeWidth={CHEVRON_STROKE_WIDTH}
-                      className="shrink-0 text-[var(--fg-3)]"
-                    />
-                  </button>
-                  <RowDivider />
-                </>
-              )}
+          {canInstall && showInstallOption && (
+            <>
+              <button
+                type="button"
+                onClick={handleInstall}
+                className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
+              >
+                <Smartphone
+                  size={ROW_ICON_SIZE}
+                  strokeWidth={ROW_ICON_STROKE_WIDTH}
+                  className={ROW_ICON_CLASSES}
+                />
+                <span className={ROW_LABEL_CLASSES}>Add to Home Screen</span>
+                <ChevronRight
+                  size={CHEVRON_ICON_SIZE}
+                  strokeWidth={CHEVRON_STROKE_WIDTH}
+                  className="shrink-0 text-[var(--fg-3)]"
+                />
+              </button>
+              <RowDivider />
+            </>
+          )}
 
           <div className={`${ROW_CLASSES} cursor-default`}>
             <Info
