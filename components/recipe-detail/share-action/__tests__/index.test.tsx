@@ -177,6 +177,7 @@ describe("ShareAction", () => {
     await userEvent.click(screen.getByRole("button", { name: "More options" }));
 
     expect(shareRecipe).toHaveBeenCalledWith({
+      id: "recipe-1",
       title: "Soup",
       url: expect.stringMatching(/\/en\/recipes\/recipe-1$/),
     });

@@ -137,8 +137,9 @@ See [Auth & Sync](../explanation/auth-and-sync.md) for the full flows. Custom cl
 | Method | Route | Auth | Description |
 |---|---|---|---|
 | `POST` | `/api/telegram-bot` | Webhook secret (optional) | Receives Telegram messages. Extracts URLs and enqueues parse jobs linked to the user's Telegram account. |
+| `POST` | `/api/telegram/share-recipe` | Session | Body `{ recipeId }`. For a **public** recipe, mints a prepared inline message (Bot API `savePreparedInlineMessage`) and returns `{ preparedMessageId }` for the Mini App's `WebApp.shareMessage`. See [Telegram Mini App](../explanation/telegram-mini-app.md). |
 
-The webhook secret (`TELEGRAM_WEBHOOK_SECRET`) is verified if set; if not set the route accepts all requests. Only one instance should own the webhook.
+The webhook secret (`TELEGRAM_WEBHOOK_SECRET`) is verified if set; if not set the route accepts all requests. Only one instance should own the webhook. On parse completion the bot's "saved" reply includes an **Open in RecipAI** button deep-linking (`startapp=recipe_<id>`) to the recipe in the Mini App.
 
 ---
 

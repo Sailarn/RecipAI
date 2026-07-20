@@ -45,4 +45,5 @@ export const api = {
   ingredientsEmbedMatch: "/api/ingredients/embed-match",
   pantry: "/api/pantry",
   pushSubscribe: "/api/push/subscribe",
+  telegramShareRecipe: "/api/telegram/share-recipe",
 } as const;

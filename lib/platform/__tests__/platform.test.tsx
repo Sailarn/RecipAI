@@ -35,7 +35,11 @@ describe("createWebPlatform", () => {
     vi.stubGlobal("navigator", { share });
     const platform = createWebPlatform();
 
-    const result = await platform.share.recipe({ title: "Soup", url: "u" });
+    const result = await platform.share.recipe({
+      id: "r1",
+      title: "Soup",
+      url: "u",
+    });
 
     expect(share).toHaveBeenCalledWith({ title: "Soup", url: "u" });
     expect(result).toBe("shared");
@@ -47,7 +51,11 @@ describe("createWebPlatform", () => {
     vi.stubGlobal("navigator", { clipboard: { writeText } });
     const platform = createWebPlatform();
 
-    const result = await platform.share.recipe({ title: "Soup", url: "u" });
+    const result = await platform.share.recipe({
+      id: "r1",
+      title: "Soup",
+      url: "u",
+    });
 
     expect(writeText).toHaveBeenCalledWith("u");
     expect(result).toBe("copied");
@@ -75,18 +83,71 @@ describe("createTelegramPlatform", () => {
     expect(haptic.selectionChanged).toHaveBeenCalledOnce();
   });
 
-  it("shares through the native Telegram sheet", async () => {
+  it("falls back to a link share when shareMessage is unsupported", async () => {
     const openTelegramLink = vi.fn();
     const platform = createTelegramPlatform({
       openTelegramLink,
     } as unknown as TelegramWebApp);
 
-    const result = await platform.share.recipe({ title: "Soup", url: "u" });
+    const result = await platform.share.recipe({
+      id: "r1",
+      title: "Soup",
+      url: "u",
+    });
 
     expect(openTelegramLink).toHaveBeenCalledWith(
       expect.stringContaining("https://t.me/share/url?url=u"),
     );
     expect(result).toBe("shared");
+  });
+
+  it("shares a prepared card via shareMessage when supported", async () => {
+    const shareMessage = vi.fn();
+    const openTelegramLink = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ preparedMessageId: "pmi-1" }),
+      }),
+    );
+    const platform = createTelegramPlatform({
+      shareMessage,
+      openTelegramLink,
+    } as unknown as TelegramWebApp);
+
+    const result = await platform.share.recipe({
+      id: "r1",
+      title: "Soup",
+      url: "u",
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/telegram/share-recipe",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(shareMessage).toHaveBeenCalledWith("pmi-1");
+    expect(openTelegramLink).not.toHaveBeenCalled();
+    expect(result).toBe("shared");
+    vi.unstubAllGlobals();
+  });
+
+  it("falls back to a link share when the prepared message fails", async () => {
+    const shareMessage = vi.fn();
+    const openTelegramLink = vi.fn();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+    const platform = createTelegramPlatform({
+      shareMessage,
+      openTelegramLink,
+    } as unknown as TelegramWebApp);
+
+    await platform.share.recipe({ id: "r1", title: "Soup", url: "u" });
+
+    expect(shareMessage).not.toHaveBeenCalled();
+    expect(openTelegramLink).toHaveBeenCalledWith(
+      expect.stringContaining("https://t.me/share/url"),
+    );
+    vi.unstubAllGlobals();
   });
 });
 

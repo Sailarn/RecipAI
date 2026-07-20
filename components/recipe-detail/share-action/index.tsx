@@ -76,6 +76,7 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
     setIsOpen(false);
     try {
       const result = await platform.share.recipe({
+        id: recipe.id,
         title: recipe.title,
         url: shareUrl,
       });

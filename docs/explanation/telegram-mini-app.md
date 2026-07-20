@@ -72,7 +72,8 @@ OIDC).
 | Google / Passkey / device-auth login | Silent `initData` sign-in; login card shows status only |
 | PWA install prompt | Native "Add to Home Screen" via `webApp.addToHomeScreen()` |
 | Web push toggle | Hidden — parse alerts arrive via the bot chat |
-| Web Share API / copy | `t.me/share/url` native share sheet |
+| Web Share API / copy | Native share sheet — a rich recipe **card** via `shareMessage` (prepared inline message), falling back to `t.me/share/url` |
+| No haptics (iOS blocks web vibration) | Native haptics on card tap, tab change, pantry/tried toggle, save/delete (`platform.haptics`) |
 | Service worker offline cache | Unregistered (Dexie still works) |
 | Launch splash | Skipped (Telegram shows its own) |
 

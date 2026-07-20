@@ -81,6 +81,10 @@ export type TelegramWebApp = {
   disableClosingConfirmation?: () => void;
   openLink?: (url: string) => void;
   openTelegramLink?: (url: string) => void;
+  shareMessage?: (
+    preparedMessageId: string,
+    callback?: (sent: boolean) => void,
+  ) => void;
   addToHomeScreen?: () => void;
   checkHomeScreenStatus?: (
     callback: (status: TelegramHomeScreenStatus) => void,

@@ -11,6 +11,8 @@ export type HapticStyle = "light" | "medium" | "heavy" | "rigid" | "soft";
 export type HapticNotify = "success" | "error" | "warning";
 
 export type RecipeShareInput = {
+  /** Recipe id — used by the Telegram native share to mint a prepared card. */
+  id: string;
   title: string;
   /** Absolute recipe URL. */
   url: string;
