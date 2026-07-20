@@ -11,7 +11,7 @@ import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { buildSavedRecipeShape } from "@/lib/parse-recipe/parsed-recipe-shape";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
-import { sendTelegramMessage } from "@/lib/telegram-bot";
+import { miniAppDeepLink, sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { type PushPayload, sendPushNotification } from "@/lib/web-push";
@@ -181,9 +181,10 @@ export async function POST(req: NextRequest) {
     if (job.telegramChatId && job.userId) {
       const parsedRecipe = finalRecipe;
       const savedShape = buildSavedRecipeShape(parsedRecipe);
+      const recipeId = crypto.randomUUID();
 
       await db.insert(recipes).values({
-        id: crypto.randomUUID(),
+        id: recipeId,
         userId: job.userId,
         title: parsedRecipe.title,
         description: parsedRecipe.description ?? null,
@@ -208,6 +209,16 @@ export async function POST(req: NextRequest) {
       await sendTelegramMessage(
         job.telegramChatId,
         `✅ <b>${parsedRecipe.title}</b> saved to RecipAI!\n\n📦 ${ingredientCount} ingredients · 👨‍🍳 ${stepCount} steps`,
+        {
+          inline_keyboard: [
+            [
+              {
+                text: "🍳 Open in RecipAI",
+                url: miniAppDeepLink(`recipe_${recipeId}`),
+              },
+            ],
+          ],
+        },
       );
     }
 
