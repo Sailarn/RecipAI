@@ -106,7 +106,3 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
 export function useTelegram(): TelegramContextValue {
   return useContext(TelegramContext);
 }
-
-export function useIsTelegram(): boolean {
-  return useContext(TelegramContext).isTelegram;
-}
