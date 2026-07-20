@@ -3,11 +3,11 @@
 import { Share2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useTelegram } from "@/components/telegram-provider";
 import { isMaintenanceError } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { usePlatform } from "@/lib/platform";
 import { setRecipeVisibility } from "@/lib/public-recipes/visibility-client";
 import { routes } from "@/lib/routes";
 import { ShareLinks } from "./share-links";
@@ -24,7 +24,7 @@ const triggerClass =
 
 export function ShareAction({ locale, recipe }: ShareActionProps) {
   const { data: session } = authClient.useSession();
-  const { webApp } = useTelegram();
+  const platform = usePlatform();
   const rootRef = useRef<HTMLDivElement>(null);
   const recipePath = routes.recipes.detail(locale, recipe.id);
   const [shareUrl, setShareUrl] = useState(recipePath);
@@ -74,20 +74,12 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
 
   async function shareMoreOptions() {
     setIsOpen(false);
-    // Inside Telegram, hand off to the native share-to-chat sheet instead of
-    // the Web Share API (which is unavailable in the WebView).
-    if (webApp?.openTelegramLink) {
-      const shareLink = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(recipe.title)}`;
-      webApp.openTelegramLink(shareLink);
-      return;
-    }
     try {
-      if (navigator.share) {
-        await navigator.share({ title: recipe.title, url: shareUrl });
-        return;
-      }
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied");
+      const result = await platform.share.recipe({
+        title: recipe.title,
+        url: shareUrl,
+      });
+      if (result === "copied") toast.success("Link copied");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
       toast.error("Could not share this recipe.");

@@ -27,11 +27,9 @@ vi.mock("@/lib/public-recipes/visibility-client", () => ({
 }));
 vi.mock("sonner", () => ({ toast }));
 
-const telegram = vi.hoisted(() => ({
-  webApp: undefined as { openTelegramLink: (url: string) => void } | undefined,
-}));
-vi.mock("@/components/telegram-provider", () => ({
-  useTelegram: () => telegram,
+const shareRecipe = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/platform", () => ({
+  usePlatform: () => ({ share: { recipe: shareRecipe } }),
 }));
 
 const privateRecipe: Recipe = {
@@ -64,7 +62,7 @@ describe("ShareAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     session.data = { user: { id: "user-1" } };
-    telegram.webApp = undefined;
+    shareRecipe.mockResolvedValue("shared");
     setRecipeVisibility.mockResolvedValue(undefined);
     updateRecipe.mockResolvedValue(undefined);
     setNavigatorProperty("share", undefined);
@@ -173,35 +171,30 @@ describe("ShareAction", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("opens native sharing from More options", async () => {
-    const nativeShare = vi.fn().mockResolvedValue(undefined);
-    setNavigatorProperty("share", nativeShare);
+  it("shares the recipe via the platform from More options", async () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
     await userEvent.click(screen.getByRole("button", { name: "More options" }));
 
-    expect(nativeShare).toHaveBeenCalledWith({
+    expect(shareRecipe).toHaveBeenCalledWith({
       title: "Soup",
       url: expect.stringMatching(/\/en\/recipes\/recipe-1$/),
     });
+    expect(toast.success).not.toHaveBeenCalled();
     expect(
       screen.queryByRole("dialog", { name: "Share recipe" }),
     ).not.toBeInTheDocument();
   });
 
-  it("shares via Telegram's native sheet when in the Mini App", async () => {
-    const openTelegramLink = vi.fn();
-    telegram.webApp = { openTelegramLink };
-    const nativeShare = vi.fn();
-    setNavigatorProperty("share", nativeShare);
+  it("toasts a copied hint when the platform copied the link", async () => {
+    shareRecipe.mockResolvedValue("copied");
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
     await userEvent.click(screen.getByRole("button", { name: "More options" }));
 
-    expect(openTelegramLink).toHaveBeenCalledWith(
-      expect.stringContaining("https://t.me/share/url?url="),
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith("Link copied"),
     );
-    expect(nativeShare).not.toHaveBeenCalled();
   });
 
   it("closes when the user presses outside the popover", async () => {
