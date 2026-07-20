@@ -8,6 +8,7 @@ import {
   getPendingUploadToken,
 } from "@/lib/parse-job-storage";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
+import { useHaptics } from "@/lib/platform";
 import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
@@ -18,6 +19,7 @@ export type SaveState = "idle" | "saving" | "saved";
 
 export function useRecipeSave(recipe?: Recipe) {
   const navigate = useNavigate();
+  const haptics = useHaptics();
   const [imageError, setImageError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const pendingImageFile = useRef<File | null>(null);
@@ -103,11 +105,13 @@ export function useRecipeSave(recipe?: Recipe) {
           captureError(caughtError);
         });
     } catch {
+      haptics.notify("error");
       setSaveState("idle");
       setImageError("Failed to save recipe");
       return;
     }
 
+    haptics.notify("success");
     setSaveState("saved");
 
     setTimeout(() => {

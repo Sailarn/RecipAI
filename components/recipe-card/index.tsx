@@ -8,6 +8,7 @@ import { RecipeDetail } from "@/components/recipe-detail";
 import { useLongPress } from "@/hooks/use-long-press";
 import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
+import { useHaptics } from "@/lib/platform";
 import { prewarmRecipeImage } from "@/lib/prewarm-recipe-images";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
@@ -33,6 +34,7 @@ export const RecipeCard = memo(function RecipeCard({
   const params = useParams();
   const locale = params.locale as string;
   const navigate = useNavigate();
+  const haptics = useHaptics();
   const [hovered, setHovered] = useState(false);
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
@@ -49,6 +51,7 @@ export const RecipeCard = memo(function RecipeCard({
 
   async function handleToggleStatus() {
     const next = recipe.status === "tried" ? null : "tried";
+    haptics.impact("medium");
     trackEvent("recipe_tried_toggled", { tried: next === "tried" });
     await updateRecipe(recipe.id, { status: next });
   }
@@ -62,6 +65,7 @@ export const RecipeCard = memo(function RecipeCard({
   }
 
   async function handleDelete() {
+    haptics.notify("warning");
     await deleteRecipe(recipe.id);
   }
 
@@ -74,6 +78,7 @@ export const RecipeCard = memo(function RecipeCard({
             didLongPress.current = false;
             return;
           }
+          haptics.impact("light");
           navigate.push(
             routes.recipes.detail(locale, recipe.id),
             <RecipeDetail

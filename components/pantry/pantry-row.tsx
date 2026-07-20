@@ -1,9 +1,12 @@
 import { toast } from "sonner";
 import { removePantryItem, togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem } from "@/lib/db/schema";
+import { useHaptics } from "@/lib/platform";
 import { trackEvent } from "@/lib/telemetry";
 
 export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
+  const haptics = useHaptics();
+
   return (
     <div className="flex items-center gap-3 py-3 px-4 border-b border-[rgba(255,200,100,0.08)]">
       {/* Checkbox toggle */}
@@ -11,6 +14,7 @@ export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
         type="button"
         data-testid={`toggle-${item.id}`}
         onClick={() => {
+          haptics.selection();
           trackEvent("pantry_item_toggled", { have: !item.on });
           togglePantryItem(item.id);
         }}

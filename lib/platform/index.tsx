@@ -26,6 +26,11 @@ export function usePlatform(): Platform {
   return useContext(PlatformContext);
 }
 
+/** Convenience accessor for the haptics namespace. No-op on web. */
+export function useHaptics(): Platform["haptics"] {
+  return useContext(PlatformContext).haptics;
+}
+
 export function useFeature(feature: Feature): boolean {
   return FEATURES[usePlatform().kind][feature];
 }

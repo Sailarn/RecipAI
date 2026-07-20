@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import type { ComponentType, ReactNode } from "react";
+import { useHaptics } from "@/lib/platform";
 
 interface NavItemProps {
   label: string;
@@ -23,11 +24,17 @@ export function NavItem({
   hideLabelWhenActive,
 }: NavItemProps) {
   const labelHidden = isActive && hideLabelWhenActive;
+  const haptics = useHaptics();
+
+  const handleClick = () => {
+    if (!isActive) haptics.selection();
+    onClick();
+  };
 
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       className="relative flex flex-col items-center justify-center gap-0.5 py-1.5 flex-1"
       style={{
         color: isActive ? "var(--food-accent)" : "var(--fg-2)",
