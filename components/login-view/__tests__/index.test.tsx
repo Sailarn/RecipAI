@@ -73,6 +73,11 @@ vi.mock("@/components/telegram-provider", () => ({
   useTelegram: () => telegramState,
 }));
 
+const signInFeature = vi.hoisted(() => ({ value: true }));
+vi.mock("@/lib/platform", () => ({
+  useFeature: () => signInFeature.value,
+}));
+
 vi.mock("next/image", () => ({
   default: ({
     src,
@@ -90,7 +95,7 @@ describe("LoginView", () => {
     vi.clearAllMocks();
     isStandalonePwa.mockReturnValue(false);
     loadPendingDeviceAuth.mockReturnValue(null);
-    telegramState.isTelegram = false;
+    signInFeature.value = true;
     telegramState.authStatus = "pending";
   });
 
@@ -100,7 +105,7 @@ describe("LoginView", () => {
   });
 
   it("hides the OAuth options and shows a status inside Telegram", () => {
-    telegramState.isTelegram = true;
+    signInFeature.value = false;
 
     render(<LoginView locale="en" />);
 
@@ -114,7 +119,7 @@ describe("LoginView", () => {
   });
 
   it("shows a retry hint when Telegram auto sign-in failed", () => {
-    telegramState.isTelegram = true;
+    signInFeature.value = false;
     telegramState.authStatus = "failed";
 
     render(<LoginView locale="en" />);

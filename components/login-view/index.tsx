@@ -21,6 +21,7 @@ import {
   loadPendingDeviceAuth,
   savePendingDeviceAuth,
 } from "@/lib/auth/pending-device-auth";
+import { useFeature } from "@/lib/platform";
 import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
@@ -31,7 +32,8 @@ const CHIP_CLASS =
 
 export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
-  const { isTelegram, authStatus } = useTelegram();
+  const { authStatus } = useTelegram();
+  const showSignInOptions = useFeature("signInOptions");
   const [externalUrl, setExternalUrl] = useState<string>();
   const [externalError, setExternalError] = useState<string>();
   const abortController = useRef<AbortController | undefined>(undefined);
@@ -127,11 +129,10 @@ export function LoginView({ locale }: { locale: string }) {
     });
   };
 
-  // Inside Telegram, sign-in is silent (initData → session). Show the auto
-  // sign-in status instead of the web OAuth options, which don't work in the
-  // WebView and are redundant with the Telegram identity.
+  // Where OAuth sign-in options aren't offered (Telegram: sign-in is silent via
+  // initData), show the auto sign-in status instead of the web login buttons.
   let signInSection: React.ReactNode;
-  if (isTelegram) {
+  if (!showSignInOptions) {
     signInSection = (
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-sans text-sm leading-[1.5] text-[var(--fg-2)]">
