@@ -1,6 +1,7 @@
 "use client";
 
 import { Bot, LogOut } from "lucide-react";
+import { useFeature } from "@/lib/platform";
 
 interface UserCardProps {
   user: {
@@ -14,6 +15,9 @@ interface UserCardProps {
 
 export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
   const initial = (user.name || user.email || "?")[0].toUpperCase();
+  // In Telegram the identity is fixed (auto sign-in), so sign-out and the bot
+  // link are hidden — the card is just an identity display.
+  const showActions = useFeature("accountActions");
 
   return (
     <div className="glass-card mb-3 rounded-3xl px-4 py-5">
@@ -39,7 +43,7 @@ export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
         </p>
       </div>
 
-      {telegramLinked && (
+      {showActions && telegramLinked && (
         <>
           <a
             href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
@@ -57,17 +61,19 @@ export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
         </>
       )}
 
-      <button
-        type="button"
-        onClick={onSignOut}
-        className="flex items-center justify-center gap-[7px] w-full p-3 rounded-[14px] border border-[rgba(239,68,68,0.22)] bg-[rgba(239,68,68,0.10)] text-[var(--action-destructive)] font-sans text-sm font-semibold cursor-pointer"
-      >
-        <LogOut
-          size={15}
-          className="text-[var(--action-destructive)] shrink-0"
-        />
-        <span>Sign out</span>
-      </button>
+      {showActions && (
+        <button
+          type="button"
+          onClick={onSignOut}
+          className="flex items-center justify-center gap-[7px] w-full p-3 rounded-[14px] border border-[rgba(239,68,68,0.22)] bg-[rgba(239,68,68,0.10)] text-[var(--action-destructive)] font-sans text-sm font-semibold cursor-pointer"
+        >
+          <LogOut
+            size={15}
+            className="text-[var(--action-destructive)] shrink-0"
+          />
+          <span>Sign out</span>
+        </button>
+      )}
     </div>
   );
 }

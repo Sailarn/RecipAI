@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { TogglePill } from "@/components/toggle-pill";
 import { isStandalonePwa } from "@/lib/pwa";
+import { isTelegramEnvironment } from "@/lib/telegram/webapp";
 import { trackEvent } from "@/lib/telemetry";
 import { THEME } from "@/lib/theme";
 
@@ -24,6 +25,14 @@ export function ThemeToggle() {
     localStorage.setItem("theme", themeName);
     // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+    // Telegram shows no launch splash, so a reload is pointless — and it would
+    // drop the Telegram launch context. Apply the theme class in place instead.
+    if (isTelegramEnvironment()) {
+      const root = document.documentElement;
+      root.classList.toggle(THEME.DARK, next);
+      root.classList.toggle(THEME.LIGHT, !next);
+      return;
+    }
     // Reload to re-trigger the splash. In the PWA that means routing through the
     // static shell page; in the browser a plain reload lets <LaunchSplash> fire.
     if (isStandalonePwa()) {

@@ -9,6 +9,7 @@ import type { PlatformKind } from "./types";
 export type Feature =
   | "signInOptions" // Google/Passkey/OIDC login buttons + the login route
   | "accountLinking" // the "Connected accounts" card
+  | "accountActions" // sign out + "Open bot" — meaningless in Telegram (identity is fixed)
   | "pushNotifications" // web-push toggle
   | "pwaInstall"; // "Add to Home Screen" row
 
@@ -16,12 +17,14 @@ export const FEATURES: Record<PlatformKind, Record<Feature, boolean>> = {
   web: {
     signInOptions: true,
     accountLinking: true,
+    accountActions: true,
     pushNotifications: true,
     pwaInstall: true,
   },
   telegram: {
     signInOptions: false,
     accountLinking: false,
+    accountActions: false,
     pushNotifications: false,
     pwaInstall: false,
   },

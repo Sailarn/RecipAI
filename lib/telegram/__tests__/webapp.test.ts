@@ -17,6 +17,7 @@ function setWebApp(webApp: Partial<TelegramWebApp> | undefined): void {
 afterEach(() => {
   setWebApp(undefined);
   window.location.hash = "";
+  sessionStorage.clear();
   for (const script of document.head.querySelectorAll("script")) {
     script.remove();
   }
@@ -63,6 +64,15 @@ describe("isTelegramEnvironment", () => {
     window.location.hash = "#tgWebAppData=user%3D1&tgWebAppVersion=8.0";
 
     expect(isTelegramEnvironment()).toBe(true);
+  });
+
+  it("stays true after a reload that drops the launch hash", () => {
+    setWebApp(undefined);
+    window.location.hash = "#tgWebAppData=user%3D1";
+    expect(isTelegramEnvironment()).toBe(true); // remembers for the session
+
+    window.location.hash = "";
+    expect(isTelegramEnvironment()).toBe(true); // still detected from the flag
   });
 });
 

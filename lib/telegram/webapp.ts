@@ -100,6 +100,24 @@ type TelegramWindow = Window & {
 
 const SDK_SRC = "https://telegram.org/js/telegram-web-app.js";
 const LAUNCH_PARAM_MARKER = "tgWebAppData";
+// Once launched from Telegram, remember it for the tab session. A reload (e.g.
+// the theme toggle, or iOS foreground) can drop the `tgWebAppData` URL hash, so
+// without this the app would mistake itself for the plain web after a reload.
+const LAUNCH_FLAG_KEY = "recipai:tg-launched";
+
+function readLaunchFlag(): boolean {
+  try {
+    return sessionStorage.getItem(LAUNCH_FLAG_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberLaunched(): void {
+  try {
+    sessionStorage.setItem(LAUNCH_FLAG_KEY, "1");
+  } catch {}
+}
 
 /**
  * The live SDK instance, or `undefined` outside Telegram / on the server.
@@ -121,10 +139,14 @@ export function getTelegramWebApp(): TelegramWebApp | undefined {
 export function isTelegramEnvironment(): boolean {
   if (typeof window === "undefined") return false;
   if (getTelegramWebApp()) return true;
-  return (
-    window.location.hash.includes(LAUNCH_PARAM_MARKER) ||
-    window.location.search.includes(LAUNCH_PARAM_MARKER)
-  );
+  const hasLaunchParams =
+    (window.location.hash || "").includes(LAUNCH_PARAM_MARKER) ||
+    (window.location.search || "").includes(LAUNCH_PARAM_MARKER);
+  if (hasLaunchParams) {
+    rememberLaunched();
+    return true;
+  }
+  return readLaunchFlag();
 }
 
 /**

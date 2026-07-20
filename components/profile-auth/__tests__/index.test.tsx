@@ -73,7 +73,10 @@ vi.mock("@/components/login-view", () => ({
 }));
 
 const platform = vi.hoisted(() => ({
-  features: { accountLinking: true } as Record<string, boolean>,
+  features: { accountLinking: true, accountActions: true } as Record<
+    string,
+    boolean
+  >,
 }));
 vi.mock("@/lib/platform", () => ({
   Capability: ({
@@ -83,6 +86,7 @@ vi.mock("@/lib/platform", () => ({
     name: string;
     children: React.ReactNode;
   }) => (platform.features[name] ? children : null),
+  useFeature: (name: string) => platform.features[name] ?? false,
 }));
 
 import { authClient } from "@/lib/auth/auth-client";
@@ -99,6 +103,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   isStandalonePwa.mockReturnValue(false);
   platform.features.accountLinking = true;
+  platform.features.accountActions = true;
   process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
 });
 
@@ -165,6 +170,17 @@ describe("ProfileAuth", () => {
       expect(
         screen.getByRole("button", { name: /sign out/i }),
       ).toBeInTheDocument();
+    });
+
+    it("hides sign-out where account actions are unavailable", () => {
+      platform.features.accountActions = false;
+
+      render(<ProfileAuth />);
+
+      expect(screen.getByText("Jane Doe")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /sign out/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("renders linked-accounts panel", () => {
