@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { MaintenanceListener } from "@/components/maintenance-listener";
 import { PageStack } from "@/components/page-stack";
 import { TelegramBackButton } from "@/components/telegram-back-button";
+import { TelegramButtonHaptics } from "@/components/telegram-button-haptics";
 import { TelegramDeepLink } from "@/components/telegram-deep-link";
 import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
@@ -42,6 +43,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <SyncProvider>
         <PageStack />
         <TelegramBackButton />
+        <TelegramButtonHaptics />
         <TelegramDeepLink />
         <MaintenanceListener />
         <Toaster

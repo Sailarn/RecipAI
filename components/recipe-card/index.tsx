@@ -51,7 +51,6 @@ export const RecipeCard = memo(function RecipeCard({
 
   async function handleToggleStatus() {
     const next = recipe.status === "tried" ? null : "tried";
-    haptics.impact("medium");
     trackEvent("recipe_tried_toggled", { tried: next === "tried" });
     await updateRecipe(recipe.id, { status: next });
   }
@@ -78,7 +77,6 @@ export const RecipeCard = memo(function RecipeCard({
             didLongPress.current = false;
             return;
           }
-          haptics.impact("light");
           navigate.push(
             routes.recipes.detail(locale, recipe.id),
             <RecipeDetail
