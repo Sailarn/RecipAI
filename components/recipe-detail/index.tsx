@@ -2,6 +2,8 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef, useState } from "react";
+import { isSignedIn } from "@/lib/auth/session-state";
+import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
@@ -50,6 +52,24 @@ export function RecipeDetail({
   const recipe: Recipe | null = liveRecipe ?? initialRecipe ?? null;
   const loading = liveRecipe === undefined && initialRecipe === undefined;
 
+  // When the recipe isn't on this device, a signed-in user may still own it on
+  // the server (a Telegram bot deep link opened before the full sync landed it).
+  // Pull that one row directly instead of flashing the private guard; the live
+  // query then re-renders it. `ownerPullDone` gates the guard so it only shows
+  // once the pull has been attempted (or the user is signed out).
+  const [ownerPullDone, setOwnerPullDone] = useState(false);
+  const pullStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (recipe || publicRecipe || !isSignedIn()) {
+      setOwnerPullDone(true);
+      return;
+    }
+    if (liveRecipe !== null || pullStartedRef.current) return;
+    pullStartedRef.current = true;
+    pullOwnRecipe(recipeId).finally(() => setOwnerPullDone(true));
+  }, [recipe, publicRecipe, liveRecipe, recipeId]);
+
   useEffect(() => {
     if (recipe && !viewedRef.current) {
       viewedRef.current = true;
@@ -70,6 +90,7 @@ export function RecipeDetail({
   if (!recipe) {
     if (publicRecipe)
       return <SharedRecipeDetail locale={locale} recipe={publicRecipe} />;
+    if (isSignedIn() && !ownerPullDone) return <RecipeSkeleton />;
     return <PrivateRecipeGuard locale={locale} />;
   }
 

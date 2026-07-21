@@ -15,6 +15,7 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/db", () => ({
   db: {
+    select: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
   },
@@ -26,9 +27,26 @@ vi.mock("@/db/schema/recipes", () => ({
 
 import { db } from "@/db";
 import { auth } from "@/lib/auth/auth";
-import { DELETE, PATCH } from "../route";
+import { DELETE, GET, PATCH } from "../route";
 
 const mockSession = { user: { id: "user-1" } };
+
+function makeGetRequest(id: string) {
+  return {
+    req: new Request(
+      `http://localhost/api/recipes/${id}`,
+    ) as unknown as NextRequest,
+    params: { params: Promise.resolve({ id }) },
+  };
+}
+
+function setupSelectChain(rows: unknown[]) {
+  const mockLimit = vi.fn().mockResolvedValue(rows);
+  const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit });
+  const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+  vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
+  return { mockFrom, mockWhere, mockLimit };
+}
 
 function makePatchRequest(id: string, body: object) {
   return {
@@ -65,6 +83,49 @@ function setupDeleteChain() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+describe("GET /api/recipes/[id]", () => {
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
+    const { req, params } = makeGetRequest("r1");
+
+    const res = await GET(req, params);
+
+    expect(res.status).toBe(401);
+  });
+
+  it("returns the owner's recipe when found", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const row = { id: "r1", title: "Mine", userId: "user-1" };
+    setupSelectChain([row]);
+    const { req, params } = makeGetRequest("r1");
+
+    const res = await GET(req, params);
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ recipe: row });
+  });
+
+  it("returns 404 when the recipe is not the user's / does not exist", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    setupSelectChain([]);
+    const { req, params } = makeGetRequest("r1");
+
+    const res = await GET(req, params);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("scopes the lookup to the authenticated user", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(mockSession as any);
+    const { mockWhere } = setupSelectChain([{ id: "r1" }]);
+    const { req, params } = makeGetRequest("r1");
+
+    await GET(req, params);
+
+    expect(mockWhere).toHaveBeenCalled();
+  });
 });
 
 describe("PATCH /api/recipes/[id]", () => {

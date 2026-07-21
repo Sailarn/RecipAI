@@ -12,6 +12,8 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { isSignedIn } from "@/lib/auth/session-state";
+import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
@@ -86,6 +88,14 @@ vi.mock("@/lib/db/recipes", () => ({
   deleteRecipe: vi.fn(),
 }));
 
+vi.mock("@/lib/auth/session-state", () => ({
+  isSignedIn: vi.fn(() => false),
+}));
+
+vi.mock("@/lib/db/pull-own-recipe", () => ({
+  pullOwnRecipe: vi.fn().mockResolvedValue(null),
+}));
+
 const mockRecipe: Recipe = {
   id: "recipe-1",
   title: "Chocolate Cake",
@@ -125,6 +135,8 @@ describe("RecipeDetail", () => {
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
     vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);
     vi.mocked(recipesModule.createRecipe).mockResolvedValue("copied-1");
+    vi.mocked(isSignedIn).mockReturnValue(false);
+    vi.mocked(pullOwnRecipe).mockResolvedValue(null);
   });
 
   it("shows loading state while fetching recipe", async () => {
@@ -319,5 +331,53 @@ describe("RecipeDetail", () => {
     expect(
       screen.getByRole("button", { name: /back to recipes/i }),
     ).toBeInTheDocument();
+  });
+
+  describe("owner pull for a not-yet-synced recipe (bot deep link)", () => {
+    it("pulls the owner's recipe from the server when signed in and not on the device", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(true);
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
+    });
+
+    it("shows a skeleton, not the private guard, while the owner pull is in flight", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(true);
+      vi.mocked(pullOwnRecipe).mockImplementation(() => new Promise(() => {}));
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalled());
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("falls back to the private guard once the owner pull finds nothing", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(true);
+      vi.mocked(pullOwnRecipe).mockResolvedValue(null);
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      expect(
+        await screen.findByText("This recipe is private"),
+      ).toBeInTheDocument();
+    });
+
+    it("does not attempt an owner pull when signed out", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(false);
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      expect(
+        await screen.findByText("This recipe is private"),
+      ).toBeInTheDocument();
+      expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
   });
 });

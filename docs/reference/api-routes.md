@@ -41,6 +41,7 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 | Method | Route | Auth | Description |
 |---|---|---|---|
 | `POST` | `/api/recipes` | Session required | Create a recipe in Postgres. |
+| `GET` | `/api/recipes/[id]` | Session required | Fetch one of the owner's own recipes (any visibility) as `{ recipe }`; `404` if not theirs. Lets a device pull a recipe not yet in local Dexie — e.g. a Telegram bot deep link opened before the full sync. Public sharing uses the isPublic-only page fetch, not this. |
 | `PATCH` | `/api/recipes/[id]` | Session required | Update a recipe (partial). Scoped to the signed-in user. |
 | `PUT` | `/api/recipes/[id]/visibility` | Session required | Publish the current owned recipe snapshot or synchronously revoke public access. Normal create/update/sync routes cannot change visibility. |
 | `DELETE` | `/api/recipes/[id]` | Session required | Delete a recipe. Scoped to the signed-in user. |

@@ -268,6 +268,15 @@ export function useSyncOnLogin() {
         now,
       });
 
+      // Normalize any recipe just pulled without canonical ingredient ids (e.g.
+      // a Telegram bot recipe, saved server-side without them) so its pantry
+      // dots work without waiting for an app restart. Lazy import keeps the
+      // normalize pipeline off this hook's load path; self-limiting no-op once
+      // every recipe is normalized.
+      import("@/lib/db/normalize-pending-recipes")
+        .then((module) => module.normalizePendingRecipes())
+        .catch(() => {});
+
       // Drop any leftover review notifications from before the server-wins
       // rework so the bell's stale "needs review" badge clears.
       await clearSyncNotifications();

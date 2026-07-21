@@ -52,6 +52,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/sync-vocab.ts` | Pull confirmed vocabulary deltas into Dexie, with watermark overlap and version-based full refresh. |
 | `lib/db/reconcile-vocab.ts` | Guarded one-time cleanup that clears stale local vocabulary rows, re-pulls, and re-normalizes recipes. |
 | `lib/db/renormalize-recipes.ts` | Repairs older recipes whose canonical ingredient id array is not index-aligned. |
+| `lib/db/normalize-pending-recipes.ts` | `normalizePendingRecipes()` — normalize any local recipe with ingredients but no `canonicalIngredientIds` (e.g. a pulled Telegram bot recipe). Runs on startup and after each sync. |
+| `lib/db/pull-own-recipe.ts` | `pullOwnRecipe(id)` — fetch the owner's own recipe from the server into Dexie (with `syncedAt`) when it isn't local yet; used by the recipe-detail deep-link path, then triggers normalization. |
 | `lib/db/pantry.ts` | `addPantryItem` (dedups by `ingredientId`, writes dormant `qty`/`unit`/`cat` defaults), `bulkPutPantry`, `clearPantry` and related pantry ops. |
 | `lib/db/supabase-sync.ts` | Fire-and-forget sync on writes: `syncCreate`, `syncUpdate`, `syncDelete`. |
 | `lib/db/supabase-sync-collections.ts` | Fire-and-forget create/update/delete sync for collections. |

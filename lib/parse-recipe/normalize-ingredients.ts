@@ -56,7 +56,33 @@ async function createProvisional(
   }
 }
 
+// Guards against two overlapping normalize passes for the same recipe — e.g.
+// the deep-link owner-pull and the post-sync sweep both catching a freshly
+// pulled bot recipe. A concurrent second run could create duplicate provisional
+// vocab rows, so it no-ops until the first finishes.
+const normalizingRecipeIds = new Set<string>();
+
 export async function normalizeRecipeIngredients(
+  recipeId: string,
+  ingredients: Array<{
+    item: string;
+    ua?: string | null;
+    en?: string | null;
+    category?: string | null;
+  }>,
+): Promise<{ matched: number; total: number }> {
+  if (normalizingRecipeIds.has(recipeId)) {
+    return { matched: 0, total: ingredients.length };
+  }
+  normalizingRecipeIds.add(recipeId);
+  try {
+    return await runNormalize(recipeId, ingredients);
+  } finally {
+    normalizingRecipeIds.delete(recipeId);
+  }
+}
+
+async function runNormalize(
   recipeId: string,
   ingredients: Array<{
     item: string;

@@ -6,6 +6,36 @@ import { ApiError } from "@/lib/api-errors";
 import { requireSession } from "@/lib/auth/require-session";
 import { pickRecipeContent } from "../recipe-write-fields";
 
+// Owner-scoped fetch of a single recipe, any visibility. Lets a device pull its
+// own recipe that isn't in local Dexie yet — e.g. opening a Telegram bot deep
+// link before the full sync has run. The public share page uses getPublicRecipe
+// (isPublic-only) instead, so a private recipe stays reachable only by its owner.
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const authed = await requireSession();
+  if (authed.response) return authed.response;
+
+  const { id } = await params;
+
+  try {
+    const [row] = await db
+      .select()
+      .from(recipes)
+      .where(
+        and(eq(recipes.id, id), eq(recipes.userId, authed.session.user.id)),
+      )
+      .limit(1);
+
+    if (!row) return ApiError.notFound();
+
+    return NextResponse.json({ recipe: row });
+  } catch (error) {
+    return ApiError.internal(error, req);
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
