@@ -39,8 +39,12 @@ export function useTelegramAutoSignIn(
           return;
         }
         setStatus("signed-in");
-        // Refresh the shared session store so useSession consumers re-render.
-        return authClient.getSession();
+        // signInWithMiniApp hits a raw endpoint, so — unlike the built-in
+        // sign-in methods — better-auth doesn't refresh the reactive useSession
+        // store. Toggle the session signal so useSession refetches
+        // `/get-session`; without this the new session (a first-time user
+        // especially) only appears after an app reopen.
+        authClient.$store.notify("$sessionSignal");
       })
       .catch((caughtError) => {
         setStatus("failed");

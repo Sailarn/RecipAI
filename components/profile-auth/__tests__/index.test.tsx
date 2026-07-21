@@ -72,6 +72,15 @@ vi.mock("@/components/login-view", () => ({
   LoginView: () => null,
 }));
 
+const telegramState = vi.hoisted(() => ({ authStatus: "idle" as string }));
+const inTelegram = vi.hoisted(() => ({ value: false }));
+vi.mock("@/components/telegram-provider", () => ({
+  useTelegram: () => ({ authStatus: telegramState.authStatus }),
+}));
+vi.mock("@/lib/telegram/webapp", () => ({
+  isTelegramEnvironment: () => inTelegram.value,
+}));
+
 const platform = vi.hoisted(() => ({
   features: { accountLinking: true, accountActions: true } as Record<
     string,
@@ -104,6 +113,8 @@ beforeEach(() => {
   isStandalonePwa.mockReturnValue(false);
   platform.features.accountLinking = true;
   platform.features.accountActions = true;
+  telegramState.authStatus = "idle";
+  inTelegram.value = false;
   process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
 });
 
@@ -148,6 +159,46 @@ describe("ProfileAuth", () => {
         routes.login("en"),
         expect.anything(),
       );
+    });
+  });
+
+  describe("telegram auto sign-in", () => {
+    beforeEach(() => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: null,
+        isPending: false,
+      } as never);
+      inTelegram.value = true;
+    });
+
+    it("holds the skeleton, not the sign-in prompt, while auto sign-in is pending", () => {
+      telegramState.authStatus = "pending";
+
+      render(<ProfileAuth />);
+
+      expect(
+        screen.queryByRole("button", { name: /sign in/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("holds the skeleton before auto sign-in has started (idle)", () => {
+      telegramState.authStatus = "idle";
+
+      render(<ProfileAuth />);
+
+      expect(
+        screen.queryByRole("button", { name: /sign in/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the sign-in prompt once auto sign-in has failed", () => {
+      telegramState.authStatus = "failed";
+
+      render(<ProfileAuth />);
+
+      expect(
+        screen.getByRole("button", { name: /sign in/i }),
+      ).toBeInTheDocument();
     });
   });
 

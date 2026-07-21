@@ -3,17 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTelegramAutoSignIn } from "@/components/telegram-provider/use-auto-sign-in";
 import type { TelegramWebApp } from "@/lib/telegram/webapp";
 
-const { sessionState, signInWithMiniApp, getSession } = vi.hoisted(() => ({
+const { sessionState, signInWithMiniApp, notify } = vi.hoisted(() => ({
   sessionState: { data: null as unknown, isPending: false },
   signInWithMiniApp: vi.fn(),
-  getSession: vi.fn().mockResolvedValue({}),
+  notify: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     useSession: () => sessionState,
     signInWithMiniApp,
-    getSession,
+    $store: { notify },
   },
 }));
 
@@ -25,7 +25,7 @@ beforeEach(() => {
   sessionState.data = null;
   sessionState.isPending = false;
   signInWithMiniApp.mockResolvedValue({ data: { user: {} }, error: null });
-  getSession.mockClear();
+  notify.mockClear();
 });
 
 afterEach(() => {
@@ -49,12 +49,12 @@ describe("useTelegramAutoSignIn", () => {
     expect(signInWithMiniApp).not.toHaveBeenCalled();
   });
 
-  it("signs in with initData and refreshes the session on success", async () => {
+  it("signs in with initData and refreshes the session store on success", async () => {
     const { result } = renderHook(() => useTelegramAutoSignIn(webAppStub()));
 
     await waitFor(() => expect(result.current).toBe("signed-in"));
     expect(signInWithMiniApp).toHaveBeenCalledWith("user=1&hash=abc");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(notify).toHaveBeenCalledWith("$sessionSignal");
   });
 
   it("reports failure and skips the refresh on an auth error", async () => {
@@ -63,7 +63,7 @@ describe("useTelegramAutoSignIn", () => {
     const { result } = renderHook(() => useTelegramAutoSignIn(webAppStub()));
 
     await waitFor(() => expect(result.current).toBe("failed"));
-    expect(getSession).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
   });
 
   it("does not sign in again when already authenticated", () => {

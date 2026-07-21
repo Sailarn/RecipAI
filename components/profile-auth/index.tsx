@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { LoginView } from "@/components/login-view";
+import { useTelegram } from "@/components/telegram-provider";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
 import {
@@ -15,6 +16,7 @@ import {
 import { Capability } from "@/lib/platform";
 import { isStandalonePwa } from "@/lib/pwa";
 import { routes } from "@/lib/routes";
+import { isTelegramEnvironment } from "@/lib/telegram/webapp";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { LinkedAccounts } from "./linked-accounts";
@@ -23,9 +25,20 @@ import { UserCard } from "./user-card";
 
 export function ProfileAuth() {
   const { data: session, isPending } = authClient.useSession();
+  const { authStatus } = useTelegram();
   const router = useRouter();
   const navigate = useNavigate();
   const { locale } = useParams<{ locale: string }>();
+
+  // Inside Telegram, sign-in is silent and always attempted on launch, so hold
+  // the skeleton until it settles instead of flashing the signed-out prompt. A
+  // first-time user hits this window longer because their account is being
+  // created; the prompt is only correct once auto sign-in has failed or the
+  // user explicitly signed out (authStatus stays "signed-in", session null).
+  const awaitingTelegramAutoSignIn =
+    isTelegramEnvironment() &&
+    !session &&
+    (authStatus === "idle" || authStatus === "pending");
   const {
     linkedProviders,
     telegramLinked,
@@ -125,7 +138,7 @@ export function ProfileAuth() {
   // Hold the full skeleton until both session and linked-accounts data are ready.
   // This prevents the Telegram bot button (and other account-state-dependent UI)
   // from popping in after a partial render.
-  if (isPending || (!!session && isLoading)) {
+  if (isPending || awaitingTelegramAutoSignIn || (!!session && isLoading)) {
     return (
       <>
         <div className="glass-card mb-3 rounded-3xl px-4 py-5">
