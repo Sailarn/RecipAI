@@ -63,7 +63,14 @@ OIDC).
 - `components/telegram-back-button` drives Telegram's native **BackButton** from the navigation
   stack: shown when a view is pushed over the root, popping it via `navigate.back()`.
 - `components/telegram-deep-link` maps the launch `start_param` to a route once —
-  `pantry`, `parse`, `profile`, or `recipe_<id>` (see `resolveStartParamHref`).
+  `pantry`, `parse`, `profile`, or `recipe_<id>` (see `resolveStartParamHref`). It reads the param
+  **synchronously** from the launch hash via `getLaunchStartParam()` (not the async SDK `webApp`) and
+  `navigate.replace`s, so a shared recipe opens straight into its detail view with the skeleton
+  instead of flashing the recipes list for ~a second while the SDK loads.
+- The shared recipe **card** caption (`lib/telegram/recipe-inline-result.ts`) is deliberately compact
+  — title + stats only, no description — because a long multi-line title plus a description made the
+  pre-send share sheet tall enough to push its controls off-screen. The "Open recipe" button carries
+  the rest.
 
 ## What changes inside Telegram
 

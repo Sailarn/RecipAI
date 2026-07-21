@@ -4,26 +4,30 @@ import {
   resolveStartParamHref,
   TelegramDeepLink,
 } from "@/components/telegram-deep-link";
-import type { TelegramWebApp } from "@/lib/telegram/webapp";
 
-const { telegramState, navigatePush } = vi.hoisted(() => ({
-  telegramState: { webApp: undefined as TelegramWebApp | undefined },
-  navigatePush: vi.fn(),
+const { launchState, navigateReplace } = vi.hoisted(() => ({
+  launchState: {
+    isTelegram: false,
+    startParam: undefined as string | undefined,
+  },
+  navigateReplace: vi.fn(),
 }));
 
-vi.mock("@/components/telegram-provider", () => ({
-  useTelegram: () => telegramState,
+vi.mock("@/lib/telegram/webapp", () => ({
+  isTelegramEnvironment: () => launchState.isTelegram,
+  getLaunchStartParam: () => launchState.startParam,
 }));
 vi.mock("@/lib/transitions", () => ({
-  useNavigate: () => ({ push: navigatePush, back: vi.fn(), replace: vi.fn() }),
+  useNavigate: () => ({
+    push: vi.fn(),
+    back: vi.fn(),
+    replace: navigateReplace,
+  }),
 }));
 
-function webAppWithStartParam(startParam: string | undefined): TelegramWebApp {
-  return { initDataUnsafe: { start_param: startParam } } as TelegramWebApp;
-}
-
 afterEach(() => {
-  telegramState.webApp = undefined;
+  launchState.isTelegram = false;
+  launchState.startParam = undefined;
   vi.clearAllMocks();
 });
 
@@ -49,26 +53,29 @@ describe("resolveStartParamHref", () => {
 
 describe("TelegramDeepLink", () => {
   it("navigates once to the resolved destination", () => {
-    telegramState.webApp = webAppWithStartParam("pantry");
+    launchState.isTelegram = true;
+    launchState.startParam = "pantry";
 
     render(<TelegramDeepLink />);
 
-    expect(navigatePush).toHaveBeenCalledExactlyOnceWith("/en/pantry");
+    expect(navigateReplace).toHaveBeenCalledExactlyOnceWith("/en/pantry");
   });
 
   it("does not navigate without a start param", () => {
-    telegramState.webApp = webAppWithStartParam(undefined);
+    launchState.isTelegram = true;
+    launchState.startParam = undefined;
 
     render(<TelegramDeepLink />);
 
-    expect(navigatePush).not.toHaveBeenCalled();
+    expect(navigateReplace).not.toHaveBeenCalled();
   });
 
   it("stays inert outside Telegram", () => {
-    telegramState.webApp = undefined;
+    launchState.isTelegram = false;
+    launchState.startParam = "recipe_abc";
 
     render(<TelegramDeepLink />);
 
-    expect(navigatePush).not.toHaveBeenCalled();
+    expect(navigateReplace).not.toHaveBeenCalled();
   });
 });

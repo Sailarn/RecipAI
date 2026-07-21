@@ -49,7 +49,7 @@ describe("buildRecipeInlineResult", () => {
     expect(content.message_text).toContain("4 servings");
   });
 
-  it("builds a photo card with the recipe image and a rich caption", () => {
+  it("builds a photo card with the recipe image and a compact caption", () => {
     const result = buildRecipeInlineResult(
       publicRecipe({
         imageUrl: "https://img/x.jpg",
@@ -63,7 +63,19 @@ describe("buildRecipeInlineResult", () => {
     expect(result.thumbnail_url).toBe("https://img/x.jpg");
     const caption = result.caption as string;
     expect(caption).toContain("Soup");
-    expect(caption).toContain("A warm bowl.");
+    expect(caption).toContain("4 servings");
+  });
+
+  it("omits the description to keep the share card compact", () => {
+    const result = buildRecipeInlineResult(
+      publicRecipe({
+        imageUrl: "https://img/x.jpg",
+        description: "A warm bowl of comforting soup.",
+      }),
+    );
+
+    const caption = result.caption as string;
+    expect(caption).not.toContain("A warm bowl of comforting soup.");
   });
 
   it("requests a JPEG transform for ImageKit images", () => {
@@ -86,7 +98,7 @@ describe("buildRecipeInlineResult", () => {
     expect(content.message_text).toContain("A &lt;b&gt; &amp; B");
   });
 
-  it("truncates a long description in the caption", () => {
+  it("keeps the caption short regardless of description length", () => {
     const result = buildRecipeInlineResult(
       publicRecipe({
         imageUrl: "https://img/x.jpg",
@@ -95,7 +107,7 @@ describe("buildRecipeInlineResult", () => {
     );
 
     const caption = result.caption as string;
-    expect(caption).toContain("…");
-    expect(caption.length).toBeLessThan(400);
+    expect(caption).not.toContain("x".repeat(50));
+    expect(caption.length).toBeLessThan(200);
   });
 });

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  getLaunchStartParam,
   getTelegramWebApp,
   isTelegramEnvironment,
   loadTelegramSdk,
@@ -73,6 +74,41 @@ describe("isTelegramEnvironment", () => {
 
     window.location.hash = "";
     expect(isTelegramEnvironment()).toBe(true); // still detected from the flag
+  });
+});
+
+describe("getLaunchStartParam", () => {
+  it("reads start_param from the live SDK when loaded", () => {
+    setWebApp({
+      initData: "user=1&hash=abc",
+      initDataUnsafe: { start_param: "recipe_abc" },
+    } as Partial<TelegramWebApp>);
+
+    expect(getLaunchStartParam()).toBe("recipe_abc");
+  });
+
+  it("parses start_param from the launch hash before the SDK loads", () => {
+    setWebApp(undefined);
+    const initData = encodeURIComponent(
+      "auth_date=1&start_param=recipe_xyz&hash=abc",
+    );
+    window.location.hash = `#tgWebAppData=${initData}&tgWebAppVersion=8.0`;
+
+    expect(getLaunchStartParam()).toBe("recipe_xyz");
+  });
+
+  it("returns undefined when there is no launch data", () => {
+    setWebApp(undefined);
+    window.location.hash = "";
+
+    expect(getLaunchStartParam()).toBeUndefined();
+  });
+
+  it("returns undefined when the hash carries no start_param", () => {
+    setWebApp(undefined);
+    window.location.hash = `#tgWebAppData=${encodeURIComponent("auth_date=1&hash=abc")}`;
+
+    expect(getLaunchStartParam()).toBeUndefined();
   });
 });
 

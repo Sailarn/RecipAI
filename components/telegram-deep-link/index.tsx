@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useTelegram } from "@/components/telegram-provider";
 import { routes } from "@/lib/routes";
+import {
+  getLaunchStartParam,
+  isTelegramEnvironment,
+} from "@/lib/telegram/webapp";
 import { useNavigate } from "@/lib/transitions";
 
 const RECIPE_PREFIX = "recipe_";
@@ -35,21 +38,21 @@ function currentLocale(): string {
 /**
  * Navigates to the target of the Mini App's launch `start_param`, once. Renders
  * nothing. No-op outside Telegram or when the param is absent/unrecognized.
+ *
+ * Reads the param synchronously from the launch hash rather than waiting for the
+ * SDK's `webApp` object, so a shared recipe opens straight into its detail view
+ * (with the skeleton) instead of flashing the recipes list for a second first.
  */
 export function TelegramDeepLink() {
-  const { webApp } = useTelegram();
   const navigate = useNavigate();
   const handled = useRef(false);
 
   useEffect(() => {
-    if (!webApp || handled.current) return;
+    if (handled.current || !isTelegramEnvironment()) return;
     handled.current = true;
-    const href = resolveStartParamHref(
-      webApp.initDataUnsafe.start_param,
-      currentLocale(),
-    );
-    if (href) navigate.push(href);
-  }, [webApp, navigate]);
+    const href = resolveStartParamHref(getLaunchStartParam(), currentLocale());
+    if (href) navigate.replace(href);
+  }, [navigate]);
 
   return null;
 }

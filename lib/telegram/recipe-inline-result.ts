@@ -2,8 +2,6 @@ import { isImageKitUrl } from "@/lib/imagekit-url";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { miniAppDeepLink } from "@/lib/telegram-bot";
 
-const CAPTION_DESCRIPTION_LIMIT = 220;
-
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -30,28 +28,19 @@ function telegramPhotoUrl(imageUrl: string): string {
 }
 
 // Everything a recipient reads in the chat message. Telegram can't render the
-// app's card styling here, so pack the info into a formatted caption instead.
+// app's card styling here, so pack the info into a formatted caption. Kept
+// deliberately short — title + stats only — because the description made the
+// pre-send share sheet tall enough to push its controls off-screen (recipes
+// can have a long, multi-line title). The "Open recipe" button carries the rest.
 function recipeCaption(recipe: PublicRecipe): string {
-  const lines = [`🍳 <b>${escapeHtml(recipe.title)}</b>`];
-
   const meta = [
     recipe.category ? escapeHtml(recipe.category) : null,
     recipeStats(recipe),
   ]
     .filter((part): part is string => part !== null)
     .join("  ·  ");
-  lines.push(meta);
 
-  const description = recipe.description?.trim();
-  if (description) {
-    const short =
-      description.length > CAPTION_DESCRIPTION_LIMIT
-        ? `${description.slice(0, CAPTION_DESCRIPTION_LIMIT).trimEnd()}…`
-        : description;
-    lines.push("", escapeHtml(short));
-  }
-
-  return lines.join("\n");
+  return [`🍳 <b>${escapeHtml(recipe.title)}</b>`, meta].join("\n");
 }
 
 /**
