@@ -280,13 +280,14 @@ describe("ServingsCalculator", () => {
   });
 
   describe("pantry — add button", () => {
-    it("shows add button when ingredient is not in pantry", () => {
+    it("shows add button for a normalized ingredient not in pantry", () => {
       vi.mocked(useLiveQuery).mockReturnValue([]);
 
       render(
         <ServingsCalculator
           originalServings={2}
           ingredients={[baseIngredient({ item: "flour" })]}
+          canonicalIngredientIds={["vocab-flour"]}
         />,
       );
 
@@ -295,13 +296,14 @@ describe("ServingsCalculator", () => {
       ).toBeInTheDocument();
     });
 
-    it("calls addPantryItem when add button clicked", async () => {
+    it("adds the canonical ingredient to pantry when add clicked", async () => {
       vi.mocked(useLiveQuery).mockReturnValue([]);
 
       render(
         <ServingsCalculator
           originalServings={2}
           ingredients={[baseIngredient({ item: "flour" })]}
+          canonicalIngredientIds={["vocab-flour"]}
         />,
       );
 
@@ -312,13 +314,12 @@ describe("ServingsCalculator", () => {
       await waitFor(() => {
         expect(addPantryItem).toHaveBeenCalledOnce();
       });
-
       expect(addPantryItem).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "flour", on: true }),
+        expect.objectContaining({ on: true, ingredientId: "vocab-flour" }),
       );
     });
 
-    it("creates a provisional ingredient when no canonical id", async () => {
+    it("shows a spinner (not add) while ingredients are still normalizing", () => {
       vi.mocked(useLiveQuery).mockReturnValue([]);
 
       render(
@@ -328,13 +329,31 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /add truffle to pantry/i }),
+      expect(
+        screen.getByLabelText("Processing ingredient"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /add truffle to pantry/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("offers no add for an unrecognized (empty canonical) ingredient", () => {
+      vi.mocked(useLiveQuery).mockReturnValue([]);
+
+      render(
+        <ServingsCalculator
+          originalServings={2}
+          ingredients={[baseIngredient({ item: "truffle" })]}
+          canonicalIngredientIds={[""]}
+        />,
       );
 
-      await waitFor(() => {
-        expect(resolveOrCreateIngredient).toHaveBeenCalledWith("truffle");
-      });
+      expect(
+        screen.queryByRole("button", { name: /add truffle to pantry/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText("Processing ingredient"),
+      ).not.toBeInTheDocument();
     });
 
     it("does not create provisional ingredient when canonical id is provided", async () => {

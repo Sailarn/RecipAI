@@ -3,7 +3,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/lib/db/db";
-import { resolveOrCreateIngredient } from "@/lib/db/ingredients";
 import { addPantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
@@ -28,6 +27,11 @@ export function useServingsCalculator({
     new Map(),
   );
   const hasCanonical = (canonicalIngredientIds ?? []).some(Boolean);
+  // Normalization writes canonicalIngredientIds once, at the end. Until then it
+  // is undefined — the recipe is still being processed (parse → normalize).
+  const normalizationPending = canonicalIngredientIds === undefined;
+  const canAddToPantry = (index: number): boolean =>
+    Boolean(canonicalIngredientIds?.[index]);
   const ratio = servings / originalServings;
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -120,21 +124,18 @@ export function useServingsCalculator({
     ingredient: RecipeIngredient,
     index: number,
   ): Promise<void> => {
+    // Only normalized (canonical) ingredients are addable — never the raw
+    // parsed text, which would pollute the pantry with unmatched duplicates.
     const canonicalId = canonicalIngredientIds?.[index];
-    const name = displayName(ingredient, index);
-
-    let ingredientId = canonicalId;
-    if (!ingredientId) {
-      ingredientId = await resolveOrCreateIngredient(ingredient.item);
-    }
+    if (!canonicalId) return;
 
     await addPantryItem({
-      name,
+      name: displayName(ingredient, index),
       qty: 1,
       unit: "pcs",
       cat: "Other",
       on: true,
-      ingredientId,
+      ingredientId: canonicalId,
     });
   };
 
@@ -144,6 +145,8 @@ export function useServingsCalculator({
     useCanonical,
     setUseCanonical,
     hasCanonical,
+    normalizationPending,
+    canAddToPantry,
     formatAmount,
     stockStatus,
     displayName,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useRef, useState } from "react";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
@@ -33,27 +34,28 @@ export function RecipeDetail({
   initialRecipe,
 }: RecipeDetailProps) {
   const navigate = useNavigate();
-  const [recipe, setRecipe] = useState<Recipe | null>(initialRecipe ?? null);
-  const [loading, setLoading] = useState(initialRecipe === undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cookingMode, setCookingMode] = useState(false);
+  const viewedRef = useRef(false);
 
-  // When opened from a list card, initialRecipe seeds the view so it paints
-  // instantly with no skeleton. Still re-read from Dexie in the background so
-  // edits made elsewhere reconcile; keep the seed if the row is gone locally so
-  // only the deep-link/no-seed path falls through to the private guard.
+  // Live-observe the recipe so background writes (e.g. ingredient normalization
+  // completing after a parse) surface without a reload. initialRecipe seeds the
+  // view so it paints instantly with no skeleton; the seed is also kept if the
+  // row is gone locally, so only the deep-link/no-seed path falls through to the
+  // private guard. `undefined` = still loading, `null` = confirmed not in Dexie.
+  const liveRecipe = useLiveQuery(
+    () => getRecipe(recipeId).then((result) => result ?? null),
+    [recipeId],
+  );
+  const recipe: Recipe | null = liveRecipe ?? initialRecipe ?? null;
+  const loading = liveRecipe === undefined && initialRecipe === undefined;
+
   useEffect(() => {
-    getRecipe(recipeId)
-      .then((result) => {
-        if (result) {
-          setRecipe(result);
-          trackEvent("recipe_viewed", { via: "list" });
-        } else if (initialRecipe === undefined) {
-          setRecipe(null);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [recipeId, initialRecipe]);
+    if (recipe && !viewedRef.current) {
+      viewedRef.current = true;
+      trackEvent("recipe_viewed", { via: "list" });
+    }
+  }, [recipe]);
 
   const handleDelete = async () => {
     trackEvent("recipe_deleted", undefined);

@@ -53,6 +53,8 @@ export function ServingsCalculator({
     useCanonical,
     setUseCanonical,
     hasCanonical,
+    normalizationPending,
+    canAddToPantry,
     formatAmount,
     stockStatus,
     displayName,
@@ -145,6 +147,8 @@ export function ServingsCalculator({
                     locale={(locale === "ua" ? "ua" : "en") as Locale}
                     showOriginal={!useCanonical}
                     pantryItem={pantryItemFor(ingredient, index)}
+                    pending={normalizationPending}
+                    canAdd={canAddToPantry(index)}
                     onAdd={() => addToPantry(ingredient, index)}
                   />
                 ))}

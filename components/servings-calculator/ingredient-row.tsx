@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
+import { LoaderCircle, PlusIcon } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import { togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
@@ -23,6 +23,10 @@ interface IngredientRowProps {
   locale: Locale;
   showOriginal: boolean;
   pantryItem: PantryItem | undefined;
+  /** Recipe ingredients are still being normalized (post-parse). */
+  pending: boolean;
+  /** This ingredient resolved to a canonical id and can be added to pantry. */
+  canAdd: boolean;
   onAdd: () => Promise<void>;
 }
 
@@ -35,6 +39,8 @@ export function IngredientRow({
   locale,
   showOriginal,
   pantryItem,
+  pending,
+  canAdd,
   onAdd,
 }: IngredientRowProps) {
   return (
@@ -93,7 +99,15 @@ export function IngredientRow({
         >
           {pantryItem.on ? "✓" : ""}
         </button>
-      ) : (
+      ) : pending ? (
+        <span
+          role="status"
+          aria-label="Processing ingredient"
+          className="w-[22px] h-[22px] shrink-0 flex items-center justify-center text-[var(--fg-3)]"
+        >
+          <LoaderCircle size={13} className="animate-spin" />
+        </span>
+      ) : canAdd ? (
         <button
           type="button"
           onClick={onAdd}
@@ -102,7 +116,7 @@ export function IngredientRow({
         >
           <PlusIcon size={11} />
         </button>
-      )}
+      ) : null}
     </li>
   );
 }
