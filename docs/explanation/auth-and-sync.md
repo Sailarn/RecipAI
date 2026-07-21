@@ -96,13 +96,11 @@ graph TD
     D --> D1[Claim anonymous jobs]
     D --> D2[Pull latest 100 server jobs into Dexie]
 
-    E --> F[computeDiff - recipes]
-    E --> G[computeDiff - collections]
-    F --> H[replaceSyncNotifications]
+    E --> F[planReconcile - recipes]
+    E --> G[planReconcile - collections]
+    F --> H[Apply server copies / delete orphans / push new]
     G --> H
-    H --> I{Any diffs?}
-    I -->|yes| J[Toast - N items need review]
-    I -->|no| K[Done]
+    H --> K[Done - silent, server wins]
 ```
 
 ### What each sync does
@@ -113,29 +111,31 @@ graph TD
 
 **Parse history** — first claims any anonymous parse jobs into the user's account, then pulls the latest 100 server-side jobs and merges them into Dexie `parseHistory`.
 
-**Recipes + collections** — fetches both sides and runs `computeDiff` (from `lib/db/sync-diff.ts`). Conflicts are where `updatedAt` differs between local and server. All diffs (server-only, local-only, conflicted) are written to Dexie `notifications` and the user is shown a toast to review them.
+**Recipes + collections** — fetches both sides and reconciles them **silently, server-wins**, via `planReconcile` (`lib/db/reconcile-plan.ts`). No review screen, no toast. See the [reconciliation table in local-storage-and-sync](local-storage-and-sync.md#read-path-reconciliation-server-wins).
 
 ---
 
-## Diff engine (`lib/db/sync-diff.ts`)
+## Reconciliation engine (`lib/db/reconcile-plan.ts`)
+
+`planReconcile` is built on `computeDiff` (`lib/db/sync-diff.ts`, which still returns the `serverOnly` / `localOnly` / `conflicted` / `identical` buckets) and turns those buckets into three concrete actions, keyed on the per-item **`syncedAt` marker**:
 
 ```ts
-computeDiff<T extends { id: string; updatedAt: Date }>(
+planReconcile<T extends { id: string; updatedAt: Date; syncedAt?: Date | null }>(
   local: T[],
   server: T[],
-): SyncDiff<T>
+  options: { now: number; graceWindowMs: number },
+): { applyFromServer: T[]; pushToServer: T[]; deleteLocalIds: string[] }
 ```
 
-Returns four buckets:
-
-| Bucket | Meaning |
+| Action | When |
 |---|---|
-| `serverOnly` | Exists on server, not locally |
-| `localOnly` | Exists locally, not on server |
-| `conflicted` | Same id, different `updatedAt` |
-| `identical` | Same id, same `updatedAt` |
+| `applyFromServer` | Server-only; server+device differing (server wins); identical-but-unmarked (to backfill the marker) — minus anything edited locally within the grace window |
+| `pushToServer` | Device-only with **no** `syncedAt` → a genuinely new local item (uploaded insert-only) |
+| `deleteLocalIds` | Device-only **with** `syncedAt` → the server deleted a previously-synced item |
 
-Conflict resolution strategy: **last-write-wins is not applied automatically** — the user resolves each conflict via the Sync Review page (`app/[locale]/sync-review/`).
+`syncedAt` is a device-local marker set whenever an item round-trips the server; it is **never** written to Postgres (stripped by the recipe/collection write-field whitelist). It is what tells a brand-new local recipe apart from one the server deleted — the whole reason server-wins doesn't resurrect deleted recipes.
+
+Conflict resolution strategy: **server wins, applied automatically.** The old per-conflict Sync Review page (`app/[locale]/sync-review/`) is retained in the codebase but no longer routed to; preserving offline edits + a review/merge decision for the genuine both-changed case is deferred future work.
 
 ---
 

@@ -52,11 +52,19 @@ interface Recipe {
   unrecognizedIngredients?: string[];
   createdAt: Date;
   updatedAt: Date;
+  syncedAt?: Date;                     // device-local sync marker, never persisted to Postgres
 }
 ```
 
 `isPublic` is optional for backward compatibility with legacy Dexie rows. A
 missing value is treated as private; only `isPublic === true` means public.
+
+`syncedAt` is a **device-local** marker set once the recipe has round-tripped
+with the server (pulled or successfully pushed). It is stripped by the
+write-field whitelist so it never reaches Postgres. The server-wins reconciler
+uses it to tell a genuinely-new local recipe (no `syncedAt` → push) from one the
+server deleted (`syncedAt` set → delete locally). See
+[reconciliation](../explanation/auth-and-sync.md).
 
 #### RecipeIngredient / Step
 ```ts
@@ -102,6 +110,7 @@ interface Collection {
   emoji: string;
   createdAt: Date;
   updatedAt: Date;
+  syncedAt?: Date;                     // device-local sync marker (see Recipe)
 }
 ```
 

@@ -39,9 +39,6 @@ vi.mock("@/lib/db/db", () => ({
       get: vi.fn(),
       delete: vi.fn().mockResolvedValue(undefined),
     },
-    notifications: {
-      count: vi.fn(),
-    },
   },
 }));
 
@@ -61,7 +58,7 @@ import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import { useNavigate } from "@/lib/transitions";
 import { ParsedRecipesSheet } from "../index";
 
-function mockLiveQuery(parsedCount: number, syncCount: number) {
+function mockLiveQuery(parsedCount: number) {
   const parsedItems = Array.from({ length: parsedCount }, (_, index) => ({
     id: `p${index}`,
     title: `Parsed ${index}`,
@@ -70,15 +67,9 @@ function mockLiveQuery(parsedCount: number, syncCount: number) {
     instructions: [],
     createdAt: new Date(),
   }));
-  // Use mockImplementation (not mockReturnValueOnce) so the alternating pattern
-  // survives re-renders: the component always calls useLiveQuery twice per render —
-  // first for parsedRecipes (even calls), second for notifications count (odd calls).
-  let callIndex = 0;
-  vi.mocked(useLiveQuery).mockImplementation(() => {
-    const result = callIndex % 2 === 0 ? parsedItems : syncCount;
-    callIndex++;
-    return result as never;
-  });
+  // The bell is driven solely by parsed recipes now (the sync-review surface was
+  // retired), so the component makes a single useLiveQuery call per render.
+  vi.mocked(useLiveQuery).mockReturnValue(parsedItems as never);
 }
 
 beforeEach(() => {
@@ -86,64 +77,28 @@ beforeEach(() => {
 });
 
 describe("ParsedRecipesSheet", () => {
-  it("renders a disabled bell button when both parsedCount and syncCount are 0", () => {
-    mockLiveQuery(0, 0);
+  it("renders a disabled bell button when there are no parsed recipes", () => {
+    mockLiveQuery(0);
     render(<ParsedRecipesSheet />);
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
     expect(button).toBeDisabled();
   });
 
-  it("renders the bell button when only parsedCount > 0", () => {
-    mockLiveQuery(2, 0);
+  it("renders the bell button when parsed recipes exist", () => {
+    mockLiveQuery(2);
     render(<ParsedRecipesSheet />);
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("renders the bell button when only syncCount > 0", () => {
-    mockLiveQuery(0, 3);
-    render(<ParsedRecipesSheet />);
-    expect(screen.getByRole("button")).toBeInTheDocument();
-  });
-
-  it("badge shows total of parsedCount + syncCount", () => {
-    mockLiveQuery(2, 3);
-    render(<ParsedRecipesSheet />);
-    expect(screen.getByText("5")).toBeInTheDocument();
-  });
-
-  it("badge shows parsedCount when syncCount is 0", () => {
-    mockLiveQuery(4, 0);
+  it("badge shows the parsed recipe count", () => {
+    mockLiveQuery(4);
     render(<ParsedRecipesSheet />);
     expect(screen.getByText("4")).toBeInTheDocument();
   });
 
-  it("badge shows syncCount when parsedCount is 0", () => {
-    mockLiveQuery(0, 7);
-    render(<ParsedRecipesSheet />);
-    expect(screen.getByText("7")).toBeInTheDocument();
-  });
-
-  it("sync card appears in sheet when syncCount > 0", async () => {
-    mockLiveQuery(0, 2);
-    render(<ParsedRecipesSheet />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button"));
-    });
-    expect(screen.getByText(/2 items need sync review/i)).toBeInTheDocument();
-  });
-
-  it("Review button in sync card is present when sheet is open", async () => {
-    mockLiveQuery(0, 1);
-    render(<ParsedRecipesSheet />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button"));
-    });
-    expect(screen.getByRole("button", { name: /review/i })).toBeInTheDocument();
-  });
-
   it("keeps sheet content below the top safe area", async () => {
-    mockLiveQuery(0, 1);
+    mockLiveQuery(1);
     render(<ParsedRecipesSheet />);
     await act(async () => {
       fireEvent.click(screen.getByRole("button"));
@@ -172,7 +127,7 @@ describe("ParsedRecipesSheet", () => {
     }
 
     it("Save button saves the recipe, deletes the entry, and shows success toast", async () => {
-      mockLiveQuery(1, 0);
+      mockLiveQuery(1);
       vi.mocked(db.parsedRecipes.get).mockResolvedValue(fakeEntry as never);
 
       render(<ParsedRecipesSheet />);
@@ -193,7 +148,7 @@ describe("ParsedRecipesSheet", () => {
     });
 
     it("Edit button deletes the entry and navigates to the new recipe form", async () => {
-      mockLiveQuery(1, 0);
+      mockLiveQuery(1);
       vi.mocked(db.parsedRecipes.get).mockResolvedValue(fakeEntry as never);
       const pushSpy = vi.fn();
       vi.mocked(useNavigate).mockReturnValue({
@@ -217,7 +172,7 @@ describe("ParsedRecipesSheet", () => {
     });
 
     it("Dismiss button deletes the entry without saving", async () => {
-      mockLiveQuery(1, 0);
+      mockLiveQuery(1);
 
       render(<ParsedRecipesSheet />);
       await openSheet();

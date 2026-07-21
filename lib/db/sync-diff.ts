@@ -1,4 +1,4 @@
-interface SyncItem {
+export interface SyncItem {
   id: string;
   updatedAt: Date;
 }

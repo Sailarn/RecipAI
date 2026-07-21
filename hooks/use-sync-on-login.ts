@@ -6,24 +6,21 @@ import { maintenanceErrorFromResponse } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
-import { replaceSyncNotifications } from "@/lib/db/notifications";
+import { clearSyncNotifications } from "@/lib/db/notifications";
 import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
 import { bulkPutParseHistory } from "@/lib/db/parse-history";
+import { planReconcile, type ReconcileItem } from "@/lib/db/reconcile-plan";
 import {
   type Collection,
   INGREDIENT_STATUS,
   type PantryItem,
   type ParseHistoryEntry,
   type Recipe,
-  type SyncEntityType,
-  type SyncNotification,
 } from "@/lib/db/schema";
-import { computeDiff, type SyncDiff } from "@/lib/db/sync-diff";
 import { pullVocab } from "@/lib/db/sync-vocab";
 import { parseHistoryEntryFromServerJob } from "@/lib/parse-recipe/parse-history-entry";
-import { api, routes } from "@/lib/routes";
+import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
-import { useNavigate } from "@/lib/transitions";
 
 // Recipes written within this window are assumed to still be in-flight (the
 // normalize PATCH hasn't reached the server yet), so a diff conflict during
@@ -90,33 +87,57 @@ async function syncIngredients(): Promise<void> {
   }
 }
 
-function diffToNotifications<T extends Recipe | Collection>(
-  diff: SyncDiff<T>,
-  entityType: SyncEntityType,
-): Omit<SyncNotification, "id" | "createdAt">[] {
-  return [
-    ...diff.serverOnly.map((item) => ({
-      entityId: item.id,
-      entityType,
-      type: "server_only" as const,
-      serverSnapshot: JSON.stringify(item),
-      localSnapshot: null,
-    })),
-    ...diff.localOnly.map((item) => ({
-      entityId: item.id,
-      entityType,
-      type: "local_only" as const,
-      serverSnapshot: null,
-      localSnapshot: JSON.stringify(item),
-    })),
-    ...diff.conflicted.map(({ local, server }) => ({
-      entityId: local.id,
-      entityType,
-      type: "conflicted" as const,
-      serverSnapshot: JSON.stringify(server),
-      localSnapshot: JSON.stringify(local),
-    })),
-  ];
+interface SyncStore<T> {
+  bulkPut(items: T[]): Promise<unknown>;
+  bulkDelete(ids: string[]): Promise<unknown>;
+  update(id: string, changes: Partial<T>): Promise<unknown>;
+}
+
+// Apply a server-wins reconciliation for one entity type: overwrite/pull the
+// server copies, delete the locally-orphaned (server-deleted) rows, and upload
+// the genuinely-new device-only rows. `syncedAt` is set on every row that
+// round-trips so a later device-only appearance is unambiguous (new vs.
+// server-deleted). It is device-local only — the server strips it on write.
+async function applyReconcile<T extends ReconcileItem>(
+  local: T[],
+  server: T[],
+  config: {
+    table: SyncStore<T>;
+    syncEndpoint: string;
+    bodyKey: "recipes" | "collections";
+    now: number;
+  },
+): Promise<void> {
+  const plan = planReconcile(local, server, {
+    now: config.now,
+    graceWindowMs: GRACE_WINDOW_MS,
+  });
+  const syncedAt = new Date(config.now);
+
+  if (plan.applyFromServer.length > 0) {
+    await config.table.bulkPut(
+      plan.applyFromServer.map((item) => ({ ...item, syncedAt })),
+    );
+  }
+
+  if (plan.deleteLocalIds.length > 0) {
+    await config.table.bulkDelete(plan.deleteLocalIds);
+  }
+
+  if (plan.pushToServer.length > 0) {
+    const res = await fetch(config.syncEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [config.bodyKey]: plan.pushToServer }),
+    });
+    if (res.ok) {
+      await Promise.all(
+        plan.pushToServer.map((item) =>
+          config.table.update(item.id, { syncedAt } as Partial<T>),
+        ),
+      );
+    }
+  }
 }
 
 // Supabase returns createdAt/updatedAt as ISO strings; revive them to Date
@@ -140,7 +161,6 @@ export function useSyncOnLogin() {
   const hasSynced = useRef(false);
   const renormalized = useRef(false);
   const shapeMigrated = useRef(false);
-  const reviewedIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setIsSignedIn(!!session);
@@ -182,7 +202,6 @@ export function useSyncOnLogin() {
       .then((module) => module.reconcileVocab())
       .catch(() => {});
   }, []);
-  const navigate = useNavigate();
   const inFlightRef = useRef<Promise<void> | null>(null);
 
   const runSync = useCallback(async () => {
@@ -216,66 +235,47 @@ export function useSyncOnLogin() {
       const { recipes: rawServerRecipes } = await recipesRes.json();
       const { collections: rawServerCollections } = await collectionsRes.json();
 
-      const serverRecipes = parseTimestamps<Recipe>(rawServerRecipes ?? []);
-      const serverCollections = parseTimestamps<Collection>(
-        rawServerCollections ?? [],
-      );
+      // A malformed-but-ok body (no array) would look like an empty server and
+      // wrongly delete every synced local row — treat it as a failed sync.
+      if (
+        !Array.isArray(rawServerRecipes) ||
+        !Array.isArray(rawServerCollections)
+      )
+        throw new Error("Malformed sync response");
+
+      const serverRecipes = parseTimestamps<Recipe>(rawServerRecipes);
+      const serverCollections =
+        parseTimestamps<Collection>(rawServerCollections);
 
       const [localRecipes, localCollections] = await Promise.all([
         db.recipes.toArray(),
         db.collections.toArray(),
       ]);
 
-      const recipeDiff = computeDiff<Recipe>(localRecipes, serverRecipes);
-
-      const collectionDiff = computeDiff<Collection>(
-        localCollections,
-        serverCollections,
-      );
-
       const now = Date.now();
-      const stableRecipeDiff: SyncDiff<Recipe> = {
-        ...recipeDiff,
-        conflicted: recipeDiff.conflicted.filter(
-          ({ local }) => now - local.updatedAt.getTime() >= GRACE_WINDOW_MS,
-        ),
-      };
 
-      const allNotifications = [
-        ...diffToNotifications(stableRecipeDiff, "recipe"),
-        ...diffToNotifications(collectionDiff, "collection"),
-      ];
+      // Server-wins reconciliation, applied silently (no review screen).
+      await applyReconcile<Recipe>(localRecipes, serverRecipes, {
+        table: db.recipes,
+        syncEndpoint: api.recipesSync,
+        bodyKey: "recipes",
+        now,
+      });
+      await applyReconcile<Collection>(localCollections, serverCollections, {
+        table: db.collections,
+        syncEndpoint: api.collectionsSync,
+        bodyKey: "collections",
+        now,
+      });
 
-      await replaceSyncNotifications(allNotifications);
-
-      // Only announce review items that are new since the last sync, so a
-      // focus-triggered re-pull doesn't re-toast a review the user has already
-      // seen (or is mid-resolving).
-      const hasNewReviewItems = allNotifications.some(
-        (notification) => !reviewedIds.current.has(notification.entityId),
-      );
-      reviewedIds.current = new Set(
-        allNotifications.map((notification) => notification.entityId),
-      );
-
-      const total = allNotifications.length;
-      if (total > 0 && hasNewReviewItems) {
-        const locale = window.location.pathname.split("/")[1] ?? "en";
-        toast.info(
-          `${total} item${total !== 1 ? "s" : ""} need${total === 1 ? "s" : ""} your review`,
-          {
-            action: {
-              label: "Review",
-              onClick: () => navigate.push(routes.syncReview(locale)),
-            },
-          },
-        );
-      }
+      // Drop any leftover review notifications from before the server-wins
+      // rework so the bell's stale "needs review" badge clears.
+      await clearSyncNotifications();
     } catch {
       toast.error("Sync failed — check your connection");
       hasSynced.current = false;
     }
-  }, [session, navigate]);
+  }, [session]);
 
   // Single-flight: a caller that invokes sync() while one is already running
   // (initial mount racing a manual pull-to-refresh, or a focus re-pull racing
@@ -299,7 +299,7 @@ export function useSyncOnLogin() {
 
   // Re-pull when the app regains focus so recipes parsed elsewhere (e.g. the
   // Telegram bot) surface without a manual reload. The in-flight guard avoids
-  // overlapping pulls; the new-items toast guard keeps repeat focus quiet.
+  // overlapping pulls; reconciliation is silent, so a repeat focus is quiet.
   useEffect(() => {
     if (!session) return;
     let running = false;

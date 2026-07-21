@@ -26,11 +26,7 @@ const BELL_BUTTON_CLASS =
 export function ParsedRecipesSheet() {
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
-  const syncCount =
-    (useLiveQuery(() => db.notifications.count(), []) as number | undefined) ??
-    0;
   const parsedCount = parsed?.length ?? 0;
-  const totalCount = parsedCount + syncCount;
 
   const navigate = useNavigate();
   const params = useParams();
@@ -72,7 +68,7 @@ export function ParsedRecipesSheet() {
     await db.parsedRecipes.delete(id);
   };
 
-  if (totalCount === 0) {
+  if (parsedCount === 0) {
     return (
       <button
         type="button"
@@ -93,7 +89,7 @@ export function ParsedRecipesSheet() {
         >
           <BellIcon size={18} className="text-[var(--fg-1)]" />
           <span className="absolute -top-0.5 -right-0.5 bg-[var(--action-primary)] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-            {totalCount}
+            {parsedCount}
           </span>
         </button>
       </SheetTrigger>
@@ -106,76 +102,45 @@ export function ParsedRecipesSheet() {
           <SheetTitle>Notifications</SheetTitle>
         </SheetHeader>
         <div className="space-y-3 px-4 pb-6">
-          {syncCount > 0 && (
-            <div className="p-4 rounded-xl space-y-2 bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)]">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium text-sm">
-                  🔄 {syncCount} item{syncCount !== 1 ? "s" : ""} need sync
-                  review
-                </p>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    navigate.push(routes.syncReview(locale));
-                    setOpen(false);
-                  }}
-                >
-                  Review →
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {parsedCount > 0 && (
-            <>
-              {syncCount > 0 && (
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">
-                  Parsed Recipes
-                </p>
-              )}
-              {parsed?.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="p-4 rounded-xl bg-muted space-y-2"
-                >
-                  <div className="flex justify-between items-start gap-2">
-                    <div>
-                      <p className="font-medium text-sm">{entry.title}</p>
-                      {entry.category && (
-                        <p className="text-xs text-muted-foreground">
-                          {entry.category}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDismiss(entry.id)}
-                      className="text-muted-foreground hover:text-foreground text-xs shrink-0"
-                    >
-                      ✕
-                    </button>
+          {parsedCount > 0 &&
+            parsed?.map((entry) => (
+              <div key={entry.id} className="p-4 rounded-xl bg-muted space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-medium text-sm">{entry.title}</p>
+                    {entry.category && (
+                      <p className="text-xs text-muted-foreground">
+                        {entry.category}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleSave(entry.id)}
-                      className="flex-1"
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(entry.id)}
-                      className="flex-1"
-                    >
-                      Edit
-                    </Button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDismiss(entry.id)}
+                    className="text-muted-foreground hover:text-foreground text-xs shrink-0"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ))}
-            </>
-          )}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleSave(entry.id)}
+                    className="flex-1"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(entry.id)}
+                    className="flex-1"
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </div>
+            ))}
         </div>
       </SheetContent>
     </Sheet>

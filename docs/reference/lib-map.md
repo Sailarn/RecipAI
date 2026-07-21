@@ -55,7 +55,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/pantry.ts` | `addPantryItem` (dedups by `ingredientId`, writes dormant `qty`/`unit`/`cat` defaults), `bulkPutPantry`, `clearPantry` and related pantry ops. |
 | `lib/db/supabase-sync.ts` | Fire-and-forget sync on writes: `syncCreate`, `syncUpdate`, `syncDelete`. |
 | `lib/db/supabase-sync-collections.ts` | Fire-and-forget create/update/delete sync for collections. |
-| `lib/db/sync-diff.ts` | Generic diff engine: `computeDiff<T>(local, server)`. |
+| `lib/db/sync-diff.ts` | Generic diff engine: `computeDiff<T>(local, server)` → server-only / local-only / conflicted / identical buckets. |
+| `lib/db/reconcile-plan.ts` | `planReconcile<T>(local, server, opts)` — server-wins planner built on `computeDiff`; returns `{ applyFromServer, pushToServer, deleteLocalIds }` keyed on the `syncedAt` marker. Drives the silent reconciliation in `use-sync-on-login.ts`. |
 | `lib/db/save-parsed-recipe.ts` | Maps `ParsedRecipe` → Dexie recipe + triggers background image upload. |
 
 ---

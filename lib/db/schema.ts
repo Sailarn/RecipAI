@@ -35,6 +35,14 @@ export interface Collection {
   emoji: string;
   createdAt: Date;
   updatedAt: Date;
+  /**
+   * Device-local sync marker. Set once the item has round-tripped with the
+   * server (pulled or successfully pushed). Absent = never synced, so a
+   * device-only copy is a genuinely new local item to push rather than one the
+   * server deleted. Never persisted to Postgres (stripped by the write-field
+   * whitelist).
+   */
+  syncedAt?: Date;
 }
 
 /** Recipe-level named group. Ingredients/steps reference one by `sectionId`. */
@@ -119,6 +127,14 @@ export interface Recipe {
   unrecognizedIngredients?: string[];
   createdAt: Date;
   updatedAt: Date;
+  /**
+   * Device-local sync marker. Set once the recipe has round-tripped with the
+   * server (pulled or successfully pushed). Absent = never synced, so a
+   * device-only copy is a genuinely new local recipe to push rather than one
+   * the server deleted. Never persisted to Postgres (stripped by the
+   * write-field whitelist).
+   */
+  syncedAt?: Date;
 }
 
 export interface ParsedIngredient {

@@ -25,8 +25,18 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/lib/db/db", () => ({
   db: {
-    recipes: { toArray: vi.fn().mockResolvedValue([]) },
-    collections: { toArray: vi.fn().mockResolvedValue([]) },
+    recipes: {
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkPut: vi.fn().mockResolvedValue(undefined),
+      bulkDelete: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(1),
+    },
+    collections: {
+      toArray: vi.fn().mockResolvedValue([]),
+      bulkPut: vi.fn().mockResolvedValue(undefined),
+      bulkDelete: vi.fn().mockResolvedValue(undefined),
+      update: vi.fn().mockResolvedValue(1),
+    },
     ingredients: {
       filter: vi
         .fn()
@@ -37,7 +47,7 @@ vi.mock("@/lib/db/db", () => ({
 }));
 
 vi.mock("@/lib/db/notifications", () => ({
-  replaceSyncNotifications: vi.fn().mockResolvedValue(undefined),
+  clearSyncNotifications: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/lib/db/pantry", () => ({
@@ -45,17 +55,10 @@ vi.mock("@/lib/db/pantry", () => ({
   bulkPutPantry: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/lib/transitions", () => ({
-  useNavigate: vi
-    .fn()
-    .mockReturnValue({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
-}));
-
-import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { db } from "@/lib/db/db";
-import { replaceSyncNotifications } from "@/lib/db/notifications";
+import { clearSyncNotifications } from "@/lib/db/notifications";
 import { useSyncOnLogin } from "../use-sync-on-login";
 
 const mockFetch = vi.fn();
@@ -71,10 +74,7 @@ function makeJsonResponse(body: object, ok = true) {
 
 function maintenanceResponse() {
   return new Response(
-    JSON.stringify({
-      error: "Maintenance window",
-      code: "MAINTENANCE_MODE",
-    }),
+    JSON.stringify({ error: "Maintenance window", code: "MAINTENANCE_MODE" }),
     { status: 503 },
   );
 }
@@ -84,28 +84,57 @@ function setupFetch({
   collections = [] as unknown[],
   rejectSync = false,
 } = {}) {
-  mockFetch.mockImplementation((url: string) => {
-    if (String(url).startsWith("/api/ingredients")) {
+  mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+    const path = String(url);
+    if (path.startsWith("/api/ingredients")) {
       return Promise.resolve(
         makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
       );
     }
-    if (String(url) === "/api/pantry") {
+    if (path === "/api/pantry") {
       return Promise.resolve(makeJsonResponse({ items: [] }));
     }
-    if (rejectSync) return Promise.reject(new Error("Network error"));
-    if (String(url) === "/api/recipes/sync") {
+    // Both the recipe pull (GET) and the new-recipe push (POST) hit this path.
+    if (path === "/api/recipes/sync") {
+      if (options?.method === "POST")
+        return Promise.resolve(makeJsonResponse({ synced: 1 }));
+      if (rejectSync) return Promise.reject(new Error("Network error"));
       return Promise.resolve(makeJsonResponse({ recipes }));
     }
+    if (path === "/api/collections/sync") {
+      return Promise.resolve(makeJsonResponse({ synced: 1 }));
+    }
+    // /api/collections GET (the collections pull).
+    if (rejectSync) return Promise.reject(new Error("Network error"));
     return Promise.resolve(makeJsonResponse({ collections }));
   });
 }
 
+const serverRecipe = (id: string, updatedAt = "2024-01-01T00:00:00.000Z") => ({
+  id,
+  title: `Recipe ${id}`,
+  servings: 1,
+  ingredients: [],
+  instructions: [],
+  createdAt: "2024-01-01T00:00:00.000Z",
+  updatedAt,
+});
+
+const localRecipe = (id: string, updatedAt: Date, syncedAt?: Date) => ({
+  id,
+  title: `Recipe ${id}`,
+  servings: 1,
+  ingredients: [],
+  instructions: [],
+  createdAt: new Date("2024-01-01"),
+  updatedAt,
+  ...(syncedAt ? { syncedAt } : {}),
+});
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
-  vi.mocked(authClient.useSession).mockReturnValue({ data: null } as any);
-  vi.mocked(useLiveQuery).mockReturnValue([] as any);
+  vi.mocked(authClient.useSession).mockReturnValue({ data: null } as never);
   vi.mocked(db.recipes.toArray).mockResolvedValue([]);
   vi.mocked(db.collections.toArray).mockResolvedValue([]);
 });
@@ -118,342 +147,179 @@ describe("useSyncOnLogin", () => {
   describe("no sync conditions", () => {
     it("does not fetch when session is null", async () => {
       renderHook(() => useSyncOnLogin());
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 
-  describe("diff-based sync flow", () => {
-    it("fetches server recipes and server collections on login", async () => {
+  describe("reconciliation flow", () => {
+    it("fetches server recipes and collections on login", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
+      } as never);
       setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
-      expect(mockFetch).toHaveBeenCalledWith("/api/ingredients");
-      expect(mockFetch).toHaveBeenCalledWith("/api/pantry");
       expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync");
       expect(mockFetch).toHaveBeenCalledWith("/api/collections");
     });
 
-    it("calls replaceSyncNotifications with empty array when no mismatches", async () => {
+    it("never shows a review toast", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
-      setupFetch();
+      } as never);
+      setupFetch({ recipes: [serverRecipe("srv-1")] });
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      expect(replaceSyncNotifications).toHaveBeenCalledWith([]);
-    });
-
-    it("writes server_only notification when server has recipe local does not", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([]);
-      setupFetch({
-        recipes: [
-          {
-            id: "srv-1",
-            title: "Server Recipe",
-            servings: 2,
-            ingredients: [],
-            instructions: [],
-            createdAt: "2024-01-01T00:00:00.000Z",
-            updatedAt: "2024-01-01T00:00:00.000Z",
-          },
-        ],
-      });
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock
-        .calls[0][0];
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0].type).toBe("server_only");
-      expect(notifications[0].entityType).toBe("recipe");
-      expect(notifications[0].entityId).toBe("srv-1");
-      expect(notifications[0].serverSnapshot).toContain("srv-1");
-      expect(notifications[0].localSnapshot).toBeNull();
-    });
-
-    it("writes local_only notification when device has recipe server does not", async () => {
-      const localRecipe = {
-        id: "local-1",
-        title: "Local Recipe",
-        servings: 2,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      };
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
-      setupFetch();
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock
-        .calls[0][0];
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0].type).toBe("local_only");
-      expect(notifications[0].entityId).toBe("local-1");
-      expect(notifications[0].localSnapshot).toContain("local-1");
-      expect(notifications[0].serverSnapshot).toBeNull();
-    });
-
-    it("writes conflicted notification when updatedAt differs", async () => {
-      const localRecipe = {
-        id: "shared-1",
-        title: "Shared Recipe",
-        servings: 2,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      };
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      vi.mocked(useLiveQuery).mockReturnValue([localRecipe] as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
-      setupFetch({
-        recipes: [
-          {
-            ...localRecipe,
-            updatedAt: "2024-01-02T00:00:00.000Z",
-            createdAt: "2024-01-01T00:00:00.000Z",
-          },
-        ],
-      });
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock
-        .calls[0][0];
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0].type).toBe("conflicted");
-      expect(notifications[0].serverSnapshot).toContain("shared-1");
-      expect(notifications[0].localSnapshot).toContain("shared-1");
-    });
-
-    it("suppresses conflicted notification for a recipe written within the grace window", async () => {
-      const recentUpdatedAt = new Date(Date.now() - 10_000);
-      const localRecipe = {
-        id: "recent-1",
-        title: "Fresh Recipe",
-        servings: 1,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: recentUpdatedAt,
-      };
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
-      setupFetch({
-        recipes: [
-          {
-            ...localRecipe,
-            createdAt: "2024-01-01T00:00:00.000Z",
-            updatedAt: "2024-01-02T00:00:00.000Z",
-          },
-        ],
-      });
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      expect(vi.mocked(replaceSyncNotifications).mock.calls[0][0]).toHaveLength(
-        0,
-      );
+      await waitFor(() => expect(db.recipes.bulkPut).toHaveBeenCalled());
       expect(toast.info).not.toHaveBeenCalled();
     });
 
-    it("still emits conflicted notification for a recipe whose local write is outside the grace window", async () => {
-      const oldDate = new Date("2024-01-01");
-      const localRecipe = {
-        id: "old-1",
-        title: "Old Recipe",
-        servings: 1,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: oldDate,
-      };
+    it("pulls a server-only recipe to the device with a synced marker", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
+      } as never);
+      setupFetch({ recipes: [serverRecipe("srv-1")] });
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(db.recipes.bulkPut).toHaveBeenCalled());
+      const written = vi.mocked(db.recipes.bulkPut).mock
+        .calls[0][0] as unknown as Array<Record<string, unknown>>;
+      expect(written).toHaveLength(1);
+      expect(written[0].id).toBe("srv-1");
+      expect(written[0].syncedAt).toBeInstanceOf(Date);
+    });
+
+    it("overwrites a device recipe with the server copy when they differ", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe("shared", new Date("2024-01-01"), new Date("2024-01-01")),
+      ] as never);
       setupFetch({
-        recipes: [
-          {
-            ...localRecipe,
-            createdAt: "2024-01-01T00:00:00.000Z",
-            updatedAt: "2024-01-02T00:00:00.000Z",
-          },
-        ],
+        recipes: [serverRecipe("shared", "2024-02-01T00:00:00.000Z")],
       });
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      const notifications = vi.mocked(replaceSyncNotifications).mock
-        .calls[0][0];
-      expect(notifications).toHaveLength(1);
-      expect(notifications[0].type).toBe("conflicted");
+      await waitFor(() => expect(db.recipes.bulkPut).toHaveBeenCalled());
+      const written = vi.mocked(db.recipes.bulkPut).mock
+        .calls[0][0] as unknown as Array<Record<string, unknown>>;
+      expect(written[0].id).toBe("shared");
     });
 
-    it("does not write notification for identical items (same updatedAt)", async () => {
-      const recipe = {
-        id: "same-1",
-        title: "Same",
-        servings: 2,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      };
+    it("does not overwrite a local edit made within the grace window", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
-      vi.mocked(useLiveQuery).mockReturnValue([recipe] as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([recipe] as any);
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe(
+          "recent",
+          new Date(Date.now() - 10_000),
+          new Date("2024-01-01"),
+        ),
+      ] as never);
       setupFetch({
-        recipes: [
-          {
-            ...recipe,
-            createdAt: recipe.createdAt.toISOString(),
-            updatedAt: recipe.updatedAt.toISOString(),
-          },
-        ],
+        recipes: [serverRecipe("recent", "2024-02-01T00:00:00.000Z")],
       });
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      expect(vi.mocked(replaceSyncNotifications).mock.calls[0][0]).toHaveLength(
-        0,
-      );
+      await waitFor(() => expect(clearSyncNotifications).toHaveBeenCalled());
+      expect(db.recipes.bulkPut).not.toHaveBeenCalled();
+      expect(db.recipes.bulkDelete).not.toHaveBeenCalled();
     });
 
-    it("shows toast.info with singular wording when 1 notification", async () => {
+    it("deletes a previously-synced device-only recipe (server removed it)", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
-      setupFetch({
-        recipes: [
-          {
-            id: "srv-1",
-            title: "T",
-            servings: 1,
-            ingredients: [],
-            instructions: [],
-            createdAt: "2024-01-01T00:00:00.000Z",
-            updatedAt: "2024-01-01T00:00:00.000Z",
-          },
-        ],
-      });
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(toast.info).toHaveBeenCalled());
-      expect(toast.info).toHaveBeenCalledWith(
-        "1 item needs your review",
-        expect.objectContaining({
-          action: expect.objectContaining({ label: "Review" }),
-        }),
-      );
-    });
-
-    it("shows toast.info with plural wording when multiple notifications", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      const makeRecipe = (id: string) => ({
-        id,
-        title: `Recipe ${id}`,
-        servings: 1,
-        ingredients: [],
-        instructions: [],
-        createdAt: "2024-01-01T00:00:00.000Z",
-        updatedAt: "2024-01-01T00:00:00.000Z",
-      });
-      setupFetch({ recipes: [makeRecipe("a"), makeRecipe("b")] });
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(toast.info).toHaveBeenCalled());
-      expect(toast.info).toHaveBeenCalledWith(
-        "2 items need your review",
-        expect.anything(),
-      );
-    });
-
-    it("does not show any toast when there are no mismatches", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe("gone", new Date("2024-01-01"), new Date("2024-01-01")),
+      ] as never);
       setupFetch();
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(replaceSyncNotifications).toHaveBeenCalled());
-      expect(toast.info).not.toHaveBeenCalled();
-      expect(toast.success).not.toHaveBeenCalled();
+      await waitFor(() => expect(db.recipes.bulkDelete).toHaveBeenCalled());
+      expect(vi.mocked(db.recipes.bulkDelete).mock.calls[0][0]).toEqual([
+        "gone",
+      ]);
     });
 
-    it("shows error toast and does not call replaceSyncNotifications on fetch failure", async () => {
+    it("pushes a never-synced device-only recipe and marks it synced", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe("new-local", new Date("2024-01-01")),
+      ] as never);
+      setupFetch();
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith(
+          "/api/recipes/sync",
+          expect.objectContaining({ method: "POST" }),
+        ),
+      );
+      await waitFor(() => expect(db.recipes.update).toHaveBeenCalled());
+      expect(vi.mocked(db.recipes.update).mock.calls[0][0]).toBe("new-local");
+      expect(db.recipes.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it("clears leftover review notifications on a successful sync", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch();
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(clearSyncNotifications).toHaveBeenCalled());
+    });
+
+    it("shows an error toast and writes nothing on fetch failure", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
       setupFetch({ rejectSync: true });
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(toast.error).toHaveBeenCalled());
-      expect(toast.error).toHaveBeenCalledWith(
-        "Sync failed — check your connection",
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+          "Sync failed — check your connection",
+        ),
       );
-      expect(replaceSyncNotifications).not.toHaveBeenCalled();
+      expect(db.recipes.bulkPut).not.toHaveBeenCalled();
+      expect(clearSyncNotifications).not.toHaveBeenCalled();
     });
 
     it("stops quietly when the sync pull is blocked by maintenance", async () => {
-      const localRecipe = {
-        id: "local-1",
-        title: "Local Recipe",
-        servings: 2,
-        ingredients: [],
-        instructions: [],
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      };
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
-      vi.mocked(db.recipes.toArray).mockResolvedValue([localRecipe] as any);
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe("local-1", new Date("2024-01-01"), new Date("2024-01-01")),
+      ] as never);
       mockFetch.mockImplementation((url: string) => {
-        if (String(url).startsWith("/api/ingredients")) {
+        const path = String(url);
+        if (path.startsWith("/api/ingredients")) {
           return Promise.resolve(
             makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
           );
         }
-        if (String(url) === "/api/pantry") {
+        if (path === "/api/pantry") {
           return Promise.resolve(makeJsonResponse({ items: [] }));
         }
-        if (String(url) === "/api/recipes/sync") {
+        if (path === "/api/recipes/sync") {
           return Promise.resolve(maintenanceResponse());
         }
         return Promise.resolve(makeJsonResponse({ collections: [] }));
@@ -465,26 +331,16 @@ describe("useSyncOnLogin", () => {
         expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync"),
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(replaceSyncNotifications).not.toHaveBeenCalled();
+      expect(db.recipes.bulkDelete).not.toHaveBeenCalled();
       expect(toast.error).not.toHaveBeenCalled();
     });
   });
 
   describe("re-pull on focus", () => {
-    const serverRecipe = {
-      id: "srv-1",
-      title: "Bot Recipe",
-      servings: 1,
-      ingredients: [],
-      instructions: [],
-      createdAt: "2024-01-01T00:00:00.000Z",
-      updatedAt: "2024-01-01T00:00:00.000Z",
-    };
-
     it("re-pulls server state when the document becomes visible again", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
+      } as never);
       setupFetch();
       renderHook(() => useSyncOnLogin());
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
@@ -493,27 +349,13 @@ describe("useSyncOnLogin", () => {
 
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
     });
-
-    it("does not re-toast the same review items on a visibility re-pull", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as any);
-      setupFetch({ recipes: [serverRecipe] });
-      renderHook(() => useSyncOnLogin());
-      await waitFor(() => expect(toast.info).toHaveBeenCalledTimes(1));
-
-      document.dispatchEvent(new Event("visibilitychange"));
-
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
-      expect(toast.info).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe("triggerSync", () => {
     it("re-runs sync when called manually after initial sync", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
+      } as never);
       setupFetch();
 
       const { result } = renderHook(() => useSyncOnLogin());
@@ -528,34 +370,32 @@ describe("useSyncOnLogin", () => {
     it("does not start a second sync while one is already in flight", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
-      } as any);
+      } as never);
 
       let resolveRecipes: (value: Response) => void = () => {};
       const recipesPromise = new Promise<Response>((resolve) => {
         resolveRecipes = resolve;
       });
       mockFetch.mockImplementation((url: string) => {
-        if (String(url).startsWith("/api/ingredients")) {
+        const path = String(url);
+        if (path.startsWith("/api/ingredients")) {
           return Promise.resolve(
             makeJsonResponse({ ingredients: [], serverMaxUpdatedAt: "" }),
           );
         }
-        if (String(url) === "/api/pantry") {
+        if (path === "/api/pantry") {
           return Promise.resolve(makeJsonResponse({ items: [] }));
         }
-        if (String(url) === "/api/recipes/sync") return recipesPromise;
+        if (path === "/api/recipes/sync") return recipesPromise;
         return Promise.resolve(makeJsonResponse({ collections: [] }));
       });
 
       const { result } = renderHook(() => useSyncOnLogin());
 
-      // Initial mount effect has started sync(); recipes/sync is still pending.
       await waitFor(() =>
         expect(mockFetch).toHaveBeenCalledWith("/api/recipes/sync"),
       );
 
-      // A manual trigger while that sync is still in flight should piggyback
-      // on it rather than starting a second, overlapping round.
       const manualCall = result.current.triggerSync();
       resolveRecipes(makeJsonResponse({ recipes: [] }));
       await manualCall;

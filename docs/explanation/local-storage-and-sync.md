@@ -33,9 +33,24 @@ The Dexie write always happens first. `syncFetch` (`lib/sync-fetch.ts`) checks `
 
 ---
 
-## Read path (reconciliation)
+## Read path (reconciliation — server wins)
 
-When a session appears, `useSyncOnLogin` pulls the server state and compares it to local Dexie state using `computeDiff`. The same single-flight reconciliation runs on manual pull-to-refresh and whenever the signed-in app returns to the foreground. Discrepancies become `SyncNotification` rows in Dexie, shown to the user via the Sync Review page.
+When a session appears, `useSyncOnLogin` pulls the server state and reconciles it into local Dexie **silently — the server is authoritative**. The same single-flight reconciliation runs on manual pull-to-refresh and whenever the signed-in app returns to the foreground. There is no review screen and no user prompt.
+
+The planner (`planReconcile` in `lib/db/reconcile-plan.ts`, built on `computeDiff`) sorts every recipe/collection by id into one of three actions, keyed on a per-item **`syncedAt` marker** — a device-local timestamp set once the item has round-tripped with the server (pulled or successfully pushed), never persisted to Postgres (the write-field whitelist strips it):
+
+| Where the item is | Marker | Action |
+|---|---|---|
+| Server + device (differing, or identical-but-unmarked) | — | **Apply the server copy** to the device (server wins), setting `syncedAt` |
+| Server only | — | **Pull to device**, setting `syncedAt` |
+| Device only | `syncedAt` set | Previously synced → the server deleted it → **delete locally** |
+| Device only | no `syncedAt` | Genuinely new local item → **push to the server** (insert-only), then set `syncedAt` |
+
+The `syncedAt` marker is what disambiguates the two device-only cases — without it, a recipe the server deleted would look identical to a brand-new local one and get resurrected on every sync.
+
+**Grace window.** A local item edited within `GRACE_WINDOW_MS` (90 s) is left untouched, so a still-in-flight local write is not overwritten by the server's pre-edit snapshot.
+
+**Known tradeoff (accepted):** an offline edit to an *existing* recipe is overwritten when the device reconnects (server wins). Preserving offline changes — and reintroducing a review/merge decision only for the genuine device-changed-AND-server-changed case — is deferred future work. The `sync-review/` route and components are kept in the codebase (unreferenced) for that.
 
 This is event-triggered pull reconciliation, not real-time sync. Changes made on another device appear after sign-in, a foreground refresh, or a manual pull-to-refresh; they do not stream between those triggers.
 
