@@ -5,6 +5,7 @@ import { deviceAuthorization } from "better-auth/plugins";
 import { telegram } from "better-auth-telegram";
 import { db } from "@/db";
 import * as schema from "@/db/schema/auth";
+import { shouldReportAuthError } from "@/lib/auth/auth-error-report";
 import {
   getAllowedAuthHosts,
   getExternalAuthUrl,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/auth/external-auth-config";
 import { externalLink } from "@/lib/auth/external-link-plugin";
 import { miniAppDataToUser } from "@/lib/auth/telegram-user";
+import { captureError } from "@/lib/telemetry";
 
 const authEnvironment =
   process.env.NODE_ENV === "production" ? "production" : "development";
@@ -32,6 +34,18 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  // The auth endpoints (/api/auth/*) are served by better-auth's own handler,
+  // so their failures never reach our ApiError wrapper and were invisible in
+  // Sentry — a new Mini App user failing to insert (NOT NULL email) showed the
+  // user a stuck login screen with no error report. Forward genuine failures to
+  // Sentry; shouldReportAuthError skips routine 4xx (denied logins, rate limits).
+  onAPIError: {
+    onError: (error: unknown) => {
+      if (shouldReportAuthError(error)) {
+        captureError(error, { tags: { source: "better-auth" } });
+      }
+    },
+  },
   account: {
     accountLinking: {
       enabled: true,

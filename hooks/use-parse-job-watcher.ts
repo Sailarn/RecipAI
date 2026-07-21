@@ -21,7 +21,7 @@ import {
   failedParseHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
-import { trackEvent } from "@/lib/telemetry";
+import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 
@@ -146,7 +146,15 @@ export function useParseJobWatcher() {
           } else {
             scheduleRetry(3000, run);
           }
-        } catch {
+        } catch (error) {
+          // A network drop is expected — retry quietly. But a failure while
+          // online (the parse-status endpoint erroring, or a bug turning the
+          // completed parse into a local recipe in handleDone) would lose the
+          // parse with no signal, so surface it. The claimJobCompletion guard
+          // means a handleDone failure reports once, not on every retry.
+          if (typeof navigator !== "undefined" && navigator.onLine) {
+            captureError(error, { tags: { source: "parse-job-watcher" } });
+          }
           scheduleRetry(5000, run); // retry on network error
         }
       };

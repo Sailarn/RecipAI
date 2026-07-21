@@ -67,7 +67,9 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/auth/auth.ts` | better-auth server config (Google, Passkey, Telegram OIDC + Mini App, Drizzle adapter). |
+| `lib/auth/auth.ts` | better-auth server config (Google, Passkey, Telegram OIDC + Mini App, Drizzle adapter). `onAPIError` forwards auth-endpoint failures to Sentry. |
+| `lib/auth/telegram-user.ts` | `miniAppDataToUser()` — maps Telegram Mini App data to a user record with a placeholder email (`user.email` is NOT NULL). |
+| `lib/auth/auth-error-report.ts` | `shouldReportAuthError()` — decides which better-auth errors reach Sentry (report 500s / raw throws, skip routine 4xx). |
 | `lib/telegram/webapp.ts` | SSR-safe wrapper over `window.Telegram.WebApp` — `isTelegramEnvironment()`, `getTelegramWebApp()`, `loadTelegramSdk()`. |
 | `components/telegram-provider/` | Detects the Telegram WebView, runs SDK lifecycle + auto sign-in (`use-auto-sign-in.ts`); exposes `useTelegram()`/`useIsTelegram()`. |
 | `components/telegram-back-button/`, `components/telegram-deep-link/` | Native BackButton wiring; `start_param` → route (`resolveStartParamHref`). |

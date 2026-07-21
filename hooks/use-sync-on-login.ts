@@ -21,6 +21,7 @@ import { pullVocab } from "@/lib/db/sync-vocab";
 import { parseHistoryEntryFromServerJob } from "@/lib/parse-recipe/parse-history-entry";
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
+import { captureError } from "@/lib/telemetry";
 
 // Recipes written within this window are assumed to still be in-flight (the
 // normalize PATCH hasn't reached the server yet), so a diff conflict during
@@ -280,9 +281,15 @@ export function useSyncOnLogin() {
       // Drop any leftover review notifications from before the server-wins
       // rework so the bell's stale "needs review" badge clears.
       await clearSyncNotifications();
-    } catch {
+    } catch (error) {
       toast.error("Sync failed — check your connection");
       hasSynced.current = false;
+      // Offline drops are expected in this local-first app, but a failure while
+      // we're online is a genuine problem — a server error or a reconcile bug —
+      // and must not be invisible. Report only those.
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        captureError(error, { tags: { source: "sync-on-login" } });
+      }
     }
   }, [session]);
 

@@ -20,6 +20,8 @@ The routing rule: **PostHog** answers *what/who* — top-N lists, funnels, trend
 
 ### Sentry — errors & tracing
 - Request instrumentation via `onRequestError`, route errors via `ApiError.capture` / `ApiError.internal`, the root client error boundary, and handled exceptions explicitly passed to `captureError`.
+- **Auth endpoints** (`/api/auth/*`) are served by better-auth's own handler, so they bypass `ApiError`. `auth.onAPIError.onError` forwards their failures to `captureError` (tag `source: "better-auth"`), filtered by `shouldReportAuthError` (`lib/auth/auth-error-report.ts`) so routine 4xx — denied logins, rate limits — don't flood Sentry while genuine 500s do. This was a blind spot: a new Mini App user failing to insert (NOT NULL email) left the user stuck with **no** Sentry event.
+- **Client best-effort paths that swallow to stay offline-tolerant** still report genuine failures when `navigator.onLine`: the sync reconciliation catch (`use-sync-on-login`, tag `sync-on-login`) and the parse-job watcher (`use-parse-job-watcher`, tag `parse-job-watcher`) — so a reconcile bug or a completed parse that fails to save locally is visible instead of silently lost.
 - `syncFetch` reports non-transient, non-maintenance HTTP failures directly; expected offline errors and 502/503/504 availability blips remain silent.
 - 20% performance trace sampling (`tracesSampleRate`).
 - Production only (`NODE_ENV === "production"`).
