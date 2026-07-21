@@ -11,6 +11,7 @@ import {
   validatePwaClient,
 } from "@/lib/auth/external-auth-config";
 import { externalLink } from "@/lib/auth/external-link-plugin";
+import { miniAppDataToUser } from "@/lib/auth/telegram-user";
 
 const authEnvironment =
   process.env.NODE_ENV === "production" ? "production" : "development";
@@ -77,6 +78,11 @@ export const auth = betterAuth({
         enabled: true,
         validateInitData: true,
         allowAutoSignin: true,
+        // The plugin's default mapper leaves email undefined; our `user.email`
+        // is NOT NULL, so a brand-new Mini App user (whose first touch is the
+        // Mini App, not web/OIDC) fails to insert and auto sign-in never
+        // completes. Supply a placeholder email so the user is created.
+        mapMiniAppDataToUser: miniAppDataToUser,
       },
       botToken: process.env.TELEGRAM_BOT_TOKEN ?? "",
       botUsername: process.env.TELEGRAM_BOT_USERNAME ?? "",

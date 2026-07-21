@@ -19,7 +19,7 @@ RecipAI uses [better-auth](https://better-auth.com) with a Drizzle/Postgres adap
 | **Google OAuth** | Requires `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`. |
 | **Passkey (WebAuthn)** | Via `@better-auth/passkey`. |
 | **Telegram OIDC** | Via `better-auth-telegram` (`providerId "telegram-oidc"`). Web login widget flow. Requires bot token + OIDC credentials. |
-| **Telegram Mini App** | Via `better-auth-telegram` `miniApp` (`providerId "telegram"`). Silent `initData` sign-in inside the Telegram WebView — see [Telegram Mini App](telegram-mini-app.md). |
+| **Telegram Mini App** | Via `better-auth-telegram` `miniApp` (`providerId "telegram"`). Silent `initData` sign-in inside the Telegram WebView. New users are created with a placeholder email (`miniApp.mapMiniAppDataToUser` → `lib/auth/telegram-user.ts`) since `user.email` is NOT NULL — see [Telegram Mini App](telegram-mini-app.md) and [gotchas](../reference/gotchas.md). |
 
 Account linking is enabled with `allowDifferentEmails: true` — a user can link multiple providers to one account.
 

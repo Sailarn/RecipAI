@@ -32,10 +32,11 @@ const CHIP_CLASS =
 
 export function LoginView({ locale }: { locale: string }) {
   const navigate = useNavigate();
-  const { authStatus } = useTelegram();
+  const { authStatus, webApp } = useTelegram();
   const showSignInOptions = useFeature("signInOptions");
   const [externalUrl, setExternalUrl] = useState<string>();
   const [externalError, setExternalError] = useState<string>();
+  const [retryingTelegram, setRetryingTelegram] = useState(false);
   const abortController = useRef<AbortController | undefined>(undefined);
   const resumedRef = useRef(false);
 
@@ -129,17 +130,45 @@ export function LoginView({ locale }: { locale: string }) {
     });
   };
 
+  // Manual retry of the Mini App sign-in after a failed silent attempt. A
+  // successful sign-in refreshes the shared session store, which navigates the
+  // app off the login screen; on failure the button re-enables.
+  const handleTelegramRetry = async () => {
+    if (!webApp) return;
+    trackEvent("login", { method: "telegram" });
+    setRetryingTelegram(true);
+    try {
+      const result = await authClient.signInWithMiniApp(webApp.initData);
+      if (!result.error) await authClient.getSession();
+    } finally {
+      setRetryingTelegram(false);
+    }
+  };
+
   // Where OAuth sign-in options aren't offered (Telegram: sign-in is silent via
   // initData), show the auto sign-in status instead of the web login buttons.
   let signInSection: React.ReactNode;
   if (!showSignInOptions) {
     signInSection = (
-      <div className="flex flex-col items-center gap-2 text-center">
+      <div className="flex flex-col items-center gap-3 text-center">
         <p className="font-sans text-sm leading-[1.5] text-[var(--fg-2)]">
           {authStatus === "failed"
-            ? "We couldn't sign you in automatically. Reopen RecipAI from your Telegram chat to try again."
+            ? "We couldn't sign you in automatically."
             : "Signing you in with Telegram…"}
         </p>
+        {authStatus === "failed" && webApp && (
+          <button
+            type="button"
+            onClick={handleTelegramRetry}
+            disabled={retryingTelegram}
+            className="signin-btn justify-center disabled:opacity-60"
+          >
+            <div className={`${CHIP_CLASS} text-[#229ED9]`}>
+              <Send size={14} strokeWidth={2} />
+            </div>
+            <span>{retryingTelegram ? "Signing in…" : "Try again"}</span>
+          </button>
+        )}
       </div>
     );
   } else if (externalUrl) {

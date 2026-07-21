@@ -31,6 +31,8 @@ vi.mock("@/lib/auth/auth-client", () => ({
       passkey: vi.fn().mockResolvedValue({ error: null }),
     },
     signInWithTelegramOIDC: vi.fn().mockResolvedValue(undefined),
+    signInWithMiniApp: vi.fn().mockResolvedValue({ error: null }),
+    getSession: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -65,7 +67,7 @@ vi.mock("@/lib/transitions", () => ({
 const telegramState = vi.hoisted(() => ({
   isTelegram: false,
   authStatus: "pending" as string,
-  webApp: undefined,
+  webApp: undefined as { initData: string } | undefined,
   user: undefined,
 }));
 
@@ -97,6 +99,7 @@ describe("LoginView", () => {
     loadPendingDeviceAuth.mockReturnValue(null);
     signInFeature.value = true;
     telegramState.authStatus = "pending";
+    telegramState.webApp = undefined;
   });
 
   it("renders the Google sign-in button", () => {
@@ -127,6 +130,36 @@ describe("LoginView", () => {
     expect(
       screen.getByText(/couldn't sign you in automatically/i),
     ).toBeInTheDocument();
+  });
+
+  it("retries the Mini App sign-in when the failed-state button is tapped", async () => {
+    const { authClient } = await import("@/lib/auth/auth-client");
+    signInFeature.value = false;
+    telegramState.authStatus = "failed";
+    telegramState.webApp = { initData: "signed-init-data" };
+
+    render(<LoginView locale="en" />);
+
+    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+
+    await waitFor(() => {
+      expect(authClient.signInWithMiniApp).toHaveBeenCalledWith(
+        "signed-init-data",
+      );
+    });
+    expect(trackEvent).toHaveBeenCalledWith("login", { method: "telegram" });
+  });
+
+  it("does not render a retry button when there is no Telegram webApp", () => {
+    signInFeature.value = false;
+    telegramState.authStatus = "failed";
+    telegramState.webApp = undefined;
+
+    render(<LoginView locale="en" />);
+
+    expect(
+      screen.queryByRole("button", { name: /try again/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("tracks login when signing in with Google", async () => {
