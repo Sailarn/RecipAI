@@ -6,6 +6,7 @@ import { isSignedIn } from "@/lib/auth/session-state";
 import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { useAwaitingTelegramAutoSignIn } from "@/lib/hooks/use-awaiting-telegram-auto-sign-in";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -60,7 +61,16 @@ export function RecipeDetail({
   const [ownerPullDone, setOwnerPullDone] = useState(false);
   const pullStartedRef = useRef(false);
 
+  // isSignedIn() is a plain module flag set from useSyncOnLogin's session
+  // effect — on a cold Telegram launch it reads false for the brief window
+  // before the silent Telegram auto sign-in resolves, which used to fall
+  // straight through to the private guard instead of waiting.
+  const awaitingTelegramAutoSignIn = useAwaitingTelegramAutoSignIn(
+    isSignedIn(),
+  );
+
   useEffect(() => {
+    if (awaitingTelegramAutoSignIn) return;
     if (recipe || publicRecipe || !isSignedIn()) {
       setOwnerPullDone(true);
       return;
@@ -68,7 +78,7 @@ export function RecipeDetail({
     if (liveRecipe !== null || pullStartedRef.current) return;
     pullStartedRef.current = true;
     pullOwnRecipe(recipeId).finally(() => setOwnerPullDone(true));
-  }, [recipe, publicRecipe, liveRecipe, recipeId]);
+  }, [recipe, publicRecipe, liveRecipe, recipeId, awaitingTelegramAutoSignIn]);
 
   useEffect(() => {
     if (recipe && !viewedRef.current) {
@@ -90,7 +100,8 @@ export function RecipeDetail({
   if (!recipe) {
     if (publicRecipe)
       return <SharedRecipeDetail locale={locale} recipe={publicRecipe} />;
-    if (isSignedIn() && !ownerPullDone) return <RecipeSkeleton />;
+    if (awaitingTelegramAutoSignIn || (isSignedIn() && !ownerPullDone))
+      return <RecipeSkeleton />;
     return <PrivateRecipeGuard locale={locale} />;
   }
 

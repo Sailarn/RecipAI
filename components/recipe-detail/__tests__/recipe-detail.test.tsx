@@ -96,6 +96,19 @@ vi.mock("@/lib/db/pull-own-recipe", () => ({
   pullOwnRecipe: vi.fn().mockResolvedValue(null),
 }));
 
+const telegramState = vi.hoisted(() => ({
+  isTelegramEnvironment: false,
+  authStatus: "idle" as "idle" | "pending" | "signed-in" | "failed",
+}));
+
+vi.mock("@/components/telegram-provider", () => ({
+  useTelegram: () => ({ authStatus: telegramState.authStatus }),
+}));
+
+vi.mock("@/lib/telegram/webapp", () => ({
+  isTelegramEnvironment: () => telegramState.isTelegramEnvironment,
+}));
+
 const mockRecipe: Recipe = {
   id: "recipe-1",
   title: "Chocolate Cake",
@@ -137,6 +150,8 @@ describe("RecipeDetail", () => {
     vi.mocked(recipesModule.createRecipe).mockResolvedValue("copied-1");
     vi.mocked(isSignedIn).mockReturnValue(false);
     vi.mocked(pullOwnRecipe).mockResolvedValue(null);
+    telegramState.isTelegramEnvironment = false;
+    telegramState.authStatus = "idle";
   });
 
   it("shows loading state while fetching recipe", async () => {
@@ -378,6 +393,49 @@ describe("RecipeDetail", () => {
         await screen.findByText("This recipe is private"),
       ).toBeInTheDocument();
       expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("cold Telegram launch — guard waits on auto sign-in", () => {
+    it("shows a skeleton, not the private guard, while Telegram auto sign-in is still pending", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(false);
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "pending";
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() =>
+        expect(recipesModule.getRecipe).toHaveBeenCalledWith("bot-1"),
+      );
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+      expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the private guard once Telegram auto sign-in fails", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(false);
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "failed";
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      expect(
+        await screen.findByText("This recipe is private"),
+      ).toBeInTheDocument();
+    });
+
+    it("attempts the owner pull once auto sign-in resolves to signed-in", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "signed-in";
+      vi.mocked(isSignedIn).mockReturnValue(true);
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
     });
   });
 });
