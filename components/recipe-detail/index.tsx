@@ -7,6 +7,7 @@ import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { useAwaitingTelegramAutoSignIn } from "@/lib/hooks/use-awaiting-telegram-auto-sign-in";
+import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -53,13 +54,20 @@ export function RecipeDetail({
   const recipe: Recipe | null = liveRecipe ?? initialRecipe ?? null;
   const loading = liveRecipe === undefined && initialRecipe === undefined;
 
-  // When the recipe isn't on this device, a signed-in user may still own it on
-  // the server (a Telegram bot deep link opened before the full sync landed it).
-  // Pull that one row directly instead of flashing the private guard; the live
-  // query then re-renders it. `ownerPullDone` gates the guard so it only shows
-  // once the pull has been attempted (or the user is signed out).
-  const [ownerPullDone, setOwnerPullDone] = useState(false);
-  const pullStartedRef = useRef(false);
+  // When the recipe isn't on this device, it's resolved one of two ways before
+  // falling back to the private guard: a signed-in user may still own it on
+  // the server (a Telegram bot deep link opened before the full sync landed
+  // it) — pull that row directly, the live query then re-renders it. If it
+  // isn't theirs (or they're signed out), it may be a recipe someone else
+  // shared publicly — e.g. opening a shared-recipe deep link while already
+  // signed in to a different account, which never carries a server
+  // `publicRecipe` prop the way a fresh page load does. `resolutionDone` gates
+  // the guard so it only shows once both have been tried.
+  const [resolutionDone, setResolutionDone] = useState(false);
+  const [fetchedPublicRecipe, setFetchedPublicRecipe] =
+    useState<PublicRecipe | null>(null);
+  const resolutionStartedRef = useRef(false);
+  const effectivePublicRecipe = publicRecipe ?? fetchedPublicRecipe;
 
   // isSignedIn() is a plain module flag set from useSyncOnLogin's session
   // effect — on a cold Telegram launch it reads false for the brief window
@@ -70,15 +78,29 @@ export function RecipeDetail({
   );
 
   useEffect(() => {
-    if (awaitingTelegramAutoSignIn) return;
-    if (recipe || publicRecipe || !isSignedIn()) {
-      setOwnerPullDone(true);
+    if (recipe || effectivePublicRecipe) {
+      setResolutionDone(true);
       return;
     }
-    if (liveRecipe !== null || pullStartedRef.current) return;
-    pullStartedRef.current = true;
-    pullOwnRecipe(recipeId).finally(() => setOwnerPullDone(true));
-  }, [recipe, publicRecipe, liveRecipe, recipeId, awaitingTelegramAutoSignIn]);
+    if (awaitingTelegramAutoSignIn) return;
+    if (liveRecipe !== null || resolutionStartedRef.current) return;
+    resolutionStartedRef.current = true;
+
+    (async () => {
+      if (isSignedIn()) {
+        const owned = await pullOwnRecipe(recipeId);
+        if (owned) return;
+      }
+      const shared = await fetchPublicRecipe(recipeId);
+      if (shared) setFetchedPublicRecipe(shared);
+    })().finally(() => setResolutionDone(true));
+  }, [
+    recipe,
+    effectivePublicRecipe,
+    liveRecipe,
+    recipeId,
+    awaitingTelegramAutoSignIn,
+  ]);
 
   useEffect(() => {
     if (recipe && !viewedRef.current) {
@@ -98,9 +120,11 @@ export function RecipeDetail({
   }
 
   if (!recipe) {
-    if (publicRecipe)
-      return <SharedRecipeDetail locale={locale} recipe={publicRecipe} />;
-    if (awaitingTelegramAutoSignIn || (isSignedIn() && !ownerPullDone))
+    if (effectivePublicRecipe)
+      return (
+        <SharedRecipeDetail locale={locale} recipe={effectivePublicRecipe} />
+      );
+    if (awaitingTelegramAutoSignIn || !resolutionDone)
       return <RecipeSkeleton />;
     return <PrivateRecipeGuard locale={locale} />;
   }

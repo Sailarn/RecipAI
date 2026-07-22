@@ -16,6 +16,7 @@ import { isSignedIn } from "@/lib/auth/session-state";
 import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { RecipeDetail } from "../index";
 
@@ -96,6 +97,10 @@ vi.mock("@/lib/db/pull-own-recipe", () => ({
   pullOwnRecipe: vi.fn().mockResolvedValue(null),
 }));
 
+vi.mock("@/lib/public-recipes/fetch-public-recipe", () => ({
+  fetchPublicRecipe: vi.fn().mockResolvedValue(null),
+}));
+
 const telegramState = vi.hoisted(() => ({
   isTelegramEnvironment: false,
   authStatus: "idle" as "idle" | "pending" | "signed-in" | "failed",
@@ -150,6 +155,7 @@ describe("RecipeDetail", () => {
     vi.mocked(recipesModule.createRecipe).mockResolvedValue("copied-1");
     vi.mocked(isSignedIn).mockReturnValue(false);
     vi.mocked(pullOwnRecipe).mockResolvedValue(null);
+    vi.mocked(fetchPublicRecipe).mockResolvedValue(null);
     telegramState.isTelegramEnvironment = false;
     telegramState.authStatus = "idle";
   });
@@ -393,6 +399,49 @@ describe("RecipeDetail", () => {
         await screen.findByText("This recipe is private"),
       ).toBeInTheDocument();
       expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("public-recipe fallback (deep link to someone else's shared recipe)", () => {
+    // A Telegram deep link never carries a server-fetched `publicRecipe` prop
+    // the way a fresh page load does (see components/telegram-deep-link) — so
+    // opening a recipe shared by another user while already signed in to a
+    // different account relies entirely on this client-side fallback.
+    it("fetches and shows the public recipe when it isn't the signed-in user's own", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(true);
+      vi.mocked(pullOwnRecipe).mockResolvedValue(null);
+      vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
+
+      render(<RecipeDetail recipeId="shared-1" locale="en" />);
+
+      expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
+      expect(screen.getByText("Shared by Olena")).toBeInTheDocument();
+      expect(fetchPublicRecipe).toHaveBeenCalledWith("shared-1");
+    });
+
+    it("fetches and shows the public recipe when signed out", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(false);
+      vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
+
+      render(<RecipeDetail recipeId="shared-1" locale="en" />);
+
+      expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
+      expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the private guard when it's neither owned nor public", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(true);
+      vi.mocked(pullOwnRecipe).mockResolvedValue(null);
+      vi.mocked(fetchPublicRecipe).mockResolvedValue(null);
+
+      render(<RecipeDetail recipeId="nobodys-1" locale="en" />);
+
+      expect(
+        await screen.findByText("This recipe is private"),
+      ).toBeInTheDocument();
     });
   });
 

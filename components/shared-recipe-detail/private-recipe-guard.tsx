@@ -14,7 +14,7 @@ export function PrivateRecipeGuard({ locale }: { locale: string }) {
 
   useEffect(() => {
     const redirect = window.setTimeout(
-      () => navigate.replace(recipesUrl),
+      () => navigate.back(recipesUrl),
       REDIRECT_SECONDS * 1000,
     );
     const countdown = window.setInterval(
@@ -40,7 +40,7 @@ export function PrivateRecipeGuard({ locale }: { locale: string }) {
       </p>
       <button
         type="button"
-        onClick={() => navigate.replace(recipesUrl)}
+        onClick={() => navigate.back(recipesUrl)}
         className="flex items-center gap-2 px-7 py-[15px] rounded-[18px] border-0 bg-[var(--action-primary)] text-white text-[15px] font-bold shadow-[0_6px_24px_color-mix(in_oklch,var(--action-primary)_45%,transparent)]"
       >
         <ArrowLeft size={18} />

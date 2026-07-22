@@ -27,6 +27,7 @@ export const api = {
   recipes: "/api/recipes",
   recipe: (id: string) => `/api/recipes/${id}`,
   recipeVisibility: (id: string) => `/api/recipes/${id}/visibility`,
+  recipePublic: (id: string) => `/api/recipes/${id}/public`,
   images: {
     upload: "/api/images/upload",
     delete: "/api/images/delete",
