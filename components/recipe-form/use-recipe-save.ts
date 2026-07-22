@@ -11,8 +11,11 @@ import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredi
 import { useHaptics } from "@/lib/platform";
 import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
-import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
+import {
+  resolveInstructionImages,
+  resolveMainImage,
+} from "./resolve-recipe-images";
 import type { RecipeOutput } from "./schema";
 
 export type SaveState = "idle" | "saving" | "saved";
@@ -59,10 +62,32 @@ export function useRecipeSave(recipe?: Recipe) {
       .filter((section) => referencedSectionIds.has(section.id))
       .map((section, order) => ({ ...section, order }));
 
+    // Resolve every image to its final durable URL *before* writing the
+    // recipe, so the save is a single write and the detail view never shows a
+    // stale/blank photo waiting on a background patch that used to happen
+    // after navigation with no loading indicator. saveState stays "saving"
+    // (button disabled, "Saving...") for this whole duration.
+    const uploadToken = getPendingUploadToken() ?? undefined;
+    clearPendingUploadToken();
+    const uploadOptions = uploadToken ? { uploadToken } : undefined;
+
+    const mainImage = await resolveMainImage({
+      pendingFile: pendingImageFile.current,
+      currentImageUrl: data.imageUrl || "",
+      previousImageFileId: recipe?.imageFileId,
+      uploadOptions,
+    });
+    const resolvedInstructions = await resolveInstructionImages({
+      instructions,
+      instructionRowIds: instructionRows.map((row) => row.stepId),
+      pendingStepFiles: pendingStepFiles.current,
+      uploadOptions,
+    });
+
     const recipeData = {
       ...data,
-      imageUrl: data.imageUrl || "",
-      imageFileId: recipe?.imageFileId,
+      imageUrl: mainImage.imageUrl,
+      imageFileId: mainImage.imageFileId,
       totalTime,
       sections,
       ingredients: data.ingredients.map((ingredient) => {
@@ -76,7 +101,7 @@ export function useRecipeSave(recipe?: Recipe) {
           ...ingredientData,
         };
       }),
-      instructions,
+      instructions: resolvedInstructions,
       imageFocusX: data.imageFocusX ?? undefined,
       imageFocusY: data.imageFocusY ?? undefined,
       imageCropX: data.imageCropX ?? undefined,
@@ -111,91 +136,19 @@ export function useRecipeSave(recipe?: Recipe) {
       return;
     }
 
-    haptics.notify("success");
+    if (mainImage.uploadFailed) {
+      haptics.notify("error");
+      setImageError(
+        "Recipe saved, but the photo couldn't be uploaded — try re-adding it from Edit.",
+      );
+    } else {
+      haptics.notify("success");
+    }
     setSaveState("saved");
 
     setTimeout(() => {
       navigate.back();
     }, 600);
-
-    // upload images in background after navigation
-    (async () => {
-      const uploadToken = getPendingUploadToken() ?? undefined;
-      clearPendingUploadToken();
-
-      const uploadOptions = uploadToken ? { uploadToken } : undefined;
-      const updates: Partial<typeof recipeData> = {};
-      let hasUpdates = false;
-
-      const file = pendingImageFile.current;
-      if (file) {
-        try {
-          if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
-          const uploaded = await uploadImage(file, uploadOptions);
-          updates.imageUrl = uploaded.url;
-          updates.imageFileId = uploaded.fileId;
-          hasUpdates = true;
-        } catch {
-          // silent
-        }
-      } else if (recipeData.imageUrl && !isImageKitUrl(recipeData.imageUrl)) {
-        try {
-          if (recipe?.imageFileId) await deleteImage(recipe.imageFileId);
-          const uploaded = await uploadImage(
-            recipeData.imageUrl,
-            uploadOptions,
-          );
-          updates.imageUrl = uploaded.url;
-          updates.imageFileId = uploaded.fileId;
-          hasUpdates = true;
-        } catch {
-          // silent
-        }
-      }
-
-      const updatedInstructions = [];
-      for (const instruction of instructions) {
-        const stepIndex = instruction.order - 1;
-        const stepId = instructionRows[stepIndex]?.stepId;
-        const stepFile = stepId ? pendingStepFiles.current[stepId] : undefined;
-        if (stepFile) {
-          try {
-            const uploaded = await uploadImage(stepFile, uploadOptions);
-            hasUpdates = true;
-            updatedInstructions.push({
-              ...instruction,
-              imageUrl: uploaded.url,
-            });
-          } catch {
-            updatedInstructions.push(instruction);
-          }
-        } else if (
-          instruction.imageUrl &&
-          !isImageKitUrl(instruction.imageUrl)
-        ) {
-          try {
-            const uploaded = await uploadImage(
-              instruction.imageUrl,
-              uploadOptions,
-            );
-            hasUpdates = true;
-            updatedInstructions.push({
-              ...instruction,
-              imageUrl: uploaded.url,
-            });
-          } catch {
-            updatedInstructions.push(instruction);
-          }
-        } else {
-          updatedInstructions.push(instruction);
-        }
-      }
-
-      if (hasUpdates) {
-        updates.instructions = updatedInstructions;
-        await updateRecipe(savedId, updates);
-      }
-    })();
   };
 
   return {

@@ -12,6 +12,7 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { uploadImage } from "@/lib/upload/images";
 import { RecipeForm } from "../index";
 
 let activeLocale = "en";
@@ -895,6 +896,55 @@ describe("RecipeForm", () => {
         .mock.calls[0];
       expect(calledId).toBe("existing-id");
       expect(calledData.title).toBe("Updated Title");
+    });
+
+    it("saves the newly picked photo's uploaded URL in the same write, not a stale one patched in later", async () => {
+      const mockRecipe: Recipe = {
+        id: "existing-id",
+        title: "Old Title",
+        imageUrl: "https://example.com/old-photo.jpg",
+        servings: 2,
+        ingredients: [{ id: "i1", item: "eggs", amount: 2, unit: "" }],
+        instructions: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const uploadedUrl = "https://ik.imagekit.io/test/new-photo.jpg";
+      vi.mocked(uploadImage).mockResolvedValue({
+        url: uploadedUrl,
+        fileId: "new-file",
+      });
+
+      const { container } = render(<RecipeForm recipe={mockRecipe} />);
+
+      const file = new File(["x"], "photo.png", { type: "image/png" });
+      const fileInput = container.querySelector('input[type="file"]');
+      expect(fileInput).toBeTruthy();
+      await act(async () => {
+        fireEvent.change(fileInput as HTMLInputElement, {
+          target: { files: [file] },
+        });
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByText("next"));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+
+      fireEvent.click(getSubmitButton()!);
+
+      await waitFor(() => {
+        expect(updateRecipe).toHaveBeenCalledOnce();
+      });
+
+      expect(uploadImage).toHaveBeenCalledWith(file, undefined);
+      const [, calledData] = (updateRecipe as ReturnType<typeof vi.fn>).mock
+        .calls[0];
+      expect(calledData.imageUrl).toBe(uploadedUrl);
     });
 
     it("preserves display-only modifiers/sectionId/sections/original through an edit save", async () => {
