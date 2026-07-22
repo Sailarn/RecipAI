@@ -145,8 +145,12 @@ export async function POST(req: NextRequest) {
         const uploaded = await uploadImageServer(imageUrl);
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
-      } catch {
-        // keep the source URL on upload failure
+      } catch (uploadError) {
+        // Best-effort: keep the source URL so the parse still completes. But a
+        // silently-swallowed failure means the recipe stores an *expiring*
+        // Instagram CDN URL that breaks within hours — so surface it instead of
+        // hiding it. (See imageFetchHeaders for the usual 403 cause.)
+        ApiError.capture(uploadError, req);
       }
     }
     const finalRecipe: ParsedRecipe = { ...recipe, imageUrl, imageFileId };

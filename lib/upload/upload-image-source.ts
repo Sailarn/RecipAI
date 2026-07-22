@@ -1,5 +1,6 @@
 import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
+import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
 import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
@@ -54,7 +55,7 @@ async function resolveFromUrl(
   url: string,
   fileName: string,
 ): Promise<ResolveResult> {
-  const response = await fetch(url);
+  const response = await fetch(url, { headers: imageFetchHeaders(url) });
   if (!response.ok)
     return {
       ok: false,

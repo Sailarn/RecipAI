@@ -104,6 +104,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(isImageKitUrl).mockReturnValue(false);
   vi.mocked(sendPushNotification).mockResolvedValue(undefined);
+  // Default: image upload succeeds. Individual tests override to reject. Without
+  // a default it resolves undefined, and the (now reported) upload catch would
+  // fire a spurious capture.
+  vi.mocked(uploadImageServer).mockResolvedValue({
+    url: IMAGEKIT_URL,
+    fileId: "file-1",
+  });
 });
 
 describe("POST /api/parse-queue/process", () => {

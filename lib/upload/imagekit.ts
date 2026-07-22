@@ -1,4 +1,5 @@
 import ImageKit from "imagekit";
+import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
 import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
@@ -14,13 +15,17 @@ export const imagekit = new ImageKit({
 export async function uploadImageServer(
   url: string,
 ): Promise<{ url: string; fileId: string }> {
-  const response = await fetch(url);
-  if (!response.ok)
-    throw new Error(`Failed to fetch image: ${response.status}`);
+  const response = await fetch(url, { headers: imageFetchHeaders(url) });
+  if (!response.ok) {
+    const host = URL.canParse(url) ? new URL(url).host : url;
+    throw new Error(`Failed to fetch image (${response.status}) from ${host}`);
+  }
 
   const fetchedContentType = response.headers.get("content-type") ?? "";
   if (!isAllowedImageType(fetchedContentType))
-    throw new Error(UPLOAD_ERRORS.UNSUPPORTED_TYPE);
+    throw new Error(
+      `${UPLOAD_ERRORS.UNSUPPORTED_TYPE} (got "${fetchedContentType}")`,
+    );
 
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength > MAX_IMAGE_BYTES)

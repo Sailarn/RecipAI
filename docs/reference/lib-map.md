@@ -88,7 +88,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/upload/imagekit.ts` | ImageKit SDK instance + `uploadImageServer()`. |
+| `lib/upload/imagekit.ts` | ImageKit SDK instance + `uploadImageServer()` (fetches the source image with `imageFetchHeaders`, then uploads). |
+| `lib/upload/image-fetch-headers.ts` | `imageFetchHeaders(url)` — browser-like `User-Agent`/`Accept` (+ `instagram.com` `Referer` for cdninstagram/fbcdn) so hotlink-guarded CDNs serve the image instead of a 403. |
 | `lib/upload/images.ts` | `isImageKitUrl()` helper (server-side upload path). |
 | `lib/imagekit-url.ts` | `getOptimizedUrl()` — builds the direct ImageKit CDN URL (`?tr=w-…`) that `RecipeImage` renders, bypassing `/_next/image`. Also `isImageKitUrl()` + `HERO_IMAGE_WIDTH`. |
 | `lib/prewarm-recipe-images.ts` | `prewarmRecipeImages()` — idle-time warms a capped batch of recipe hero images into the SW cache; `prewarmRecipeImage()` warms one on pointer intent. `selectPrewarmUrls()` is its pure core. |

@@ -136,7 +136,14 @@ describe("POST /api/images/upload", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(fetch).toHaveBeenCalledWith("https://example.com/image.jpg");
+      expect(fetch).toHaveBeenCalledWith(
+        "https://example.com/image.jpg",
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "User-Agent": expect.stringContaining("Mozilla/5.0"),
+          }),
+        }),
+      );
 
       vi.unstubAllGlobals();
     });
