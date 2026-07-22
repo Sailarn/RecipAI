@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { RecipeDetail } from "@/components/recipe-detail";
 import { routes } from "@/lib/routes";
 import {
   getLaunchStartParam,
@@ -9,6 +10,14 @@ import {
 import { useNavigate } from "@/lib/transitions";
 
 const RECIPE_PREFIX = "recipe_";
+
+/** The recipe id in a `recipe_<id>` start param, or null for anything else. */
+export function recipeIdFromStartParam(
+  startParam: string | undefined,
+): string | null {
+  if (!startParam || !startParam.startsWith(RECIPE_PREFIX)) return null;
+  return startParam.slice(RECIPE_PREFIX.length) || null;
+}
 
 /**
  * Maps a Telegram `start_param` (from a `t.me/<bot>/<app>?startapp=…` link) to
@@ -24,10 +33,8 @@ export function resolveStartParamHref(
   if (startParam === "pantry") return routes.pantry(locale);
   if (startParam === "parse") return routes.recipes.parse(locale);
   if (startParam === "profile") return routes.profile(locale);
-  if (startParam.startsWith(RECIPE_PREFIX)) {
-    const id = startParam.slice(RECIPE_PREFIX.length);
-    return id ? routes.recipes.detail(locale, id) : null;
-  }
+  const recipeId = recipeIdFromStartParam(startParam);
+  if (recipeId) return routes.recipes.detail(locale, recipeId);
   return null;
 }
 
@@ -40,8 +47,12 @@ function currentLocale(): string {
  * nothing. No-op outside Telegram or when the param is absent/unrecognized.
  *
  * Reads the param synchronously from the launch hash rather than waiting for the
- * SDK's `webApp` object, so a shared recipe opens straight into its detail view
- * (with the skeleton) instead of flashing the recipes list for a second first.
+ * SDK's `webApp` object, so it acts before the first paint. A `recipe_<id>` is
+ * **pushed onto the navigation stack** over the recipes list (the launch page,
+ * since the home route redirects there) — so closing it pops back to the list
+ * with the stack's slide animation, instead of a bare URL replace that leaves
+ * nothing underneath and loses the transition. Non-recipe destinations are tab
+ * roots, so they `replace`.
  */
 export function TelegramDeepLink() {
   const navigate = useNavigate();
@@ -50,7 +61,20 @@ export function TelegramDeepLink() {
   useEffect(() => {
     if (handled.current || !isTelegramEnvironment()) return;
     handled.current = true;
-    const href = resolveStartParamHref(getLaunchStartParam(), currentLocale());
+
+    const startParam = getLaunchStartParam();
+    const locale = currentLocale();
+    const recipeId = recipeIdFromStartParam(startParam);
+
+    if (recipeId) {
+      navigate.push(
+        routes.recipes.detail(locale, recipeId),
+        <RecipeDetail recipeId={recipeId} locale={locale} />,
+      );
+      return;
+    }
+
+    const href = resolveStartParamHref(startParam, locale);
     if (href) navigate.replace(href);
   }, [navigate]);
 

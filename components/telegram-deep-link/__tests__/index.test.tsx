@@ -5,12 +5,13 @@ import {
   TelegramDeepLink,
 } from "@/components/telegram-deep-link";
 
-const { launchState, navigateReplace } = vi.hoisted(() => ({
+const { launchState, navigateReplace, navigatePush } = vi.hoisted(() => ({
   launchState: {
     isTelegram: false,
     startParam: undefined as string | undefined,
   },
   navigateReplace: vi.fn(),
+  navigatePush: vi.fn(),
 }));
 
 vi.mock("@/lib/telegram/webapp", () => ({
@@ -19,10 +20,13 @@ vi.mock("@/lib/telegram/webapp", () => ({
 }));
 vi.mock("@/lib/transitions", () => ({
   useNavigate: () => ({
-    push: vi.fn(),
+    push: navigatePush,
     back: vi.fn(),
     replace: navigateReplace,
   }),
+}));
+vi.mock("@/components/recipe-detail", () => ({
+  RecipeDetail: (props: { recipeId: string; locale: string }) => props,
 }));
 
 afterEach(() => {
@@ -61,6 +65,19 @@ describe("TelegramDeepLink", () => {
     expect(navigateReplace).toHaveBeenCalledExactlyOnceWith("/en/pantry");
   });
 
+  it("pushes a recipe deep link over the recipes list, not a replace", () => {
+    launchState.isTelegram = true;
+    launchState.startParam = "recipe_abc123";
+
+    render(<TelegramDeepLink />);
+
+    expect(navigateReplace).not.toHaveBeenCalled();
+    expect(navigatePush).toHaveBeenCalledTimes(1);
+    const [href, element] = navigatePush.mock.calls[0];
+    expect(href).toBe("/en/recipes/abc123");
+    expect(element.props).toMatchObject({ recipeId: "abc123", locale: "en" });
+  });
+
   it("does not navigate without a start param", () => {
     launchState.isTelegram = true;
     launchState.startParam = undefined;
@@ -68,6 +85,7 @@ describe("TelegramDeepLink", () => {
     render(<TelegramDeepLink />);
 
     expect(navigateReplace).not.toHaveBeenCalled();
+    expect(navigatePush).not.toHaveBeenCalled();
   });
 
   it("stays inert outside Telegram", () => {

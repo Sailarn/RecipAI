@@ -62,11 +62,17 @@ OIDC).
 
 - `components/telegram-back-button` drives Telegram's native **BackButton** from the navigation
   stack: shown when a view is pushed over the root, popping it via `navigate.back()`.
-- `components/telegram-deep-link` maps the launch `start_param` to a route once —
-  `pantry`, `parse`, `profile`, or `recipe_<id>` (see `resolveStartParamHref`). It reads the param
-  **synchronously** from the launch hash via `getLaunchStartParam()` (not the async SDK `webApp`) and
-  `navigate.replace`s, so a shared recipe opens straight into its detail view with the skeleton
-  instead of flashing the recipes list for ~a second while the SDK loads.
+- `components/telegram-deep-link` maps the launch `start_param` to a destination once —
+  `pantry`, `parse`, `profile`, or `recipe_<id>`. It reads the param **synchronously** from the launch
+  hash via `getLaunchStartParam()` (not the async SDK `webApp`), so it acts before the first paint.
+  A `recipe_<id>` is **pushed onto the navigation stack** over the recipes list (the launch page — the
+  home route redirects there), so closing it pops back to the list with the slide animation; a bare
+  `navigate.replace` left nothing underneath and lost the transition. Non-recipe params are tab roots,
+  so they `replace`. Trade-off: the recipes list is now intentionally behind the detail (the previous
+  `replace` avoided a ~1s list flash, but also killed the stack effect). **Owned-recipe scope:** the
+  pushed `<RecipeDetail recipeId>` has no server-fetched `publicRecipe`, so a genuinely cross-user
+  *public* share resolves via the signed-in owner-pull (or the private guard) rather than the shared
+  view — acceptable for the single-user deployment.
 - **One recipe card, two surfaces.** `lib/telegram/recipe-card.ts` is the single builder for the
   Telegram recipe card — caption (title + category + `time · servings · ingredients`), the
   `🍳 Open recipe` deep-link button, and the JPEG photo transform. Both the **share** flow
