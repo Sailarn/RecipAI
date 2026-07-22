@@ -3,6 +3,7 @@
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lazy, Suspense, useEffect } from "react";
+import { useNavigationStack } from "@/lib/navigation-stack";
 import { prefetchRecipesPage } from "@/lib/recipes-prefetch";
 import { routes } from "@/lib/routes";
 import { scheduleIdle } from "@/lib/schedule-idle";
@@ -36,9 +37,17 @@ export function BottomNav() {
   const navigate = useNavigate();
   const pathname = usePathname();
   const router = useRouter();
+  const { entries } = useNavigationStack();
 
+  // The stack (not the browser pathname) is the source of truth for what's
+  // currently on screen: a pushed view (e.g. a Telegram deep link straight
+  // into a recipe) updates the stack immediately, but usePathname() reflects
+  // it only once Next's router has caught up with the pushState call — a
+  // pushed recipe/edit/pantry view could otherwise render under the nav
+  // (or with the wrong active tab) for that window.
+  const topHref = entries.at(-1)?.href ?? pathname;
   const { shouldHide, isPantryMode, activeHref } = getBottomNavState(
-    pathname,
+    topHref,
     locale,
   );
 

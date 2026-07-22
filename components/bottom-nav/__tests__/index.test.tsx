@@ -9,6 +9,11 @@ vi.mock("next/navigation", () => ({
   useRouter: vi.fn().mockReturnValue({ prefetch: routerPrefetch }),
 }));
 
+const { useNavigationStack } = vi.hoisted(() => ({
+  useNavigationStack: vi.fn(),
+}));
+vi.mock("@/lib/navigation-stack", () => ({ useNavigationStack }));
+
 // Idle scheduling runs synchronously in tests so prefetch assertions don't
 // need to wait on requestIdleCallback/setTimeout.
 vi.mock("@/lib/schedule-idle", () => ({
@@ -55,14 +60,29 @@ const navigate = {
   reset: vi.fn(),
 };
 
+// Sets both usePathname() and the navigation stack's top entry to the same
+// href — the "not currently pushed, viewing this route directly" case most
+// tests care about. Use mockStackTop() directly when a test needs the two to
+// disagree (a pushed view whose pathname sync hasn't caught up yet).
+function mockRoute(href: string) {
+  vi.mocked(usePathname).mockReturnValue(href);
+  vi.mocked(useNavigationStack).mockReturnValue({
+    entries: [{ id: "root", href, element: null }],
+    push: vi.fn(),
+    pop: vi.fn(),
+    reset: vi.fn(),
+    canPop: false,
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(useNavigate).mockReturnValue(navigate);
+  mockRoute("/en/recipes");
 });
 
 describe("BottomNav — main mode", () => {
   it("renders the Recipes, AI Import, and Profile nav items", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
     expect(screen.getByText("recipes")).toBeInTheDocument();
     expect(screen.getByText("AI Import")).toBeInTheDocument();
@@ -70,19 +90,16 @@ describe("BottomNav — main mode", () => {
   });
 
   it("renders pantry orb button in main mode", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
     expect(screen.getByTestId("pantry-orb")).toBeInTheDocument();
   });
 
   it("does not render pantry-back-orb in main mode", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
     expect(screen.queryByTestId("pantry-back-orb")).not.toBeInTheDocument();
   });
 
   it("clicking pantry orb calls navigate.push with pantry route", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
     fireEvent.click(screen.getByTestId("pantry-orb"));
     expect(navigate.push).toHaveBeenCalledWith("/en/pantry", expect.anything());
@@ -91,25 +108,25 @@ describe("BottomNav — main mode", () => {
 
 describe("BottomNav — pantry mode", () => {
   it("renders pantry expanded label in pantry mode", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/pantry");
+    mockRoute("/en/pantry");
     render(<BottomNav />);
     expect(screen.getByTestId("pantry-label")).toBeInTheDocument();
   });
 
   it("renders back orb in pantry mode", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/pantry");
+    mockRoute("/en/pantry");
     render(<BottomNav />);
     expect(screen.getByTestId("pantry-back-orb")).toBeInTheDocument();
   });
 
   it("does not render AI Import in pantry mode", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/pantry");
+    mockRoute("/en/pantry");
     render(<BottomNav />);
     expect(screen.queryByText("AI Import")).not.toBeInTheDocument();
   });
 
   it("clicking back orb calls navigate.back with no arguments", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/pantry");
+    mockRoute("/en/pantry");
     render(<BottomNav />);
     fireEvent.click(screen.getByTestId("pantry-back-orb"));
     expect(navigate.back).toHaveBeenCalledWith();
@@ -118,33 +135,55 @@ describe("BottomNav — pantry mode", () => {
 
 describe("BottomNav — visibility", () => {
   it("hides on /edit routes", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes/123/edit");
+    mockRoute("/en/recipes/123/edit");
     const { container } = render(<BottomNav />);
     expect(container.firstChild).toBeNull();
   });
 
   it("hides on /login route", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/login");
+    mockRoute("/en/login");
     const { container } = render(<BottomNav />);
     expect(container.firstChild).toBeNull();
   });
 
   it("hides on recipe detail page", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes/abc123");
+    mockRoute("/en/recipes/abc123");
     const { container } = render(<BottomNav />);
     expect(container.firstChild).toBeNull();
   });
 
   it("hides on /parse-history route", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/parse-history");
+    mockRoute("/en/parse-history");
     const { container } = render(<BottomNav />);
     expect(container.firstChild).toBeNull();
   });
 
   it("stays visible on /pantry route", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/pantry");
+    mockRoute("/en/pantry");
     const { container } = render(<BottomNav />);
     expect(container.firstChild).not.toBeNull();
+  });
+
+  it("hides on a pushed recipe view even if usePathname() hasn't caught up yet", () => {
+    // Simulates the deep-link regression: navigate.push() updates the stack
+    // (and calls history.pushState) synchronously, but usePathname() only
+    // reflects it once Next's router has processed that pushState — for that
+    // window the two disagree. The stack, not the pathname, must win.
+    vi.mocked(usePathname).mockReturnValue("/en/recipes");
+    vi.mocked(useNavigationStack).mockReturnValue({
+      entries: [
+        { id: "root", href: "/en/recipes", element: null },
+        { id: "detail", href: "/en/recipes/abc123", element: null },
+      ],
+      push: vi.fn(),
+      pop: vi.fn(),
+      reset: vi.fn(),
+      canPop: true,
+    });
+
+    const { container } = render(<BottomNav />);
+
+    expect(container.firstChild).toBeNull();
   });
 });
 
@@ -160,7 +199,6 @@ describe("BottomNav — position", () => {
 
 describe("BottomNav — prefetch", () => {
   it("idle-prefetches the other tabs' routes on mount, not the active one", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
 
     expect(routerPrefetch).toHaveBeenCalledWith("/en/recipes/parse");
@@ -169,7 +207,6 @@ describe("BottomNav — prefetch", () => {
   });
 
   it("re-fires prefetch for a tab on pointer-down", () => {
-    vi.mocked(usePathname).mockReturnValue("/en/recipes");
     render(<BottomNav />);
     routerPrefetch.mockClear();
 
