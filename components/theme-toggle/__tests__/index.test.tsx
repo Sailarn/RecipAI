@@ -8,7 +8,13 @@ import {
   it,
   vi,
 } from "vitest";
+import { setCloudItem } from "@/lib/telegram/cloud-storage";
 import { ThemeToggle } from "../index";
+
+vi.mock("@/lib/telegram/cloud-storage", () => ({
+  CLOUD_PREF_KEYS: { theme: "theme", locale: "locale" },
+  setCloudItem: vi.fn().mockResolvedValue(true),
+}));
 
 const reloadSpy = vi.fn();
 const replaceSpy = vi.fn();
@@ -70,6 +76,14 @@ describe("ThemeToggle", () => {
       fireEvent.click(screen.getByRole("button"));
 
       expect(Storage.prototype.setItem).toHaveBeenCalledWith("theme", "light");
+    });
+
+    it("mirrors the theme to Telegram CloudStorage for cross-reopen persistence", () => {
+      render(<ThemeToggle />);
+
+      fireEvent.click(screen.getByRole("button"));
+
+      expect(setCloudItem).toHaveBeenCalledWith("theme", "dark");
     });
 
     it("sets the theme cookie when toggling", () => {

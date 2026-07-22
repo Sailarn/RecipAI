@@ -61,6 +61,26 @@ export type TelegramHomeScreenStatus =
   | "added"
   | "missed";
 
+// Per-user key/value store that persists across app reopens and devices —
+// unlike localStorage/cookies, which the WebView drops between sessions. The
+// callbacks are error-first. Present from Bot API 6.9; optional so older
+// clients degrade gracefully.
+export type TelegramCloudStorage = {
+  setItem: (
+    key: string,
+    value: string,
+    callback?: (error: string | null, success?: boolean) => void,
+  ) => void;
+  getItem: (
+    key: string,
+    callback: (error: string | null, value?: string) => void,
+  ) => void;
+  removeItem: (
+    key: string,
+    callback?: (error: string | null, success?: boolean) => void,
+  ) => void;
+};
+
 export type TelegramWebApp = {
   initData: string;
   initDataUnsafe: { user?: TelegramUser; start_param?: string };
@@ -92,6 +112,7 @@ export type TelegramWebApp = {
   BackButton: TelegramBackButton;
   MainButton: TelegramMainButton;
   HapticFeedback?: TelegramHapticFeedback;
+  CloudStorage?: TelegramCloudStorage;
 };
 
 type TelegramWindow = Window & {

@@ -93,6 +93,20 @@ OIDC).
 | No haptics (iOS blocks web vibration) | Native haptics on card tap, tab change, pantry/tried toggle, save/delete (`platform.haptics`) |
 | Service worker offline cache | Unregistered (Dexie still works) |
 | Launch splash | Skipped (Telegram shows its own) |
+| Theme preference | Persisted to **CloudStorage** (localStorage is cleared between sessions) and restored on launch |
+
+## Preference persistence
+
+The WebView clears `localStorage` and cookies between app reopens (recipes survive only because
+`useSyncOnLogin` re-pulls them from the server), so the theme cookie/localStorage and the
+`NEXT_LOCALE` cookie don't stick. User preferences are therefore mirrored to **Telegram
+CloudStorage** (`lib/telegram/cloud-storage.ts` — a promise wrapper over the SDK's error-first
+`CloudStorage`, keyed by `CLOUD_PREF_KEYS`), which persists per-user across reopens and devices.
+
+- **Theme:** `ThemeToggle` writes the choice to CloudStorage alongside localStorage/cookie;
+  `TelegramProvider` reads it back on launch (`restoreThemeFromCloud`) and flips the `<html>` class.
+  The synchronous pre-paint script still reads localStorage first (no flash when it survives); the
+  CloudStorage restore is async, so a brief default-theme flash is possible when it doesn't.
 
 ## Setup (BotFather / ops)
 

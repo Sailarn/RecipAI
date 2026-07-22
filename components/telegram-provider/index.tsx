@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { CLOUD_PREF_KEYS, getCloudItem } from "@/lib/telegram/cloud-storage";
 import {
   getTelegramWebApp,
   isTelegramEnvironment,
@@ -9,6 +10,7 @@ import {
   type TelegramWebApp,
 } from "@/lib/telegram/webapp";
 import { trackEvent } from "@/lib/telemetry";
+import { THEME } from "@/lib/theme";
 import {
   type AutoSignInStatus,
   useTelegramAutoSignIn,
@@ -47,6 +49,22 @@ function unregisterServiceWorkers(): void {
   });
 }
 
+// Restore the theme the user last chose. The pre-paint script reads it from
+// localStorage, but Telegram clears that between sessions — so on reopen the
+// class is back to the default until CloudStorage (which persists) restores it.
+// Async, so a brief default-theme flash is possible before this applies.
+async function restoreThemeFromCloud(): Promise<void> {
+  const theme = await getCloudItem(CLOUD_PREF_KEYS.theme);
+  if (theme !== THEME.DARK && theme !== THEME.LIGHT) return;
+  const root = document.documentElement;
+  root.classList.toggle(THEME.DARK, theme === THEME.DARK);
+  root.classList.toggle(THEME.LIGHT, theme === THEME.LIGHT);
+  // Re-seed the fast path so it wins pre-paint on the next reopen if it survives.
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {}
+}
+
 function initializeWebApp(webApp: TelegramWebApp): void {
   webApp.ready();
   webApp.expand();
@@ -82,6 +100,7 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
       const resolved = webApp ?? getTelegramWebApp();
       if (cancelled || !resolved) return;
       initializeWebApp(resolved);
+      void restoreThemeFromCloud();
       setState({
         isTelegram: true,
         webApp: resolved,

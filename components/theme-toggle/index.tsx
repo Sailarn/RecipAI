@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { TogglePill } from "@/components/toggle-pill";
 import { isStandalonePwa } from "@/lib/pwa";
+import { CLOUD_PREF_KEYS, setCloudItem } from "@/lib/telegram/cloud-storage";
 import { isTelegramEnvironment } from "@/lib/telegram/webapp";
 import { trackEvent } from "@/lib/telemetry";
 import { THEME } from "@/lib/theme";
@@ -25,6 +26,10 @@ export function ThemeToggle() {
     localStorage.setItem("theme", themeName);
     // biome-ignore lint/suspicious/noDocumentCookie: theme cookie set for server-side dark/light detection
     document.cookie = `theme=${themeName}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+    // Telegram clears localStorage/cookies between sessions, so mirror the choice
+    // to CloudStorage — the launch restore reads it back on the next reopen.
+    // No-op outside Telegram.
+    void setCloudItem(CLOUD_PREF_KEYS.theme, themeName);
     // Telegram shows no launch splash, so a reload is pointless — and it would
     // drop the Telegram launch context. Apply the theme class in place instead.
     if (isTelegramEnvironment()) {

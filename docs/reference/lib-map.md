@@ -71,6 +71,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/auth/telegram-user.ts` | `miniAppDataToUser()` — maps Telegram Mini App data to a user record with a placeholder email (`user.email` is NOT NULL). |
 | `lib/auth/auth-error-report.ts` | `shouldReportAuthError()` — decides which better-auth errors reach Sentry (report 500s / raw throws, skip routine 4xx). |
 | `lib/telegram/webapp.ts` | SSR-safe wrapper over `window.Telegram.WebApp` — `isTelegramEnvironment()`, `getTelegramWebApp()`, `loadTelegramSdk()`. |
+| `lib/telegram/cloud-storage.ts` | Promise wrapper over the Mini App `CloudStorage` (`getCloudItem`/`setCloudItem`, `CLOUD_PREF_KEYS`) — persists prefs across reopens where localStorage/cookies don't. |
 | `lib/telegram/recipe-card.ts` | The one recipe-card builder — `recipeCardCaption()`, `recipeCardStats()`, `recipeCardButton()`, `telegramPhotoUrl()` — shared by the share flow and the bot's parse-completion message. |
 | `lib/telegram/recipe-inline-result.ts` | `buildRecipeInlineResult()` — wraps the card into a share InlineQueryResult (photo or article). |
 | `components/telegram-provider/` | Detects the Telegram WebView, runs SDK lifecycle + auto sign-in (`use-auto-sign-in.ts`); exposes `useTelegram()`/`useIsTelegram()`. |
