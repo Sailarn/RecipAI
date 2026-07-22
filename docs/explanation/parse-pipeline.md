@@ -153,6 +153,8 @@ sequenceDiagram
 
 **Anonymous jobs:** jobs created without a session have `user_id = null`. On login, `POST /api/parse-queue/claim` adopts them into the user's account so they appear in the server-side history.
 
+**Telegram-notify hand-off.** A parse started **inside** the Mini App can't rely on web push (dead in the Telegram WebView — service workers are unregistered on launch), so without a bot ping it finishes silently and the user only sees the review toast the next time they open the app. When the "Telegram notifications" toggle is on (`lib/hooks/use-telegram-notify.ts` — default on for Telegram-connected users, per-device localStorage), the client sends `telegramNotify: true`; the enqueue route resolves the user's `telegramChatId` (`resolveTelegramChatId`) and stamps the job with it. That routes the in-app parse through the **same completion branch as the bot flow**: `process` saves the recipe server-side (`saveParsedRecipeForUser`, shared with the bot) and sends the "saved" bot message with the deep-link button — bypassing the two client-side pollers and the review step entirely. The client sees the echoed `telegramNotify: true`, skips its review/watcher/`process` path, and the saved recipe appears on the next sync/focus re-pull (the same path that surfaces bot-saved recipes). A cache hit is saved inline in the enqueue route; a cache miss is kicked to `process` server-side so completion happens even if the client navigates away.
+
 ---
 
 ## Rate limiting (`lib/rate-limit.ts`)

@@ -23,6 +23,7 @@ import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { PushNotificationToggle } from "./components/push-notification-toggle";
 import { RowDivider } from "./components/row-divider";
+import { TelegramNotifyToggle } from "./components/telegram-notify-toggle";
 import {
   CHEVRON_ICON_SIZE,
   CHEVRON_STROKE_WIDTH,
@@ -109,6 +110,8 @@ export default function ProfilePage() {
           </button>
 
           <PushNotificationToggle />
+
+          <TelegramNotifyToggle />
 
           <RowDivider />
 

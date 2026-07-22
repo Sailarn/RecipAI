@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { apiFetch, isMaintenanceError } from "@/lib/api/api-fetch";
 import { db } from "@/lib/db/db";
 import { recordParseHistory } from "@/lib/db/parse-history";
@@ -37,6 +38,10 @@ import { useNavigate } from "@/lib/transitions";
 interface UseUrlParseOptions {
   locale: string;
   onSuccess?: (data: ParsedRecipeEntry) => void;
+  // When the user has Telegram notifications on, the parse is handed off to the
+  // server (auto-save + bot message on completion) instead of the in-app review
+  // flow. The server confirms it actually resolved a chat before we hand off.
+  telegramNotify?: boolean;
 }
 
 function isValidUrl(value: string): boolean {
@@ -48,7 +53,11 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
+export function useUrlParse({
+  locale,
+  onSuccess,
+  telegramNotify,
+}: UseUrlParseOptions) {
   const navigate = useNavigate();
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
@@ -183,6 +192,7 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         body: JSON.stringify({
           url,
           pushEndpoint,
+          telegramNotify,
         }),
       });
 
@@ -192,11 +202,28 @@ export function useUrlParse({ locale, onSuccess }: UseUrlParseOptions) {
         uploadToken,
         cached,
         result: cachedResult,
+        telegramNotify: notifyConfirmed,
       } = await res.json();
       trackEvent("parse_started", {
         source: "url",
         domain: new URL(url).hostname,
       });
+
+      // Telegram-notify hand-off: the server saves the recipe and messages the
+      // user via the bot on completion, so skip the in-app review flow entirely
+      // (no durable entry, no background watcher, no client /process call). The
+      // saved recipe surfaces on the next sync / focus re-pull.
+      if (notifyConfirmed) {
+        toast.success(cached ? "Saved to RecipAI" : "Importing recipe", {
+          description: cached
+            ? "Added to your recipes."
+            : "We'll notify you in Telegram when it's ready.",
+        });
+        if (cached) trackEvent("parse_succeeded", { source: "url" });
+        setUrl("");
+        setLoading(false);
+        return;
+      }
 
       // Instant cache hit: the URL was already parsed, so the job is DONE
       // immediately. Show the result inline now instead of the background

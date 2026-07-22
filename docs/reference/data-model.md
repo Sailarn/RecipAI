@@ -221,7 +221,7 @@ Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, casc
 | `normalized_url` | text | Indexed cache key — `url` with tracking params stripped and Instagram `reel`/`reels`/`p`/`tv` collapsed to one media id (`normalizeSourceUrl`). Migration `0017` |
 | `parser_version` | text | Pipeline version that produced `result`; the cache only serves rows matching the current `PARSER_VERSION`. Migration `0017` |
 | `user_comment` | text | **Dormant** — the AI-hint input was removed; the column is retained for a one-line restore |
-| `telegram_chat_id` | text | Set when job originates from the Telegram bot |
+| `telegram_chat_id` | text | Chat to notify on completion. Set when the job comes from the Telegram bot **or** from an in-app Mini-App parse with "Telegram notifications" on. Its presence routes the job through the auto-save + bot-message completion branch. |
 | `push_endpoint` | text | Nullable. The push subscription endpoint to notify when the job completes |
 | `status` | text | `pending` / `processing` / `done` / `failed` |
 | `result` | jsonb | `ParsedRecipe` payload when done. The process route attempts an ImageKit upload at parse time; on upload failure the cached result retains the original source URL |

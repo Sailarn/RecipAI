@@ -16,7 +16,7 @@ The client detects this via `maintenanceErrorFromResponse` (`lib/api/api-fetch.t
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/parse-queue` | Rate-limited (anon: 15/hr, user: 60/hr) | Create a parse job. Returns `{ jobId, uploadToken }`. On a **cache hit** (same normalized URL already parsed by the current `PARSER_VERSION`) the job is inserted already `done` with the cloned result and the response also carries `{ cached: true, result }`. |
+| `POST` | `/api/parse-queue` | Rate-limited (anon: 15/hr, user: 60/hr) | Create a parse job. Body `{ url, pushEndpoint?, telegramNotify? }`. Returns `{ jobId, uploadToken }`. On a **cache hit** (same normalized URL already parsed by the current `PARSER_VERSION`) the job is inserted already `done` with the cloned result and the response also carries `{ cached: true, result }`. When `telegramNotify` is set and the signed-in user has a linked Telegram account, the job is stamped with their `telegramChatId` and the response echoes `{ telegramNotify: true }` — see the Telegram-notify hand-off below. |
 | `GET` | `/api/parse-queue` | Session required | List the signed-in user's parse jobs. |
 | `GET` | `/api/parse-queue/[id]` | None | Poll a job's status and result. |
 | `POST` | `/api/parse-queue/process` | None (internal) | Process a queued job. Idempotent — skips if job is `done` or `processing` within 90 s. `maxDuration: 60`. |
@@ -111,6 +111,8 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 | `DELETE` | `/api/push/subscribe` | None | Remove a push subscription by `{ endpoint }`. |
 
 The server sends a push notification via VAPID when a parse job finishes (`POST /api/parse-queue/process`): success sends "recipe ready", and failure sends a parse-failed notification. The client passes its subscription endpoint when creating a job, but at completion a **signed-in** job is delivered to *all* of the user's current subscriptions — resolved by `userId` at send time, so a device that subscribed after (or instead of) the enqueue-time endpoint still gets the push. Anonymous jobs fall back to the single enqueue-time endpoint. Expired endpoints (`404`/`410`) are pruned per send.
+
+**Telegram-notify hand-off.** Web push is dead inside the Telegram WebView (service workers are unregistered on launch), so a parse started **inside** the Mini App would otherwise finish silently. When the client sends `telegramNotify: true` (Mini App, or a web user with a linked Telegram account and the "Telegram notifications" toggle on — `lib/hooks/use-telegram-notify.ts`), `POST /api/parse-queue` resolves the user's chat id (`resolveTelegramChatId`) and stamps the job's `telegramChatId`. That makes an in-app parse take the **same completion path as the bot flow**: `process` saves the recipe server-side (`saveParsedRecipeForUser`) and sends the "saved" bot message with the deep-link button — no in-app review step. The client (`use-url-parse`) sees the echoed `telegramNotify: true`, skips its review/watcher/`process` path, and the saved recipe surfaces on the next sync/focus re-pull. A cache hit is saved server-side inline in the enqueue route; a cache miss kicks `process` off server-side so completion + notification happen even if the client navigates away. If the user has no resolvable Telegram connection the response is `{ telegramNotify: false }` and the client falls back to the normal review flow.
 
 ---
 

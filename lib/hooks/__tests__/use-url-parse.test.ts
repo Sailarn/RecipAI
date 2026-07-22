@@ -55,6 +55,9 @@ vi.mock("@/lib/parse-recipe/parse-history-entry", () => ({
 const claimJobCompletion = vi.hoisted(() => vi.fn().mockReturnValue(true));
 vi.mock("@/lib/parse-job-completion", () => ({ claimJobCompletion }));
 
+const toastSuccess = vi.hoisted(() => vi.fn());
+vi.mock("sonner", () => ({ toast: { success: toastSuccess } }));
+
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
 import { addJobId, getJobIds } from "@/lib/parse-job-storage";
@@ -375,6 +378,80 @@ describe("useUrlParse", () => {
         );
         expect(result.current.jobId).toBeNull();
       });
+    });
+  });
+
+  describe("telegram notify hand-off", () => {
+    it("skips the in-app review flow when the server confirms a notify parse", async () => {
+      mockFetch.mockImplementation((requestUrl: string) => {
+        if (requestUrl === "/api/parse-queue") {
+          return Promise.resolve(
+            makeResponse({
+              jobId: "job-1",
+              uploadToken: null,
+              telegramNotify: true,
+            }),
+          );
+        }
+        return Promise.resolve(makeResponse({}));
+      });
+
+      const { result } = renderHook(() =>
+        useUrlParse({ locale: "en", telegramNotify: true }),
+      );
+
+      act(() => {
+        result.current.setUrl("https://example.com/recipe");
+      });
+      await act(async () => {
+        await result.current.handleParse();
+      });
+
+      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
+      expect(addJobId).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/parse-queue/process",
+        expect.anything(),
+      );
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Importing recipe",
+        expect.anything(),
+      );
+      expect(result.current.jobId).toBeNull();
+      expect(result.current.result).toBeNull();
+      expect(result.current.url).toBe("");
+    });
+
+    it("falls back to the review flow when the server does not confirm notify", async () => {
+      mockFetch.mockImplementation((requestUrl: string) => {
+        if (requestUrl === "/api/parse-queue") {
+          return Promise.resolve(
+            makeResponse({
+              jobId: "job-1",
+              uploadToken: null,
+              telegramNotify: false,
+            }),
+          );
+        }
+        if (requestUrl === "/api/parse-queue/process") {
+          return Promise.resolve(makeResponse({}));
+        }
+        return Promise.resolve(makeResponse({ status: "pending" }));
+      });
+
+      const { result } = renderHook(() =>
+        useUrlParse({ locale: "en", telegramNotify: true }),
+      );
+
+      act(() => {
+        result.current.setUrl("https://example.com/recipe");
+      });
+      await act(async () => {
+        await result.current.handleParse();
+      });
+
+      expect(addJobId).toHaveBeenCalledWith("job-1", null);
+      expect(toastSuccess).not.toHaveBeenCalled();
     });
   });
 

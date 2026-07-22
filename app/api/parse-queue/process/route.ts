@@ -3,14 +3,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { pushSubscriptions } from "@/db/schema/push-subscriptions";
-import { recipes } from "@/db/schema/recipes";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
-import { buildSavedRecipeShape } from "@/lib/parse-recipe/parsed-recipe-shape";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
+import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
 import { miniAppDeepLink, sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
@@ -177,38 +176,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // notify via Telegram if triggered from bot
+    // Notify via Telegram when the job carries a chat id — both the bot flow and
+    // an in-app Mini-App parse with "Telegram notifications" on. Both skip the
+    // in-app review step, so the recipe is saved server-side here and the bot
+    // message deep-links straight to it.
     if (job.telegramChatId && job.userId) {
-      const parsedRecipe = finalRecipe;
-      const savedShape = buildSavedRecipeShape(parsedRecipe);
-      const recipeId = crypto.randomUUID();
-
-      await db.insert(recipes).values({
-        id: recipeId,
+      const recipeId = await saveParsedRecipeForUser({
         userId: job.userId,
-        title: parsedRecipe.title,
-        description: parsedRecipe.description ?? null,
-        imageUrl: parsedRecipe.imageUrl ?? null,
-        imageFileId: parsedRecipe.imageFileId ?? null,
-        prepTime: parsedRecipe.prepTime ?? null,
-        cookTime: parsedRecipe.cookTime ?? null,
-        totalTime:
-          (parsedRecipe.prepTime || 0) + (parsedRecipe.cookTime || 0) || null,
-        servings: parsedRecipe.servings ?? 1,
-        ingredients: savedShape.ingredients,
-        instructions: savedShape.instructions,
-        sections: savedShape.sections,
+        parsed: finalRecipe,
         sourceUrl: jobUrl,
-        category: parsedRecipe.category ?? null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
-      const ingredientCount = parsedRecipe.ingredients?.length ?? 0;
-      const stepCount = parsedRecipe.instructions?.length ?? 0;
+      const ingredientCount = finalRecipe.ingredients?.length ?? 0;
+      const stepCount = finalRecipe.instructions?.length ?? 0;
       await sendTelegramMessage(
         job.telegramChatId,
-        `✅ <b>${parsedRecipe.title}</b> saved to RecipAI!\n\n📦 ${ingredientCount} ingredients · 👨‍🍳 ${stepCount} steps`,
+        `✅ <b>${finalRecipe.title}</b> saved to RecipAI!\n\n📦 ${ingredientCount} ingredients · 👨‍🍳 ${stepCount} steps`,
         {
           inline_keyboard: [
             [

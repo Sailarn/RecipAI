@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
+import { useTelegramNotify } from "@/lib/hooks/use-telegram-notify";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
@@ -17,6 +18,7 @@ export default function ParseRecipePage() {
   const locale = params.locale as string;
   const t = useTranslations("parse");
   const [tab, setTab] = useState<Tab>("url");
+  const { shouldNotify } = useTelegramNotify();
 
   const {
     url,
@@ -28,7 +30,7 @@ export default function ParseRecipePage() {
     handleParse,
     handleSave,
     handleReset,
-  } = useUrlParse({ locale });
+  } = useUrlParse({ locale, telegramNotify: shouldNotify });
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-[100px]">

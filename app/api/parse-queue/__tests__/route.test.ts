@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { selectLimit } = vi.hoisted(() => ({ selectLimit: vi.fn() }));
 
@@ -30,11 +30,19 @@ vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/upload/upload-token", () => ({
   mintUploadToken: vi.fn().mockResolvedValue("mock-upload-token"),
 }));
+vi.mock("@/lib/telegram/account", () => ({
+  resolveTelegramChatId: vi.fn().mockResolvedValue(null),
+}));
+vi.mock("@/lib/parse-recipe/save-parsed-recipe-server", () => ({
+  saveParsedRecipeForUser: vi.fn().mockResolvedValue("recipe-1"),
+}));
 
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
+import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
+import { resolveTelegramChatId } from "@/lib/telegram/account";
 import { mintUploadToken } from "@/lib/upload/upload-token";
 import { GET, POST } from "../route";
 
@@ -49,8 +57,15 @@ beforeEach(() => {
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
   vi.mocked(mintUploadToken).mockResolvedValue("mock-upload-token");
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
+  vi.mocked(resolveTelegramChatId).mockResolvedValue(null);
+  vi.mocked(saveParsedRecipeForUser).mockResolvedValue("recipe-1");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null)));
   // Default: cache miss (no prior parsed job for this URL).
   selectLimit.mockResolvedValue([]);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("POST /api/parse-queue", () => {
@@ -223,6 +238,97 @@ describe("POST /api/parse-queue", () => {
 
     expect(res.status).toBe(500);
     expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  describe("Telegram-notify hand-off", () => {
+    it("does not resolve a chat when telegramNotify is not requested", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        user: { id: "user-42" },
+      } as never);
+
+      const res = await POST(
+        makeRequest({ url: "https://example.com/recipe" }) as never,
+      );
+
+      expect(resolveTelegramChatId).not.toHaveBeenCalled();
+      expect((await res.json()).telegramNotify).toBe(false);
+    });
+
+    it("stores the resolved chat id and triggers processing on a cache miss", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        user: { id: "user-42" },
+      } as never);
+      vi.mocked(resolveTelegramChatId).mockResolvedValue("chat-9");
+      const { db } = await import("@/db");
+
+      const res = await POST(
+        makeRequest({
+          url: "https://example.com/recipe",
+          telegramNotify: true,
+        }) as never,
+      );
+
+      const body = await res.json();
+      expect(body.telegramNotify).toBe(true);
+      const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+      expect(insertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ telegramChatId: "chat-9" }),
+      );
+      expect(saveParsedRecipeForUser).not.toHaveBeenCalled();
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/parse-queue/process"),
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+
+    it("returns telegramNotify false when the user has no Telegram connection", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        user: { id: "user-42" },
+      } as never);
+      vi.mocked(resolveTelegramChatId).mockResolvedValue(null);
+      const { db } = await import("@/db");
+
+      const res = await POST(
+        makeRequest({
+          url: "https://example.com/recipe",
+          telegramNotify: true,
+        }) as never,
+      );
+
+      expect((await res.json()).telegramNotify).toBe(false);
+      const insertValues = vi.mocked(db.insert).mock.results[0]?.value?.values;
+      expect(insertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ telegramChatId: null }),
+      );
+      expect(saveParsedRecipeForUser).not.toHaveBeenCalled();
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("saves the cached result server-side on a Telegram-notify cache hit", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        user: { id: "user-42" },
+      } as never);
+      vi.mocked(resolveTelegramChatId).mockResolvedValue("chat-9");
+      selectLimit.mockResolvedValue([{ result: { title: "Cached Pasta" } }]);
+
+      const res = await POST(
+        makeRequest({
+          url: "https://example.com/recipe",
+          telegramNotify: true,
+        }) as never,
+      );
+
+      expect((await res.json()).cached).toBe(true);
+      expect(saveParsedRecipeForUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "user-42",
+          parsed: { title: "Cached Pasta" },
+          sourceUrl: "https://example.com/recipe",
+        }),
+      );
+      // A cache hit is already DONE, so it must not re-trigger /process.
+      expect(fetch).not.toHaveBeenCalled();
+    });
   });
 });
 
