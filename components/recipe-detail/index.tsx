@@ -54,47 +54,61 @@ export function RecipeDetail({
   const recipe: Recipe | null = liveRecipe ?? initialRecipe ?? null;
   const loading = liveRecipe === undefined && initialRecipe === undefined;
 
-  // When the recipe isn't on this device, it's resolved one of two ways before
-  // falling back to the private guard: a signed-in user may still own it on
-  // the server (a Telegram bot deep link opened before the full sync landed
-  // it) — pull that row directly, the live query then re-renders it. If it
-  // isn't theirs (or they're signed out), it may be a recipe someone else
-  // shared publicly — e.g. opening a shared-recipe deep link while already
-  // signed in to a different account, which never carries a server
-  // `publicRecipe` prop the way a fresh page load does. `resolutionDone` gates
-  // the guard so it only shows once both have been tried.
-  const [resolutionDone, setResolutionDone] = useState(false);
+  // When the recipe isn't on this device, two independent checks decide what
+  // to show — a Telegram deep link pushes this view with no server-fetched
+  // `publicRecipe` the way a fresh page load has, so both run client-side.
+  //
+  // 1. Is it public? No login required — this is the only check a genuine
+  //    share needs, so it runs immediately and unconditionally.
+  // 2. If not, is it the signed-in user's own recipe, just not synced to this
+  //    device yet (a bot deep link opened before the full sync landed it)?
+  //    This one does need auth to have settled, so it waits its turn.
+  //
+  // Keeping these separate matters: the public check must never be blocked on
+  // sign-in resolving, or a stuck/slow Telegram auto sign-in turns a plain
+  // public share into an infinite skeleton.
+  const [publicCheckDone, setPublicCheckDone] = useState(false);
   const [fetchedPublicRecipe, setFetchedPublicRecipe] =
     useState<PublicRecipe | null>(null);
-  const resolutionStartedRef = useRef(false);
+  const publicCheckStartedRef = useRef(false);
   const effectivePublicRecipe = publicRecipe ?? fetchedPublicRecipe;
+
+  const [ownerPullDone, setOwnerPullDone] = useState(false);
+  const ownerPullStartedRef = useRef(false);
 
   // isSignedIn() is a plain module flag set from useSyncOnLogin's session
   // effect — on a cold Telegram launch it reads false for the brief window
-  // before the silent Telegram auto sign-in resolves, which used to fall
-  // straight through to the private guard instead of waiting.
+  // before the silent Telegram auto sign-in resolves.
   const awaitingTelegramAutoSignIn = useAwaitingTelegramAutoSignIn(
     isSignedIn(),
   );
 
   useEffect(() => {
     if (recipe || effectivePublicRecipe) {
-      setResolutionDone(true);
+      setPublicCheckDone(true);
       return;
     }
-    if (awaitingTelegramAutoSignIn) return;
-    if (liveRecipe !== null || resolutionStartedRef.current) return;
-    resolutionStartedRef.current = true;
+    if (liveRecipe !== null || publicCheckStartedRef.current) return;
+    publicCheckStartedRef.current = true;
+    fetchPublicRecipe(recipeId)
+      .then((shared) => {
+        if (shared) setFetchedPublicRecipe(shared);
+      })
+      .finally(() => setPublicCheckDone(true));
+  }, [recipe, effectivePublicRecipe, liveRecipe, recipeId]);
 
-    (async () => {
-      if (isSignedIn()) {
-        const owned = await pullOwnRecipe(recipeId);
-        if (owned) return;
-      }
-      const shared = await fetchPublicRecipe(recipeId);
-      if (shared) setFetchedPublicRecipe(shared);
-    })().finally(() => setResolutionDone(true));
+  useEffect(() => {
+    if (!publicCheckDone || recipe || effectivePublicRecipe) return;
+    if (awaitingTelegramAutoSignIn) return;
+    if (!isSignedIn()) {
+      setOwnerPullDone(true);
+      return;
+    }
+    if (liveRecipe !== null || ownerPullStartedRef.current) return;
+    ownerPullStartedRef.current = true;
+    pullOwnRecipe(recipeId).finally(() => setOwnerPullDone(true));
   }, [
+    publicCheckDone,
     recipe,
     effectivePublicRecipe,
     liveRecipe,
@@ -124,8 +138,8 @@ export function RecipeDetail({
       return (
         <SharedRecipeDetail locale={locale} recipe={effectivePublicRecipe} />
       );
-    if (awaitingTelegramAutoSignIn || !resolutionDone)
-      return <RecipeSkeleton />;
+    if (!publicCheckDone) return <RecipeSkeleton />;
+    if (awaitingTelegramAutoSignIn || !ownerPullDone) return <RecipeSkeleton />;
     return <PrivateRecipeGuard locale={locale} />;
   }
 

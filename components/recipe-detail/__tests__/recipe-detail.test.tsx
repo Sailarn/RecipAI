@@ -443,6 +443,22 @@ describe("RecipeDetail", () => {
         await screen.findByText("This recipe is private"),
       ).toBeInTheDocument();
     });
+
+    it("resolves a public share even while Telegram auto sign-in is stuck pending (regression)", async () => {
+      // The public check must never be gated on sign-in resolving — otherwise
+      // a stuck/slow auto sign-in turns a plain public share into an infinite
+      // skeleton, which is exactly what was reported.
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(isSignedIn).mockReturnValue(false);
+      vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "pending";
+
+      render(<RecipeDetail recipeId="shared-1" locale="en" />);
+
+      expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
+      expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
   });
 
   describe("cold Telegram launch — guard waits on auto sign-in", () => {
