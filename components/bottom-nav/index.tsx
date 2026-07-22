@@ -39,13 +39,17 @@ export function BottomNav() {
   const router = useRouter();
   const { entries } = useNavigationStack();
 
-  // The stack (not the browser pathname) is the source of truth for what's
-  // currently on screen: a pushed view (e.g. a Telegram deep link straight
-  // into a recipe) updates the stack immediately, but usePathname() reflects
-  // it only once Next's router has caught up with the pushState call — a
-  // pushed recipe/edit/pantry view could otherwise render under the nav
-  // (or with the wrong active tab) for that window.
-  const topHref = entries.at(-1)?.href ?? pathname;
+  // Prefer usePathname() at the stack root: it updates immediately on a real
+  // Next.js navigation (tab switch), while the stack's own entries lag behind
+  // until `currentPage` (the actual rendered content) catches up — using the
+  // stack there made the active-tab pill stutter/freeze on plain tab taps.
+  // But a *pushed* view (entries.length > 1 — a Telegram deep link straight
+  // into a recipe, edit, pantry, ...) never updates usePathname() at all
+  // (raw history.pushState, not routed through Next), so there the stack's
+  // own top entry is the only thing that's ever correct — without it the nav
+  // rendered under a pushed recipe view instead of hiding.
+  const topHref =
+    entries.length > 1 ? (entries.at(-1)?.href ?? pathname) : pathname;
   const { shouldHide, isPantryMode, activeHref } = getBottomNavState(
     topHref,
     locale,
