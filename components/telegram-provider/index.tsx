@@ -85,6 +85,17 @@ type TelegramState = {
   user: TelegramUser | undefined;
 };
 
+// The SDK script's `load` event can fire before Telegram's native layer has
+// actually populated `initData` on the WebApp object — observed reliably on
+// deep-link launches (a `recipe_<id>` startapp param opened from a shared
+// link): the object exists but getTelegramWebApp() rejects it as empty, so a
+// single check gives up permanently — no account gets auto-created and
+// Profile spins forever, even though the URL-hash-based launch detection
+// (isTelegramEnvironment) already knows we're in Telegram. Poll briefly
+// instead of trusting the first check.
+const WEBAPP_POLL_INTERVAL_MS = 200;
+const WEBAPP_POLL_MAX_ATTEMPTS = 25; // ~5s total
+
 export function TelegramProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<TelegramState>({
     isTelegram: false,
@@ -96,9 +107,10 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
     if (!isTelegramEnvironment()) return;
 
     let cancelled = false;
-    loadTelegramSdk().then((webApp) => {
-      const resolved = webApp ?? getTelegramWebApp();
-      if (cancelled || !resolved) return;
+    let pollTimer: number | undefined;
+
+    function settle(resolved: TelegramWebApp): void {
+      if (cancelled) return;
       initializeWebApp(resolved);
       void restoreThemeFromCloud();
       setState({
@@ -106,10 +118,35 @@ export function TelegramProvider({ children }: { children: React.ReactNode }) {
         webApp: resolved,
         user: resolved.initDataUnsafe.user,
       });
+    }
+
+    function pollForWebApp(attempt: number): void {
+      if (cancelled) return;
+      const resolved = getTelegramWebApp();
+      if (resolved) {
+        settle(resolved);
+        return;
+      }
+      if (attempt >= WEBAPP_POLL_MAX_ATTEMPTS) return;
+      pollTimer = window.setTimeout(
+        () => pollForWebApp(attempt + 1),
+        WEBAPP_POLL_INTERVAL_MS,
+      );
+    }
+
+    loadTelegramSdk().then((webApp) => {
+      const resolved = webApp ?? getTelegramWebApp();
+      if (cancelled) return;
+      if (resolved) {
+        settle(resolved);
+        return;
+      }
+      pollForWebApp(0);
     });
 
     return () => {
       cancelled = true;
+      if (pollTimer !== undefined) window.clearTimeout(pollTimer);
     };
   }, []);
 

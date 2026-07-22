@@ -44,7 +44,10 @@ function Probe() {
 afterEach(() => {
   setWebApp(undefined);
   document.documentElement.classList.remove("telegram");
+  window.location.hash = "";
+  sessionStorage.clear();
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe("TelegramProvider", () => {
@@ -80,5 +83,64 @@ describe("TelegramProvider", () => {
     expect(webApp.disableVerticalSwipes).toHaveBeenCalledOnce();
     expect(webApp.setHeaderColor).toHaveBeenCalledWith("#0a0a0a");
     expect(document.documentElement.classList.contains("telegram")).toBe(true);
+  });
+
+  it("retries when the WebApp object exists but initData hasn't been populated yet (deep-link race)", async () => {
+    // Reproduces the reported bug: on a recipe_<id> deep link, the SDK
+    // script's `load` event fired before Telegram's native layer populated
+    // initData, so a single check saw an "empty" WebApp and gave up for
+    // good — no account was ever auto-created and Profile spun forever.
+    // isTelegramEnvironment() detects the launch from the URL hash
+    // independently of the SDK object, same as a real deep link.
+    vi.useFakeTimers();
+    window.location.hash = "#tgWebAppData=start_param%3Drecipe_abc";
+
+    const webApp: Partial<TelegramWebApp> = {
+      initData: "",
+      initDataUnsafe: {},
+      ready: vi.fn(),
+      expand: vi.fn(),
+      setHeaderColor: vi.fn(),
+      setBackgroundColor: vi.fn(),
+      disableVerticalSwipes: vi.fn(),
+    };
+    setWebApp(webApp);
+
+    render(
+      <TelegramProvider>
+        <Probe />
+      </TelegramProvider>,
+    );
+
+    expect(screen.getByTestId("is-telegram").textContent).toBe("false");
+
+    // Telegram's native layer populates initData a moment later.
+    webApp.initData = "user=1&hash=abc";
+    webApp.initDataUnsafe = { user: { id: 42, first_name: "Ada" } };
+
+    await vi.advanceTimersByTimeAsync(5000);
+
+    expect(screen.getByTestId("is-telegram").textContent).toBe("true");
+    expect(screen.getByTestId("user-id").textContent).toBe("42");
+  });
+
+  it("gives up after the retry window if initData never arrives", async () => {
+    vi.useFakeTimers();
+    window.location.hash = "#tgWebAppData=start_param%3Drecipe_abc";
+
+    setWebApp({
+      initData: "",
+      initDataUnsafe: {},
+    });
+
+    render(
+      <TelegramProvider>
+        <Probe />
+      </TelegramProvider>,
+    );
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    expect(screen.getByTestId("is-telegram").textContent).toBe("false");
   });
 });
