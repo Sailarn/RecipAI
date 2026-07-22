@@ -69,10 +69,13 @@ OIDC).
   home route redirects there), so closing it pops back to the list with the slide animation; a bare
   `navigate.replace` left nothing underneath and lost the transition. Non-recipe params are tab roots,
   so they `replace`. Trade-off: the recipes list is now intentionally behind the detail (the previous
-  `replace` avoided a ~1s list flash, but also killed the stack effect). **Owned-recipe scope:** the
-  pushed `<RecipeDetail recipeId>` has no server-fetched `publicRecipe`, so a genuinely cross-user
-  *public* share resolves via the signed-in owner-pull (or the private guard) rather than the shared
-  view — acceptable for the single-user deployment.
+  `replace` avoided a ~1s list flash, but also killed the stack effect). The pushed
+  `<RecipeDetail recipeId>` has no server-fetched `publicRecipe` the way a fresh SSR page load does, so
+  `RecipeDetail` resolves it client-side: a signed-in owner-pull first (`GET /api/recipes/[id]`), then —
+  if that isn't theirs, or nobody's signed in — a fallback fetch to the public, anonymous
+  `GET /api/recipes/[id]/public` (same isPublic-only scope as the share page's `getPublicRecipe()`)
+  before giving up to the private guard. Both attempts are gated on Telegram auto sign-in having
+  settled first (`useAwaitingTelegramAutoSignIn`), so a cold launch doesn't race the guard.
 - **One recipe card, two surfaces.** `lib/telegram/recipe-card.ts` is the single builder for the
   Telegram recipe card — caption (title + category + `time · servings · ingredients`), the
   `🍳 Open recipe` deep-link button, and the JPEG photo transform. Both the **share** flow
