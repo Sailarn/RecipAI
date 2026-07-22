@@ -336,7 +336,10 @@ describe("RecipeDetail", () => {
       expect.objectContaining({ isPublic: false }),
     );
     await waitFor(() => {
-      expect(navigation.replace).toHaveBeenCalledWith("/en/recipes/copied-1");
+      expect(navigation.replace).toHaveBeenCalledWith(
+        "/en/recipes/copied-1",
+        expect.anything(),
+      );
     });
   });
 

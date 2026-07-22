@@ -21,6 +21,7 @@ type NavigationStackContextValue = {
   push: (href: string, element: React.ReactNode) => void;
   pop: () => void;
   reset: (href: string, element: React.ReactNode) => void;
+  replaceTop: (href: string, element: React.ReactNode) => void;
   canPop: boolean;
 };
 
@@ -171,9 +172,38 @@ export function NavigationStackProvider({
     [updateEntries],
   );
 
+  // Swaps the top entry's element in place — same slot, same history depth —
+  // instead of pushing a new one. Uses replaceState (not pushState) so the
+  // entry beneath (e.g. the recipes list under a shared-recipe-turned-owned
+  // view) stays exactly one "back" away. The new id forces PageStack to
+  // unmount the old element rather than re-rendering it with new props, so
+  // stale local state (e.g. a frozen "Saving..." button) can't linger.
+  const replaceTop = useCallback(
+    (href: string, element: React.ReactNode) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      const current = entriesRef.current;
+      const next =
+        current.length > 0
+          ? [...current.slice(0, -1), { id, href, element }]
+          : [{ id, href, element }];
+
+      stackPushing.current = true;
+      history.replaceState(null, "", href);
+      updateEntries(next);
+    },
+    [updateEntries],
+  );
+
   return (
     <NavigationStackContext.Provider
-      value={{ entries, push, pop, reset, canPop: entries.length > 1 }}
+      value={{
+        entries,
+        push,
+        pop,
+        reset,
+        replaceTop,
+        canPop: entries.length > 1,
+      }}
     >
       {children}
     </NavigationStackContext.Provider>

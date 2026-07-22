@@ -9,6 +9,7 @@ import type { Recipe } from "@/lib/db/schema";
 import { useAwaitingTelegramAutoSignIn } from "@/lib/hooks/use-awaiting-telegram-auto-sign-in";
 import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
+import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { CookingCarousel } from "../cooking-carousel";
@@ -136,7 +137,16 @@ export function RecipeDetail({
   if (!recipe) {
     if (effectivePublicRecipe)
       return (
-        <SharedRecipeDetail locale={locale} recipe={effectivePublicRecipe} />
+        <SharedRecipeDetail
+          locale={locale}
+          recipe={effectivePublicRecipe}
+          onSaved={(savedId) =>
+            navigate.replace(
+              routes.recipes.detail(locale, savedId),
+              <RecipeDetail recipeId={savedId} locale={locale} />,
+            )
+          }
+        />
       );
     if (!publicCheckDone) return <RecipeSkeleton />;
     if (awaitingTelegramAutoSignIn || !ownerPullDone) return <RecipeSkeleton />;

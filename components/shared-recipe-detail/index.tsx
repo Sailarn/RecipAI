@@ -16,11 +16,16 @@ import { RecipeMeta } from "../recipe-detail/recipe-meta";
 interface SharedRecipeDetailProps {
   locale: string;
   recipe: PublicRecipe;
+  // Called with the new local id once the copy is saved. The caller (not this
+  // component) owns swapping the view to the owned recipe — SharedRecipeDetail
+  // has no reason to know how that's rendered.
+  onSaved: (recipeId: string) => void;
 }
 
 export function SharedRecipeDetail({
   locale,
   recipe,
+  onSaved,
 }: SharedRecipeDetailProps) {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -29,8 +34,8 @@ export function SharedRecipeDetail({
     setSaving(true);
     try {
       const id = await createRecipe(clonePublicRecipe(recipe));
-      navigate.replace(routes.recipes.detail(locale, id));
       toast.success("Saved — now it is yours to edit");
+      onSaved(id);
     } catch {
       toast.error("Could not save this recipe. Try again.");
       setSaving(false);

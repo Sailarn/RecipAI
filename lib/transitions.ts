@@ -30,6 +30,12 @@ export function useNavigate() {
         router.push(href);
       }
     },
-    replace: (href: string) => router.replace(href),
+    replace: (href: string, element?: ReactNode) => {
+      if (element !== undefined) {
+        stack.replaceTop(href, element);
+      } else {
+        router.replace(href);
+      }
+    },
   };
 }
