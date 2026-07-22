@@ -96,7 +96,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_instrumentation_test",
-      "community": 37,
+      "community": 66,
       "norm_label": "instrumentation.test.ts"
     },
     {
@@ -526,7 +526,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_recipes_tests_recipes_page_test",
-      "community": 60,
+      "community": 10,
       "norm_label": "recipes-page.test.tsx"
     },
     {
@@ -536,7 +536,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "app_locale_recipes_tests_recipes_page_test_mockrecipes",
-      "community": 60,
+      "community": 10,
       "norm_label": "mockrecipes"
     },
     {
@@ -706,7 +706,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_recipes_parse_components_parse_info_banner_index",
-      "community": 51,
+      "community": 174,
       "norm_label": "index.tsx"
     },
     {
@@ -716,7 +716,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_locale_recipes_parse_components_parse_info_banner_index_parseinfobanner",
-      "community": 51,
+      "community": 174,
       "norm_label": "parseinfobanner()"
     },
     {
@@ -766,7 +766,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_recipes_parse_page",
-      "community": 51,
+      "community": 174,
       "norm_label": "page.tsx"
     },
     {
@@ -776,7 +776,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_locale_recipes_parse_page_tab",
-      "community": 51,
+      "community": 174,
       "norm_label": "tab"
     },
     {
@@ -786,7 +786,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "app_locale_recipes_parse_page_parserecipepage",
-      "community": 51,
+      "community": 174,
       "norm_label": "parserecipepage()"
     },
     {
@@ -836,7 +836,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_tests_page_test",
-      "community": 1,
+      "community": 3,
       "norm_label": "page.test.tsx"
     },
     {
@@ -846,7 +846,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "app_locale_sync_review_tests_page_test_serveronlyrecipe",
-      "community": 1,
+      "community": 3,
       "norm_label": "serveronlyrecipe"
     },
     {
@@ -856,7 +856,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "app_locale_sync_review_tests_page_test_localonlycollection",
-      "community": 1,
+      "community": 3,
       "norm_label": "localonlycollection"
     },
     {
@@ -866,7 +866,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "app_locale_sync_review_tests_page_test_conflictedrecipe",
-      "community": 1,
+      "community": 3,
       "norm_label": "conflictedrecipe"
     },
     {
@@ -876,7 +876,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_action_button_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -886,7 +886,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_action_button_index_actionbuttonvariant",
-      "community": 1,
+      "community": 3,
       "norm_label": "actionbuttonvariant"
     },
     {
@@ -896,7 +896,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_action_button_index_variant_classes",
-      "community": 1,
+      "community": 3,
       "norm_label": "variant_classes"
     },
     {
@@ -906,7 +906,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_action_button_index_actionbuttonprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "actionbuttonprops"
     },
     {
@@ -916,7 +916,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_action_button_index_actionbutton",
-      "community": 1,
+      "community": 3,
       "norm_label": "actionbutton()"
     },
     {
@@ -926,7 +926,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_conflicted_section_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -936,7 +936,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_conflicted_section_index_conflictedsectionprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "conflictedsectionprops"
     },
     {
@@ -946,7 +946,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_conflicted_section_index_buildconflictmeta",
-      "community": 1,
+      "community": 3,
       "norm_label": "buildconflictmeta()"
     },
     {
@@ -956,7 +956,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_conflicted_section_index_conflictedsection",
-      "community": 1,
+      "community": 3,
       "norm_label": "conflictedsection()"
     },
     {
@@ -966,7 +966,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_item_card_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -976,7 +976,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_item_card_index_getdisplayname",
-      "community": 1,
+      "community": 3,
       "norm_label": "getdisplayname()"
     },
     {
@@ -986,7 +986,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_item_card_index_itemcardprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "itemcardprops"
     },
     {
@@ -996,7 +996,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_item_card_index_itemcard",
-      "community": 1,
+      "community": 3,
       "norm_label": "itemcard()"
     },
     {
@@ -1006,7 +1006,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_local_only_section_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -1016,7 +1016,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_local_only_section_index_localonlysectionprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "localonlysectionprops"
     },
     {
@@ -1026,7 +1026,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_local_only_section_index_localonlysection",
-      "community": 1,
+      "community": 3,
       "norm_label": "localonlysection()"
     },
     {
@@ -1036,7 +1036,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_section_header_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -1046,7 +1046,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_section_header_index_sectionheaderprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "sectionheaderprops"
     },
     {
@@ -1056,7 +1056,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_section_header_index_sectionheader",
-      "community": 1,
+      "community": 3,
       "norm_label": "sectionheader()"
     },
     {
@@ -1066,7 +1066,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_server_only_section_index",
-      "community": 1,
+      "community": 3,
       "norm_label": "index.tsx"
     },
     {
@@ -1076,7 +1076,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_server_only_section_index_serveronlysectionprops",
-      "community": 1,
+      "community": 3,
       "norm_label": "serveronlysectionprops"
     },
     {
@@ -1086,7 +1086,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_locale_sync_review_components_server_only_section_index_serveronlysection",
-      "community": 1,
+      "community": 3,
       "norm_label": "serveronlysection()"
     },
     {
@@ -1096,7 +1096,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_page",
-      "community": 1,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_sync_utils",
-      "community": 1,
+      "community": 3,
       "norm_label": "sync-utils.ts"
     },
     {
@@ -1126,7 +1126,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_locale_sync_review_sync_utils_formatdate",
-      "community": 1,
+      "community": 3,
       "norm_label": "formatdate()"
     },
     {
@@ -1326,7 +1326,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_tests_layout_test",
-      "community": 4,
+      "community": 82,
       "norm_label": "layout.test.ts"
     },
     {
@@ -1356,7 +1356,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_collections_id_tests_route_test",
-      "community": 162,
+      "community": 21,
       "norm_label": "route.test.ts"
     },
     {
@@ -1366,7 +1366,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_api_collections_id_tests_route_test_makedeletereq",
-      "community": 162,
+      "community": 21,
       "norm_label": "makedeletereq()"
     },
     {
@@ -1376,7 +1376,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "app_api_collections_id_tests_route_test_makepatchreq",
-      "community": 162,
+      "community": 21,
       "norm_label": "makepatchreq()"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "app_api_collections_id_tests_route_test_mocksession",
-      "community": 162,
+      "community": 21,
       "norm_label": "mocksession()"
     },
     {
@@ -1396,7 +1396,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "app_api_collections_id_tests_route_test_setupupdate",
-      "community": 162,
+      "community": 21,
       "norm_label": "setupupdate()"
     },
     {
@@ -1416,7 +1416,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "app_api_collections_id_route_patch",
-      "community": 162,
+      "community": 21,
       "norm_label": "patch()"
     },
     {
@@ -1426,7 +1426,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "app_api_collections_id_route_delete",
-      "community": 162,
+      "community": 21,
       "norm_label": "delete()"
     },
     {
@@ -1436,7 +1436,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_collections_tests_route_test",
-      "community": 162,
+      "community": 21,
       "norm_label": "route.test.ts"
     },
     {
@@ -1446,7 +1446,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_api_collections_tests_route_test_makereq",
-      "community": 162,
+      "community": 21,
       "norm_label": "makereq()"
     },
     {
@@ -1456,7 +1456,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "app_api_collections_tests_route_test_mocksession",
-      "community": 162,
+      "community": 21,
       "norm_label": "mocksession()"
     },
     {
@@ -1466,7 +1466,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "app_api_collections_tests_route_test_setupselect",
-      "community": 162,
+      "community": 21,
       "norm_label": "setupselect()"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "app_api_collections_tests_route_test_setupinsert",
-      "community": 162,
+      "community": 21,
       "norm_label": "setupinsert()"
     },
     {
@@ -1496,7 +1496,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "app_api_collections_route_get",
-      "community": 162,
+      "community": 21,
       "norm_label": "get()"
     },
     {
@@ -1506,7 +1506,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "app_api_collections_route_post",
-      "community": 162,
+      "community": 21,
       "norm_label": "post()"
     },
     {
@@ -1786,7 +1786,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test",
-      "community": 7,
+      "community": 30,
       "norm_label": "route.test.ts"
     },
     {
@@ -1796,7 +1796,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test_mockinsertonconflict_mockselectwhere_mockselectlimit_mockupdatewhere_mocktransaction_mockdeletewhere_mockexecute",
-      "community": 7,
+      "community": 30,
       "norm_label": "{\n  mockinsertonconflict,\n  mockselectwhere,\n  mockselectlimit,\n  mockupdatewhere,\n  mocktransaction,\n  mockdeletewhere,\n  mockexecute,\n}"
     },
     {
@@ -1806,7 +1806,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test_makereq",
-      "community": 7,
+      "community": 30,
       "norm_label": "makereq()"
     },
     {
@@ -1816,7 +1816,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test_mocksession",
-      "community": 7,
+      "community": 30,
       "norm_label": "mocksession"
     },
     {
@@ -1826,7 +1826,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test_provisionalentry",
-      "community": 7,
+      "community": 30,
       "norm_label": "provisionalentry"
     },
     {
@@ -1836,7 +1836,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_tests_route_test_enrichedingredient",
-      "community": 7,
+      "community": 30,
       "norm_label": "enrichedingredient"
     },
     {
@@ -1856,7 +1856,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_route_buildenrichmentprompt",
-      "community": 7,
+      "community": 30,
       "norm_label": "buildenrichmentprompt()"
     },
     {
@@ -1866,7 +1866,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "app_api_ingredients_enrich_route_post",
-      "community": 7,
+      "community": 30,
       "norm_label": "post()"
     },
     {
@@ -1876,7 +1876,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_ingredients_route",
-      "community": 7,
+      "community": 162,
       "norm_label": "route.ts"
     },
     {
@@ -1886,7 +1886,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "app_api_ingredients_route_get",
-      "community": 7,
+      "community": 162,
       "norm_label": "get()"
     },
     {
@@ -2016,7 +2016,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_api_pantry_route_get",
-      "community": 6,
+      "community": 7,
       "norm_label": "get()"
     },
     {
@@ -2046,7 +2046,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_parse_queue_id_tests_route_test",
-      "community": 19,
+      "community": 21,
       "norm_label": "route.test.ts"
     },
     {
@@ -2056,7 +2056,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_api_parse_queue_id_tests_route_test_makerequest",
-      "community": 19,
+      "community": 21,
       "norm_label": "makerequest()"
     },
     {
@@ -2066,7 +2066,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "app_api_parse_queue_id_tests_route_test_setupselectchain",
-      "community": 19,
+      "community": 21,
       "norm_label": "setupselectchain()"
     },
     {
@@ -2076,7 +2076,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_parse_queue_id_route",
-      "community": 19,
+      "community": 21,
       "norm_label": "route.ts"
     },
     {
@@ -2086,7 +2086,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_api_parse_queue_id_route_get",
-      "community": 19,
+      "community": 21,
       "norm_label": "get()"
     },
     {
@@ -2396,7 +2396,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test",
-      "community": 30,
+      "community": 169,
       "norm_label": "photo-route.test.ts"
     },
     {
@@ -2406,7 +2406,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test_insertvalues",
-      "community": 30,
+      "community": 169,
       "norm_label": "insertvalues"
     },
     {
@@ -2416,7 +2416,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test_updatewhere",
-      "community": 30,
+      "community": 169,
       "norm_label": "updatewhere"
     },
     {
@@ -2426,7 +2426,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test_updateset",
-      "community": 30,
+      "community": 169,
       "norm_label": "updateset"
     },
     {
@@ -2436,7 +2436,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test_mockrecipe",
-      "community": 30,
+      "community": 169,
       "norm_label": "mockrecipe"
     },
     {
@@ -2446,7 +2446,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "app_api_parse_recipe_tests_photo_route_test_makerequest",
-      "community": 30,
+      "community": 169,
       "norm_label": "makerequest()"
     },
     {
@@ -2466,7 +2466,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "app_api_parse_recipe_photo_route_post",
-      "community": 30,
+      "community": 169,
       "norm_label": "post()"
     },
     {
@@ -2476,7 +2476,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_push_subscribe_tests_route_test",
-      "community": 21,
+      "community": 49,
       "norm_label": "route.test.ts"
     },
     {
@@ -2486,7 +2486,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_api_push_subscribe_tests_route_test_onconflictdoupdate_insertvalues_deletewhere",
-      "community": 21,
+      "community": 49,
       "norm_label": "{ onconflictdoupdate, insertvalues, deletewhere }"
     },
     {
@@ -2496,7 +2496,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "app_api_push_subscribe_tests_route_test_validbody",
-      "community": 21,
+      "community": 49,
       "norm_label": "validbody"
     },
     {
@@ -2506,7 +2506,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "app_api_push_subscribe_tests_route_test_makerequest",
-      "community": 21,
+      "community": 49,
       "norm_label": "makerequest()"
     },
     {
@@ -2516,7 +2516,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_push_subscribe_route",
-      "community": 21,
+      "community": 49,
       "norm_label": "route.ts"
     },
     {
@@ -2526,7 +2526,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "app_api_push_subscribe_route_subscribebody",
-      "community": 21,
+      "community": 49,
       "norm_label": "subscribebody"
     },
     {
@@ -2536,7 +2536,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "app_api_push_subscribe_route_post",
-      "community": 21,
+      "community": 49,
       "norm_label": "post()"
     },
     {
@@ -2546,7 +2546,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "app_api_push_subscribe_route_delete",
-      "community": 21,
+      "community": 49,
       "norm_label": "delete()"
     },
     {
@@ -2806,7 +2806,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_api_recipes_tests_route_test",
-      "community": 6,
+      "community": 21,
       "norm_label": "route.test.ts"
     },
     {
@@ -2816,7 +2816,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "app_api_recipes_tests_route_test_mocksession",
-      "community": 6,
+      "community": 21,
       "norm_label": "mocksession"
     },
     {
@@ -2826,7 +2826,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "app_api_recipes_tests_route_test_makerequest",
-      "community": 6,
+      "community": 21,
       "norm_label": "makerequest()"
     },
     {
@@ -2836,7 +2836,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "app_api_recipes_tests_route_test_setupinsertchain",
-      "community": 6,
+      "community": 21,
       "norm_label": "setupinsertchain()"
     },
     {
@@ -3236,7 +3236,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_global_error",
-      "community": 36,
+      "community": 57,
       "norm_label": "global-error.tsx"
     },
     {
@@ -3246,7 +3246,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "app_global_error_globalerror",
-      "community": 36,
+      "community": 57,
       "norm_label": "globalerror()"
     },
     {
@@ -3256,7 +3256,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_layout",
-      "community": 4,
+      "community": 82,
       "norm_label": "layout.tsx"
     },
     {
@@ -3266,7 +3266,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_layout_viewport",
-      "community": 4,
+      "community": 82,
       "norm_label": "viewport"
     },
     {
@@ -3276,7 +3276,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "app_layout_metadata",
-      "community": 4,
+      "community": 82,
       "norm_label": "metadata"
     },
     {
@@ -3286,7 +3286,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
-      "community": 4,
+      "community": 82,
       "norm_label": "rootlayout()"
     },
     {
@@ -4036,7 +4036,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_tests_index_test",
-      "community": 38,
+      "community": 60,
       "norm_label": "index.test.tsx"
     },
     {
@@ -4046,7 +4046,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_tests_index_test_collections",
-      "community": 38,
+      "community": 60,
       "norm_label": "collections"
     },
     {
@@ -4056,7 +4056,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_collection_row",
-      "community": 38,
+      "community": 60,
       "norm_label": "collection-row.tsx"
     },
     {
@@ -4066,7 +4066,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_collection_row_collectionrowprops",
-      "community": 38,
+      "community": 60,
       "norm_label": "collectionrowprops"
     },
     {
@@ -4076,7 +4076,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_collection_row_collectionrow",
-      "community": 38,
+      "community": 60,
       "norm_label": "collectionrow()"
     },
     {
@@ -4086,7 +4086,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_index",
-      "community": 38,
+      "community": 60,
       "norm_label": "index.tsx"
     },
     {
@@ -4096,7 +4096,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_index_addtocollectionsheetprops",
-      "community": 38,
+      "community": 60,
       "norm_label": "addtocollectionsheetprops"
     },
     {
@@ -4106,7 +4106,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_add_to_collection_sheet_index_addtocollectionsheet",
-      "community": 38,
+      "community": 60,
       "norm_label": "addtocollectionsheet()"
     },
     {
@@ -4296,7 +4296,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_bottom_nav_nav_match",
-      "community": 62,
+      "community": 174,
       "norm_label": "nav-match.ts"
     },
     {
@@ -4306,7 +4306,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "components_bottom_nav_nav_match_bottomnavstate",
-      "community": 62,
+      "community": 174,
       "norm_label": "bottomnavstate"
     },
     {
@@ -4486,7 +4486,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_client_shell_tests_index_test",
-      "community": 35,
+      "community": 118,
       "norm_label": "index.test.tsx"
     },
     {
@@ -4496,7 +4496,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_client_shell_index",
-      "community": 35,
+      "community": 118,
       "norm_label": "index.tsx"
     },
     {
@@ -4506,7 +4506,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "components_client_shell_index_bottomnav",
-      "community": 35,
+      "community": 118,
       "norm_label": "bottomnav"
     },
     {
@@ -4516,7 +4516,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "components_client_shell_index_parsejobwatcher",
-      "community": 35,
+      "community": 118,
       "norm_label": "parsejobwatcher"
     },
     {
@@ -4526,7 +4526,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "components_client_shell_index_clientshell",
-      "community": 35,
+      "community": 118,
       "norm_label": "clientshell()"
     },
     {
@@ -4566,7 +4566,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_collections_shelf_index_collectionsshelfprops",
-      "community": 57,
+      "community": 60,
       "norm_label": "collectionsshelfprops"
     },
     {
@@ -4856,7 +4856,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_cooking_carousel_overview_slide_overviewslide",
-      "community": 63,
+      "community": 173,
       "norm_label": "overviewslide()"
     },
     {
@@ -5386,7 +5386,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test",
-      "community": 160,
+      "community": 31,
       "norm_label": "index.test.tsx"
     },
     {
@@ -5396,7 +5396,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_tomato",
-      "community": 160,
+      "community": 31,
       "norm_label": "tomato"
     },
     {
@@ -5406,7 +5406,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_milk",
-      "community": 160,
+      "community": 31,
       "norm_label": "milk"
     },
     {
@@ -5416,7 +5416,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_garlic",
-      "community": 160,
+      "community": 31,
       "norm_label": "garlic"
     },
     {
@@ -5426,7 +5426,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_rice",
-      "community": 160,
+      "community": 31,
       "norm_label": "rice"
     },
     {
@@ -5436,7 +5436,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_onclose",
-      "community": 160,
+      "community": 31,
       "norm_label": "onclose"
     },
     {
@@ -5446,7 +5446,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_setupvocab",
-      "community": 160,
+      "community": 31,
       "norm_label": "setupvocab()"
     },
     {
@@ -5456,7 +5456,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "components_ingredient_picker_tests_index_test_countlabel",
-      "community": 160,
+      "community": 31,
       "norm_label": "countlabel()"
     },
     {
@@ -5626,7 +5626,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "components_ingredient_picker_index_ingredientpicker",
-      "community": 56,
+      "community": 31,
       "norm_label": "ingredientpicker()"
     },
     {
@@ -5666,7 +5666,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_ingredient_picker_picker_skeleton",
-      "community": 31,
+      "community": 119,
       "norm_label": "picker-skeleton.tsx"
     },
     {
@@ -5676,7 +5676,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_ingredient_picker_picker_skeleton_skeleton_groups",
-      "community": 31,
+      "community": 119,
       "norm_label": "skeleton_groups"
     },
     {
@@ -5686,7 +5686,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "components_ingredient_picker_picker_skeleton_pickerskeleton",
-      "community": 31,
+      "community": 119,
       "norm_label": "pickerskeleton()"
     },
     {
@@ -5976,7 +5976,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_maintenance_listener_tests_index_test",
-      "community": 35,
+      "community": 118,
       "norm_label": "index.test.tsx"
     },
     {
@@ -5986,7 +5986,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_maintenance_listener_tests_index_test_error",
-      "community": 35,
+      "community": 118,
       "norm_label": "{ error }"
     },
     {
@@ -5996,7 +5996,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_maintenance_listener_tests_index_test_dispatchmaintenance",
-      "community": 35,
+      "community": 118,
       "norm_label": "dispatchmaintenance()"
     },
     {
@@ -6006,7 +6006,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_maintenance_listener_index",
-      "community": 35,
+      "community": 118,
       "norm_label": "index.tsx"
     },
     {
@@ -6016,7 +6016,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_maintenance_listener_index_maintenancelistener",
-      "community": 35,
+      "community": 118,
       "norm_label": "maintenancelistener()"
     },
     {
@@ -6226,7 +6226,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test",
-      "community": 56,
+      "community": 31,
       "norm_label": "index.test.tsx"
     },
     {
@@ -6236,7 +6236,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test_tomato",
-      "community": 56,
+      "community": 31,
       "norm_label": "tomato"
     },
     {
@@ -6246,7 +6246,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test_milk",
-      "community": 56,
+      "community": 31,
       "norm_label": "milk"
     },
     {
@@ -6256,7 +6256,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test_milkpantryitem",
-      "community": 56,
+      "community": 31,
       "norm_label": "milkpantryitem"
     },
     {
@@ -6266,7 +6266,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test_onclose",
-      "community": 56,
+      "community": 31,
       "norm_label": "onclose"
     },
     {
@@ -6276,7 +6276,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_tests_index_test_pickerprops",
-      "community": 56,
+      "community": 31,
       "norm_label": "pickerprops()"
     },
     {
@@ -6286,7 +6286,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_index",
-      "community": 56,
+      "community": 31,
       "norm_label": "index.tsx"
     },
     {
@@ -6296,7 +6296,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_index_commitlabel",
-      "community": 56,
+      "community": 31,
       "norm_label": "commitlabel()"
     },
     {
@@ -6306,7 +6306,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "components_pantry_add_pantry_picker_index_addpantrypicker",
-      "community": 56,
+      "community": 31,
       "norm_label": "addpantrypicker()"
     },
     {
@@ -6486,7 +6486,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_parse_job_watcher_index",
-      "community": 0,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -6496,7 +6496,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_parse_job_watcher_index_parsejobwatcher",
-      "community": 0,
+      "community": 1,
       "norm_label": "parsejobwatcher()"
     },
     {
@@ -6506,7 +6506,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_parse_photo_index",
-      "community": 51,
+      "community": 174,
       "norm_label": "index.tsx"
     },
     {
@@ -6516,7 +6516,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "components_parse_photo_index_parsephotoprops",
-      "community": 51,
+      "community": 1,
       "norm_label": "parsephotoprops"
     },
     {
@@ -6526,7 +6526,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "components_parse_photo_index_parsephoto",
-      "community": 51,
+      "community": 174,
       "norm_label": "parsephoto()"
     },
     {
@@ -6536,7 +6536,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_parsed_recipes_sheet_tests_index_test",
-      "community": 174,
+      "community": 1,
       "norm_label": "index.test.tsx"
     },
     {
@@ -6546,7 +6546,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "components_parsed_recipes_sheet_tests_index_test_mocklivequery",
-      "community": 174,
+      "community": 1,
       "norm_label": "mocklivequery()"
     },
     {
@@ -6556,7 +6556,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "components_parsed_recipes_sheet_tests_index_test_opensheet",
-      "community": 174,
+      "community": 1,
       "norm_label": "opensheet()"
     },
     {
@@ -6566,7 +6566,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_parsed_recipes_sheet_index",
-      "community": 42,
+      "community": 1,
       "norm_label": "index.tsx"
     },
     {
@@ -6576,7 +6576,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "components_parsed_recipes_sheet_index_parsedrecipessheet",
-      "community": 174,
+      "community": 1,
       "norm_label": "parsedrecipessheet()"
     },
     {
@@ -6746,7 +6746,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_profile_auth_tests_use_linked_accounts_test",
-      "community": 4,
+      "community": 43,
       "norm_label": "use-linked-accounts.test.ts"
     },
     {
@@ -6756,7 +6756,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_profile_auth_tests_use_linked_accounts_test_listaccounts",
-      "community": 4,
+      "community": 43,
       "norm_label": "listaccounts"
     },
     {
@@ -6766,7 +6766,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "components_profile_auth_tests_use_linked_accounts_test_listuserpasskeys",
-      "community": 4,
+      "community": 43,
       "norm_label": "listuserpasskeys"
     },
     {
@@ -6856,7 +6856,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_profile_auth_user_card",
-      "community": 2,
+      "community": 54,
       "norm_label": "user-card.tsx"
     },
     {
@@ -6866,7 +6866,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_profile_auth_user_card_usercardprops",
-      "community": 2,
+      "community": 54,
       "norm_label": "usercardprops"
     },
     {
@@ -6876,7 +6876,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_profile_auth_user_card_usercard",
-      "community": 2,
+      "community": 54,
       "norm_label": "usercard()"
     },
     {
@@ -6936,7 +6936,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_card_tests_index_test",
-      "community": 164,
+      "community": 10,
       "norm_label": "index.test.tsx"
     },
     {
@@ -6946,7 +6946,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_recipe_card_tests_index_test_mockpush",
-      "community": 164,
+      "community": 10,
       "norm_label": "mockpush"
     },
     {
@@ -6956,7 +6956,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "components_recipe_card_tests_index_test_baserecipe",
-      "community": 164,
+      "community": 10,
       "norm_label": "baserecipe"
     },
     {
@@ -6966,7 +6966,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "components_recipe_card_tests_index_test_baseprops",
-      "community": 164,
+      "community": 10,
       "norm_label": "baseprops"
     },
     {
@@ -6976,7 +6976,7 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "components_recipe_card_tests_index_test_opencontextmenu",
-      "community": 164,
+      "community": 10,
       "norm_label": "opencontextmenu()"
     },
     {
@@ -6986,7 +6986,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_card_card_footer",
-      "community": 164,
+      "community": 39,
       "norm_label": "card-footer.tsx"
     },
     {
@@ -6996,7 +6996,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "components_recipe_card_card_footer_cardfooterprops",
-      "community": 164,
+      "community": 39,
       "norm_label": "cardfooterprops"
     },
     {
@@ -7006,7 +7006,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_recipe_card_card_footer_cardfooter",
-      "community": 164,
+      "community": 39,
       "norm_label": "cardfooter()"
     },
     {
@@ -7016,7 +7016,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_card_card_thumbnail",
-      "community": 113,
+      "community": 10,
       "norm_label": "card-thumbnail.tsx"
     },
     {
@@ -7026,7 +7026,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_recipe_card_card_thumbnail_cardthumbnailprops",
-      "community": 113,
+      "community": 10,
       "norm_label": "cardthumbnailprops"
     },
     {
@@ -7036,7 +7036,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "components_recipe_card_card_thumbnail_cardthumbnail",
-      "community": 113,
+      "community": 10,
       "norm_label": "cardthumbnail()"
     },
     {
@@ -7046,7 +7046,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_card_constants",
-      "community": 164,
+      "community": 10,
       "norm_label": "constants.ts"
     },
     {
@@ -7056,7 +7056,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_recipe_card_constants_clampmenupos",
-      "community": 164,
+      "community": 10,
       "norm_label": "clampmenupos()"
     },
     {
@@ -7066,7 +7066,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_card_index",
-      "community": 164,
+      "community": 10,
       "norm_label": "index.tsx"
     },
     {
@@ -7086,7 +7086,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "components_recipe_card_index_recipecard",
-      "community": 164,
+      "community": 10,
       "norm_label": "recipecard"
     },
     {
@@ -7166,7 +7166,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_tests_recipe_detail_test",
-      "community": 171,
+      "community": 174,
       "norm_label": "recipe-detail.test.tsx"
     },
     {
@@ -7176,7 +7176,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "components_recipe_detail_tests_recipe_detail_test_navigation",
-      "community": 171,
+      "community": 174,
       "norm_label": "navigation"
     },
     {
@@ -7186,7 +7186,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "components_recipe_detail_tests_recipe_detail_test_mockrecipe",
-      "community": 171,
+      "community": 174,
       "norm_label": "mockrecipe"
     },
     {
@@ -7196,7 +7196,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "components_recipe_detail_tests_recipe_detail_test_publicrecipe",
-      "community": 171,
+      "community": 174,
       "norm_label": "publicrecipe"
     },
     {
@@ -7206,7 +7206,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_category_badge",
-      "community": 104,
+      "community": 174,
       "norm_label": "category-badge.tsx"
     },
     {
@@ -7216,7 +7216,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_category_badge_category_colors",
-      "community": 104,
+      "community": 174,
       "norm_label": "category_colors"
     },
     {
@@ -7226,7 +7226,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_recipe_detail_category_badge_categorybadgeprops",
-      "community": 104,
+      "community": 174,
       "norm_label": "categorybadgeprops"
     },
     {
@@ -7236,7 +7236,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_detail_category_badge_categorybadge",
-      "community": 104,
+      "community": 174,
       "norm_label": "categorybadge()"
     },
     {
@@ -7266,7 +7266,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "components_recipe_detail_delete_dialog_deletedialog",
-      "community": 104,
+      "community": 174,
       "norm_label": "deletedialog()"
     },
     {
@@ -7276,7 +7276,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_index",
-      "community": 104,
+      "community": 174,
       "norm_label": "index.tsx"
     },
     {
@@ -7286,7 +7286,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "components_recipe_detail_index_recipedetailprops",
-      "community": 104,
+      "community": 10,
       "norm_label": "recipedetailprops"
     },
     {
@@ -7296,7 +7296,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "components_recipe_detail_index_recipedetail",
-      "community": 164,
+      "community": 174,
       "norm_label": "recipedetail()"
     },
     {
@@ -7366,7 +7366,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_actions",
-      "community": 23,
+      "community": 38,
       "norm_label": "recipe-actions.tsx"
     },
     {
@@ -7376,7 +7376,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_actions_recipeactionsprops",
-      "community": 23,
+      "community": 38,
       "norm_label": "recipeactionsprops"
     },
     {
@@ -7386,7 +7386,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_actions_recipeactions",
-      "community": 23,
+      "community": 38,
       "norm_label": "recipeactions()"
     },
     {
@@ -7406,7 +7406,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_header_recipeheaderprops",
-      "community": 60,
+      "community": 10,
       "norm_label": "recipeheaderprops"
     },
     {
@@ -7426,7 +7426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_hero",
-      "community": 173,
+      "community": 174,
       "norm_label": "recipe-hero.tsx"
     },
     {
@@ -7436,7 +7436,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_hero_recipeheroprops",
-      "community": 173,
+      "community": 10,
       "norm_label": "recipeheroprops"
     },
     {
@@ -7446,7 +7446,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_hero_recipehero",
-      "community": 104,
+      "community": 174,
       "norm_label": "recipehero()"
     },
     {
@@ -7456,7 +7456,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_meta",
-      "community": 104,
+      "community": 174,
       "norm_label": "recipe-meta.tsx"
     },
     {
@@ -7466,7 +7466,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_meta_recipemetaprops",
-      "community": 104,
+      "community": 174,
       "norm_label": "recipemetaprops"
     },
     {
@@ -7476,7 +7476,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_meta_iconmap",
-      "community": 104,
+      "community": 174,
       "norm_label": "iconmap"
     },
     {
@@ -7486,7 +7486,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_detail_recipe_meta_recipemeta",
-      "community": 104,
+      "community": 174,
       "norm_label": "recipemeta()"
     },
     {
@@ -7626,7 +7626,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "components_recipe_detail_share_action_index_shareactionprops",
-      "community": 67,
+      "community": 10,
       "norm_label": "shareactionprops"
     },
     {
@@ -7826,7 +7826,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_tests_form_validation_test",
-      "community": 55,
+      "community": 35,
       "norm_label": "form-validation.test.ts"
     },
     {
@@ -7836,7 +7836,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_recipe_form_tests_form_validation_test_schema",
-      "community": 55,
+      "community": 35,
       "norm_label": "schema"
     },
     {
@@ -7846,7 +7846,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "components_recipe_form_tests_form_validation_test_validingredient",
-      "community": 55,
+      "community": 35,
       "norm_label": "validingredient"
     },
     {
@@ -7856,7 +7856,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "components_recipe_form_tests_form_validation_test_validbase",
-      "community": 55,
+      "community": 35,
       "norm_label": "validbase"
     },
     {
@@ -7976,7 +7976,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_basic_info",
-      "community": 55,
+      "community": 27,
       "norm_label": "basic-info.tsx"
     },
     {
@@ -7986,7 +7986,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_form_basic_info_basicinfoprops",
-      "community": 55,
+      "community": 27,
       "norm_label": "basicinfoprops"
     },
     {
@@ -7996,7 +7996,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "components_recipe_form_basic_info_basicinfo",
-      "community": 37,
+      "community": 66,
       "norm_label": "basicinfo()"
     },
     {
@@ -8056,7 +8056,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_focal_point_picker",
-      "community": 55,
+      "community": 27,
       "norm_label": "focal-point-picker.tsx"
     },
     {
@@ -8066,7 +8066,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_recipe_form_focal_point_picker_focalpointpickerprops",
-      "community": 55,
+      "community": 27,
       "norm_label": "focalpointpickerprops"
     },
     {
@@ -8076,7 +8076,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_recipe_form_focal_point_picker_focalpointpicker",
-      "community": 55,
+      "community": 27,
       "norm_label": "focalpointpicker()"
     },
     {
@@ -8146,7 +8146,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker",
-      "community": 55,
+      "community": 27,
       "norm_label": "image-crop-picker.tsx"
     },
     {
@@ -8156,7 +8156,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_croprect",
-      "community": 55,
+      "community": 27,
       "norm_label": "croprect"
     },
     {
@@ -8166,7 +8166,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_imagecroppickerprops",
-      "community": 55,
+      "community": 27,
       "norm_label": "imagecroppickerprops"
     },
     {
@@ -8176,7 +8176,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_empty_crop",
-      "community": 55,
+      "community": 27,
       "norm_label": "empty_crop"
     },
     {
@@ -8186,7 +8186,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_topercentcrop",
-      "community": 55,
+      "community": 27,
       "norm_label": "topercentcrop()"
     },
     {
@@ -8196,7 +8196,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_frompercentcrop",
-      "community": 55,
+      "community": 27,
       "norm_label": "frompercentcrop()"
     },
     {
@@ -8206,7 +8206,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "components_recipe_form_image_crop_picker_imagecroppicker",
-      "community": 55,
+      "community": 27,
       "norm_label": "imagecroppicker()"
     },
     {
@@ -8276,7 +8276,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_ingredients_section_additive_picker",
-      "community": 169,
+      "community": 56,
       "norm_label": "additive-picker.tsx"
     },
     {
@@ -8286,7 +8286,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_recipe_form_ingredients_section_additive_picker_additivepickerprops",
-      "community": 169,
+      "community": 56,
       "norm_label": "additivepickerprops"
     },
     {
@@ -8296,7 +8296,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_form_ingredients_section_additive_picker_modifierkeys",
-      "community": 169,
+      "community": 56,
       "norm_label": "modifierkeys"
     },
     {
@@ -8306,7 +8306,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "components_recipe_form_ingredients_section_additive_picker_additivepicker",
-      "community": 169,
+      "community": 56,
       "norm_label": "additivepicker()"
     },
     {
@@ -8316,7 +8316,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section",
-      "community": 55,
+      "community": 12,
       "norm_label": "instructions-section.tsx"
     },
     {
@@ -8326,7 +8326,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_instructionssectionprops",
-      "community": 55,
+      "community": 35,
       "norm_label": "instructionssectionprops"
     },
     {
@@ -8336,7 +8336,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_instructionfieldidentity",
-      "community": 55,
+      "community": 12,
       "norm_label": "instructionfieldidentity"
     },
     {
@@ -8346,7 +8346,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_instructionrowid",
-      "community": 55,
+      "community": 12,
       "norm_label": "instructionrowid()"
     },
     {
@@ -8356,7 +8356,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_addstepdroptarget",
-      "community": 55,
+      "community": 12,
       "norm_label": "addstepdroptarget()"
     },
     {
@@ -8366,7 +8366,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_groupstepids",
-      "community": 55,
+      "community": 12,
       "norm_label": "groupstepids()"
     },
     {
@@ -8376,7 +8376,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_instructionssection",
-      "community": 55,
+      "community": 12,
       "norm_label": "instructionssection()"
     },
     {
@@ -8386,7 +8386,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_tests_state_test",
-      "community": 55,
+      "community": 12,
       "norm_label": "state.test.ts"
     },
     {
@@ -8396,7 +8396,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_tests_state_test_state",
-      "community": 55,
+      "community": 12,
       "norm_label": "state"
     },
     {
@@ -8406,7 +8406,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_tests_step_card_test",
-      "community": 55,
+      "community": 35,
       "norm_label": "step-card.test.tsx"
     },
     {
@@ -8416,7 +8416,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_tests_step_card_test_stepcardharness",
-      "community": 55,
+      "community": 35,
       "norm_label": "stepcardharness()"
     },
     {
@@ -8426,7 +8426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_section_container",
-      "community": 173,
+      "community": 12,
       "norm_label": "section-container.tsx"
     },
     {
@@ -8436,7 +8436,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_section_container_sectioncontainerprops",
-      "community": 173,
+      "community": 12,
       "norm_label": "sectioncontainerprops"
     },
     {
@@ -8446,7 +8446,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_section_container_sectioncontainer",
-      "community": 173,
+      "community": 12,
       "norm_label": "sectioncontainer()"
     },
     {
@@ -8456,7 +8456,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_state",
-      "community": 55,
+      "community": 12,
       "norm_label": "state.ts"
     },
     {
@@ -8466,7 +8466,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_state_orderstepids",
-      "community": 55,
+      "community": 12,
       "norm_label": "orderstepids()"
     },
     {
@@ -8476,7 +8476,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_state_movesteptodroptarget",
-      "community": 55,
+      "community": 12,
       "norm_label": "movesteptodroptarget()"
     },
     {
@@ -8486,7 +8486,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_state_movesteptostep",
-      "community": 55,
+      "community": 12,
       "norm_label": "movesteptostep()"
     },
     {
@@ -8496,7 +8496,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_state_removestepsection",
-      "community": 55,
+      "community": 12,
       "norm_label": "removestepsection()"
     },
     {
@@ -8506,7 +8506,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_step_card",
-      "community": 55,
+      "community": 35,
       "norm_label": "step-card.tsx"
     },
     {
@@ -8516,7 +8516,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_step_card_stepcardprops",
-      "community": 55,
+      "community": 35,
       "norm_label": "stepcardprops"
     },
     {
@@ -8526,7 +8526,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_step_card_clipboardimage",
-      "community": 55,
+      "community": 35,
       "norm_label": "clipboardimage()"
     },
     {
@@ -8536,7 +8536,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_step_card_stepcard",
-      "community": 55,
+      "community": 35,
       "norm_label": "stepcard()"
     },
     {
@@ -8546,7 +8546,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_types",
-      "community": 55,
+      "community": 12,
       "norm_label": "types.ts"
     },
     {
@@ -8556,7 +8556,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "components_recipe_form_instructions_section_types_instructionsectionstate",
-      "community": 55,
+      "community": 12,
       "norm_label": "instructionsectionstate"
     },
     {
@@ -8606,7 +8606,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_photo_adjust_modal",
-      "community": 55,
+      "community": 27,
       "norm_label": "photo-adjust-modal.tsx"
     },
     {
@@ -8616,7 +8616,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_recipe_form_photo_adjust_modal_previews",
-      "community": 55,
+      "community": 27,
       "norm_label": "previews"
     },
     {
@@ -8626,7 +8626,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_recipe_form_photo_adjust_modal_photoadjustmodalprops",
-      "community": 55,
+      "community": 27,
       "norm_label": "photoadjustmodalprops"
     },
     {
@@ -8636,7 +8636,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "components_recipe_form_photo_adjust_modal_previewimgstyle",
-      "community": 55,
+      "community": 27,
       "norm_label": "previewimgstyle()"
     },
     {
@@ -8646,7 +8646,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "components_recipe_form_photo_adjust_modal_photoadjustmodal",
-      "community": 55,
+      "community": 27,
       "norm_label": "photoadjustmodal()"
     },
     {
@@ -8656,7 +8656,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_schema",
-      "community": 55,
+      "community": 35,
       "norm_label": "schema.ts"
     },
     {
@@ -8666,7 +8666,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_recipe_form_schema_preparationmodifierschema",
-      "community": 55,
+      "community": 35,
       "norm_label": "preparationmodifierschema"
     },
     {
@@ -8676,7 +8676,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "components_recipe_form_schema_recipesectionschema",
-      "community": 55,
+      "community": 35,
       "norm_label": "recipesectionschema"
     },
     {
@@ -8696,7 +8696,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "components_recipe_form_schema_dummyschema",
-      "community": 55,
+      "community": 35,
       "norm_label": "dummyschema"
     },
     {
@@ -8706,7 +8706,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "components_recipe_form_schema_recipeformdata",
-      "community": 55,
+      "community": 35,
       "norm_label": "recipeformdata"
     },
     {
@@ -8716,7 +8716,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "components_recipe_form_schema_recipeoutput",
-      "community": 55,
+      "community": 35,
       "norm_label": "recipeoutput"
     },
     {
@@ -8726,7 +8726,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_form_use_recipe_save",
-      "community": 10,
+      "community": 1,
       "norm_label": "use-recipe-save.ts"
     },
     {
@@ -8746,7 +8746,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "components_recipe_form_use_recipe_save_userecipesave",
-      "community": 55,
+      "community": 1,
       "norm_label": "userecipesave()"
     },
     {
@@ -8886,7 +8886,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipe_list_skeleton_index",
-      "community": 119,
+      "community": 39,
       "norm_label": "index.tsx"
     },
     {
@@ -8896,7 +8896,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "components_recipe_list_skeleton_index_skeletonids",
-      "community": 119,
+      "community": 39,
       "norm_label": "skeletonids"
     },
     {
@@ -8906,7 +8906,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_recipe_list_skeleton_index_recipelistskeleton",
-      "community": 119,
+      "community": 39,
       "norm_label": "recipelistskeleton()"
     },
     {
@@ -9016,7 +9016,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_recipes_page_overlays_index",
-      "community": 38,
+      "community": 36,
       "norm_label": "index.tsx"
     },
     {
@@ -9026,7 +9026,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "components_recipes_page_overlays_index_recipespageoverlaysprops",
-      "community": 38,
+      "community": 36,
       "norm_label": "recipespageoverlaysprops"
     },
     {
@@ -9036,7 +9036,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "components_recipes_page_overlays_index_recipespageoverlays",
-      "community": 38,
+      "community": 36,
       "norm_label": "recipespageoverlays()"
     },
     {
@@ -9046,7 +9046,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_servings_calculator_tests_index_test",
-      "community": 26,
+      "community": 171,
       "norm_label": "index.test.tsx"
     },
     {
@@ -9056,7 +9056,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "components_servings_calculator_tests_index_test_baseingredient",
-      "community": 26,
+      "community": 171,
       "norm_label": "baseingredient()"
     },
     {
@@ -9066,7 +9066,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "components_servings_calculator_tests_index_test_basepantryitem",
-      "community": 26,
+      "community": 171,
       "norm_label": "basepantryitem()"
     },
     {
@@ -9116,7 +9116,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_servings_calculator_ingredient_row",
-      "community": 12,
+      "community": 56,
       "norm_label": "ingredient-row.tsx"
     },
     {
@@ -9126,7 +9126,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "components_servings_calculator_ingredient_row_bullet_color",
-      "community": 12,
+      "community": 56,
       "norm_label": "bullet_color"
     },
     {
@@ -9136,7 +9136,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "components_servings_calculator_ingredient_row_ingredientrowprops",
-      "community": 12,
+      "community": 56,
       "norm_label": "ingredientrowprops"
     },
     {
@@ -9146,7 +9146,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "components_servings_calculator_ingredient_row_ingredientrow",
-      "community": 12,
+      "community": 56,
       "norm_label": "ingredientrow()"
     },
     {
@@ -9156,7 +9156,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_servings_calculator_use_servings_calculator",
-      "community": 26,
+      "community": 171,
       "norm_label": "use-servings-calculator.ts"
     },
     {
@@ -9166,7 +9166,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_servings_calculator_use_servings_calculator_stockstatus",
-      "community": 12,
+      "community": 56,
       "norm_label": "stockstatus"
     },
     {
@@ -9176,7 +9176,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "components_servings_calculator_use_servings_calculator_useservingscalculatorprops",
-      "community": 26,
+      "community": 171,
       "norm_label": "useservingscalculatorprops"
     },
     {
@@ -9216,7 +9216,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_shared_recipe_detail_index",
-      "community": 104,
+      "community": 174,
       "norm_label": "index.tsx"
     },
     {
@@ -9226,7 +9226,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "components_shared_recipe_detail_index_sharedrecipedetailprops",
-      "community": 104,
+      "community": 11,
       "norm_label": "sharedrecipedetailprops"
     },
     {
@@ -9236,7 +9236,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "components_shared_recipe_detail_index_sharedrecipedetail",
-      "community": 104,
+      "community": 174,
       "norm_label": "sharedrecipedetail()"
     },
     {
@@ -9426,7 +9426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_telegram_button_haptics_tests_index_test",
-      "community": 2,
+      "community": 77,
       "norm_label": "index.test.tsx"
     },
     {
@@ -9436,7 +9436,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "components_telegram_button_haptics_tests_index_test_platform",
-      "community": 2,
+      "community": 77,
       "norm_label": "{ platform }"
     },
     {
@@ -9446,7 +9446,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "components_telegram_button_haptics_tests_index_test_pressbutton",
-      "community": 2,
+      "community": 77,
       "norm_label": "pressbutton()"
     },
     {
@@ -9456,7 +9456,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_telegram_button_haptics_index",
-      "community": 2,
+      "community": 77,
       "norm_label": "index.tsx"
     },
     {
@@ -9466,7 +9466,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "components_telegram_button_haptics_index_telegrambuttonhaptics",
-      "community": 2,
+      "community": 77,
       "norm_label": "telegrambuttonhaptics()"
     },
     {
@@ -9476,18 +9476,18 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_telegram_deep_link_tests_index_test",
-      "community": 66,
+      "community": 14,
       "norm_label": "index.test.tsx"
     },
     {
-      "label": "{ launchState, navigateReplace }",
+      "label": "{ launchState, navigateReplace, navigatePush }",
       "file_type": "code",
       "source_file": "components/telegram-deep-link/__tests__/index.test.tsx",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "components_telegram_deep_link_tests_index_test_launchstate_navigatereplace",
-      "community": 66,
-      "norm_label": "{ launchstate, navigatereplace }"
+      "id": "components_telegram_deep_link_tests_index_test_launchstate_navigatereplace_navigatepush",
+      "community": 14,
+      "norm_label": "{ launchstate, navigatereplace, navigatepush }"
     },
     {
       "label": "index.tsx",
@@ -9496,37 +9496,47 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_telegram_deep_link_index",
-      "community": 66,
+      "community": 14,
       "norm_label": "index.tsx"
+    },
+    {
+      "label": "recipeIdFromStartParam()",
+      "file_type": "code",
+      "source_file": "components/telegram-deep-link/index.tsx",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "components_telegram_deep_link_index_recipeidfromstartparam",
+      "community": 14,
+      "norm_label": "recipeidfromstartparam()"
     },
     {
       "label": "resolveStartParamHref()",
       "file_type": "code",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L19",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "components_telegram_deep_link_index_resolvestartparamhref",
-      "community": 66,
+      "community": 14,
       "norm_label": "resolvestartparamhref()"
     },
     {
       "label": "currentLocale()",
       "file_type": "code",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L34",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "components_telegram_deep_link_index_currentlocale",
-      "community": 66,
+      "community": 14,
       "norm_label": "currentlocale()"
     },
     {
       "label": "TelegramDeepLink()",
       "file_type": "code",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L46",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "components_telegram_deep_link_index_telegramdeeplink",
-      "community": 66,
+      "community": 14,
       "norm_label": "telegramdeeplink()"
     },
     {
@@ -10716,7 +10726,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "db_index",
-      "community": 6,
+      "community": 21,
       "norm_label": "index.ts"
     },
     {
@@ -10726,7 +10736,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "db_index_client",
-      "community": 6,
+      "community": 21,
       "norm_label": "client"
     },
     {
@@ -10736,7 +10746,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "db_index_db",
-      "community": 19,
+      "community": 21,
       "norm_label": "db"
     },
     {
@@ -10796,7 +10806,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "db_schema_auth_user",
-      "community": 162,
+      "community": 165,
       "norm_label": "user"
     },
     {
@@ -10996,7 +11006,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "db_schema_push_subscriptions",
-      "community": 21,
+      "community": 49,
       "norm_label": "push-subscriptions.ts"
     },
     {
@@ -11006,7 +11016,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "db_schema_push_subscriptions_pushsubscriptions",
-      "community": 21,
+      "community": 49,
       "norm_label": "pushsubscriptions"
     },
     {
@@ -11016,7 +11026,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "db_schema_push_subscriptions_pushsubscriptionsrelations",
-      "community": 21,
+      "community": 49,
       "norm_label": "pushsubscriptionsrelations"
     },
     {
@@ -11186,7 +11196,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_tests_use_recipe_filter_test",
-      "community": 60,
+      "community": 57,
       "norm_label": "use-recipe-filter.test.ts"
     },
     {
@@ -11196,7 +11206,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "hooks_tests_use_recipe_filter_test_mockrecipes",
-      "community": 60,
+      "community": 57,
       "norm_label": "mockrecipes"
     },
     {
@@ -11406,7 +11416,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_parse_job_watcher",
-      "community": 0,
+      "community": 1,
       "norm_label": "use-parse-job-watcher.ts"
     },
     {
@@ -11416,7 +11426,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "hooks_use_parse_job_watcher_useparsejobwatcher",
-      "community": 0,
+      "community": 1,
       "norm_label": "useparsejobwatcher()"
     },
     {
@@ -11526,7 +11536,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "hooks_use_recipes_page_state_filterstate",
-      "community": 38,
+      "community": 36,
       "norm_label": "filterstate"
     },
     {
@@ -11536,7 +11546,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "hooks_use_recipes_page_state_newcollectionmodalstate",
-      "community": 38,
+      "community": 36,
       "norm_label": "newcollectionmodalstate"
     },
     {
@@ -11546,7 +11556,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "hooks_use_recipes_page_state_editcollectionmodalstate",
-      "community": 38,
+      "community": 36,
       "norm_label": "editcollectionmodalstate"
     },
     {
@@ -11576,7 +11586,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login",
-      "community": 27,
+      "community": 171,
       "norm_label": "use-sync-on-login.ts"
     },
     {
@@ -11586,7 +11596,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login_syncparsehistory",
-      "community": 27,
+      "community": 171,
       "norm_label": "syncparsehistory()"
     },
     {
@@ -11596,7 +11606,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login_syncpantry",
-      "community": 27,
+      "community": 171,
       "norm_label": "syncpantry()"
     },
     {
@@ -11606,7 +11616,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login_syncingredients",
-      "community": 27,
+      "community": 171,
       "norm_label": "syncingredients()"
     },
     {
@@ -11666,7 +11676,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login_parsetimestamps",
-      "community": 27,
+      "community": 171,
       "norm_label": "parsetimestamps()"
     },
     {
@@ -11676,7 +11686,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "hooks_use_sync_on_login_ismaintenanceblocked",
-      "community": 27,
+      "community": 171,
       "norm_label": "ismaintenanceblocked()"
     },
     {
@@ -11756,7 +11766,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "instrumentation",
-      "community": 37,
+      "community": 66,
       "norm_label": "instrumentation.ts"
     },
     {
@@ -11766,7 +11776,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "instrumentation_shouldprewarmlocalembed",
-      "community": 37,
+      "community": 66,
       "norm_label": "shouldprewarmlocalembed()"
     },
     {
@@ -11776,7 +11786,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "instrumentation_register",
-      "community": 37,
+      "community": 66,
       "norm_label": "register()"
     },
     {
@@ -12016,7 +12026,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_tests_rate_limit_test",
-      "community": 71,
+      "community": 19,
       "norm_label": "rate-limit.test.ts"
     },
     {
@@ -12026,7 +12036,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_tests_redis_test",
-      "community": 4,
+      "community": 43,
       "norm_label": "redis.test.ts"
     },
     {
@@ -12036,7 +12046,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_tests_redis_test_redisconstructor_redisget_redison",
-      "community": 4,
+      "community": 43,
       "norm_label": "{ redisconstructor, redisget, redison }"
     },
     {
@@ -12046,7 +12056,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_tests_redis_test_constructor",
-      "community": 4,
+      "community": 43,
       "norm_label": "constructor()"
     },
     {
@@ -12136,7 +12146,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_tests_video_url_test",
-      "community": 23,
+      "community": 38,
       "norm_label": "video-url.test.ts"
     },
     {
@@ -12276,7 +12286,7 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "lib_ai_callaiforingredient",
-      "community": 7,
+      "community": 30,
       "norm_label": "callaiforingredient()"
     },
     {
@@ -12286,7 +12296,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "lib_ai_callaiforrecipephoto",
-      "community": 30,
+      "community": 169,
       "norm_label": "callaiforrecipephoto()"
     },
     {
@@ -12316,7 +12326,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "lib_api_errors_capturewithcontext",
-      "community": 162,
+      "community": 46,
       "norm_label": "capturewithcontext()"
     },
     {
@@ -12346,7 +12356,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_api_limits_parse_rate_limit",
-      "community": 71,
+      "community": 19,
       "norm_label": "parse_rate_limit"
     },
     {
@@ -12356,7 +12366,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_api_limits_embed_rate_limit",
-      "community": 71,
+      "community": 19,
       "norm_label": "embed_rate_limit"
     },
     {
@@ -12376,7 +12386,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "lib_api_limits_recipe_sync_errors",
-      "community": 162,
+      "community": 6,
       "norm_label": "recipe_sync_errors"
     },
     {
@@ -12386,7 +12396,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_api_tests_api_fetch_test",
-      "community": 27,
+      "community": 67,
       "norm_label": "api-fetch.test.ts"
     },
     {
@@ -12396,7 +12406,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_api_tests_api_fetch_test_maintenanceresponse",
-      "community": 27,
+      "community": 67,
       "norm_label": "maintenanceresponse()"
     },
     {
@@ -12406,7 +12416,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "lib_api_tests_api_fetch_test_capture",
-      "community": 27,
+      "community": 67,
       "norm_label": "capture()"
     },
     {
@@ -12416,7 +12426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_api_api_fetch",
-      "community": 27,
+      "community": 67,
       "norm_label": "api-fetch.ts"
     },
     {
@@ -12426,7 +12436,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_api_api_fetch_maintenanceerror",
-      "community": 27,
+      "community": 67,
       "norm_label": "maintenanceerror"
     },
     {
@@ -12436,7 +12446,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_api_api_fetch_maintenanceerror_constructor",
-      "community": 27,
+      "community": 67,
       "norm_label": ".constructor()"
     },
     {
@@ -12446,7 +12456,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_api_api_fetch_ismaintenanceerror",
-      "community": 27,
+      "community": 16,
       "norm_label": "ismaintenanceerror()"
     },
     {
@@ -12456,7 +12466,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_api_api_fetch_maintenancebody",
-      "community": 27,
+      "community": 67,
       "norm_label": "maintenancebody"
     },
     {
@@ -12466,7 +12476,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "lib_api_api_fetch_maintenanceerrorfromresponse",
-      "community": 27,
+      "community": 67,
       "norm_label": "maintenanceerrorfromresponse()"
     },
     {
@@ -12476,7 +12486,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "lib_api_api_fetch_announcemaintenance",
-      "community": 27,
+      "community": 67,
       "norm_label": "announcemaintenance()"
     },
     {
@@ -12486,7 +12496,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "lib_api_api_fetch_announceifmaintenance",
-      "community": 27,
+      "community": 67,
       "norm_label": "announceifmaintenance()"
     },
     {
@@ -12496,7 +12506,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "lib_api_api_fetch_apifetch",
-      "community": 27,
+      "community": 67,
       "norm_label": "apifetch()"
     },
     {
@@ -12506,7 +12516,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_auth_tests_auth_error_report_test",
-      "community": 4,
+      "community": 159,
       "norm_label": "auth-error-report.test.ts"
     },
     {
@@ -12616,7 +12626,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_auth_tests_telegram_user_test",
-      "community": 4,
+      "community": 21,
       "norm_label": "telegram-user.test.ts"
     },
     {
@@ -12646,7 +12656,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_auth_auth_error_report",
-      "community": 4,
+      "community": 159,
       "norm_label": "auth-error-report.ts"
     },
     {
@@ -12656,7 +12666,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_auth_auth_error_report_expected_client_error_statuses",
-      "community": 4,
+      "community": 159,
       "norm_label": "expected_client_error_statuses"
     },
     {
@@ -12666,7 +12676,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "lib_auth_auth_error_report_shouldreportautherror",
-      "community": 4,
+      "community": 159,
       "norm_label": "shouldreportautherror()"
     },
     {
@@ -13206,7 +13216,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_auth_session_state_setissignedin",
-      "community": 27,
+      "community": 171,
       "norm_label": "setissignedin()"
     },
     {
@@ -13226,7 +13236,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_auth_telegram_user",
-      "community": 4,
+      "community": 21,
       "norm_label": "telegram-user.ts"
     },
     {
@@ -13236,7 +13246,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "lib_auth_telegram_user_miniappdatatouser",
-      "community": 4,
+      "community": 21,
       "norm_label": "miniappdatatouser()"
     },
     {
@@ -13266,7 +13276,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "lib_categories_recipecategory",
-      "community": 58,
+      "community": 1,
       "norm_label": "recipecategory"
     },
     {
@@ -13436,7 +13446,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_tests_pantry_test",
-      "community": 26,
+      "community": 171,
       "norm_label": "pantry.test.ts"
     },
     {
@@ -13446,7 +13456,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_db_tests_pantry_test_fetchmock",
-      "community": 26,
+      "community": 171,
       "norm_label": "fetchmock"
     },
     {
@@ -13456,7 +13466,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "lib_db_tests_pantry_test_mockexistingpantryrow",
-      "community": 26,
+      "community": 171,
       "norm_label": "mockexistingpantryrow()"
     },
     {
@@ -13566,7 +13576,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_tests_reconcile_vocab_test",
-      "community": 27,
+      "community": 171,
       "norm_label": "reconcile-vocab.test.ts"
     },
     {
@@ -13576,7 +13586,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_db_tests_reconcile_vocab_test_mockclear_mocktoarray_mockpullvocab_mocknormalize",
-      "community": 27,
+      "community": 171,
       "norm_label": "{ mockclear, mocktoarray, mockpullvocab, mocknormalize }"
     },
     {
@@ -13616,7 +13626,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_tests_save_parsed_recipe_test",
-      "community": 10,
+      "community": 1,
       "norm_label": "save-parsed-recipe.test.ts"
     },
     {
@@ -13626,7 +13636,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "lib_db_tests_save_parsed_recipe_test_baseentry",
-      "community": 10,
+      "community": 1,
       "norm_label": "baseentry"
     },
     {
@@ -13706,7 +13716,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_tests_sync_vocab_test",
-      "community": 27,
+      "community": 171,
       "norm_label": "sync-vocab.test.ts"
     },
     {
@@ -13716,7 +13726,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_db_tests_sync_vocab_test_mockbulkput",
-      "community": 27,
+      "community": 171,
       "norm_label": "{ mockbulkput }"
     },
     {
@@ -13726,7 +13736,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "lib_db_tests_sync_vocab_test_mockfetchonce",
-      "community": 27,
+      "community": 171,
       "norm_label": "mockfetchonce()"
     },
     {
@@ -13736,7 +13746,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_tests_test_utils",
-      "community": 10,
+      "community": 47,
       "norm_label": "test-utils.ts"
     },
     {
@@ -13746,7 +13756,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_db_tests_test_utils_fakeindexeddb",
-      "community": 10,
+      "community": 47,
       "norm_label": "fakeindexeddb"
     },
     {
@@ -13816,7 +13826,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_db",
-      "community": 16,
+      "community": 171,
       "norm_label": "db.ts"
     },
     {
@@ -13826,7 +13836,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_db_db_recipedatabase",
-      "community": 16,
+      "community": 26,
       "norm_label": "recipedatabase"
     },
     {
@@ -13836,7 +13846,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_db_db_recipedatabase_constructor",
-      "community": 16,
+      "community": 26,
       "norm_label": ".constructor()"
     },
     {
@@ -14026,7 +14036,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_pantry",
-      "community": 26,
+      "community": 171,
       "norm_label": "pantry.ts"
     },
     {
@@ -14036,7 +14046,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_db_pantry_getpantryitems",
-      "community": 26,
+      "community": 171,
       "norm_label": "getpantryitems()"
     },
     {
@@ -14046,7 +14056,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_db_pantry_syncpantryupsert",
-      "community": 26,
+      "community": 171,
       "norm_label": "syncpantryupsert()"
     },
     {
@@ -14056,7 +14066,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "lib_db_pantry_addpantryitem",
-      "community": 26,
+      "community": 171,
       "norm_label": "addpantryitem()"
     },
     {
@@ -14076,7 +14086,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "lib_db_pantry_togglepantryitem",
-      "community": 26,
+      "community": 171,
       "norm_label": "togglepantryitem()"
     },
     {
@@ -14086,7 +14096,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "lib_db_pantry_clearpantry",
-      "community": 27,
+      "community": 171,
       "norm_label": "clearpantry()"
     },
     {
@@ -14096,7 +14106,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "lib_db_pantry_bulkputpantry",
-      "community": 27,
+      "community": 171,
       "norm_label": "bulkputpantry()"
     },
     {
@@ -14166,7 +14176,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_parsed_recipes",
-      "community": 0,
+      "community": 1,
       "norm_label": "parsed-recipes.ts"
     },
     {
@@ -14176,7 +14186,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_db_parsed_recipes_createparsedrecipeentry",
-      "community": 0,
+      "community": 1,
       "norm_label": "createparsedrecipeentry()"
     },
     {
@@ -14186,7 +14196,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_db_parsed_recipes_addparsedreciperesult",
-      "community": 0,
+      "community": 1,
       "norm_label": "addparsedreciperesult()"
     },
     {
@@ -14216,7 +14226,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_pull_own_recipe",
-      "community": 171,
+      "community": 174,
       "norm_label": "pull-own-recipe.ts"
     },
     {
@@ -14226,7 +14236,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_db_pull_own_recipe_pullownrecipe",
-      "community": 171,
+      "community": 174,
       "norm_label": "pullownrecipe()"
     },
     {
@@ -14296,7 +14306,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_db_recipes_createrecipe",
-      "community": 10,
+      "community": 1,
       "norm_label": "createrecipe()"
     },
     {
@@ -14396,7 +14406,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_reconcile_vocab",
-      "community": 27,
+      "community": 171,
       "norm_label": "reconcile-vocab.ts"
     },
     {
@@ -14406,7 +14416,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_db_reconcile_vocab_reconcilevocab",
-      "community": 27,
+      "community": 171,
       "norm_label": "reconcilevocab()"
     },
     {
@@ -14416,7 +14426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_renormalize_recipes",
-      "community": 43,
+      "community": 171,
       "norm_label": "renormalize-recipes.ts"
     },
     {
@@ -14426,7 +14436,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_db_renormalize_recipes_renormalizeoutdatedrecipes",
-      "community": 43,
+      "community": 171,
       "norm_label": "renormalizeoutdatedrecipes()"
     },
     {
@@ -14436,7 +14446,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_save_parsed_recipe",
-      "community": 10,
+      "community": 1,
       "norm_label": "save-parsed-recipe.ts"
     },
     {
@@ -14446,7 +14456,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "lib_db_save_parsed_recipe_saveparsedrecipe",
-      "community": 10,
+      "community": 1,
       "norm_label": "saveparsedrecipe()"
     },
     {
@@ -14516,7 +14526,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_db_schema_parsejobstatus",
-      "community": 26,
+      "community": 19,
       "norm_label": "parsejobstatus"
     },
     {
@@ -14546,7 +14556,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "lib_db_schema_collection",
-      "community": 38,
+      "community": 60,
       "norm_label": "collection"
     },
     {
@@ -14606,7 +14616,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "lib_db_schema_recipe",
-      "community": 60,
+      "community": 10,
       "norm_label": "recipe"
     },
     {
@@ -14626,7 +14636,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "lib_db_schema_parsedrecipe",
-      "community": 23,
+      "community": 1,
       "norm_label": "parsedrecipe"
     },
     {
@@ -14696,7 +14706,7 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "lib_db_schema_syncnotification",
-      "community": 1,
+      "community": 3,
       "norm_label": "syncnotification"
     },
     {
@@ -14846,7 +14856,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_db_sync_vocab",
-      "community": 27,
+      "community": 171,
       "norm_label": "sync-vocab.ts"
     },
     {
@@ -14856,7 +14866,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_db_sync_vocab_deltasince",
-      "community": 27,
+      "community": 171,
       "norm_label": "deltasince()"
     },
     {
@@ -14866,7 +14876,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "lib_db_sync_vocab_pullvocab",
-      "community": 27,
+      "community": 171,
       "norm_label": "pullvocab()"
     },
     {
@@ -14956,7 +14966,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_embed_tests_index_test",
-      "community": 45,
+      "community": 108,
       "norm_label": "index.test.ts"
     },
     {
@@ -15046,7 +15056,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_embed_index",
-      "community": 45,
+      "community": 108,
       "norm_label": "index.ts"
     },
     {
@@ -15056,7 +15066,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_embed_index_lazylocalprovider",
-      "community": 45,
+      "community": 108,
       "norm_label": "lazylocalprovider"
     },
     {
@@ -15066,7 +15076,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_embed_index_parseproviders",
-      "community": 45,
+      "community": 108,
       "norm_label": "parseproviders()"
     },
     {
@@ -15076,7 +15086,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "lib_embed_index_configuredproviders",
-      "community": 45,
+      "community": 108,
       "norm_label": "configuredproviders()"
     },
     {
@@ -15226,7 +15236,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_embed_types_embedunavailable",
-      "community": 45,
+      "community": 71,
       "norm_label": "embedunavailable"
     },
     {
@@ -15236,7 +15246,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "lib_embed_types_embedunavailable_constructor",
-      "community": 45,
+      "community": 71,
       "norm_label": ".constructor()"
     },
     {
@@ -15266,7 +15276,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_hooks_tests_use_push_subscription_test",
-      "community": 54,
+      "community": 112,
       "norm_label": "use-push-subscription.test.ts"
     },
     {
@@ -15276,7 +15286,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_hooks_tests_use_push_subscription_test_fakesubscription",
-      "community": 54,
+      "community": 112,
       "norm_label": "fakesubscription"
     },
     {
@@ -15286,7 +15296,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_hooks_tests_use_push_subscription_test_pushenvoptions",
-      "community": 54,
+      "community": 112,
       "norm_label": "pushenvoptions"
     },
     {
@@ -15296,7 +15306,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "lib_hooks_tests_use_push_subscription_test_setuppushenv",
-      "community": 54,
+      "community": 112,
       "norm_label": "setuppushenv()"
     },
     {
@@ -15306,7 +15316,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "lib_hooks_tests_use_push_subscription_test_maintenanceresponse",
-      "community": 54,
+      "community": 112,
       "norm_label": "maintenanceresponse()"
     },
     {
@@ -15456,7 +15466,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_hooks_use_normalize_on_startup",
-      "community": 35,
+      "community": 171,
       "norm_label": "use-normalize-on-startup.ts"
     },
     {
@@ -15466,7 +15476,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "lib_hooks_use_normalize_on_startup_usenormalizeonstartup",
-      "community": 35,
+      "community": 118,
       "norm_label": "usenormalizeonstartup()"
     },
     {
@@ -15476,7 +15486,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_hooks_use_push_subscription",
-      "community": 54,
+      "community": 67,
       "norm_label": "use-push-subscription.ts"
     },
     {
@@ -15486,7 +15496,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_hooks_use_push_subscription_urlbase64touint8array",
-      "community": 54,
+      "community": 67,
       "norm_label": "urlbase64touint8array()"
     },
     {
@@ -15496,7 +15506,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_hooks_use_push_subscription_pushpermissionstate",
-      "community": 54,
+      "community": 67,
       "norm_label": "pushpermissionstate"
     },
     {
@@ -15506,7 +15516,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lib_hooks_use_push_subscription_usepushsubscriptionresult",
-      "community": 54,
+      "community": 67,
       "norm_label": "usepushsubscriptionresult"
     },
     {
@@ -15516,7 +15526,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "lib_hooks_use_push_subscription_haspushapis",
-      "community": 54,
+      "community": 67,
       "norm_label": "haspushapis()"
     },
     {
@@ -15626,7 +15636,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_hooks_use_telemetry_identity_usetelemetryidentity",
-      "community": 35,
+      "community": 24,
       "norm_label": "usetelemetryidentity()"
     },
     {
@@ -15666,7 +15676,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "lib_hooks_use_url_parse_useurlparse",
-      "community": 51,
+      "community": 174,
       "norm_label": "useurlparse()"
     },
     {
@@ -15676,7 +15686,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_hooks_use_vocab_sync",
-      "community": 35,
+      "community": 171,
       "norm_label": "use-vocab-sync.ts"
     },
     {
@@ -15686,7 +15696,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_hooks_use_vocab_sync_usevocabsync",
-      "community": 35,
+      "community": 118,
       "norm_label": "usevocabsync()"
     },
     {
@@ -15736,7 +15746,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_logger",
-      "community": 17,
+      "community": 0,
       "norm_label": "logger.ts"
     },
     {
@@ -15746,7 +15756,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_logger_logargs",
-      "community": 17,
+      "community": 0,
       "norm_label": "logargs"
     },
     {
@@ -15756,7 +15766,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_logger_logger",
-      "community": 17,
+      "community": 0,
       "norm_label": "logger"
     },
     {
@@ -15766,7 +15776,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_maintenance_constants",
-      "community": 27,
+      "community": 67,
       "norm_label": "maintenance-constants.ts"
     },
     {
@@ -16046,7 +16056,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "lib_parse_job_storage_getpendinguploadtoken",
-      "community": 0,
+      "community": 1,
       "norm_label": "getpendinguploadtoken()"
     },
     {
@@ -16056,7 +16066,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "lib_parse_job_storage_clearpendinguploadtoken",
-      "community": 10,
+      "community": 0,
       "norm_label": "clearpendinguploadtoken()"
     },
     {
@@ -16076,7 +16086,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_enrich_ingredient_test",
-      "community": 171,
+      "community": 43,
       "norm_label": "enrich-ingredient.test.ts"
     },
     {
@@ -16086,7 +16096,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_enrich_ingredient_test_mockissignedin_mockpantrymodify_mockrecipestoarray_mockrecipesupdate_mockingredientsdelete_mockingredientsupdate_mocksyncupdate",
-      "community": 171,
+      "community": 43,
       "norm_label": "{\n  mockissignedin,\n  mockpantrymodify,\n  mockrecipestoarray,\n  mockrecipesupdate,\n  mockingredientsdelete,\n  mockingredientsupdate,\n  mocksyncupdate,\n}"
     },
     {
@@ -16096,7 +16106,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_enrich_ingredient_test_mockfetch",
-      "community": 171,
+      "community": 43,
       "norm_label": "mockfetch"
     },
     {
@@ -16106,7 +16116,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_friendly_parse_error_test",
-      "community": 49,
+      "community": 16,
       "norm_label": "friendly-parse-error.test.ts"
     },
     {
@@ -16116,7 +16126,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_index_test",
-      "community": 23,
+      "community": 38,
       "norm_label": "index.test.ts"
     },
     {
@@ -16126,7 +16136,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_index_test_mockrecipe",
-      "community": 23,
+      "community": 38,
       "norm_label": "mockrecipe"
     },
     {
@@ -16136,7 +16146,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_modifiers_test",
-      "community": 169,
+      "community": 56,
       "norm_label": "modifiers.test.ts"
     },
     {
@@ -16146,7 +16156,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_normalize_ingredients_test",
-      "community": 171,
+      "community": 43,
       "norm_label": "normalize-ingredients.test.ts"
     },
     {
@@ -16156,7 +16166,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_normalize_ingredients_test_mockfilterresult_mockdbingredientsfilter_mockdbingredientsput_mockdbrecipesupdate_mocksyncupdate_mockenrichingredient_mocktrackevent",
-      "community": 171,
+      "community": 43,
       "norm_label": "{\n  mockfilterresult,\n  mockdbingredientsfilter,\n  mockdbingredientsput,\n  mockdbrecipesupdate,\n  mocksyncupdate,\n  mockenrichingredient,\n  mocktrackevent,\n}"
     },
     {
@@ -16166,7 +16176,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_normalize_ingredients_test_garlic",
-      "community": 171,
+      "community": 43,
       "norm_label": "garlic"
     },
     {
@@ -16176,7 +16186,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_normalize_ingredients_test_onion",
-      "community": 171,
+      "community": 43,
       "norm_label": "onion"
     },
     {
@@ -16186,7 +16196,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_normalize_url_test",
-      "community": 19,
+      "community": 46,
       "norm_label": "normalize-url.test.ts"
     },
     {
@@ -16196,7 +16206,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_parse_history_entry_test",
-      "community": 49,
+      "community": 16,
       "norm_label": "parse-history-entry.test.ts"
     },
     {
@@ -16226,7 +16236,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_recipe_result_test",
-      "community": 30,
+      "community": 24,
       "norm_label": "recipe-result.test.ts"
     },
     {
@@ -16236,7 +16246,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_recipe_result_test_completerecipe",
-      "community": 30,
+      "community": 24,
       "norm_label": "completerecipe"
     },
     {
@@ -16246,7 +16256,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_save_parsed_recipe_server_test",
-      "community": 11,
+      "community": 19,
       "norm_label": "save-parsed-recipe-server.test.ts"
     },
     {
@@ -16256,7 +16266,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_save_parsed_recipe_server_test_values",
-      "community": 11,
+      "community": 19,
       "norm_label": "values"
     },
     {
@@ -16266,7 +16276,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_save_parsed_recipe_server_test_parsed",
-      "community": 11,
+      "community": 19,
       "norm_label": "parsed"
     },
     {
@@ -16316,7 +16326,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_vocab_match_test",
-      "community": 171,
+      "community": 43,
       "norm_label": "vocab-match.test.ts"
     },
     {
@@ -16326,7 +16336,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_vocab_match_test_mocktoarray",
-      "community": 171,
+      "community": 43,
       "norm_label": "{ mocktoarray }"
     },
     {
@@ -16336,7 +16346,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_parse_recipe_tests_vocab_match_test_makeentry",
-      "community": 171,
+      "community": 43,
       "norm_label": "makeentry()"
     },
     {
@@ -16416,7 +16426,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_friendly_parse_error",
-      "community": 49,
+      "community": 16,
       "norm_label": "friendly-parse-error.ts"
     },
     {
@@ -16426,7 +16436,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "lib_parse_recipe_friendly_parse_error_parse_error_messages",
-      "community": 49,
+      "community": 16,
       "norm_label": "parse_error_messages"
     },
     {
@@ -16436,7 +16446,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "lib_parse_recipe_friendly_parse_error_permanent_messages",
-      "community": 49,
+      "community": 16,
       "norm_label": "permanent_messages"
     },
     {
@@ -16446,7 +16456,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "lib_parse_recipe_friendly_parse_error_friendlyparseerror",
-      "community": 49,
+      "community": 16,
       "norm_label": "friendlyparseerror()"
     },
     {
@@ -16526,7 +16536,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_index",
-      "community": 23,
+      "community": 38,
       "norm_label": "index.ts"
     },
     {
@@ -16536,7 +16546,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "lib_parse_recipe_index_parserecipefromurl",
-      "community": 23,
+      "community": 38,
       "norm_label": "parserecipefromurl()"
     },
     {
@@ -16546,7 +16556,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_modifiers",
-      "community": 169,
+      "community": 56,
       "norm_label": "modifiers.ts"
     },
     {
@@ -16556,7 +16566,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "lib_parse_recipe_modifiers_preparation_modifiers",
-      "community": 169,
+      "community": 56,
       "norm_label": "preparation_modifiers"
     },
     {
@@ -16566,7 +16576,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "lib_parse_recipe_modifiers_preparationmodifier",
-      "community": 169,
+      "community": 56,
       "norm_label": "preparationmodifier"
     },
     {
@@ -16586,7 +16596,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "lib_parse_recipe_modifiers_modifierlabel",
-      "community": 169,
+      "community": 56,
       "norm_label": "modifierlabel()"
     },
     {
@@ -16646,7 +16656,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "lib_parse_recipe_normalize_ingredients_normalizerecipeingredients",
-      "community": 10,
+      "community": 1,
       "norm_label": "normalizerecipeingredients()"
     },
     {
@@ -16666,7 +16676,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_normalize_url",
-      "community": 19,
+      "community": 46,
       "norm_label": "normalize-url.ts"
     },
     {
@@ -16676,7 +16686,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "lib_parse_recipe_normalize_url_tracking_params",
-      "community": 19,
+      "community": 46,
       "norm_label": "tracking_params"
     },
     {
@@ -16686,7 +16696,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "lib_parse_recipe_normalize_url_istrackingparam",
-      "community": 19,
+      "community": 46,
       "norm_label": "istrackingparam()"
     },
     {
@@ -16696,7 +16706,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "lib_parse_recipe_normalize_url_normalizesourceurl",
-      "community": 19,
+      "community": 46,
       "norm_label": "normalizesourceurl()"
     },
     {
@@ -16706,7 +16716,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry",
-      "community": 49,
+      "community": 16,
       "norm_label": "parse-history-entry.ts"
     },
     {
@@ -16716,7 +16726,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_hostlabel",
-      "community": 49,
+      "community": 16,
       "norm_label": "hostlabel()"
     },
     {
@@ -16726,7 +16736,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_doneparsehistoryentry",
-      "community": 49,
+      "community": 16,
       "norm_label": "doneparsehistoryentry()"
     },
     {
@@ -16736,7 +16746,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_failedparsehistoryentry",
-      "community": 49,
+      "community": 16,
       "norm_label": "failedparsehistoryentry()"
     },
     {
@@ -16746,7 +16756,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_donephotohistoryentry",
-      "community": 49,
+      "community": 16,
       "norm_label": "donephotohistoryentry()"
     },
     {
@@ -16756,7 +16766,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_failedphotohistoryentry",
-      "community": 49,
+      "community": 16,
       "norm_label": "failedphotohistoryentry()"
     },
     {
@@ -16766,7 +16776,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_serverparsejob",
-      "community": 49,
+      "community": 16,
       "norm_label": "serverparsejob"
     },
     {
@@ -16776,7 +16786,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "lib_parse_recipe_parse_history_entry_parsehistoryentryfromserverjob",
-      "community": 49,
+      "community": 16,
       "norm_label": "parsehistoryentryfromserverjob()"
     },
     {
@@ -16846,7 +16856,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_photo",
-      "community": 27,
+      "community": 67,
       "norm_label": "photo.ts"
     },
     {
@@ -16856,7 +16866,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_parse_recipe_photo_compressimage",
-      "community": 27,
+      "community": 67,
       "norm_label": "compressimage()"
     },
     {
@@ -16866,7 +16876,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "lib_parse_recipe_photo_parserecipefromphoto",
-      "community": 27,
+      "community": 67,
       "norm_label": "parserecipefromphoto()"
     },
     {
@@ -16926,7 +16936,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result",
-      "community": 30,
+      "community": 24,
       "norm_label": "recipe-result.ts"
     },
     {
@@ -16936,7 +16946,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_notreciperesult",
-      "community": 30,
+      "community": 24,
       "norm_label": "notreciperesult"
     },
     {
@@ -16946,7 +16956,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_recipeextractionresult",
-      "community": 30,
+      "community": 24,
       "norm_label": "recipeextractionresult"
     },
     {
@@ -16956,7 +16966,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_recipesource",
-      "community": 30,
+      "community": 24,
       "norm_label": "recipesource"
     },
     {
@@ -16966,7 +16976,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_incompletereason",
-      "community": 30,
+      "community": 24,
       "norm_label": "incompletereason"
     },
     {
@@ -16976,7 +16986,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_incompletecontext",
-      "community": 30,
+      "community": 24,
       "norm_label": "incompletecontext"
     },
     {
@@ -16986,7 +16996,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_rejectincomplete",
-      "community": 30,
+      "community": 24,
       "norm_label": "rejectincomplete()"
     },
     {
@@ -16996,7 +17006,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "lib_parse_recipe_recipe_result_requirecompleterecipe",
-      "community": 30,
+      "community": 24,
       "norm_label": "requirecompleterecipe()"
     },
     {
@@ -17006,7 +17016,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_save_parsed_recipe_server",
-      "community": 11,
+      "community": 19,
       "norm_label": "save-parsed-recipe-server.ts"
     },
     {
@@ -17016,7 +17026,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "lib_parse_recipe_save_parsed_recipe_server_saveparsedrecipeforuserparams",
-      "community": 23,
+      "community": 19,
       "norm_label": "saveparsedrecipeforuserparams"
     },
     {
@@ -17026,7 +17036,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "lib_parse_recipe_save_parsed_recipe_server_saveparsedrecipeforuser",
-      "community": 11,
+      "community": 19,
       "norm_label": "saveparsedrecipeforuser()"
     },
     {
@@ -17036,7 +17046,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_parse_recipe_save_photo_result",
-      "community": 10,
+      "community": 1,
       "norm_label": "save-photo-result.ts"
     },
     {
@@ -17046,7 +17056,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "lib_parse_recipe_save_photo_result_savephotoparseresult",
-      "community": 10,
+      "community": 1,
       "norm_label": "savephotoparseresult()"
     },
     {
@@ -17196,7 +17206,7 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "lib_parse_recipe_video_parsevideorecipe",
-      "community": 23,
+      "community": 38,
       "norm_label": "parsevideorecipe()"
     },
     {
@@ -17426,7 +17436,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_platform_index_useplatform",
-      "community": 2,
+      "community": 77,
       "norm_label": "useplatform()"
     },
     {
@@ -17436,7 +17446,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "lib_platform_index_usehaptics",
-      "community": 2,
+      "community": 1,
       "norm_label": "usehaptics()"
     },
     {
@@ -17446,7 +17456,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "lib_platform_index_usefeature",
-      "community": 2,
+      "community": 54,
       "norm_label": "usefeature()"
     },
     {
@@ -17456,7 +17466,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "lib_platform_index_capability",
-      "community": 2,
+      "community": 54,
       "norm_label": "capability()"
     },
     {
@@ -17906,7 +17916,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_public_recipes_types",
-      "community": 104,
+      "community": 11,
       "norm_label": "types.ts"
     },
     {
@@ -17916,7 +17926,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_public_recipes_types_publicrecipeowner",
-      "community": 104,
+      "community": 11,
       "norm_label": "publicrecipeowner"
     },
     {
@@ -17926,7 +17936,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "lib_public_recipes_types_publicrecipe",
-      "community": 104,
+      "community": 11,
       "norm_label": "publicrecipe"
     },
     {
@@ -17936,7 +17946,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_public_recipes_visibility_client",
-      "community": 27,
+      "community": 67,
       "norm_label": "visibility-client.ts"
     },
     {
@@ -17946,7 +17956,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_public_recipes_visibility_client_setrecipevisibility",
-      "community": 27,
+      "community": 67,
       "norm_label": "setrecipevisibility()"
     },
     {
@@ -17986,7 +17996,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_rate_limit",
-      "community": 71,
+      "community": 19,
       "norm_label": "rate-limit.ts"
     },
     {
@@ -17996,7 +18006,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_rate_limit_ratelimitresult",
-      "community": 71,
+      "community": 19,
       "norm_label": "ratelimitresult"
     },
     {
@@ -18006,7 +18016,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "lib_rate_limit_ratelimit",
-      "community": 71,
+      "community": 19,
       "norm_label": "ratelimit()"
     },
     {
@@ -18016,7 +18026,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "lib_rate_limit_clientkey",
-      "community": 71,
+      "community": 19,
       "norm_label": "clientkey()"
     },
     {
@@ -18026,7 +18036,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "lib_rate_limit_enforceparseratelimit",
-      "community": 71,
+      "community": 19,
       "norm_label": "enforceparseratelimit()"
     },
     {
@@ -18036,7 +18046,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "lib_rate_limit_enforceembedratelimit",
-      "community": 71,
+      "community": 19,
       "norm_label": "enforceembedratelimit()"
     },
     {
@@ -18076,7 +18086,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_redis",
-      "community": 71,
+      "community": 19,
       "norm_label": "redis.ts"
     },
     {
@@ -18086,7 +18096,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "lib_redis_getredisclient",
-      "community": 71,
+      "community": 19,
       "norm_label": "getredisclient()"
     },
     {
@@ -18096,7 +18106,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "lib_redis_redis",
-      "community": 71,
+      "community": 19,
       "norm_label": "redis"
     },
     {
@@ -18106,7 +18116,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_routes",
-      "community": 27,
+      "community": 174,
       "norm_label": "routes.ts"
     },
     {
@@ -18126,7 +18136,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "lib_routes_api",
-      "community": 27,
+      "community": 171,
       "norm_label": "api"
     },
     {
@@ -18676,7 +18686,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_telegram_tests_account_test",
-      "community": 19,
+      "community": 165,
       "norm_label": "account.test.ts"
     },
     {
@@ -18686,7 +18696,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_telegram_tests_account_test_telegramaccount",
-      "community": 19,
+      "community": 165,
       "norm_label": "telegramaccount"
     },
     {
@@ -18696,7 +18706,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lib_telegram_tests_account_test_makeaccount",
-      "community": 19,
+      "community": 165,
       "norm_label": "makeaccount()"
     },
     {
@@ -18706,7 +18716,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "lib_telegram_tests_account_test_makeidtoken",
-      "community": 19,
+      "community": 165,
       "norm_label": "makeidtoken()"
     },
     {
@@ -18716,7 +18726,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "lib_telegram_tests_account_test_mockselectchains",
-      "community": 19,
+      "community": 165,
       "norm_label": "mockselectchains()"
     },
     {
@@ -18746,7 +18756,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_telegram_tests_recipe_inline_result_test",
-      "community": 104,
+      "community": 11,
       "norm_label": "recipe-inline-result.test.ts"
     },
     {
@@ -18756,7 +18766,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_telegram_tests_recipe_inline_result_test_publicrecipe",
-      "community": 104,
+      "community": 11,
       "norm_label": "publicrecipe()"
     },
     {
@@ -18796,7 +18806,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_telegram_account",
-      "community": 19,
+      "community": 165,
       "norm_label": "account.ts"
     },
     {
@@ -18806,7 +18816,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_telegram_account_telegramaccount",
-      "community": 19,
+      "community": 165,
       "norm_label": "telegramaccount"
     },
     {
@@ -18816,7 +18826,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_telegram_account_telegramidfromaccount",
-      "community": 19,
+      "community": 165,
       "norm_label": "telegramidfromaccount()"
     },
     {
@@ -18826,7 +18836,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "lib_telegram_account_resolvetelegramchatid",
-      "community": 19,
+      "community": 165,
       "norm_label": "resolvetelegramchatid()"
     },
     {
@@ -19316,7 +19326,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "lib_telemetry_index_trackevent",
-      "community": 24,
+      "community": 1,
       "norm_label": "trackevent()"
     },
     {
@@ -19346,7 +19356,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "lib_telemetry_index_captureerror",
-      "community": 162,
+      "community": 46,
       "norm_label": "captureerror()"
     },
     {
@@ -19356,7 +19366,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "lib_telemetry_index_log",
-      "community": 30,
+      "community": 24,
       "norm_label": "log()"
     },
     {
@@ -19616,7 +19626,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_upload_images",
-      "community": 10,
+      "community": 1,
       "norm_label": "images.ts"
     },
     {
@@ -19626,7 +19636,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "lib_upload_images_isimagekiturl",
-      "community": 10,
+      "community": 1,
       "norm_label": "isimagekiturl()"
     },
     {
@@ -19636,7 +19646,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_upload_images_imagerequestoptions",
-      "community": 10,
+      "community": 1,
       "norm_label": "imagerequestoptions"
     },
     {
@@ -19646,7 +19656,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_upload_images_buildauthheaders",
-      "community": 10,
+      "community": 1,
       "norm_label": "buildauthheaders()"
     },
     {
@@ -19656,7 +19666,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "lib_upload_images_uploadimage",
-      "community": 10,
+      "community": 1,
       "norm_label": "uploadimage()"
     },
     {
@@ -19856,7 +19866,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "lib_utils_generateid",
-      "community": 10,
+      "community": 1,
       "norm_label": "generateid()"
     },
     {
@@ -19866,7 +19876,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_video_url",
-      "community": 23,
+      "community": 38,
       "norm_label": "video-url.ts"
     },
     {
@@ -19886,7 +19896,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_video_url_parseurl",
-      "community": 23,
+      "community": 38,
       "norm_label": "parseurl()"
     },
     {
@@ -19896,7 +19906,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_video_url_normalizedhost",
-      "community": 23,
+      "community": 38,
       "norm_label": "normalizedhost()"
     },
     {
@@ -19906,7 +19916,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "lib_video_url_getsocialplatform",
-      "community": 23,
+      "community": 38,
       "norm_label": "getsocialplatform()"
     },
     {
@@ -19916,7 +19926,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "lib_video_url_issocialurl",
-      "community": 23,
+      "community": 38,
       "norm_label": "issocialurl()"
     },
     {
@@ -19926,7 +19936,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "lib_video_url_getyoutubethumbnail",
-      "community": 23,
+      "community": 38,
       "norm_label": "getyoutubethumbnail()"
     },
     {
@@ -19936,7 +19946,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "lib_video_url_isinstagramurl",
-      "community": 23,
+      "community": 38,
       "norm_label": "isinstagramurl()"
     },
     {
@@ -21414,7 +21424,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sentry_edge_config",
-      "community": 37,
+      "community": 66,
       "norm_label": "sentry.edge.config.ts"
     },
     {
@@ -21424,7 +21434,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "sentry_server_config",
-      "community": 37,
+      "community": 66,
       "norm_label": "sentry.server.config.ts"
     },
     {
@@ -21704,7 +21714,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "vitest_setup",
-      "community": 36,
+      "community": 43,
       "norm_label": "vitest.setup.ts"
     },
     {
@@ -22551,7 +22561,7 @@
       "label": "What changes inside Telegram",
       "file_type": "document",
       "source_file": "docs/explanation/telegram-mini-app.md",
-      "source_location": "L79",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "docs_explanation_telegram_mini_app_what_changes_inside_telegram",
       "community": 168,
@@ -22561,7 +22571,7 @@
       "label": "Setup (BotFather / ops)",
       "file_type": "document",
       "source_file": "docs/explanation/telegram-mini-app.md",
-      "source_location": "L91",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "docs_explanation_telegram_mini_app_setup_botfather_ops",
       "community": 168,
@@ -23896,7 +23906,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 43,
       "norm_label": ".github/workflows/ci.yml",
       "community_name": "Route Layout & Auth",
       "id": "github_workflows_ci_yml"
@@ -24246,7 +24256,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 36,
+      "community": 57,
       "norm_label": "react 19",
       "community_name": "Global Error & Collections",
       "id": "react"
@@ -24302,7 +24312,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 7,
+      "community": 162,
       "norm_label": "drizzle orm",
       "community_name": "Parse Job Notifications",
       "id": "drizzle_orm"
@@ -24498,7 +24508,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 4,
+      "community": 43,
       "norm_label": "vitest",
       "community_name": "Route Layout & Auth",
       "id": "vitest"
@@ -48898,6 +48908,17 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/telegram-deep-link/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_telegram_deep_link_index",
+      "target": "components_recipe_detail_index",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
@@ -48940,6 +48961,17 @@
       "weight": 1.0,
       "source": "components_recipe_detail_index_recipedetail",
       "target": "lib_transitions_usenavigate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/telegram-deep-link/index.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_telegram_deep_link_index",
+      "target": "components_recipe_detail_index_recipedetail",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -56538,7 +56570,7 @@
       "source_location": "L8",
       "weight": 1.0,
       "source": "components_telegram_deep_link_tests_index_test",
-      "target": "components_telegram_deep_link_tests_index_test_launchstate_navigatereplace",
+      "target": "components_telegram_deep_link_tests_index_test_launchstate_navigatereplace_navigatepush",
       "confidence_score": 1.0
     },
     {
@@ -56567,7 +56599,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L34",
+      "source_location": "L41",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "components_telegram_deep_link_index_currentlocale",
@@ -56577,7 +56609,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L19",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "components_telegram_deep_link_index",
+      "target": "components_telegram_deep_link_index_recipeidfromstartparam",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/telegram-deep-link/index.tsx",
+      "source_location": "L28",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "components_telegram_deep_link_index_resolvestartparamhref",
@@ -56587,7 +56629,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L46",
+      "source_location": "L57",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "components_telegram_deep_link_index_telegramdeeplink",
@@ -56598,7 +56640,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_routes",
@@ -56609,7 +56651,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_routes_routes",
@@ -56620,7 +56662,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_telegram_webapp",
@@ -56631,7 +56673,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_telegram_webapp_getlaunchstartparam",
@@ -56642,7 +56684,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_telegram_webapp_istelegramenvironment",
@@ -56653,7 +56695,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_transitions",
@@ -56664,7 +56706,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index",
       "target": "lib_transitions_usenavigate",
@@ -56685,9 +56727,20 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "source_file": "components/telegram-deep-link/index.tsx",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "components_telegram_deep_link_index_resolvestartparamhref",
+      "target": "components_telegram_deep_link_index_recipeidfromstartparam",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/telegram-deep-link/index.tsx",
-      "source_location": "L47",
+      "source_location": "L58",
       "weight": 1.0,
       "source": "components_telegram_deep_link_index_telegramdeeplink",
       "target": "lib_transitions_usenavigate"
@@ -87162,7 +87215,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/explanation/telegram-mini-app.md",
-      "source_location": "L91",
+      "source_location": "L97",
       "weight": 1.0,
       "source": "docs_explanation_telegram_mini_app_telegram_mini_app",
       "target": "docs_explanation_telegram_mini_app_setup_botfather_ops",
@@ -87172,7 +87225,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/explanation/telegram-mini-app.md",
-      "source_location": "L79",
+      "source_location": "L85",
       "weight": 1.0,
       "source": "docs_explanation_telegram_mini_app_telegram_mini_app",
       "target": "docs_explanation_telegram_mini_app_what_changes_inside_telegram",
@@ -88616,5 +88669,5 @@
       "source_file": "docs/explanation/ingredient-vocabulary.md"
     }
   ],
-  "built_at_commit": "b96f7c7fe3b72828f173cffc6da2c052de3c65cd"
+  "built_at_commit": "b7facebf463bc0067e56ff1036d43f3263f81150"
 }
