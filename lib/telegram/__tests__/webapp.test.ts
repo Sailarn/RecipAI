@@ -139,6 +139,23 @@ describe("getLaunchInitData", () => {
 
     expect(getLaunchInitData()).toBeUndefined();
   });
+
+  it("returns the remembered payload after an in-app navigation drops the hash", () => {
+    // Reproduces the shared-recipe deep-link bug: TelegramDeepLink reads the
+    // launch hash and pushes the recipe view (history.pushState), wiping
+    // `#tgWebAppData` from the URL before the silent sign-in reads initData —
+    // and on private-chat launches the SDK webApp never resolves to fall back
+    // on. The payload must survive that wipe for the tab session.
+    setWebApp(undefined);
+    const raw = "auth_date=1&start_param=recipe_xyz&hash=abc";
+    window.location.hash = `#tgWebAppData=${encodeURIComponent(raw)}&tgWebAppVersion=8.0`;
+
+    expect(getLaunchInitData()).toBe(raw); // seen while the hash is intact
+
+    window.location.hash = ""; // navigation rewrote the URL
+
+    expect(getLaunchInitData()).toBe(raw); // still available from memory
+  });
 });
 
 describe("loadTelegramSdk", () => {

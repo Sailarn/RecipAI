@@ -125,6 +125,11 @@ const LAUNCH_PARAM_MARKER = "tgWebAppData";
 // the theme toggle, or iOS foreground) can drop the `tgWebAppData` URL hash, so
 // without this the app would mistake itself for the plain web after a reload.
 const LAUNCH_FLAG_KEY = "recipai:tg-launched";
+// The decoded launch payload, remembered for the same reason (and one more): an
+// in-app navigation rewrites the URL and drops the hash within a single page
+// load — a `recipe_<id>` deep link pushes the recipe view before the silent
+// sign-in reads initData — so the live hash is often already gone by then.
+const LAUNCH_DATA_KEY = "recipai:tg-launch-data";
 
 function readLaunchFlag(): boolean {
   try {
@@ -137,6 +142,20 @@ function readLaunchFlag(): boolean {
 function rememberLaunched(): void {
   try {
     sessionStorage.setItem(LAUNCH_FLAG_KEY, "1");
+  } catch {}
+}
+
+function readRememberedLaunchData(): string | undefined {
+  try {
+    return sessionStorage.getItem(LAUNCH_DATA_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function rememberLaunchData(raw: string): void {
+  try {
+    sessionStorage.setItem(LAUNCH_DATA_KEY, raw);
   } catch {}
 }
 
@@ -175,16 +194,23 @@ export function isTelegramEnvironment(): boolean {
  * once. This is the same payload `webApp.initData` holds once the SDK has
  * caught up — reading it directly lets a deep link resolve (a start param,
  * or a full sign-in) before, or even without, the SDK object ever populating.
+ *
+ * The live hash wins whenever it's present (and is remembered for the tab
+ * session as it's read); once an in-app navigation has dropped it from the
+ * URL, the remembered copy is returned instead — so a deep-link launch's
+ * silent sign-in still has initData after the recipe view has been pushed.
  */
 function getLaunchDataFromHash(): string | undefined {
   if (typeof window === "undefined") return undefined;
   const source = `${window.location.hash}&${window.location.search}`;
   const match = source.match(/tgWebAppData=([^&]+)/);
-  if (!match) return undefined;
+  if (!match) return readRememberedLaunchData();
   try {
-    return decodeURIComponent(match[1]);
+    const raw = decodeURIComponent(match[1]);
+    rememberLaunchData(raw);
+    return raw;
   } catch {
-    return undefined;
+    return readRememberedLaunchData();
   }
 }
 

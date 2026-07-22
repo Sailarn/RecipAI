@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTelegramAutoSignIn } from "@/components/telegram-provider/use-auto-sign-in";
-import type { TelegramWebApp } from "@/lib/telegram/webapp";
+import { getLaunchInitData, type TelegramWebApp } from "@/lib/telegram/webapp";
 
 const { sessionState, signInWithMiniApp, notify } = vi.hoisted(() => ({
   sessionState: { data: null as unknown, isPending: false },
@@ -31,6 +31,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.clearAllMocks();
   window.location.hash = "";
+  sessionStorage.clear();
 });
 
 describe("useTelegramAutoSignIn", () => {
@@ -83,6 +84,25 @@ describe("useTelegramAutoSignIn", () => {
     // carries the identical initData payload and is available immediately.
     window.location.hash =
       "#tgWebAppData=user%3D1%26hash%3Dabc%26start_param%3Drecipe_x";
+
+    const { result } = renderHook(() => useTelegramAutoSignIn(undefined));
+
+    await waitFor(() => expect(result.current).toBe("signed-in"));
+    expect(signInWithMiniApp).toHaveBeenCalledWith(
+      "user=1&hash=abc&start_param=recipe_x",
+    );
+  });
+
+  it("still signs in after a deep-link navigation has dropped the launch hash", async () => {
+    // The shared-recipe bug: TelegramDeepLink pushes the recipe view and wipes
+    // `#tgWebAppData` before this hook (which had waited on the session check)
+    // reads initData — with no resolved WebApp to fall back on, the account was
+    // never created and Profile spun forever. The remembered launch payload
+    // must keep the sign-in working past the wipe.
+    window.location.hash =
+      "#tgWebAppData=user%3D1%26hash%3Dabc%26start_param%3Drecipe_x";
+    getLaunchInitData(); // deep link reads the hash first, seeding the memory
+    window.location.hash = ""; // then its push rewrites the URL
 
     const { result } = renderHook(() => useTelegramAutoSignIn(undefined));
 
