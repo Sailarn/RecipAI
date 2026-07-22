@@ -19,6 +19,7 @@ import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
 import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
 import { useFeature } from "@/lib/platform";
 import { routes } from "@/lib/routes";
+import { CLOUD_PREF_KEYS, setCloudItem } from "@/lib/telegram/cloud-storage";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { PushNotificationToggle } from "./components/push-notification-toggle";
@@ -57,6 +58,9 @@ export default function ProfilePage() {
   const toggleLanguage = (e: React.MouseEvent) => {
     e.stopPropagation();
     trackEvent("language_changed", { locale: nextLocale });
+    // Persist the explicit choice so a Mini App reopen restores it (the URL and
+    // NEXT_LOCALE cookie don't survive the WebView). No-op outside Telegram.
+    void setCloudItem(CLOUD_PREF_KEYS.locale, nextLocale);
     const newPath = window.location.pathname.replace(
       `/${locale}`,
       `/${nextLocale}`,

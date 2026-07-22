@@ -107,6 +107,16 @@ CloudStorage** (`lib/telegram/cloud-storage.ts` — a promise wrapper over the S
   `TelegramProvider` reads it back on launch (`restoreThemeFromCloud`) and flips the `<html>` class.
   The synchronous pre-paint script still reads localStorage first (no flash when it survives); the
   CloudStorage restore is async, so a brief default-theme flash is possible when it doesn't.
+- **Locale:** the locale lives in the URL path, so a reopen lands on the middleware default. The
+  profile language toggle writes the choice to CloudStorage; `TelegramLocaleSync` (in `ClientShell`)
+  resolves the intended locale on launch (`resolveLaunchLocale`: stored choice → else a seed from the
+  Telegram UI language) and redirects if the launch URL differs. It waits for the SDK (CloudStorage +
+  `language_code` need it) and **defers to a deep link** — when a `start_param` is present, the deep
+  link owns the destination and its locale, so the locale sync skips to avoid a competing navigation.
+- **Telegram-language seed** (`localeFromTelegramLanguage`): with no stored choice, `uk`→`ua`,
+  `en`→`en`, `ru`→`ua`, anything else→`en` (Telegram uses ISO `uk`; the app locale is `ua`). The seed
+  is recomputed each launch and never stored, so it tracks the Telegram language until the user picks
+  one — only an explicit choice is written to CloudStorage and it always wins.
 
 ## Setup (BotFather / ops)
 

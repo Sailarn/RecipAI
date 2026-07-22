@@ -72,6 +72,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/auth/auth-error-report.ts` | `shouldReportAuthError()` — decides which better-auth errors reach Sentry (report 500s / raw throws, skip routine 4xx). |
 | `lib/telegram/webapp.ts` | SSR-safe wrapper over `window.Telegram.WebApp` — `isTelegramEnvironment()`, `getTelegramWebApp()`, `loadTelegramSdk()`. |
 | `lib/telegram/cloud-storage.ts` | Promise wrapper over the Mini App `CloudStorage` (`getCloudItem`/`setCloudItem`, `CLOUD_PREF_KEYS`) — persists prefs across reopens where localStorage/cookies don't. |
+| `lib/telegram/launch-locale.ts` | `resolveLaunchLocale()` (stored choice → else Telegram-language seed) + `localeFromTelegramLanguage()` mapping. |
+| `components/telegram-locale-sync/` | Launch effect: restores the Mini App locale (redirects if the URL differs); defers to a deep link. |
 | `lib/telegram/recipe-card.ts` | The one recipe-card builder — `recipeCardCaption()`, `recipeCardStats()`, `recipeCardButton()`, `telegramPhotoUrl()` — shared by the share flow and the bot's parse-completion message. |
 | `lib/telegram/recipe-inline-result.ts` | `buildRecipeInlineResult()` — wraps the card into a share InlineQueryResult (photo or article). |
 | `components/telegram-provider/` | Detects the Telegram WebView, runs SDK lifecycle + auto sign-in (`use-auto-sign-in.ts`); exposes `useTelegram()`/`useIsTelegram()`. |
