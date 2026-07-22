@@ -45,6 +45,29 @@ describe("sendTelegramMessage", () => {
     const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string);
     expect(body).not.toHaveProperty("reply_markup");
   });
+
+  it("returns true when Telegram accepts the message", async () => {
+    await expect(sendTelegramMessage(123, "hi")).resolves.toBe(true);
+  });
+
+  it("returns false when Telegram rejects the message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: () => Promise.resolve("Bad Request: chat not found"),
+      }),
+    );
+
+    await expect(sendTelegramMessage(123, "hi")).resolves.toBe(false);
+  });
+
+  it("returns false when the request itself throws", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+
+    await expect(sendTelegramMessage(123, "hi")).resolves.toBe(false);
+  });
 });
 
 describe("extractUrl", () => {

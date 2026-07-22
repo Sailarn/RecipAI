@@ -382,13 +382,116 @@ describe("useUrlParse", () => {
   });
 
   describe("telegram notify hand-off", () => {
-    it("skips the in-app review flow when the server confirms a notify parse", async () => {
+    it("polls without review or re-save, then toasts success on a notify parse", async () => {
       mockFetch.mockImplementation((requestUrl: string) => {
         if (requestUrl === "/api/parse-queue") {
           return Promise.resolve(
             makeResponse({
               jobId: "job-1",
               uploadToken: null,
+              telegramNotify: true,
+            }),
+          );
+        }
+        return Promise.resolve(
+          makeResponse({
+            status: "done",
+            result: {
+              title: "Notify Recipe",
+              ingredients: [],
+              instructions: [],
+            },
+            url: "https://example.com/recipe",
+          }),
+        );
+      });
+
+      const { result } = renderHook(() =>
+        useUrlParse({ locale: "en", telegramNotify: true }),
+      );
+
+      act(() => {
+        result.current.setUrl("https://example.com/recipe");
+      });
+      await act(async () => {
+        await result.current.handleParse();
+      });
+
+      await waitFor(() => {
+        expect(toastSuccess).toHaveBeenCalledWith(
+          "Saved to RecipAI",
+          expect.anything(),
+        );
+      });
+      // Server owns the save: no durable review entry, no watcher, no /process.
+      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
+      expect(addJobId).not.toHaveBeenCalled();
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/parse-queue/process",
+        expect.anything(),
+      );
+      expect(trackEvent).toHaveBeenCalledWith("parse_succeeded", {
+        source: "url",
+      });
+      expect(result.current.jobId).toBeNull();
+      expect(result.current.url).toBe("");
+    });
+
+    it("surfaces the failure in-app when a notify parse fails", async () => {
+      mockFetch.mockImplementation((requestUrl: string) => {
+        if (requestUrl === "/api/parse-queue") {
+          return Promise.resolve(
+            makeResponse({
+              jobId: "job-1",
+              uploadToken: null,
+              telegramNotify: true,
+            }),
+          );
+        }
+        return Promise.resolve(
+          makeResponse({
+            status: "failed",
+            error: "Couldn't extract a recipe from this social post",
+            url: "https://example.com/recipe",
+          }),
+        );
+      });
+
+      const { result } = renderHook(() =>
+        useUrlParse({ locale: "en", telegramNotify: true }),
+      );
+
+      act(() => {
+        result.current.setUrl("https://example.com/recipe");
+      });
+      await act(async () => {
+        await result.current.handleParse();
+      });
+
+      await waitFor(() => {
+        expect(trackEvent).toHaveBeenCalledWith("parse_failed", {
+          source: "url",
+          reason: "Couldn't extract a recipe from this social post",
+        });
+      });
+      expect(result.current.error).not.toBeNull();
+      expect(addJobId).not.toHaveBeenCalled();
+      expect(toastSuccess).not.toHaveBeenCalled();
+    });
+
+    it("toasts success immediately on a notify cache hit (saved server-side)", async () => {
+      mockFetch.mockImplementation((requestUrl: string) => {
+        if (requestUrl === "/api/parse-queue") {
+          return Promise.resolve(
+            makeResponse({
+              jobId: "job-1",
+              uploadToken: null,
+              cached: true,
+              result: {
+                title: "Cached Notify",
+                ingredients: [],
+                instructions: [],
+              },
               telegramNotify: true,
             }),
           );
@@ -407,18 +510,12 @@ describe("useUrlParse", () => {
         await result.current.handleParse();
       });
 
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Saved to RecipAI",
+        expect.anything(),
+      );
       expect(db.parsedRecipes.add).not.toHaveBeenCalled();
       expect(addJobId).not.toHaveBeenCalled();
-      expect(mockFetch).not.toHaveBeenCalledWith(
-        "/api/parse-queue/process",
-        expect.anything(),
-      );
-      expect(toastSuccess).toHaveBeenCalledWith(
-        "Importing recipe",
-        expect.anything(),
-      );
-      expect(result.current.jobId).toBeNull();
-      expect(result.current.result).toBeNull();
       expect(result.current.url).toBe("");
     });
 

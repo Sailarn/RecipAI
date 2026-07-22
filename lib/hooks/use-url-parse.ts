@@ -81,7 +81,11 @@ export function useUrlParse({
   }, [activeParsedRecipeId, loading, jobId]);
   const result = parsedRecipe ?? null;
 
-  const poll = useCallback((id: string) => {
+  // `notifyMode` jobs are saved + announced server-side (Telegram notifications
+  // on). The client polls only to surface the terminal state in-app — a success
+  // toast or the failure error — without building a durable review entry or
+  // re-saving (which would duplicate the server's copy).
+  const poll = useCallback((id: string, notifyMode = false) => {
     const run = async () => {
       try {
         const statusRes = await fetch(api.parseQueueJob(id));
@@ -96,6 +100,22 @@ export function useUrlParse({
             return;
           }
           const parsed = result as ParsedRecipe;
+          if (notifyMode) {
+            recordParseHistory(
+              doneParseHistoryEntry(
+                id,
+                parsed.title,
+                parsed.sourceUrl ?? jobUrl,
+              ),
+            ).catch(() => {});
+            trackEvent("parse_succeeded", { source: "url" });
+            toast.success("Saved to RecipAI", {
+              description: "Added to your recipes.",
+            });
+            setLoading(false);
+            setJobId(null);
+            return;
+          }
           const uploadToken = getUploadToken(id);
           if (uploadToken) storePendingUploadToken(uploadToken);
           removeJobId(id);
@@ -210,18 +230,24 @@ export function useUrlParse({
       });
 
       // Telegram-notify hand-off: the server saves the recipe and messages the
-      // user via the bot on completion, so skip the in-app review flow entirely
-      // (no durable entry, no background watcher, no client /process call). The
-      // saved recipe surfaces on the next sync / focus re-pull.
+      // user via the bot on completion, so skip the in-app *review* flow (no
+      // durable entry, no background watcher, no client /process call). A cache
+      // hit is already saved server-side; otherwise poll in notify mode purely
+      // to surface the terminal state in-app — the "parsing in background"
+      // banner, then a success toast or the failure error.
       if (notifyConfirmed) {
-        toast.success(cached ? "Saved to RecipAI" : "Importing recipe", {
-          description: cached
-            ? "Added to your recipes."
-            : "We'll notify you in Telegram when it's ready.",
-        });
-        if (cached) trackEvent("parse_succeeded", { source: "url" });
         setUrl("");
+        if (cached) {
+          trackEvent("parse_succeeded", { source: "url" });
+          toast.success("Saved to RecipAI", {
+            description: "Added to your recipes.",
+          });
+          setLoading(false);
+          return;
+        }
+        setJobId(newJobId);
         setLoading(false);
+        poll(newJobId, true);
         return;
       }
 

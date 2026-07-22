@@ -1,3 +1,5 @@
+import { captureError } from "@/lib/telemetry";
+
 const TELEGRAM_API = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
 // The Mini App's short name in @BotFather (the `<app>` in t.me/<bot>/<app>).
@@ -7,21 +9,39 @@ type InlineKeyboardMarkup = {
   inline_keyboard: { text: string; url: string }[][];
 };
 
+// Best-effort — a bot message must never fail the request that triggered it.
+// But a swallowed non-2xx (a bad chat id, an HTML parse error, rate limiting)
+// silently drops a completion notification, so surface it to Sentry instead of
+// discarding it. Returns whether Telegram accepted the message.
 export async function sendTelegramMessage(
   chatId: number | string,
   text: string,
   replyMarkup?: InlineKeyboardMarkup,
-): Promise<void> {
-  await fetch(`${TELEGRAM_API}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: "HTML",
-      ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
-    }),
-  });
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${TELEGRAM_API}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "HTML",
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const description = await res.text().catch(() => "");
+      captureError(new Error(`Telegram sendMessage failed: ${res.status}`), {
+        tags: { source: "telegram-bot" },
+        extra: { chatId: String(chatId), status: res.status, description },
+      });
+      return false;
+    }
+    return true;
+  } catch (error) {
+    captureError(error, { tags: { source: "telegram-bot" } });
+    return false;
+  }
 }
 
 /** Deep link that opens the Mini App at a `startapp` target (e.g. `recipe_<id>`). */
