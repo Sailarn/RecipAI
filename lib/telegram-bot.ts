@@ -11,29 +11,27 @@ type InlineKeyboardMarkup = {
 
 // Best-effort — a bot message must never fail the request that triggered it.
 // But a swallowed non-2xx (a bad chat id, an HTML parse error, rate limiting)
-// silently drops a completion notification, so surface it to Sentry instead of
-// discarding it. Returns whether Telegram accepted the message.
-export async function sendTelegramMessage(
-  chatId: number | string,
-  text: string,
-  replyMarkup?: InlineKeyboardMarkup,
+// silently drops a notification, so surface it to Sentry instead of discarding
+// it. Returns whether Telegram accepted the call.
+async function callTelegram(
+  method: string,
+  payload: Record<string, unknown>,
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${TELEGRAM_API}/sendMessage`, {
+    const res = await fetch(`${TELEGRAM_API}/${method}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
-      }),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const description = await res.text().catch(() => "");
-      captureError(new Error(`Telegram sendMessage failed: ${res.status}`), {
+      captureError(new Error(`Telegram ${method} failed: ${res.status}`), {
         tags: { source: "telegram-bot" },
-        extra: { chatId: String(chatId), status: res.status, description },
+        extra: {
+          chatId: String(payload.chat_id ?? ""),
+          status: res.status,
+          description,
+        },
       });
       return false;
     }
@@ -42,6 +40,36 @@ export async function sendTelegramMessage(
     captureError(error, { tags: { source: "telegram-bot" } });
     return false;
   }
+}
+
+export function sendTelegramMessage(
+  chatId: number | string,
+  text: string,
+  replyMarkup?: InlineKeyboardMarkup,
+): Promise<boolean> {
+  return callTelegram("sendMessage", {
+    chat_id: chatId,
+    text,
+    parse_mode: "HTML",
+    ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+  });
+}
+
+// Sends the recipe card as a native photo message (image + caption + button) so
+// the parse-completion notification matches the shared recipe card.
+export function sendTelegramPhoto(
+  chatId: number | string,
+  photoUrl: string,
+  caption: string,
+  replyMarkup?: InlineKeyboardMarkup,
+): Promise<boolean> {
+  return callTelegram("sendPhoto", {
+    chat_id: chatId,
+    photo: photoUrl,
+    caption,
+    parse_mode: "HTML",
+    ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+  });
 }
 
 /** Deep link that opens the Mini App at a `startapp` target (e.g. `recipe_<id>`). */

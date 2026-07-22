@@ -10,7 +10,13 @@ import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
-import { miniAppDeepLink, sendTelegramMessage } from "@/lib/telegram-bot";
+import {
+  type RecipeCardData,
+  recipeCardButton,
+  recipeCardCaption,
+  telegramPhotoUrl,
+} from "@/lib/telegram/recipe-card";
+import { sendTelegramMessage, sendTelegramPhoto } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { type PushPayload, sendPushNotification } from "@/lib/web-push";
@@ -191,22 +197,29 @@ export async function POST(req: NextRequest) {
         sourceUrl: jobUrl,
       });
 
-      const ingredientCount = finalRecipe.ingredients?.length ?? 0;
-      const stepCount = finalRecipe.instructions?.length ?? 0;
-      await sendTelegramMessage(
-        job.telegramChatId,
-        `✅ <b>${finalRecipe.title}</b> saved to RecipAI!\n\n📦 ${ingredientCount} ingredients · 👨‍🍳 ${stepCount} steps`,
-        {
-          inline_keyboard: [
-            [
-              {
-                text: "🍳 Open in RecipAI",
-                url: miniAppDeepLink(`recipe_${recipeId}`),
-              },
-            ],
-          ],
-        },
-      );
+      const cardData: RecipeCardData = {
+        id: recipeId,
+        title: finalRecipe.title,
+        category: finalRecipe.category ?? null,
+        totalTime:
+          (finalRecipe.prepTime || 0) + (finalRecipe.cookTime || 0) || null,
+        servings: finalRecipe.servings ?? 1,
+        ingredientCount: finalRecipe.ingredients?.length ?? 0,
+        imageUrl: finalRecipe.imageUrl ?? null,
+      };
+      const caption = recipeCardCaption(cardData, "✅ Saved to RecipAI");
+      const replyMarkup = recipeCardButton(recipeId);
+
+      if (cardData.imageUrl) {
+        await sendTelegramPhoto(
+          job.telegramChatId,
+          telegramPhotoUrl(cardData.imageUrl),
+          caption,
+          replyMarkup,
+        );
+      } else {
+        await sendTelegramMessage(job.telegramChatId, caption, replyMarkup);
+      }
     }
 
     return NextResponse.json({ ok: true });

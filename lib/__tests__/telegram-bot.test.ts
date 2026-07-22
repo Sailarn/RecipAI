@@ -3,6 +3,7 @@ import {
   extractUrl,
   miniAppDeepLink,
   sendTelegramMessage,
+  sendTelegramPhoto,
 } from "@/lib/telegram-bot";
 
 describe("miniAppDeepLink", () => {
@@ -67,6 +68,45 @@ describe("sendTelegramMessage", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
 
     await expect(sendTelegramMessage(123, "hi")).resolves.toBe(false);
+  });
+});
+
+describe("sendTelegramPhoto", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("posts to sendPhoto with the photo, caption, and reply markup", async () => {
+    const markup = {
+      inline_keyboard: [[{ text: "Open", url: "https://t.me/x" }]],
+    };
+
+    await sendTelegramPhoto(123, "https://img/x.jpg", "Yum", markup);
+
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toContain("/sendPhoto");
+    const body = JSON.parse(init?.body as string);
+    expect(body.photo).toBe("https://img/x.jpg");
+    expect(body.caption).toBe("Yum");
+    expect(body.reply_markup).toEqual(markup);
+  });
+
+  it("returns false when Telegram rejects the photo", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: () => Promise.resolve("Bad Request"),
+      }),
+    );
+
+    await expect(
+      sendTelegramPhoto(123, "https://img/x.jpg", "Yum"),
+    ).resolves.toBe(false);
   });
 });
 

@@ -67,10 +67,14 @@ OIDC).
   **synchronously** from the launch hash via `getLaunchStartParam()` (not the async SDK `webApp`) and
   `navigate.replace`s, so a shared recipe opens straight into its detail view with the skeleton
   instead of flashing the recipes list for ~a second while the SDK loads.
-- The shared recipe **card** caption (`lib/telegram/recipe-inline-result.ts`) is deliberately compact
-  — title + stats only, no description — because a long multi-line title plus a description made the
-  pre-send share sheet tall enough to push its controls off-screen. The "Open recipe" button carries
-  the rest.
+- **One recipe card, two surfaces.** `lib/telegram/recipe-card.ts` is the single builder for the
+  Telegram recipe card — caption (title + category + `time · servings · ingredients`), the
+  `🍳 Open recipe` deep-link button, and the JPEG photo transform. Both the **share** flow
+  (`recipe-inline-result.ts` → prepared inline message) and the **bot's parse-completion** message
+  (`/api/parse-queue/process` → `sendTelegramPhoto`, a native photo card with a `✅ Saved to RecipAI`
+  header) render from it, so a recipient sees one consistent card. The caption is deliberately compact
+  — no description — because a long multi-line title plus a description made the pre-send share sheet
+  tall enough to push its controls off-screen; the button carries the rest.
 
 ## What changes inside Telegram
 

@@ -30,10 +30,14 @@ vi.mock("@/lib/parse-recipe", () => ({
 
 vi.mock("@/lib/telegram-bot", () => ({
   sendTelegramMessage: vi.fn(),
+  sendTelegramPhoto: vi.fn(),
+  miniAppDeepLink: (startParam: string) =>
+    `https://t.me/recipai_auth_bot/recipai?startapp=${startParam}`,
 }));
 
 import { db } from "@/db";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
+import { sendTelegramPhoto } from "@/lib/telegram-bot";
 import { captureError } from "@/lib/telemetry";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
@@ -385,6 +389,34 @@ describe("POST /api/parse-queue/process", () => {
       expect(updateChain.set).not.toHaveBeenCalledWith(
         expect.objectContaining({ status: "done" }),
       );
+    });
+  });
+
+  describe("Telegram-triggered save — completion card", () => {
+    it("sends a photo card with the saved header, stats, and deep-link button", async () => {
+      setupDb(baseJob);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendTelegramPhoto).toHaveBeenCalledWith(
+        "chat-1",
+        expect.stringContaining(IMAGEKIT_URL),
+        expect.stringContaining("✅ Saved to RecipAI"),
+        expect.objectContaining({
+          inline_keyboard: [
+            [
+              expect.objectContaining({
+                text: "🍳 Open recipe",
+                url: expect.stringContaining("startapp=recipe_"),
+              }),
+            ],
+          ],
+        }),
+      );
+      const caption = vi.mocked(sendTelegramPhoto).mock.calls[0][2];
+      expect(caption).toContain("Pasta");
+      expect(caption).toContain("ingredient");
     });
   });
 

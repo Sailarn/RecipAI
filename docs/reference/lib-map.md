@@ -71,6 +71,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/auth/telegram-user.ts` | `miniAppDataToUser()` — maps Telegram Mini App data to a user record with a placeholder email (`user.email` is NOT NULL). |
 | `lib/auth/auth-error-report.ts` | `shouldReportAuthError()` — decides which better-auth errors reach Sentry (report 500s / raw throws, skip routine 4xx). |
 | `lib/telegram/webapp.ts` | SSR-safe wrapper over `window.Telegram.WebApp` — `isTelegramEnvironment()`, `getTelegramWebApp()`, `loadTelegramSdk()`. |
+| `lib/telegram/recipe-card.ts` | The one recipe-card builder — `recipeCardCaption()`, `recipeCardStats()`, `recipeCardButton()`, `telegramPhotoUrl()` — shared by the share flow and the bot's parse-completion message. |
+| `lib/telegram/recipe-inline-result.ts` | `buildRecipeInlineResult()` — wraps the card into a share InlineQueryResult (photo or article). |
 | `components/telegram-provider/` | Detects the Telegram WebView, runs SDK lifecycle + auto sign-in (`use-auto-sign-in.ts`); exposes `useTelegram()`/`useIsTelegram()`. |
 | `components/telegram-back-button/`, `components/telegram-deep-link/` | Native BackButton wiring; `start_param` → route (`resolveStartParamHref`). |
 | `lib/auth/auth-client.ts` | Client-side auth client (`authClient.useSession()`, etc.). |
@@ -159,7 +161,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 |---|---|
 | `lib/video-url.ts` | `isSocialUrl()`, `getSocialPlatform()`, `isInstagramUrl()` — social URL type detection. |
 | `lib/pwa.ts` | Installed-PWA and iOS environment detection. |
-| `lib/telegram-bot.ts` | `sendTelegramMessage()`, `extractUrl()`. |
+| `lib/telegram-bot.ts` | `sendTelegramMessage()`, `sendTelegramPhoto()`, `miniAppDeepLink()`, `savePreparedInlineMessage()`, `extractUrl()`. |
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
 | `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
