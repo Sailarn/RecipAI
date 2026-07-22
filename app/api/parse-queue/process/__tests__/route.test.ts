@@ -37,7 +37,7 @@ vi.mock("@/lib/telegram-bot", () => ({
 
 import { db } from "@/db";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
-import { sendTelegramPhoto } from "@/lib/telegram-bot";
+import { sendTelegramMessage, sendTelegramPhoto } from "@/lib/telegram-bot";
 import { captureError } from "@/lib/telemetry";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
@@ -106,7 +106,7 @@ function flushMicrotasks() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(isImageKitUrl).mockReturnValue(false);
+  vi.mocked(isImageKitUrl).mockImplementation((url) => url === IMAGEKIT_URL);
   vi.mocked(sendPushNotification).mockResolvedValue(undefined);
   // Default: image upload succeeds. Individual tests override to reject. Without
   // a default it resolves undefined, and the (now reported) upload catch would
@@ -484,6 +484,43 @@ describe("POST /api/parse-queue/process", () => {
         .calls[0][0];
       expect(insertValues.imageUrl).toBe(CDN_URL);
       expect(insertValues.imageFileId).toBeNull();
+    });
+  });
+
+  describe("Telegram-triggered save — notify failures don't undo the save", () => {
+    it("falls back to a text message when the saved image isn't on ImageKit", async () => {
+      setupDb(baseJob);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(uploadImageServer).mockRejectedValue(
+        new Error("Upload failed"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendTelegramPhoto).not.toHaveBeenCalled();
+      expect(sendTelegramMessage).toHaveBeenCalledWith(
+        "chat-1",
+        expect.stringContaining("Pasta"),
+        expect.objectContaining({ inline_keyboard: expect.anything() }),
+      );
+    });
+
+    it("keeps the job done and reports the error instead of marking it failed when the Telegram send throws", async () => {
+      const { updateChain } = setupDb(baseJob);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(sendTelegramPhoto).mockRejectedValue(
+        new Error("Telegram sendPhoto failed: 400"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(captureError).toHaveBeenCalled();
     });
   });
 });

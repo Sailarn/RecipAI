@@ -210,15 +210,26 @@ export async function POST(req: NextRequest) {
       const caption = recipeCardCaption(cardData, "✅ Saved to RecipAI");
       const replyMarkup = recipeCardButton(recipeId);
 
-      if (cardData.imageUrl) {
-        await sendTelegramPhoto(
-          job.telegramChatId,
-          telegramPhotoUrl(cardData.imageUrl),
-          caption,
-          replyMarkup,
-        );
-      } else {
-        await sendTelegramMessage(job.telegramChatId, caption, replyMarkup);
+      // The recipe is already saved at this point, so a failure here is a
+      // notification-delivery problem, not a parse failure — it must not fall
+      // into the outer catch, which would mark the job FAILED and tell the
+      // user parsing failed when it didn't. A non-ImageKit imageUrl means the
+      // upload above failed and this is the (possibly now-expired/403) source
+      // CDN URL, which Telegram often can't fetch either — skip straight to
+      // text in that case instead of making a call likely to fail.
+      try {
+        if (cardData.imageUrl && isImageKitUrl(cardData.imageUrl)) {
+          await sendTelegramPhoto(
+            job.telegramChatId,
+            telegramPhotoUrl(cardData.imageUrl),
+            caption,
+            replyMarkup,
+          );
+        } else {
+          await sendTelegramMessage(job.telegramChatId, caption, replyMarkup);
+        }
+      } catch (notifyError) {
+        ApiError.capture(notifyError, req);
       }
     }
 
