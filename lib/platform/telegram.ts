@@ -38,17 +38,27 @@ function shareRecipeLink(
  * Telegram Mini App platform. Haptics hit the native engine via the SDK (works
  * on iOS + Android Telegram, unlike web vibration). Sharing hands off to the
  * native share-to-chat sheet.
+ *
+ * `webApp` is optional: `kind` must read "telegram" (so feature gating hides
+ * web-only UI like "Connected accounts") from the moment `isTelegramEnvironment()`
+ * knows we're in a Mini App, which is well before the SDK script itself finishes
+ * loading and TelegramProvider gets a live `webApp` instance. Haptics/share are
+ * no-ops until then — the same as they'd be moments earlier on web.
  */
-export function createTelegramPlatform(webApp: TelegramWebApp): Platform {
+export function createTelegramPlatform(
+  webApp: TelegramWebApp | undefined,
+): Platform {
   return {
     kind: "telegram",
     haptics: {
-      impact: (style = "light") => webApp.HapticFeedback?.impactOccurred(style),
-      notify: (type) => webApp.HapticFeedback?.notificationOccurred(type),
-      selection: () => webApp.HapticFeedback?.selectionChanged(),
+      impact: (style = "light") =>
+        webApp?.HapticFeedback?.impactOccurred(style),
+      notify: (type) => webApp?.HapticFeedback?.notificationOccurred(type),
+      selection: () => webApp?.HapticFeedback?.selectionChanged(),
     },
     share: {
       async recipe(input: RecipeShareInput): Promise<ShareResult> {
+        if (!webApp) return "shared";
         // Prefer the native card; degrade to a plain link share if the prepared
         // message can't be created (network, older client, backend error).
         const shared = await shareRecipeCard(webApp, input.id).catch(

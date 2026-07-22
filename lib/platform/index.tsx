@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 import { useTelegram } from "@/components/telegram-provider";
+import { isTelegramEnvironment } from "@/lib/telegram/webapp";
 import { FEATURES, type Feature } from "./features";
 import { createTelegramPlatform } from "./telegram";
 import type { Platform } from "./types";
@@ -11,8 +12,17 @@ const PlatformContext = createContext<Platform>(createWebPlatform());
 
 export function PlatformProvider({ children }: { children: React.ReactNode }) {
   const { webApp } = useTelegram();
+  // isTelegramEnvironment() is true immediately on a Mini App launch (SDK
+  // cache, launch params, or a remembered flag), well before TelegramProvider's
+  // async SDK script load resolves `webApp`. Feature gating (Capability /
+  // useFeature) must see "telegram" from that first paint, not wait on the
+  // script — otherwise Telegram-hidden UI (e.g. "Connected accounts") renders
+  // on the web feature set until the script loads, or indefinitely if it stalls.
   const platform = useMemo(
-    () => (webApp ? createTelegramPlatform(webApp) : createWebPlatform()),
+    () =>
+      webApp || isTelegramEnvironment()
+        ? createTelegramPlatform(webApp)
+        : createWebPlatform(),
     [webApp],
   );
   return (

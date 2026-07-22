@@ -5,16 +5,22 @@ import { createTelegramPlatform } from "@/lib/platform/telegram";
 import { createWebPlatform } from "@/lib/platform/web";
 import type { TelegramWebApp } from "@/lib/telegram/webapp";
 
-const { telegramState } = vi.hoisted(() => ({
+const { telegramState, inTelegramEnvironment } = vi.hoisted(() => ({
   telegramState: { webApp: undefined as TelegramWebApp | undefined },
+  inTelegramEnvironment: { value: false },
 }));
 
 vi.mock("@/components/telegram-provider", () => ({
   useTelegram: () => telegramState,
 }));
 
+vi.mock("@/lib/telegram/webapp", () => ({
+  isTelegramEnvironment: () => inTelegramEnvironment.value,
+}));
+
 afterEach(() => {
   telegramState.webApp = undefined;
+  inTelegramEnvironment.value = false;
   vi.restoreAllMocks();
 });
 
@@ -149,6 +155,19 @@ describe("createTelegramPlatform", () => {
     );
     vi.unstubAllGlobals();
   });
+
+  it("no-ops haptics and share while the SDK hasn't loaded yet", async () => {
+    const platform = createTelegramPlatform(undefined);
+
+    expect(() => {
+      platform.haptics.impact("light");
+      platform.haptics.notify("success");
+      platform.haptics.selection();
+    }).not.toThrow();
+    await expect(
+      platform.share.recipe({ id: "r1", title: "Soup", url: "u" }),
+    ).resolves.toBe("shared");
+  });
 });
 
 describe("useFeature", () => {
@@ -192,5 +211,23 @@ describe("useFeature", () => {
       push: false,
       install: false,
     });
+  });
+
+  it("disables those surfaces in Telegram even before the SDK script has loaded", () => {
+    // isTelegramEnvironment() is true (launch params / remembered flag) but
+    // TelegramProvider's async SDK load hasn't populated webApp yet — feature
+    // gating must not fall back to the web defaults during that window.
+    inTelegramEnvironment.value = true;
+    telegramState.webApp = undefined;
+
+    const { result } = renderHook(
+      () => ({
+        linking: useFeature("accountLinking"),
+        push: useFeature("pushNotifications"),
+      }),
+      { wrapper: PlatformProvider },
+    );
+
+    expect(result.current).toEqual({ linking: false, push: false });
   });
 });
