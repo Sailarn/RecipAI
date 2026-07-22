@@ -171,6 +171,24 @@ export function isTelegramEnvironment(): boolean {
 }
 
 /**
+ * The raw `tgWebAppData` launch hash Telegram appends to the URL, decoded
+ * once. This is the same payload `webApp.initData` holds once the SDK has
+ * caught up — reading it directly lets a deep link resolve (a start param,
+ * or a full sign-in) before, or even without, the SDK object ever populating.
+ */
+function getLaunchDataFromHash(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const source = `${window.location.hash}&${window.location.search}`;
+  const match = source.match(/tgWebAppData=([^&]+)/);
+  if (!match) return undefined;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * The Mini App launch `start_param` (from a `?startapp=…` deep link), read
  * synchronously so a deep link can be resolved before the SDK finishes loading.
  * Prefers the live SDK; otherwise parses it out of the `tgWebAppData` launch
@@ -179,19 +197,27 @@ export function isTelegramEnvironment(): boolean {
 export function getLaunchStartParam(): string | undefined {
   const webApp = getTelegramWebApp();
   if (webApp) return webApp.initDataUnsafe.start_param;
-  if (typeof window === "undefined") return undefined;
-
-  const source = `${window.location.hash}&${window.location.search}`;
-  const match = source.match(/tgWebAppData=([^&]+)/);
-  if (!match) return undefined;
+  const raw = getLaunchDataFromHash();
+  if (!raw) return undefined;
   try {
-    return (
-      new URLSearchParams(decodeURIComponent(match[1])).get("start_param") ??
-      undefined
-    );
+    return new URLSearchParams(raw).get("start_param") ?? undefined;
   } catch {
     return undefined;
   }
+}
+
+/**
+ * The raw `initData` payload Telegram signs for this launch — Telegram can
+ * populate `webApp.initData` *after* the SDK script's `load` event fires
+ * (confirmed on deep-link launches specifically — see gotchas.md), so a
+ * caller that needs initData right away (sign-in) shouldn't wait on the SDK
+ * object resolving. Falls back to the `tgWebAppData` launch hash, which
+ * carries the identical payload and is available from the first paint.
+ */
+export function getLaunchInitData(): string | undefined {
+  const webApp = getTelegramWebApp();
+  if (webApp) return webApp.initData;
+  return getLaunchDataFromHash();
 }
 
 /**

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TelegramProvider, useTelegram } from "@/components/telegram-provider";
 import type { TelegramWebApp } from "@/lib/telegram/webapp";
@@ -106,11 +106,13 @@ describe("TelegramProvider", () => {
     };
     setWebApp(webApp);
 
-    render(
-      <TelegramProvider>
-        <Probe />
-      </TelegramProvider>,
-    );
+    await act(async () => {
+      render(
+        <TelegramProvider>
+          <Probe />
+        </TelegramProvider>,
+      );
+    });
 
     expect(screen.getByTestId("is-telegram").textContent).toBe("false");
 
@@ -118,7 +120,9 @@ describe("TelegramProvider", () => {
     webApp.initData = "user=1&hash=abc";
     webApp.initDataUnsafe = { user: { id: 42, first_name: "Ada" } };
 
-    await vi.advanceTimersByTimeAsync(5000);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
 
     expect(screen.getByTestId("is-telegram").textContent).toBe("true");
     expect(screen.getByTestId("user-id").textContent).toBe("42");
@@ -133,13 +137,17 @@ describe("TelegramProvider", () => {
       initDataUnsafe: {},
     });
 
-    render(
-      <TelegramProvider>
-        <Probe />
-      </TelegramProvider>,
-    );
+    await act(async () => {
+      render(
+        <TelegramProvider>
+          <Probe />
+        </TelegramProvider>,
+      );
+    });
 
-    await vi.advanceTimersByTimeAsync(10_000);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
 
     expect(screen.getByTestId("is-telegram").textContent).toBe("false");
   });

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  getLaunchInitData,
   getLaunchStartParam,
   getTelegramWebApp,
   isTelegramEnvironment,
@@ -109,6 +110,34 @@ describe("getLaunchStartParam", () => {
     window.location.hash = `#tgWebAppData=${encodeURIComponent("auth_date=1&hash=abc")}`;
 
     expect(getLaunchStartParam()).toBeUndefined();
+  });
+});
+
+describe("getLaunchInitData", () => {
+  it("reads initData from the live SDK when loaded", () => {
+    setWebApp({ initData: "user=1&hash=abc" });
+
+    expect(getLaunchInitData()).toBe("user=1&hash=abc");
+  });
+
+  it("falls back to the launch hash when the SDK hasn't populated initData yet", () => {
+    // Reproduces the reported bug: the WebApp object can exist with an empty
+    // initData for a while after the SDK script loads (deep-link launches
+    // specifically — see gotchas.md). getLaunchInitData must not depend on
+    // the SDK resolving at all — it reads the identical payload straight off
+    // the URL, available from the very first paint.
+    setWebApp({ initData: "" });
+    const raw = "auth_date=1&start_param=recipe_xyz&hash=abc";
+    window.location.hash = `#tgWebAppData=${encodeURIComponent(raw)}&tgWebAppVersion=8.0`;
+
+    expect(getLaunchInitData()).toBe(raw);
+  });
+
+  it("returns undefined when there is no launch data at all", () => {
+    setWebApp(undefined);
+    window.location.hash = "";
+
+    expect(getLaunchInitData()).toBeUndefined();
   });
 });
 

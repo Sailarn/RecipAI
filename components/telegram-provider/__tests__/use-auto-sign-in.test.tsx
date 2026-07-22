@@ -30,6 +30,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks();
+  window.location.hash = "";
 });
 
 describe("useTelegramAutoSignIn", () => {
@@ -73,5 +74,21 @@ describe("useTelegramAutoSignIn", () => {
 
     expect(result.current).toBe("signed-in");
     expect(signInWithMiniApp).not.toHaveBeenCalled();
+  });
+
+  it("signs in from the launch hash when no WebApp has resolved yet (deep-link account creation)", async () => {
+    // The bug this covers: a shared-recipe deep link never got an account
+    // created because the hook previously required a resolved WebApp object
+    // before attempting sign-in at all — see gotchas.md. The launch hash
+    // carries the identical initData payload and is available immediately.
+    window.location.hash =
+      "#tgWebAppData=user%3D1%26hash%3Dabc%26start_param%3Drecipe_x";
+
+    const { result } = renderHook(() => useTelegramAutoSignIn(undefined));
+
+    await waitFor(() => expect(result.current).toBe("signed-in"));
+    expect(signInWithMiniApp).toHaveBeenCalledWith(
+      "user=1&hash=abc&start_param=recipe_x",
+    );
   });
 });

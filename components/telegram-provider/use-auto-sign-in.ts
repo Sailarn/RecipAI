@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
-import type { TelegramWebApp } from "@/lib/telegram/webapp";
+import { getLaunchInitData, type TelegramWebApp } from "@/lib/telegram/webapp";
 
 export type AutoSignInStatus = "idle" | "pending" | "signed-in" | "failed";
 
@@ -23,16 +23,25 @@ export function useTelegramAutoSignIn(
   const attempted = useRef(false);
 
   useEffect(() => {
-    if (!webApp || attempted.current || isPending) return;
+    if (attempted.current || isPending) return;
     if (session) {
       setStatus("signed-in");
       return;
     }
 
+    // Prefer the resolved SDK's initData, but don't wait on it: Telegram can
+    // populate webApp.initData *after* the SDK script's `load` event —
+    // confirmed on deep-link launches specifically (see gotchas.md) — and
+    // waiting for `webApp` here left a shared-recipe deep link's account
+    // never created. The launch hash carries the identical payload and is
+    // available from the first paint.
+    const initData = webApp?.initData || getLaunchInitData();
+    if (!initData) return;
+
     attempted.current = true;
     setStatus("pending");
     authClient
-      .signInWithMiniApp(webApp.initData)
+      .signInWithMiniApp(initData)
       .then((result) => {
         if (result.error) {
           setStatus("failed");
