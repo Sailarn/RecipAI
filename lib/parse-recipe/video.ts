@@ -1,4 +1,4 @@
-import { callAiForRecipe } from "@/lib/ai";
+import { type AiRecipeCaller, callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchSocialContent, type SocialContent } from "@/lib/scrapers/apify";
 import { captureError, log, trackEvent } from "@/lib/telemetry";
@@ -193,6 +193,7 @@ async function parseSocialContent(
   url: string,
   content: SocialContent,
   startedAt: number,
+  aiCaller: AiRecipeCaller,
 ): Promise<ParsedRecipe> {
   enforceDurationLimit(content);
   let transcript = await getTranscript(content);
@@ -212,11 +213,9 @@ async function parseSocialContent(
   }
 
   const prompt = buildSocialPrompt(content, transcript);
-  const recipe = requireCompleteRecipe(
-    await callAiForRecipe(prompt),
-    "social",
-    { url },
-  );
+  const recipe = requireCompleteRecipe(await aiCaller(prompt), "social", {
+    url,
+  });
 
   if (!recipe.imageUrl) {
     recipe.imageUrl = content.thumbnailUrl ?? content.imageUrls[0];
@@ -232,7 +231,10 @@ async function parseSocialContent(
   return parsedRecipe;
 }
 
-export async function parseVideoRecipe(url: string): Promise<ParsedRecipe> {
+export async function parseVideoRecipe(
+  url: string,
+  aiCaller: AiRecipeCaller = callAiForRecipe,
+): Promise<ParsedRecipe> {
   const startedAt = Date.now();
   const platform = getSocialPlatform(url);
   if (!platform) {
@@ -248,7 +250,7 @@ export async function parseVideoRecipe(url: string): Promise<ParsedRecipe> {
   let content: SocialContent | undefined;
   try {
     content = await fetchSocialContent(url);
-    return await parseSocialContent(url, content, startedAt);
+    return await parseSocialContent(url, content, startedAt, aiCaller);
   } catch (error) {
     logFailure({
       platform: content?.platform ?? platform,

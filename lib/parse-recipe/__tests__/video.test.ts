@@ -299,4 +299,23 @@ describe("parseVideoRecipe", () => {
     });
     expect(captureError).not.toHaveBeenCalled();
   });
+
+  it("uses the injected aiCaller instead of callAiForRecipe when one is passed", async () => {
+    const url = "https://www.instagram.com/p/abc123/";
+    vi.mocked(fetchSocialContent).mockResolvedValue({
+      platform: "instagram",
+      url,
+      caption: "Tomato toast: bread, tomatoes, olive oil.",
+      imageUrls: ["https://cdn/post.jpg"],
+      thumbnailUrl: "https://cdn/post.jpg",
+    });
+    const customCaller = vi.fn().mockResolvedValue(parsedRecipe);
+
+    await parseVideoRecipe(url, customCaller);
+
+    expect(customCaller).toHaveBeenCalledWith(
+      expect.stringContaining("<caption>"),
+    );
+    expect(callAiForRecipe).not.toHaveBeenCalled();
+  });
 });
