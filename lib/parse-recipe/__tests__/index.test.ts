@@ -56,4 +56,33 @@ describe("parseRecipeFromUrl", () => {
     expect(parseVideoRecipe).not.toHaveBeenCalled();
     expect(result).toEqual(mockRecipe);
   });
+
+  it("forwards a custom aiCaller to parseWebRecipe", async () => {
+    vi.mocked(isSocialUrl).mockReturnValue(false);
+    vi.mocked(parseWebRecipe).mockResolvedValue(mockRecipe);
+    const customCaller = vi.fn();
+
+    await parseRecipeFromUrl("https://example.com/recipe", customCaller);
+
+    expect(parseWebRecipe).toHaveBeenCalledWith(
+      "https://example.com/recipe",
+      customCaller,
+    );
+  });
+
+  it("forwards a custom aiCaller to parseVideoRecipe", async () => {
+    vi.mocked(isSocialUrl).mockReturnValue(true);
+    vi.mocked(parseVideoRecipe).mockResolvedValue(mockRecipe);
+    const customCaller = vi.fn();
+
+    await parseRecipeFromUrl(
+      "https://www.instagram.com/reel/ABC/",
+      customCaller,
+    );
+
+    expect(parseVideoRecipe).toHaveBeenCalledWith(
+      "https://www.instagram.com/reel/ABC/",
+      customCaller,
+    );
+  });
 });

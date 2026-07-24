@@ -116,6 +116,8 @@ graph LR
 
 All Gemini models use `responseMimeType: "application/json"`. OpenAI uses `response_format: { type: "json_object" }`. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without it the chain ends at `gemini-2.5-flash-lite`.
 
+`parseWebRecipe`, `parseVideoRecipe`, and `parseRecipeFromUrl` all accept an optional second `aiCaller` parameter (defaults to `callAiForRecipe`). No production caller passes one — it exists solely so the local model-comparison harness (`scripts/local/model-eval/`, gitignored) can run the exact same scrape/trim/prompt/validate pipeline against a different provider without duplicating that logic.
+
 ---
 
 ## Parse queue (`app/api/parse-queue/`)
