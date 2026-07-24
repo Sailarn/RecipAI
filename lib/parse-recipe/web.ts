@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { callAiForRecipe } from "@/lib/ai";
+import { type AiRecipeCaller, callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchHtmlWithPhantomJs } from "@/lib/scrapers/phantomjs";
 import { fetchHtmlWithScrapeDo } from "@/lib/scrapers/scrape-do";
@@ -111,7 +111,10 @@ function logParsePipeline(
   });
 }
 
-export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
+export async function parseWebRecipe(
+  url: string,
+  aiCaller: AiRecipeCaller = callAiForRecipe,
+): Promise<ParsedRecipe> {
   const startedAt = Date.now();
   let scraper: "phantomjs" | "scrape-do" = "phantomjs";
   let html: string;
@@ -165,7 +168,7 @@ export async function parseWebRecipe(url: string): Promise<ParsedRecipe> {
   }
 
   const recipe = requireCompleteRecipe(
-    await callAiForRecipe(buildWebPrompt(textContent)),
+    await aiCaller(buildWebPrompt(textContent)),
     "page",
     { url },
   );
