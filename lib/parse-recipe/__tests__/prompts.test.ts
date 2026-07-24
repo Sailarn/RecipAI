@@ -55,4 +55,27 @@ describe("recipe extraction prompts", () => {
     expect(prompt).toContain("oz -> g");
     expect(prompt).toContain("NEVER cup, oz, lb, fl oz, pint, quart");
   });
+
+  it.each([
+    ["web", buildWebPrompt("page content")],
+    ["photo", buildPhotoPrompt()],
+    [
+      "social",
+      buildSocialPrompt(
+        { platform: "youtube", imageUrls: [] },
+        "recipe transcript",
+      ),
+    ],
+  ])("instructs the %s extractor to split a compound ingredient line into one object per item", (_, prompt) => {
+    expect(prompt).toContain("salt, pepper, chicken seasoning");
+    expect(prompt).toContain("one ingredient object PER item");
+    expect(prompt).toContain("either/or choice");
+  });
+
+  it("instructs the item/modifiers schema to recognize noun-after preparation words", () => {
+    const prompt = buildWebPrompt("page content");
+
+    expect(prompt).toContain("lamb mince");
+    expect(prompt).toContain("MINCED in modifiers");
+  });
 });
