@@ -98,6 +98,84 @@ describe("matchVocabId", () => {
     });
   });
 
+  describe("exact name/alias containment beats fuzzy token fallback", () => {
+    it("resolves 'white onion' to onion instead of a modifier-word alias match", async () => {
+      mockToArray.mockResolvedValue([
+        makeEntry("onion", "onion", "цибуля"),
+        makeEntry("all-purpose-flour", "all-purpose flour", "борошно", {
+          en: ["white flour"],
+        }),
+      ]);
+
+      const result = await matchVocabId("white onion");
+
+      expect(result).toBe("onion");
+    });
+
+    it("resolves 'caster sugar' to sugar instead of an unrelated substring alias match", async () => {
+      // 3 entries — bust cache
+      mockToArray.mockResolvedValue([
+        makeEntry("sugar", "sugar", "цукор"),
+        makeEntry("worcestershire-sauce", "worcestershire sauce", undefined, {
+          en: ["worcestershire"],
+        }),
+        makeEntry("salt", "salt", "сіль"),
+      ]);
+
+      const result = await matchVocabId("caster sugar");
+
+      expect(result).toBe("sugar");
+    });
+
+    it("resolves a plural ingredient text via a registered plural alias", async () => {
+      // 4 entries — bust cache
+      mockToArray.mockResolvedValue([
+        makeEntry("mushroom", "mushroom", "гриб", { en: ["mushrooms"] }),
+        makeEntry("dried-apricot", "dried apricot", "курага"),
+        makeEntry("salt", "salt", "сіль"),
+        makeEntry("garlic", "garlic", "часник"),
+      ]);
+
+      const result = await matchVocabId("dried mushrooms");
+
+      expect(result).toBe("mushroom");
+    });
+
+    it("prefers the longer, more specific alias over a shorter one that also matches", async () => {
+      // 5 entries — bust cache (previous test also used 4)
+      mockToArray.mockResolvedValue([
+        makeEntry("cream", "cream", "вершки"),
+        makeEntry("heavy-cream", "heavy cream", undefined, {
+          en: ["heavy cream"],
+        }),
+        makeEntry("salt", "salt", "сіль"),
+        makeEntry("garlic", "garlic", "часник"),
+        makeEntry("butter", "butter", "вершкове масло"),
+      ]);
+
+      const result = await matchVocabId("heavy cream");
+
+      expect(result).toBe("heavy-cream");
+    });
+
+    it("does not match a name inside a longer unrelated word (word-boundary guard)", async () => {
+      // 7 entries — bust cache (previous test used 5, next uses 6)
+      mockToArray.mockResolvedValue([
+        makeEntry("egg", "egg", "яйце"),
+        makeEntry("eggplant", "eggplant", "баклажан"),
+        makeEntry("salt", "salt", "сіль"),
+        makeEntry("garlic", "garlic", "часник"),
+        makeEntry("butter", "butter", "вершкове масло"),
+        makeEntry("carrot", "carrot", "морква"),
+        makeEntry("cabbage", "cabbage", "капуста"),
+      ]);
+
+      const result = await matchVocabId("eggplant");
+
+      expect(result).toBe("eggplant");
+    });
+  });
+
   describe("en head key", () => {
     it("resolves via the en head when the item string itself does not match", async () => {
       // 6 entries — bust cache

@@ -4,19 +4,21 @@ import { INGREDIENT_STATUS } from "@/lib/db/schema";
 
 const FUSE_THRESHOLD = 0.2;
 
-let fuseCache: {
+type VocabIndex = {
   index: Fuse<{ id: string; text: string }>;
-  size: number;
-} | null = null;
+  items: Array<{ id: string; text: string }>;
+};
 
-async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
+let fuseCache: (VocabIndex & { size: number }) | null = null;
+
+async function getFuseIndex(): Promise<VocabIndex> {
   const vocab = await db.ingredients
     .filter(
       (ingredient) =>
         !ingredient.status || ingredient.status === INGREDIENT_STATUS.CONFIRMED,
     )
     .toArray();
-  if (fuseCache && fuseCache.size === vocab.length) return fuseCache.index;
+  if (fuseCache && fuseCache.size === vocab.length) return fuseCache;
   const items = vocab.flatMap((vocabEntry) => [
     { id: vocabEntry.id, text: vocabEntry.en },
     ...(vocabEntry.ua ? [{ id: vocabEntry.id, text: vocabEntry.ua }] : []),
@@ -34,8 +36,8 @@ async function getFuseIndex(): Promise<Fuse<{ id: string; text: string }>> {
     threshold: FUSE_THRESHOLD,
     includeScore: true,
   });
-  fuseCache = { index, size: vocab.length };
-  return index;
+  fuseCache = { index, items, size: vocab.length };
+  return fuseCache;
 }
 
 function preprocessIngredient(text: string): string {
@@ -58,14 +60,51 @@ function pickBestId(
   return (slugHit ?? tied[0]).item.id;
 }
 
-function fuseHit(
-  fuse: Fuse<{ id: string; text: string }>,
+function escapeRegExpChars(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Exact whole-word/phrase containment beats fuzzy scoring outright: if the
+// ingredient text literally contains a vocab name/alias as a whole word or
+// phrase, that entry wins with no Fuse search involved. This prevents a
+// modifier word from outscoring the real noun purely because Fuse compares
+// tokens independently — "white onion" fuzzy-matching alias "white flour" as
+// readily as it matches "onion" itself, just because the modifier comes
+// first. Boundaries use \p{L}/\p{N} (not \b, which is ASCII-only and doesn't
+// bound Cyrillic phrases at all) so "egg" can't match inside "eggplant".
+// Prefers the LONGEST matching name so a short generic alias ("cream") can't
+// shadow a more specific one that also matches ("heavy cream"); on a tie,
+// prefers the slug id over a uuid provisional, same as pickBestId.
+function exactNameMatch(
   text: string,
+  items: Array<{ id: string; text: string }>,
 ): string | null {
+  const lower = text.toLowerCase();
+  const matches: Array<{ id: string; length: number }> = [];
+  for (const item of items) {
+    const name = item.text.trim().toLowerCase();
+    if (!name) continue;
+    const pattern = new RegExp(
+      `(?<![\\p{L}\\p{N}])${escapeRegExpChars(name)}(?![\\p{L}\\p{N}])`,
+      "u",
+    );
+    if (pattern.test(lower)) matches.push({ id: item.id, length: name.length });
+  }
+  if (matches.length === 0) return null;
+  const maxLength = Math.max(...matches.map((match) => match.length));
+  const longest = matches.filter((match) => match.length === maxLength);
+  const slugMatch = longest.find((match) => !/^[0-9a-f]{8}-/.test(match.id));
+  return (slugMatch ?? longest[0]).id;
+}
+
+function fuseHit(vocabIndex: VocabIndex, text: string): string | null {
   const preprocessed = preprocessIngredient(text);
 
+  const exactMatch = exactNameMatch(preprocessed, vocabIndex.items);
+  if (exactMatch) return exactMatch;
+
   // Try the full preprocessed text first
-  const full = fuse.search(preprocessed);
+  const full = vocabIndex.index.search(preprocessed);
   if (full.length > 0) return pickBestId(full);
 
   // Fall back to individual token search — handles multi-word phrases like
@@ -77,7 +116,7 @@ function fuseHit(
     .map((token) => token.replace(/[.,]/g, ""))
     .filter((token) => token.length > 3);
   for (const token of tokens) {
-    const fuseResults = fuse.search(token);
+    const fuseResults = vocabIndex.index.search(token);
     if (
       fuseResults.length > 0 &&
       fuseResults[0].item.text.trim().split(/\s+/).length <= 2
@@ -101,10 +140,10 @@ export async function matchVocabId(
   ua?: string | null,
   en?: string | null,
 ): Promise<string | null> {
-  const fuse = await getFuseIndex();
+  const vocabIndex = await getFuseIndex();
   return (
-    (en ? fuseHit(fuse, en) : null) ??
-    fuseHit(fuse, text) ??
-    (ua ? fuseHit(fuse, ua) : null)
+    (en ? fuseHit(vocabIndex, en) : null) ??
+    fuseHit(vocabIndex, text) ??
+    (ua ? fuseHit(vocabIndex, ua) : null)
   );
 }
