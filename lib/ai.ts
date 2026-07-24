@@ -144,6 +144,10 @@ async function generateJson<T>(
   throw lastError;
 }
 
+export type AiRecipeCaller = (
+  prompt: string,
+) => Promise<RecipeExtractionResult>;
+
 export async function callAiForRecipe(
   prompt: string,
 ): Promise<RecipeExtractionResult> {
