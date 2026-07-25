@@ -48,6 +48,8 @@ Every URL parse goes through the AI. The former schema.org JSON-LD fast path was
 
 **Text limit:** the final text is sliced to 25,000 characters before being sent to the AI.
 
+**Scraper fallback is logged, not silent.** `parseWebRecipe` accepts an optional second `htmlFetcher` parameter (defaults to the PhantomJsCloud→scrape.do chain above), mirroring the `aiCaller` seam on the AI model chain below — no production caller passes one; it exists so `scripts/local/model-eval/` (gitignored) can substitute a local Playwright render instead of spending scraper credits on every provider it tests. When PhantomJsCloud fails and the chain falls through to scrape.do, the underlying PhantomJS error is logged (`log("warn", "phantomjs_fallback", { url, error })`) rather than discarded — a prior version swallowed it silently, which made a real PhantomJsCloud "out of credits" (402) failure indistinguishable from any other cause once scrape.do's own error was all that surfaced.
+
 ---
 
 ## Social pipeline (`lib/parse-recipe/video.ts`)
@@ -104,17 +106,23 @@ graph LR
     A[generateJson] --> B[gemini-2.5-flash]
     B -->|fail| C[gemini-2.0-flash]
     C -->|fail| D[gemini-2.5-flash-lite]
-    D -->|fail| E{OPENAI_API_KEY set?}
+    D -->|fail| DS{context=recipe AND<br/>DEEPSEEK_API_KEY set?}
+    DS -->|yes| DM[deepseek-v4-flash]
+    DS -->|no| E{OPENAI_API_KEY set?}
+    DM -->|fail| E
     E -->|yes| F[gpt-4o-mini]
     E -->|no| G[Throw last error]
     F -->|fail| G
     B -->|ok| H[ParsedRecipe]
     C -->|ok| H
     D -->|ok| H
+    DM -->|ok| H
     F -->|ok| H
 ```
 
-All Gemini models use `responseMimeType: "application/json"`. OpenAI uses `response_format: { type: "json_object" }`. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without it the chain ends at `gemini-2.5-flash-lite`.
+All Gemini models use `responseMimeType: "application/json"`. DeepSeek and OpenAI both use `response_format: { type: "json_object" }` via a shared `callOpenAiCompatibleJson` helper (same request shape, different base URL/model/key), with a 90s timeout on each — neither had an explicit timeout before, and DeepSeek's heavier `deepseek-v4-pro` tier was observed hanging past 2 minutes in side-by-side model testing (`scripts/local/model-eval`), which is why production uses the faster `deepseek-v4-flash` specifically.
+
+DeepSeek is skipped entirely for `context: "photo"` (its chat API has no image input) and whenever `DEEPSEEK_API_KEY` is unset — the chain falls straight through to the OpenAI check in either case. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without either optional key, the chain ends at `gemini-2.5-flash-lite`.
 
 `parseWebRecipe`, `parseVideoRecipe`, and `parseRecipeFromUrl` all accept an optional second `aiCaller` parameter (defaults to `callAiForRecipe`). No production caller passes one — it exists solely so the local model-comparison harness (`scripts/local/model-eval/`, gitignored) can run the exact same scrape/trim/prompt/validate pipeline against a different provider without duplicating that logic.
 

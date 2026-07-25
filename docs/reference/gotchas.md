@@ -113,6 +113,9 @@ The `parse_pipeline` Axiom log fires after a recipe is accepted, so it is not th
 **Failed extractions have a forensic `parse_incomplete` record.**
 Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-independent) with `source`, `reason` (`not_recipe` / `no_ingredients` / `no_instructions`), the source URL when available, and an optional `jobId`. Under-extractions also include the full partial `result`; a failed job never persists that payload, so this log is the only record of what the model produced. Expected web/social under-extractions are not sent to Sentry, while the synchronous photo route also captures its terminal error. Query Axiom to deep-dive a bad extraction, not just count it.
 
+**A PhantomJsCloud failure used to be invisible once scrape.do also failed.**
+`parseWebRecipe` (`lib/parse-recipe/web.ts`) tries PhantomJsCloud first and only falls back to scrape.do on error. The fallback `catch` used to discard the PhantomJS error entirely, so if scrape.do *also* failed (e.g. its own 502), the only error you'd ever see was scrape.do's — with no way to tell whether PhantomJS failed for the same reason, a different one, or was simply out of credits. Real incident: PhantomJsCloud returned `402 OUT OF CREDITS` on every call, which cascaded to scrape.do and looked identical to scrape.do just being flaky. Fixed by logging the swallowed PhantomJS error (`log("warn", "phantomjs_fallback", { url, error })`) before attempting scrape.do — check for this event first when web parses are failing.
+
 ---
 
 ## Overflow detection

@@ -20,7 +20,8 @@ Developer-supplied variables live in `.env.local` (never committed). Copy `.env.
 | Variable | Required | Description |
 |---|---|---|
 | `GEMINI_API_KEY` | Yes | Google Gemini API key. The app cycles through the Gemini model chain defined in `lib/ai.ts` until one succeeds. |
-| `OPENAI_API_KEY` | No | OpenAI API key. Only used as a last resort after every Gemini model in the chain fails. Uses `gpt-4o-mini`. Omit to disable the fallback entirely. |
+| `DEEPSEEK_API_KEY` | No | DeepSeek API key. Tried after every Gemini model fails, before the OpenAI fallback — recipe (web/video) parses only, never photo (no image input support). Uses `deepseek-v4-flash`. Omit to skip this tier entirely. |
+| `OPENAI_API_KEY` | No | OpenAI API key. Only used as a last resort after every Gemini model (and DeepSeek, when configured) fails. Uses `gpt-4o-mini`. Omit to disable the fallback entirely. |
 
 ---
 
