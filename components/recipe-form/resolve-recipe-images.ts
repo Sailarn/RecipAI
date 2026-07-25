@@ -1,3 +1,4 @@
+import { captureError } from "@/lib/telemetry";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 
 interface UploadOptions {
@@ -51,7 +52,8 @@ export async function resolveMainImage({
       imageFileId: uploaded.fileId,
       uploadFailed: false,
     };
-  } catch {
+  } catch (caughtError) {
+    captureError(caughtError, { tags: { area: "recipe-image-upload" } });
     return {
       imageUrl: currentImageUrl,
       imageFileId: previousImageFileId,
@@ -74,14 +76,20 @@ interface ResolveInstructionImagesInput<T extends InstructionWithImage> {
   uploadOptions?: UploadOptions;
 }
 
+interface ResolvedInstructions<T> {
+  instructions: T[];
+  uploadFailed: boolean;
+}
+
 // Same upload-before-write treatment as resolveMainImage, applied per step photo.
 export async function resolveInstructionImages<T extends InstructionWithImage>({
   instructions,
   instructionRowIds,
   pendingStepFiles,
   uploadOptions,
-}: ResolveInstructionImagesInput<T>): Promise<T[]> {
+}: ResolveInstructionImagesInput<T>): Promise<ResolvedInstructions<T>> {
   const resolved: T[] = [];
+  let uploadFailed = false;
   for (const instruction of instructions) {
     const stepId = instructionRowIds[instruction.order - 1];
     const stepFile = stepId ? pendingStepFiles[stepId] : undefined;
@@ -99,9 +107,11 @@ export async function resolveInstructionImages<T extends InstructionWithImage>({
     try {
       const uploaded = await uploadImage(source, uploadOptions);
       resolved.push({ ...instruction, imageUrl: uploaded.url });
-    } catch {
+    } catch (caughtError) {
+      captureError(caughtError, { tags: { area: "recipe-image-upload" } });
+      uploadFailed = true;
       resolved.push(instruction);
     }
   }
-  return resolved;
+  return { instructions: resolved, uploadFailed };
 }

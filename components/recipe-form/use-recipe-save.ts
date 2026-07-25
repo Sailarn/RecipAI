@@ -77,7 +77,10 @@ export function useRecipeSave(recipe?: Recipe) {
       previousImageFileId: recipe?.imageFileId,
       uploadOptions,
     });
-    const resolvedInstructions = await resolveInstructionImages({
+    const {
+      instructions: resolvedInstructions,
+      uploadFailed: stepUploadFailed,
+    } = await resolveInstructionImages({
       instructions,
       instructionRowIds: instructionRows.map((row) => row.stepId),
       pendingStepFiles: pendingStepFiles.current,
@@ -136,14 +139,19 @@ export function useRecipeSave(recipe?: Recipe) {
       return;
     }
 
-    if (mainImage.uploadFailed) {
+    // A failed photo upload keeps the user on this form (no auto-navigate) so
+    // they can immediately retry — the pending file refs are untouched, and
+    // the text/ingredient/step data is already durably saved either way.
+    if (mainImage.uploadFailed || stepUploadFailed) {
       haptics.notify("error");
       setImageError(
-        "Recipe saved, but the photo couldn't be uploaded — try re-adding it from Edit.",
+        "Recipe saved, but a photo couldn't be uploaded — check your connection and save again to retry.",
       );
-    } else {
-      haptics.notify("success");
+      setSaveState("idle");
+      return;
     }
+
+    haptics.notify("success");
     setSaveState("saved");
 
     setTimeout(() => {

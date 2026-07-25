@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { captureError } from "@/lib/telemetry";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import {
   resolveInstructionImages,
@@ -9,6 +10,10 @@ vi.mock("@/lib/upload/images", () => ({
   uploadImage: vi.fn(),
   deleteImage: vi.fn(),
   isImageKitUrl: vi.fn(),
+}));
+
+vi.mock("@/lib/telemetry", () => ({
+  captureError: vi.fn(),
 }));
 
 const IMAGEKIT_URL = "https://ik.imagekit.io/test/recipe.jpg";
@@ -81,9 +86,10 @@ describe("resolveMainImage", () => {
     expect(result.imageUrl).toBe(IMAGEKIT_URL);
   });
 
-  it("keeps the previous image and reports failure without deleting anything when the upload fails", async () => {
+  it("keeps the previous image, reports failure, and captures the error without deleting anything when the upload fails", async () => {
     const file = new File(["x"], "photo.png", { type: "image/png" });
-    vi.mocked(uploadImage).mockRejectedValue(new Error("network error"));
+    const uploadError = new Error("network error");
+    vi.mocked(uploadImage).mockRejectedValue(uploadError);
 
     const result = await resolveMainImage({
       pendingFile: file,
@@ -97,6 +103,7 @@ describe("resolveMainImage", () => {
       imageFileId: "old-file",
       uploadFailed: true,
     });
+    expect(captureError).toHaveBeenCalledWith(uploadError, expect.anything());
   });
 
   it("is a no-op when there is neither a pending file nor a URL", async () => {
@@ -130,7 +137,8 @@ describe("resolveInstructionImages", () => {
     });
 
     expect(uploadImage).toHaveBeenCalledWith(file, undefined);
-    expect(result[0].imageUrl).toBe(IMAGEKIT_URL);
+    expect(result.instructions[0].imageUrl).toBe(IMAGEKIT_URL);
+    expect(result.uploadFailed).toBe(false);
   });
 
   it("uploads a non-ImageKit step imageUrl when there's no pending file", async () => {
@@ -146,7 +154,8 @@ describe("resolveInstructionImages", () => {
     });
 
     expect(uploadImage).toHaveBeenCalledWith(CDN_URL, undefined);
-    expect(result[0].imageUrl).toBe(IMAGEKIT_URL);
+    expect(result.instructions[0].imageUrl).toBe(IMAGEKIT_URL);
+    expect(result.uploadFailed).toBe(false);
   });
 
   it("leaves a step untouched when it has no image at all", async () => {
@@ -157,11 +166,13 @@ describe("resolveInstructionImages", () => {
     });
 
     expect(uploadImage).not.toHaveBeenCalled();
-    expect(result[0].imageUrl).toBeUndefined();
+    expect(result.instructions[0].imageUrl).toBeUndefined();
+    expect(result.uploadFailed).toBe(false);
   });
 
-  it("keeps the step's existing imageUrl when its upload fails", async () => {
-    vi.mocked(uploadImage).mockRejectedValue(new Error("network error"));
+  it("keeps the step's existing imageUrl, reports failure, and captures the error when its upload fails", async () => {
+    const uploadError = new Error("network error");
+    vi.mocked(uploadImage).mockRejectedValue(uploadError);
 
     const result = await resolveInstructionImages({
       instructions: [{ order: 1, instruction: "Mix", imageUrl: CDN_URL }],
@@ -169,6 +180,8 @@ describe("resolveInstructionImages", () => {
       pendingStepFiles: {},
     });
 
-    expect(result[0].imageUrl).toBe(CDN_URL);
+    expect(result.instructions[0].imageUrl).toBe(CDN_URL);
+    expect(result.uploadFailed).toBe(true);
+    expect(captureError).toHaveBeenCalledWith(uploadError, expect.anything());
   });
 });
