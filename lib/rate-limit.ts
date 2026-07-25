@@ -1,6 +1,10 @@
 import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { EMBED_RATE_LIMIT, PARSE_RATE_LIMIT } from "@/lib/api-limits";
+import {
+  EMBED_RATE_LIMIT,
+  PARSE_RATE_LIMIT,
+  UPLOAD_RATE_LIMIT,
+} from "@/lib/api-limits";
 import { redis } from "@/lib/redis";
 import { log, trackEvent } from "@/lib/telemetry";
 
@@ -73,6 +77,33 @@ export async function enforceParseRateLimit(
       const callerType = userId ? "user" : "anon";
       log("warn", "rate_limit_hit", { caller_type: callerType });
       trackEvent("rate_limit_hit", { caller_type: callerType });
+      return ApiError.rateLimited(result.resetSeconds);
+    }
+  } catch (error) {
+    ApiError.capture(error, req);
+  }
+  return null;
+}
+
+/**
+ * Enforce the anonymous image-upload limit (callers with a session or a valid
+ * upload token bypass this — see requireUploadAuthOrRateLimit). Returns a 429
+ * response when over the limit, or null to proceed. Fails open (allows) when
+ * Redis is unavailable, capturing the error — availability over strict limiting.
+ */
+export async function enforceUploadRateLimit(
+  req: Request,
+): Promise<NextResponse | null> {
+  const { limit, windowSeconds } = UPLOAD_RATE_LIMIT.ANON;
+  try {
+    const result = await rateLimit(
+      `upload:${clientKey(req)}`,
+      limit,
+      windowSeconds,
+    );
+    if (!result.allowed) {
+      log("warn", "rate_limit_hit", { caller_type: "anon" });
+      trackEvent("rate_limit_hit", { caller_type: "anon" });
       return ApiError.rateLimited(result.resetSeconds);
     }
   } catch (error) {

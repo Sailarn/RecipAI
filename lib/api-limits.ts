@@ -19,6 +19,13 @@ export const EMBED_RATE_LIMIT = {
   USER: { limit: 600, windowSeconds: 60 },
 } as const;
 
+// Anonymous image uploads only (a session or parse upload token bypasses this
+// entirely) — an edit can touch several photos in one save (cover + steps),
+// so a bit higher than the anon parse limit.
+export const UPLOAD_RATE_LIMIT = {
+  ANON: { limit: 30, windowSeconds: 3600 },
+} as const;
+
 export const COLLECTION_ERRORS = {
   NAME_REQUIRED: "name required",
   NAME_TOO_LONG: `name must be ${MAX_COLLECTION_NAME_LENGTH} characters or fewer`,

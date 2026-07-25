@@ -6,11 +6,11 @@ vi.mock("@/lib/upload/imagekit", () => ({
   },
 }));
 vi.mock("@/lib/upload/upload-auth", () => ({
-  requireUploadAuth: vi.fn(),
+  requireUploadAuthOrRateLimit: vi.fn(),
 }));
 
 import { imagekit } from "@/lib/upload/imagekit";
-import { requireUploadAuth } from "@/lib/upload/upload-auth";
+import { requireUploadAuthOrRateLimit } from "@/lib/upload/upload-auth";
 import { UPLOAD_ERRORS } from "@/lib/upload/upload-limits";
 import { POST } from "../upload/route";
 
@@ -47,13 +47,13 @@ function makeFetchResponse(
 beforeEach(() => {
   vi.clearAllMocks();
   // Default: authorised.
-  vi.mocked(requireUploadAuth).mockResolvedValue(null);
+  vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue(null);
 });
 
 describe("POST /api/images/upload", () => {
   describe("authentication", () => {
-    it("returns 401 when requireUploadAuth rejects the request", async () => {
-      vi.mocked(requireUploadAuth).mockResolvedValue(
+    it("returns 401 when requireUploadAuthOrRateLimit rejects the request", async () => {
+      vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue(
         new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
         }) as never,
@@ -64,12 +64,12 @@ describe("POST /api/images/upload", () => {
       expect(res.status).toBe(401);
     });
 
-    it("delegates auth decisions to requireUploadAuth", async () => {
+    it("delegates auth decisions to requireUploadAuthOrRateLimit", async () => {
       vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
 
       await POST(makeJsonRequest({ file: "base64data==" }));
 
-      expect(requireUploadAuth).toHaveBeenCalledOnce();
+      expect(requireUploadAuthOrRateLimit).toHaveBeenCalledOnce();
     });
   });
 
