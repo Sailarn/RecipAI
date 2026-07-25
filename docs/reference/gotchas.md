@@ -116,6 +116,14 @@ Every rejected parse emits a `parse_incomplete` Axiom log (server-side, consent-
 **A PhantomJsCloud failure used to be invisible once scrape.do also failed.**
 `parseWebRecipe` (`lib/parse-recipe/web.ts`) tries PhantomJsCloud first and only falls back to scrape.do on error. The fallback `catch` used to discard the PhantomJS error entirely, so if scrape.do *also* failed (e.g. its own 502), the only error you'd ever see was scrape.do's — with no way to tell whether PhantomJS failed for the same reason, a different one, or was simply out of credits. Real incident: PhantomJsCloud returned `402 OUT OF CREDITS` on every call, which cascaded to scrape.do and looked identical to scrape.do just being flaky. Fixed by logging the swallowed PhantomJS error (`log("warn", "phantomjs_fallback", { url, error })`) before attempting scrape.do — check for this event first when web parses are failing.
 
+**A failed recipe-photo upload used to look like a successful save.**
+Real incident: editing an existing recipe's photo (e.g. pasting a new image after an Instagram CDN photo failed to save) silently kept the *old* image — no error shown, nothing in Sentry, survived reload. Three things stacked:
+1. `POST /api/images/upload` had been hard-gated to session-or-upload-token in `36f98fa` (2026-06-01), but the upload token is minted only by the parse flow and cleared on first save (`use-recipe-save.ts`) — a plain edit has neither, so it 401s for anyone not signed in.
+2. `ApiError.unauthorized()`/`badRequest()` don't capture to Sentry (only `ApiError.internal()` does) — an auth/validation rejection is invisible there by design.
+3. `resolveMainImage`/`resolveInstructionImages` (`components/recipe-form/resolve-recipe-images.ts`) caught the upload error with a bare `catch {}` and returned the *old* URL with `uploadFailed: true` — and `use-recipe-save.ts` then reported the save as fully successful (`setSaveState("saved")`) and auto-navigated away 600ms later regardless, so the error banner it did set was never actually seen.
+
+Fixed: the upload route now falls through to a per-IP rate limit instead of a hard 401 when there's no session/token (`requireUploadAuthOrRateLimit`, `lib/upload/upload-auth.ts`) so anonymous edits work again; the resolve functions now `captureError(...)` on failure; and a failed photo upload keeps the user on the form with a persistent error instead of navigating away. When a recipe-image "silently doesn't update," check for `phantomjs_fallback`-style masking first — this exact pattern (swallow the error, report success anyway) has bitten this app twice now.
+
 ---
 
 ## Overflow detection

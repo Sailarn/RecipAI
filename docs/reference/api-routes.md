@@ -67,12 +67,12 @@ These routes back the Postgres copy of local data. Session is only needed to syn
 
 ## Images
 
-Both routes accept either a valid session **or** a short-lived upload token (minted by `POST /api/parse-queue` and stored in Redis for 30 minutes).
+Both routes accept a valid session **or** a short-lived upload token (minted by `POST /api/parse-queue` and stored in Redis for 30 minutes). `upload` additionally allows requests with neither, since a recipe edit outside the parse flow (e.g. anonymous) has no token — those instead go through a per-IP rate limit rather than being rejected outright.
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/images/upload` | Session or upload token | Upload an image to ImageKit. Accepts multipart file data or JSON containing a remote `url` or base64 `file`; the 10 MB cap applies to every source. Multipart and fetched images must be JPEG, PNG, WebP, or GIF. Returns `{ url, fileId }`. |
-| `DELETE` | `/api/images/delete` | Session or upload token | Delete an image from ImageKit by `fileId`. |
+| `POST` | `/api/images/upload` | Session or upload token, else IP rate-limited | Upload an image to ImageKit. Accepts multipart file data or JSON containing a remote `url` or base64 `file`; the 10 MB cap applies to every source. Multipart and fetched images must be JPEG, PNG, WebP, or GIF. Returns `{ url, fileId }`. Without a session/token the request still proceeds but is capped at `UPLOAD_RATE_LIMIT.ANON` (30/hour per IP, `lib/api-limits.ts`). |
+| `DELETE` | `/api/images/delete` | Session or upload token | Delete an image from ImageKit by `fileId`. Stays hard-gated (no rate-limit fallback) — deletion is already best-effort cleanup on every caller, so a rejected request just orphans a file rather than losing data. |
 
 ---
 
