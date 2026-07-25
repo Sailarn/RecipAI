@@ -17,6 +17,30 @@ const MIN_TRIMMED_CHARS = 300;
 const MIN_TRIMMED_RATIO = 0.1;
 const MAX_JSON_LD_CONTEXT_CHARS = 12000;
 
+// Injectable so the local model-eval harness can substitute a local Playwright
+// render instead of burning PhantomJS/scrape.do credits on every test run.
+export type HtmlFetcher = (url: string) => Promise<{
+  html: string;
+  scraper: string;
+}>;
+
+async function defaultHtmlFetcher(
+  url: string,
+): Promise<{ html: string; scraper: string }> {
+  try {
+    return { html: await fetchHtmlWithPhantomJs(url), scraper: "phantomjs" };
+  } catch (phantomJsError) {
+    log("warn", "phantomjs_fallback", {
+      url,
+      error:
+        phantomJsError instanceof Error
+          ? phantomJsError.message
+          : String(phantomJsError),
+    });
+    return { html: await fetchHtmlWithScrapeDo(url), scraper: "scrape-do" };
+  }
+}
+
 function bodyText($: cheerio.CheerioAPI): string {
   return $("body").text().replace(/\s+/g, " ").trim();
 }
@@ -81,7 +105,7 @@ export function extractJsonLdContext($: cheerio.CheerioAPI): string {
 // pipeline performance/cost dashboard — see docs/explanation/observability.md.
 function logParsePipeline(
   url: string,
-  scraper: "phantomjs" | "scrape-do",
+  scraper: string,
   scrapeMs: number,
   startedAt: number,
   recipe: ParsedRecipe,
@@ -114,17 +138,11 @@ function logParsePipeline(
 export async function parseWebRecipe(
   url: string,
   aiCaller: AiRecipeCaller = callAiForRecipe,
+  htmlFetcher: HtmlFetcher = defaultHtmlFetcher,
 ): Promise<ParsedRecipe> {
   const startedAt = Date.now();
-  let scraper: "phantomjs" | "scrape-do" = "phantomjs";
-  let html: string;
   const scrapeStartedAt = Date.now();
-  try {
-    html = await fetchHtmlWithPhantomJs(url);
-  } catch {
-    scraper = "scrape-do";
-    html = await fetchHtmlWithScrapeDo(url);
-  }
+  const { html, scraper } = await htmlFetcher(url);
   const scrapeMs = Date.now() - scrapeStartedAt;
 
   const $ = cheerio.load(html);

@@ -85,4 +85,23 @@ describe("parseRecipeFromUrl", () => {
       customCaller,
     );
   });
+
+  it("forwards a custom htmlFetcher alongside aiCaller to parseWebRecipe", async () => {
+    vi.mocked(isSocialUrl).mockReturnValue(false);
+    vi.mocked(parseWebRecipe).mockResolvedValue(mockRecipe);
+    const customCaller = vi.fn();
+    const customFetcher = vi.fn();
+
+    await parseRecipeFromUrl(
+      "https://example.com/recipe",
+      customCaller,
+      customFetcher,
+    );
+
+    expect(parseWebRecipe).toHaveBeenCalledWith(
+      "https://example.com/recipe",
+      customCaller,
+      customFetcher,
+    );
+  });
 });

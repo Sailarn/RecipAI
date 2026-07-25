@@ -56,4 +56,20 @@ describe("parseWebRecipe", () => {
     );
     expect(callAiForRecipe).not.toHaveBeenCalled();
   });
+
+  it("uses the injected htmlFetcher instead of PhantomJS/scrape.do when one is passed", async () => {
+    const customCaller = vi.fn().mockResolvedValue(parsedRecipe);
+    const customFetcher = vi
+      .fn()
+      .mockResolvedValue({ html, scraper: "playwright-local" });
+
+    await parseWebRecipe(
+      "https://example.com/recipe",
+      customCaller,
+      customFetcher,
+    );
+
+    expect(customFetcher).toHaveBeenCalledWith("https://example.com/recipe");
+    expect(fetchHtmlWithPhantomJs).not.toHaveBeenCalled();
+  });
 });
