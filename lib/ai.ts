@@ -2,14 +2,27 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { RecipeExtractionResult } from "@/lib/parse-recipe/recipe-result";
 import { log, trackEvent } from "@/lib/telemetry";
 
-// Try every free Gemini model in turn; only if they ALL fail do we fall back to
+// Try every free Gemini model in turn; then DeepSeek for recipe (web/video)
+// parses only — DeepSeek's chat API has no image input, so photo parses skip
+// straight past it to OpenAI; only if ALL of those fail do we fall back to
 // the paid OpenAI model — keeping cost on the free tier whenever possible.
 const GEMINI_MODEL_CHAIN = [
   "gemini-2.5-flash",
   "gemini-2.0-flash",
   "gemini-2.5-flash-lite",
 ] as const;
+// The faster/cheaper tier — deepseek-v4-pro measured meaningfully slower in
+// side-by-side model testing (scripts/local/model-eval), too slow to be
+// worth it this late in an already-degraded fallback chain.
+const DEEPSEEK_MODEL = "deepseek-v4-flash";
 const OPENAI_MODEL = "gpt-4o-mini";
+const DEEPSEEK_FALLBACK_INDEX = GEMINI_MODEL_CHAIN.length;
+const OPENAI_FALLBACK_INDEX = GEMINI_MODEL_CHAIN.length + 1;
+// Neither DeepSeek nor OpenAI had an explicit timeout before — a hung
+// request would block a queued parse job indefinitely. 90s gives real
+// headroom (observed DeepSeek chat-tier latency: well under 60s) without
+// blocking a background job forever.
+const HTTP_PROVIDER_TIMEOUT_MS = 90_000;
 
 type AiContext = "recipe" | "ingredient" | "photo";
 
@@ -50,26 +63,30 @@ async function callGeminiJson<T>(
   return parseJson<T>(result.response.text(), "Gemini");
 }
 
-async function callOpenAiJson<T>(messages: OpenAiMessage[]): Promise<T> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OpenAI API key not configured");
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+async function callOpenAiCompatibleJson<T>(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  messages: OpenAiMessage[],
+  providerLabel: string,
+): Promise<T> {
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model,
       response_format: { type: "json_object" },
       messages,
     }),
+    signal: AbortSignal.timeout(HTTP_PROVIDER_TIMEOUT_MS),
   });
 
   if (!response.ok) {
     throw new Error(
-      `OpenAI error: ${response.status} — ${await response.text()}`,
+      `${providerLabel} error: ${response.status} — ${await response.text()}`,
     );
   }
 
@@ -77,13 +94,39 @@ async function callOpenAiJson<T>(messages: OpenAiMessage[]): Promise<T> {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned no content");
-  return parseJson<T>(content, "OpenAI");
+  if (!content) throw new Error(`${providerLabel} returned no content`);
+  return parseJson<T>(content, providerLabel);
+}
+
+async function callOpenAiJson<T>(messages: OpenAiMessage[]): Promise<T> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OpenAI API key not configured");
+  return callOpenAiCompatibleJson(
+    "https://api.openai.com/v1",
+    apiKey,
+    OPENAI_MODEL,
+    messages,
+    "OpenAI",
+  );
+}
+
+async function callDeepSeekJson<T>(messages: OpenAiMessage[]): Promise<T> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("DeepSeek API key not configured");
+  return callOpenAiCompatibleJson(
+    "https://api.deepseek.com",
+    apiKey,
+    DEEPSEEK_MODEL,
+    messages,
+    "DeepSeek",
+  );
 }
 
 /**
  * Run the recipe-extraction prompt through the model chain: every free Gemini
- * model first, then OpenAI as a last resort (only when an OPENAI_API_KEY is set).
+ * model first, then DeepSeek for recipe (web/video) parses only (skipped for
+ * photo — no vision support — and only when a DEEPSEEK_API_KEY is set), then
+ * OpenAI as a last resort (only when an OPENAI_API_KEY is set).
  */
 async function generateJson<T>(
   geminiContents: GeminiContents,
@@ -116,6 +159,31 @@ async function generateJson<T>(
     }
   }
 
+  if (context === "recipe" && process.env.DEEPSEEK_API_KEY) {
+    trackEvent("ai_fallback_to_deepseek", { context });
+    const startedAt = Date.now();
+    try {
+      const parsed = await callDeepSeekJson<T>(openAiMessages);
+      log("info", "ai_call", {
+        model: DEEPSEEK_MODEL,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: true,
+        fallback_index: DEEPSEEK_FALLBACK_INDEX,
+      });
+      return parsed;
+    } catch (deepSeekError) {
+      lastError = deepSeekError;
+      log("warn", "ai_call", {
+        model: DEEPSEEK_MODEL,
+        context,
+        duration_ms: Date.now() - startedAt,
+        success: false,
+        fallback_index: DEEPSEEK_FALLBACK_INDEX,
+      });
+    }
+  }
+
   if (process.env.OPENAI_API_KEY) {
     trackEvent("ai_fallback_to_openai", { context });
     const startedAt = Date.now();
@@ -126,7 +194,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: true,
-        fallback_index: GEMINI_MODEL_CHAIN.length,
+        fallback_index: OPENAI_FALLBACK_INDEX,
       });
       return parsed;
     } catch (openAiError) {
@@ -136,7 +204,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: false,
-        fallback_index: GEMINI_MODEL_CHAIN.length,
+        fallback_index: OPENAI_FALLBACK_INDEX,
       });
     }
   }

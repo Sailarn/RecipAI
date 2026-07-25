@@ -63,6 +63,7 @@ export type TelemetryEvents = {
   parse_history_viewed: undefined;
   sync_review_resolved: { choice: string };
   // server-side mirrors (cost/abuse alerting)
+  ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
   rate_limit_hit: { caller_type: "user" | "anon" };
 };
