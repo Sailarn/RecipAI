@@ -1,5 +1,6 @@
 import ImageKit from "imagekit";
 import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
+import { sourceFetchFailedMessage } from "@/lib/upload/source-image-failure";
 import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
@@ -18,7 +19,7 @@ export async function uploadImageServer(
   const response = await fetch(url, { headers: imageFetchHeaders(url) });
   if (!response.ok) {
     const host = URL.canParse(url) ? new URL(url).host : url;
-    throw new Error(`Failed to fetch image (${response.status}) from ${host}`);
+    throw new Error(sourceFetchFailedMessage(response.status, host));
   }
 
   const fetchedContentType = response.headers.get("content-type") ?? "";

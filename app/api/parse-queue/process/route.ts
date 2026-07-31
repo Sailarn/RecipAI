@@ -11,6 +11,7 @@ import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
 import {
+  type InlineKeyboardMarkup,
   type RecipeCardData,
   recipeCardButton,
   recipeCardCaption,
@@ -19,6 +20,7 @@ import {
 import { sendTelegramMessage, sendTelegramPhoto } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
+import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
 import { type PushPayload, sendPushNotification } from "@/lib/web-push";
 import { classifyParseError, parseWithRetry } from "./helpers";
 
@@ -53,6 +55,41 @@ async function handlePushFailure(
     return;
   }
   logger.error("Push send failed", pushError);
+}
+
+interface SendRecipeCardOptions {
+  chatId: number | string;
+  imageUrl: string | null | undefined;
+  caption: string;
+  replyMarkup: InlineKeyboardMarkup;
+}
+
+// Delivers the saved-recipe card, degrading to text whenever the photo can't be
+// sent. A non-ImageKit URL means the mirror upload failed and this is the
+// (likely expired) source CDN URL, which Telegram usually can't fetch either —
+// so skip straight to text. Telegram can also reject an ImageKit URL it fails
+// to fetch with a 400; the recipe is already saved by this point, so falling
+// back to text delivers the notification instead of dropping it.
+async function sendRecipeCard({
+  chatId,
+  imageUrl,
+  caption,
+  replyMarkup,
+}: SendRecipeCardOptions): Promise<void> {
+  if (imageUrl && isImageKitUrl(imageUrl)) {
+    try {
+      await sendTelegramPhoto(
+        chatId,
+        telegramPhotoUrl(imageUrl),
+        caption,
+        replyMarkup,
+      );
+      return;
+    } catch (photoError) {
+      logger.warn("[parse-queue] telegram photo send failed", photoError);
+    }
+  }
+  await sendTelegramMessage(chatId, caption, replyMarkup);
 }
 
 // A job whose PROCESSING row is newer than this is treated as in-flight, so a
@@ -152,11 +189,19 @@ export async function POST(req: NextRequest) {
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
       } catch (uploadError) {
-        // Best-effort: keep the source URL so the parse still completes. But a
-        // silently-swallowed failure means the recipe stores an *expiring*
-        // Instagram CDN URL that breaks within hours — so surface it instead of
-        // hiding it. (See imageFetchHeaders for the usual 403 cause.)
-        ApiError.capture(uploadError, req);
+        // Best-effort: keep the source URL so the parse still completes. A CDN
+        // that refuses or drops the fetch is an expected outcome of parsing
+        // third-party content — log it (the recipe still stores an *expiring*
+        // URL, so it needs a trace) but don't report it. Anything else is a
+        // real upload defect and stays captured.
+        if (isSourceImageUnavailable(uploadError)) {
+          logger.warn("[parse-queue] source image unavailable", {
+            jobId,
+            message: uploadError.message,
+          });
+        } else {
+          ApiError.capture(uploadError, req);
+        }
       }
     }
     const finalRecipe: ParsedRecipe = { ...recipe, imageUrl, imageFileId };
@@ -213,21 +258,15 @@ export async function POST(req: NextRequest) {
       // The recipe is already saved at this point, so a failure here is a
       // notification-delivery problem, not a parse failure — it must not fall
       // into the outer catch, which would mark the job FAILED and tell the
-      // user parsing failed when it didn't. A non-ImageKit imageUrl means the
-      // upload above failed and this is the (possibly now-expired/403) source
-      // CDN URL, which Telegram often can't fetch either — skip straight to
-      // text in that case instead of making a call likely to fail.
+      // user parsing failed when it didn't. Only a failed text send reaches
+      // this catch; sendRecipeCard absorbs the photo-specific failures.
       try {
-        if (cardData.imageUrl && isImageKitUrl(cardData.imageUrl)) {
-          await sendTelegramPhoto(
-            job.telegramChatId,
-            telegramPhotoUrl(cardData.imageUrl),
-            caption,
-            replyMarkup,
-          );
-        } else {
-          await sendTelegramMessage(job.telegramChatId, caption, replyMarkup);
-        }
+        await sendRecipeCard({
+          chatId: job.telegramChatId,
+          imageUrl: cardData.imageUrl,
+          caption,
+          replyMarkup,
+        });
       } catch (notifyError) {
         ApiError.capture(notifyError, req);
       }

@@ -1,6 +1,7 @@
 import type { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
 import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
+import { SOURCE_FETCH_FAILED } from "@/lib/upload/source-image-failure";
 import {
   isAllowedImageType,
   MAX_IMAGE_BYTES,
@@ -59,7 +60,7 @@ async function resolveFromUrl(
   if (!response.ok)
     return {
       ok: false,
-      response: ApiError.badRequest("Failed to fetch image from URL"),
+      response: ApiError.badRequest(SOURCE_FETCH_FAILED),
     };
 
   const mimeType = response.headers.get("content-type") ?? "";

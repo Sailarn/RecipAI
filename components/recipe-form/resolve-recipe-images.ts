@@ -1,8 +1,21 @@
+import { logger } from "@/lib/logger";
 import { captureError } from "@/lib/telemetry";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
+import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
 
 interface UploadOptions {
   uploadToken?: string;
+}
+
+// The caller still flags the save as `uploadFailed` either way, so the user is
+// told. Only genuine upload defects are worth reporting — a source CDN that
+// refuses the fetch is expected and unfixable from here.
+function reportUploadFailure(caughtError: unknown): void {
+  if (isSourceImageUnavailable(caughtError)) {
+    logger.warn("[recipe-form] source image unavailable", caughtError.message);
+    return;
+  }
+  captureError(caughtError, { tags: { area: "recipe-image-upload" } });
 }
 
 interface ResolvedImage {
@@ -53,7 +66,7 @@ export async function resolveMainImage({
       uploadFailed: false,
     };
   } catch (caughtError) {
-    captureError(caughtError, { tags: { area: "recipe-image-upload" } });
+    reportUploadFailure(caughtError);
     return {
       imageUrl: currentImageUrl,
       imageFileId: previousImageFileId,
@@ -108,7 +121,7 @@ export async function resolveInstructionImages<T extends InstructionWithImage>({
       const uploaded = await uploadImage(source, uploadOptions);
       resolved.push({ ...instruction, imageUrl: uploaded.url });
     } catch (caughtError) {
-      captureError(caughtError, { tags: { area: "recipe-image-upload" } });
+      reportUploadFailure(caughtError);
       uploadFailed = true;
       resolved.push(instruction);
     }

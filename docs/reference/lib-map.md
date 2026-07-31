@@ -104,6 +104,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/upload/upload-token.ts` | `mintUploadToken()` / `verifyUploadToken()` via Redis (30 min TTL). |
 | `lib/upload/upload-image-source.ts` | Resolves multipart, remote-URL, or base64 upload bodies into one validated source shape. |
 | `lib/upload/upload-limits.ts` | Upload size and type constraints. |
+| `lib/upload/source-image-failure.ts` | `isSourceImageUnavailable()` + the `SOURCE_FETCH_FAILED` / `sourceFetchFailedMessage()` message constants. Separates an unreachable origin CDN (expected — log it) from a genuine upload defect (capture it). |
 
 ---
 

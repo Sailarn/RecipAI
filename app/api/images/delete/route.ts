@@ -4,6 +4,18 @@ import { logger } from "@/lib/logger";
 import { imagekit } from "@/lib/upload/imagekit";
 import { requireUploadAuth } from "@/lib/upload/upload-auth";
 
+// ImageKit's SDK rejects with a plain `{ message, help }` object, not an Error,
+// so an `instanceof Error` check reads an empty message and every expected
+// outcome below falls through to a Sentry-reported 500.
+function imagekitErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    const { message } = error as { message: unknown };
+    if (typeof message === "string") return message;
+  }
+  return "";
+}
+
 export async function DELETE(request: Request) {
   const authError = await requireUploadAuth(request);
   if (authError) return authError;
@@ -22,7 +34,7 @@ export async function DELETE(request: Request) {
     await imagekit.deleteFile(fileId);
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
+    const message = imagekitErrorMessage(error);
     // Already-deleted is a no-op success.
     if (message.includes("does not exist")) {
       return NextResponse.json({ success: true });

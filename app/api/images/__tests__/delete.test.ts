@@ -84,6 +84,19 @@ describe("DELETE /api/images/delete", () => {
       expect(body).toEqual({ success: true });
     });
 
+    it("returns success:true when ImageKit rejects with its plain-object error", async () => {
+      vi.mocked(imagekit.deleteFile).mockRejectedValue({
+        message: "The requested file does not exist.",
+        help: "For support kindly contact us at support@imagekit.io .",
+      });
+
+      const res = await DELETE(makeRequest({ fileId: "file-ghost" }));
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ success: true });
+    });
+
     it("does not 500 on ImageKit's transient internal error (best-effort cleanup)", async () => {
       vi.mocked(imagekit.deleteFile).mockRejectedValue(
         new Error(

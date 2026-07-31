@@ -484,6 +484,22 @@ describe("POST /api/parse-queue/process", () => {
         .calls[0][0];
       expect(insertValues.imageUrl).toBe(CDN_URL);
       expect(insertValues.imageFileId).toBeNull();
+      expect(captureError).toHaveBeenCalled();
+    });
+
+    it("does not report a source CDN that refuses the image fetch", async () => {
+      setupDb(baseJob);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(uploadImageServer).mockRejectedValue(
+        new Error("Failed to fetch image (403) from cdn.example.com"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      const insertValues = vi.mocked(db.insert("" as any).values as any).mock
+        .calls[0][0];
+      expect(insertValues.imageUrl).toBe(CDN_URL);
+      expect(captureError).not.toHaveBeenCalled();
     });
   });
 
@@ -505,11 +521,37 @@ describe("POST /api/parse-queue/process", () => {
       );
     });
 
-    it("keeps the job done and reports the error instead of marking it failed when the Telegram send throws", async () => {
+    it("delivers the card as text when Telegram rejects the photo", async () => {
       const { updateChain } = setupDb(baseJob);
       vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
       vi.mocked(sendTelegramPhoto).mockRejectedValue(
         new Error("Telegram sendPhoto failed: 400"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(sendTelegramMessage).toHaveBeenCalledWith(
+        "chat-1",
+        expect.stringContaining("Pasta"),
+        expect.objectContaining({ inline_keyboard: expect.anything() }),
+      );
+      expect(updateChain.set).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "done" }),
+      );
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(captureError).not.toHaveBeenCalled();
+    });
+
+    it("keeps the job done and reports the error when the text fallback also throws", async () => {
+      const { updateChain } = setupDb(baseJob);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+      vi.mocked(sendTelegramPhoto).mockRejectedValue(
+        new Error("Telegram sendPhoto failed: 400"),
+      );
+      vi.mocked(sendTelegramMessage).mockRejectedValue(
+        new Error("Telegram sendMessage failed: 403"),
       );
 
       await POST(makeRequest({ jobId: "job-1" }));
