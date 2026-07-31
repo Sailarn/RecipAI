@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/recipe-sections";
 import type { RecipeIngredient, RecipeSection } from "@/lib/db/schema";
 import { modifierLabel } from "@/lib/parse-recipe/modifiers";
+import { unitLabel } from "@/lib/units";
 
 interface IngredientsListProps {
   ingredients: RecipeIngredient[];
@@ -59,7 +60,8 @@ export function IngredientsList({
                           {ingredient.amount}{" "}
                         </span>
                       )}
-                      {ingredient.unit && `${ingredient.unit} `}
+                      {ingredient.unit &&
+                        `${unitLabel(ingredient.unit, locale)} `}
                       {ingredient.item}
                       {ingredient.modifiers?.map((modifier) => (
                         <span

@@ -169,6 +169,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
 | `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
 | `lib/parse-job-events.ts` | Browser events that hand completed parse-job rows from the global watcher back to the parse page. |
+| `lib/units.ts` | `MEASUREMENT_UNITS` (canonical code → `en`/`ua` label) + `unitLabel()` / `toMeasurementUnit()`. Display-only localization of the stored unit code, with an alias table covering en/ua/ru spelling variants. |
 | `lib/categories.ts` | Recipe category constants. |
 | `lib/category-styles.ts` | Category badge colors (`getCategoryStyle()`) — single source of truth. |
 | `lib/utils.ts` | `generateId()` and other small utilities. |

@@ -5,6 +5,7 @@ import type { Locale } from "@/i18n/config";
 import { togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
 import { modifierLabel } from "@/lib/parse-recipe/modifiers";
+import { unitLabel } from "@/lib/units";
 import { cn } from "@/lib/utils";
 import type { StockStatus } from "./use-servings-calculator";
 
@@ -63,7 +64,9 @@ export function IngredientRow({
           {scaledAmount && (
             <span className="font-semibold">{scaledAmount} </span>
           )}
-          {ingredient.unit && <span>{ingredient.unit} </span>}
+          {ingredient.unit && (
+            <span>{unitLabel(ingredient.unit, locale)} </span>
+          )}
           {name}
           {ingredient.modifiers?.map((modifier) => (
             <span

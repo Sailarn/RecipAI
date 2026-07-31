@@ -1,4 +1,9 @@
+"use client";
+
+import { useLocale } from "next-intl";
+import type { Locale } from "@/i18n/config";
 import type { ParsedIngredient } from "@/lib/db/schema";
+import { unitLabel } from "@/lib/units";
 
 const MAX_VISIBLE_INGREDIENTS = 4;
 
@@ -7,6 +12,8 @@ interface IngredientsPreviewProps {
 }
 
 export function IngredientsPreview({ ingredients }: IngredientsPreviewProps) {
+  const locale = useLocale() as Locale;
+
   if (ingredients.length === 0) return null;
 
   const visible = ingredients.slice(0, MAX_VISIBLE_INGREDIENTS);
@@ -28,7 +35,7 @@ export function IngredientsPreview({ ingredients }: IngredientsPreviewProps) {
             </span>
             <span>
               {ingredient.amount && `${ingredient.amount} `}
-              {ingredient.unit && `${ingredient.unit} `}
+              {ingredient.unit && `${unitLabel(ingredient.unit, locale)} `}
               {ingredient.item}
             </span>
           </li>

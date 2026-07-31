@@ -119,4 +119,41 @@ describe("IngredientsList", () => {
 
     expect(screen.queryByText("mainSection")).not.toBeInTheDocument();
   });
+
+  describe("unit localization", () => {
+    function ingredientText(item: string): string {
+      const row = screen.getByText(item, { exact: false });
+      return row.textContent ?? "";
+    }
+
+    it("localizes the stored unit code in the ua locale", () => {
+      renderList(
+        [
+          { id: "1", item: "борошно", amount: 300, unit: "g" },
+          { id: "2", item: "розпушувач", amount: 1, unit: "tsp" },
+        ],
+        [],
+        "ua",
+      );
+
+      expect(ingredientText("борошно")).toContain("300 г");
+      expect(ingredientText("розпушувач")).toContain("1 ч. л.");
+    });
+
+    it("keeps the canonical code in the en locale", () => {
+      renderList(
+        [{ id: "1", item: "flour", amount: 300, unit: "g" }],
+        [],
+        "en",
+      );
+
+      expect(ingredientText("flour")).toContain("300 g");
+    });
+
+    it("leaves a unit it cannot classify untouched", () => {
+      renderList([{ id: "1", item: "сіль", unit: "щіпка" }], [], "ua");
+
+      expect(ingredientText("сіль")).toContain("щіпка");
+    });
+  });
 });
