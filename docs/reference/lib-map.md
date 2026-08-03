@@ -173,6 +173,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/units.ts` | `MEASUREMENT_UNITS` (canonical code → `en`/`ua` label) + `unitLabel()` / `toMeasurementUnit()`. Display-only localization of the stored unit code, with an alias table covering en/ua/ru spelling variants. |
 | `lib/categories.ts` | Recipe category constants. |
 | `lib/category-styles.ts` | Category badge colors (`getCategoryStyle()`) — single source of truth. |
+| `lib/url.ts` | `isValidUrl()` (absolute http/https, any host) and `extractFirstUrl()` (pulls the link out of pasted share-sheet text). Shared by the import field's paste action and `useUrlParse`'s submit guard. |
 | `lib/utils.ts` | `generateId()` and other small utilities. |
 | `lib/theme.ts` | Theme helpers. |
 | `lib/recipes-prefetch.ts` | Prefetch helpers for recipe lists. |
@@ -188,7 +189,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/sync-context.tsx` | `SyncProvider` (mounts `useSyncOnLogin` once in `ClientShell`) + `useTriggerSync()` (pull-to-refresh consumes this, not the hook directly). |
 | `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, and creates parsed-recipe bell entries for background completions. |
 | `hooks/` (rest) | UI hooks: long press, pull to refresh, recipe filter/matcher, recipes page state, live-query transition. |
-| `lib/hooks/` | PWA install/push, telemetry identity, public vocabulary sync, startup normalization, and URL-parse hooks. |
+| `lib/hooks/use-clipboard-link.ts` | Clipboard support for the import field: `pasteLink()` (gesture-driven, Telegram SDK then browser API) and an opportunistic `suggestion` of a copied link, read silently only where `clipboard-read` is already granted. |
+| `lib/hooks/` | PWA install/push, telemetry identity, public vocabulary sync, startup normalization, clipboard link, and URL-parse hooks. |
 
 ---
 

@@ -101,6 +101,10 @@ export type TelegramWebApp = {
   disableClosingConfirmation?: () => void;
   openLink?: (url: string) => void;
   openTelegramLink?: (url: string) => void;
+  // Bot API 6.4+. Documented as resolving with real text only for Mini Apps
+  // launched from the attachment menu — elsewhere the callback still fires, but
+  // with an empty string. Optional so older clients degrade to the browser API.
+  readTextFromClipboard?: (callback: (text: string) => void) => void;
   shareMessage?: (
     preparedMessageId: string,
     callback?: (sent: boolean) => void,

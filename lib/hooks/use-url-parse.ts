@@ -34,6 +34,7 @@ import {
 import { api, routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
+import { isValidUrl } from "@/lib/url";
 
 interface UseUrlParseOptions {
   locale: string;
@@ -42,15 +43,6 @@ interface UseUrlParseOptions {
   // server (auto-save + bot message on completion) instead of the in-app review
   // flow. The server confirms it actually resolved a chat before we hand off.
   telegramNotify?: boolean;
-}
-
-function isValidUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:";
-  } catch {
-    return false;
-  }
 }
 
 export function useUrlParse({

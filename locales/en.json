@@ -140,6 +140,16 @@
       "submit": "Parse Recipe",
       "parsing": "Reading recipe...",
       "hint": "Works with handwritten and printed recipes in any language"
+    },
+    "url": {
+      "label": "Recipe URL",
+      "submit": "Import with AI",
+      "submitting": "Parsing recipe…",
+      "paste": "Paste link from clipboard",
+      "clear": "Clear",
+      "suggestion": "Copied link — tap to use",
+      "dismissSuggestion": "Dismiss suggestion",
+      "pasteEmpty": "No link found in your clipboard"
     }
   }
 }
