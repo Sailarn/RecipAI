@@ -6,11 +6,9 @@ vi.mock("@/lib/public-recipes/server", () => ({
   getPublicRecipe: vi.fn(),
 }));
 vi.mock("@/components/recipe-detail", () => ({
-  RecipeDetail: ({
-    publicRecipe,
-  }: {
-    publicRecipe: { title: string } | null;
-  }) => <div>{publicRecipe?.title ?? "private"}</div>,
+  RecipeDetail: ({ recipeId }: { recipeId: string }) => (
+    <div>detail:{recipeId}</div>
+  ),
 }));
 
 import { getPublicRecipe } from "@/lib/public-recipes/server";
@@ -29,10 +27,16 @@ const publicRecipe = {
 describe("recipe page", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("passes a public fallback to recipe detail", async () => {
-    vi.mocked(getPublicRecipe).mockResolvedValue(publicRecipe);
+  it("renders recipe detail for the requested id", async () => {
     render(await RecipePage({ params }));
-    expect(screen.getByText("Soup")).toBeInTheDocument();
+
+    expect(screen.getByText("detail:recipe-1")).toBeInTheDocument();
+  });
+
+  it("does not block the page body on a public-recipe lookup", async () => {
+    await RecipePage({ params });
+
+    expect(getPublicRecipe).not.toHaveBeenCalled();
   });
 
   it("generates noindex public metadata", async () => {

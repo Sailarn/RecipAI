@@ -26,10 +26,15 @@ export async function generateMetadata({
   };
 }
 
+// Deliberately does NOT await getPublicRecipe. The overwhelmingly common case
+// is opening your own recipe, which lives in Dexie — blocking the shell on a
+// Supabase round-trip only to hand down `null` made every deep link pay for
+// the rare share case. RecipeDetail already resolves a public recipe itself
+// (fetchPublicRecipe) when it can't find the id locally, which is the path
+// Telegram deep links have always taken. The DB read stays in
+// generateMetadata above, where streaming metadata keeps it off the critical
+// path for browsers.
 export default async function RecipePage({ params }: RecipePageProps) {
   const { locale, id } = await params;
-  const publicRecipe = await getPublicRecipe(id);
-  return (
-    <RecipeDetail recipeId={id} locale={locale} publicRecipe={publicRecipe} />
-  );
+  return <RecipeDetail recipeId={id} locale={locale} />;
 }
