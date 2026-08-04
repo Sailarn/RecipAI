@@ -16,7 +16,11 @@ import { FormActionBar } from "./form-action-bar";
 import { FormHeader } from "./form-header";
 import { IngredientsSection } from "./ingredients-section";
 import { InstructionsSection } from "./instructions-section";
-import { createRecipeSchema, type RecipeFormData } from "./schema";
+import {
+  createRecipeSchema,
+  type RecipeFormData,
+  type RecipeOutput,
+} from "./schema";
 import { useRecipeSave } from "./use-recipe-save";
 import { useScrollOverflow } from "./use-scroll-overflow";
 import { useTabNavigation } from "./use-tab-navigation";
@@ -46,9 +50,13 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<RecipeFormData>({
-    // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
-    resolver: zodResolver(recipeSchema) as any,
+    // The third generic is what makes the transform typecheck: the form holds
+    // RecipeFormData (servings as a string from the input), the resolver hands
+    // handleSubmit the parsed RecipeOutput. Without it react-hook-form assumes
+    // input and output are the same shape and both the resolver and every
+    // handleSubmit call need casting.
+  } = useForm<RecipeFormData, unknown, RecipeOutput>({
+    resolver: zodResolver(recipeSchema),
     mode: "onSubmit",
     defaultValues,
   });
@@ -98,11 +106,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         className="relative z-[1] flex-1 min-h-0 overscroll-contain [-webkit-overflow-scrolling:touch] p-4"
         style={{ overflowY: needsScroll ? "auto" : "hidden" }}
       >
-        <form
-          // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
-          onSubmit={handleSubmit(onSubmit as any)}
-          className="overflow-hidden"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="overflow-hidden">
           <div hidden={activeTab !== "info"}>
             <BasicInfo
               register={register}
@@ -176,8 +180,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
         nextLabel={t("next")}
         onBack={handleBack}
         onNext={handleNext}
-        // biome-ignore lint/suspicious/noExplicitAny: zodResolver type conflict with transforms
-        onSave={handleSubmit(onSubmit as any)}
+        onSave={handleSubmit(onSubmit)}
       />
     </div>
   );

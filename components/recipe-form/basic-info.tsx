@@ -4,7 +4,6 @@ import { ImageIcon, ScanSearch, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import {
-  type Control,
   type FieldErrors,
   type UseFormRegister,
   useWatch,
@@ -15,12 +14,12 @@ import { cn } from "@/lib/utils";
 import { FocalPointPicker } from "./focal-point-picker";
 import type { CropRect } from "./image-crop-picker";
 import { PhotoAdjustModal } from "./photo-adjust-modal";
-import type { RecipeFormData } from "./schema";
+import type { RecipeFormControl, RecipeFormData } from "./schema";
 
 interface BasicInfoProps {
   register: UseFormRegister<RecipeFormData>;
   errors: FieldErrors<RecipeFormData>;
-  control: Control<RecipeFormData>;
+  control: RecipeFormControl;
   onFileSelect: (file: File | null) => void;
   focusX: number;
   focusY: number;

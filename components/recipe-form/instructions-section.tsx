@@ -18,7 +18,6 @@ import { FolderPlus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import {
-  type Control,
   type FieldErrors,
   type UseFormRegister,
   type UseFormSetValue,
@@ -35,11 +34,11 @@ import {
 } from "./instructions-section/state";
 import { StepCard } from "./instructions-section/step-card";
 import type { InstructionSectionState } from "./instructions-section/types";
-import type { RecipeFormData } from "./schema";
+import type { RecipeFormControl, RecipeFormData } from "./schema";
 
 interface InstructionsSectionProps {
   register: UseFormRegister<RecipeFormData>;
-  control: Control<RecipeFormData>;
+  control: RecipeFormControl;
   errors: FieldErrors<RecipeFormData>;
   setValue: UseFormSetValue<RecipeFormData>;
   onStepFileSelect: (stepId: string, file: File | null) => void;

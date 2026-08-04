@@ -1,3 +1,4 @@
+import type { Control } from "react-hook-form";
 import { z } from "zod";
 import {
   PREPARATION_MODIFIERS,
@@ -86,3 +87,13 @@ export function createRecipeSchema(t: (key: string) => string) {
 const dummySchema = createRecipeSchema(() => "");
 export type RecipeFormData = z.input<typeof dummySchema>;
 export type RecipeOutput = z.output<typeof dummySchema>;
+
+/**
+ * The form's `control`, with the transform generics spelled out.
+ *
+ * `useForm<RecipeFormData, unknown, RecipeOutput>` produces a three-generic
+ * Control; a child typed as the defaulted `Control<RecipeFormData>` is a
+ * genuinely different type and won't accept it. Sharing one alias keeps every
+ * section in step with the form.
+ */
+export type RecipeFormControl = Control<RecipeFormData, unknown, RecipeOutput>;

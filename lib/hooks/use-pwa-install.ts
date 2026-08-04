@@ -8,6 +8,17 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Non-standard properties the platform checks below rely on: `standalone` is
+// WebKit-only (how iOS reports an installed home-screen app) and `MSStream`
+// exists solely to exclude old IE from the iPad/iPhone user-agent test.
+interface WebKitNavigator extends Navigator {
+  standalone?: boolean;
+}
+
+interface LegacyIEWindow extends Window {
+  MSStream?: unknown;
+}
+
 export function usePwaInstall() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -17,14 +28,12 @@ export function usePwaInstall() {
   useEffect(() => {
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      // biome-ignore lint/suspicious/noExplicitAny: iOS-only non-standard property
-      (navigator as any).standalone === true;
+      (navigator as WebKitNavigator).standalone === true;
     setIsInstalled(standalone);
 
     setIsIOS(
       /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-        // biome-ignore lint/suspicious/noExplicitAny: IE check
-        !(window as any).MSStream,
+        !(window as LegacyIEWindow).MSStream,
     );
 
     const handler = (event: Event) => {

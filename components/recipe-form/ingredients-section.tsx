@@ -6,7 +6,6 @@ import { AnimatePresence } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
-  type Control,
   Controller,
   type FieldErrors,
   type UseFormRegister,
@@ -30,11 +29,11 @@ import {
   buildVocabNameIndex,
   localizeIngredientItem,
 } from "./localize-item";
-import type { RecipeFormData } from "./schema";
+import type { RecipeFormControl, RecipeFormData } from "./schema";
 
 interface IngredientsSectionProps {
   register: UseFormRegister<RecipeFormData>;
-  control: Control<RecipeFormData>;
+  control: RecipeFormControl;
   errors: FieldErrors<RecipeFormData>;
   setValue: UseFormSetValue<RecipeFormData>;
   locale: Locale;
