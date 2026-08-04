@@ -5,6 +5,10 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
     useSession: vi.fn().mockReturnValue({ data: null }),
@@ -285,7 +289,7 @@ describe("useSyncOnLogin", () => {
       await waitFor(() => expect(clearSyncNotifications).toHaveBeenCalled());
     });
 
-    it("shows an error toast and writes nothing on fetch failure", async () => {
+    it("shows a retryable error toast and writes nothing on fetch failure", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
       } as never);
@@ -295,11 +299,27 @@ describe("useSyncOnLogin", () => {
 
       await waitFor(() =>
         expect(toast.error).toHaveBeenCalledWith(
-          "Sync failed — check your connection",
+          "syncFailed",
+          expect.objectContaining({
+            action: expect.objectContaining({ label: "retry" }),
+          }),
         ),
       );
       expect(db.recipes.bulkPut).not.toHaveBeenCalled();
       expect(clearSyncNotifications).not.toHaveBeenCalled();
+    });
+
+    it("stays quiet about a sync failure while offline", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch({ rejectSync: true });
+      vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(db.recipes.toArray).toHaveBeenCalledTimes(0));
+      expect(toast.error).not.toHaveBeenCalled();
     });
 
     it("stops quietly when the sync pull is blocked by maintenance", async () => {

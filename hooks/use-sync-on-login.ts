@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { maintenanceErrorFromResponse } from "@/lib/api/api-fetch";
@@ -27,6 +28,9 @@ import { captureError } from "@/lib/telemetry";
 // normalize PATCH hasn't reached the server yet), so a diff conflict during
 // this period is transient and silently ignored.
 const GRACE_WINDOW_MS = 90_000;
+
+// Stable id so repeat failures replace the toast rather than stack.
+const SYNC_FAILURE_TOAST_ID = "sync-failure";
 
 // One-shot Dexie migrations run in the background, so a failure has no visible
 // symptom — the data just stays in its old shape. They used to swallow
@@ -168,6 +172,7 @@ async function isMaintenanceBlocked(response: Response): Promise<boolean> {
 }
 
 export function useSyncOnLogin() {
+  const t = useTranslations("common");
   const { data: session } = authClient.useSession();
   const hasSynced = useRef(false);
   const renormalized = useRef(false);
@@ -214,6 +219,7 @@ export function useSyncOnLogin() {
       .catch(reportMigrationFailure("reconcile-vocab"));
   }, []);
   const inFlightRef = useRef<Promise<void> | null>(null);
+  const syncRef = useRef<(() => Promise<void>) | null>(null);
 
   const runSync = useCallback(async () => {
     if (!session) return;
@@ -292,16 +298,26 @@ export function useSyncOnLogin() {
       // rework so the bell's stale "needs review" badge clears.
       await clearSyncNotifications();
     } catch (error) {
-      toast.error("Sync failed — check your connection");
       hasSynced.current = false;
       // Offline drops are expected in this local-first app, but a failure while
       // we're online is a genuine problem — a server error or a reconcile bug —
-      // and must not be invisible. Report only those.
+      // and must not be invisible. Report and surface only those: being offline
+      // is a normal state here, not something to nag about, and this runs again
+      // on every foreground so an unconditional toast repeats endlessly.
       if (typeof navigator === "undefined" || navigator.onLine) {
         captureError(error, { tags: { source: "sync-on-login" } });
+        toast.error(t("syncFailed"), {
+          // A stable id collapses repeats (mount racing a focus re-pull) into
+          // one toast instead of stacking them.
+          id: SYNC_FAILURE_TOAST_ID,
+          action: {
+            label: t("retry"),
+            onClick: () => void syncRef.current?.(),
+          },
+        });
       }
     }
-  }, [session]);
+  }, [session, t]);
 
   // Single-flight: a caller that invokes sync() while one is already running
   // (initial mount racing a manual pull-to-refresh, or a focus re-pull racing
@@ -316,6 +332,12 @@ export function useSyncOnLogin() {
     inFlightRef.current = promise;
     return promise;
   }, [runSync]);
+
+  // The failure toast's Retry needs `sync`, which is defined in terms of
+  // runSync — so runSync reaches it through this ref rather than a cycle.
+  useEffect(() => {
+    syncRef.current = sync;
+  }, [sync]);
 
   useEffect(() => {
     if (!session || hasSynced.current) return;

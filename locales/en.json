@@ -14,7 +14,9 @@
     "closeModal": "Close modal",
     "minutes": "min",
     "errorBody": "This part of the app hit a problem. Your saved recipes are untouched.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "syncFailed": "Couldn't sync with the server",
+    "retry": "Retry"
   },
   "home": {
     "tagline": "Your personal recipe management app"
