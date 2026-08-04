@@ -25,6 +25,24 @@ import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 
+// Most parses finish within the first few polls, so start tight and back off
+// from there — a job that is still running after a minute is not going to
+// benefit from being asked every 3 seconds, and each poll costs a server round
+// trip (and, through the proxy, a maintenance-config read).
+const INITIAL_POLL_MS = 3_000;
+const MAX_POLL_MS = 30_000;
+const POLL_BACKOFF = 1.5;
+
+// Network errors are expected in this app (offline is a normal state), so they
+// keep retrying at a fixed interval and never count towards the deadline below.
+const NETWORK_RETRY_MS = 5_000;
+
+// A job the server still calls "processing" after this long is stuck. Give up
+// rather than polling for the lifetime of the tab, and leave a history entry so
+// the parse doesn't just vanish.
+const MAX_WATCH_MS = 15 * 60_000;
+const TIMEOUT_REASON = "Parsing timed out — the job never finished.";
+
 export function useParseJobWatcher() {
   const navigate = useNavigate();
   // Jobs that are already being polled (or have reached a terminal state).
@@ -108,6 +126,26 @@ export function useParseJobWatcher() {
         timeouts.current.add(timer);
       };
 
+      const startedAt = Date.now();
+      let pollDelay = INITIAL_POLL_MS;
+
+      const openParseHistory = () => {
+        const locale = window.location.pathname.split("/")[1];
+        navigate.push(routes.parseHistory(locale));
+      };
+
+      const abandonStuckJob = (jobUrl: string | undefined) => {
+        if (!claimJobCompletion(id)) return;
+        removeJobId(id);
+        trackEvent("parse_failed", { source: "url", reason: TIMEOUT_REASON });
+        recordParseHistory(
+          failedParseHistoryEntry(id, jobUrl ?? "", TIMEOUT_REASON),
+        ).catch(() => {});
+        toast.error(TIMEOUT_REASON, {
+          action: { label: "Details", onClick: openParseHistory },
+        });
+      };
+
       const run = async () => {
         try {
           const res = await fetch(api.parseQueueJob(id));
@@ -135,16 +173,13 @@ export function useParseJobWatcher() {
               failedParseHistoryEntry(id, jobUrl, rawError),
             ).catch(() => {});
             toast.error(rawError, {
-              action: {
-                label: "Details",
-                onClick: () => {
-                  const locale = window.location.pathname.split("/")[1];
-                  navigate.push(routes.parseHistory(locale));
-                },
-              },
+              action: { label: "Details", onClick: openParseHistory },
             });
+          } else if (Date.now() - startedAt >= MAX_WATCH_MS) {
+            abandonStuckJob(jobUrl);
           } else {
-            scheduleRetry(3000, run);
+            scheduleRetry(pollDelay, run);
+            pollDelay = Math.min(pollDelay * POLL_BACKOFF, MAX_POLL_MS);
           }
         } catch (error) {
           // A network drop is expected — retry quietly. But a failure while
@@ -155,7 +190,7 @@ export function useParseJobWatcher() {
           if (typeof navigator !== "undefined" && navigator.onLine) {
             captureError(error, { tags: { source: "parse-job-watcher" } });
           }
-          scheduleRetry(5000, run); // retry on network error
+          scheduleRetry(NETWORK_RETRY_MS, run);
         }
       };
       run();

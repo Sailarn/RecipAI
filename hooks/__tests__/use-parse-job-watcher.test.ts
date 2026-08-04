@@ -295,6 +295,103 @@ describe("useParseJobWatcher", () => {
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
       await waitFor(() => expect(db.parsedRecipes.add).toHaveBeenCalled());
     });
+
+    it("backs off between polls instead of asking every 3s forever", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(pendingResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      // Second gap is 4.5s, so 3s more is not yet enough for a third poll.
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        vi.advanceTimersByTime(1500);
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("gives up on a job still processing after the watch deadline", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(
+        makeResponse({ status: "pending", url: "https://example.com/recipe" }),
+      );
+
+      renderHook(() => useParseJobWatcher());
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Run out the 15-minute deadline across the backed-off poll schedule.
+      for (let index = 0; index < 60; index += 1) {
+        await act(async () => {
+          vi.advanceTimersByTime(30_000);
+          await Promise.resolve();
+        });
+      }
+
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(
+          "Parsing timed out — the job never finished.",
+          expect.objectContaining({
+            action: expect.objectContaining({ label: "Details" }),
+          }),
+        ),
+      );
+      expect(removeJobId).toHaveBeenCalledWith("job-1");
+      expect(recordParseHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "job-1",
+          status: "failed",
+          reason: "Parsing timed out — the job never finished.",
+        }),
+      );
+    });
+
+    it("stops polling once it has given up", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(pendingResponse());
+
+      renderHook(() => useParseJobWatcher());
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      for (let index = 0; index < 60; index += 1) {
+        await act(async () => {
+          vi.advanceTimersByTime(30_000);
+          await Promise.resolve();
+        });
+      }
+
+      const callsAtGiveUp = mockFetch.mock.calls.length;
+      await act(async () => {
+        vi.advanceTimersByTime(120_000);
+        await Promise.resolve();
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(callsAtGiveUp);
+    });
   });
 
   describe("network error retry", () => {
