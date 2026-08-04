@@ -6,6 +6,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useParseJobWatcher } from "../use-parse-job-watcher";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 vi.mock("sonner", () => ({
   toast: Object.assign(vi.fn(), {
     success: vi.fn(),
@@ -147,7 +151,7 @@ describe("useParseJobWatcher", () => {
       expect(toast).toHaveBeenCalledWith(
         "Test Recipe",
         expect.objectContaining({
-          description: "Recipe parsed — tap to review",
+          description: "parsedTapToReview",
         }),
       );
     });
@@ -230,7 +234,7 @@ describe("useParseJobWatcher", () => {
       expect(toast.error).toHaveBeenCalledWith(
         "Could not parse URL",
         expect.objectContaining({
-          action: expect.objectContaining({ label: "Details" }),
+          action: expect.objectContaining({ label: "details" }),
         }),
       );
     });
@@ -262,9 +266,9 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() => expect(toast.error).toHaveBeenCalled());
       expect(toast.error).toHaveBeenCalledWith(
-        "Failed to parse recipe",
+        "failedGeneric",
         expect.objectContaining({
-          action: expect.objectContaining({ label: "Details" }),
+          action: expect.objectContaining({ label: "details" }),
         }),
       );
     });
@@ -351,9 +355,9 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() =>
         expect(toast.error).toHaveBeenCalledWith(
-          "Parsing timed out — the job never finished.",
+          "timedOut",
           expect.objectContaining({
-            action: expect.objectContaining({ label: "Details" }),
+            action: expect.objectContaining({ label: "details" }),
           }),
         ),
       );
@@ -362,7 +366,7 @@ describe("useParseJobWatcher", () => {
         expect.objectContaining({
           id: "job-1",
           status: "failed",
-          reason: "Parsing timed out — the job never finished.",
+          reason: "timedOut",
         }),
       );
     });

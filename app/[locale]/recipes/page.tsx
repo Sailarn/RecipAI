@@ -90,7 +90,7 @@ export default function RecipesPage() {
           } as CSSProperties
         }
       >
-        {isRefreshing ? "Refreshing…" : "↓ Release to refresh"}
+        {isRefreshing ? t("refreshing") : t("releaseToRefresh")}
       </div>
 
       {/* Greeting, title, notifications bell — always visible so parsed recipes are always reachable */}

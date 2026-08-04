@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function RecipeCardContextMenu({
   onAddToCollection,
   onDelete,
 }: RecipeCardContextMenuProps) {
+  const t = useTranslations("recipes");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function RecipeCardContextMenu({
 
   if (!mounted) return null;
 
-  const statusLabel = status === "tried" ? "Mark as untried" : "Mark as tried";
+  const statusLabel = t(status === "tried" ? "markUntried" : "markTried");
 
   return createPortal(
     <>
@@ -77,7 +79,7 @@ export function RecipeCardContextMenu({
           }}
           className={cn(menuItemClass, "text-[var(--fg-1)]")}
         >
-          Add to collection
+          {t("addToCollection")}
         </button>
 
         <button
@@ -88,7 +90,7 @@ export function RecipeCardContextMenu({
           }}
           className={cn(menuItemClass, "text-red-500 border-b-0")}
         >
-          Delete recipe
+          {t("deleteRecipe")}
         </button>
       </div>
     </>,

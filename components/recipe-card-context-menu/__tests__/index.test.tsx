@@ -1,5 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 import { RecipeCardContextMenu } from "../index";
 
 const baseProps = {
@@ -14,19 +19,19 @@ const baseProps = {
 describe("RecipeCardContextMenu", () => {
   it("renders all three menu items", () => {
     render(<RecipeCardContextMenu {...baseProps} />);
-    expect(screen.getByText("Mark as tried")).toBeInTheDocument();
-    expect(screen.getByText("Add to collection")).toBeInTheDocument();
-    expect(screen.getByText("Delete recipe")).toBeInTheDocument();
+    expect(screen.getByText("markTried")).toBeInTheDocument();
+    expect(screen.getByText("addToCollection")).toBeInTheDocument();
+    expect(screen.getByText("deleteRecipe")).toBeInTheDocument();
   });
 
-  it("shows 'Mark as untried' when status is tried", () => {
+  it("shows 'markUntried' when status is tried", () => {
     render(<RecipeCardContextMenu {...baseProps} status="tried" />);
-    expect(screen.getByText("Mark as untried")).toBeInTheDocument();
+    expect(screen.getByText("markUntried")).toBeInTheDocument();
   });
 
-  it("shows 'Mark as tried' when status is null", () => {
+  it("shows 'markTried' when status is null", () => {
     render(<RecipeCardContextMenu {...baseProps} status={null} />);
-    expect(screen.getByText("Mark as tried")).toBeInTheDocument();
+    expect(screen.getByText("markTried")).toBeInTheDocument();
   });
 
   it("calls onToggleStatus when status item is clicked", () => {
@@ -34,7 +39,7 @@ describe("RecipeCardContextMenu", () => {
     render(
       <RecipeCardContextMenu {...baseProps} onToggleStatus={onToggleStatus} />,
     );
-    fireEvent.click(screen.getByText("Mark as tried"));
+    fireEvent.click(screen.getByText("markTried"));
     expect(onToggleStatus).toHaveBeenCalled();
   });
 
@@ -46,14 +51,14 @@ describe("RecipeCardContextMenu", () => {
         onAddToCollection={onAddToCollection}
       />,
     );
-    fireEvent.click(screen.getByText("Add to collection"));
+    fireEvent.click(screen.getByText("addToCollection"));
     expect(onAddToCollection).toHaveBeenCalled();
   });
 
   it("calls onDelete when Delete is clicked", () => {
     const onDelete = vi.fn();
     render(<RecipeCardContextMenu {...baseProps} onDelete={onDelete} />);
-    fireEvent.click(screen.getByText("Delete recipe"));
+    fireEvent.click(screen.getByText("deleteRecipe"));
     expect(onDelete).toHaveBeenCalled();
   });
 

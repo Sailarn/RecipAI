@@ -136,7 +136,7 @@ describe("useRecipeSave", () => {
 
     expect(createRecipe).toHaveBeenCalledOnce();
     expect(result.current.saveState).toBe("idle");
-    expect(result.current.imageError).toMatch(/photo couldn't be uploaded/i);
+    expect(result.current.imageError).toBe("photoUploadFailed");
     expect(useHaptics().notify).toHaveBeenCalledWith("error");
     expect(useNavigate().back).not.toHaveBeenCalled();
   });
@@ -153,7 +153,7 @@ describe("useRecipeSave", () => {
     });
 
     expect(result.current.saveState).toBe("idle");
-    expect(result.current.imageError).toMatch(/photo couldn't be uploaded/i);
+    expect(result.current.imageError).toBe("photoUploadFailed");
     expect(useNavigate().back).not.toHaveBeenCalled();
   });
 
@@ -181,7 +181,7 @@ describe("useRecipeSave", () => {
     });
 
     expect(result.current.saveState).toBe("idle");
-    expect(result.current.imageError).toBe("Failed to save recipe");
+    expect(result.current.imageError).toBe("saveFailed");
     expect(useHaptics().notify).toHaveBeenCalledWith("error");
     expect(useNavigate().back).not.toHaveBeenCalled();
   });

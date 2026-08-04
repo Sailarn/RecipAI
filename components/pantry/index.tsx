@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Plus, Search } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { db } from "@/lib/db/db";
 import type { PantryItem } from "@/lib/db/schema";
@@ -22,6 +23,7 @@ function subtitle(items: PantryItem[]): string {
 }
 
 export function PantryPage() {
+  const tPantry = useTranslations("pantry");
   const params = useParams();
   const locale = (params?.locale as string) ?? "en";
   const items = useLiveQuery(() => db.pantry.toArray(), []) ?? [];
@@ -97,10 +99,8 @@ export function PantryPage() {
             className="flex flex-col items-center justify-center px-6 py-16 gap-3 text-[var(--fg-3)] font-sans text-[15px] text-center"
           >
             <span className="text-[40px]">🧺</span>
-            <p className="m-0">Your pantry is empty.</p>
-            <p className="m-0 text-[13px]">
-              Tap + to add ingredients you have at home.
-            </p>
+            <p className="m-0">{tPantry("empty")}</p>
+            <p className="m-0 text-[13px]">{tPantry("emptyHint")}</p>
           </div>
         )}
 

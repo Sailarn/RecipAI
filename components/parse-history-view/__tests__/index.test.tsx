@@ -5,6 +5,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 import { PARSE_HISTORY_STATUS } from "@/lib/db/schema";
 import { ParseHistoryView } from "../index";
 

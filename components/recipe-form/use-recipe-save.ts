@@ -138,7 +138,7 @@ export function useRecipeSave(recipe?: Recipe) {
     } catch {
       haptics.notify("error");
       setSaveState("idle");
-      setImageError("Failed to save recipe");
+      setImageError(t("saveFailed"));
       return;
     }
 
@@ -147,9 +147,7 @@ export function useRecipeSave(recipe?: Recipe) {
     // the text/ingredient/step data is already durably saved either way.
     if (mainImage.uploadFailed || stepUploadFailed) {
       haptics.notify("error");
-      setImageError(
-        "Recipe saved, but a photo couldn't be uploaded — check your connection and save again to retry.",
-      );
+      setImageError(t("photoUploadFailed"));
       setSaveState("idle");
       return;
     }

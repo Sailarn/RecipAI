@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { apiFetch, isMaintenanceError } from "@/lib/api/api-fetch";
@@ -14,6 +15,7 @@ import { useNavigate } from "@/lib/transitions";
 import { ParseHistoryRow } from "./entry-row";
 
 export function ParseHistoryView() {
+  const tParse = useTranslations("parse");
   const navigate = useNavigate();
   const entries = useLiveQuery(() => getParseHistory(), []);
   const [retryingIds, setRetryingIds] = useState<Set<string>>(new Set());
@@ -77,9 +79,11 @@ export function ParseHistoryView() {
 
       {entries !== undefined && entries.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-          <p className="font-medium text-[var(--fg-2)]">No imports yet</p>
+          <p className="font-medium text-[var(--fg-2)]">
+            {tParse("noImports")}
+          </p>
           <p className="mt-1 text-sm text-[var(--fg-3)]">
-            Recipes you import — and any that fail — will show up here.
+            {tParse("noImportsHint")}
           </p>
         </div>
       ) : (

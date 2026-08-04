@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
@@ -41,9 +42,9 @@ const NETWORK_RETRY_MS = 5_000;
 // rather than polling for the lifetime of the tab, and leave a history entry so
 // the parse doesn't just vanish.
 const MAX_WATCH_MS = 15 * 60_000;
-const TIMEOUT_REASON = "Parsing timed out — the job never finished.";
 
 export function useParseJobWatcher() {
+  const t = useTranslations("parse");
   const navigate = useNavigate();
   // Jobs that are already being polled (or have reached a terminal state).
   // useNavigate() returns a fresh object every render, so this hook's effect
@@ -84,22 +85,22 @@ export function useParseJobWatcher() {
       dispatchParsedRecipeCreated({ jobId: id, entryId: updatedEntry.id });
 
       toast(result.title, {
-        description: "Recipe parsed — tap to review",
+        description: t("parsedTapToReview"),
         duration: 10000,
         closeButton: true,
         action: {
-          label: "Save",
+          label: t("reviewSave"),
           onClick: async () => {
             await saveParsedRecipe(
               updatedEntry,
               getPendingUploadToken() ?? undefined,
             );
             await db.parsedRecipes.delete(updatedEntry.id);
-            toast.success("Recipe saved!");
+            toast.success(t("savedShort"));
           },
         },
         cancel: {
-          label: "Edit",
+          label: t("reviewEdit"),
           onClick: () => {
             trackEvent("parse_reviewed", undefined);
             localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
@@ -110,7 +111,7 @@ export function useParseJobWatcher() {
         },
       });
     },
-    [navigate],
+    [navigate, t],
   );
 
   const poll = useCallback(
@@ -137,12 +138,13 @@ export function useParseJobWatcher() {
       const abandonStuckJob = (jobUrl: string | undefined) => {
         if (!claimJobCompletion(id)) return;
         removeJobId(id);
-        trackEvent("parse_failed", { source: "url", reason: TIMEOUT_REASON });
+        const timeoutReason = t("timedOut");
+        trackEvent("parse_failed", { source: "url", reason: timeoutReason });
         recordParseHistory(
-          failedParseHistoryEntry(id, jobUrl ?? "", TIMEOUT_REASON),
+          failedParseHistoryEntry(id, jobUrl ?? "", timeoutReason),
         ).catch(() => {});
-        toast.error(TIMEOUT_REASON, {
-          action: { label: "Details", onClick: openParseHistory },
+        toast.error(timeoutReason, {
+          action: { label: t("details"), onClick: openParseHistory },
         });
       };
 
@@ -166,14 +168,14 @@ export function useParseJobWatcher() {
             ).catch(() => {});
           } else if (status === "failed") {
             if (!claimJobCompletion(id)) return;
-            const rawError: string = error || "Failed to parse recipe";
+            const rawError: string = error || t("failedGeneric");
             removeJobId(id);
             trackEvent("parse_failed", { source: "url", reason: rawError });
             recordParseHistory(
               failedParseHistoryEntry(id, jobUrl, rawError),
             ).catch(() => {});
             toast.error(rawError, {
-              action: { label: "Details", onClick: openParseHistory },
+              action: { label: t("details"), onClick: openParseHistory },
             });
           } else if (Date.now() - startedAt >= MAX_WATCH_MS) {
             abandonStuckJob(jobUrl);
@@ -195,7 +197,7 @@ export function useParseJobWatcher() {
       };
       run();
     },
-    [handleDone, navigate],
+    [handleDone, navigate, t],
   );
 
   useEffect(() => {

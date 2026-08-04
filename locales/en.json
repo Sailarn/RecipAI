@@ -60,7 +60,13 @@
       "deleted": "\"{title}\" deleted",
       "undo": "Undo",
       "undoFailed": "Could not restore the recipe"
-    }
+    },
+    "markTried": "Mark as tried",
+    "markUntried": "Mark as untried",
+    "addToCollection": "Add to collection",
+    "deleteRecipe": "Delete recipe",
+    "refreshing": "Refreshing…",
+    "releaseToRefresh": "↓ Release to refresh"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -119,7 +125,9 @@
     "stepHintText": "Describe each step clearly",
     "addImage": "Add image",
     "removeImage": "Remove image",
-    "updated": "Recipe updated"
+    "updated": "Recipe updated",
+    "saveFailed": "Failed to save recipe",
+    "photoUploadFailed": "Recipe saved, but a photo couldn't be uploaded — check your connection and save again to retry."
   },
   "form": {
     "required": "This field is required"
@@ -164,6 +172,19 @@
       "suggestion": "Copied link — tap to use",
       "dismissSuggestion": "Dismiss suggestion",
       "pasteEmpty": "No link found in your clipboard"
-    }
+    },
+    "parsedTapToReview": "Recipe parsed — tap to review",
+    "savedShort": "Recipe saved!",
+    "reviewSave": "Save",
+    "reviewEdit": "Edit",
+    "details": "Details",
+    "failedGeneric": "Failed to parse recipe",
+    "timedOut": "Parsing timed out — the job never finished.",
+    "noImports": "No imports yet",
+    "noImportsHint": "Recipes you import — and any that fail — will show up here."
+  },
+  "pantry": {
+    "empty": "Your pantry is empty.",
+    "emptyHint": "Tap + to add ingredients you have at home."
   }
 }
