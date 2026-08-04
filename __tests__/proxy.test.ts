@@ -75,6 +75,39 @@ describe("proxy", () => {
     expect(ensureAppAvailable).not.toHaveBeenCalled();
   });
 
+  it("sends a next-intl locale-root redirect straight to the recipes list", async () => {
+    intlMiddleware.mockReturnValue(
+      NextResponse.redirect("https://recipai.test/ua"),
+    );
+
+    const response = await proxy(makeRequest("/"));
+
+    expect(response.headers.get("location")).toBe(
+      "https://recipai.test/ua/recipes",
+    );
+  });
+
+  it("redirects a directly requested locale root to the recipes list", async () => {
+    const response = await proxy(makeRequest("/en"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "https://recipai.test/en/recipes",
+    );
+  });
+
+  it("leaves redirects to non-locale-root paths untouched", async () => {
+    intlMiddleware.mockReturnValue(
+      NextResponse.redirect("https://recipai.test/ua/login"),
+    );
+
+    const response = await proxy(makeRequest("/login"));
+
+    expect(response.headers.get("location")).toBe(
+      "https://recipai.test/ua/login",
+    );
+  });
+
   it("matches API requests", () => {
     expect(config).toEqual(
       expect.objectContaining({
