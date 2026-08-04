@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import type { StatusFilter } from "@/components/status-chips";
 import type { Recipe } from "@/lib/db/schema";
 
@@ -14,11 +14,17 @@ export function useRecipeFilter(
   const [status, setStatus] = useState<StatusFilter>(["all"]);
   const [collectionId, setCollectionId] = useState<string | null>(null);
 
+  // Filtering + sorting the whole library on every keystroke re-rendered the
+  // page, the filter bar and the virtualiser synchronously, so typing felt
+  // heavy on a large library. Deferring the query keeps the input itself at
+  // interactive priority and lets React drop intermediate result sets.
+  const deferredSearch = useDeferredValue(search);
+
   const filtered = useMemo(() => {
     let result = [...recipes];
 
-    if (search.trim()) {
-      const query = search.toLowerCase();
+    if (deferredSearch.trim()) {
+      const query = deferredSearch.toLowerCase();
       result = result.filter(
         (recipe) =>
           recipe.title.toLowerCase().includes(query) ||
@@ -73,7 +79,15 @@ export function useRecipeFilter(
     });
 
     return result;
-  }, [recipes, search, sort, category, status, collectionId, getMissing]);
+  }, [
+    recipes,
+    deferredSearch,
+    sort,
+    category,
+    status,
+    collectionId,
+    getMissing,
+  ]);
 
   return {
     search,
