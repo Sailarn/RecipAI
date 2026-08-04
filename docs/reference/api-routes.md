@@ -6,7 +6,11 @@ All routes live under `app/api/`. These routes are the server-sync layer — par
 
 ## Maintenance mode
 
-`proxy.ts` (Next.js middleware) gates every `/api/*` request except `/api/auth/*` and `/api/manifest` behind a DB-backed kill switch, before any route handler runs. `ensureAppAvailable()` (`lib/maintenance.ts`) reads the single-row `app_config` Postgres table (see [data model](data-model.md#app_config)); if `maintenance_enabled` is true — or if that read itself throws — the request is short-circuited with `503 { error, code: "MAINTENANCE_MODE" }` and a `Retry-After: 30` header. This **fails closed** (a DB outage looks like maintenance to every caller), the opposite of the rate limiter below, which fails open on a Redis outage.
+`proxy.ts` (Next.js middleware) gates every `/api/*` request except `/api/auth/*` and `/api/manifest` behind a DB-backed kill switch, before any route handler runs. `ensureAppAvailable()` (`lib/maintenance.ts`) reads the single-row `app_config` Postgres table (see [data model](data-model.md#app_config)); if `maintenance_enabled` is true the request is short-circuited with `503 { error, code: "MAINTENANCE_MODE" }` and a `Retry-After: 30` header.
+
+The read is **cached in module memory for 30 s** and single-flighted, so this guard costs one query per instance per window rather than a Postgres round-trip on every API call. The practical consequence: toggling maintenance takes up to 30 s to reach an already-warm server instance.
+
+It **fails open**, like the rate limiter below — if the config read throws, the last successfully-read value is used (so a real maintenance window survives a transient blip) and the request is allowed when no value has ever been read. The failure is reported to Sentry with `source: "maintenance-config"`. Failing open matters because this guard also fronts routes that never touch Postgres (image upload, photo parse, embeds); a blip on one small read must not 503 the entire API.
 
 The client detects this via `maintenanceErrorFromResponse` (`lib/api/api-fetch.ts`) — `status === 503` and `body.code === MAINTENANCE_MODE_CODE` — and surfaces the server-supplied message as a toast (`MaintenanceListener`). `syncFetch` swallows it without reporting to Sentry (see [gotchas](gotchas.md)). Toggle via the Supabase dashboard directly — no admin UI yet.
 
