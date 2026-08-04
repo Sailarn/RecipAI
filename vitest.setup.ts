@@ -22,6 +22,17 @@ if (typeof window !== "undefined")
     })),
   });
 
+// Components read copy through next-intl, which needs a provider that unit
+// tests don't render. Returning the key keeps assertions on stable identifiers
+// instead of English copy that changes whenever wording does. A test that cares
+// about real translations can still override this with a local vi.mock.
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+  NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
+}));
+
 vi.mock("@/lib/transitions", () => ({
   slideTransition: vi.fn(),
   useNavigate: () => ({

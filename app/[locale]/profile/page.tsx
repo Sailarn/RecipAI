@@ -131,7 +131,7 @@ export default function ProfilePage() {
               strokeWidth={ROW_ICON_STROKE_WIDTH}
               className={ROW_ICON_CLASSES}
             />
-            <span className={ROW_LABEL_CLASSES}>Import history</span>
+            <span className={ROW_LABEL_CLASSES}>{t("importHistory")}</span>
             <ChevronRight
               size={CHEVRON_ICON_SIZE}
               strokeWidth={CHEVRON_STROKE_WIDTH}
@@ -153,7 +153,9 @@ export default function ProfilePage() {
                   strokeWidth={ROW_ICON_STROKE_WIDTH}
                   className={ROW_ICON_CLASSES}
                 />
-                <span className={ROW_LABEL_CLASSES}>Add to Home Screen</span>
+                <span className={ROW_LABEL_CLASSES}>
+                  {t("addToHomeScreen")}
+                </span>
                 <ChevronRight
                   size={CHEVRON_ICON_SIZE}
                   strokeWidth={CHEVRON_STROKE_WIDTH}
@@ -170,7 +172,7 @@ export default function ProfilePage() {
               strokeWidth={ROW_ICON_STROKE_WIDTH}
               className={ROW_ICON_CLASSES}
             />
-            <span className={ROW_LABEL_CLASSES}>Version</span>
+            <span className={ROW_LABEL_CLASSES}>{t("version")}</span>
             {/* Build metadata: server and client can momentarily disagree in dev
                 after a version bump (stale bundle). It always matches in a clean
                 prod build, so suppress the benign hydration warning. */}

@@ -149,7 +149,16 @@
     "loginPrompt": "Sign in to sync your recipes across devices",
     "login": "Sign in (coming soon)",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "importHistory": "Import history",
+    "addToHomeScreen": "Add to Home Screen",
+    "version": "Version",
+    "telegramNotifications": "Telegram notifications",
+    "pushNotifications": "Push notifications",
+    "enableInSettings": "Enable in Settings",
+    "openRecipeBot": "Open Recipe Bot",
+    "botHint": "Send any recipe URL or supported social post to your bot — it'll save it to your account automatically.",
+    "signOut": "Sign out"
   },
   "parse": {
     "tabs": {

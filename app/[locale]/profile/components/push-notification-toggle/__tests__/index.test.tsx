@@ -85,6 +85,6 @@ describe("PushNotificationToggle", () => {
     render(<PushNotificationToggle />);
 
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-    expect(screen.getByText("Enable in Settings")).toBeInTheDocument();
+    expect(screen.getByText("enableInSettings")).toBeInTheDocument();
   });
 });

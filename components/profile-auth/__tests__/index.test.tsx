@@ -132,7 +132,7 @@ describe("ProfileAuth", () => {
         screen.queryByRole("button", { name: /sign in/i }),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("button", { name: /sign out/i }),
+        screen.queryByRole("button", { name: "signOut" }),
       ).not.toBeInTheDocument();
     });
   });
@@ -219,7 +219,7 @@ describe("ProfileAuth", () => {
     it("shows sign-out button", () => {
       render(<ProfileAuth />);
       expect(
-        screen.getByRole("button", { name: /sign out/i }),
+        screen.getByRole("button", { name: "signOut" }),
       ).toBeInTheDocument();
     });
 
@@ -230,7 +230,7 @@ describe("ProfileAuth", () => {
 
       expect(screen.getByText("Jane Doe")).toBeInTheDocument();
       expect(
-        screen.queryByRole("button", { name: /sign out/i }),
+        screen.queryByRole("button", { name: "signOut" }),
       ).not.toBeInTheDocument();
     });
 
@@ -312,7 +312,7 @@ describe("ProfileAuth", () => {
       render(<ProfileAuth />);
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
+        fireEvent.click(screen.getByRole("button", { name: "signOut" }));
       });
 
       await waitFor(() => {

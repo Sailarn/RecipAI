@@ -38,7 +38,7 @@ describe("TelegramNotifyToggle", () => {
 
     const toggle = screen.getByRole("switch");
     expect(toggle).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByText("Telegram notifications")).toBeInTheDocument();
+    expect(screen.getByText("telegramNotifications")).toBeInTheDocument();
   });
 
   it("toggles the preference off when clicked while enabled", () => {

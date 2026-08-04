@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, BellOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TogglePill } from "@/components/toggle-pill";
 import { usePushSubscription } from "@/lib/hooks/use-push-subscription";
 import { useFeature } from "@/lib/platform";
@@ -14,6 +15,7 @@ import {
 import { RowDivider } from "../row-divider";
 
 export function PushNotificationToggle() {
+  const t = useTranslations("profile");
   const push = usePushSubscription();
 
   // Unavailable where the platform can't deliver push — inside Telegram web
@@ -36,8 +38,10 @@ export function PushNotificationToggle() {
             strokeWidth={ROW_ICON_STROKE_WIDTH}
             className={ROW_ICON_CLASSES}
           />
-          <span className={ROW_LABEL_CLASSES}>Push notifications</span>
-          <span className="text-xs text-[var(--fg-3)]">Enable in Settings</span>
+          <span className={ROW_LABEL_CLASSES}>{t("pushNotifications")}</span>
+          <span className="text-xs text-[var(--fg-3)]">
+            {t("enableInSettings")}
+          </span>
         </div>
       ) : (
         <button
@@ -54,7 +58,7 @@ export function PushNotificationToggle() {
             strokeWidth={ROW_ICON_STROKE_WIDTH}
             className={ROW_ICON_CLASSES}
           />
-          <span className={ROW_LABEL_CLASSES}>Push notifications</span>
+          <span className={ROW_LABEL_CLASSES}>{t("pushNotifications")}</span>
           <TogglePill checked={pushEnabled} offIcon={BellOff} onIcon={Bell} />
         </button>
       )}

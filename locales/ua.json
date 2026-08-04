@@ -149,7 +149,16 @@
     "loginPrompt": "Увійдіть, щоб синхронізувати рецепти між пристроями",
     "login": "Увійти (незабаром)",
     "theme": "Тема",
-    "language": "Мова"
+    "language": "Мова",
+    "importHistory": "Історія імпортів",
+    "addToHomeScreen": "Додати на головний екран",
+    "version": "Версія",
+    "telegramNotifications": "Сповіщення в Telegram",
+    "pushNotifications": "Push-сповіщення",
+    "enableInSettings": "Увімкніть у налаштуваннях",
+    "openRecipeBot": "Відкрити бот",
+    "botHint": "Надішліть боту будь-яке посилання на рецепт або допис із соцмереж — він збереже його до вашого акаунту автоматично.",
+    "signOut": "Вийти"
   },
   "parse": {
     "tabs": {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Bot, LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFeature } from "@/lib/platform";
 
 interface UserCardProps {
@@ -14,6 +15,7 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
+  const t = useTranslations("profile");
   const initial = (user.name || user.email || "?")[0].toUpperCase();
   // In Telegram the identity is fixed (auto sign-in), so sign-out and the bot
   // link are hidden — the card is just an identity display.
@@ -52,11 +54,10 @@ export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
             className="flex items-center justify-center gap-[7px] w-full p-3 bg-[rgba(255,170,50,0.10)] border border-[rgba(255,200,100,0.22)] backdrop-blur-[12px] rounded-[14px] font-sans text-sm font-semibold text-[var(--fg-1)] no-underline mb-2 cursor-pointer"
           >
             <Bot size={15} className="text-[var(--food-accent)] shrink-0" />
-            <span>Open Recipe Bot</span>
+            <span>{t("openRecipeBot")}</span>
           </a>
           <p className="font-sans text-[11px] text-[var(--fg-3)] text-center leading-[1.6] mb-3.5 px-1">
-            Send any recipe URL or supported social post to your bot — it'll
-            save it to your account automatically.
+            {t("botHint")}
           </p>
         </>
       )}
@@ -71,7 +72,7 @@ export function UserCard({ user, telegramLinked, onSignOut }: UserCardProps) {
             size={15}
             className="text-[var(--action-destructive)] shrink-0"
           />
-          <span>Sign out</span>
+          <span>{t("signOut")}</span>
         </button>
       )}
     </div>

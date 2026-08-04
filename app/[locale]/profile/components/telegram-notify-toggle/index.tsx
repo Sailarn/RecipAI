@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, BellOff, Send } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TogglePill } from "@/components/toggle-pill";
 import { useTelegramNotify } from "@/lib/hooks/use-telegram-notify";
 import {
@@ -13,6 +14,7 @@ import {
 import { RowDivider } from "../row-divider";
 
 export function TelegramNotifyToggle() {
+  const t = useTranslations("profile");
   const { available, enabled, setEnabled } = useTelegramNotify();
 
   // Only meaningful for Telegram-connected users; hidden for everyone else.
@@ -33,7 +35,7 @@ export function TelegramNotifyToggle() {
           strokeWidth={ROW_ICON_STROKE_WIDTH}
           className={ROW_ICON_CLASSES}
         />
-        <span className={ROW_LABEL_CLASSES}>Telegram notifications</span>
+        <span className={ROW_LABEL_CLASSES}>{t("telegramNotifications")}</span>
         <TogglePill checked={enabled} offIcon={BellOff} onIcon={Bell} />
       </button>
     </>
