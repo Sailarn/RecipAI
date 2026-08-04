@@ -28,6 +28,16 @@ import { captureError } from "@/lib/telemetry";
 // this period is transient and silently ignored.
 const GRACE_WINDOW_MS = 90_000;
 
+// One-shot Dexie migrations run in the background, so a failure has no visible
+// symptom — the data just stays in its old shape. They used to swallow
+// everything; report instead, without a user-facing message (there is nothing
+// the user could do, and the app works either way).
+function reportMigrationFailure(source: string) {
+  return (error: unknown) => {
+    captureError(error, { tags: { source: `startup-migration:${source}` } });
+  };
+}
+
 // Adopt this client's anonymous parse jobs into the account, then pull the
 // user's full server-side history into Dexie so it shows across devices.
 async function syncParseHistory(): Promise<void> {
@@ -176,7 +186,7 @@ export function useSyncOnLogin() {
     renormalized.current = true;
     import("@/lib/db/renormalize-recipes")
       .then((module) => module.renormalizeOutdatedRecipes())
-      .catch(() => {});
+      .catch(reportMigrationFailure("renormalize-recipes"));
   }, []);
 
   // One-time upgrade from the legacy single-`modifier`/string-`section` recipe
@@ -189,7 +199,7 @@ export function useSyncOnLogin() {
     shapeMigrated.current = true;
     import("@/lib/db/migrate-recipe-shape")
       .then((module) => module.migrateLegacyRecipeShapes())
-      .catch(() => {});
+      .catch(reportMigrationFailure("migrate-recipe-shape"));
   }, []);
 
   // One-time reconcile: clears stale duplicate vocab rows left over from the
@@ -201,7 +211,7 @@ export function useSyncOnLogin() {
   useEffect(() => {
     import("@/lib/db/reconcile-vocab")
       .then((module) => module.reconcileVocab())
-      .catch(() => {});
+      .catch(reportMigrationFailure("reconcile-vocab"));
   }, []);
   const inFlightRef = useRef<Promise<void> | null>(null);
 
@@ -276,7 +286,7 @@ export function useSyncOnLogin() {
       // every recipe is normalized.
       import("@/lib/db/normalize-pending-recipes")
         .then((module) => module.normalizePendingRecipes())
-        .catch(() => {});
+        .catch(reportMigrationFailure("normalize-pending-recipes"));
 
       // Drop any leftover review notifications from before the server-wins
       // rework so the bell's stale "needs review" badge clears.
