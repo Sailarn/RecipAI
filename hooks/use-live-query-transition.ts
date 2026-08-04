@@ -1,5 +1,5 @@
 import { liveQuery } from "dexie";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 
 /**
  * Drop-in for useLiveQuery that defers *subsequent* data updates with
@@ -21,6 +21,12 @@ export function useLiveQueryTransition<T>(
 ): T | undefined {
   const [state, setState] = useState<T | undefined>(undefined);
 
+  // The subscription is keyed on the caller's deps, not on onError, so without
+  // this the effect would hold whichever onError it closed over when it last
+  // ran — a stale handler that could set state on an unmounted owner.
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
   useEffect(() => {
     let hasResolved = false;
     const subscription = liveQuery(querier).subscribe({
@@ -32,7 +38,7 @@ export function useLiveQueryTransition<T>(
           setState(value as T);
         }
       },
-      error: () => onError?.(),
+      error: () => onErrorRef.current?.(),
     });
     return () => subscription.unsubscribe();
     // biome-ignore lint/correctness/useExhaustiveDependencies: mirrors useLiveQuery — caller owns deps
