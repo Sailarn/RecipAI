@@ -70,7 +70,10 @@ const appShellEntries = locales.flatMap((locale) =>
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
-  disable: false,
+  // Off in dev, where a service worker mostly serves yesterday's build back to
+  // you. Set SW_DEV=1 to turn it on for local PWA/offline work (`bun run
+  // tunnel` + an installed app).
+  disable: process.env.NODE_ENV === "development" && process.env.SW_DEV !== "1",
   reloadOnOnline: false,
   additionalPrecacheEntries: [...publicPrecacheEntries(), ...appShellEntries],
 });

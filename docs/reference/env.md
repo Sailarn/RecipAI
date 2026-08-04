@@ -139,6 +139,7 @@ PostHog and Axiom only send data when `NODE_ENV === "production"` (like Sentry).
 |---|---|---|
 | `TELEMETRY_DEV` | No | Set to `1` to enable the **server-side** vendors (Axiom, PostHog-node) in development. |
 | `NEXT_PUBLIC_TELEMETRY_DEV` | No | Set to `1` to enable the **client-side** PostHog browser SDK in development. |
+| `SW_DEV` | No | Set to `1` to build and register the service worker in development. Off by default — a dev service worker mostly serves the previous build back to you. Turn it on for local PWA/offline work. |
 
 ---
 
