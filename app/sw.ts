@@ -4,6 +4,7 @@ import {
   CacheableResponsePlugin,
   CacheFirst,
   ExpirationPlugin,
+  NetworkFirst,
   Serwist,
 } from "serwist";
 
@@ -38,6 +39,32 @@ const serwist = new Serwist({
           new ExpirationPlugin({
             maxEntries: 400,
             maxAgeSeconds: 30 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+    {
+      // Page loads. @serwist/next's default HTML rule matches on the request's
+      // *Content-Type* header, which navigation requests don't send, so real
+      // page loads fell through to its generic `others` handler — a NetworkFirst
+      // with no timeout, i.e. a launch on a bad connection sat waiting for the
+      // network with a perfectly good cached copy on disk.
+      //
+      // NetworkFirst with a short timeout rather than StaleWhileRevalidate on
+      // purpose: SWR would paint instantly but could serve HTML from a previous
+      // deploy that references JS chunks the new build no longer has.
+      matcher: ({ request, sameOrigin, url: { pathname } }) =>
+        sameOrigin &&
+        request.mode === "navigate" &&
+        !pathname.startsWith("/api/"),
+      handler: new NetworkFirst({
+        cacheName: "pages",
+        networkTimeoutSeconds: 3,
+        plugins: [
+          new CacheableResponsePlugin({ statuses: [200] }),
+          new ExpirationPlugin({
+            maxEntries: 64,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
           }),
         ],
       }),
