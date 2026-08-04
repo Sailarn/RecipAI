@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { initPostHogClient } from "@/lib/telemetry/posthog-client";
+import { scheduleIdle } from "@/lib/schedule-idle";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({
@@ -24,6 +24,13 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-initPostHogClient();
+// Analytics is never worth competing with first paint: both this module and
+// posthog-js itself are pulled in once the browser is idle. Any event fired
+// before the load lands is queued inside the client and replayed.
+scheduleIdle(() => {
+  import("@/lib/telemetry/posthog-client")
+    .then((posthogClientModule) => posthogClientModule.initPostHogClient())
+    .catch(() => {});
+});
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
