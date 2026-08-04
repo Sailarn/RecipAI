@@ -42,6 +42,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/db.ts` | Dexie instance + all version migrations (currently v12). |
 | `lib/db/schema.ts` | TypeScript types for all Dexie entities. |
 | `lib/db/recipes.ts` | CRUD: `createRecipe`, `updateRecipe`, `deleteRecipe` (returns the removed row and leaves its ImageKit file alone), plus `restoreRecipe` / `discardRecipeImage` for the undo window. |
+| `lib/sync/sync-entities.ts` | The per-entity sync primitives: `syncParseHistory`, `syncPantry`, `syncIngredients`, plus the generic server-wins `applyReconcile` and the `parseTimestamps` reviver. |
+| `lib/sync/startup-migrations.ts` | `runStartupMigrations()` — the one-shot Dexie upgrades run at boot (renormalize-recipes, migrate-recipe-shape, reconcile-vocab) — and `normalizePulledRecipes()`, run after each reconcile. All lazily imported, unawaited, and reported to Sentry on failure. |
 | `hooks/use-delete-recipe.ts` | The delete users actually trigger: removes the recipe, raises a success toast with a 6 s **Undo**, and only destroys the uploaded image once that window closes. Both delete entry points (detail header, card long-press) go through it. |
 | `lib/db/recipe-sections.ts` | `groupBySectionId` (ingredients — catalog order, coalesced), `groupBySectionRuns` (steps — consecutive runs, order preserved), `sectionName`, `shouldShowSections`. Display-side grouping helpers; see [gotchas](../reference/gotchas.md). |
 | `lib/db/migrate-recipe-shape.ts` | `migrateLegacyRecipeShapes()` — one-time-per-recipe upgrade from legacy single-`modifier`/string-`section` to `modifiers[]` + structured `sections`/`sectionId`. Run from `use-sync-on-login.ts`. |
