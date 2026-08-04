@@ -37,4 +37,20 @@ describe("LaunchSplash", () => {
 
     expect(container.querySelector("[data-launch-splash]")).toBeNull();
   });
+
+  it("hides once the app has painted, well before the one-second ceiling", () => {
+    const { container } = render(<LaunchSplash />);
+
+    act(() => vi.advanceTimersByTime(300));
+
+    expect(container.querySelector("[data-launch-splash]")).toBeNull();
+  });
+
+  it("keeps the splash up for a minimum window so it cannot flash", () => {
+    const { container } = render(<LaunchSplash />);
+
+    act(() => vi.advanceTimersByTime(100));
+
+    expect(container.querySelector("[data-launch-splash]")).not.toBeNull();
+  });
 });
