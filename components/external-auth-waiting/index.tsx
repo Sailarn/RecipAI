@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   canShareExternalAuthUrl,
@@ -18,6 +19,8 @@ export function ExternalAuthWaiting({
   title: string;
   onCancel: () => void;
 }) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">(
     "idle",
   );
@@ -64,18 +67,16 @@ export function ExternalAuthWaiting({
         {title}
       </p>
       <p className="text-sm text-[var(--fg-2)]">
-        {shareFirst
-          ? "Tap Share, then open the link in Safari or Chrome — that's where you're signed in to Google. Approve there and come back."
-          : "Open this in your browser, where you're signed in to Google. Approve there, then come back."}
+        {shareFirst ? t("shareFirstHint") : t("browserHint")}
       </p>
 
       {shareFirst ? (
         <>
           <button type="button" className="signin-btn" onClick={shareLink}>
-            Share link
+            {t("shareLink")}
           </button>
           {shareStatus === "error" && (
-            <p className="text-xs text-red-400">Could not share the link.</p>
+            <p className="text-xs text-red-400">{t("shareFailed")}</p>
           )}
           <button
             type="button"
@@ -83,34 +84,30 @@ export function ExternalAuthWaiting({
             onClick={copyLink}
           >
             {copyStatus === "copied"
-              ? "Link copied — open it in your browser"
-              : "Copy link instead"}
+              ? t("linkCopiedOpen")
+              : t("copyLinkInstead")}
           </button>
           {copyStatus === "error" && (
-            <p className="text-xs text-red-400">Could not copy the link.</p>
+            <p className="text-xs text-red-400">{t("copyFailed")}</p>
           )}
         </>
       ) : (
         <>
           <button type="button" className="signin-btn" onClick={copyAndOpen}>
-            {openStatus === "copied" ? "Opening browser…" : "Open in browser"}
+            {openStatus === "copied" ? t("openingBrowser") : t("openInBrowser")}
           </button>
           {openStatus === "error" && (
-            <p className="text-xs text-red-400">
-              Could not open the link. Copy it instead.
-            </p>
+            <p className="text-xs text-red-400">{t("openFailed")}</p>
           )}
           <button
             type="button"
             className="text-sm text-[var(--fg-3)] py-2"
             onClick={copyLink}
           >
-            {copyStatus === "copied"
-              ? "Link copied — open it in your browser"
-              : "Copy link"}
+            {copyStatus === "copied" ? t("linkCopiedOpen") : t("copyLink")}
           </button>
           {copyStatus === "error" && (
-            <p className="text-xs text-red-400">Could not copy the link.</p>
+            <p className="text-xs text-red-400">{t("copyFailed")}</p>
           )}
         </>
       )}
@@ -120,7 +117,7 @@ export function ExternalAuthWaiting({
         className="text-sm text-[var(--fg-3)] py-2"
         onClick={onCancel}
       >
-        Cancel
+        {tCommon("cancel")}
       </button>
     </div>
   );

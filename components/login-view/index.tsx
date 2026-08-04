@@ -2,6 +2,7 @@
 
 import { KeyRound, Send } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { GoogleLogo } from "@/components/google-logo";
@@ -31,6 +32,8 @@ const CHIP_CLASS =
   "w-7 h-7 rounded-lg bg-black/30 flex items-center justify-center shrink-0";
 
 export function LoginView({ locale }: { locale: string }) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const navigate = useNavigate();
   const { authStatus, webApp } = useTelegram();
   const showSignInOptions = useFeature("signInOptions");
@@ -152,9 +155,7 @@ export function LoginView({ locale }: { locale: string }) {
     signInSection = (
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="font-sans text-sm leading-[1.5] text-[var(--fg-2)]">
-          {authStatus === "failed"
-            ? "We couldn't sign you in automatically."
-            : "Signing you in with Telegram…"}
+          {authStatus === "failed" ? t("autoSignInFailed") : t("autoSigningIn")}
         </p>
         {authStatus === "failed" && webApp && (
           <button
@@ -166,7 +167,9 @@ export function LoginView({ locale }: { locale: string }) {
             <div className={`${CHIP_CLASS} text-[#229ED9]`}>
               <Send size={14} strokeWidth={2} />
             </div>
-            <span>{retryingTelegram ? "Signing in…" : "Try again"}</span>
+            <span>
+              {retryingTelegram ? t("signingIn") : tCommon("tryAgain")}
+            </span>
           </button>
         )}
       </div>
@@ -175,7 +178,7 @@ export function LoginView({ locale }: { locale: string }) {
     signInSection = (
       <ExternalAuthWaiting
         url={externalUrl}
-        title="Waiting for Google"
+        title={t("waitingForGoogle")}
         onCancel={() => {
           abortController.current?.abort();
           clearPendingDeviceAuth();
@@ -194,7 +197,7 @@ export function LoginView({ locale }: { locale: string }) {
           <div className={CHIP_CLASS}>
             <GoogleLogo />
           </div>
-          <span>Continue with Google</span>
+          <span>{t("continueGoogle")}</span>
         </button>
         <button
           type="button"
@@ -204,7 +207,7 @@ export function LoginView({ locale }: { locale: string }) {
           <div className={`${CHIP_CLASS} text-[var(--food-accent)]`}>
             <KeyRound size={14} strokeWidth={2} />
           </div>
-          <span>Continue with Passkey</span>
+          <span>{t("continuePasskey")}</span>
         </button>
         <button
           type="button"
@@ -214,11 +217,10 @@ export function LoginView({ locale }: { locale: string }) {
           <div className={`${CHIP_CLASS} text-[#229ED9]`}>
             <Send size={14} strokeWidth={2} />
           </div>
-          <span>Continue with Telegram</span>
+          <span>{t("continueTelegram")}</span>
         </button>
         <p className="text-center text-[11px] text-[var(--fg-3)] mt-1 leading-[1.5]">
-          New here? Use Google or Telegram — Passkey only works once you've
-          added one to your account.
+          {t("passkeyHint")}
         </p>
       </div>
     );
@@ -246,7 +248,7 @@ export function LoginView({ locale }: { locale: string }) {
             RecipAI
           </h1>
           <p className="font-sans text-xs text-[var(--fg-2)] mt-1">
-            Save and discover your favourite recipes with AI
+            {t("tagline")}
           </p>
         </div>
 

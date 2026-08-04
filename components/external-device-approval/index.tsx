@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { externalAuthClient } from "@/lib/auth/external-auth-client";
 import { getExternalAuthUrl } from "@/lib/auth/external-auth-config";
@@ -12,6 +13,7 @@ export function ExternalDeviceApproval({
   userCode: string;
   locale: string;
 }) {
+  const t = useTranslations("auth");
   const { data: session, isPending } = externalAuthClient.useSession();
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">(
     "idle",
@@ -51,18 +53,18 @@ export function ExternalDeviceApproval({
     }
   };
 
-  if (isPending) return <AuthCard>Checking authentication…</AuthCard>;
+  if (isPending) return <AuthCard>{t("checking")}</AuthCard>;
   if (status === "done") {
-    return <AuthCard>Done. Return to RecipAI.</AuthCard>;
+    return <AuthCard>{t("doneReturn")}</AuthCard>;
   }
   if (status === "error") {
-    return <AuthCard>This request is invalid or expired.</AuthCard>;
+    return <AuthCard>{t("invalidOrExpired")}</AuthCard>;
   }
   if (!session) {
     return (
       <AuthCard>
         <button type="button" className="signin-btn" onClick={signIn}>
-          Continue with Google
+          {t("continueGoogle")}
         </button>
       </AuthCard>
     );
@@ -70,14 +72,18 @@ export function ExternalDeviceApproval({
 
   return (
     <AuthCard>
-      <p>Continue as {session.user.email || session.user.name}?</p>
+      <p>
+        {t("continueAs", {
+          account: session.user.email || session.user.name || "",
+        })}
+      </p>
       <button
         type="button"
         className="signin-btn"
         disabled={status === "working"}
         onClick={() => decide(true)}
       >
-        Continue to RecipAI
+        {t("continueToApp")}
       </button>
       <button
         type="button"
@@ -85,7 +91,7 @@ export function ExternalDeviceApproval({
         disabled={status === "working"}
         onClick={() => decide(false)}
       >
-        Deny
+        {t("deny")}
       </button>
     </AuthCard>
   );

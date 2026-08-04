@@ -49,16 +49,14 @@ describe("ExternalLink", () => {
 
     render(<ExternalLink locale="en" />);
 
-    expect(
-      await screen.findByText("This linking request is invalid or expired."),
-    ).toBeVisible();
+    expect(await screen.findByText("linkInvalidOrExpired")).toBeVisible();
     expect(linkSocial).not.toHaveBeenCalled();
   });
 
   it("does not redeem a request without a token", async () => {
     render(<ExternalLink locale="en" />);
 
-    expect(screen.getByText("This linking request is invalid.")).toBeVisible();
+    expect(screen.getByText("linkInvalid")).toBeVisible();
     expect(redeem).not.toHaveBeenCalled();
   });
 });
@@ -74,9 +72,7 @@ describe("ExternalLinkComplete", () => {
 
     render(<ExternalLinkComplete />);
 
-    expect(
-      await screen.findByText("Google account linked. Return to RecipAI."),
-    ).toBeVisible();
+    expect(await screen.findByText("linked")).toBeVisible();
     expect(cleanup).toHaveBeenCalledOnce();
   });
 
@@ -90,8 +86,6 @@ describe("ExternalLinkComplete", () => {
 
     render(<ExternalLinkComplete />);
 
-    expect(
-      await screen.findByText(/it may already be a separate RecipAI account/),
-    ).toBeVisible();
+    expect(await screen.findByText("linkFailedExisting")).toBeVisible();
   });
 });

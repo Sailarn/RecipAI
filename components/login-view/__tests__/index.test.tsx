@@ -104,7 +104,7 @@ describe("LoginView", () => {
 
   it("renders the Google sign-in button", () => {
     render(<LoginView locale="en" />);
-    expect(screen.getByText("Continue with Google")).toBeInTheDocument();
+    expect(screen.getByText("continueGoogle")).toBeInTheDocument();
   });
 
   it("hides the OAuth options and shows a status inside Telegram", () => {
@@ -112,13 +112,9 @@ describe("LoginView", () => {
 
     render(<LoginView locale="en" />);
 
-    expect(screen.queryByText("Continue with Google")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Continue with Telegram"),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Signing you in with Telegram…"),
-    ).toBeInTheDocument();
+    expect(screen.queryByText("continueGoogle")).not.toBeInTheDocument();
+    expect(screen.queryByText("continueTelegram")).not.toBeInTheDocument();
+    expect(screen.getByText("autoSigningIn")).toBeInTheDocument();
   });
 
   it("shows a retry hint when Telegram auto sign-in failed", () => {
@@ -127,9 +123,7 @@ describe("LoginView", () => {
 
     render(<LoginView locale="en" />);
 
-    expect(
-      screen.getByText(/couldn't sign you in automatically/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText("autoSignInFailed")).toBeInTheDocument();
   });
 
   it("retries the Mini App sign-in when the failed-state button is tapped", async () => {
@@ -140,7 +134,7 @@ describe("LoginView", () => {
 
     render(<LoginView locale="en" />);
 
-    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+    fireEvent.click(screen.getByRole("button", { name: "tryAgain" }));
 
     await waitFor(() => {
       expect(authClient.signInWithMiniApp).toHaveBeenCalledWith(
@@ -158,14 +152,14 @@ describe("LoginView", () => {
     render(<LoginView locale="en" />);
 
     expect(
-      screen.queryByRole("button", { name: /try again/i }),
+      screen.queryByRole("button", { name: "tryAgain" }),
     ).not.toBeInTheDocument();
   });
 
   it("tracks login when signing in with Google", async () => {
     render(<LoginView locale="en" />);
 
-    fireEvent.click(screen.getByText("Continue with Google"));
+    fireEvent.click(screen.getByText("continueGoogle"));
 
     expect(trackEvent).toHaveBeenCalledWith("login", { method: "google" });
   });
@@ -174,7 +168,7 @@ describe("LoginView", () => {
     const { authClient } = await import("@/lib/auth/auth-client");
     render(<LoginView locale="en" />);
 
-    fireEvent.click(screen.getByText("Continue with Google"));
+    fireEvent.click(screen.getByText("continueGoogle"));
 
     await waitFor(() => {
       expect(authClient.signIn.social).toHaveBeenCalledWith({
@@ -200,7 +194,7 @@ describe("LoginView", () => {
     });
     render(<LoginView locale="uk" />);
 
-    fireEvent.click(screen.getByText("Continue with Google"));
+    fireEvent.click(screen.getByText("continueGoogle"));
 
     await waitFor(() => {
       expect(requestDeviceAuthorization).toHaveBeenCalledOnce();
@@ -258,12 +252,12 @@ describe("LoginView", () => {
         }),
     );
     render(<LoginView locale="en" />);
-    fireEvent.click(screen.getByText("Continue with Google"));
+    fireEvent.click(screen.getByText("continueGoogle"));
 
-    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    fireEvent.click(await screen.findByRole("button", { name: "cancel" }));
 
     await waitFor(() => {
-      expect(screen.getByText("Continue with Google")).toBeVisible();
+      expect(screen.getByText("continueGoogle")).toBeVisible();
     });
   });
 
@@ -284,9 +278,9 @@ describe("LoginView", () => {
         }),
     );
     const { unmount } = render(<LoginView locale="en" />);
-    fireEvent.click(screen.getByText("Continue with Google"));
+    fireEvent.click(screen.getByText("continueGoogle"));
 
-    await screen.findByText("Waiting for Google");
+    await screen.findByText("waitingForGoogle");
     unmount();
     resolvePolling?.({ status: "cancelled" });
     await Promise.resolve();
@@ -297,15 +291,13 @@ describe("LoginView", () => {
 
   it("hints that passkey needs an existing account", () => {
     render(<LoginView locale="en" />);
-    expect(
-      screen.getByText(/Passkey only works once you've added one/i),
-    ).toBeVisible();
+    expect(screen.getByText("passkeyHint")).toBeVisible();
   });
 
   it("tracks login when signing in with Passkey", async () => {
     render(<LoginView locale="en" />);
 
-    fireEvent.click(screen.getByText("Continue with Passkey"));
+    fireEvent.click(screen.getByText("continuePasskey"));
 
     expect(trackEvent).toHaveBeenCalledWith("login", { method: "passkey" });
   });
@@ -313,7 +305,7 @@ describe("LoginView", () => {
   it("tracks login when signing in with Telegram", async () => {
     render(<LoginView locale="en" />);
 
-    fireEvent.click(screen.getByText("Continue with Telegram"));
+    fireEvent.click(screen.getByText("continueTelegram"));
 
     expect(trackEvent).toHaveBeenCalledWith("login", { method: "telegram" });
   });

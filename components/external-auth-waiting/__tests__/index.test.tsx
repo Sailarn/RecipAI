@@ -35,17 +35,15 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={vi.fn()}
       />,
     );
 
-    expect(screen.getByText("Waiting for Google")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Open in browser" }),
-    ).toBeVisible();
-    expect(screen.getByRole("button", { name: "Copy link" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
+    expect(screen.getByText("waitingForGoogle")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "openInBrowser" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "copyLink" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "cancel" })).toBeVisible();
   });
 
   it("copies before attempting to open the supplied URL", async () => {
@@ -53,19 +51,19 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={vi.fn()}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open in browser" }));
+    fireEvent.click(screen.getByRole("button", { name: "openInBrowser" }));
 
     await waitFor(() => {
       expect(copyAndOpenExternalAuthUrl).toHaveBeenCalledWith(
         "https://auth.example/request",
       );
       expect(
-        screen.getByRole("button", { name: /Opening browser/ }),
+        screen.getByRole("button", { name: "openingBrowser" }),
       ).toBeVisible();
     });
   });
@@ -75,15 +73,17 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={vi.fn()}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    fireEvent.click(screen.getByRole("button", { name: "copyLink" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /Link copied/ })).toBeVisible();
+      expect(
+        screen.getByRole("button", { name: "linkCopiedOpen" }),
+      ).toBeVisible();
     });
   });
 
@@ -94,16 +94,16 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={vi.fn()}
       />,
     );
 
-    expect(screen.getByText(/Tap Share/)).toBeVisible();
+    expect(screen.getByText("shareFirstHint")).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Open in browser" }),
+      screen.queryByRole("button", { name: "openInBrowser" }),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Share link" }));
+    fireEvent.click(screen.getByRole("button", { name: "shareLink" }));
 
     await waitFor(() => {
       expect(shareExternalAuthUrl).toHaveBeenCalledWith(
@@ -118,16 +118,14 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={vi.fn()}
       />,
     );
 
+    expect(screen.getByRole("button", { name: "openInBrowser" })).toBeVisible();
     expect(
-      screen.getByRole("button", { name: "Open in browser" }),
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("button", { name: "Share link" }),
+      screen.queryByRole("button", { name: "shareLink" }),
     ).not.toBeInTheDocument();
   });
 
@@ -137,15 +135,15 @@ describe("ExternalAuthWaiting", () => {
     render(
       <ExternalAuthWaiting
         url="https://auth.example/request"
-        title="Waiting for Google"
+        title="waitingForGoogle"
         onCancel={onCancel}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "copyLink" }));
+    fireEvent.click(screen.getByRole("button", { name: "cancel" }));
 
     expect(onCancel).toHaveBeenCalledOnce();
-    expect(await screen.findByText("Could not copy the link.")).toBeVisible();
+    expect(await screen.findByText("copyFailed")).toBeVisible();
   });
 });

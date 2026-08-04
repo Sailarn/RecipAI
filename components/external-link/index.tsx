@@ -1,12 +1,30 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { externalAuthClient } from "@/lib/auth/external-auth-client";
 import { getExternalAuthUrl } from "@/lib/auth/external-auth-config";
 import { routes } from "@/lib/routes";
 
+// These effects hold state in *message keys*, not translated strings, so `t`
+// never has to appear in their dependency arrays. It matters: both effects run
+// a one-shot side effect (redeeming a link token, cleaning up the browser
+// session), and `t` is not a stable reference, so depending on it re-fires them.
+type LinkMessageKey =
+  | "preparingLink"
+  | "linkInvalid"
+  | "linkInvalidOrExpired"
+  | "linkStartFailed";
+
+type CompleteMessageKey =
+  | "finishingLink"
+  | "cleanupFailed"
+  | "linkFailedExisting"
+  | "linked";
+
 export function ExternalLink({ locale }: { locale: string }) {
-  const [message, setMessage] = useState("Preparing secure account linking…");
+  const t = useTranslations("auth");
+  const [messageKey, setMessageKey] = useState<LinkMessageKey>("preparingLink");
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.hash.slice(1)).get(
@@ -18,7 +36,7 @@ export function ExternalLink({ locale }: { locale: string }) {
       window.location.pathname + window.location.search,
     );
     if (!token) {
-      setMessage("This linking request is invalid.");
+      setMessageKey("linkInvalid");
       return;
     }
 
@@ -28,7 +46,7 @@ export function ExternalLink({ locale }: { locale: string }) {
           token,
         });
         if (redemption.error) {
-          setMessage("This linking request is invalid or expired.");
+          setMessageKey("linkInvalidOrExpired");
           return;
         }
         const externalOrigin = getExternalAuthUrl({
@@ -41,37 +59,37 @@ export function ExternalLink({ locale }: { locale: string }) {
           errorCallbackURL: `${completionUrl}&error=link_failed`,
         });
         if (result.error) {
-          setMessage("Google account linking could not be started.");
+          setMessageKey("linkStartFailed");
         }
       } catch {
-        setMessage("Google account linking could not be started.");
+        setMessageKey("linkStartFailed");
       }
     };
     void begin();
   }, [locale]);
 
-  return <ExternalMessage>{message}</ExternalMessage>;
+  return <ExternalMessage>{t(messageKey)}</ExternalMessage>;
 }
 
 export function ExternalLinkComplete() {
-  const [message, setMessage] = useState("Finishing account linking…");
+  const t = useTranslations("auth");
+  const [messageKey, setMessageKey] =
+    useState<CompleteMessageKey>("finishingLink");
+
   useEffect(() => {
     const linkingFailed = new URLSearchParams(window.location.search).has(
       "error",
     );
     externalAuthClient.externalLink.cleanup().then((result) => {
       if (result.error) {
-        setMessage("Browser cleanup failed. Return to RecipAI and try again.");
+        setMessageKey("cleanupFailed");
         return;
       }
-      setMessage(
-        linkingFailed
-          ? "Couldn't link Google — it may already be a separate RecipAI account. Sign in with it directly instead. Return to RecipAI."
-          : "Google account linked. Return to RecipAI.",
-      );
+      setMessageKey(linkingFailed ? "linkFailedExisting" : "linked");
     });
   }, []);
-  return <ExternalMessage>{message}</ExternalMessage>;
+
+  return <ExternalMessage>{t(messageKey)}</ExternalMessage>;
 }
 
 function ExternalMessage({ children }: { children: React.ReactNode }) {

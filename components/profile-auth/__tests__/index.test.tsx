@@ -272,8 +272,8 @@ describe("ProfileAuth", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
 
-      await screen.findByText("Waiting for Google");
-      fireEvent.click(screen.getByRole("button", { name: "Open in browser" }));
+      await screen.findByText("waitingForGoogle");
+      fireEvent.click(screen.getByRole("button", { name: "openInBrowser" }));
       expect(copyAndOpenExternalAuthUrl).toHaveBeenCalledWith(
         "https://auth.example/external-auth/link?locale=en#token=one-time-token",
       );
@@ -292,7 +292,7 @@ describe("ProfileAuth", () => {
       expect(
         await screen.findByText(/wait a minute and try again/i),
       ).toBeVisible();
-      expect(screen.queryByText("Waiting for Google")).not.toBeInTheDocument();
+      expect(screen.queryByText("waitingForGoogle")).not.toBeInTheDocument();
     });
 
     it("surfaces the failure status when handoff generation returns no token", async () => {

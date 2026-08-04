@@ -2,6 +2,7 @@
 
 import { User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalAuthWaiting } from "@/components/external-auth-waiting";
 import { LoginView } from "@/components/login-view";
@@ -23,6 +24,7 @@ import { useLinkedAccounts } from "./use-linked-accounts";
 import { UserCard } from "./user-card";
 
 export function ProfileAuth() {
+  const tAuth = useTranslations("auth");
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const navigate = useNavigate();
@@ -174,7 +176,7 @@ export function ProfileAuth() {
           <div className="glass-card mb-3 rounded-3xl p-5">
             <ExternalAuthWaiting
               url={externalLinkUrl}
-              title="Waiting for Google"
+              title={tAuth("waitingForGoogle")}
               onCancel={() => {
                 stopLinkPolling();
                 setExternalLinkUrl(undefined);

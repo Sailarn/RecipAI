@@ -33,9 +33,7 @@ describe("ExternalDeviceApproval", () => {
     useSession.mockReturnValue({ data: null, isPending: false });
 
     render(<ExternalDeviceApproval userCode="ABCD" locale="uk" />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Continue with Google" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "continueGoogle" }));
 
     expect(signInSocial).toHaveBeenCalledWith({
       provider: "google",
@@ -45,8 +43,8 @@ describe("ExternalDeviceApproval", () => {
   });
 
   it.each([
-    ["Continue to RecipAI", approve],
-    ["Deny", deny],
+    ["continueToApp", approve],
+    ["deny", deny],
   ] as const)("handles %s and signs out the temporary browser session", async (label, action) => {
     useSession.mockReturnValue({
       data: { user: { email: "person@example.com", name: "Person" } },
@@ -66,7 +64,7 @@ describe("ExternalDeviceApproval", () => {
       query: { user_code: "ABCD" },
     });
     expect(signOut).toHaveBeenCalledOnce();
-    expect(screen.getByText("Done. Return to RecipAI.")).toBeVisible();
+    expect(screen.getByText("doneReturn")).toBeVisible();
   });
 
   it("shows a stable error for an expired code", async () => {
@@ -80,13 +78,9 @@ describe("ExternalDeviceApproval", () => {
     });
 
     render(<ExternalDeviceApproval userCode="ABCD" locale="en" />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Continue to RecipAI" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "continueToApp" }));
 
-    expect(
-      await screen.findByText("This request is invalid or expired."),
-    ).toBeVisible();
+    expect(await screen.findByText("invalidOrExpired")).toBeVisible();
     expect(approve).not.toHaveBeenCalled();
   });
 });
