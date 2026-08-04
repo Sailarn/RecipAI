@@ -5,6 +5,7 @@ import {
   CacheFirst,
   ExpirationPlugin,
   NetworkFirst,
+  NetworkOnly,
   Serwist,
 } from "serwist";
 
@@ -42,6 +43,17 @@ const serwist = new Serwist({
           }),
         ],
       }),
+    },
+    {
+      // Never serve an API response from cache. Dexie is this app's offline
+      // store — the API exists only to reconcile against the *current* server
+      // state, so a stale hit is worse than a failed request. @serwist/next's
+      // default rule set caches /api/* NetworkFirst, which meant a flaky
+      // connection could feed /api/recipes/sync a stale server snapshot and
+      // have the server-wins reconcile act on it.
+      matcher: ({ sameOrigin, url: { pathname } }) =>
+        sameOrigin && pathname.startsWith("/api/"),
+      handler: new NetworkOnly(),
     },
     {
       // Page loads. @serwist/next's default HTML rule matches on the request's
