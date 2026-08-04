@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { trackEvent } from "@/lib/telemetry";
 import { cn } from "@/lib/utils";
 
@@ -11,11 +12,11 @@ interface StatusChipsProps {
   onChange: (value: StatusFilter) => void;
 }
 
-const OPTIONS: { key: StatusFilterKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "tried", label: "Tried ✓" },
-  { key: "cancook", label: "Can Cook 🟢" },
-  { key: "nearly", label: "Half+ 🟡" },
+const OPTIONS: { key: StatusFilterKey; labelKey: string }[] = [
+  { key: "all", labelKey: "all" },
+  { key: "tried", labelKey: "statusTried" },
+  { key: "cancook", labelKey: "statusCanCook" },
+  { key: "nearly", labelKey: "statusNearly" },
 ];
 
 export function toggleStatus(
@@ -31,9 +32,10 @@ export function toggleStatus(
 }
 
 export function StatusChips({ active, onChange }: StatusChipsProps) {
+  const t = useTranslations("recipes");
   return (
     <div className="flex gap-[6px] mb-[14px] flex-wrap">
-      {OPTIONS.map(({ key, label }) => {
+      {OPTIONS.map(({ key, labelKey }) => {
         const isActive = active.includes(key);
         return (
           <button
@@ -51,7 +53,7 @@ export function StatusChips({ active, onChange }: StatusChipsProps) {
                 : "font-medium text-[var(--fg-3)] bg-transparent",
             )}
           >
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}

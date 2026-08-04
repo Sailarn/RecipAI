@@ -1,3 +1,4 @@
+import { useCategoryLabel } from "@/hooks/use-category-label";
 import type * as React from "react";
 
 import { getCategoryStyle } from "@/lib/category-styles";
@@ -19,6 +20,7 @@ interface BadgeProps {
  *   border: 1px solid {textColor}30
  */
 export function Badge({ category, className = "", style }: BadgeProps) {
+  const categoryLabel = useCategoryLabel();
   const badge = getCategoryStyle(category);
 
   return (
@@ -40,7 +42,7 @@ export function Badge({ category, className = "", style }: BadgeProps) {
         ...style,
       }}
     >
-      {category}
+      {categoryLabel(category)}
     </span>
   );
 }

@@ -66,7 +66,24 @@
     "addToCollection": "Add to collection",
     "deleteRecipe": "Delete recipe",
     "refreshing": "Refreshing…",
-    "releaseToRefresh": "↓ Release to refresh"
+    "releaseToRefresh": "↓ Release to refresh",
+    "filters": "Filters",
+    "reset": "Reset",
+    "category": "Category",
+    "status": "Status",
+    "sortBy": "Sort by",
+    "statusTried": "Tried ✓",
+    "statusCanCook": "Can Cook 🟢",
+    "statusNearly": "Half+ 🟡",
+    "statusCanCookShort": "Can Cook",
+    "statusNearlyShort": "Nearly",
+    "statusHint": "Can Cook = all ingredients in pantry. Nearly = missing 1–2.",
+    "sortNewestShort": "Newest",
+    "notifications": "Notifications",
+    "newCollection": "New Collection",
+    "editCollection": "Edit Collection",
+    "collectionNamePlaceholder": "Collection name…",
+    "addToCollectionTitle": "Add to Collection"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -232,5 +249,17 @@
     "cleanupFailed": "Browser cleanup failed. Return to RecipAI and try again.",
     "linkFailedExisting": "Couldn't link Google — it may already be a separate RecipAI account. Sign in with it directly instead. Return to RecipAI.",
     "linked": "Google account linked. Return to RecipAI."
+  },
+  "categories": {
+    "Breakfast": "Breakfast",
+    "Lunch": "Lunch",
+    "Dinner": "Dinner",
+    "Soup": "Soup",
+    "Salad": "Salad",
+    "Snack": "Snack",
+    "Dessert": "Dessert",
+    "Baking": "Baking",
+    "Drink": "Drink",
+    "Other": "Other"
   }
 }

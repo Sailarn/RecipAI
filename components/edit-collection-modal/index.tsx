@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { EmojiPicker } from "@/components/emoji-picker";
@@ -24,6 +25,7 @@ export function EditCollectionModal({
   onSave,
   onDelete,
 }: EditCollectionModalProps) {
+  const t = useTranslations("recipes");
   const [name, setName] = useState(collection.name);
   const [emoji, setEmoji] = useState(collection.emoji);
 
@@ -33,7 +35,7 @@ export function EditCollectionModal({
 
   return (
     <BottomSheet
-      title="Edit Collection"
+      title={t("editCollection")}
       onClose={onClose}
       backdropTestId="edit-modal-backdrop"
     >
@@ -55,7 +57,7 @@ export function EditCollectionModal({
 
             <input
               type="text"
-              placeholder="Collection name…"
+              placeholder={t("collectionNamePlaceholder")}
               value={name}
               onChange={(event) => setName(event.target.value)}
               className={`${NAME_INPUT_CLASS} ${

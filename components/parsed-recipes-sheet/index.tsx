@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { BellIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -24,6 +25,7 @@ const BELL_BUTTON_CLASS =
   "relative p-2 rounded-full bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)] outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]";
 
 export function ParsedRecipesSheet() {
+  const t = useTranslations("recipes");
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
   const parsedCount = parsed?.length ?? 0;
@@ -99,7 +101,7 @@ export function ParsedRecipesSheet() {
         aria-describedby={undefined}
       >
         <SheetHeader className="mb-4">
-          <SheetTitle>Notifications</SheetTitle>
+          <SheetTitle>{t("notifications")}</SheetTitle>
         </SheetHeader>
         <div className="space-y-3 px-4 pb-6">
           {parsedCount > 0 &&

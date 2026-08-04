@@ -57,18 +57,18 @@ describe("CompactFilterBar", () => {
 
   it("renders violet chip for non-default status", () => {
     render(<CompactFilterBar {...defaultProps} status={["tried"]} />);
-    expect(screen.getByText("Tried ✓")).toBeInTheDocument();
+    expect(screen.getByText("statusTried")).toBeInTheDocument();
   });
 
   it("renders violet chips for multiple active statuses", () => {
     render(<CompactFilterBar {...defaultProps} status={["tried", "nearly"]} />);
-    expect(screen.getByText("Tried ✓")).toBeInTheDocument();
-    expect(screen.getByText("Nearly")).toBeInTheDocument();
+    expect(screen.getByText("statusTried")).toBeInTheDocument();
+    expect(screen.getByText("statusNearlyShort")).toBeInTheDocument();
   });
 
   it("renders violet chip for non-default sort", () => {
     render(<CompactFilterBar {...defaultProps} sort="az" />);
-    expect(screen.getByText("A → Z")).toBeInTheDocument();
+    expect(screen.getByText("sortAZ")).toBeInTheDocument();
   });
 
   it("does not render chips for default filter values", () => {
@@ -82,8 +82,8 @@ describe("CompactFilterBar", () => {
       />,
     );
     expect(screen.queryByTestId("search-chip")).not.toBeInTheDocument();
-    expect(screen.queryByText("Tried ✓")).not.toBeInTheDocument();
-    expect(screen.queryByText("A → Z")).not.toBeInTheDocument();
+    expect(screen.queryByText("statusTried")).not.toBeInTheDocument();
+    expect(screen.queryByText("sortAZ")).not.toBeInTheDocument();
   });
 
   it("calls onScrollTop when the bar is tapped", () => {

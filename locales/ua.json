@@ -66,7 +66,24 @@
     "addToCollection": "Додати до колекції",
     "deleteRecipe": "Видалити рецепт",
     "refreshing": "Оновлення…",
-    "releaseToRefresh": "↓ Відпустіть, щоб оновити"
+    "releaseToRefresh": "↓ Відпустіть, щоб оновити",
+    "filters": "Фільтри",
+    "reset": "Скинути",
+    "category": "Категорія",
+    "status": "Статус",
+    "sortBy": "Сортувати за",
+    "statusTried": "Готував ✓",
+    "statusCanCook": "Можна готувати 🟢",
+    "statusNearly": "Половина+ 🟡",
+    "statusCanCookShort": "Можна готувати",
+    "statusNearlyShort": "Майже",
+    "statusHint": "«Можна готувати» = усі інгредієнти є в коморі. «Майже» = бракує 1–2.",
+    "sortNewestShort": "Найновіші",
+    "notifications": "Сповіщення",
+    "newCollection": "Нова колекція",
+    "editCollection": "Редагувати колекцію",
+    "collectionNamePlaceholder": "Назва колекції…",
+    "addToCollectionTitle": "Додати до колекції"
   },
   "recipeForm": {
     "createTitle": "Створити рецепт",
@@ -232,5 +249,17 @@
     "cleanupFailed": "Не вдалося очистити дані браузера. Поверніться до RecipAI і спробуйте ще раз.",
     "linkFailedExisting": "Не вдалося зв'язати Google — можливо, це вже окремий акаунт RecipAI. Увійдіть через нього напряму. Поверніться до RecipAI.",
     "linked": "Акаунт Google зв'язано. Поверніться до RecipAI."
+  },
+  "categories": {
+    "Breakfast": "Сніданок",
+    "Lunch": "Обід",
+    "Dinner": "Вечеря",
+    "Soup": "Суп",
+    "Salad": "Салат",
+    "Snack": "Перекус",
+    "Dessert": "Десерт",
+    "Baking": "Випічка",
+    "Drink": "Напій",
+    "Other": "Інше"
   }
 }

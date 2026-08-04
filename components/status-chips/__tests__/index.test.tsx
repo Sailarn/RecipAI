@@ -32,10 +32,10 @@ describe("toggleStatus", () => {
 describe("StatusChips", () => {
   it("renders all status options", () => {
     render(<StatusChips active={["all"]} onChange={vi.fn()} />);
-    expect(screen.getByText("All")).toBeInTheDocument();
-    expect(screen.getByText("Tried ✓")).toBeInTheDocument();
-    expect(screen.getByText("Can Cook 🟢")).toBeInTheDocument();
-    expect(screen.getByText("Half+ 🟡")).toBeInTheDocument();
+    expect(screen.getByText("all")).toBeInTheDocument();
+    expect(screen.getByText("statusTried")).toBeInTheDocument();
+    expect(screen.getByText("statusCanCook")).toBeInTheDocument();
+    expect(screen.getByText("statusNearly")).toBeInTheDocument();
   });
 
   it("does not render Want to try chip", () => {
@@ -46,28 +46,28 @@ describe("StatusChips", () => {
   it("calls onChange with ['tried'] when Tried chip is clicked from 'all'", () => {
     const onChange = vi.fn();
     render(<StatusChips active={["all"]} onChange={onChange} />);
-    fireEvent.click(screen.getByText("Tried ✓"));
+    fireEvent.click(screen.getByText("statusTried"));
     expect(onChange).toHaveBeenCalledWith(["tried"]);
   });
 
   it("calls onChange with ['all'] when All chip is clicked", () => {
     const onChange = vi.fn();
     render(<StatusChips active={["tried"]} onChange={onChange} />);
-    fireEvent.click(screen.getByText("All"));
+    fireEvent.click(screen.getByText("all"));
     expect(onChange).toHaveBeenCalledWith(["all"]);
   });
 
   it("calls onChange with ['cancook'] when Can Cook chip is clicked from 'all'", () => {
     const onChange = vi.fn();
     render(<StatusChips active={["all"]} onChange={onChange} />);
-    fireEvent.click(screen.getByText("Can Cook 🟢"));
+    fireEvent.click(screen.getByText("statusCanCook"));
     expect(onChange).toHaveBeenCalledWith(["cancook"]);
   });
 
   it("adds 'nearly' to existing selection", () => {
     const onChange = vi.fn();
     render(<StatusChips active={["tried"]} onChange={onChange} />);
-    fireEvent.click(screen.getByText("Half+ 🟡"));
+    fireEvent.click(screen.getByText("statusNearly"));
     const called = onChange.mock.calls[0][0] as StatusFilter;
     expect(called).toContain("tried");
     expect(called).toContain("nearly");
@@ -75,7 +75,10 @@ describe("StatusChips", () => {
 
   it("marks the active chip with data-active=true and others with data-active=false", () => {
     render(<StatusChips active={["tried"]} onChange={vi.fn()} />);
-    expect(screen.getByText("Tried ✓")).toHaveAttribute("data-active", "true");
-    expect(screen.getByText("All")).toHaveAttribute("data-active", "false");
+    expect(screen.getByText("statusTried")).toHaveAttribute(
+      "data-active",
+      "true",
+    );
+    expect(screen.getByText("all")).toHaveAttribute("data-active", "false");
   });
 });

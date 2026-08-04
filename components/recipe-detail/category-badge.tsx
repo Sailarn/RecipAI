@@ -1,3 +1,7 @@
+"use client";
+
+import { useCategoryLabel } from "@/hooks/use-category-label";
+
 const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   Breakfast: { bg: "rgba(232,89,12,0.22)", color: "#fdba74" },
   Lunch: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
@@ -18,6 +22,7 @@ interface CategoryBadgeProps {
 }
 
 export function CategoryBadge({ category }: CategoryBadgeProps) {
+  const categoryLabel = useCategoryLabel();
   const { bg, color } = CATEGORY_COLORS[category] ?? FALLBACK;
 
   return (
@@ -29,7 +34,7 @@ export function CategoryBadge({ category }: CategoryBadgeProps) {
         borderColor: `${color}30`,
       }}
     >
-      {category}
+      {categoryLabel(category)}
     </span>
   );
 }

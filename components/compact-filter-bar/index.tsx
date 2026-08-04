@@ -1,5 +1,7 @@
 import { ChevronUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { StatusFilter } from "@/components/status-chips";
+import { useCategoryLabel } from "@/hooks/use-category-label";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import type { Collection } from "@/lib/db/schema";
 
@@ -18,18 +20,18 @@ const CHIP_COLLECTION = "var(--food-accent)";
 const CHIP_SEARCH = "var(--action-primary)";
 const CHIP_FILTER = "var(--ai-accent)";
 
-const SORT_LABELS: Record<SortOption, string> = {
-  newest: "Newest",
-  oldest: "↓ Oldest first",
-  az: "A → Z",
-  za: "Z → A",
+const SORT_LABEL_KEYS: Record<SortOption, string> = {
+  newest: "sortNewestShort",
+  oldest: "sortOldest",
+  az: "sortAZ",
+  za: "sortZA",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  all: "All",
-  tried: "Tried ✓",
-  cancook: "Can Cook",
-  nearly: "Nearly",
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  all: "all",
+  tried: "statusTried",
+  cancook: "statusCanCookShort",
+  nearly: "statusNearlyShort",
 };
 
 function Chip({ label, color }: { label: string; color: string }) {
@@ -56,6 +58,8 @@ export function CompactFilterBar({
   status,
   onScrollTop,
 }: CompactFilterBarProps) {
+  const t = useTranslations("recipes");
+  const categoryLabel = useCategoryLabel();
   const activeCollection = collections.find(
     (collection) => collection.id === activeCollectionId,
   );
@@ -78,17 +82,23 @@ export function CompactFilterBar({
           </span>
         )}
 
-        {category && <Chip label={category} color={CHIP_FILTER} />}
+        {category && (
+          <Chip label={categoryLabel(category)} color={CHIP_FILTER} />
+        )}
         {!status.includes("all") &&
           status.map((statusValue) => (
             <Chip
               key={statusValue}
-              label={STATUS_LABELS[statusValue] ?? statusValue}
+              label={
+                statusValue in STATUS_LABEL_KEYS
+                  ? t(STATUS_LABEL_KEYS[statusValue])
+                  : statusValue
+              }
               color={CHIP_FILTER}
             />
           ))}
         {sort !== "newest" && (
-          <Chip label={SORT_LABELS[sort]} color={CHIP_FILTER} />
+          <Chip label={t(SORT_LABEL_KEYS[sort])} color={CHIP_FILTER} />
         )}
 
         <div className="ml-auto shrink-0 w-[30px] h-[30px] rounded-full bg-[rgba(255,200,100,0.1)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center">

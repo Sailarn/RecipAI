@@ -5,8 +5,10 @@ import { NewCollectionModal } from "../index";
 describe("NewCollectionModal", () => {
   it("renders the modal with title and input", () => {
     render(<NewCollectionModal onClose={vi.fn()} onCreate={vi.fn()} />);
-    expect(screen.getByText("New Collection")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Collection name…")).toBeInTheDocument();
+    expect(screen.getByText("newCollection")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("collectionNamePlaceholder"),
+    ).toBeInTheDocument();
   });
 
   it("Create button is disabled when name is empty", () => {
@@ -16,7 +18,7 @@ describe("NewCollectionModal", () => {
 
   it("Create button enables when name is typed", () => {
     render(<NewCollectionModal onClose={vi.fn()} onCreate={vi.fn()} />);
-    fireEvent.change(screen.getByPlaceholderText("Collection name…"), {
+    fireEvent.change(screen.getByPlaceholderText("collectionNamePlaceholder"), {
       target: { value: "Favourites" },
     });
     expect(screen.getByRole("button", { name: "Create" })).not.toBeDisabled();
@@ -25,7 +27,7 @@ describe("NewCollectionModal", () => {
   it("calls onCreate with name and selected emoji", () => {
     const onCreate = vi.fn();
     render(<NewCollectionModal onClose={vi.fn()} onCreate={onCreate} />);
-    fireEvent.change(screen.getByPlaceholderText("Collection name…"), {
+    fireEvent.change(screen.getByPlaceholderText("collectionNamePlaceholder"), {
       target: { value: "Faves" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Create" }));

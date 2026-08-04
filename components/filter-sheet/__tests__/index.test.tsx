@@ -17,23 +17,23 @@ const defaultProps = {
 describe("FilterSheet", () => {
   it("renders Sort by, Category, and Status sections", () => {
     render(<FilterSheet {...defaultProps} />);
-    expect(screen.getByText("Sort by")).toBeInTheDocument();
-    expect(screen.getByText("Category")).toBeInTheDocument();
-    expect(screen.getByText("Status")).toBeInTheDocument();
+    expect(screen.getByText("sortBy")).toBeInTheDocument();
+    expect(screen.getByText("category")).toBeInTheDocument();
+    expect(screen.getByText("status")).toBeInTheDocument();
   });
 
   it("renders all four sort options", () => {
     render(<FilterSheet {...defaultProps} />);
-    expect(screen.getByText("Newest first")).toBeInTheDocument();
-    expect(screen.getByText("Oldest first")).toBeInTheDocument();
-    expect(screen.getByText("A → Z")).toBeInTheDocument();
-    expect(screen.getByText("Z → A")).toBeInTheDocument();
+    expect(screen.getByText("sortNewest")).toBeInTheDocument();
+    expect(screen.getByText("sortOldest")).toBeInTheDocument();
+    expect(screen.getByText("sortAZ")).toBeInTheDocument();
+    expect(screen.getByText("sortZA")).toBeInTheDocument();
   });
 
   it("calls onSortChange when a sort option is clicked", () => {
     const onSortChange = vi.fn();
     render(<FilterSheet {...defaultProps} onSortChange={onSortChange} />);
-    fireEvent.click(screen.getByText("Oldest first"));
+    fireEvent.click(screen.getByText("sortOldest"));
     expect(onSortChange).toHaveBeenCalledWith("oldest");
   });
 
@@ -52,7 +52,7 @@ describe("FilterSheet", () => {
         onStatusChange={onStatusChange}
       />,
     );
-    fireEvent.click(screen.getByText("Reset"));
+    fireEvent.click(screen.getByText("reset"));
     expect(onSortChange).toHaveBeenCalledWith("newest");
     expect(onCategoryChange).toHaveBeenCalledWith(null);
     expect(onStatusChange).toHaveBeenCalledWith(["all"]);
@@ -61,14 +61,14 @@ describe("FilterSheet", () => {
   it("clicking Tried calls onStatusChange with ['tried']", () => {
     const onStatusChange = vi.fn();
     render(<FilterSheet {...defaultProps} onStatusChange={onStatusChange} />);
-    fireEvent.click(screen.getByText("Tried ✓"));
+    fireEvent.click(screen.getByText("statusTried"));
     expect(onStatusChange).toHaveBeenCalledWith(["tried"]);
   });
 
   it("renders Can Cook and Nearly status options", () => {
     render(<FilterSheet {...defaultProps} />);
-    expect(screen.getByText("Can Cook 🟢")).toBeInTheDocument();
-    expect(screen.getByText("Half+ 🟡")).toBeInTheDocument();
+    expect(screen.getByText("statusCanCook")).toBeInTheDocument();
+    expect(screen.getByText("statusNearly")).toBeInTheDocument();
   });
 
   it("renders category options including Breakfast", () => {

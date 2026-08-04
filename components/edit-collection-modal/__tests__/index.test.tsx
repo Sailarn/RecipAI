@@ -22,7 +22,7 @@ describe("EditCollectionModal", () => {
       />,
     );
     expect(screen.getByDisplayValue("Favourites")).toBeInTheDocument();
-    expect(screen.getByText("Edit Collection")).toBeInTheDocument();
+    expect(screen.getByText("editCollection")).toBeInTheDocument();
   });
 
   it("calls onClose when backdrop is clicked", () => {

@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import {
   type StatusFilter,
@@ -6,6 +7,7 @@ import {
   toggleStatus,
 } from "@/components/status-chips";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui";
+import { useCategoryLabel } from "@/hooks/use-category-label";
 import type { SortOption } from "@/hooks/use-recipe-filter";
 import { RECIPE_CATEGORIES } from "@/lib/categories";
 import { trackEvent } from "@/lib/telemetry";
@@ -21,18 +23,18 @@ interface FilterSheetProps {
   onStatusChange: (status: StatusFilter) => void;
 }
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "az", label: "A → Z" },
-  { value: "za", label: "Z → A" },
+const SORT_OPTIONS: { value: SortOption; labelKey: string }[] = [
+  { value: "newest", labelKey: "sortNewest" },
+  { value: "oldest", labelKey: "sortOldest" },
+  { value: "az", labelKey: "sortAZ" },
+  { value: "za", labelKey: "sortZA" },
 ];
 
-const STATUS_OPTIONS: { value: StatusFilterKey; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "tried", label: "Tried ✓" },
-  { value: "cancook", label: "Can Cook 🟢" },
-  { value: "nearly", label: "Half+ 🟡" },
+const STATUS_OPTIONS: { value: StatusFilterKey; labelKey: string }[] = [
+  { value: "all", labelKey: "all" },
+  { value: "tried", labelKey: "statusTried" },
+  { value: "cancook", labelKey: "statusCanCook" },
+  { value: "nearly", labelKey: "statusNearly" },
 ];
 
 const CHIP_BASE_CLASS =
@@ -64,6 +66,8 @@ export function FilterSheet({
   status,
   onStatusChange,
 }: FilterSheetProps) {
+  const t = useTranslations("recipes");
+  const categoryLabel = useCategoryLabel();
   function handleReset() {
     onSortChange("newest");
     onCategoryChange(null);
@@ -82,27 +86,27 @@ export function FilterSheet({
           <div className="w-9 h-1 rounded-full bg-[rgba(255,200,100,0.28)]" />
         </div>
         <SheetHeader className="flex-row items-center justify-between mb-2">
-          <SheetTitle className="text-xl font-bold">Filters</SheetTitle>
+          <SheetTitle className="text-xl font-bold">{t("filters")}</SheetTitle>
           <button
             type="button"
             onClick={handleReset}
             className="text-[15px] font-sans font-medium text-[var(--fg-2)] bg-transparent border-none cursor-pointer py-1"
           >
-            Reset
+            {t("reset")}
           </button>
         </SheetHeader>
 
         <div className="flex flex-col gap-6 px-4">
           {/* Category */}
           <div>
-            <SectionLabel>Category</SectionLabel>
+            <SectionLabel>{t("category")}</SectionLabel>
             <div className="flex gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => onCategoryChange(null)}
                 className={chipClass(category === null)}
               >
-                All
+                {t("all")}
               </button>
               {RECIPE_CATEGORIES.map((categoryOption) => (
                 <button
@@ -116,7 +120,7 @@ export function FilterSheet({
                   }}
                   className={chipClass(category === categoryOption)}
                 >
-                  {categoryOption}
+                  {categoryLabel(categoryOption)}
                 </button>
               ))}
             </div>
@@ -124,9 +128,9 @@ export function FilterSheet({
 
           {/* Status */}
           <div>
-            <SectionLabel>Status</SectionLabel>
+            <SectionLabel>{t("status")}</SectionLabel>
             <div className="flex gap-2 flex-wrap">
-              {STATUS_OPTIONS.map(({ value, label }) => (
+              {STATUS_OPTIONS.map(({ value, labelKey }) => (
                 <button
                   key={value}
                   type="button"
@@ -136,20 +140,20 @@ export function FilterSheet({
                   }}
                   className={chipClass(status.includes(value))}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
             <p className="mt-2.5 text-[11px] text-[var(--fg-3)] font-sans">
-              Can Cook = all ingredients in pantry. Nearly = missing 1–2.
+              {t("statusHint")}
             </p>
           </div>
 
           {/* Sort by — list style */}
           <div>
-            <SectionLabel>Sort by</SectionLabel>
+            <SectionLabel>{t("sortBy")}</SectionLabel>
             <div className="rounded-[14px] border border-[rgba(255,200,100,0.14)] overflow-hidden">
-              {SORT_OPTIONS.map(({ value, label }, index) => {
+              {SORT_OPTIONS.map(({ value, labelKey }, index) => {
                 const isActive = sort === value;
                 return (
                   <button
@@ -165,7 +169,7 @@ export function FilterSheet({
                         : ""
                     } ${isActive ? "font-semibold text-[var(--fg-1)]" : "font-normal text-[var(--fg-2)]"}`}
                   >
-                    {label}
+                    {t(labelKey)}
                     {isActive && (
                       <Check
                         size={16}
