@@ -29,6 +29,14 @@ vi.mock("@/lib/platform", () => ({
   }),
 }));
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
+vi.mock("sonner", () => ({
+  toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
+}));
+
 vi.mock("@/lib/telemetry", () => ({
   captureError: vi.fn(),
   trackEvent: vi.fn(),
@@ -45,6 +53,7 @@ vi.mock("../resolve-recipe-images", () => ({
   resolveInstructionImages: vi.fn(),
 }));
 
+import { toast } from "sonner";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import { useHaptics } from "@/lib/platform";
 import { useNavigate } from "@/lib/transitions";
@@ -87,8 +96,7 @@ afterEach(() => {
 });
 
 describe("useRecipeSave", () => {
-  it("saves, shows success, and navigates back after a delay when nothing fails", async () => {
-    vi.useFakeTimers();
+  it("saves, confirms with a toast, and navigates back immediately when nothing fails", async () => {
     const { result } = renderHook(() => useRecipeSave());
 
     await act(async () => {
@@ -99,13 +107,19 @@ describe("useRecipeSave", () => {
     expect(result.current.saveState).toBe("saved");
     expect(result.current.imageError).toBeNull();
     expect(useHaptics().notify).toHaveBeenCalledWith("success");
-    expect(useNavigate().back).not.toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith("saved");
+    expect(useNavigate().back).toHaveBeenCalledOnce();
+  });
+
+  it("reports an edit as an update rather than a new save", async () => {
+    const existing = { id: "r1", title: "Existing" } as never;
+    const { result } = renderHook(() => useRecipeSave(existing));
 
     await act(async () => {
-      vi.advanceTimersByTime(600);
+      await result.current.onSubmit(baseData);
     });
 
-    expect(useNavigate().back).toHaveBeenCalledOnce();
+    expect(toast.success).toHaveBeenCalledWith("updated");
   });
 
   it("keeps the user on the form with a visible error when the main image upload fails", async () => {

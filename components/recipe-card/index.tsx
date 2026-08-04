@@ -3,10 +3,12 @@
 import { useParams } from "next/navigation";
 import { memo, useCallback, useRef, useState } from "react";
 import { AddToCollectionSheet } from "@/components/add-to-collection-sheet";
+import { DeleteRecipeDialog } from "@/components/delete-recipe-dialog";
 import { RecipeCardContextMenu } from "@/components/recipe-card-context-menu";
 import { RecipeDetail } from "@/components/recipe-detail";
+import { useDeleteRecipe } from "@/hooks/use-delete-recipe";
 import { useLongPress } from "@/hooks/use-long-press";
-import { deleteRecipe, updateRecipe } from "@/lib/db/recipes";
+import { updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { useHaptics } from "@/lib/platform";
 import { prewarmRecipeImage } from "@/lib/prewarm-recipe-images";
@@ -35,9 +37,11 @@ export const RecipeCard = memo(function RecipeCard({
   const locale = params.locale as string;
   const navigate = useNavigate();
   const haptics = useHaptics();
+  const deleteWithUndo = useDeleteRecipe();
   const [hovered, setHovered] = useState(false);
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const didLongPress = useRef(false);
 
   const handleLongPress = useCallback((pos: { x: number; y: number }) => {
@@ -65,7 +69,7 @@ export const RecipeCard = memo(function RecipeCard({
 
   async function handleDelete() {
     haptics.notify("warning");
-    await deleteRecipe(recipe.id);
+    await deleteWithUndo(recipe.id);
   }
 
   return (
@@ -141,9 +145,15 @@ export const RecipeCard = memo(function RecipeCard({
             setMenuPos(null);
             setShowCollectionSheet(true);
           }}
-          onDelete={handleDelete}
+          onDelete={() => setShowDeleteConfirm(true)}
         />
       )}
+
+      <DeleteRecipeDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDelete}
+      />
 
       {showCollectionSheet && (
         <AddToCollectionSheet

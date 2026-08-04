@@ -4,8 +4,10 @@ import { db } from "../db";
 import {
   createRecipe,
   deleteRecipe,
+  discardRecipeImage,
   getAllRecipes,
   getRecipe,
+  restoreRecipe,
   updateRecipe,
 } from "../recipes";
 
@@ -190,7 +192,7 @@ describe("Recipe CRUD Operations", () => {
     expect(deleted).toBeUndefined();
   });
 
-  it("should call deleteImage when recipe has imageFileId", async () => {
+  it("should leave the uploaded image alone so the delete stays undoable", async () => {
     const id = await createRecipe({
       title: "With Image",
       servings: 1,
@@ -201,21 +203,79 @@ describe("Recipe CRUD Operations", () => {
 
     await deleteRecipe(id);
 
+    expect(deleteImage).not.toHaveBeenCalled();
+  });
+
+  it("should return the deleted recipe so the caller can restore it", async () => {
+    const id = await createRecipe({
+      title: "To Delete",
+      servings: 3,
+      ingredients: [],
+      instructions: [],
+    });
+
+    const deleted = await deleteRecipe(id);
+
+    expect(deleted).toEqual(
+      expect.objectContaining({ id, title: "To Delete" }),
+    );
+  });
+
+  it("should return undefined when the recipe is already gone", async () => {
+    const deleted = await deleteRecipe("missing-id");
+
+    expect(deleted).toBeUndefined();
+  });
+
+  it("should discard the image only when explicitly asked", async () => {
+    const id = await createRecipe({
+      title: "With Image",
+      servings: 1,
+      ingredients: [],
+      instructions: [],
+      imageFileId: "file_abc123",
+    });
+    const deleted = await deleteRecipe(id);
+    if (!deleted) throw new Error("expected deleteRecipe to return the row");
+
+    await discardRecipeImage(deleted);
+
     expect(deleteImage).toHaveBeenCalledOnce();
     expect(deleteImage).toHaveBeenCalledWith("file_abc123");
   });
 
-  it("should not call deleteImage when recipe has no imageFileId", async () => {
+  it("should not discard an image for a recipe that never had one", async () => {
     const id = await createRecipe({
       title: "No Image",
       servings: 1,
       ingredients: [],
       instructions: [],
     });
+    const deleted = await deleteRecipe(id);
+    if (!deleted) throw new Error("expected deleteRecipe to return the row");
 
-    await deleteRecipe(id);
+    await discardRecipeImage(deleted);
 
     expect(deleteImage).not.toHaveBeenCalled();
+  });
+
+  it("should restore a deleted recipe with its id and image intact", async () => {
+    const id = await createRecipe({
+      title: "Restore Me",
+      servings: 2,
+      ingredients: [],
+      instructions: [],
+      imageFileId: "file_abc123",
+    });
+    const deleted = await deleteRecipe(id);
+    if (!deleted) throw new Error("expected deleteRecipe to return the row");
+    vi.clearAllMocks();
+
+    await restoreRecipe(deleted);
+
+    const restored = await getRecipe(id);
+    expect(restored).toEqual(deleted);
+    expect(syncCreate).toHaveBeenCalledWith(deleted);
   });
 
   it("should call syncDelete after deleting a recipe", async () => {

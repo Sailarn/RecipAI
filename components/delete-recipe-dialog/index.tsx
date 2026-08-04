@@ -12,17 +12,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface DeleteDialogProps {
+interface DeleteRecipeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }
 
-export function DeleteDialog({
+export function DeleteRecipeDialog({
   open,
   onOpenChange,
   onConfirm,
-}: DeleteDialogProps) {
+}: DeleteRecipeDialogProps) {
   const t = useTranslations("common");
   const tRecipes = useTranslations("recipes");
 

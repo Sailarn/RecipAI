@@ -53,19 +53,39 @@ export async function updateRecipe(
 }
 
 /**
- * Delete a recipe
+ * Delete a recipe locally and on the server, returning the row that was
+ * removed so the caller can offer undo.
+ *
+ * The uploaded image is deliberately left alone — destroying it here would
+ * make undo lossy, since ImageKit deletion can't be reversed. Callers own the
+ * image: call `discardRecipeImage` once undo is no longer possible, or
+ * `restoreRecipe` to put the recipe back with its photo intact.
  */
-export async function deleteRecipe(id: string): Promise<void> {
+export async function deleteRecipe(id: string): Promise<Recipe | undefined> {
   const recipe = await db.recipes.get(id);
-
-  if (recipe?.imageFileId) {
-    try {
-      await deleteImage(recipe.imageFileId);
-    } catch {
-      // image already gone or failed — continue with recipe deletion
-    }
-  }
 
   await db.recipes.delete(id);
   syncDelete(id);
+
+  return recipe;
+}
+
+/**
+ * Destroy the uploaded image a deleted recipe owned. Irreversible — only call
+ * once the recipe can no longer be restored.
+ */
+export async function discardRecipeImage(recipe: Recipe): Promise<void> {
+  if (!recipe.imageFileId) return;
+
+  try {
+    await deleteImage(recipe.imageFileId);
+  } catch {
+    // image already gone or the request failed — nothing left to do
+  }
+}
+
+/** Put back a recipe removed by `deleteRecipe`, id and image included. */
+export async function restoreRecipe(recipe: Recipe): Promise<void> {
+  await db.recipes.add(recipe);
+  syncCreate(recipe);
 }

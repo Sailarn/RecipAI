@@ -1,6 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { createRecipe, updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import {
@@ -21,6 +23,7 @@ import type { RecipeOutput } from "./schema";
 export type SaveState = "idle" | "saving" | "saved";
 
 export function useRecipeSave(recipe?: Recipe) {
+  const t = useTranslations("recipeForm");
   const navigate = useNavigate();
   const haptics = useHaptics();
   const [imageError, setImageError] = useState<string | null>(null);
@@ -153,10 +156,11 @@ export function useRecipeSave(recipe?: Recipe) {
 
     haptics.notify("success");
     setSaveState("saved");
-
-    setTimeout(() => {
-      navigate.back();
-    }, 600);
+    // The toast is the confirmation now, so there is nothing left to linger
+    // here for — the form used to hold a "Saved" button state for 600ms before
+    // navigating, which just made every save feel slower than it was.
+    toast.success(t(recipe ? "updated" : "saved"));
+    navigate.back();
   };
 
   return {

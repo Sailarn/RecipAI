@@ -2,9 +2,11 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef, useState } from "react";
+import { DeleteRecipeDialog } from "@/components/delete-recipe-dialog";
+import { useDeleteRecipe } from "@/hooks/use-delete-recipe";
 import { isSignedIn } from "@/lib/auth/session-state";
 import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
-import { deleteRecipe, getRecipe } from "@/lib/db/recipes";
+import { getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { useAwaitingTelegramAutoSignIn } from "@/lib/hooks/use-awaiting-telegram-auto-sign-in";
 import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
@@ -17,7 +19,6 @@ import { ServingsCalculator } from "../servings-calculator";
 import { SharedRecipeDetail } from "../shared-recipe-detail";
 import { PrivateRecipeGuard } from "../shared-recipe-detail/private-recipe-guard";
 import { CategoryBadge } from "./category-badge";
-import { DeleteDialog } from "./delete-dialog";
 import { InstructionsList } from "./instructions-list";
 import { RecipeActions } from "./recipe-actions";
 import { RecipeHeader } from "./recipe-header";
@@ -39,6 +40,7 @@ export function RecipeDetail({
   initialRecipe,
 }: RecipeDetailProps) {
   const navigate = useNavigate();
+  const deleteWithUndo = useDeleteRecipe();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cookingMode, setCookingMode] = useState(false);
   const viewedRef = useRef(false);
@@ -125,9 +127,10 @@ export function RecipeDetail({
   }, [recipe]);
 
   const handleDelete = async () => {
-    trackEvent("recipe_deleted", undefined);
-    await deleteRecipe(recipeId);
+    // Leave the detail view first: the toast (and its Undo) belongs on the
+    // list the user lands back on, not on a view of a recipe that is gone.
     navigate.back();
+    await deleteWithUndo(recipeId);
   };
 
   if (loading) {
@@ -211,7 +214,7 @@ export function RecipeDetail({
           />
         )}
 
-        <DeleteDialog
+        <DeleteRecipeDialog
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}
           onConfirm={handleDelete}

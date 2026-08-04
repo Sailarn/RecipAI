@@ -295,11 +295,22 @@ describe("RecipeCard", () => {
       });
     });
 
-    it("calls deleteRecipe on delete", async () => {
+    it("asks for confirmation before deleting", async () => {
       render(<RecipeCard {...baseProps} />);
       openContextMenu();
 
       fireEvent.click(screen.getByRole("button", { name: "delete-recipe" }));
+
+      expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
+      expect(deleteRecipe).not.toHaveBeenCalled();
+    });
+
+    it("deletes once the confirmation is accepted", async () => {
+      render(<RecipeCard {...baseProps} />);
+      openContextMenu();
+
+      fireEvent.click(screen.getByRole("button", { name: "delete-recipe" }));
+      fireEvent.click(await screen.findByRole("button", { name: "delete" }));
 
       await waitFor(() => {
         expect(deleteRecipe).toHaveBeenCalledWith("r1");

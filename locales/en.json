@@ -46,8 +46,13 @@
     "sortZA": "Z → A",
     "noResults": "No recipes found",
     "deleteConfirmTitle": "Delete Recipe",
-    "deleteConfirmMessage": "Are you sure you want to delete this recipe? This action cannot be undone.",
-    "all": "All"
+    "deleteConfirmMessage": "Are you sure you want to delete this recipe?",
+    "all": "All",
+    "delete": {
+      "deleted": "\"{title}\" deleted",
+      "undo": "Undo",
+      "undoFailed": "Could not restore the recipe"
+    }
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -57,7 +62,7 @@
     "tabSteps": "Steps",
     "next": "Next",
     "back": "Back",
-    "saved": "Saved!",
+    "saved": "Recipe saved",
     "basicInfo": "Basic Information",
     "title": "Title",
     "titleRequired": "Title is required",
@@ -105,7 +110,8 @@
     "hintExample": "e.g. 2 cups flour, 1 tbsp olive oil",
     "stepHintText": "Describe each step clearly",
     "addImage": "Add image",
-    "removeImage": "Remove image"
+    "removeImage": "Remove image",
+    "updated": "Recipe updated"
   },
   "form": {
     "required": "This field is required"

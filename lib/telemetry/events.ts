@@ -44,6 +44,7 @@ export type TelemetryEvents = {
   // recipe lifecycle (recipe edits are recipe_saved {source:"edit"} — no separate event)
   recipe_viewed: { via: "list" | "search" | "collection" | "deep_link" };
   recipe_deleted: undefined;
+  recipe_delete_undone: undefined;
   step_images_viewed: undefined;
   recipe_tried_toggled: { tried: boolean };
   servings_adjusted: { servings: number };
