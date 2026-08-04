@@ -2,6 +2,7 @@
 
 import { motion, type Transition } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { PageErrorBoundary } from "@/components/page-error-boundary";
 import {
   clearNativePopPending,
   isNativePopPending,
@@ -133,7 +134,7 @@ export function PageStack() {
               className="app-full-bleed-background pointer-events-none absolute z-0"
             />
             <div className="absolute inset-0 z-[1] overflow-y-auto pb-0 [-webkit-overflow-scrolling:touch]">
-              {entry.element}
+              <PageErrorBoundary>{entry.element}</PageErrorBoundary>
             </div>
           </motion.div>
         );

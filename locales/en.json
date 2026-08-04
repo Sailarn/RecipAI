@@ -12,7 +12,9 @@
     "saving": "Saving...",
     "recipeNotFound": "Recipe not found",
     "closeModal": "Close modal",
-    "minutes": "min"
+    "minutes": "min",
+    "errorBody": "This part of the app hit a problem. Your saved recipes are untouched.",
+    "tryAgain": "Try again"
   },
   "home": {
     "tagline": "Your personal recipe management app"
