@@ -75,6 +75,20 @@ export default withSentryConfig(withSerwist(withNextIntl(nextConfig)), {
   project: "recipai-app",
   silent: !process.env.CI,
   widenClientFileUpload: true,
+  // Sentry dominates the boot bundle (139 KB gz of 204 KB), so treeshake what
+  // this app doesn't use. Performance tracing is the only real lever — Replay
+  // is already absent from the bundle — and it's worth 48 KB gz on every cold
+  // start. We use Sentry purely for error/issue reporting; web vitals come
+  // from Vercel Speed Insights. Accordingly, tracesSampleRate is no longer set
+  // in any of the three Sentry configs.
+  // excludeReplayWorker is deliberately NOT set: it is only safe when a
+  // compression worker is self-hosted, which we don't do.
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayShadowDom: true,
+    excludeReplayIframe: true,
+    excludeTracing: true,
+  },
   sourcemaps: {
     disable: false,
   },

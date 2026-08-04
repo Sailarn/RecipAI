@@ -12,6 +12,5 @@ if (process.env.NODE_ENV === "production") {
     // Enable sending user PII (Personally Identifiable Information)
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
-    tracesSampleRate: 0.2,
   });
 }

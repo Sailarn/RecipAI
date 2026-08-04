@@ -12,7 +12,6 @@ if (process.env.NODE_ENV === "production") {
     // Enable sending user PII (Personally Identifiable Information)
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
-    tracesSampleRate: 0.2,
 
     // The service worker is registered by @serwist/next's auto-injected script.
     // Its registration promise rejects (unhandled) in environments where SW
