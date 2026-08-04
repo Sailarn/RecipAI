@@ -16,7 +16,11 @@
     "errorBody": "This part of the app hit a problem. Your saved recipes are untouched.",
     "tryAgain": "Try again",
     "syncFailed": "Couldn't sync with the server",
-    "retry": "Retry"
+    "retry": "Retry",
+    "storageUnavailable": "This browser is blocking local storage, so recipes can't be saved on this device.",
+    "storageUpgraded": "RecipAI was updated in another tab.",
+    "storageBlocked": "Close RecipAI's other tabs to finish updating.",
+    "reload": "Reload"
   },
   "home": {
     "tagline": "Your personal recipe management app"

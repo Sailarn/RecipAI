@@ -9,6 +9,7 @@ import { TelegramBackButton } from "@/components/telegram-back-button";
 import { TelegramButtonHaptics } from "@/components/telegram-button-haptics";
 import { TelegramDeepLink } from "@/components/telegram-deep-link";
 import { TelegramLocaleSync } from "@/components/telegram-locale-sync";
+import { useDatabaseLifecycle } from "@/hooks/use-database-lifecycle";
 import { useNormalizeOnStartup } from "@/lib/hooks/use-normalize-on-startup";
 import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
 import { useVocabSync } from "@/lib/hooks/use-vocab-sync";
@@ -33,6 +34,7 @@ const ParseJobWatcher = dynamic(
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  useDatabaseLifecycle();
   useVocabSync();
   useNormalizeOnStartup();
   useTelemetryIdentity();

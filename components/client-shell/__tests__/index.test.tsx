@@ -29,6 +29,10 @@ vi.mock("@/components/telegram-button-haptics", () => ({
   TelegramButtonHaptics: vi.fn(() => null),
 }));
 
+vi.mock("@/hooks/use-database-lifecycle", () => ({
+  useDatabaseLifecycle: vi.fn(),
+}));
+
 vi.mock("@/lib/hooks/use-normalize-on-startup", () => ({
   useNormalizeOnStartup: vi.fn(),
 }));
