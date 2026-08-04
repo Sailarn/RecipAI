@@ -2,13 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import {
-  type CSSProperties,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useRef } from "react";
 import { RecipeEmptyState } from "@/components/recipe-empty-state";
 import { RecipeFilterBar } from "@/components/recipe-filter-bar";
 import { RecipeListError } from "@/components/recipe-list-error";
@@ -17,6 +11,7 @@ import { RecipeVirtualList } from "@/components/recipe-virtual-list";
 import { RecipesPageOverlays } from "@/components/recipes-page-overlays";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipesPageState } from "@/hooks/use-recipes-page-state";
+import { useScrollCollapse } from "@/hooks/use-scroll-collapse";
 import { getGreeting } from "@/lib/greeting";
 import { prewarmRecipeImages } from "@/lib/prewarm-recipe-images";
 import { useTriggerSync } from "@/lib/sync-context";
@@ -56,34 +51,9 @@ export default function RecipesPage() {
     setCollectionId,
     filtered,
   } = filter;
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    if (loading) return;
-    const container = scrollRef.current;
-    const sentinel = sentinelRef.current;
-    if (!container || !sentinel) return;
-    setIsCollapsed(
-      sentinel.getBoundingClientRect().top <
-        container.getBoundingClientRect().top,
-    );
-  }, [loading]);
-
-  useEffect(() => {
-    if (loading) return;
-    const container = scrollRef.current;
-    const sentinel = sentinelRef.current;
-    if (!container || !sentinel) return;
-    const check = () =>
-      setIsCollapsed(
-        sentinel.getBoundingClientRect().top <
-          container.getBoundingClientRect().top,
-      );
-    container.addEventListener("scroll", check, { passive: true });
-    return () => container.removeEventListener("scroll", check);
-  }, [loading]);
+  const isCollapsed = useScrollCollapse(scrollRef, sentinelRef, !loading);
 
   // Prewarm every recipe's detail hero image into the SW cache during idle time
   // so opening a recipe shows its photo instantly. Deduped across remounts.
