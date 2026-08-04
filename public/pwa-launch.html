@@ -32,12 +32,20 @@
         target = `/${locale}/recipes`;
       }
 
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = target;
-      document.head.appendChild(link);
+      // Warm the target, then navigate the moment it lands instead of sleeping a
+      // fixed second. `fetch` (unlike rel=prefetch, which Safari ignores) both
+      // populates the HTTP cache and tells us when the document is ready, so a
+      // warm launch leaves this shell in ~100ms rather than always paying 1000ms.
+      // The timeout is now only a ceiling for a slow/failed warm-up.
+      let navigated = false;
+      const go = () => {
+        if (navigated) return;
+        navigated = true;
+        location.replace(target);
+      };
 
-      setTimeout(() => location.replace(target), 1000);
+      setTimeout(go, 1000);
+      fetch(target, { credentials: 'same-origin' }).then(go, go);
     })();
   </script>
 </body>
