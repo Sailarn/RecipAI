@@ -8,6 +8,7 @@ import { RecipeCardContextMenu } from "@/components/recipe-card-context-menu";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { useDeleteRecipe } from "@/hooks/use-delete-recipe";
 import { useLongPress } from "@/hooks/use-long-press";
+import { useReportFailure } from "@/hooks/use-report-failure";
 import { updateRecipe } from "@/lib/db/recipes";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { useHaptics } from "@/lib/platform";
@@ -38,6 +39,7 @@ export const RecipeCard = memo(function RecipeCard({
   const navigate = useNavigate();
   const haptics = useHaptics();
   const deleteWithUndo = useDeleteRecipe();
+  const reportFailure = useReportFailure();
   const [hovered, setHovered] = useState(false);
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [showCollectionSheet, setShowCollectionSheet] = useState(false);
@@ -56,7 +58,7 @@ export const RecipeCard = memo(function RecipeCard({
   async function handleToggleStatus() {
     const next = recipe.status === "tried" ? null : "tried";
     trackEvent("recipe_tried_toggled", { tried: next === "tried" });
-    await updateRecipe(recipe.id, { status: next });
+    await updateRecipe(recipe.id, { status: next }).catch(reportFailure);
   }
 
   async function handleAddToCollection(collectionId: string) {
@@ -64,12 +66,14 @@ export const RecipeCard = memo(function RecipeCard({
     const updated = current.includes(collectionId)
       ? current.filter((id) => id !== collectionId)
       : [...current, collectionId];
-    await updateRecipe(recipe.id, { collectionIds: updated });
+    await updateRecipe(recipe.id, { collectionIds: updated }).catch(
+      reportFailure,
+    );
   }
 
   async function handleDelete() {
     haptics.notify("warning");
-    await deleteWithUndo(recipe.id);
+    await deleteWithUndo(recipe.id).catch(reportFailure);
   }
 
   return (

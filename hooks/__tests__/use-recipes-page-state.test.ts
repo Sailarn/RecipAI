@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { useRecipesPageState } from "../use-recipes-page-state";
 
+vi.mock("@/hooks/use-report-failure", () => ({
+  useReportFailure: () => (error: unknown) => {
+    throw error;
+  },
+}));
+
 vi.mock("@/hooks/use-live-query-transition", () => ({
   useLiveQueryTransition: vi.fn(),
 }));

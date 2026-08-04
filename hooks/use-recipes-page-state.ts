@@ -3,6 +3,7 @@ import type { StatusFilter } from "@/components/status-chips";
 import { useLiveQueryTransition } from "@/hooks/use-live-query-transition";
 import { type SortOption, useRecipeFilter } from "@/hooks/use-recipe-filter";
 import { useRecipeMatcher } from "@/hooks/use-recipe-matcher";
+import { useReportFailure } from "@/hooks/use-report-failure";
 import {
   createCollection,
   deleteCollection,
@@ -55,6 +56,7 @@ export interface RecipesPageState {
 }
 
 export function useRecipesPageState(): RecipesPageState {
+  const reportFailure = useReportFailure();
   const [recipesError, setRecipesError] = useState(false);
   const recipesFromDB = useLiveQueryTransition(
     () => getAllRecipes(),
@@ -116,7 +118,7 @@ export function useRecipesPageState(): RecipesPageState {
     open: () => setShowNewCollection(true),
     close: () => setShowNewCollection(false),
     onCreate: async (data) => {
-      await createCollection(data);
+      await createCollection(data).catch(reportFailure);
       trackEvent("collection_created", undefined);
       setShowNewCollection(false);
     },
@@ -128,11 +130,13 @@ export function useRecipesPageState(): RecipesPageState {
     close: () => setEditingCollection(null),
     onSave: async (data) => {
       if (!editingCollection) return;
-      await renameCollection(editingCollection.id, data.name, data.emoji);
+      await renameCollection(editingCollection.id, data.name, data.emoji).catch(
+        reportFailure,
+      );
     },
     onDelete: async () => {
       if (!editingCollection) return;
-      await deleteCollection(editingCollection.id);
+      await deleteCollection(editingCollection.id).catch(reportFailure);
       if (collectionId === editingCollection.id) setCollectionId(null);
       setEditingCollection(null);
     },
