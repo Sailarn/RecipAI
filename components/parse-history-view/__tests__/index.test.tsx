@@ -105,7 +105,7 @@ describe("ParseHistoryView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Retry" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
-    expect(toastError).not.toHaveBeenCalledWith("Failed to retry import");
+    expect(toastError).not.toHaveBeenCalledWith("retryFailed");
     expect(addJobId).not.toHaveBeenCalled();
   });
 });

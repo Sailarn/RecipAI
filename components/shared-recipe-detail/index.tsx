@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark, ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createRecipe } from "@/lib/db/recipes";
@@ -28,16 +29,17 @@ export function SharedRecipeDetail({
   onSaved,
 }: SharedRecipeDetailProps) {
   const navigate = useNavigate();
+  const t = useTranslations("recipes");
   const [saving, setSaving] = useState(false);
 
   async function saveCopy() {
     setSaving(true);
     try {
       const id = await createRecipe(clonePublicRecipe(recipe));
-      toast.success("Saved — now it is yours to edit");
+      toast.success(t("savedShared"));
       onSaved(id);
     } catch {
-      toast.error("Could not save this recipe. Try again.");
+      toast.error(t("saveSharedFailed"));
       setSaving(false);
     }
   }

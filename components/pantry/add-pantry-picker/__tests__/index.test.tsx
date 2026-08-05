@@ -78,7 +78,7 @@ describe("AddPantryPicker", () => {
 
     const props = pickerProps();
     expect(props.testId).toBe("add-pantry-picker");
-    expect(props.title).toBe("Add to Pantry");
+    expect(props.title).toBe("addTitle");
     expect(props.commit).toBeDefined();
   });
 

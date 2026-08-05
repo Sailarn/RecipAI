@@ -419,7 +419,7 @@ describe("useUrlParse", () => {
 
       await waitFor(() => {
         expect(toastSuccess).toHaveBeenCalledWith(
-          "Saved to RecipAI",
+          "savedToApp",
           expect.anything(),
         );
       });
@@ -511,7 +511,7 @@ describe("useUrlParse", () => {
       });
 
       expect(toastSuccess).toHaveBeenCalledWith(
-        "Saved to RecipAI",
+        "savedToApp",
         expect.anything(),
       );
       expect(db.parsedRecipes.add).not.toHaveBeenCalled();

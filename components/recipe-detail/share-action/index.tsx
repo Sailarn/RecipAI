@@ -1,6 +1,7 @@
 "use client";
 
 import { Share2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isMaintenanceError } from "@/lib/api/api-fetch";
@@ -23,6 +24,7 @@ const triggerClass =
   "flex cursor-pointer items-center justify-center rounded-full border border-[rgba(255,255,255,0.15)] bg-[rgba(0,0,0,0.38)] p-[9px] text-[rgba(255,255,255,0.90)] backdrop-blur-[16px]";
 
 export function ShareAction({ locale, recipe }: ShareActionProps) {
+  const t = useTranslations("recipes");
   const { data: session } = authClient.useSession();
   const platform = usePlatform();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
       setConfirmedIsPublic(nextVisibility);
     } catch (error) {
       if (!isMaintenanceError(error)) {
-        toast.error("Could not update recipe visibility.");
+        toast.error(t("visibilityFailed"));
       }
     } finally {
       setIsUpdating(false);
@@ -65,10 +67,10 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied");
+      toast.success(t("linkCopied"));
       setIsOpen(false);
     } catch {
-      toast.error("Could not copy this recipe link.");
+      toast.error(t("copyLinkFailed"));
     }
   }
 
@@ -80,10 +82,10 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
         title: recipe.title,
         url: shareUrl,
       });
-      if (result === "copied") toast.success("Link copied");
+      if (result === "copied") toast.success(t("linkCopied"));
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      toast.error("Could not share this recipe.");
+      toast.error(t("shareRecipeFailed"));
     }
   }
 

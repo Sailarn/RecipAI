@@ -1,6 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { apiFetch, isMaintenanceError } from "@/lib/api/api-fetch";
@@ -51,6 +52,12 @@ export function useUrlParse({
   telegramNotify,
 }: UseUrlParseOptions) {
   const navigate = useNavigate();
+  const t = useTranslations("parse");
+  // `poll` must keep a stable identity — an effect below depends on it, and
+  // `t` is not a stable reference, so putting it in the dependency array would
+  // restart polling whenever the component re-renders.
+  const tRef = useRef(t);
+  tRef.current = t;
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
   const { subscription, subscribe, isSupported, permission } =
@@ -101,8 +108,8 @@ export function useUrlParse({
               ),
             ).catch(() => {});
             trackEvent("parse_succeeded", { source: "url" });
-            toast.success("Saved to RecipAI", {
-              description: "Added to your recipes.",
+            toast.success(tRef.current("savedToApp"), {
+              description: tRef.current("addedToRecipes"),
             });
             setLoading(false);
             setJobId(null);
@@ -138,7 +145,7 @@ export function useUrlParse({
           pollRef.current = setTimeout(run, 3000);
         }
       } catch {
-        setError("Network error while checking status");
+        setError(tRef.current("statusCheckFailed"));
         setLoading(false);
       }
     };
@@ -177,7 +184,7 @@ export function useUrlParse({
 
   const handleParse = async () => {
     if (!isValidUrl(url)) {
-      setError("Please enter a valid URL including https://");
+      setError(t("invalidUrl"));
       return;
     }
     setLoading(true);
@@ -208,7 +215,7 @@ export function useUrlParse({
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to create parse job");
+      if (!res.ok) throw new Error(t("jobCreateFailed"));
       const {
         jobId: newJobId,
         uploadToken,
@@ -231,8 +238,8 @@ export function useUrlParse({
         setUrl("");
         if (cached) {
           trackEvent("parse_succeeded", { source: "url" });
-          toast.success("Saved to RecipAI", {
-            description: "Added to your recipes.",
+          toast.success(t("savedToApp"), {
+            description: t("addedToRecipes"),
           });
           setLoading(false);
           return;

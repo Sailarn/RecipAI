@@ -2,6 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { IngredientPicker } from "@/components/ingredient-picker";
 import { getIngredientDisplayName } from "@/components/ingredient-picker/display-name";
@@ -17,6 +18,7 @@ function commitLabel(count: number): string {
 }
 
 export function AddPantryPicker({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("pantry");
   const { locale = "en" } = useParams<{ locale: Locale }>();
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
@@ -47,7 +49,7 @@ export function AddPantryPicker({ onClose }: { onClose: () => void }) {
   return (
     <IngredientPicker
       testId="add-pantry-picker"
-      title="Add to Pantry"
+      title={t("addTitle")}
       onClose={onClose}
       disabledIngredientIds={addedIngredientIds}
       commit={{ label: commitLabel, onCommit: handleCommit }}

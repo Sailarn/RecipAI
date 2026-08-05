@@ -26,6 +26,7 @@ const BELL_BUTTON_CLASS =
 
 export function ParsedRecipesSheet() {
   const t = useTranslations("recipes");
+  const tParse = useTranslations("parse");
   const [open, setOpen] = useState(false);
   const parsed = useLiveQuery(() => db.parsedRecipes.toArray(), []);
   const parsedCount = parsed?.length ?? 0;
@@ -54,7 +55,7 @@ export function ParsedRecipesSheet() {
 
     await saveParsedRecipe({ ...entry, imageUrl, imageFileId }, uploadToken);
     await db.parsedRecipes.delete(id);
-    toast.success("Recipe saved!");
+    toast.success(tParse("savedShort"));
   };
 
   const handleEdit = (id: string) => {

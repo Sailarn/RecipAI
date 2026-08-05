@@ -6,9 +6,22 @@ import { routes } from "@/lib/routes";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { generateId } from "@/lib/utils";
 
+/**
+ * Copy for the review toast. Passed in rather than translated here: this is a
+ * plain async function, so it has no access to a next-intl hook.
+ */
+export interface PhotoParseLabels {
+  fallbackTitle: string;
+  description: string;
+  save: string;
+  edit: string;
+  saved: string;
+}
+
 export async function savePhotoParseResult(
   recipe: ParsedRecipe,
   locale: string,
+  labels: PhotoParseLabels,
 ): Promise<void> {
   const entry = {
     id: generateId(),
@@ -40,21 +53,21 @@ export async function savePhotoParseResult(
   const saved = { ...entry, imageUrl, imageFileId };
   await db.parsedRecipes.add(saved);
 
-  const title = recipe.title || "Recipe parsed";
+  const title = recipe.title || labels.fallbackTitle;
   toast(title, {
-    description: "Recipe parsed — tap to review",
+    description: labels.description,
     duration: 10000,
     closeButton: true,
     action: {
-      label: "Save",
+      label: labels.save,
       onClick: async () => {
         await saveParsedRecipe(saved);
         await db.parsedRecipes.delete(saved.id);
-        toast.success("Recipe saved!");
+        toast.success(labels.saved);
       },
     },
     cancel: {
-      label: "Edit",
+      label: labels.edit,
       onClick: () => {
         localStorage.setItem("parsedRecipe", JSON.stringify(saved));
         db.parsedRecipes.delete(saved.id);

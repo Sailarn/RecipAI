@@ -1,9 +1,11 @@
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { removePantryItem, togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
 
 export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
+  const t = useTranslations("pantry");
   return (
     <div className="flex items-center gap-3 py-3 px-4 border-b border-[rgba(255,200,100,0.08)]">
       {/* Checkbox toggle */}
@@ -41,7 +43,7 @@ export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
         data-testid={`delete-${item.id}`}
         onClick={async () => {
           await removePantryItem(item.id);
-          toast.success(`${name} removed`);
+          toast.success(t("removed", { name }));
         }}
         aria-label={`Remove ${name}`}
         className="w-7 h-7 rounded-lg border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.08)] text-[var(--action-destructive)] cursor-pointer text-sm flex items-center justify-center shrink-0"

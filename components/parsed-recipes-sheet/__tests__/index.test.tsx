@@ -143,7 +143,7 @@ describe("ParsedRecipesSheet", () => {
           undefined,
         );
         expect(db.parsedRecipes.delete).toHaveBeenCalledWith("p0");
-        expect(toast.success).toHaveBeenCalledWith("Recipe saved!");
+        expect(toast.success).toHaveBeenCalledWith("savedShort");
       });
     });
 

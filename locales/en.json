@@ -83,7 +83,13 @@
     "newCollection": "New Collection",
     "editCollection": "Edit Collection",
     "collectionNamePlaceholder": "Collection name…",
-    "addToCollectionTitle": "Add to Collection"
+    "addToCollectionTitle": "Add to Collection",
+    "savedShared": "Saved — now it is yours to edit",
+    "saveSharedFailed": "Could not save this recipe. Try again.",
+    "visibilityFailed": "Could not update recipe visibility.",
+    "linkCopied": "Link copied",
+    "copyLinkFailed": "Could not copy this recipe link.",
+    "shareRecipeFailed": "Could not share this recipe."
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -207,11 +213,31 @@
     "failedGeneric": "Failed to parse recipe",
     "timedOut": "Parsing timed out — the job never finished.",
     "noImports": "No imports yet",
-    "noImportsHint": "Recipes you import — and any that fail — will show up here."
+    "noImportsHint": "Recipes you import — and any that fail — will show up here.",
+    "fallbackTitle": "Recipe parsed",
+    "processFailed": "Failed to process parsed recipe",
+    "retryFailed": "Failed to retry import",
+    "savedToApp": "Saved to RecipAI",
+    "addedToRecipes": "Added to your recipes.",
+    "statusCheckFailed": "Network error while checking status",
+    "invalidUrl": "Please enter a valid URL including https://",
+    "jobCreateFailed": "Failed to create parse job",
+    "parseFailedShort": "Parse failed",
+    "analyzeWithAi": "Analyze with AI",
+    "analyzing": "Analyzing…",
+    "photoPreviewAlt": "Recipe preview",
+    "cameraLabel": "Camera"
   },
   "pantry": {
     "empty": "Your pantry is empty.",
-    "emptyHint": "Tap + to add ingredients you have at home."
+    "emptyHint": "Tap + to add ingredients you have at home.",
+    "removed": "{name} removed",
+    "searchPlaceholder": "Search pantry…",
+    "addTitle": "Add to Pantry",
+    "addItem": "Add pantry item",
+    "inStock": "{count} in stock",
+    "toBuy": "{count} to buy",
+    "emptyShort": "Empty pantry"
   },
   "auth": {
     "tagline": "Save and discover your favourite recipes with AI",

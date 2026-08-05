@@ -50,7 +50,7 @@ export function ParseHistoryView() {
       if (!processResponse.ok) throw new Error("Failed to process retry");
     } catch (error) {
       if (!isMaintenanceError(error)) {
-        toast.error("Failed to retry import");
+        toast.error(tParse("retryFailed"));
       }
     } finally {
       setRetryingIds((current) => {

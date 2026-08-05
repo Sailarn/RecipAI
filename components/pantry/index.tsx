@@ -13,13 +13,16 @@ import { localizedPantryName } from "./localized-name";
 import { PantryRow } from "./pantry-row";
 
 // Subtitle: "N in stock · M to buy"
-function subtitle(items: PantryItem[]): string {
+function buildSubtitle(
+  items: PantryItem[],
+  t: (key: string, values?: Record<string, number>) => string,
+): string {
   const inStock = items.filter((item) => item.on).length;
   const outOfStock = items.filter((item) => !item.on).length;
   const parts: string[] = [];
-  if (inStock > 0) parts.push(`${inStock} in stock`);
-  if (outOfStock > 0) parts.push(`${outOfStock} to buy`);
-  return parts.join(" · ") || "Empty pantry";
+  if (inStock > 0) parts.push(t("inStock", { count: inStock }));
+  if (outOfStock > 0) parts.push(t("toBuy", { count: outOfStock }));
+  return parts.join(" · ") || t("emptyShort");
 }
 
 export function PantryPage() {
@@ -65,7 +68,7 @@ export function PantryPage() {
           data-testid="pantry-subtitle"
           className="font-sans text-[13px] text-[var(--fg-3)] mt-1"
         >
-          {subtitle(items)}
+          {buildSubtitle(items, tPantry)}
         </p>
 
         {/* Search */}
@@ -77,7 +80,7 @@ export function PantryPage() {
             />
             <input
               type="search"
-              placeholder="Search pantry…"
+              placeholder={tPantry("searchPlaceholder")}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               // text-base (16px) keeps iOS Safari from auto-zooming on focus
@@ -150,7 +153,7 @@ export function PantryPage() {
         type="button"
         data-testid="add-pantry-item"
         onClick={() => setShowAddPicker(true)}
-        aria-label="Add pantry item"
+        aria-label={tPantry("addItem")}
         className="absolute right-5 bottom-25 w-13 h-13 rounded-full bg-[rgba(251,191,36,0.9)] border-none cursor-pointer flex items-center justify-center shadow-[0_4px_20px_rgba(251,191,36,0.35)] z-[100]"
       >
         <Plus size={22} className="text-[#1a0f00]" />

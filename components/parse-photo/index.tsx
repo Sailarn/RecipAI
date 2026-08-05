@@ -93,17 +93,23 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
 
         // Default: queue to parsedRecipes and show toast
         try {
-          await savePhotoParseResult(recipe, capturedLocale);
+          await savePhotoParseResult(recipe, capturedLocale, {
+            fallbackTitle: t("fallbackTitle"),
+            description: t("parsedTapToReview"),
+            save: t("reviewSave"),
+            edit: t("reviewEdit"),
+            saved: t("savedShort"),
+          });
         } catch (err) {
           logger.error("[ParsePhoto] failed to save:", err);
-          toast.error("Failed to process parsed recipe", {
+          toast.error(t("processFailed"), {
             duration: 10000,
             closeButton: true,
           });
         }
       })
       .catch((err) => {
-        const msg = err instanceof Error ? err.message : "Parse failed";
+        const msg = err instanceof Error ? err.message : t("parseFailedShort");
         trackEvent("parse_failed", {
           source: "photo",
           reason: err instanceof Error ? err.message : String(err),
@@ -119,7 +125,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
             duration: 10000,
             closeButton: true,
             action: {
-              label: "Details",
+              label: t("details"),
               onClick: () => navigate.push(routes.parseHistory(capturedLocale)),
             },
           });
@@ -152,7 +158,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           {/* biome-ignore lint/performance/noImgElement: preview is a blob object URL, not compatible with next/image */}
           <img
             src={previewUrl}
-            alt="Recipe preview"
+            alt={t("photoPreviewAlt")}
             className="w-full max-h-64 object-contain rounded-2xl cursor-pointer"
             style={{ border: "1px solid var(--glass-card-border)" }}
             onClick={() => inputRef.current?.click()}
@@ -175,7 +181,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
             className="w-8 h-8"
             style={{ color: "var(--food-accent)" }}
             strokeWidth={1.5}
-            aria-label="Camera"
+            aria-label={t("cameraLabel")}
           />
           <span style={{ font: "var(--type-button)", color: "inherit" }}>
             {t("photo.cta")}
@@ -195,8 +201,8 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
       <AiButton
         onClick={handleSubmit}
         disabled={!file}
-        label="Analyze with AI"
-        loadingLabel="Analyzing…"
+        label={t("analyzeWithAi")}
+        loadingLabel={t("analyzing")}
       />
     </div>
   );

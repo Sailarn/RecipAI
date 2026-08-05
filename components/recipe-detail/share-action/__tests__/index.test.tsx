@@ -112,9 +112,7 @@ describe("ShareAction", () => {
     );
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "Could not update recipe visibility.",
-      ),
+      expect(toast.error).toHaveBeenCalledWith("visibilityFailed"),
     );
     expect(
       screen.getByRole("switch", { name: "Public recipe" }),
@@ -194,7 +192,7 @@ describe("ShareAction", () => {
     await userEvent.click(screen.getByRole("button", { name: "More options" }));
 
     await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith("Link copied"),
+      expect(toast.success).toHaveBeenCalledWith("linkCopied"),
     );
   });
 

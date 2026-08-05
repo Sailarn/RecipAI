@@ -100,7 +100,7 @@ describe("IngredientPicker", () => {
       setupVocab([TOMATO]);
       render(
         <IngredientPicker
-          title="Add to Pantry"
+          title="addTitle"
           onClose={onClose}
           onPick={vi.fn()}
         />,
@@ -114,7 +114,7 @@ describe("IngredientPicker", () => {
         "[background:var(--app-mesh)]",
       );
       expect(
-        screen.getByRole("heading", { name: "Add to Pantry" }),
+        screen.getByRole("heading", { name: "addTitle" }),
       ).toBeInTheDocument();
     });
 

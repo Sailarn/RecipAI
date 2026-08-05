@@ -130,7 +130,7 @@ describe("PantryRow", () => {
     render(<PantryPage />);
     fireEvent.click(screen.getByTestId("delete-a1"));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Flour removed");
+      expect(toast.success).toHaveBeenCalledWith("removed");
     });
   });
 });
