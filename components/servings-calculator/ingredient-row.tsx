@@ -1,6 +1,7 @@
 "use client";
 
 import { LoaderCircle, PlusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/config";
 import { togglePantryItem } from "@/lib/db/pantry";
 import type { PantryItem, RecipeIngredient } from "@/lib/db/schema";
@@ -44,6 +45,7 @@ export function IngredientRow({
   canAdd,
   onAdd,
 }: IngredientRowProps) {
+  const tRecipes = useTranslations("recipes");
   return (
     <li
       className={cn(
@@ -105,7 +107,7 @@ export function IngredientRow({
       ) : pending ? (
         <span
           role="status"
-          aria-label="Processing ingredient"
+          aria-label={tRecipes("processingIngredient")}
           className="w-[22px] h-[22px] shrink-0 flex items-center justify-center text-[var(--fg-3)]"
         >
           <LoaderCircle size={13} className="animate-spin" />

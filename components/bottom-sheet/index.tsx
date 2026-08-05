@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -25,6 +26,7 @@ export function BottomSheet({
   backdropTestId,
   children,
 }: BottomSheetProps) {
+  const tCommon = useTranslations("common");
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -44,7 +46,7 @@ export function BottomSheet({
       <button
         type="button"
         data-testid={backdropTestId}
-        aria-label="Close"
+        aria-label={tCommon("close")}
         onClick={requestClose}
         className="absolute inset-0 bg-black/55 backdrop-blur-[4px] border-none cursor-pointer p-0"
       />

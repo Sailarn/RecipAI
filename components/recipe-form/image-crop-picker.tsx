@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import ReactCrop, { type PercentCrop } from "react-image-crop";
 
@@ -35,6 +36,7 @@ export function ImageCropPicker({
   crop,
   onChange,
 }: ImageCropPickerProps) {
+  const t = useTranslations("recipeForm");
   const [rCrop, setRCrop] = useState<PercentCrop>(
     crop ? toPercentCrop(crop) : EMPTY_CROP,
   );
@@ -79,7 +81,7 @@ export function ImageCropPicker({
         {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
         <img
           src={imageSrc}
-          alt="Crop"
+          alt={t("cropAlt")}
           draggable={false}
           className="w-full block"
         />

@@ -46,6 +46,7 @@ export function ServingsCalculator({
   canonicalIngredientIds,
   locale,
 }: ServingsCalculatorProps) {
+  const tRecipes = useTranslations("recipes");
   const t = useTranslations("recipes");
   const {
     servings,
@@ -99,7 +100,7 @@ export function ServingsCalculator({
         <div className="flex items-center gap-[14px]">
           <button
             type="button"
-            aria-label="Decrease servings"
+            aria-label={tRecipes("decreaseServings")}
             onClick={() => setServings((prev) => Math.max(1, prev - 1))}
             className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
           >
@@ -110,7 +111,7 @@ export function ServingsCalculator({
           </span>
           <button
             type="button"
-            aria-label="Increase servings"
+            aria-label={tRecipes("increaseServings")}
             onClick={() => setServings((prev) => prev + 1)}
             className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
           >

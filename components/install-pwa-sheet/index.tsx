@@ -1,6 +1,7 @@
 "use client";
 
 import { Share, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -10,6 +11,8 @@ interface InstallPwaSheetProps {
 }
 
 export function InstallPwaSheet({ isIOS, onClose }: InstallPwaSheetProps) {
+  const t = useTranslations("install");
+  const tCommon = useTranslations("common");
   const [closing, setClosing] = useState(false);
 
   function requestClose() {
@@ -21,7 +24,7 @@ export function InstallPwaSheet({ isIOS, onClose }: InstallPwaSheetProps) {
     <div className="fixed inset-0 z-[500] flex items-end touch-none">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={tCommon("close")}
         onClick={requestClose}
         className="absolute inset-0 bg-black/55 backdrop-blur-[4px] border-none cursor-pointer p-0"
       />
@@ -40,7 +43,7 @@ export function InstallPwaSheet({ isIOS, onClose }: InstallPwaSheetProps) {
         <button
           type="button"
           onClick={requestClose}
-          aria-label="Close"
+          aria-label={tCommon("close")}
           className="absolute top-4 right-4 text-[var(--fg-3)] bg-transparent border-none cursor-pointer p-1"
         >
           <X size={18} />
@@ -52,11 +55,10 @@ export function InstallPwaSheet({ isIOS, onClose }: InstallPwaSheetProps) {
           📲
         </p>
         <p className="text-[17px] font-bold text-[var(--fg-1)] font-display text-center mb-2">
-          Add to Home Screen
+          {t("title")}
         </p>
         <p className="text-[13px] text-[var(--fg-2)] leading-[1.65] text-center mb-6">
-          Install RecipAI to get push notifications when recipes finish parsing,
-          and open the app full-screen straight from your home screen.
+          {t("body")}
         </p>
 
         {isIOS ? <IOSSteps /> : <FallbackNote />}
@@ -67,35 +69,40 @@ export function InstallPwaSheet({ isIOS, onClose }: InstallPwaSheetProps) {
 }
 
 function IOSSteps() {
+  const t = useTranslations("install");
+
   return (
     <>
       <ol className="flex flex-col gap-3 mb-6">
         <Step number={1}>
-          Tap the{" "}
-          <span className="inline-flex items-center gap-1 text-[var(--fg-1)] font-medium">
-            Share <Share size={13} className="inline" />
-          </span>{" "}
-          button at the bottom of Safari
+          {t.rich("step1", {
+            share: (chunks) => (
+              <span className="inline-flex items-center gap-1 text-[var(--fg-1)] font-medium">
+                {chunks} <Share size={13} className="inline" />
+              </span>
+            ),
+          })}
         </Step>
-        <Step number={2}>Scroll down and tap "Add to Home Screen"</Step>
-        <Step number={3}>Tap "Add" in the top-right corner</Step>
+        <Step number={2}>{t("step2")}</Step>
+        <Step number={3}>{t("step3")}</Step>
       </ol>
       <p className="text-[11px] text-[var(--fg-3)] text-center">
-        Push notifications only work when installed — Safari browser tabs don't
-        support them on iOS.
+        {t("iosNote")}
       </p>
     </>
   );
 }
 
 function FallbackNote() {
+  const t = useTranslations("install");
+
   return (
     <p className="text-[13px] text-[var(--fg-2)] leading-[1.65] text-center">
-      Open RecipAI in{" "}
-      <span className="text-[var(--fg-1)] font-medium">Chrome on Android</span>{" "}
-      or{" "}
-      <span className="text-[var(--fg-1)] font-medium">Safari on iPhone</span>{" "}
-      to install it as an app.
+      {t.rich("fallback", {
+        b: (chunks) => (
+          <span className="text-[var(--fg-1)] font-medium">{chunks}</span>
+        ),
+      })}
     </p>
   );
 }

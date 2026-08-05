@@ -119,9 +119,15 @@ export function IngredientsSection({
       </p>
 
       <div className="flex gap-[6px] mb-1">
-        <div className={cn(colLabelClass, "w-[56px] shrink-0")}>Qty</div>
-        <div className={cn(colLabelClass, "w-[68px] shrink-0")}>Unit</div>
-        <div className={cn(colLabelClass, "flex-1 min-w-0")}>Ingredient</div>
+        <div className={cn(colLabelClass, "w-[56px] shrink-0")}>
+          {t("qtyHeader")}
+        </div>
+        <div className={cn(colLabelClass, "w-[68px] shrink-0")}>
+          {t("unitHeader")}
+        </div>
+        <div className={cn(colLabelClass, "flex-1 min-w-0")}>
+          {t("ingredientHeader")}
+        </div>
         <div className="w-8 shrink-0" />
       </div>
 

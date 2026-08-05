@@ -24,6 +24,7 @@ export function RecipeHeader({
   recipe,
   onDeleteClick,
 }: RecipeHeaderProps) {
+  const tCommon = useTranslations("common");
   const t = useTranslations("common");
   const tRecipes = useTranslations("recipes");
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function RecipeHeader({
         <button
           type="button"
           onClick={onDeleteClick}
-          aria-label="Delete"
+          aria-label={tCommon("delete")}
           className={`${glassPillClass} py-[7px] px-[10px] flex items-center justify-center`}
         >
           <Trash2 size={13} />

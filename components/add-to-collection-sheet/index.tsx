@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Collection } from "@/lib/db/schema";
@@ -19,6 +20,7 @@ export function AddToCollectionSheet({
   onSelect,
   onClose,
 }: AddToCollectionSheetProps) {
+  const tCommon = useTranslations("common");
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -38,7 +40,7 @@ export function AddToCollectionSheet({
       <button
         type="button"
         data-testid="sheet-backdrop"
-        aria-label="Close"
+        aria-label={tCommon("close")}
         onClick={handleClose}
         className="absolute inset-0 bg-black/55 backdrop-blur-[4px] border-none cursor-pointer p-0"
       />

@@ -131,9 +131,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Increase servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "increaseServings" }));
 
       expect(screen.getByText("5")).toBeInTheDocument();
     });
@@ -146,9 +144,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Decrease servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "decreaseServings" }));
 
       expect(screen.getByText("3")).toBeInTheDocument();
     });
@@ -161,12 +157,8 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Decrease servings" }),
-      );
-      fireEvent.click(
-        screen.getByRole("button", { name: "Decrease servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "decreaseServings" }));
+      fireEvent.click(screen.getByRole("button", { name: "decreaseServings" }));
 
       expect(screen.getByText("1")).toBeInTheDocument();
     });
@@ -180,9 +172,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Increase servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "increaseServings" }));
 
       expect(screen.getByText("10")).toBeInTheDocument();
     });
@@ -196,9 +186,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Increase servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "increaseServings" }));
 
       expect(screen.getByText("9")).toBeInTheDocument();
     });
@@ -212,9 +200,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Increase servings" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "increaseServings" }));
 
       expect(screen.getByText("1.5")).toBeInTheDocument();
     });
@@ -329,9 +315,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      expect(
-        screen.getByLabelText("Processing ingredient"),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText("processingIngredient")).toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: /add truffle to pantry/i }),
       ).not.toBeInTheDocument();
@@ -352,7 +336,7 @@ describe("ServingsCalculator", () => {
         screen.queryByRole("button", { name: /add truffle to pantry/i }),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByLabelText("Processing ingredient"),
+        screen.queryByLabelText("processingIngredient"),
       ).not.toBeInTheDocument();
     });
 

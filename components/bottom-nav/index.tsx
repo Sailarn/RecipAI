@@ -31,6 +31,7 @@ const PILL_BASE_CLASS =
   "flex items-center justify-center rounded-[28px] overflow-hidden relative shrink-0 h-14";
 
 export function BottomNav() {
+  const t = useTranslations("navigation");
   const params = useParams();
   const locale = params.locale as string;
   const tNav = useTranslations("navigation");
@@ -133,7 +134,7 @@ export function BottomNav() {
             type="button"
             data-testid="pantry-back-orb"
             onClick={() => navigate.back()}
-            aria-label="Back to Recipes"
+            aria-label={t("backToRecipes")}
             className="animate-[pillContentIn_0.26s_ease_0.18s_forwards] opacity-0 w-full h-full flex flex-col items-center justify-center gap-0.5 bg-transparent border-none cursor-pointer p-0 select-none text-[var(--fg-2)]"
           >
             <NavColumn icon={<RecipesIcon />} label={tNav("recipes")} />
@@ -182,7 +183,7 @@ export function BottomNav() {
 
       <PantryPill
         isPantryMode={isPantryMode}
-        label="Pantry"
+        label={t("pantry")}
         onOpen={openPantry}
       />
     </div>

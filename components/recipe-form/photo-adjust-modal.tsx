@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -68,6 +69,8 @@ export function PhotoAdjustModal({
   onCropChange,
   onClose,
 }: PhotoAdjustModalProps) {
+  const t = useTranslations("recipeForm");
+  const tCommon = useTranslations("common");
   const [focusX, setFocusX] = useState(initFocusX);
   const [focusY, setFocusY] = useState(initFocusY);
   const [crop, setCrop] = useState<CropRect | null>(initCrop);
@@ -94,7 +97,7 @@ export function PhotoAdjustModal({
           <button
             type="button"
             onClick={() => setStep("crop")}
-            aria-label="Back to crop"
+            aria-label={t("backToCrop")}
             className={iconBtnClass}
           >
             <ChevronLeft size={18} color="rgba(255,255,255,0.75)" />
@@ -112,7 +115,7 @@ export function PhotoAdjustModal({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tCommon("close")}
           className={iconBtnClass}
         >
           <X size={15} color="rgba(255,255,255,0.75)" />

@@ -15,6 +15,7 @@ import { useNavigate } from "@/lib/transitions";
 import { ParseHistoryRow } from "./entry-row";
 
 export function ParseHistoryView() {
+  const tCommon = useTranslations("common");
   const tParse = useTranslations("parse");
   const navigate = useNavigate();
   const entries = useLiveQuery(() => getParseHistory(), []);
@@ -67,7 +68,7 @@ export function ParseHistoryView() {
         <button
           type="button"
           onClick={() => navigate.back()}
-          aria-label="Back"
+          aria-label={tCommon("back")}
           className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] text-[var(--fg-1)] cursor-pointer"
         >
           <ChevronLeft size={18} />

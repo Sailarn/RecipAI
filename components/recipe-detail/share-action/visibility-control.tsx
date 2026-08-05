@@ -1,6 +1,7 @@
 "use client";
 
 import { Globe2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface VisibilityControlProps {
   isPublic: boolean;
@@ -15,6 +16,7 @@ export function VisibilityControl({
   isUpdating,
   onToggle,
 }: VisibilityControlProps) {
+  const tRecipes = useTranslations("recipes");
   return (
     <>
       <div
@@ -35,7 +37,7 @@ export function VisibilityControl({
           type="button"
           role="switch"
           aria-checked={isPublic}
-          aria-label="Public recipe"
+          aria-label={tRecipes("publicRecipeAria")}
           disabled={!isSignedIn || isUpdating}
           onClick={onToggle}
           className={`relative h-8 w-[54px] shrink-0 cursor-pointer rounded-full border-0 transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${

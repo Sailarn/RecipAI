@@ -154,7 +154,7 @@ export function BasicInfo({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="w-[42px] h-[42px] rounded-[12px] bg-[rgba(255,170,50,0.09)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center cursor-pointer shrink-0"
-            title="Upload from device"
+            title={t("uploadFromDevice")}
           >
             <ImageIcon size={16} className="text-[var(--fg-2)]" />
           </button>

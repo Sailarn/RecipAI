@@ -307,9 +307,12 @@ describe("IngredientPicker", () => {
       setupVocab([TOMATO, MILK, GARLIC]);
       render(<IngredientPicker title="t" onClose={onClose} onPick={vi.fn()} />);
 
-      fireEvent.change(screen.getByPlaceholderText("Search ingredients…"), {
-        target: { value: "milk" },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText("searchIngredientsPlaceholder"),
+        {
+          target: { value: "milk" },
+        },
+      );
 
       expect(screen.getByText("Milk")).toBeInTheDocument();
       expect(screen.queryByText("Tomato")).not.toBeInTheDocument();
@@ -320,9 +323,12 @@ describe("IngredientPicker", () => {
       setupVocab([TOMATO]);
       render(<IngredientPicker title="t" onClose={onClose} onPick={vi.fn()} />);
 
-      fireEvent.change(screen.getByPlaceholderText("Search ingredients…"), {
-        target: { value: "tomatoes" },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText("searchIngredientsPlaceholder"),
+        {
+          target: { value: "tomatoes" },
+        },
+      );
 
       expect(screen.getByText("Tomato")).toBeInTheDocument();
     });
@@ -331,9 +337,12 @@ describe("IngredientPicker", () => {
       setupVocab([TOMATO, MILK]);
       render(<IngredientPicker title="t" onClose={onClose} onPick={vi.fn()} />);
 
-      fireEvent.change(screen.getByPlaceholderText("Search ingredients…"), {
-        target: { value: "xyz-nonexistent" },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText("searchIngredientsPlaceholder"),
+        {
+          target: { value: "xyz-nonexistent" },
+        },
+      );
 
       expect(screen.queryByText("Tomato")).not.toBeInTheDocument();
     });
@@ -342,12 +351,18 @@ describe("IngredientPicker", () => {
       setupVocab([TOMATO, MILK]);
       render(<IngredientPicker title="t" onClose={onClose} onPick={vi.fn()} />);
 
-      fireEvent.change(screen.getByPlaceholderText("Search ingredients…"), {
-        target: { value: "milk" },
-      });
-      fireEvent.change(screen.getByPlaceholderText("Search ingredients…"), {
-        target: { value: "" },
-      });
+      fireEvent.change(
+        screen.getByPlaceholderText("searchIngredientsPlaceholder"),
+        {
+          target: { value: "milk" },
+        },
+      );
+      fireEvent.change(
+        screen.getByPlaceholderText("searchIngredientsPlaceholder"),
+        {
+          target: { value: "" },
+        },
+      );
 
       expect(screen.getByText("Tomato")).toBeInTheDocument();
       expect(screen.getByText("Milk")).toBeInTheDocument();

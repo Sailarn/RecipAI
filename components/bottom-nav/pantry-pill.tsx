@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { NavColumn } from "./nav-column";
 import { PantryIcon } from "./nav-icons";
 import { PILL_H, PILL_W } from "./use-bottom-nav";
@@ -19,6 +20,7 @@ interface PantryPillProps {
 }
 
 export function PantryPill({ isPantryMode, label, onOpen }: PantryPillProps) {
+  const t = useTranslations("navigation");
   if (isPantryMode) {
     return (
       <div
@@ -54,7 +56,7 @@ export function PantryPill({ isPantryMode, label, onOpen }: PantryPillProps) {
         type="button"
         data-testid="pantry-orb"
         onClick={onOpen}
-        aria-label="Open Pantry"
+        aria-label={t("openPantry")}
         className="w-full h-full flex flex-col items-center justify-center gap-0.5 bg-transparent border-none cursor-pointer p-0 select-none text-[var(--fg-2)]"
       >
         <NavColumn icon={<PantryIcon />} label={label} />

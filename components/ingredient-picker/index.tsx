@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Search, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Locale } from "@/i18n/config";
@@ -71,6 +72,8 @@ export function IngredientPicker({
   markedIngredientIds,
   testId = "ingredient-picker",
 }: IngredientPickerProps) {
+  const tCommon = useTranslations("common");
+  const tForm = useTranslations("recipeForm");
   const { locale = "en" } = useParams<{ locale: Locale }>();
 
   const [search, setSearch] = useState("");
@@ -184,7 +187,7 @@ export function IngredientPicker({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tCommon("close")}
           className="w-8 h-8 rounded-full bg-[rgba(255,200,100,0.08)] border border-[rgba(255,200,100,0.15)] flex items-center justify-center text-[var(--fg-3)] cursor-pointer shrink-0"
         >
           <X size={16} />
@@ -196,10 +199,10 @@ export function IngredientPicker({
           <Search size={17} className="shrink-0 text-[var(--fg-2)]" />
           <input
             type="search"
-            placeholder="Search ingredients…"
+            placeholder={tForm("searchIngredientsPlaceholder")}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            aria-label="Search ingredients"
+            aria-label={tForm("searchIngredientsAria")}
             className="w-full py-3 bg-transparent border-0 text-[var(--fg-1)] placeholder:text-[var(--fg-3)] font-sans text-base outline-none box-border"
           />
         </div>

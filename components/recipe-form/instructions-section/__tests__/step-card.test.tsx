@@ -70,7 +70,7 @@ test("paste selects an image even when it is not the first clipboard item", () =
   render(<StepCardHarness onStepFileSelect={onStepFileSelect} />);
 
   fireEvent.click(screen.getByRole("button", { name: "addImage" }));
-  fireEvent.paste(screen.getByPlaceholderText("Image URL or paste"), {
+  fireEvent.paste(screen.getByPlaceholderText("stepImagePlaceholder"), {
     clipboardData: {
       items: [
         { type: "text/plain", getAsFile: () => null },

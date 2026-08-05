@@ -1,4 +1,5 @@
 import { BookOpenIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CookingNavBarProps {
   currentSlide: number;
@@ -19,6 +20,7 @@ export function CookingNavBar({
   onNext,
   onOpenIngredients,
 }: CookingNavBarProps) {
+  const t = useTranslations("cooking");
   return (
     <div className="bg-[rgba(6,4,2,0.85)] backdrop-blur-[20px] py-2 px-[14px] flex justify-between items-center shrink-0">
       {currentSlide > 0 ? (
@@ -58,7 +60,7 @@ export function CookingNavBar({
         {currentSlide > 0 && (
           <button
             type="button"
-            aria-label="Previous step"
+            aria-label={t("previousStep")}
             onClick={onPrev}
             className="w-9 h-9 rounded-full bg-white/[0.08] border border-white/[0.12] text-[var(--fg-2)] cursor-pointer flex items-center justify-center"
           >

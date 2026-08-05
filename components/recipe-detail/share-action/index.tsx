@@ -93,7 +93,7 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        aria-label="Share"
+        aria-label={t("shareAria")}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -105,7 +105,7 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
       {isOpen && (
         <div
           role="dialog"
-          aria-label="Share recipe"
+          aria-label={t("shareRecipeAria")}
           className="fixed right-[14px] top-[max(64px,calc(env(safe-area-inset-top)+52px))] z-50 w-[min(380px,calc(100vw-28px))] rounded-[26px] border border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)] p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.62)] backdrop-blur-2xl"
         >
           <span className="absolute -top-[7px] right-[103px] h-3.5 w-3.5 rotate-45 border-l border-t border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)]" />

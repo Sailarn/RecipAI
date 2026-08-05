@@ -88,7 +88,7 @@ describe("CookingCarousel", () => {
     const onClose = vi.fn();
     render(<CookingCarousel recipe={recipe} locale="en" onClose={onClose} />);
 
-    fireEvent.click(screen.getByLabelText("Close cooking mode"));
+    fireEvent.click(screen.getByLabelText("closeMode"));
 
     expect(onClose).toHaveBeenCalled();
   });

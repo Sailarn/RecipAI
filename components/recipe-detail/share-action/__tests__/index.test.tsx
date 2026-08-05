@@ -55,7 +55,7 @@ function setNavigatorProperty(name: string, value: unknown) {
 }
 
 async function openSharePopover() {
-  await userEvent.click(screen.getByRole("button", { name: "Share" }));
+  await userEvent.click(screen.getByRole("button", { name: "shareAria" }));
 }
 
 describe("ShareAction", () => {
@@ -76,10 +76,10 @@ describe("ShareAction", () => {
     await openSharePopover();
 
     expect(
-      screen.getByRole("dialog", { name: "Share recipe" }),
+      screen.getByRole("dialog", { name: "shareRecipeAria" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).not.toBeChecked();
     expect(
       screen.queryByRole("button", { name: "Copy link" }),
@@ -93,7 +93,7 @@ describe("ShareAction", () => {
     renderShareAction();
     await openSharePopover();
     await userEvent.click(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     );
 
     expect(setRecipeVisibility).toHaveBeenCalledWith(privateRecipe, true);
@@ -108,14 +108,14 @@ describe("ShareAction", () => {
     renderShareAction();
     await openSharePopover();
     await userEvent.click(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     );
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("visibilityFailed"),
     );
     expect(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).not.toBeChecked();
     expect(updateRecipe).not.toHaveBeenCalled();
     expect(
@@ -128,14 +128,14 @@ describe("ShareAction", () => {
     renderShareAction();
     await openSharePopover();
     await userEvent.click(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     );
 
     await waitFor(() => expect(setRecipeVisibility).toHaveBeenCalled());
     expect(toast.error).not.toHaveBeenCalled();
     expect(updateRecipe).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).not.toBeChecked();
   });
 
@@ -143,7 +143,7 @@ describe("ShareAction", () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
     await userEvent.click(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     );
 
     expect(setRecipeVisibility).toHaveBeenCalledWith(
@@ -165,7 +165,7 @@ describe("ShareAction", () => {
       expect.stringMatching(/\/en\/recipes\/recipe-1$/),
     );
     expect(
-      screen.queryByRole("dialog", { name: "Share recipe" }),
+      screen.queryByRole("dialog", { name: "shareRecipeAria" }),
     ).not.toBeInTheDocument();
   });
 
@@ -181,7 +181,7 @@ describe("ShareAction", () => {
     });
     expect(toast.success).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole("dialog", { name: "Share recipe" }),
+      screen.queryByRole("dialog", { name: "shareRecipeAria" }),
     ).not.toBeInTheDocument();
   });
 
@@ -200,12 +200,12 @@ describe("ShareAction", () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
     expect(
-      screen.getByRole("dialog", { name: "Share recipe" }),
+      screen.getByRole("dialog", { name: "shareRecipeAria" }),
     ).toBeInTheDocument();
     fireEvent.pointerDown(document.body);
 
     expect(
-      screen.queryByRole("dialog", { name: "Share recipe" }),
+      screen.queryByRole("dialog", { name: "shareRecipeAria" }),
     ).not.toBeInTheDocument();
   });
 
@@ -213,12 +213,12 @@ describe("ShareAction", () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
     expect(
-      screen.getByRole("dialog", { name: "Share recipe" }),
+      screen.getByRole("dialog", { name: "shareRecipeAria" }),
     ).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
 
     expect(
-      screen.queryByRole("dialog", { name: "Share recipe" }),
+      screen.queryByRole("dialog", { name: "shareRecipeAria" }),
     ).not.toBeInTheDocument();
   });
 
@@ -228,7 +228,7 @@ describe("ShareAction", () => {
     await openSharePopover();
 
     expect(
-      screen.getByRole("switch", { name: "Public recipe" }),
+      screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).toBeDisabled();
     expect(screen.getByText("Sign in to share recipes.")).toBeInTheDocument();
   });

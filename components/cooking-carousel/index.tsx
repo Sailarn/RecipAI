@@ -1,6 +1,7 @@
 "use client";
 
 import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -27,6 +28,7 @@ export function CookingCarousel({
   locale,
   onClose,
 }: CookingCarouselProps) {
+  const t = useTranslations("cooking");
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApiState] = useState<CarouselApi | null>(null);
@@ -70,7 +72,7 @@ export function CookingCarousel({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close cooking mode"
+          aria-label={t("closeMode")}
           className="bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] border border-white/[0.15] rounded-full py-[7px] px-3 text-white/90 cursor-pointer text-xs font-medium flex items-center justify-center"
         >
           <XIcon className="w-3.5 h-3.5" />

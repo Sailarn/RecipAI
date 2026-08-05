@@ -94,7 +94,7 @@ export function StepCard({
       <div className="mb-2 flex items-center gap-2">
         <button
           type="button"
-          aria-label="Drag step"
+          aria-label={t("dragStep")}
           className="cursor-grab touch-none text-[var(--fg-3)]"
           {...attributes}
           {...listeners}
@@ -110,7 +110,7 @@ export function StepCard({
         {totalSteps > 1 && (
           <button
             type="button"
-            aria-label="Remove step"
+            aria-label={t("removeStep")}
             onClick={onRemove}
             className="p-1 text-[var(--action-destructive)]"
           >
@@ -140,7 +140,7 @@ export function StepCard({
             <div className="mb-2 flex gap-2">
               <Input
                 {...register(`instructions.${index}.imageUrl`)}
-                placeholder="Image URL or paste"
+                placeholder={t("stepImagePlaceholder")}
                 type="url"
                 onPaste={(event) =>
                   selectFile(clipboardImage(event.clipboardData.items))
@@ -148,7 +148,7 @@ export function StepCard({
               />
               <button
                 type="button"
-                aria-label="Upload step image"
+                aria-label={t("uploadStepImage")}
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 text-[var(--fg-2)]"
               >

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
 interface FocalPointPickerProps {
@@ -23,6 +24,7 @@ export function FocalPointPicker({
   showCrosshair = false,
   onChange,
 }: FocalPointPickerProps) {
+  const t = useTranslations("recipeForm");
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
@@ -56,7 +58,7 @@ export function FocalPointPicker({
       {/* biome-ignore lint/performance/noImgElement: blob/external URL — next/image rejects blob URLs */}
       <img
         src={imageSrc}
-        alt="Focal point preview"
+        alt={t("focalPreviewAlt")}
         className="w-full h-full object-cover pointer-events-none select-none block"
         style={{ objectPosition: `${focusX}% ${focusY}%` }}
       />
@@ -74,7 +76,7 @@ export function FocalPointPicker({
       )}
       <button
         type="button"
-        aria-label="Drag to set focal point"
+        aria-label={t("dragFocalPoint")}
         className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(255,255,255,0.95)] shadow-[0_0_0_2px_rgba(0,0,0,0.45),0_2px_8px_rgba(0,0,0,0.5)] cursor-grab touch-none border-0 p-0"
         style={{
           left: `${focusX}%`,

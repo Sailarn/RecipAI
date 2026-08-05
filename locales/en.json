@@ -20,7 +20,9 @@
     "storageUnavailable": "This browser is blocking local storage, so recipes can't be saved on this device.",
     "storageUpgraded": "RecipAI was updated in another tab.",
     "storageBlocked": "Close RecipAI's other tabs to finish updating.",
-    "reload": "Reload"
+    "reload": "Reload",
+    "close": "Close",
+    "back": "Back"
   },
   "home": {
     "tagline": "Your personal recipe management app"
@@ -29,7 +31,10 @@
     "home": "Home",
     "recipes": "Recipes",
     "settings": "Settings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "openPantry": "Open Pantry",
+    "backToRecipes": "Back to Recipes",
+    "pantry": "Pantry"
   },
   "recipes": {
     "loading": "Loading...",
@@ -89,7 +94,13 @@
     "visibilityFailed": "Could not update recipe visibility.",
     "linkCopied": "Link copied",
     "copyLinkFailed": "Could not copy this recipe link.",
-    "shareRecipeFailed": "Could not share this recipe."
+    "shareRecipeFailed": "Could not share this recipe.",
+    "shareAria": "Share",
+    "shareRecipeAria": "Share recipe",
+    "publicRecipeAria": "Public recipe",
+    "decreaseServings": "Decrease servings",
+    "increaseServings": "Increase servings",
+    "processingIngredient": "Processing ingredient"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -150,7 +161,21 @@
     "removeImage": "Remove image",
     "updated": "Recipe updated",
     "saveFailed": "Failed to save recipe",
-    "photoUploadFailed": "Recipe saved, but a photo couldn't be uploaded — check your connection and save again to retry."
+    "photoUploadFailed": "Recipe saved, but a photo couldn't be uploaded — check your connection and save again to retry.",
+    "qtyHeader": "Qty",
+    "unitHeader": "Unit",
+    "ingredientHeader": "Ingredient",
+    "backToCrop": "Back to crop",
+    "uploadFromDevice": "Upload from device",
+    "cropAlt": "Crop",
+    "focalPreviewAlt": "Focal point preview",
+    "dragFocalPoint": "Drag to set focal point",
+    "dragStep": "Drag step",
+    "removeStep": "Remove step",
+    "stepImagePlaceholder": "Image URL or paste",
+    "uploadStepImage": "Upload step image",
+    "searchIngredientsPlaceholder": "Search ingredients…",
+    "searchIngredientsAria": "Search ingredients"
   },
   "form": {
     "required": "This field is required"
@@ -287,5 +312,20 @@
     "Baking": "Baking",
     "Drink": "Drink",
     "Other": "Other"
+  },
+  "cooking": {
+    "closeMode": "Close cooking mode",
+    "previousStep": "Previous step",
+    "closeIngredients": "Close ingredients",
+    "closeIngredientsPanel": "Close ingredients panel"
+  },
+  "install": {
+    "title": "Add to Home Screen",
+    "body": "Install RecipAI to get push notifications when recipes finish parsing, and open the app full-screen straight from your home screen.",
+    "step1": "Tap the <share>Share</share> button at the bottom of Safari",
+    "step2": "Scroll down and tap \"Add to Home Screen\"",
+    "step3": "Tap \"Add\" in the top-right corner",
+    "iosNote": "Push notifications only work when installed — Safari browser tabs don't support them on iOS.",
+    "fallback": "Open RecipAI in <b>Chrome on Android</b> or <b>Safari on iPhone</b> to install it as an app."
   }
 }

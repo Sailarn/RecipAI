@@ -1,4 +1,5 @@
 import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 import { ServingsCalculator } from "@/components/servings-calculator";
 import type { Recipe } from "@/lib/db/schema";
@@ -14,11 +15,12 @@ export function IngredientsSheet({
   locale,
   onClose,
 }: IngredientsSheetProps) {
+  const t = useTranslations("cooking");
   return createPortal(
     <>
       <button
         type="button"
-        aria-label="Close ingredients"
+        aria-label={t("closeIngredients")}
         onClick={onClose}
         className="fixed inset-0 bg-[rgba(6,4,2,0.6)] z-[400] border-none cursor-default p-0"
       />
@@ -26,7 +28,7 @@ export function IngredientsSheet({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close ingredients panel"
+          aria-label={t("closeIngredientsPanel")}
           className="absolute top-3 right-3 bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] rounded-full py-1.5 px-2.5 cursor-pointer border border-white/[0.15] text-white/90 flex items-center justify-center"
         >
           <XIcon className="w-3 h-3" />
