@@ -100,7 +100,19 @@
     "publicRecipeAria": "Public recipe",
     "decreaseServings": "Decrease servings",
     "increaseServings": "Increase servings",
-    "processingIngredient": "Processing ingredient"
+    "processingIngredient": "Processing ingredient",
+    "markOutOfStock": "Mark as out of stock",
+    "markInStock": "Mark as in stock",
+    "addToPantryAria": "Add {name} to pantry",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "startCooking": "Start Cooking",
+    "openPost": "Open post",
+    "source": "Source",
+    "simplifiedMode": "Simplified",
+    "originalMode": "Original",
+    "deleteCollection": "Delete collection"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -195,7 +207,7 @@
   "profile": {
     "title": "Profile",
     "loginPrompt": "Sign in to sync your recipes across devices",
-    "login": "Sign in (coming soon)",
+    "login": "Sign in",
     "theme": "Theme",
     "language": "Language",
     "importHistory": "Import history",
@@ -251,9 +263,19 @@
     "analyzeWithAi": "Analyze with AI",
     "analyzing": "Analyzing…",
     "photoPreviewAlt": "Recipe preview",
-    "cameraLabel": "Camera"
+    "cameraLabel": "Camera",
+    "historyTitle": "Import history",
+    "statusDone": "Done",
+    "statusFailed": "Failed",
+    "photoSource": "Photo",
+    "retry": "Retry",
+    "retrying": "Retrying…",
+    "pageTitle": "Import Recipe",
+    "infoWorks": "Works with any recipe website — just paste the URL below.",
+    "infoExamples": "Examples: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com"
   },
   "pantry": {
+    "title": "Pantry",
     "empty": "Your pantry is empty.",
     "emptyHint": "Tap + to add ingredients you have at home.",
     "removed": "{name} removed",
@@ -262,7 +284,11 @@
     "addItem": "Add pantry item",
     "inStock": "{count} in stock",
     "toBuy": "{count} to buy",
-    "emptyShort": "Empty pantry"
+    "emptyShort": "Empty pantry",
+    "outOfStock": "Out of stock",
+    "noResults": "No ingredients match \"{search}\"",
+    "markOutOfStock": "Mark as out of stock",
+    "markInStock": "Mark as in stock"
   },
   "auth": {
     "tagline": "Save and discover your favourite recipes with AI",
@@ -299,7 +325,8 @@
     "finishingLink": "Finishing account linking…",
     "cleanupFailed": "Browser cleanup failed. Return to RecipAI and try again.",
     "linkFailedExisting": "Couldn't link Google — it may already be a separate RecipAI account. Sign in with it directly instead. Return to RecipAI.",
-    "linked": "Google account linked. Return to RecipAI."
+    "linked": "Google account linked. Return to RecipAI.",
+    "termsNotice": "By continuing, you agree to our terms of service and privacy policy"
   },
   "categories": {
     "Breakfast": "Breakfast",
@@ -317,7 +344,13 @@
     "closeMode": "Close cooking mode",
     "previousStep": "Previous step",
     "closeIngredients": "Close ingredients",
-    "closeIngredientsPanel": "Close ingredients panel"
+    "closeIngredientsPanel": "Close ingredients panel",
+    "title": "Cooking",
+    "ingredients": "Ingredients",
+    "next": "Next",
+    "done": "Done",
+    "stepProgress": "Step {current}/{total}",
+    "stepAlt": "Step {order}"
   },
   "install": {
     "title": "Add to Home Screen",

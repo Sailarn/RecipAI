@@ -26,6 +26,7 @@ export function EditCollectionModal({
   onDelete,
 }: EditCollectionModalProps) {
   const t = useTranslations("recipes");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState(collection.name);
   const [emoji, setEmoji] = useState(collection.emoji);
 
@@ -73,7 +74,7 @@ export function EditCollectionModal({
                 onClick={requestClose}
                 className={CANCEL_BUTTON_CLASS}
               >
-                Cancel
+                {tCommon("cancel")}
               </button>
               <button
                 type="button"
@@ -85,7 +86,7 @@ export function EditCollectionModal({
                     : "cursor-default bg-[rgba(59,130,246,0.25)] text-white/35"
                 }`}
               >
-                Save
+                {tCommon("save")}
               </button>
             </div>
 
@@ -94,7 +95,7 @@ export function EditCollectionModal({
               onClick={handleDelete}
               className="w-full p-[11px] bg-transparent text-[var(--action-destructive)] border border-[rgba(239,68,68,0.25)] rounded-xl text-[13px] font-medium font-sans cursor-pointer"
             >
-              Delete collection
+              {t("deleteCollection")}
             </button>
           </>
         );

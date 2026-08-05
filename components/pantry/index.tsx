@@ -62,7 +62,7 @@ export function PantryPage() {
       {/* Header — stays pinned at the top */}
       <div className="shrink-0 px-5 pb-4 pt-[max(20px,calc(env(safe-area-inset-top)+8px))]">
         <h1 className="font-display font-extrabold text-[28px] text-[var(--fg-1)] m-0 leading-[1.2]">
-          Pantry
+          {tPantry("title")}
         </h1>
         <p
           data-testid="pantry-subtitle"
@@ -110,7 +110,7 @@ export function PantryPage() {
         {/* No search results */}
         {items.length > 0 && query && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center px-6 py-12 gap-2 text-[var(--fg-3)] font-sans text-sm text-center">
-            <p className="m-0">No ingredients match "{search}"</p>
+            <p className="m-0">{tPantry("noResults", { search })}</p>
           </div>
         )}
 
@@ -132,7 +132,7 @@ export function PantryPage() {
           <>
             {inStock.length > 0 && (
               <p className="mx-5 mb-2 text-[11px] font-semibold text-[var(--fg-3)] uppercase tracking-[0.08em] font-sans">
-                Out of stock
+                {tPantry("outOfStock")}
               </p>
             )}
             <div className="glass-card mx-4 mb-3 rounded-[18px] overflow-hidden">

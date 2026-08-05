@@ -93,17 +93,17 @@ describe("CookingCarousel", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("shows Next (not Done) on the overview slide", () => {
+  it("shows next (not done) on the overview slide", () => {
     render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
-    expect(screen.getByText("Next")).toBeInTheDocument();
-    expect(screen.queryByText("Done")).not.toBeInTheDocument();
+    expect(screen.getByText("next")).toBeInTheDocument();
+    expect(screen.queryByText("done")).not.toBeInTheDocument();
   });
 
   it("hides Prev and Ingredients on the overview slide", () => {
     render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
-    expect(screen.queryByText("Ingredients")).not.toBeInTheDocument();
+    expect(screen.queryByText("ingredients")).not.toBeInTheDocument();
   });
 
   it("shows Prev and Ingredients once past the overview slide", () => {
@@ -111,7 +111,7 @@ describe("CookingCarousel", () => {
 
     goToSlide(1);
 
-    expect(screen.getByText("Ingredients")).toBeInTheDocument();
+    expect(screen.getByText("ingredients")).toBeInTheDocument();
   });
 
   it("shows Done on the last step slide", () => {
@@ -119,8 +119,8 @@ describe("CookingCarousel", () => {
 
     goToSlide(recipe.instructions.length);
 
-    expect(screen.getByText("Done")).toBeInTheDocument();
-    expect(screen.queryByText("Next")).not.toBeInTheDocument();
+    expect(screen.getByText("done")).toBeInTheDocument();
+    expect(screen.queryByText("next")).not.toBeInTheDocument();
   });
 
   it("calls onClose when Done is clicked on the last slide", () => {
@@ -128,7 +128,7 @@ describe("CookingCarousel", () => {
     render(<CookingCarousel recipe={recipe} locale="en" onClose={onClose} />);
 
     goToSlide(recipe.instructions.length);
-    fireEvent.click(screen.getByText("Done"));
+    fireEvent.click(screen.getByText("done"));
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -136,7 +136,7 @@ describe("CookingCarousel", () => {
   it("advances to the next slide when Next is clicked", () => {
     render(<CookingCarousel recipe={recipe} locale="en" onClose={vi.fn()} />);
 
-    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByText("next"));
 
     expect(carouselState.scrollTo).toHaveBeenCalledWith(1);
   });
@@ -148,7 +148,7 @@ describe("CookingCarousel", () => {
     expect(screen.getAllByTestId("servings-calculator")).toHaveLength(1);
 
     goToSlide(1);
-    fireEvent.click(screen.getByText("Ingredients"));
+    fireEvent.click(screen.getByText("ingredients"));
 
     expect(screen.getAllByTestId("servings-calculator")).toHaveLength(2);
   });
@@ -161,7 +161,7 @@ describe("CookingCarousel", () => {
     );
 
     goToSlide(1);
-    fireEvent.click(screen.getByText("Ingredients"));
+    fireEvent.click(screen.getByText("ingredients"));
 
     for (const calculator of screen.getAllByTestId("servings-calculator")) {
       expect(calculator).toHaveAttribute("data-sections", "Main");

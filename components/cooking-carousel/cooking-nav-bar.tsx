@@ -31,7 +31,7 @@ export function CookingNavBar({
         >
           <BookOpenIcon className="w-3.5 h-3.5 text-[var(--fg-2)]" />
           <span className="text-[11px] font-medium text-[var(--fg-2)]">
-            Ingredients
+            {t("ingredients")}
           </span>
         </button>
       ) : (
@@ -78,7 +78,7 @@ export function CookingNavBar({
               : "var(--action-primary)",
           }}
         >
-          {isLastStep ? "Done" : "Next"}
+          {isLastStep ? t("done") : t("next")}
           {!isLastStep && <ChevronRight className="w-3.5 h-3.5" />}
         </button>
       </div>

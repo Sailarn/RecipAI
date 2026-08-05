@@ -67,7 +67,7 @@ export function CookingCarousel({
       {/* Header — absolute positioned above carousel */}
       <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-[14px] pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-2">
         <span className="font-display text-[17px] font-bold text-[var(--fg-1)]">
-          Cooking
+          {t("title")}
         </span>
         <button
           type="button"

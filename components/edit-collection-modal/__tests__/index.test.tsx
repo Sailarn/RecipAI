@@ -55,7 +55,7 @@ describe("EditCollectionModal", () => {
       target: { value: "Faves" },
     });
     await act(async () => {
-      fireEvent.click(screen.getByText("Save"));
+      fireEvent.click(screen.getByText("save"));
     });
     expect(onSave).toHaveBeenCalledWith({ name: "Faves", emoji: "⭐" });
     fireEvent.animationEnd(screen.getByTestId("sheet-panel"));
@@ -72,8 +72,8 @@ describe("EditCollectionModal", () => {
         onDelete={vi.fn()}
       />,
     );
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    fireEvent.click(screen.getByText("Save"));
+    expect(screen.getByRole("button", { name: "save" })).toBeDisabled();
+    fireEvent.click(screen.getByText("save"));
     expect(onSave).not.toHaveBeenCalled();
   });
 
@@ -89,7 +89,7 @@ describe("EditCollectionModal", () => {
       />,
     );
     await act(async () => {
-      fireEvent.click(screen.getByText("Delete collection"));
+      fireEvent.click(screen.getByText("deleteCollection"));
     });
     expect(onDelete).toHaveBeenCalled();
     fireEvent.animationEnd(screen.getByTestId("sheet-panel"));

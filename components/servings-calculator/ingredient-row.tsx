@@ -93,7 +93,7 @@ export function IngredientRow({
           type="button"
           onClick={() => togglePantryItem(pantryItem.id)}
           aria-label={
-            pantryItem.on ? "Mark as out of stock" : "Mark as in stock"
+            pantryItem.on ? tRecipes("markOutOfStock") : tRecipes("markInStock")
           }
           className={cn(
             "w-[22px] h-[22px] rounded-[6px] shrink-0 cursor-pointer flex items-center justify-center text-[11px] text-[rgba(251,191,36,0.9)] transition-all duration-150 ease",
@@ -116,7 +116,7 @@ export function IngredientRow({
         <button
           type="button"
           onClick={onAdd}
-          aria-label={`Add ${name} to pantry`}
+          aria-label={tRecipes("addToPantryAria", { name })}
           className="w-[22px] h-[22px] rounded-[6px] border border-[rgba(255,200,100,0.25)] bg-[rgba(255,200,100,0.06)] shrink-0 cursor-pointer flex items-center justify-center text-[rgba(255,200,100,0.6)] transition-all duration-150 ease"
         >
           <PlusIcon size={11} />

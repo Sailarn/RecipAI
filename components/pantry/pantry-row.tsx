@@ -16,7 +16,7 @@ export function PantryRow({ item, name }: { item: PantryItem; name: string }) {
           trackEvent("pantry_item_toggled", { have: !item.on });
           togglePantryItem(item.id);
         }}
-        aria-label={item.on ? "Mark as out of stock" : "Mark as in stock"}
+        aria-label={item.on ? t("markOutOfStock") : t("markInStock")}
         className={`w-[22px] h-[22px] rounded-md border-2 shrink-0 cursor-pointer flex items-center justify-center text-[13px] transition-all duration-150 ${
           item.on
             ? "border-[rgba(251,191,36,0.8)] bg-[rgba(251,191,36,0.2)]"

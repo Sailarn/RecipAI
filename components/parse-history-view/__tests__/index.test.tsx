@@ -61,7 +61,7 @@ describe("ParseHistoryView", () => {
   it("re-enqueues a failed URL import", async () => {
     render(<ParseHistoryView />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await userEvent.click(screen.getByRole("button", { name: "retry" }));
 
     await waitFor(() =>
       expect(addJobId).toHaveBeenCalledWith("retry-job", "token"),
@@ -87,7 +87,7 @@ describe("ParseHistoryView", () => {
   it("hides Retry for a permanent (private/restricted) failure", () => {
     render(<ParseHistoryView />);
 
-    expect(screen.getAllByRole("button", { name: "Retry" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "retry" })).toHaveLength(1);
   });
 
   it("does not replace maintenance with a generic retry error", async () => {
@@ -102,7 +102,7 @@ describe("ParseHistoryView", () => {
     );
     render(<ParseHistoryView />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await userEvent.click(screen.getByRole("button", { name: "retry" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(toastError).not.toHaveBeenCalledWith("retryFailed");

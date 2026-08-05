@@ -1,6 +1,8 @@
 import { Info } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function ParseInfoBanner() {
+  const t = useTranslations("parse");
   return (
     <div className="glass-subtle flex gap-[9px] items-start mb-4 rounded-[14px] py-[10px] px-[12px]">
       <Info
@@ -10,11 +12,10 @@ export function ParseInfoBanner() {
       />
       <div>
         <p className="text-[12px] text-[var(--fg-2)] leading-[1.55]">
-          Works with any recipe website — just paste the URL below.
+          {t("infoWorks")}
         </p>
         <p className="text-[12px] text-[var(--fg-3)] leading-[1.55] mt-[2px]">
-          Examples: silpo.ua, allrecipes.com, bbcgoodfood.com,
-          cooking.nytimes.com
+          {t("infoExamples")}
         </p>
       </div>
     </div>

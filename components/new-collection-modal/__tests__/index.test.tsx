@@ -13,7 +13,7 @@ describe("NewCollectionModal", () => {
 
   it("Create button is disabled when name is empty", () => {
     render(<NewCollectionModal onClose={vi.fn()} onCreate={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "create" })).toBeDisabled();
   });
 
   it("Create button enables when name is typed", () => {
@@ -21,7 +21,7 @@ describe("NewCollectionModal", () => {
     fireEvent.change(screen.getByPlaceholderText("collectionNamePlaceholder"), {
       target: { value: "Favourites" },
     });
-    expect(screen.getByRole("button", { name: "Create" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "create" })).not.toBeDisabled();
   });
 
   it("calls onCreate with name and selected emoji", () => {
@@ -30,7 +30,7 @@ describe("NewCollectionModal", () => {
     fireEvent.change(screen.getByPlaceholderText("collectionNamePlaceholder"), {
       target: { value: "Faves" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Create" }));
+    fireEvent.click(screen.getByRole("button", { name: "create" }));
     expect(onCreate).toHaveBeenCalledWith({ name: "Faves", emoji: "⭐" });
   });
 

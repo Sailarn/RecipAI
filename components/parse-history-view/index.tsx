@@ -74,7 +74,7 @@ export function ParseHistoryView() {
           <ChevronLeft size={18} />
         </button>
         <h1 className="font-heading text-[22px] font-extrabold text-[var(--fg-1)]">
-          Import history
+          {tParse("historyTitle")}
         </h1>
       </header>
 

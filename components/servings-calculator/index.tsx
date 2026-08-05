@@ -46,7 +46,6 @@ export function ServingsCalculator({
   canonicalIngredientIds,
   locale,
 }: ServingsCalculatorProps) {
-  const tRecipes = useTranslations("recipes");
   const t = useTranslations("recipes");
   const {
     servings,
@@ -72,7 +71,7 @@ export function ServingsCalculator({
       <div className="px-[14px] py-3 border-b border-b-[var(--border-subtle)]">
         <div className="flex items-center justify-between mb-[9px]">
           <span className="text-[11px] font-semibold text-[var(--fg-2)] uppercase tracking-[0.06em]">
-            Servings
+            {t("servings")}
           </span>
           {hasCanonical && (
             <div className="flex rounded-[8px] border border-[var(--border-subtle)] overflow-hidden">
@@ -90,7 +89,9 @@ export function ServingsCalculator({
                         : "bg-transparent text-[var(--fg-3)]",
                     )}
                   >
-                    {mode}
+                    {mode === "parsed"
+                      ? t("simplifiedMode")
+                      : t("originalMode")}
                   </button>
                 );
               })}
@@ -100,7 +101,7 @@ export function ServingsCalculator({
         <div className="flex items-center gap-[14px]">
           <button
             type="button"
-            aria-label={tRecipes("decreaseServings")}
+            aria-label={t("decreaseServings")}
             onClick={() => setServings((prev) => Math.max(1, prev - 1))}
             className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
           >
@@ -111,7 +112,7 @@ export function ServingsCalculator({
           </span>
           <button
             type="button"
-            aria-label={tRecipes("increaseServings")}
+            aria-label={t("increaseServings")}
             onClick={() => setServings((prev) => prev + 1)}
             className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
           >

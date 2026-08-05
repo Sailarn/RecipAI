@@ -21,6 +21,7 @@ export function NewCollectionModal({
   onCreate,
 }: NewCollectionModalProps) {
   const t = useTranslations("recipes");
+  const tCommon = useTranslations("common");
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("⭐");
 
@@ -61,7 +62,7 @@ export function NewCollectionModal({
                 onClick={requestClose}
                 className={CANCEL_BUTTON_CLASS}
               >
-                Cancel
+                {tCommon("cancel")}
               </button>
               <button
                 type="button"
@@ -73,7 +74,7 @@ export function NewCollectionModal({
                     : "cursor-default bg-[rgba(59,130,246,0.25)] text-white/35"
                 }`}
               >
-                Create
+                {tCommon("create")}
               </button>
             </div>
           </>

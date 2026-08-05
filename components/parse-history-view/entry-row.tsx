@@ -7,6 +7,7 @@ import {
   ImageIcon,
   RotateCcw,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PARSE_HISTORY_STATUS, type ParseHistoryEntry } from "@/lib/db/schema";
 import { isRetriableFailure } from "@/lib/parse-recipe/friendly-parse-error";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function ParseHistoryRow({
   isRetrying,
   onRetry,
 }: ParseHistoryRowProps) {
+  const t = useTranslations("parse");
   const isDone = entry.status === PARSE_HISTORY_STATUS.DONE;
   const canRetry =
     !isDone && Boolean(entry.url) && isRetriableFailure(entry.reason);
@@ -41,7 +43,7 @@ export function ParseHistoryRow({
           )}
         >
           {isDone ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-          {isDone ? "Done" : "Failed"}
+          {isDone ? t("statusDone") : t("statusFailed")}
         </span>
       </div>
 
@@ -65,7 +67,7 @@ export function ParseHistoryRow({
         ) : (
           <span className="flex items-center gap-1 min-w-0 text-xs text-[var(--fg-3)]">
             <ImageIcon size={12} className="shrink-0" />
-            Photo
+            {t("photoSource")}
           </span>
         )}
         <div className="shrink-0 flex items-center gap-2">
@@ -77,7 +79,7 @@ export function ParseHistoryRow({
               className="flex items-center gap-1 text-[11px] font-semibold text-[var(--food-accent)] disabled:opacity-50"
             >
               <RotateCcw size={12} />
-              {isRetrying ? "Retrying…" : "Retry"}
+              {isRetrying ? t("retrying") : t("retry")}
             </button>
           )}
           <span className="text-[11px] text-[var(--fg-3)]">

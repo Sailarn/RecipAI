@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { RecipeImage } from "@/components/recipe-image";
 import { sectionName } from "@/lib/db/recipe-sections";
 import type { RecipeSection, Step } from "@/lib/db/schema";
@@ -28,6 +29,7 @@ function getInstructionTypographyClass(instruction: string): string {
 }
 
 export function StepSlide({ step, totalSteps, sections }: StepSlideProps) {
+  const t = useTranslations("cooking");
   const instructionTypographyClass = getInstructionTypographyClass(
     step.instruction,
   );
@@ -38,12 +40,12 @@ export function StepSlide({ step, totalSteps, sections }: StepSlideProps) {
       <div className="relative w-full h-[190px] rounded-2xl overflow-hidden mb-3">
         <RecipeImage
           imageUrl={step.imageUrl}
-          title={`Step ${step.order}`}
+          title={t("stepAlt", { order: step.order })}
           width={800}
         />
         <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,4,2,0.97)_0%,transparent_60%)]" />
         <div className="absolute bottom-2 left-2 py-1 px-2 rounded-full bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] text-[10px] font-medium text-white">
-          Step {step.order}/{totalSteps}
+          {t("stepProgress", { current: step.order, total: totalSteps })}
         </div>
       </div>
       {stepSectionName && (

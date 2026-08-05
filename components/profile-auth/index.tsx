@@ -25,6 +25,7 @@ import { UserCard } from "./user-card";
 
 export function ProfileAuth() {
   const tAuth = useTranslations("auth");
+  const tProfile = useTranslations("profile");
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const navigate = useNavigate();
@@ -211,14 +212,14 @@ export function ProfileAuth() {
         <User size={28} strokeWidth={1.5} className="text-[var(--fg-3)]" />
       </div>
       <p className="font-sans text-sm leading-[1.5] text-[var(--fg-2)]">
-        Sign in to sync your recipes across devices
+        {tProfile("loginPrompt")}
       </p>
       <button
         type="button"
         onClick={handleSignIn}
         className="w-full p-3.5 rounded-[14px] border border-[rgba(255,220,120,0.35)] bg-[linear-gradient(135deg,rgba(255,180,60,0.85),rgba(255,150,30,0.90))] backdrop-blur-[12px] text-[#1a0f00] font-sans text-[15px] font-bold cursor-pointer shadow-[0_4px_18px_rgba(255,160,40,0.30)] transition-opacity duration-150"
       >
-        Sign in
+        {tProfile("login")}
       </button>
     </div>
   );

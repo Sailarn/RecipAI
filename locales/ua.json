@@ -100,7 +100,19 @@
     "publicRecipeAria": "Публічний рецепт",
     "decreaseServings": "Зменшити порції",
     "increaseServings": "Збільшити порції",
-    "processingIngredient": "Обробляємо інгредієнт"
+    "processingIngredient": "Обробляємо інгредієнт",
+    "markOutOfStock": "Позначити як відсутнє",
+    "markInStock": "Позначити як наявне",
+    "addToPantryAria": "Додати {name} до комори",
+    "greetingMorning": "Доброго ранку",
+    "greetingAfternoon": "Доброго дня",
+    "greetingEvening": "Доброго вечора",
+    "startCooking": "Почати готувати",
+    "openPost": "Відкрити допис",
+    "source": "Джерело",
+    "simplifiedMode": "Спрощено",
+    "originalMode": "Оригінал",
+    "deleteCollection": "Видалити колекцію"
   },
   "recipeForm": {
     "createTitle": "Створити рецепт",
@@ -195,7 +207,7 @@
   "profile": {
     "title": "Профіль",
     "loginPrompt": "Увійдіть, щоб синхронізувати рецепти між пристроями",
-    "login": "Увійти (незабаром)",
+    "login": "Увійти",
     "theme": "Тема",
     "language": "Мова",
     "importHistory": "Історія імпортів",
@@ -251,9 +263,19 @@
     "analyzeWithAi": "Аналізувати з ШІ",
     "analyzing": "Аналізуємо…",
     "photoPreviewAlt": "Попередній перегляд рецепта",
-    "cameraLabel": "Камера"
+    "cameraLabel": "Камера",
+    "historyTitle": "Історія імпортів",
+    "statusDone": "Готово",
+    "statusFailed": "Помилка",
+    "photoSource": "Фото",
+    "retry": "Повторити",
+    "retrying": "Повторюємо…",
+    "pageTitle": "Імпорт рецепта",
+    "infoWorks": "Працює з будь-яким сайтом рецептів — просто вставте посилання нижче.",
+    "infoExamples": "Приклади: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com"
   },
   "pantry": {
+    "title": "Комора",
     "empty": "Ваша комора порожня.",
     "emptyHint": "Торкніться +, щоб додати інгредієнти, які є вдома.",
     "removed": "{name} видалено",
@@ -262,7 +284,11 @@
     "addItem": "Додати продукт",
     "inStock": "{count} у наявності",
     "toBuy": "{count} купити",
-    "emptyShort": "Комора порожня"
+    "emptyShort": "Комора порожня",
+    "outOfStock": "Немає в наявності",
+    "noResults": "Інгредієнти не знайдено за запитом «{search}»",
+    "markOutOfStock": "Позначити як відсутнє",
+    "markInStock": "Позначити як наявне"
   },
   "auth": {
     "tagline": "Зберігайте та відкривайте улюблені рецепти за допомогою ШІ",
@@ -299,7 +325,8 @@
     "finishingLink": "Завершуємо зв'язування акаунта…",
     "cleanupFailed": "Не вдалося очистити дані браузера. Поверніться до RecipAI і спробуйте ще раз.",
     "linkFailedExisting": "Не вдалося зв'язати Google — можливо, це вже окремий акаунт RecipAI. Увійдіть через нього напряму. Поверніться до RecipAI.",
-    "linked": "Акаунт Google зв'язано. Поверніться до RecipAI."
+    "linked": "Акаунт Google зв'язано. Поверніться до RecipAI.",
+    "termsNotice": "Продовжуючи, ви погоджуєтеся з умовами використання та політикою конфіденційності"
   },
   "categories": {
     "Breakfast": "Сніданок",
@@ -317,7 +344,13 @@
     "closeMode": "Вийти з режиму готування",
     "previousStep": "Попередній крок",
     "closeIngredients": "Закрити інгредієнти",
-    "closeIngredientsPanel": "Закрити панель інгредієнтів"
+    "closeIngredientsPanel": "Закрити панель інгредієнтів",
+    "title": "Готування",
+    "ingredients": "Інгредієнти",
+    "next": "Далі",
+    "done": "Готово",
+    "stepProgress": "Крок {current}/{total}",
+    "stepAlt": "Крок {order}"
   },
   "install": {
     "title": "Додати на головний екран",

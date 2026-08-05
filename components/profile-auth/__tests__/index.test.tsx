@@ -129,7 +129,7 @@ describe("ProfileAuth", () => {
       render(<ProfileAuth />);
 
       expect(
-        screen.queryByRole("button", { name: /sign in/i }),
+        screen.queryByRole("button", { name: "login" }),
       ).not.toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: "signOut" }),
@@ -147,14 +147,12 @@ describe("ProfileAuth", () => {
 
     it("shows sign-in button", () => {
       render(<ProfileAuth />);
-      expect(
-        screen.getByRole("button", { name: /sign in/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "login" })).toBeInTheDocument();
     });
 
     it("pushes login route when sign-in is clicked", () => {
       render(<ProfileAuth />);
-      fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+      fireEvent.click(screen.getByRole("button", { name: "login" }));
       expect(mockPush).toHaveBeenCalledWith(
         routes.login("en"),
         expect.anything(),
@@ -177,7 +175,7 @@ describe("ProfileAuth", () => {
       render(<ProfileAuth />);
 
       expect(
-        screen.queryByRole("button", { name: /sign in/i }),
+        screen.queryByRole("button", { name: "login" }),
       ).not.toBeInTheDocument();
     });
 
@@ -187,7 +185,7 @@ describe("ProfileAuth", () => {
       render(<ProfileAuth />);
 
       expect(
-        screen.queryByRole("button", { name: /sign in/i }),
+        screen.queryByRole("button", { name: "login" }),
       ).not.toBeInTheDocument();
     });
 
@@ -196,9 +194,7 @@ describe("ProfileAuth", () => {
 
       render(<ProfileAuth />);
 
-      expect(
-        screen.getByRole("button", { name: /sign in/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "login" })).toBeInTheDocument();
     });
   });
 

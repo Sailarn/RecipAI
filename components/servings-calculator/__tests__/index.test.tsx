@@ -278,7 +278,7 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.getByRole("button", { name: /add flour to pantry/i }),
+        screen.getByRole("button", { name: "addToPantryAria" }),
       ).toBeInTheDocument();
     });
 
@@ -293,9 +293,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /add flour to pantry/i }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "addToPantryAria" }));
 
       await waitFor(() => {
         expect(addPantryItem).toHaveBeenCalledOnce();
@@ -317,7 +315,7 @@ describe("ServingsCalculator", () => {
 
       expect(screen.getByLabelText("processingIngredient")).toBeInTheDocument();
       expect(
-        screen.queryByRole("button", { name: /add truffle to pantry/i }),
+        screen.queryByRole("button", { name: "addToPantryAria" }),
       ).not.toBeInTheDocument();
     });
 
@@ -333,7 +331,7 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.queryByRole("button", { name: /add truffle to pantry/i }),
+        screen.queryByRole("button", { name: "addToPantryAria" }),
       ).not.toBeInTheDocument();
       expect(
         screen.queryByLabelText("processingIngredient"),
@@ -351,9 +349,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /add flour to pantry/i }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "addToPantryAria" }));
 
       await waitFor(() => {
         expect(addPantryItem).toHaveBeenCalled();
@@ -378,7 +374,7 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.getByRole("button", { name: /mark as out of stock/i }),
+        screen.getByRole("button", { name: "markOutOfStock" }),
       ).toBeInTheDocument();
     });
 
@@ -396,7 +392,7 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.getByRole("button", { name: /mark as out of stock/i }),
+        screen.getByRole("button", { name: "markOutOfStock" }),
       ).toHaveTextContent("✓");
     });
 
@@ -414,7 +410,7 @@ describe("ServingsCalculator", () => {
       );
 
       const toggleBtn = screen.getByRole("button", {
-        name: /mark as in stock/i,
+        name: "markInStock",
       });
       expect(toggleBtn).toHaveTextContent("");
     });
@@ -432,9 +428,7 @@ describe("ServingsCalculator", () => {
         />,
       );
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /mark as out of stock/i }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "markOutOfStock" }));
 
       await waitFor(() => {
         expect(togglePantryItem).toHaveBeenCalledWith("p1");
@@ -452,7 +446,7 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.queryByRole("button", { name: "parsed" }),
+        screen.queryByRole("button", { name: "simplifiedMode" }),
       ).not.toBeInTheDocument();
     });
 
@@ -466,10 +460,10 @@ describe("ServingsCalculator", () => {
       );
 
       expect(
-        screen.getByRole("button", { name: "parsed" }),
+        screen.getByRole("button", { name: "simplifiedMode" }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "original" }),
+        screen.getByRole("button", { name: "originalMode" }),
       ).toBeInTheDocument();
     });
 
@@ -483,7 +477,7 @@ describe("ServingsCalculator", () => {
       );
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "original" }));
+        fireEvent.click(screen.getByRole("button", { name: "originalMode" }));
       });
 
       expect(screen.getByText(/plain flour/)).toBeInTheDocument();
@@ -537,7 +531,7 @@ describe("ServingsCalculator", () => {
       expect(screen.queryByText("Grated Mozzarella")).not.toBeInTheDocument();
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "original" }));
+        fireEvent.click(screen.getByRole("button", { name: "originalMode" }));
       });
 
       expect(screen.getByText("Grated Mozzarella")).toBeInTheDocument();

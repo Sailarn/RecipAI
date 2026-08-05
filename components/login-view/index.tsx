@@ -261,7 +261,7 @@ export function LoginView({ locale }: { locale: string }) {
         )}
 
         <p className="text-center text-[11px] text-[var(--fg-3)] mt-[18px] leading-[1.6]">
-          By continuing, you agree to our terms of service and privacy policy
+          {t("termsNotice")}
         </p>
       </div>
     </main>
