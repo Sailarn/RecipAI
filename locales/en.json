@@ -218,7 +218,10 @@
     "enableInSettings": "Enable in Settings",
     "openRecipeBot": "Open Recipe Bot",
     "botHint": "Send any recipe URL or supported social post to your bot — it'll save it to your account automatically.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "connectedAccounts": "Connected accounts",
+    "connected": "Connected",
+    "connect": "Connect"
   },
   "parse": {
     "tabs": {

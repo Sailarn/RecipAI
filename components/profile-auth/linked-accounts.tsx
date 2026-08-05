@@ -2,6 +2,7 @@
 
 import { Check, KeyRound, Send } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { GoogleLogo } from "@/components/google-logo";
 import { Skeleton } from "@/components/ui";
 import { authClient } from "@/lib/auth/auth-client";
@@ -25,6 +26,7 @@ export function LinkedAccounts({
   passkeyAdded,
   isLoading,
 }: LinkedAccountsProps) {
+  const t = useTranslations("profile");
   const params = useParams();
   const locale = params.locale as string;
   const googleLinked = linkedProviders.includes("google");
@@ -42,7 +44,7 @@ export function LinkedAccounts({
     return (
       <div className="glass-card mb-3 rounded-3xl overflow-hidden">
         <p className="text-xs font-semibold text-[var(--fg-3)] uppercase tracking-[0.07em] px-4 pt-[14px] pb-1.5">
-          Connected accounts
+          {t("connectedAccounts")}
         </p>
         <div className="px-4 pb-3.5 flex flex-col gap-2">
           <Skeleton className="h-12 w-full rounded-[10px]" />
@@ -108,7 +110,7 @@ export function LinkedAccounts({
                 <Check size={11} className="text-green-400" />
               </div>
               <span className="font-sans text-xs text-green-400">
-                Connected
+                {t("connected")}
               </span>
             </div>
           ) : (
@@ -117,7 +119,7 @@ export function LinkedAccounts({
               onClick={provider.onConnect}
               className="py-[5px] px-3 rounded-full bg-[rgba(255,170,50,0.10)] border border-[rgba(255,200,100,0.25)] font-sans text-xs font-semibold text-[var(--food-accent)] cursor-pointer transition-all duration-150"
             >
-              Connect
+              {t("connect")}
             </button>
           )}
         </div>
