@@ -52,6 +52,7 @@ app/api/parse-queue/__tests__/route.test.ts
     useNavigate: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
   }));
   ```
+- **Copy assertions use translation keys, not English.** `vitest.setup.ts` mocks `next-intl` globally so `useTranslations()` returns the key it was given. Assert `getByText("statusTried")`, never `getByText("Tried ✓")` — the copy changes whenever wording or language does, the key doesn't. A test that genuinely needs real translations can override with a local `vi.mock("next-intl", …)`.
 - For `vi.mock` factories that reference module-level constants, use `vi.hoisted`:
   ```ts
   const mockFn = vi.hoisted(() => vi.fn());
