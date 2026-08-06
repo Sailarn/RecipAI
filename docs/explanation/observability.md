@@ -84,6 +84,19 @@ Two events rather than one terminal event on purpose: "stuck, then resolved afte
 
 The failure path also re-throws now. It previously ended in a bare `catch {}` that showed a toast and nothing else, so a failed Dexie write reached no reporting anywhere. The save lives in a hook rather than the view so the re-throw is directly assertable — driving it through a click handler makes the rejection unhandled by construction, which a test cannot observe without leaking it into the whole run.
 
+### IndexedDB health
+
+Every read goes through Dexie, so storage trouble presents to the user as "the app is stuck on skeletons" — indistinguishable from a hang. `hooks/use-database-lifecycle.ts` emits:
+
+| Event | Meaning |
+|---|---|
+| `db_open_failed` | The database would not open. `reason` is the error **name** (`QuotaExceededError`, `UnknownError` for Safari private mode, `DatabaseClosedError`) — messages are skipped: they add nothing to grouping and can carry user data. |
+| `db_open_slow` | The open succeeded but took ≥3s, long enough that the user calls it broken. |
+| `db_closed_by_other_tab` | Another tab opened a newer schema; Dexie closed this connection and every subsequent query on this page fails. |
+| `db_upgrade_blocked` | This tab is holding an old version open while another waits to upgrade. |
+
+A failed open already reached Sentry via `captureError`, but only as an error — with no way to line it up against what the user was doing. These put storage health on the same timeline as the rest of the session, which is what "recipes just don't load for this one user" actually needs.
+
 ### Axiom — server logs
 See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-record table (AI cost, rate limits, and the parse-pipeline performance record).
 

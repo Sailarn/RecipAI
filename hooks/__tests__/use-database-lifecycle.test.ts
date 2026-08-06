@@ -18,8 +18,11 @@ vi.mock("sonner", () => ({
   }),
 }));
 
-const { captureError } = vi.hoisted(() => ({ captureError: vi.fn() }));
-vi.mock("@/lib/telemetry", () => ({ captureError }));
+const { captureError, trackEvent } = vi.hoisted(() => ({
+  captureError: vi.fn(),
+  trackEvent: vi.fn(),
+}));
+vi.mock("@/lib/telemetry", () => ({ captureError, trackEvent }));
 
 const handlers = new Map<string, (() => void)[]>();
 const { dbMock } = vi.hoisted(() => ({
@@ -104,6 +107,63 @@ describe("useDatabaseLifecycle", () => {
     fireEvent("blocked");
 
     expect(toast.warning).toHaveBeenCalledWith("storageBlocked");
+  });
+
+  it("classifies an unopenable database by error name", async () => {
+    const failure = new Error("no room");
+    failure.name = "QuotaExceededError";
+    dbMock.open.mockRejectedValue(failure);
+
+    renderHook(() => useDatabaseLifecycle());
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("db_open_failed", {
+        reason: "QuotaExceededError",
+      }),
+    );
+  });
+
+  it("reports a slow open that eventually succeeds", async () => {
+    dbMock.open.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 3200)),
+    );
+    vi.useFakeTimers();
+
+    renderHook(() => useDatabaseLifecycle());
+    await vi.advanceTimersByTimeAsync(3200);
+    vi.useRealTimers();
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      "db_open_slow",
+      expect.objectContaining({ duration_ms: expect.any(Number) }),
+    );
+  });
+
+  it("stays quiet when the database opens promptly", async () => {
+    renderHook(() => useDatabaseLifecycle());
+
+    await waitFor(() => expect(dbMock.open).toHaveBeenCalled());
+
+    expect(trackEvent).not.toHaveBeenCalledWith(
+      "db_open_slow",
+      expect.anything(),
+    );
+  });
+
+  it("reports another tab closing the connection", () => {
+    renderHook(() => useDatabaseLifecycle());
+
+    fireEvent("versionchange");
+
+    expect(trackEvent).toHaveBeenCalledWith("db_closed_by_other_tab");
+  });
+
+  it("reports a blocked upgrade", () => {
+    renderHook(() => useDatabaseLifecycle());
+
+    fireEvent("blocked");
+
+    expect(trackEvent).toHaveBeenCalledWith("db_upgrade_blocked");
   });
 
   it("unsubscribes on unmount", () => {

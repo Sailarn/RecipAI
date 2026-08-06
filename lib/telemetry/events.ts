@@ -82,6 +82,12 @@ export type TelemetryEvents = {
   shared_recipe_save_started: undefined;
   shared_recipe_save_succeeded: { duration_ms: number };
   shared_recipe_save_failed: undefined;
+  // IndexedDB health. Every read goes through Dexie, so a database that opens
+  // slowly or not at all presents as "the app is stuck on skeletons".
+  db_open_failed: { reason: string };
+  db_open_slow: { duration_ms: number };
+  db_closed_by_other_tab: undefined;
+  db_upgrade_blocked: undefined;
   // server-side mirrors (cost/abuse alerting)
   ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
