@@ -84,6 +84,11 @@ export type TelemetryEvents = {
     server_build_id: string;
   };
   sw_controller_changed: undefined;
+  display_zoom_detected: {
+    zoom: number;
+    viewport_width: number;
+    screen_width: number;
+  };
   // recipe detail resolution — every terminal state, including the share path,
   // which used to emit nothing at all
   recipe_detail_resolved: {

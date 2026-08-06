@@ -50,6 +50,13 @@ scheduleIdle(() => {
       return buildFreshnessModule.reportBuildFreshness();
     })
     .catch(() => {});
+
+  // Page zoom in an installed PWA cannot be prevented from the page, so the
+  // only remedy is making it visible — otherwise it presents as "the app
+  // suddenly renders smaller" with nothing anywhere to explain it.
+  import("@/lib/pwa/display-scale")
+    .then((displayScaleModule) => displayScaleModule.reportDisplayScale())
+    .catch(() => {});
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

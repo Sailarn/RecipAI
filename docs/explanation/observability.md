@@ -61,6 +61,17 @@ On detecting staleness the client calls `registration.update()` rather than forc
 
 Versioning the page cache should make `stale_document_detected` unreachable, so it is a regression alarm rather than routine traffic. A cluster of them on one device means the cache fix has a hole; a scatter across devices at one timestamp is just a mid-session deploy.
 
+### Page zoom in an installed PWA — `display_zoom_detected`
+
+A standalone window fills the screen and the app is portrait-locked in the manifest, so `window.innerWidth` should equal `screen.width`. Page zoom re-lays-out the page at a wider CSS viewport, so any deviation *is* the zoom factor: a 393px screen reporting a 462px viewport is 85% zoom (393 / 462 = 0.85, one of iOS's presets). `lib/pwa/display-scale.ts` reports `zoom`, `viewport_width` and `screen_width` whenever the ratio is more than 5% off 1.
+
+Two deliberate choices:
+
+- **Standalone only.** A browser window is legitimately not the size of the display it sits on, so the comparison is meaningless in a tab.
+- **Layout viewport, not `visualViewport`.** Pinch-zoom scales the *visual* viewport and leaves layout alone, so reading `innerWidth` catches only persisted page zoom and stays quiet during a pinch the user is actively holding.
+
+**This cannot be prevented from the page, and the event is the entire remedy.** Page zoom is an accessibility control with no override API. `user-scalable=no` and `maximum-scale=1` target pinch-zoom — a different mechanism — and iOS has ignored both since iOS 10 regardless. Counteracting it with an inverse CSS `zoom` would override a user's accessibility setting, break `position: fixed`, and blur text; don't. The failure mode this exists for is a real one: an installed PWA silently rendering at 85% looks like an app bug, reproduces nowhere else (Safari and the Telegram WebView keep their own zoom state for the same origin), and otherwise leaves no trace at all.
+
 ### Recipe detail — how a view resolved
 
 `recipe_viewed` only fires for a recipe found in Dexie. That left the share path emitting **nothing**: a public recipe that rendered perfectly and one that hung on a skeleton forever produced identical telemetry — a `$pageview` and silence. Since a share link is the one URL that is never a local recipe, the entire shared-recipe experience was invisible.
