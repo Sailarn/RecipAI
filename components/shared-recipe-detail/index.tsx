@@ -1,11 +1,6 @@
 "use client";
 
 import { Bookmark, ChevronLeft } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
-import { createRecipe } from "@/lib/db/recipes";
-import { clonePublicRecipe } from "@/lib/public-recipes/clone";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -13,6 +8,7 @@ import { IngredientsList } from "../recipe-detail/ingredients-list";
 import { InstructionsList } from "../recipe-detail/instructions-list";
 import { RecipeHero } from "../recipe-detail/recipe-hero";
 import { RecipeMeta } from "../recipe-detail/recipe-meta";
+import { useSaveSharedCopy } from "./use-save-shared-copy";
 
 interface SharedRecipeDetailProps {
   locale: string;
@@ -29,20 +25,7 @@ export function SharedRecipeDetail({
   onSaved,
 }: SharedRecipeDetailProps) {
   const navigate = useNavigate();
-  const t = useTranslations("recipes");
-  const [saving, setSaving] = useState(false);
-
-  async function saveCopy() {
-    setSaving(true);
-    try {
-      const id = await createRecipe(clonePublicRecipe(recipe));
-      toast.success(t("savedShared"));
-      onSaved(id);
-    } catch {
-      toast.error(t("saveSharedFailed"));
-      setSaving(false);
-    }
-  }
+  const { saving, saveCopy } = useSaveSharedCopy(recipe);
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-base)]">
@@ -96,7 +79,7 @@ export function SharedRecipeDetail({
         <button
           type="button"
           disabled={saving}
-          onClick={saveCopy}
+          onClick={() => saveCopy(onSaved)}
           className="w-full flex items-center justify-center gap-2 rounded-[18px] border-0 bg-[var(--action-primary)] p-4 text-[15px] font-bold text-white shadow-[0_6px_24px_color-mix(in_oklch,var(--action-primary)_50%,transparent)] disabled:opacity-60"
         >
           <Bookmark size={18} />

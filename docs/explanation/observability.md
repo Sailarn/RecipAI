@@ -76,6 +76,14 @@ Two events rather than one terminal event on purpose: "stuck, then resolved afte
 
 `resolveOutcome()` is a pure function mirroring `RecipeDetail`'s render branches, kept beside the hook and tested directly — it is the part that silently drifts when the render changes. `recipe_viewed` is unchanged, so existing insights keep working. (Note it still reports `via: "list"` for every view including deep links; that predates this and is not yet fixed.)
 
+### Saving a shared recipe
+
+`shared_recipe_save_started` → `shared_recipe_save_succeeded` (`duration_ms`) / `shared_recipe_save_failed`, from `components/shared-recipe-detail/use-save-shared-copy.ts`.
+
+`started` fires **before** the write, which is the whole point: a save that hangs — neither resolving nor rejecting — shows up only as a `started` with no matching outcome. That is the signature of the reported "saving a shared recipe was broken for a while, then fixed itself".
+
+The failure path also re-throws now. It previously ended in a bare `catch {}` that showed a toast and nothing else, so a failed Dexie write reached no reporting anywhere. The save lives in a hook rather than the view so the re-throw is directly assertable — driving it through a click handler makes the rejection unhandled by construction, which a test cannot observe without leaking it into the whole run.
+
 ### Axiom — server logs
 See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-record table (AI cost, rate limits, and the parse-pipeline performance record).
 

@@ -77,6 +77,11 @@ export type TelemetryEvents = {
     was_stuck: boolean;
   };
   recipe_detail_stuck: { after_ms: number };
+  // saving someone else's shared recipe as your own copy. `started` is the
+  // point: a save that neither succeeds nor fails is only visible against it.
+  shared_recipe_save_started: undefined;
+  shared_recipe_save_succeeded: { duration_ms: number };
+  shared_recipe_save_failed: undefined;
   // server-side mirrors (cost/abuse alerting)
   ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
