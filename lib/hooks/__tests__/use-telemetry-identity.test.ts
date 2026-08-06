@@ -18,19 +18,40 @@ function mockSession(value: { data: unknown; isPending: boolean }): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
 });
+
+function atPath(pathname: string): void {
+  vi.stubGlobal("location", { pathname });
+}
 
 describe("useTelemetryIdentity", () => {
   it("identifies the user when a session is present", () => {
+    atPath("/ua/recipes");
     mockSession({ data: { user: { id: "user-1" } }, isPending: false });
 
     renderHook(() => useTelemetryIdentity());
 
     expect(identifyUser).toHaveBeenCalledWith(
       "user-1",
-      expect.objectContaining({ locale: expect.any(String) }),
+      expect.objectContaining({ locale: "ua" }),
     );
     expect(resetIdentity).not.toHaveBeenCalled();
+  });
+
+  it("omits the locale outside the locale-prefixed app", () => {
+    // This hook also runs under /external-auth, where the first path segment
+    // is not a locale. Writing it anyway would overwrite a real locale with
+    // "external-auth".
+    atPath("/external-auth/device");
+    mockSession({ data: { user: { id: "user-1" } }, isPending: false });
+
+    renderHook(() => useTelemetryIdentity());
+
+    expect(identifyUser).toHaveBeenCalledWith(
+      "user-1",
+      expect.not.objectContaining({ locale: expect.anything() }),
+    );
   });
 
   it("includes email, name, and image when the provider supplies them", () => {

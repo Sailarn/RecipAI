@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { type Locale, locales } from "@/i18n/config";
 import { authClient } from "@/lib/auth/auth-client";
 import { identifyUser, resetIdentity } from "@/lib/telemetry";
+
+function isLocale(segment: string | undefined): segment is Locale {
+  return locales.includes(segment as Locale);
+}
 
 /**
  * Links PostHog identity to the authenticated user, app-wide (mounted in
@@ -23,9 +28,12 @@ export function useTelemetryIdentity() {
       // Providers differ: a passkey- or Telegram-only account may have no
       // email or avatar. Include each property only when set so a later
       // session never overwrites an earlier provider's value with a blank.
-      const personProperties: Record<string, unknown> = {
-        locale: window.location.pathname.split("/")[1],
-      };
+      const personProperties: Record<string, unknown> = {};
+      // Only the app is locale-prefixed. This hook also runs under
+      // /external-auth, where the first segment is "external-auth" — writing
+      // that as the person's locale would overwrite a real one with garbage.
+      const firstSegment = window.location.pathname.split("/")[1];
+      if (isLocale(firstSegment)) personProperties.locale = firstSegment;
       if (email) personProperties.email = email;
       if (name) personProperties.name = name;
       if (image) personProperties.image = image;
