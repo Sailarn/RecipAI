@@ -311,8 +311,8 @@ describe("RecipeDetail", () => {
     );
 
     expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
-    expect(screen.getByText("Shared by Olena")).toBeInTheDocument();
-    expect(screen.getByText("View only")).toBeInTheDocument();
+    expect(screen.getByText("sharedBy")).toBeInTheDocument();
+    expect(screen.getByText("viewOnly")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /^edit$/i }),
     ).not.toBeInTheDocument();
@@ -329,7 +329,7 @@ describe("RecipeDetail", () => {
     );
 
     await userEvent.click(
-      await screen.findByRole("button", { name: /save to my recipes/i }),
+      await screen.findByRole("button", { name: "saveToMyRecipes" }),
     );
 
     expect(recipesModule.createRecipe).toHaveBeenCalledWith(
@@ -419,7 +419,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="shared-1" locale="en" />);
 
       expect(await screen.findByText("Shared Soup")).toBeInTheDocument();
-      expect(screen.getByText("Shared by Olena")).toBeInTheDocument();
+      expect(screen.getByText("sharedBy")).toBeInTheDocument();
       expect(fetchPublicRecipe).toHaveBeenCalledWith("shared-1");
     });
 

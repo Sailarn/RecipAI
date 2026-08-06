@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark, ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -25,6 +26,7 @@ export function SharedRecipeDetail({
   onSaved,
 }: SharedRecipeDetailProps) {
   const navigate = useNavigate();
+  const t = useTranslations("recipes");
   const { saving, saveCopy } = useSaveSharedCopy(recipe);
 
   return (
@@ -36,7 +38,7 @@ export function SharedRecipeDetail({
           className="py-[7px] pr-[14px] pl-[10px] flex items-center gap-1 bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] border border-[rgba(255,255,255,0.15)] rounded-full text-white text-xs"
         >
           <ChevronLeft size={13} />
-          Recipes
+          {t("title")}
         </button>
       </div>
 
@@ -44,10 +46,10 @@ export function SharedRecipeDetail({
         <RecipeHero recipe={recipe} />
         <div className="mb-4 flex items-center justify-between gap-3 rounded-[14px] border border-[rgba(255,200,100,0.16)] bg-[rgba(20,16,8,0.6)] px-[13px] py-[9px] backdrop-blur-[16px]">
           <span className="text-xs text-[var(--fg-1)]">
-            Shared by {recipe.owner.name}
+            {t("sharedBy", { name: recipe.owner.name })}
           </span>
           <span className="rounded-full bg-[rgba(139,92,246,0.18)] px-[9px] py-1 text-[10px] font-bold uppercase text-violet-300">
-            View only
+            {t("viewOnly")}
           </span>
         </div>
         <h1 className="mb-4 font-[family-name:var(--font-display)] text-2xl font-extrabold text-[var(--fg-1)]">
@@ -83,7 +85,7 @@ export function SharedRecipeDetail({
           className="w-full flex items-center justify-center gap-2 rounded-[18px] border-0 bg-[var(--action-primary)] p-4 text-[15px] font-bold text-white shadow-[0_6px_24px_color-mix(in_oklch,var(--action-primary)_50%,transparent)] disabled:opacity-60"
         >
           <Bookmark size={18} />
-          {saving ? "Saving..." : "Save to my recipes"}
+          {saving ? t("savingShared") : t("saveToMyRecipes")}
         </button>
       </div>
     </div>

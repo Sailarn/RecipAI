@@ -88,7 +88,7 @@ export function LinkedAccounts({
   return (
     <div className="glass-card mb-3 rounded-3xl overflow-hidden">
       <p className="text-xs font-semibold text-[var(--fg-3)] uppercase tracking-[0.07em] px-4 pt-[14px] pb-1.5">
-        Connected accounts
+        {t("connectedAccounts")}
       </p>
 
       {providers.map((provider, index) => (

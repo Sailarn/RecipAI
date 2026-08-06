@@ -40,6 +40,16 @@ describe("LinkedAccounts", () => {
     });
   });
 
+  describe("section heading", () => {
+    it("is translated once loaded, not just while loading", () => {
+      // The loaded branch hardcoded "Connected accounts" while the skeleton
+      // used the key, so the heading flipped back to English the moment the
+      // accounts arrived — which is all a signed-in user ever sees.
+      render(<LinkedAccounts {...defaultProps} />);
+      expect(screen.getByText("connectedAccounts")).toBeInTheDocument();
+    });
+  });
+
   describe("provider rows", () => {
     it("shows all three provider names", () => {
       render(<LinkedAccounts {...defaultProps} />);
