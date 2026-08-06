@@ -6,6 +6,7 @@ const { posthogMock, clientTelemetryEnabled } = vi.hoisted(() => ({
     capture: vi.fn(),
     identify: vi.fn(),
     reset: vi.fn(),
+    register: vi.fn(),
   },
   clientTelemetryEnabled: vi.fn(() => true),
 }));
@@ -78,6 +79,30 @@ describe("posthog client", () => {
       await flushDynamicImport();
 
       expect(posthogMock.init).not.toHaveBeenCalled();
+    });
+
+    it("registers the build id as a super-property", async () => {
+      vi.stubEnv("NEXT_PUBLIC_BUILD_ID", "deadbeef1234");
+      const { initPostHogClient } = await loadModule();
+
+      initPostHogClient();
+      await flushDynamicImport();
+
+      expect(posthogMock.register).toHaveBeenCalledWith({
+        build_id: "deadbeef1234",
+      });
+    });
+
+    it("registers a placeholder build id when none was compiled in", async () => {
+      vi.stubEnv("NEXT_PUBLIC_BUILD_ID", "");
+      const { initPostHogClient } = await loadModule();
+
+      initPostHogClient();
+      await flushDynamicImport();
+
+      expect(posthogMock.register).toHaveBeenCalledWith({
+        build_id: "unknown",
+      });
     });
   });
 

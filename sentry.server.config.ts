@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { getBuildId } from "@/lib/build-id";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({
@@ -11,5 +12,8 @@ if (process.env.NODE_ENV === "production") {
     // Enable sending user PII (Personally Identifiable Information)
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
+
+    // See instrumentation-client.ts for why this is a tag and not `release`.
+    initialScope: { tags: { build_id: getBuildId() } },
   });
 }

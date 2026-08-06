@@ -33,6 +33,21 @@ The routing rule: **PostHog** answers *what/who* — top-N lists, funnels, trend
 - **Named events** (the full taxonomy lives in `lib/telemetry/events.ts`): auth (`login`, `logout`, `account_linked`), the parse funnel (`parse_started` with `source`+`domain`, `parse_succeeded`, `parse_failed`, `parse_reviewed`, `recipe_saved`, `ingredients_normalized`), recipe lifecycle (`recipe_viewed`, `recipe_deleted`, `recipe_tried_toggled`, `step_images_viewed`, `servings_adjusted`), engagement (`search_performed`, `filter_applied`, collections, pantry, `theme_changed`, `language_changed`), and lifecycle signals (`embed_match`, `push_subscribed`, `push_unsubscribed`, `pwa_installed`, `parse_history_viewed`, `sync_review_resolved`).
 - This is where you build "top parsed domains," the parse conversion funnel, retention, and DAU/WAU. Insights are computed retroactively over stored events, so they can be built at any time without losing prior data.
 
+### Build identity — `build_id`
+
+Every event carries the build it came from. `lib/build-id.ts` reads `NEXT_PUBLIC_BUILD_ID`, resolved once in `next.config.ts` (`resolveBuildId`: Vercel commit SHA → `git rev-parse` → package version, [never a clock](../reference/gotchas.md)) and inlined at build time.
+
+| Surface | How it is attached |
+|---|---|
+| PostHog browser | `posthog.register({ build_id })` at init — a super-property on every subsequent event |
+| PostHog node | Merged into `properties` per event; posthog-node has no super-property equivalent |
+| Sentry (all three runtimes) | `initialScope.tags.build_id` |
+| Profile screen | Shown next to the version as `v2.26.0 · abc1234`, so a support question pins the exact deploy |
+
+It is a Sentry **tag**, deliberately not `release`: `withSentryConfig` detects its own release name and uploads source maps under it, so overriding `release` with our truncated id would orphan those maps and leave every stack trace minified.
+
+Why it earns its place: the package version only moves on a release, which cannot distinguish "running the current deploy" from "pinned to old cached code by a stale service-worker cache". With `build_id`, events arriving with an id that is no longer the deployed one *are* the symptom — one filter instead of an investigation. That is the signal that was missing when an Android user's recipes silently failed to load; see the service-worker entry in [Gotchas](../reference/gotchas.md).
+
 ### Axiom — server logs
 See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-record table (AI cost, rate limits, and the parse-pipeline performance record).
 

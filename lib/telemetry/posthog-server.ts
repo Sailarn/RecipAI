@@ -1,4 +1,5 @@
 import { PostHog } from "posthog-node";
+import { getBuildId } from "@/lib/build-id";
 import { serverTelemetryEnabled } from "./environment";
 import type { EventName, TelemetryEvents } from "./events";
 
@@ -26,6 +27,8 @@ export function captureServerEvent<E extends EventName>(
   getClient()?.capture({
     distinctId,
     event: name,
-    properties,
+    // posthog-node has no super-property equivalent, so the build id is merged
+    // per event to match what the browser client registers once at init.
+    properties: { ...properties, build_id: getBuildId() },
   });
 }

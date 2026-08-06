@@ -16,6 +16,7 @@ import { ParseHistoryView } from "@/components/parse-history-view";
 import { ProfileAuth } from "@/components/profile-auth";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LOCALE_DISPLAY_NAME, type Locale, locales } from "@/i18n/config";
+import { getBuildId } from "@/lib/build-id";
 import { usePwaInstall } from "@/lib/hooks/use-pwa-install";
 import { useFeature } from "@/lib/platform";
 import { routes } from "@/lib/routes";
@@ -176,11 +177,16 @@ export default function ProfilePage() {
             {/* Build metadata: server and client can momentarily disagree in dev
                 after a version bump (stale bundle). It always matches in a clean
                 prod build, so suppress the benign hydration warning. */}
+            {/* The build id rides along with the version so a support question
+                ("what does your profile say?") pins the exact deploy — the
+                package version only moves on a release, which is far too
+                coarse to tell whether a device is stuck on old cached code. */}
             <span
               suppressHydrationWarning
               className="font-sans text-sm text-[var(--fg-3)]"
             >
-              v{process.env.NEXT_PUBLIC_APP_VERSION}
+              v{process.env.NEXT_PUBLIC_APP_VERSION} ·{" "}
+              {getBuildId().slice(0, 7)}
             </span>
           </div>
         </div>

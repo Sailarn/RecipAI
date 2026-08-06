@@ -1,4 +1,5 @@
 import type { PostHog } from "posthog-js";
+import { getBuildId } from "@/lib/build-id";
 import { clientTelemetryEnabled } from "./environment";
 import type { EventName, TelemetryEvents } from "./events";
 
@@ -45,6 +46,11 @@ export function initPostHogClient(): void {
         persistence: "localStorage+cookie",
         session_recording: { maskAllInputs: true },
       });
+      // Super-property: rides along on every event from here on, so "which
+      // build was this user running" is a filter rather than an investigation.
+      // A device pinned to an old build by a stale cache is visible as events
+      // arriving with a build_id that is no longer the deployed one.
+      posthog.register({ build_id: getBuildId() });
       markReady(posthog);
     })
     .catch(markUnavailable);

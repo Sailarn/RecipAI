@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { getBuildId } from "@/lib/build-id";
 import { scheduleIdle } from "@/lib/schedule-idle";
 
 if (process.env.NODE_ENV === "production") {
@@ -12,6 +13,13 @@ if (process.env.NODE_ENV === "production") {
     // Enable sending user PII (Personally Identifiable Information)
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
+
+    // A tag, deliberately not `release`. withSentryConfig detects its own
+    // release name and uploads source maps under it; overriding `release` here
+    // with our (truncated) build id would orphan those maps and leave every
+    // stack trace minified. The tag gives the same "which build" filter with
+    // none of that risk, and matches the build_id property on PostHog events.
+    initialScope: { tags: { build_id: getBuildId() } },
 
     // The service worker is registered by @serwist/next's auto-injected script.
     // Its registration promise rejects (unhandled) in environments where SW
