@@ -15,6 +15,7 @@ import { useHaptics } from "@/lib/platform";
 import { prewarmRecipeImage } from "@/lib/prewarm-recipe-images";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
+import type { RecipeViewSource } from "@/lib/telemetry/events";
 import { useNavigate } from "@/lib/transitions";
 import { cn } from "@/lib/utils";
 import { CardFooter } from "./card-footer";
@@ -26,6 +27,11 @@ interface RecipeCardProps {
   collections: Collection[];
   priority?: boolean;
   pantryMatch?: { missing: number; total: number } | null;
+  /** Which browsing context this card is being rendered in, passed on to the
+   *  detail view it pushes. Threaded as a prop rather than read from context
+   *  because `navigate.push` renders the detail view in the shell's navigation
+   *  stack, outside this page's tree — no provider here would reach it. */
+  via: RecipeViewSource;
 }
 
 export const RecipeCard = memo(function RecipeCard({
@@ -33,6 +39,7 @@ export const RecipeCard = memo(function RecipeCard({
   collections,
   priority = false,
   pantryMatch,
+  via,
 }: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -91,6 +98,7 @@ export const RecipeCard = memo(function RecipeCard({
               recipeId={recipe.id}
               locale={locale}
               initialRecipe={recipe}
+              via={via}
             />,
           );
         }}

@@ -13,6 +13,7 @@ import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
+import type { RecipeViewSource } from "@/lib/telemetry/events";
 import { useNavigate } from "@/lib/transitions";
 import { CookingCarousel } from "../cooking-carousel";
 import { ServingsCalculator } from "../servings-calculator";
@@ -32,6 +33,9 @@ interface RecipeDetailProps {
   locale: string;
   publicRecipe?: PublicRecipe | null;
   initialRecipe?: Recipe;
+  /** Defaults to `deep_link`: every other source pushes this view
+   *  deliberately, so no stated source means the URL was opened directly. */
+  via?: RecipeViewSource;
 }
 
 export function RecipeDetail({
@@ -39,6 +43,7 @@ export function RecipeDetail({
   locale,
   publicRecipe,
   initialRecipe,
+  via = "deep_link",
 }: RecipeDetailProps) {
   const navigate = useNavigate();
   const deleteWithUndo = useDeleteRecipe();
@@ -123,9 +128,9 @@ export function RecipeDetail({
   useEffect(() => {
     if (recipe && !viewedRef.current) {
       viewedRef.current = true;
-      trackEvent("recipe_viewed", { via: "list" });
+      trackEvent("recipe_viewed", { via });
     }
-  }, [recipe]);
+  }, [recipe, via]);
 
   // recipe_viewed above only covers the Dexie branch. This covers every
   // terminal state — including the share path, which reported nothing at all,
@@ -161,7 +166,11 @@ export function RecipeDetail({
           onSaved={(savedId) =>
             navigate.replace(
               routes.recipes.detail(locale, savedId),
-              <RecipeDetail recipeId={savedId} locale={locale} />,
+              <RecipeDetail
+                recipeId={savedId}
+                locale={locale}
+                via="shared_save"
+              />,
             )
           }
         />

@@ -15,12 +15,28 @@ import { useScrollCollapse } from "@/hooks/use-scroll-collapse";
 import { type GreetingPeriod, getGreeting } from "@/lib/greeting";
 import { prewarmRecipeImages } from "@/lib/prewarm-recipe-images";
 import { useTriggerSync } from "@/lib/sync-context";
+import type { RecipeViewSource } from "@/lib/telemetry/events";
 
 const GREETING_KEYS: Record<GreetingPeriod, string> = {
   morning: "greetingMorning",
   afternoon: "greetingAfternoon",
   evening: "greetingEvening",
 };
+
+/**
+ * Which browsing context a card opened from, for `recipe_viewed`.
+ *
+ * Search wins over a collection because searching *within* a collection is
+ * still a search — the query is what surfaced the recipe.
+ */
+function browseSource(
+  search: string,
+  collectionId: string | null,
+): RecipeViewSource {
+  if (search) return "search";
+  if (collectionId) return "collection";
+  return "list";
+}
 
 const ParsedRecipesSheet = dynamic(
   () =>
@@ -147,6 +163,7 @@ export default function RecipesPage() {
             getMissing={getMissing}
             scrollRef={scrollRef}
             hasActiveSearch={!!search}
+            via={browseSource(search, collectionId)}
           />
           {/* Nav bar clearance — outside the virtualiser so it always adds to scroll height */}
           <div className="h-[110px]" />

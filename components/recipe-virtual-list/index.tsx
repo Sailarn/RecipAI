@@ -6,6 +6,7 @@ import { type RefObject, useMemo } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Collection, Recipe } from "@/lib/db/schema";
+import type { RecipeViewSource } from "@/lib/telemetry/events";
 
 const skeletonCardIds = ["a", "b", "c", "d", "e", "f"];
 
@@ -15,6 +16,9 @@ interface RecipeVirtualListProps {
   getMissing: (recipe: Recipe) => { missing: number; total: number } | null;
   scrollRef: RefObject<HTMLDivElement | null>;
   hasActiveSearch: boolean;
+  /** Passed straight through to each card, which hands it to the detail view
+   *  it pushes — the list itself has no opinion on it. */
+  via: RecipeViewSource;
 }
 
 function RecipeGridSkeleton() {
@@ -40,6 +44,7 @@ export function RecipeVirtualList({
   getMissing,
   scrollRef,
   hasActiveSearch,
+  via,
 }: RecipeVirtualListProps) {
   const t = useTranslations("recipes");
 
@@ -108,6 +113,7 @@ export function RecipeVirtualList({
                 collections={collections}
                 priority={virtualRow.index === 0}
                 pantryMatch={getMissing(recipe)}
+                via={via}
               />
             ))}
             {/* Keep grid balanced when the last row has one card */}

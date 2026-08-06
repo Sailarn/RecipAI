@@ -18,6 +18,7 @@ import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { fetchPublicRecipe } from "@/lib/public-recipes/fetch-public-recipe";
 import type { PublicRecipe } from "@/lib/public-recipes/types";
+import { trackEvent } from "@/lib/telemetry";
 import { RecipeDetail } from "../index";
 
 const navigation = vi.hoisted(() => ({
@@ -184,6 +185,74 @@ describe("RecipeDetail", () => {
     );
 
     expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
+  });
+
+  describe("recipe_viewed source", () => {
+    it("reports the source the view was opened from", () => {
+      vi.mocked(recipesModule.getRecipe).mockImplementation(
+        () => new Promise(() => {}),
+      );
+
+      render(
+        <RecipeDetail
+          recipeId="recipe-1"
+          locale="en"
+          initialRecipe={mockRecipe}
+          via="search"
+        />,
+      );
+
+      expect(trackEvent).toHaveBeenCalledWith("recipe_viewed", {
+        via: "search",
+      });
+    });
+
+    it("falls back to deep_link when no source is given", () => {
+      // Every in-app entry point pushes this view deliberately and states its
+      // source, so an unstated one means the URL was opened directly. This
+      // used to be hardcoded to "list", which made the property meaningless.
+      vi.mocked(recipesModule.getRecipe).mockImplementation(
+        () => new Promise(() => {}),
+      );
+
+      render(
+        <RecipeDetail
+          recipeId="recipe-1"
+          locale="en"
+          initialRecipe={mockRecipe}
+        />,
+      );
+
+      expect(trackEvent).toHaveBeenCalledWith("recipe_viewed", {
+        via: "deep_link",
+      });
+    });
+
+    it("reports a view only once per mount", () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
+
+      const { rerender } = render(
+        <RecipeDetail
+          recipeId="recipe-1"
+          locale="en"
+          initialRecipe={mockRecipe}
+          via="collection"
+        />,
+      );
+      rerender(
+        <RecipeDetail
+          recipeId="recipe-1"
+          locale="en"
+          initialRecipe={mockRecipe}
+          via="collection"
+        />,
+      );
+
+      const views = vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "recipe_viewed");
+      expect(views).toHaveLength(1);
+    });
   });
 
   it("keeps the seeded recipe when the background Dexie read finds nothing", async () => {

@@ -78,6 +78,7 @@ describe("RecipeVirtualList", () => {
           getMissing={mockGetMissing}
           scrollRef={scrollRef}
           hasActiveSearch={true}
+          via="list"
         />,
       );
 
@@ -94,6 +95,7 @@ describe("RecipeVirtualList", () => {
           getMissing={mockGetMissing}
           scrollRef={scrollRef}
           hasActiveSearch={false}
+          via="list"
         />,
       );
 
@@ -113,6 +115,7 @@ describe("RecipeVirtualList", () => {
           getMissing={mockGetMissing}
           scrollRef={scrollRef}
           hasActiveSearch={false}
+          via="list"
         />,
       );
 
@@ -135,6 +138,7 @@ describe("RecipeVirtualList", () => {
           getMissing={mockGetMissing}
           scrollRef={scrollRef}
           hasActiveSearch={false}
+          via="list"
         />,
       );
 
@@ -156,6 +160,7 @@ describe("RecipeVirtualList", () => {
           getMissing={getMissing}
           scrollRef={scrollRef}
           hasActiveSearch={false}
+          via="list"
         />,
       );
 

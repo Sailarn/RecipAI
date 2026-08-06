@@ -1,5 +1,20 @@
 // lib/telemetry/events.ts
 
+/**
+ * How the user arrived at a recipe detail view.
+ *
+ * `deep_link` is the default at the bottom of `RecipeDetail`, because every
+ * other source has to push the view deliberately — arriving with no stated
+ * source means the URL was opened directly (a share link, a Telegram deep
+ * link, a cold PWA launch).
+ */
+export type RecipeViewSource =
+  | "list"
+  | "search"
+  | "collection"
+  | "deep_link"
+  | "shared_save";
+
 /** Every analytics event in the app. Adding an event = adding an entry here.
  *  Inline event-name strings at call sites are forbidden. */
 export type TelemetryEvents = {
@@ -42,7 +57,7 @@ export type TelemetryEvents = {
     degraded: boolean;
   };
   // recipe lifecycle (recipe edits are recipe_saved {source:"edit"} — no separate event)
-  recipe_viewed: { via: "list" | "search" | "collection" | "deep_link" };
+  recipe_viewed: { via: RecipeViewSource };
   recipe_deleted: undefined;
   recipe_delete_undone: undefined;
   step_images_viewed: undefined;

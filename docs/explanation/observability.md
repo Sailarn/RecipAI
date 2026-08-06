@@ -74,7 +74,17 @@ Versioning the page cache should make `stale_document_detected` unreachable, so 
 
 Two events rather than one terminal event on purpose: "stuck, then resolved after 20s" (slow) and "stuck, never resolved" (broken) are different bugs, and a single event would collapse them. A `recipe_detail_stuck` with no matching `recipe_detail_resolved` in the session is the hard failure.
 
-`resolveOutcome()` is a pure function mirroring `RecipeDetail`'s render branches, kept beside the hook and tested directly — it is the part that silently drifts when the render changes. `recipe_viewed` is unchanged, so existing insights keep working. (Note it still reports `via: "list"` for every view including deep links; that predates this and is not yet fixed.)
+`resolveOutcome()` is a pure function mirroring `RecipeDetail`'s render branches, kept beside the hook and tested directly — it is the part that silently drifts when the render changes.
+
+`recipe_viewed` complements this with *where the user came from* rather than how it resolved. Its `via` was hardcoded to `"list"` at the single call site, so every view — deep links, search results, collections — reported the same value and any "how do people reach recipes" analysis was meaningless. It is now a real `RecipeViewSource`, threaded from the entry point:
+
+| Source | Set by |
+|---|---|
+| `list` / `search` / `collection` | `browseSource()` on the recipes page → `RecipeVirtualList` → `RecipeCard` |
+| `shared_save` | The replace after saving someone else's shared recipe |
+| `deep_link` | The default — every other source pushes the view deliberately, so an unstated one means the URL was opened directly |
+
+Threaded as a prop rather than via context because `navigate.push` renders the detail view in the shell's navigation stack, **outside** the page's tree — a provider on the recipes page would never reach it. Searching within a collection counts as `search`: the query is what surfaced the recipe.
 
 ### Saving a shared recipe
 

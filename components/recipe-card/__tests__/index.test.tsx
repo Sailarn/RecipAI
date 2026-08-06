@@ -120,6 +120,7 @@ const baseRecipe = {
 const baseProps = {
   recipe: baseRecipe,
   collections: [],
+  via: "list" as const,
 };
 
 beforeEach(() => {
