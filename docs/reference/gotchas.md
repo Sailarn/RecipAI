@@ -206,6 +206,15 @@ The Task 0 probe succeeded on the Pi with Bun 1.3.11 and produced a 384-dimensio
 **`public/sw.js` is regenerated on every build.**
 It is gitignored. Do not commit it. Running `bun run build` will always overwrite it.
 
+**Runtime SW caches are not cleared on activation — version anything build-coupled.**
+Serwist cleans up its *precache* between versions, but runtime caches (`runtimeCaching`) survive deploys untouched. That is how the navigation cache came to serve stale HTML: it was named `"pages"` and keyed by URL alone, with a 7-day `maxAgeSeconds`, so a document cached from an older build stayed servable indefinitely. Only the six app shells per locale are precached (`appShellEntries` in `next.config.ts`); **recipe detail is not**, so `/[locale]/recipes/[id]` — the URL every share link points at — was served from that cache. Whenever the network missed the handler's `networkTimeoutSeconds: 3`, the user got an old document referencing `/_next/static/chunks/*` hashes the current build no longer serves: the page painted, the app never hydrated, and nothing reached Sentry because the app JS never ran. A slow device hit the timeout on nearly every launch; clearing browser storage was the only user-side fix.
+
+The cache is now `app-pages-${NEXT_PUBLIC_BUILD_ID}`, so a stale hit can only ever return a document from the *current* build, and an `activate` listener deletes both older `app-pages-*` caches and the legacy `"pages"` one. Two rules when touching this:
+- **Keep the `app-` prefix.** `defaultCache` owns `"pages"`, `"pages-rsc"` and `"pages-rsc-prefetch"`; a bare `pages-` cleanup prefix deletes Serwist's own RSC caches on every activation.
+- **`BUILD_ID` must be deterministic.** `next.config.ts` is evaluated more than once per build (server, client, service worker). `resolveBuildId()` reads `VERCEL_GIT_COMMIT_SHA`, then `git rev-parse`, then the package version — never a clock. A `Date.now()` id gives those evaluations different values, so the precached shells, the runtime cache name and the id compiled into the app bundle would disagree about which build they belong to.
+
+This is also why the bug reproduced only outside Telegram: `TelegramProvider` unregisters service workers on launch (see the Telegram section below), so the Mini App always fetched fresh HTML.
+
 **Recipe images deliberately bypass `next/image`.**
 `RecipeImage` renders a plain `<img>` on a direct ImageKit CDN URL (`getOptimizedUrl` in `lib/imagekit-url.ts` → `?tr=w-…,f-webp,q-80`) instead of `next/image`. If it went through `/_next/image`, requests would hit Vercel's optimizer (cold-optimize latency + image-unit billing) and the service worker's `recipe-images` `CacheFirst` rule would never match — so the images could not be cached or prewarmed, and would double-optimize (ImageKit *then* Vercel). Consequence: the `biome-ignore lint/performance/noImgElement` on those `<img>` tags is intentional; don't "fix" it back to `next/image`. Other images (avatars, etc.) still use `next/image`.
 

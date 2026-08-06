@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -46,6 +47,36 @@ function publicPrecacheEntries(
   });
 }
 
+/**
+ * Identifies the deployed build. Everything the service worker caches is keyed
+ * by it, so a document from one build can never be paired with chunks from
+ * another.
+ *
+ * Deliberately derived from deterministic sources, never a clock. next.config
+ * is evaluated more than once per build (server, client, service worker), and a
+ * `Date.now()` id hands those evaluations *different* values — the precached
+ * shells would then disagree with both the runtime page cache and the build id
+ * compiled into the app bundle about which build they belong to.
+ */
+function resolveBuildId(): string {
+  const vercelSha = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (vercelSha) return vercelSha.slice(0, 12);
+  try {
+    return execFileSync("git", ["rev-parse", "--short=12", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    // No Vercel env and no git (a tarball build). Coarser than a commit — it
+    // only moves on a release — but stable across evaluations, which matters
+    // more: an unstable id would make every load look stale to itself.
+    return packageJson.version;
+  }
+}
+
+const BUILD_ID = resolveBuildId();
+
 // Every JS/CSS/font asset is precached, but the page shells were not — so a
 // first offline launch of a tab the user hadn't visited yet fell through to
 // /~offline, and every launch re-fetched HTML it already had. These are the
@@ -54,7 +85,7 @@ function publicPrecacheEntries(
 // The revision changes on every build, so a deploy re-fetches all of them at
 // service-worker install and the whole app version flips over atomically on
 // activation — no chance of stale HTML pointing at chunks that no longer exist.
-const SHELL_REVISION = `${packageJson.version}-${Date.now()}`;
+const SHELL_REVISION = BUILD_ID;
 
 const appShellEntries = locales.flatMap((locale) =>
   [
@@ -99,6 +130,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_APP_VERSION: packageJson.version,
+    NEXT_PUBLIC_BUILD_ID: BUILD_ID,
   },
   images: {
     remotePatterns: [
