@@ -38,6 +38,18 @@ scheduleIdle(() => {
   import("@/lib/telemetry/posthog-client")
     .then((posthogClientModule) => posthogClientModule.initPostHogClient())
     .catch(() => {});
+
+  // Answers "is this device running the code we think it is?" — the question
+  // that had no answer when an Android user's recipes silently failed to load.
+  // Swallowed like the init above: a diagnostic must never be the thing that
+  // breaks a boot, and it runs too early for the re-throw pattern (there is no
+  // error boundary above instrumentation).
+  import("@/lib/pwa/build-freshness")
+    .then((buildFreshnessModule) => {
+      buildFreshnessModule.watchServiceWorkerTakeover();
+      return buildFreshnessModule.reportBuildFreshness();
+    })
+    .catch(() => {});
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

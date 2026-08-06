@@ -63,6 +63,12 @@ export type TelemetryEvents = {
   telegram_mini_app_launched: { hasStartParam: boolean };
   parse_history_viewed: undefined;
   sync_review_resolved: { choice: string };
+  // app delivery — is this device running the code we think it is?
+  stale_document_detected: {
+    document_build_id: string;
+    server_build_id: string;
+  };
+  sw_controller_changed: undefined;
   // server-side mirrors (cost/abuse alerting)
   ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };

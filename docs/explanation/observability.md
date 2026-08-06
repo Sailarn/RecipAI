@@ -48,6 +48,19 @@ It is a Sentry **tag**, deliberately not `release`: `withSentryConfig` detects i
 
 Why it earns its place: the package version only moves on a release, which cannot distinguish "running the current deploy" from "pinned to old cached code by a stale service-worker cache". With `build_id`, events arriving with an id that is no longer the deployed one *are* the symptom — one filter instead of an investigation. That is the signal that was missing when an Android user's recipes silently failed to load; see the service-worker entry in [Gotchas](../reference/gotchas.md).
 
+### App delivery — is the client running the code we shipped?
+
+Two events, both fired from `instrumentation-client.ts` at idle via `lib/pwa/build-freshness.ts`:
+
+| Event | Meaning |
+|---|---|
+| `stale_document_detected` | The bundle's `build_id` disagrees with `/api/build`. The document came from a previous deploy. Carries `document_build_id` and `server_build_id`. |
+| `sw_controller_changed` | A service worker took control of an already-open page. `skipWaiting` + `clientsClaim` swap the worker under live tabs on deploy, leaving the page running the old build's JS against the new build's caches — the shape of "it broke, then fixed itself", which a reload repairs without a trace. |
+
+On detecting staleness the client calls `registration.update()` rather than forcing a reload: the new worker's install precaches the current build and its activate sweeps older page caches, so the next navigation is clean — without yanking the page out from under someone mid-edit, and without risking a reload loop against a rolling deploy that is still serving both builds.
+
+Versioning the page cache should make `stale_document_detected` unreachable, so it is a regression alarm rather than routine traffic. A cluster of them on one device means the cache fix has a hole; a scatter across devices at one timestamp is just a mid-session deploy.
+
 ### Axiom — server logs
 See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-record table (AI cost, rate limits, and the parse-pipeline performance record).
 

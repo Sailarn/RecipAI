@@ -23,6 +23,7 @@ export const routes = {
 } as const;
 
 export const api = {
+  build: "/api/build",
   recipesSync: "/api/recipes/sync",
   recipes: "/api/recipes",
   recipe: (id: string) => `/api/recipes/${id}`,
