@@ -136,6 +136,10 @@ Events are sent to `/ingest/...` (a Next.js rewrite in `next.config.ts`) which f
 
 PostHog session replay is on with `maskAllInputs: true`. Replay is initialized at page load via `instrumentation-client.ts` so the recording starts from the first user interaction.
 
+Sampling is 100% — deliberately. The user base is single-digit, PostHog's free tier covers 5,000 recordings a month, and current volume is roughly ten a day, so there is no reason to sample. At this size a replay answers "what actually happened to this user" faster than any query.
+
+`capture_performance: true` records network **timing** — request URLs and status codes, no headers and no bodies, so nothing carries a token or user content. This is what makes a broken page load legible: a document left over from an old build shows up as 404s on `/_next/static/chunks/*` right there in the replay. Nothing else can see that failure, because the app's own JS never runs and so reports nothing.
+
 ## Server logs in Axiom
 
 `log()` calls on the server emit structured JSON rows to the `recipai` dataset (configurable via `AXIOM_DATASET`). Current instrumented signals:

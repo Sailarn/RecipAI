@@ -45,6 +45,13 @@ export function initPostHogClient(): void {
         capture_pageleave: true,
         persistence: "localStorage+cookie",
         session_recording: { maskAllInputs: true },
+        // Network *timing* in replays — request URLs and statuses, no headers
+        // and no bodies, so nothing carries a token or user content. This is
+        // what makes a failed page load legible: a document left over from an
+        // old build shows up directly as 404s on /_next/static/chunks/*, which
+        // is otherwise invisible everywhere (the app's own JS never runs, so
+        // it reports nothing).
+        capture_performance: true,
       });
       // Super-property: rides along on every event from here on, so "which
       // build was this user running" is a filter rather than an investigation.
