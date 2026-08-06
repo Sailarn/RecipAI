@@ -61,6 +61,21 @@ On detecting staleness the client calls `registration.update()` rather than forc
 
 Versioning the page cache should make `stale_document_detected` unreachable, so it is a regression alarm rather than routine traffic. A cluster of them on one device means the cache fix has a hole; a scatter across devices at one timestamp is just a mid-session deploy.
 
+### Recipe detail — how a view resolved
+
+`recipe_viewed` only fires for a recipe found in Dexie. That left the share path emitting **nothing**: a public recipe that rendered perfectly and one that hung on a skeleton forever produced identical telemetry — a `$pageview` and silence. Since a share link is the one URL that is never a local recipe, the entire shared-recipe experience was invisible.
+
+`components/recipe-detail/use-resolution-outcome.ts` closes it with two events:
+
+| Event | Properties | Meaning |
+|---|---|---|
+| `recipe_detail_resolved` | `outcome`, `duration_ms`, `was_stuck` | A terminal state was reached. `outcome` is `local` (Dexie), `shared` (someone else's public recipe), or `not_found` (private guard). |
+| `recipe_detail_stuck` | `after_ms` | 8s elapsed with the view still on a skeleton. |
+
+Two events rather than one terminal event on purpose: "stuck, then resolved after 20s" (slow) and "stuck, never resolved" (broken) are different bugs, and a single event would collapse them. A `recipe_detail_stuck` with no matching `recipe_detail_resolved` in the session is the hard failure.
+
+`resolveOutcome()` is a pure function mirroring `RecipeDetail`'s render branches, kept beside the hook and tested directly — it is the part that silently drifts when the render changes. `recipe_viewed` is unchanged, so existing insights keep working. (Note it still reports `via: "list"` for every view including deep links; that predates this and is not yet fixed.)
+
 ### Axiom — server logs
 See [Server logs in Axiom](#server-logs-in-axiom) below for the structured-record table (AI cost, rate limits, and the parse-pipeline performance record).
 

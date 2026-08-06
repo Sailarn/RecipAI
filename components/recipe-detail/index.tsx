@@ -25,6 +25,7 @@ import { RecipeHeader } from "./recipe-header";
 import { RecipeHero } from "./recipe-hero";
 import { RecipeMeta } from "./recipe-meta";
 import { RecipeSkeleton } from "./recipe-skeleton";
+import { resolveOutcome, useResolutionOutcome } from "./use-resolution-outcome";
 
 interface RecipeDetailProps {
   recipeId: string;
@@ -125,6 +126,20 @@ export function RecipeDetail({
       trackEvent("recipe_viewed", { via: "list" });
     }
   }, [recipe]);
+
+  // recipe_viewed above only covers the Dexie branch. This covers every
+  // terminal state — including the share path, which reported nothing at all,
+  // so a shared recipe that hung looked exactly like one that rendered fine.
+  useResolutionOutcome(
+    resolveOutcome({
+      loading,
+      hasRecipe: Boolean(recipe),
+      hasPublicRecipe: Boolean(effectivePublicRecipe),
+      publicCheckDone,
+      ownerPullDone,
+      awaitingTelegramAutoSignIn,
+    }),
+  );
 
   const handleDelete = async () => {
     // Leave the detail view first: the toast (and its Undo) belongs on the

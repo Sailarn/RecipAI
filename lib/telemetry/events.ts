@@ -69,6 +69,14 @@ export type TelemetryEvents = {
     server_build_id: string;
   };
   sw_controller_changed: undefined;
+  // recipe detail resolution — every terminal state, including the share path,
+  // which used to emit nothing at all
+  recipe_detail_resolved: {
+    outcome: "local" | "shared" | "not_found";
+    duration_ms: number;
+    was_stuck: boolean;
+  };
+  recipe_detail_stuck: { after_ms: number };
   // server-side mirrors (cost/abuse alerting)
   ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
