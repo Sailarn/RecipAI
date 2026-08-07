@@ -159,6 +159,9 @@ Telegram OIDC uses a synthetic `<id>@telegram.oidc` email that never matches Goo
 **iOS PWA reloads when it returns to the foreground.**
 Coming back from the system browser wipes in-memory state, so the pending device authorization is persisted to `localStorage` (`lib/auth/pending-device-auth.ts`) and polling resumes on mount. `window.open` also can't escape the in-app browser on iOS — the Share sheet is the only reliable way out, so it's the primary action there.
 
+**`getRequestConfig` must not `notFound()` on a missing locale — it 404s the whole `external-auth` tree.**
+`i18n/request.ts` runs for *any* route that resolves next-intl config, not just `app/[locale]`. The `external-auth` pages live outside that segment, so `requestLocale` is `undefined` there — and a `if (!locale) notFound()` turned every one of them into a 404. That took down PWA Google sign-in completely: the device-authorization `verificationUri` points at `/external-auth/device` on the auth host, so the browser handoff dead-ended on a 404 page. Wrapping those pages in `ExternalAuthIntlProvider` is what started resolving the config there, so the breakage arrived with a translation commit and looked nothing like an auth change. Only 404 a locale segment that is *present and invalid*; a missing one means "route outside `[locale]`" and must fall back to `defaultLocale`. `app/[locale]/layout.tsx` already rejects genuinely bad locales before this runs.
+
 ---
 
 ## Recipe ingredients & steps
