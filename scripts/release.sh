@@ -137,9 +137,13 @@ deploy_vercel() {
     tokenArgs=(--token="$VERCEL_TOKEN")
   fi
 
-  vercel pull --yes --environment=production "${tokenArgs[@]}" || fail "${FAIL} vercel pull failed"
-  vercel build --prod "${tokenArgs[@]}" || fail "${FAIL} vercel build failed"
-  vercel deploy --prebuilt --prod "${tokenArgs[@]}" || fail "${FAIL} vercel deploy failed"
+  # macOS ships bash 3.2, where `"${arr[@]}"` on an *empty* array counts as an
+  # unbound variable and `set -u` aborts — which killed the deploy after
+  # release-it had already bumped, tagged and pushed. `${arr[@]+"${arr[@]}"}`
+  # expands to nothing when empty and to the quoted elements otherwise.
+  vercel pull --yes --environment=production ${tokenArgs[@]+"${tokenArgs[@]}"} || fail "${FAIL} vercel pull failed"
+  vercel build --prod ${tokenArgs[@]+"${tokenArgs[@]}"} || fail "${FAIL} vercel build failed"
+  vercel deploy --prebuilt --prod ${tokenArgs[@]+"${tokenArgs[@]}"} || fail "${FAIL} vercel deploy failed"
   echo -e "${GREEN}${PASS}${RESET} Deployed to Vercel"
 }
 
