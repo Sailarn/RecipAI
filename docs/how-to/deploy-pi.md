@@ -9,6 +9,8 @@ The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel. Both the Pi and Ver
 
 ---
 
+Pi deploy is also the last step of `scripts/release.sh --mode=local` (see [deploy-vercel.md](deploy-vercel.md#local-release-pipeline-github-actions-unavailable)) — the fallback path when GitHub Actions can't run the pipeline itself.
+
 ## SSH in
 
 ```bash

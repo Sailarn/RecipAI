@@ -71,3 +71,18 @@ vercel --prod
 ```
 
 Requires the Vercel CLI (`npm i -g vercel`) and `vercel link` to have been run once.
+
+---
+
+## Local release pipeline (GitHub Actions unavailable)
+
+`scripts/release.sh` mirrors the CI + release + deploy pipeline above so a release isn't blocked on GitHub Actions being up.
+
+```bash
+bun run release:pipeline                       # --mode=cloud (default) — same as today: push, let Actions handle it
+bun run release:pipeline -- --mode=local        # run CI checks, version bump, Vercel deploy, and Pi deploy locally
+```
+
+`--mode=local` runs, in order: `tsc --noEmit` / `biome ci .` / tests (same commands as `ci.yml`), a check for unreleased files under `db/migrations/` (stops with the migration command above if found — pass `--skip-migration-check` if you already applied it by hand), `release-it --ci`, then the same `vercel pull` / `vercel build --prod` / `vercel deploy --prebuilt --prod` sequence as `release.yml`, then `ssh recipai@recipai.local '~/deploy.sh'` for the Pi. Set `VERCEL_TOKEN` in the environment to run non-interactively; otherwise it uses your local `vercel login` session.
+
+Use `--mode=local` only when Actions can't run the pipeline itself — it's the fallback, not the default.

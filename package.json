@@ -21,6 +21,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "release": "release-it",
+    "release:pipeline": "./scripts/release.sh",
     "docs": "python3 -m mkdocs serve",
     "docs:build": "python3 -m mkdocs build --strict",
     "tunnel": "ngrok http 3000"
