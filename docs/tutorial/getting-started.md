@@ -6,7 +6,8 @@ How to run RecipAI locally from scratch.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) (runtime + package manager)
+- [Bun](https://bun.sh) 1.4+ (runtime + package manager — runs every script, test and build)
+- [Node.js](https://nodejs.org) 24 LTS (the deploy runtime; `.nvmrc` pins the exact version, so `nvm use` picks it up)
 - [Python 3](https://python.org) (optional — only needed for the documentation commands)
 - A Supabase project (for Postgres + auth)
 - A Google Gemini API key
