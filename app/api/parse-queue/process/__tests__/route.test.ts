@@ -313,7 +313,9 @@ describe("POST /api/parse-queue/process", () => {
       const doneCall = updateChain.set.mock.calls.find(
         (call) => (call[0] as { status?: string }).status === "done",
       );
-      expect((doneCall?.[0] as { result?: unknown }).result).toEqual(
+      expect(doneCall).toBeDefined();
+      const doneUpdate = doneCall?.[0] as { result?: unknown } | undefined;
+      expect(doneUpdate?.result).toEqual(
         expect.objectContaining({
           imageUrl: IMAGEKIT_URL,
           imageFileId: "file-1",

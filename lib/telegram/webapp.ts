@@ -171,7 +171,7 @@ function rememberLaunchData(raw: string): void {
 export function getTelegramWebApp(): TelegramWebApp | undefined {
   if (typeof window === "undefined") return undefined;
   const webApp = (window as TelegramWindow).Telegram?.WebApp;
-  if (!webApp || !webApp.initData) return undefined;
+  if (!webApp?.initData) return undefined;
   return webApp;
 }
 

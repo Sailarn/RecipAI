@@ -156,6 +156,14 @@ The linking handoff sets a temporary session cookie on the external origin; if t
 **Duplicate accounts can't be merged through the UI.**
 Telegram OIDC uses a synthetic `<id>@telegram.oidc` email that never matches Google's, so signing in with the second provider standalone forks a new user; `linkSocial` can only attach an *unowned* provider, not merge two owned identities. Resolution is a manual DB merge (move user-scoped rows, delete the dupe — all FKs to `user` are `ON DELETE CASCADE`). A self-service in-app merge is tracked on the board.
 
+**better-auth is pinned to the 1.6 line, and `@better-auth/core` is pinned in `overrides`.**
+`better-auth` and `@better-auth/passkey` use `~1.6.30` (not `^`) deliberately: **1.7 re-keys the `account` table on `(issuer, accountId)` and makes `account.issuer` required**, which needs a schema regeneration *and* an identity backfill against the live DB — not something a routine `bun update` should do. A caret range would silently pull 1.7 in. There is also a version wall: `@better-auth/passkey@1.7.x` requires `better-auth@^1.7.1`, while `better-auth-telegram@2.x` requires `>=1.6.22 <1.7.0` — the two majors cannot coexist. `better-auth-telegram` stays at `1.5.0`, whose `^1.5.0` peer admits the whole 1.x line, so it isn't the thing blocking a future 1.7 move.
+
+The `overrides` pin exists because every `@better-auth/*` sub-package peers `@better-auth/core` as `^1.6.30`, which **resolves to 1.7.1** — leaving a hoisted 1.7.1 alongside the 1.6.30 that `better-auth` depends on exactly. Two copies of `core` means two structurally different `AuthContext` types.
+
+**Import better-auth internals from `better-auth/*`, never from `@better-auth/core/*`.**
+`@better-auth/core` is a transitive package we don't declare, so a bare import resolves to whatever is *hoisted* — which may be a different copy than the one `better-auth/cookies` and `better-auth/api` use internally. When that happened, `setSessionCookie(context, …)` and `deleteSessionCookie(context)` in `lib/auth/external-link-plugin.ts` failed to typecheck with a wall of unreadable `getPlugin(...)`/`PluginContext` variance errors — the real message being "these are two different `AuthContext`s". `better-auth/api` re-exports `createAuthEndpoint` from its *own* nested copy, so importing from there keeps every type on one instance. Diagnostic heuristic: incomprehensible structural mismatch between two types that look identical = a duplicated package, check `find node_modules -path '*<pkg>/package.json'`.
+
 **iOS PWA reloads when it returns to the foreground.**
 Coming back from the system browser wipes in-memory state, so the pending device authorization is persisted to `localStorage` (`lib/auth/pending-device-auth.ts`) and polling resumes on mount. `window.open` also can't escape the in-app browser on iOS — the Share sheet is the only reliable way out, so it's the primary action there.
 

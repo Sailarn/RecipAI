@@ -20,9 +20,8 @@ describe("makeHttpProvider", () => {
     expect(result).toEqual([[1, 2, 3]]);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://pi.example/api/embed");
-    expect((init?.headers as Record<string, string>)["x-embed-secret"]).toBe(
-      "s3cret",
-    );
+    const headers = init?.headers as Record<string, string> | undefined;
+    expect(headers?.["x-embed-secret"]).toBe("s3cret");
   });
 
   it("throws on a non-OK response", async () => {

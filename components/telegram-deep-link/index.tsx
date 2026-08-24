@@ -15,7 +15,7 @@ const RECIPE_PREFIX = "recipe_";
 export function recipeIdFromStartParam(
   startParam: string | undefined,
 ): string | null {
-  if (!startParam || !startParam.startsWith(RECIPE_PREFIX)) return null;
+  if (!startParam?.startsWith(RECIPE_PREFIX)) return null;
   return startParam.slice(RECIPE_PREFIX.length) || null;
 }
 

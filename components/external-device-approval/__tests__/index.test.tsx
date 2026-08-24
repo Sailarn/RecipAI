@@ -45,27 +45,30 @@ describe("ExternalDeviceApproval", () => {
   it.each([
     ["continueToApp", approve],
     ["deny", deny],
-  ] as const)("handles %s and signs out the temporary browser session", async (label, action) => {
-    useSession.mockReturnValue({
-      data: { user: { email: "person@example.com", name: "Person" } },
-      isPending: false,
-    });
-    verifyDevice.mockResolvedValue({ data: {}, error: null });
-    action.mockResolvedValue({ data: {}, error: null });
-    signOut.mockResolvedValue({ data: {}, error: null });
+  ] as const)(
+    "handles %s and signs out the temporary browser session",
+    async (label, action) => {
+      useSession.mockReturnValue({
+        data: { user: { email: "person@example.com", name: "Person" } },
+        isPending: false,
+      });
+      verifyDevice.mockResolvedValue({ data: {}, error: null });
+      action.mockResolvedValue({ data: {}, error: null });
+      signOut.mockResolvedValue({ data: {}, error: null });
 
-    render(<ExternalDeviceApproval userCode="ABCD" locale="en" />);
-    fireEvent.click(screen.getByRole("button", { name: label }));
+      render(<ExternalDeviceApproval userCode="ABCD" locale="en" />);
+      fireEvent.click(screen.getByRole("button", { name: label }));
 
-    await waitFor(() =>
-      expect(action).toHaveBeenCalledWith({ userCode: "ABCD" }),
-    );
-    expect(verifyDevice).toHaveBeenCalledWith({
-      query: { user_code: "ABCD" },
-    });
-    expect(signOut).toHaveBeenCalledOnce();
-    expect(screen.getByText("doneReturn")).toBeVisible();
-  });
+      await waitFor(() =>
+        expect(action).toHaveBeenCalledWith({ userCode: "ABCD" }),
+      );
+      expect(verifyDevice).toHaveBeenCalledWith({
+        query: { user_code: "ABCD" },
+      });
+      expect(signOut).toHaveBeenCalledOnce();
+      expect(screen.getByText("doneReturn")).toBeVisible();
+    },
+  );
 
   it("shows a stable error for an expired code", async () => {
     useSession.mockReturnValue({

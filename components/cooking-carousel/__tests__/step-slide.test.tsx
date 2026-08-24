@@ -23,15 +23,15 @@ describe("StepSlide", () => {
     { instructionLength: 141, expectedClass: "text-[17px]" },
     { instructionLength: 260, expectedClass: "text-[17px]" },
     { instructionLength: 261, expectedClass: "text-[14px]" },
-  ])("uses $expectedClass for a $instructionLength-character instruction", ({
-    instructionLength,
-    expectedClass,
-  }) => {
-    const step = createStep(instructionLength);
-    render(<StepSlide step={step} totalSteps={1} />);
+  ])(
+    "uses $expectedClass for a $instructionLength-character instruction",
+    ({ instructionLength, expectedClass }) => {
+      const step = createStep(instructionLength);
+      render(<StepSlide step={step} totalSteps={1} />);
 
-    expect(screen.getByText(step.instruction)).toHaveClass(expectedClass);
-  });
+      expect(screen.getByText(step.instruction)).toHaveClass(expectedClass);
+    },
+  );
 
   it("shows the section label when the step's sectionId resolves", () => {
     const step: Step = {

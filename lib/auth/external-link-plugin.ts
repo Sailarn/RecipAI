@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
-import { createAuthEndpoint } from "@better-auth/core/api";
-import { sessionMiddleware } from "better-auth/api";
+import { createAuthEndpoint, sessionMiddleware } from "better-auth/api";
 import { deleteSessionCookie, setSessionCookie } from "better-auth/cookies";
 import { generateRandomString } from "better-auth/crypto";
 import { eq } from "drizzle-orm";
