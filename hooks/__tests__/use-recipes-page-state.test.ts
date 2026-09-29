@@ -80,7 +80,6 @@ function setupLiveQuery(
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   recipesPageCache.recipes = undefined;
   recipesPageCache.collections = undefined;
   vi.mocked(useRecipeMatcher).mockReturnValue({

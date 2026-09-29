@@ -53,7 +53,6 @@ function makeRequest(body: object) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
   vi.mocked(mintUploadToken).mockResolvedValue("mock-upload-token");
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);

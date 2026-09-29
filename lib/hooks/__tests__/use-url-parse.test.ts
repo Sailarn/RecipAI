@@ -94,7 +94,6 @@ function mockParsedRecipesLiveQuery() {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockFetch.mockReset();
   parsedRecipeEntries.clear();
   mockParsedRecipesLiveQuery();

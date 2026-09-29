@@ -11,7 +11,6 @@ vi.mock("@/lib/transitions", () => ({
 describe("PrivateRecipeGuard", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.clearAllMocks();
   });
 
   afterEach(() => vi.useRealTimers());

@@ -77,7 +77,6 @@ function mockRoute(href: string) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(useNavigate).mockReturnValue(navigate);
   mockRoute("/en/recipes");
 });

@@ -9,7 +9,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: vi.fn(),
@@ -71,10 +71,6 @@ function mockLiveQuery(parsedCount: number) {
   // retired), so the component makes a single useLiveQuery call per render.
   vi.mocked(useLiveQuery).mockReturnValue(parsedItems as never);
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("ParsedRecipesSheet", () => {
   it("renders a disabled bell button when there are no parsed recipes", () => {

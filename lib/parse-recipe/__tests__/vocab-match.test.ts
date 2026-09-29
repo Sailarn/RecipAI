@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const { mockToArray } = vi.hoisted(() => ({
   mockToArray: vi.fn(),
@@ -35,10 +35,6 @@ function makeEntry(
     updatedAt: new Date("2024-01-01"),
   };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("matchVocabId", () => {
   describe("tie-break: slug ids beat uuid ids on identical text", () => {

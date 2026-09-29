@@ -49,7 +49,6 @@ vi.mock("@/lib/transitions", () => ({
 vi.mock("sonner", () => ({ toast: { error: toastError } }));
 
 beforeEach(() => {
-  vi.clearAllMocks();
   fetchMock.mockResolvedValue({
     ok: true,
     json: () => Promise.resolve({ jobId: "retry-job", uploadToken: "token" }),

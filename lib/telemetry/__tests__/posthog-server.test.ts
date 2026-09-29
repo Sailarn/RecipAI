@@ -19,7 +19,6 @@ async function loadModule() {
 
 describe("posthog server", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     serverTelemetryEnabled.mockReturnValue(true);
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
     vi.stubEnv("NEXT_PUBLIC_BUILD_ID", "deadbeef1234");

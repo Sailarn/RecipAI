@@ -1,13 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const getTelegramWebApp = vi.hoisted(() => vi.fn());
 vi.mock("../webapp", () => ({ getTelegramWebApp }));
 
 import { getCloudItem, setCloudItem } from "../cloud-storage";
-
-afterEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("getCloudItem", () => {
   it("resolves null when CloudStorage is unavailable", async () => {

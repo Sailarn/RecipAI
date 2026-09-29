@@ -27,7 +27,6 @@ import { syncCreate, syncDelete, syncUpdate } from "../supabase-sync";
 beforeEach(async () => {
   await db.recipes.clear();
   await db.parsedRecipes.clear();
-  vi.clearAllMocks();
 });
 
 describe("Recipe CRUD Operations", () => {

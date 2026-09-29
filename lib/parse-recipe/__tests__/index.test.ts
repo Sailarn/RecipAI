@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ParsedRecipe } from "@/lib/db/schema";
 
 vi.mock("@/lib/video-url", () => ({
@@ -25,10 +25,6 @@ const mockRecipe: ParsedRecipe = {
   instructions: [],
   sourceUrl: "https://example.com",
 };
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("parseRecipeFromUrl", () => {
   it("calls parseVideoRecipe for social URLs", async () => {

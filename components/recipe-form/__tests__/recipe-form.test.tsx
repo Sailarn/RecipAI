@@ -135,7 +135,6 @@ function getSubmitButton() {
 describe("RecipeForm", () => {
   beforeEach(() => {
     activeLocale = "en";
-    vi.clearAllMocks();
   });
 
   describe("Create Mode", () => {

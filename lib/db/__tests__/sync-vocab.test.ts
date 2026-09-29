@@ -23,7 +23,6 @@ function mockFetchOnce(body: unknown, ok = true) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   localStorage.clear();
   vi.stubEnv("NEXT_PUBLIC_APP_VERSION", APP_VERSION);
   mockBulkPut.mockResolvedValue(undefined);

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Headers()),
@@ -64,8 +64,6 @@ function insertChain() {
   vi.mocked(db.insert).mockReturnValue({ values } as never);
   return { values };
 }
-
-beforeEach(() => vi.clearAllMocks());
 
 describe("PUT recipe visibility", () => {
   it("requires authentication", async () => {

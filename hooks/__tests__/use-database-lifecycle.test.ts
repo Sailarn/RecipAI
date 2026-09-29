@@ -42,7 +42,6 @@ function fireEvent(name: string) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   handlers.clear();
   dbMock.open.mockResolvedValue(undefined);
   dbMock.on.mockImplementation((name: string, handler?: () => void) => {

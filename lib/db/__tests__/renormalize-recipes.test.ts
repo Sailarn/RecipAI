@@ -26,7 +26,6 @@ const makeRecipe = (
 });
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockNormalize.mockResolvedValue({ matched: 0, total: 0 });
 });
 

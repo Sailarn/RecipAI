@@ -3,7 +3,7 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { PageErrorBoundary } from "../index";
 
 vi.mock("next-intl", () => ({
@@ -28,10 +28,6 @@ function withSilencedErrorLog(run: () => void) {
     consoleError.mockRestore();
   }
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("PageErrorBoundary", () => {
   it("renders its children when nothing throws", () => {

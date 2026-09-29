@@ -32,7 +32,6 @@ const parsedRecipe: ParsedRecipe = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(fetchHtmlWithPhantomJs).mockResolvedValue(html);
   vi.mocked(callAiForRecipe).mockResolvedValue(parsedRecipe);
 });

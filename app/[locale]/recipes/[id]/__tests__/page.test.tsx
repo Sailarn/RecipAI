@@ -1,6 +1,6 @@
 /** @vitest-environment happy-dom */
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/public-recipes/server", () => ({
   getPublicRecipe: vi.fn(),
@@ -25,8 +25,6 @@ const publicRecipe = {
 };
 
 describe("recipe page", () => {
-  beforeEach(() => vi.clearAllMocks());
-
   it("renders recipe detail for the requested id", async () => {
     render(await RecipePage({ params }));
 

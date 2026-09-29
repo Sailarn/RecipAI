@@ -21,7 +21,6 @@ const mockRecipe = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   process.env.GEMINI_API_KEY = "test-key";
   // .env.local's real DEEPSEEK_API_KEY/OPENAI_API_KEY leak into process.env
   // via Vite's automatic env loading — clear both explicitly so every test

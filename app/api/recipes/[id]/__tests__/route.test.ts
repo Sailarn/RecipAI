@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Headers()),
@@ -80,10 +80,6 @@ function setupDeleteChain() {
   vi.mocked(db.delete).mockReturnValue({ where: mockWhere } as any);
   return { mockWhere };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("GET /api/recipes/[id]", () => {
   it("returns 401 when not authenticated", async () => {

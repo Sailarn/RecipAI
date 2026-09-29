@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../db", () => ({
   db: {
@@ -25,8 +25,6 @@ import {
 } from "../collections";
 import { db } from "../db";
 import { syncUpdateCollection } from "../supabase-sync-collections";
-
-beforeEach(() => vi.clearAllMocks());
 
 describe("createCollection", () => {
   it("adds collection to dexie and returns id", async () => {

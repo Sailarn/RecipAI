@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const { captureServerEvent, captureClientEvent, sendLog } = vi.hoisted(() => ({
   captureServerEvent: vi.fn(),
@@ -25,10 +25,6 @@ function flushDynamicImports() {
 }
 
 describe("telemetry facade on the server", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("routes trackEvent to the server capturer", async () => {
     trackEvent("rate_limit_hit", { caller_type: "anon" });
     await flushDynamicImports();

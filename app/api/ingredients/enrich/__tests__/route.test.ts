@@ -79,7 +79,6 @@ const enrichedIngredient = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   // Reset once-queues so no state bleeds between tests
   mockSelectWhere.mockReset();
   mockSelectLimit.mockReset();

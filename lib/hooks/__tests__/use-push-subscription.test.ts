@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.hoisted(() => {
   // Read at module load by the hook — must be set before the import below.
@@ -67,10 +67,6 @@ function maintenanceResponse() {
     { status: 503 },
   );
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();

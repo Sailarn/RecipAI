@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const values = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/db", () => ({
@@ -24,10 +24,6 @@ const parsed = {
 } as unknown as ParsedRecipe;
 
 describe("saveParsedRecipeForUser", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("inserts a recipe row for the user and returns its id", async () => {
     const recipeId = await saveParsedRecipeForUser({
       userId: "user-1",

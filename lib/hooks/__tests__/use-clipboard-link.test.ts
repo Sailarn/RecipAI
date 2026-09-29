@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useClipboardLink } from "../use-clipboard-link";
 
 const getTelegramWebApp = vi.hoisted(() => vi.fn());
@@ -45,10 +45,6 @@ function setupClipboard(options: ClipboardEnvOptions = {}) {
 
 beforeEach(() => {
   getTelegramWebApp.mockReturnValue(undefined);
-});
-
-afterEach(() => {
-  vi.clearAllMocks();
 });
 
 describe("useClipboardLink", () => {

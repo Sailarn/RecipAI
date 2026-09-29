@@ -73,7 +73,6 @@ const outOfStock: PantryItem = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(useLiveQuery).mockReturnValue([inStock, outOfStock]);
 });
 

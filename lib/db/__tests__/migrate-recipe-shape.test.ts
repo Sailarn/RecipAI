@@ -16,7 +16,6 @@ vi.mock("../recipes", () => ({
 import { migrateLegacyRecipeShapes } from "../migrate-recipe-shape";
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockUpdateRecipe.mockResolvedValue(undefined);
 });
 

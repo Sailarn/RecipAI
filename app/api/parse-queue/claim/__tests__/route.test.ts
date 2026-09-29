@@ -19,7 +19,6 @@ function makeRequest(body: unknown) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   updateWhere.mockResolvedValue(undefined);
   vi.mocked(requireSession).mockResolvedValue({
     session: { user: { id: "user-1" } },

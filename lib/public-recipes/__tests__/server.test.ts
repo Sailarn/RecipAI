@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const queryOperators = vi.hoisted(() => ({
   and: vi.fn((...conditions: unknown[]) => ({ and: conditions })),
@@ -88,10 +88,6 @@ function setupSelectQuery(rows: object[]) {
 
   return { from, innerJoin, limit, where };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("getPublicRecipe", () => {
   it("maps an allowlisted public row to a browser-safe DTO", async () => {

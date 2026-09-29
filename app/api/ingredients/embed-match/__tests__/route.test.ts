@@ -31,7 +31,6 @@ function post(body: unknown): NextRequest {
 }
 
 afterEach(() => {
-  vi.clearAllMocks();
   vi.mocked(enforceEmbedRateLimit).mockResolvedValue(null);
 });
 

@@ -20,7 +20,6 @@ function withDisplay(viewportWidth: number, screenWidth: number) {
 
 describe("reportDisplayScale", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     isStandalonePwa.mockReturnValue(true);
   });
 

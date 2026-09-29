@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
   db: { delete: vi.fn(), update: vi.fn() },
@@ -46,8 +46,6 @@ function setupUpdate() {
   });
   vi.mocked(db.update).mockReturnValue({ set } as any);
 }
-
-beforeEach(() => vi.clearAllMocks());
 
 describe("DELETE /api/collections/[id]", () => {
   it("returns 401 when not authenticated", async () => {

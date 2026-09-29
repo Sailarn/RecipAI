@@ -40,7 +40,6 @@ const entry: ParseHistoryEntry = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   reverse.mockReturnValue({ toArray });
   limit.mockReturnValue({ primaryKeys });
   orderBy.mockReturnValue({ reverse, limit });

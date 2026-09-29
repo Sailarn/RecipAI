@@ -122,7 +122,6 @@ const conflictedRecipe: SyncNotification = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
 });
 

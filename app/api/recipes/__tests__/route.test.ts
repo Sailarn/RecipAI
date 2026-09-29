@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(new Headers()),
@@ -50,10 +50,6 @@ function setupInsertChain(
   vi.mocked(db.insert).mockReturnValue({ values: mockValues } as any);
   return { mockValues, mockOnConflictDoNothing, mockReturning };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("POST /api/recipes", () => {
   it("returns 401 when not authenticated", async () => {

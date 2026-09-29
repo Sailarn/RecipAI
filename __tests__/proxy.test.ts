@@ -18,7 +18,6 @@ function makeRequest(pathname: string): NextRequest {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(ensureAppAvailable).mockResolvedValue(null);
   intlMiddleware.mockReturnValue(NextResponse.next());
 });

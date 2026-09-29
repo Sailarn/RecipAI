@@ -55,7 +55,6 @@ function mockExistingPantryRow(existing: unknown) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   fetchMock.mockResolvedValue(new Response());
   mockExistingPantryRow(undefined);
 });

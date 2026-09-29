@@ -94,7 +94,6 @@ async function runActivate() {
 
 describe("service worker", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });

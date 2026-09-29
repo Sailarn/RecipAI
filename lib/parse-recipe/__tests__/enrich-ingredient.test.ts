@@ -53,7 +53,6 @@ import { enrichIngredient } from "../enrich-ingredient";
 const mockFetch = vi.fn();
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
   mockIsSignedIn.mockReturnValue(true);
   mockPantryModify.mockResolvedValue(undefined);

@@ -13,7 +13,6 @@ vi.mock("@/lib/platform", () => ({ usePlatform: () => platform }));
 
 afterEach(() => {
   platform.kind = "telegram";
-  vi.clearAllMocks();
 });
 
 function pressButton(button: HTMLElement) {

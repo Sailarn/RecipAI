@@ -29,7 +29,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.clearAllMocks();
   window.location.hash = "";
   sessionStorage.clear();
 });

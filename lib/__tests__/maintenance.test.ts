@@ -37,7 +37,6 @@ function mockConfigRows(rows: object[]) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.useRealTimers();
   resetAppConfigCache();
   mockConfigRows([]);

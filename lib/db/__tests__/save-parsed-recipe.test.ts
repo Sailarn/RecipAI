@@ -47,7 +47,6 @@ const baseEntry: ParsedRecipeEntry = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(createRecipe).mockResolvedValue("new-recipe-id");
   vi.mocked(updateRecipe).mockResolvedValue(undefined);
   vi.mocked(isImageKitUrl).mockReturnValue(false);

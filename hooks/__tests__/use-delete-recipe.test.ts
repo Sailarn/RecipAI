@@ -48,7 +48,6 @@ function getUndoHandler() {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.useFakeTimers();
   vi.mocked(deleteRecipe).mockResolvedValue(deletedRecipe);
   vi.mocked(restoreRecipe).mockResolvedValue(undefined);

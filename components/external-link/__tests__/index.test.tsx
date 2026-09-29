@@ -20,7 +20,6 @@ import { ExternalLink, ExternalLinkComplete } from "../index";
 
 describe("ExternalLink", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
     history.replaceState(null, "", "/external-auth/link");
   });
@@ -63,7 +62,6 @@ describe("ExternalLink", () => {
 
 describe("ExternalLinkComplete", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     history.replaceState(null, "", "/external-auth/link/complete");
   });
 

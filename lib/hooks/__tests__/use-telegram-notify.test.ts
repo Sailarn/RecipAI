@@ -20,7 +20,6 @@ vi.mock("@/components/profile-auth/use-linked-accounts", () => ({
 import { useTelegramNotify } from "../use-telegram-notify";
 
 beforeEach(() => {
-  vi.clearAllMocks();
   window.localStorage.clear();
   useTelegram.mockReturnValue({ isTelegram: false });
   useSession.mockReturnValue({ data: null });

@@ -92,7 +92,6 @@ const failedResponse = (error?: string) =>
 const pendingResponse = () => makeResponse({ status: "pending" });
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockFetch.mockReset();
   claimJobCompletion.mockReturnValue(true);
   vi.stubGlobal("fetch", mockFetch);

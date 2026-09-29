@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const {
   createRecipe,
@@ -34,8 +34,6 @@ function renderSave() {
 }
 
 describe("useSaveSharedCopy", () => {
-  beforeEach(() => vi.clearAllMocks());
-
   describe("when the copy is written", () => {
     it("hands the new local id to the caller", async () => {
       createRecipe.mockResolvedValue("local-id");

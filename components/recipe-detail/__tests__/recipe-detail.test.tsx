@@ -149,7 +149,6 @@ const publicRecipe: PublicRecipe = {
 
 describe("RecipeDetail", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     // Default: recipe loads successfully
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
     vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);

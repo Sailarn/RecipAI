@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
   db: {
@@ -30,10 +30,6 @@ function setupSelectChain(result: object[]) {
   vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
   return { mockWhere, mockFrom };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("GET /api/parse-queue/[id]", () => {
   it("returns 404 when job is not found", async () => {

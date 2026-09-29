@@ -28,7 +28,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.clearAllMocks();
   tg.webApp = undefined;
 });
 

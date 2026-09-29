@@ -67,8 +67,6 @@ const ONION = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
-
   // Vocab: garlic + onion (size 2 — fuseCache keyed by length, so consistent)
   mockFilterResult.toArray.mockResolvedValue([GARLIC, ONION]);
   // No existing provisional by default

@@ -2,7 +2,7 @@
  * @vitest-environment happy-dom
  */
 import { render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -31,10 +31,6 @@ const mockRecipe = {
   createdAt: new Date(),
   updatedAt: new Date(),
 } as unknown as Recipe;
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("RecipeEditView", () => {
   describe("loading state", () => {

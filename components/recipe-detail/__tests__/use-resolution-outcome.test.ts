@@ -73,7 +73,6 @@ describe("resolveOutcome", () => {
 
 describe("useResolutionOutcome", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.useFakeTimers();
   });
 

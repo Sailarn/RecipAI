@@ -29,7 +29,6 @@ const parsedRecipe: ParsedRecipe = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.unstubAllGlobals();
   vi.mocked(transcribeWithGroq).mockReset();
   vi.mocked(callAiForRecipe).mockResolvedValue(parsedRecipe);

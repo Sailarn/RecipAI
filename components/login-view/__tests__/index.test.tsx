@@ -94,7 +94,6 @@ vi.mock("next/image", () => ({
 
 describe("LoginView", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     isStandalonePwa.mockReturnValue(false);
     loadPendingDeviceAuth.mockReturnValue(null);
     signInFeature.value = true;

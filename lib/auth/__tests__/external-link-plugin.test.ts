@@ -127,7 +127,6 @@ describe("external link endpoints", () => {
   beforeEach(() => {
     verificationStore.clear();
     sessions.clear();
-    vi.clearAllMocks();
   });
 
   it("stores only a token hash bound to the current user", async () => {

@@ -15,7 +15,6 @@ import { syncFetch } from "../sync-fetch";
 const fetchMock = vi.fn();
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
 });

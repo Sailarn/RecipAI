@@ -26,7 +26,6 @@ function flushDynamicImport() {
 
 describe("posthog client", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     clientTelemetryEnabled.mockReturnValue(true);
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
   });

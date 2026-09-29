@@ -103,7 +103,6 @@ const mockRecipes: Recipe[] = [
 
 describe("RecipesPage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
   });
 

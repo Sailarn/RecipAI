@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("web-push", () => ({
   default: {
@@ -11,10 +11,6 @@ import webPush from "web-push";
 import { sendPushNotification } from "../web-push";
 
 describe("sendPushNotification", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("sends with high urgency so the push isn't batched/delayed by iOS", async () => {
     await sendPushNotification(
       { endpoint: "https://web.push.apple.com/x", p256dh: "p", auth: "a" },

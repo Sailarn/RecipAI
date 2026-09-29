@@ -58,7 +58,6 @@ function telegramMessage(overrides: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   selectWhere.mockResolvedValue([]);
   vi.mocked(extractUrl).mockReturnValue(null);
   delete process.env.TELEGRAM_WEBHOOK_SECRET;

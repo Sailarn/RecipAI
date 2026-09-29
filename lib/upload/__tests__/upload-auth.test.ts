@@ -28,7 +28,6 @@ function makeRequest(uploadToken?: string) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
 });
 

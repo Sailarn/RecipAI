@@ -60,7 +60,6 @@ async function openSharePopover() {
 
 describe("ShareAction", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     session.data = { user: { id: "user-1" } };
     shareRecipe.mockResolvedValue("shared");
     setRecipeVisibility.mockResolvedValue(undefined);

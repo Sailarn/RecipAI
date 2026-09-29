@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/redis", () => ({
   redis: { incr: vi.fn(), expire: vi.fn(), ttl: vi.fn() },
@@ -7,10 +7,6 @@ vi.mock("@/lib/redis", () => ({
 import { redis } from "@/lib/redis";
 import { trackEvent } from "@/lib/telemetry";
 import { clientKey, enforceParseRateLimit, rateLimit } from "../rate-limit";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("rateLimit", () => {
   it("sets the window on the first hit and allows it", async () => {

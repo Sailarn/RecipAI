@@ -31,7 +31,6 @@ function backButtonSpy() {
 afterEach(() => {
   telegramState.webApp = undefined;
   stackState.canPop = false;
-  vi.clearAllMocks();
 });
 
 describe("TelegramBackButton", () => {

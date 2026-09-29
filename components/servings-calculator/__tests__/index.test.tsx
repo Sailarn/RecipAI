@@ -64,7 +64,6 @@ const basePantryItem = (overrides: Partial<PantryItem> = {}): PantryItem =>
   }) as PantryItem;
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(useLiveQuery).mockReturnValue([]);
 });
 

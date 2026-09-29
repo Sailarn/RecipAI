@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useEffect } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: vi.fn(),
@@ -89,10 +89,6 @@ function setupVocab(vocab: VocabularyIngredient[]) {
 
 const countLabel = (count: number) =>
   count > 0 ? `Add ${count}` : "Add items";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("IngredientPicker", () => {
   describe("layout", () => {

@@ -17,7 +17,6 @@ function mockSession(value: { data: unknown; isPending: boolean }): void {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.unstubAllGlobals();
 });
 

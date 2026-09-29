@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
   db: { select: vi.fn(), insert: vi.fn(), update: vi.fn(), delete: vi.fn() },
@@ -61,8 +61,6 @@ function makeDeleteReq(id: string | undefined) {
     headers: { "Content-Type": "application/json" },
   }) as never;
 }
-
-beforeEach(() => vi.clearAllMocks());
 
 describe("POST /api/pantry", () => {
   it("returns 401 when not authenticated", async () => {

@@ -2,7 +2,7 @@
  * @vitest-environment happy-dom
  */
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
@@ -24,10 +24,6 @@ const defaultProps = {
   onLinkGoogle: vi.fn(),
   onAddPasskey: vi.fn(),
 };
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("LinkedAccounts", () => {
   describe("loading state", () => {

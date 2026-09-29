@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/dynamic", () => ({
   default: vi.fn(() => () => null),
@@ -56,10 +56,6 @@ vi.mock("@/lib/navigation-stack", () => ({
 
 import { Toaster } from "sonner";
 import { ClientShell } from "../index";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("ClientShell notifications", () => {
   it("keeps toasts below the safe area", () => {

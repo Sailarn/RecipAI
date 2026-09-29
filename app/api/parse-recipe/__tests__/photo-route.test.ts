@@ -44,7 +44,6 @@ function makeRequest(body: unknown): Request {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
 });
 

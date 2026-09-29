@@ -30,7 +30,6 @@ const RECONCILE_KEY = "vocabReconciled_v1";
 const WATERMARK_KEY = "ingredientsSyncedAt";
 
 beforeEach(() => {
-  vi.clearAllMocks();
   localStorage.clear();
   mockClear.mockResolvedValue(undefined);
   mockPullVocab.mockResolvedValue(undefined);

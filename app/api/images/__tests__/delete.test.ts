@@ -22,7 +22,6 @@ function makeRequest(body: object) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   // Default: authorised.
   vi.mocked(requireUploadAuth).mockResolvedValue(null);
 });

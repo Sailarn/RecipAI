@@ -3,16 +3,12 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const useTelegramNotify = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/hooks/use-telegram-notify", () => ({ useTelegramNotify }));
 
 import { TelegramNotifyToggle } from "../index";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("TelegramNotifyToggle", () => {
   it("renders nothing when the user has no Telegram connection", () => {

@@ -26,7 +26,6 @@ interface TestInstruction {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(isImageKitUrl).mockImplementation((url) => url === IMAGEKIT_URL);
   vi.mocked(deleteImage).mockResolvedValue(undefined);
 });

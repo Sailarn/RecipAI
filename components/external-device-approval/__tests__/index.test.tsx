@@ -25,7 +25,6 @@ import { ExternalDeviceApproval } from "../index";
 
 describe("ExternalDeviceApproval", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL = "https://auth.example";
   });
 

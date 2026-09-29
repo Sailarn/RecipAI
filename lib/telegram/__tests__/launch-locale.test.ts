@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TelegramWebApp } from "../webapp";
 
 const getCloudItem = vi.hoisted(() => vi.fn());
@@ -17,10 +17,6 @@ function webApp(languageCode: string | undefined): TelegramWebApp {
     initDataUnsafe: { user: { id: 1, language_code: languageCode } },
   } as TelegramWebApp;
 }
-
-afterEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("localeFromTelegramLanguage", () => {
   it("keeps English", () => {

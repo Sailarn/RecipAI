@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MaintenanceListener } from "@/components/maintenance-listener";
 import { MAINTENANCE_EVENT } from "@/lib/api/api-fetch";
 
@@ -12,10 +12,6 @@ function dispatchMaintenance(message?: string) {
     new CustomEvent(MAINTENANCE_EVENT, { detail: { message } }),
   );
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("MaintenanceListener", () => {
   it("shows the maintenance message as a deduped toast", () => {

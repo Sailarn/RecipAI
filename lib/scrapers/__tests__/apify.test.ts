@@ -23,7 +23,6 @@ function fetchRequestBody(mockFetch: ReturnType<typeof vi.fn>) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.stubEnv("APIFY_TOKEN", "test-token");
 });
 

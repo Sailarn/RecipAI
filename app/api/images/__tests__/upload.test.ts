@@ -45,7 +45,6 @@ function makeFetchResponse(
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   // Default: authorised.
   vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue(null);
 });

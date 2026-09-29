@@ -30,7 +30,6 @@ const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(db.ingredients.add).mockResolvedValue("ignored" as never);
   // Default: no existing match, so a fresh provisional is created.
   vi.mocked(db.ingredients.filter).mockReturnValue({

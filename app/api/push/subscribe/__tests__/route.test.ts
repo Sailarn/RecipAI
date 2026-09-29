@@ -34,7 +34,6 @@ function makeRequest(body: unknown) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   insertValues.mockReturnValue({ onConflictDoUpdate });
   vi.mocked(auth.api.getSession).mockResolvedValue(null);
 });

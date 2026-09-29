@@ -109,7 +109,6 @@ const sessionUser = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
   isStandalonePwa.mockReturnValue(false);
   platform.features.accountLinking = true;
   platform.features.accountActions = true;

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
   db: { select: vi.fn(), insert: vi.fn() },
@@ -42,8 +42,6 @@ function setupInsert() {
   const values = vi.fn().mockResolvedValue(undefined);
   vi.mocked(db.insert).mockReturnValue({ values } as any);
 }
-
-beforeEach(() => vi.clearAllMocks());
 
 describe("POST /api/collections/sync", () => {
   it("returns 401 when not authenticated", async () => {

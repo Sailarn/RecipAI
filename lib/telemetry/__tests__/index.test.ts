@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const {
   captureClientEvent,
@@ -44,10 +44,6 @@ function flushDynamicImports() {
 }
 
 describe("telemetry facade", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   describe("trackEvent", () => {
     it("routes to the client capturer in a browser environment", async () => {
       trackEvent("recipe_saved", { source: "parse" });

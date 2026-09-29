@@ -136,7 +136,6 @@ const localRecipe = (id: string, updatedAt: Date, syncedAt?: Date) => ({
 });
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.stubGlobal("fetch", mockFetch);
   vi.mocked(authClient.useSession).mockReturnValue({ data: null } as never);
   vi.mocked(db.recipes.toArray).mockResolvedValue([]);

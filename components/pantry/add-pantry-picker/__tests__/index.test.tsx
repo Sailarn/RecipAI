@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: vi.fn(),
@@ -66,10 +66,6 @@ function pickerProps() {
   const calls = vi.mocked(IngredientPicker).mock.calls;
   return calls[calls.length - 1][0];
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("AddPantryPicker", () => {
   it("renders the shared picker in multi-select pantry mode", () => {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const upload = vi.hoisted(() =>
   vi.fn().mockResolvedValue({
@@ -24,9 +24,6 @@ function imageResponse(overrides?: Partial<Response>): Response {
   } as unknown as Response;
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 afterEach(() => {
   vi.unstubAllGlobals();
 });

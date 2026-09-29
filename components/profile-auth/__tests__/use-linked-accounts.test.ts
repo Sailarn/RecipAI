@@ -17,7 +17,6 @@ vi.mock("@/lib/auth/auth-client", () => ({
 describe("useLinkedAccounts", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
   });
 
   it("does not call APIs and is not loading when hasSession is false", async () => {

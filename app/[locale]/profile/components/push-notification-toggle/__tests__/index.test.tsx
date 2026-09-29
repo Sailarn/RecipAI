@@ -28,7 +28,6 @@ function mockPush(overrides: Partial<PushState>): void {
 
 afterEach(() => {
   pushFeature.value = true;
-  vi.clearAllMocks();
 });
 
 describe("PushNotificationToggle", () => {

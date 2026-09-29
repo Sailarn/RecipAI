@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/redis", () => ({
   redis: {
@@ -9,10 +9,6 @@ vi.mock("@/lib/redis", () => ({
 
 import { redis } from "@/lib/redis";
 import { mintUploadToken, verifyUploadToken } from "../upload-token";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("mintUploadToken", () => {
   it("stores the token in Redis with a 1800-second TTL", async () => {

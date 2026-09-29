@@ -26,7 +26,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.clearAllMocks();
   vi.unstubAllEnvs();
 });
 

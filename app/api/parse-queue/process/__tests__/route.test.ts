@@ -105,7 +105,6 @@ function flushMicrotasks() {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(isImageKitUrl).mockImplementation((url) => url === IMAGEKIT_URL);
   vi.mocked(sendPushNotification).mockResolvedValue(undefined);
   // Default: image upload succeeds. Individual tests override to reject. Without

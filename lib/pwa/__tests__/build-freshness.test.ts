@@ -20,7 +20,6 @@ function respondWith(body: unknown, ok = true) {
 
 describe("build freshness", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.stubEnv("NEXT_PUBLIC_BUILD_ID", "document-build");
     vi.stubGlobal("navigator", { serviceWorker: { getRegistration } });
   });

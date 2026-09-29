@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { log } from "@/lib/telemetry";
 import { requireCompleteRecipe } from "../recipe-result";
@@ -13,10 +13,6 @@ const completeRecipe = {
 } as unknown as ParsedRecipe;
 
 describe("requireCompleteRecipe", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns the recipe and logs nothing when complete", () => {
     const result = requireCompleteRecipe(completeRecipe, "page", {
       jobId: "job-1",

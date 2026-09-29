@@ -4,7 +4,7 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ParseForm } from "../index";
 
 const { useClipboardLink } = vi.hoisted(() => ({
@@ -59,10 +59,6 @@ function renderForm(options: RenderOptions = {}) {
 
   return { onUrlChange, onSubmit, pasteLink, dismissSuggestion };
 }
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
 
 describe("ParseForm", () => {
   describe("paste action", () => {

@@ -85,7 +85,6 @@ function mockSuccessfulImages() {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   vi.mocked(createRecipe).mockResolvedValue("new-id");
   vi.mocked(updateRecipe).mockResolvedValue(undefined);
   mockSuccessfulImages();

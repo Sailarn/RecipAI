@@ -26,7 +26,6 @@ import { ExternalAuthWaiting } from "../index";
 
 describe("ExternalAuthWaiting", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     canShareExternalAuthUrl.mockReturnValue(false);
     isIos.mockReturnValue(false);
   });

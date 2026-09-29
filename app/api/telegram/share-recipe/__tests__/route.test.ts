@@ -41,7 +41,6 @@ function makeRequest(body: unknown): NextRequest {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
   requireSessionResult.value = { session: { user: { id: "u1" } } };
   selectLimit.mockResolvedValue([{ telegramId: "316693380" }]);
   getPublicRecipe.mockResolvedValue({ id: "rec-1", title: "Soup" });
