@@ -112,10 +112,9 @@ export const auth = betterAuth({
         //
         // Use the id_token's `id` claim (the real numeric Telegram user id,
         // matching initData), NOT `sub` — Telegram's `sub` is an opaque
-        // pairwise identifier that does not match the Mini App id. The lib's
-        // TelegramOIDCClaims type omits `id`, so read it via a narrowed cast.
+        // pairwise identifier that does not match the Mini App id.
         mapOIDCProfileToUser: (claims) => {
-          const telegramId = (claims as { id?: string | number }).id;
+          const telegramId = claims.id;
           return telegramId ? { telegramId: String(telegramId) } : {};
         },
       },
