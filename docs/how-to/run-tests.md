@@ -5,7 +5,7 @@
 ```bash
 bun run test              # run all tests (Vitest, watch mode)
 bun run test --run        # run once and exit (CI mode)
-bun run test:ui           # open Vitest browser UI
+bun run test:ui           # open Vitest browser UI (URL carries an auth token; use the one it prints)
 bun run test:coverage     # run with coverage report
 ```
 
@@ -58,6 +58,9 @@ app/api/parse-queue/__tests__/route.test.ts
   const mockFn = vi.hoisted(() => vi.fn());
   vi.mock("@/lib/something", () => ({ myFn: mockFn }));
   ```
+- `vi.mock`, `vi.hoisted` and `vi.unmock` must sit at module top level — Vitest 5 throws when they are called inside a function, `describe` or `it`.
+- Mock call history is cleared before every test by default (`clearMocks`, on since Vitest 5), so a `beforeEach(() => vi.clearAllMocks())` is redundant. It only clears history: a `mockReturnValue`/`mockImplementation` set in one test still leaks into the next — use `mockReset()` or set it per test.
+- Assertions returning a promise (`expect(…).resolves`/`.rejects`) must be awaited; Vitest 5 fails the test otherwise.
 
 ---
 
