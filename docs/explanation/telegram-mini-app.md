@@ -74,11 +74,14 @@ OIDC).
   so they `replace`. Trade-off: the recipes list is now intentionally behind the detail (the previous
   `replace` avoided a ~1s list flash, but also killed the stack effect). The pushed
   `<RecipeDetail recipeId>` has no server-fetched `publicRecipe` the way a fresh SSR page load does, so
-  `RecipeDetail` resolves it client-side: a signed-in owner-pull first (`GET /api/recipes/[id]`), then —
-  if that isn't theirs, or nobody's signed in — a fallback fetch to the public, anonymous
-  `GET /api/recipes/[id]/public` (same isPublic-only scope as the share page's `getPublicRecipe()`)
-  before giving up to the private guard. Both attempts are gated on Telegram auto sign-in having
-  settled first (`useAwaitingTelegramAutoSignIn`), so a cold launch doesn't race the guard.
+  `RecipeDetail` resolves it client-side with two checks: the public, anonymous
+  `GET /api/recipes/[id]/public` (same isPublic-only scope as the share page's `getPublicRecipe()`),
+  which runs immediately and never waits on auth; then, if it isn't public, a signed-in owner-pull
+  (`GET /api/recipes/[id]`) before giving up to the private guard. The owner-pull waits until the
+  session has settled — the reactive `authClient.useSession()` no longer pending **and** Telegram auto
+  sign-in no longer idle/pending (`useAwaitingTelegramAutoSignIn`) — so a cold first launch, where the
+  account is still being created, doesn't race the guard. It reads the session reactively, not the
+  `isSignedIn()` module flag, which lags a fresh sign-in (see [gotchas](../reference/gotchas.md)).
 - **One recipe card, two surfaces.** `lib/telegram/recipe-card.ts` is the single builder for the
   Telegram recipe card — caption (title + category + `time · servings · ingredients`), the
   `🍳 Open recipe` deep-link button, and the JPEG photo transform. Both the **share** flow

@@ -20,7 +20,7 @@ interface ResolutionState {
   hasPublicRecipe: boolean;
   publicCheckDone: boolean;
   ownerPullDone: boolean;
-  awaitingTelegramAutoSignIn: boolean;
+  awaitingSession: boolean;
 }
 
 /**
@@ -37,7 +37,7 @@ export function resolveOutcome(
   if (state.hasRecipe) return "local";
   if (state.hasPublicRecipe) return "shared";
   if (!state.publicCheckDone) return null;
-  if (state.awaitingTelegramAutoSignIn || !state.ownerPullDone) return null;
+  if (state.awaitingSession || !state.ownerPullDone) return null;
   return "not_found";
 }
 

@@ -17,7 +17,7 @@ const pending = {
   hasPublicRecipe: false,
   publicCheckDone: false,
   ownerPullDone: false,
-  awaitingTelegramAutoSignIn: false,
+  awaitingSession: false,
 };
 
 describe("resolveOutcome", () => {
@@ -45,13 +45,13 @@ describe("resolveOutcome", () => {
     expect(resolveOutcome({ ...pending, ownerPullDone: true })).toBeNull();
   });
 
-  it("stays pending while a Telegram sign-in is still settling", () => {
+  it("stays pending while the session is still settling", () => {
     expect(
       resolveOutcome({
         ...pending,
         publicCheckDone: true,
         ownerPullDone: true,
-        awaitingTelegramAutoSignIn: true,
+        awaitingSession: true,
       }),
     ).toBeNull();
   });

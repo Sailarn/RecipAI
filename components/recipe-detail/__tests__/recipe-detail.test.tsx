@@ -12,7 +12,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { isSignedIn } from "@/lib/auth/session-state";
 import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
@@ -67,9 +66,17 @@ vi.mock("@/lib/transitions", () => ({
   }),
 }));
 
+const sessionState = vi.hoisted(() => ({
+  data: null as { user: { id: string } } | null,
+  isPending: false,
+}));
+
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: {
-    useSession: () => ({ data: { user: { id: "user-1" } } }),
+    useSession: () => ({
+      data: sessionState.data,
+      isPending: sessionState.isPending,
+    }),
   },
 }));
 
@@ -88,10 +95,6 @@ vi.mock("@/lib/db/recipes", () => ({
   createRecipe: vi.fn(),
   getRecipe: vi.fn(),
   deleteRecipe: vi.fn(),
-}));
-
-vi.mock("@/lib/auth/session-state", () => ({
-  isSignedIn: vi.fn(() => false),
 }));
 
 vi.mock("@/lib/db/pull-own-recipe", () => ({
@@ -114,6 +117,11 @@ vi.mock("@/components/telegram-provider", () => ({
 vi.mock("@/lib/telegram/webapp", () => ({
   isTelegramEnvironment: () => telegramState.isTelegramEnvironment,
 }));
+
+function setSignedIn(signedIn: boolean) {
+  sessionState.data = signedIn ? { user: { id: "user-1" } } : null;
+  sessionState.isPending = false;
+}
 
 const mockRecipe: Recipe = {
   id: "recipe-1",
@@ -153,7 +161,7 @@ describe("RecipeDetail", () => {
     vi.mocked(recipesModule.getRecipe).mockResolvedValue(mockRecipe);
     vi.mocked(recipesModule.deleteRecipe).mockResolvedValue(undefined);
     vi.mocked(recipesModule.createRecipe).mockResolvedValue("copied-1");
-    vi.mocked(isSignedIn).mockReturnValue(false);
+    setSignedIn(false);
     vi.mocked(pullOwnRecipe).mockResolvedValue(null);
     vi.mocked(fetchPublicRecipe).mockResolvedValue(null);
     telegramState.isTelegramEnvironment = false;
@@ -428,7 +436,7 @@ describe("RecipeDetail", () => {
   describe("owner pull for a not-yet-synced recipe (bot deep link)", () => {
     it("pulls the owner's recipe from the server when signed in and not on the device", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
 
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
@@ -437,7 +445,7 @@ describe("RecipeDetail", () => {
 
     it("shows a skeleton, not the private guard, while the owner pull is in flight", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
       vi.mocked(pullOwnRecipe).mockImplementation(() => new Promise(() => {}));
 
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
@@ -450,7 +458,7 @@ describe("RecipeDetail", () => {
 
     it("falls back to the private guard once the owner pull finds nothing", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
       vi.mocked(pullOwnRecipe).mockResolvedValue(null);
 
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
@@ -462,7 +470,7 @@ describe("RecipeDetail", () => {
 
     it("does not attempt an owner pull when signed out", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(false);
+      setSignedIn(false);
 
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
@@ -480,7 +488,7 @@ describe("RecipeDetail", () => {
     // different account relies entirely on this client-side fallback.
     it("fetches and shows the public recipe when it isn't the signed-in user's own", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
       vi.mocked(pullOwnRecipe).mockResolvedValue(null);
       vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
 
@@ -493,7 +501,7 @@ describe("RecipeDetail", () => {
 
     it("fetches and shows the public recipe when signed out", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(false);
+      setSignedIn(false);
       vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
 
       render(<RecipeDetail recipeId="shared-1" locale="en" />);
@@ -504,7 +512,7 @@ describe("RecipeDetail", () => {
 
     it("falls back to the private guard when it's neither owned nor public", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
       vi.mocked(pullOwnRecipe).mockResolvedValue(null);
       vi.mocked(fetchPublicRecipe).mockResolvedValue(null);
 
@@ -520,7 +528,7 @@ describe("RecipeDetail", () => {
       // a stuck/slow auto sign-in turns a plain public share into an infinite
       // skeleton, which is exactly what was reported.
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(false);
+      setSignedIn(false);
       vi.mocked(fetchPublicRecipe).mockResolvedValue(publicRecipe);
       telegramState.isTelegramEnvironment = true;
       telegramState.authStatus = "pending";
@@ -535,7 +543,7 @@ describe("RecipeDetail", () => {
   describe("cold Telegram launch — guard waits on auto sign-in", () => {
     it("shows a skeleton, not the private guard, while Telegram auto sign-in is still pending", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(false);
+      setSignedIn(false);
       telegramState.isTelegramEnvironment = true;
       telegramState.authStatus = "pending";
 
@@ -552,7 +560,7 @@ describe("RecipeDetail", () => {
 
     it("falls back to the private guard once Telegram auto sign-in fails", async () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
-      vi.mocked(isSignedIn).mockReturnValue(false);
+      setSignedIn(false);
       telegramState.isTelegramEnvironment = true;
       telegramState.authStatus = "failed";
 
@@ -567,11 +575,90 @@ describe("RecipeDetail", () => {
       vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
       telegramState.isTelegramEnvironment = true;
       telegramState.authStatus = "signed-in";
-      vi.mocked(isSignedIn).mockReturnValue(true);
+      setSignedIn(true);
 
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
+    });
+  });
+
+  describe("session still arriving (first launch, account just signed in)", () => {
+    it("keeps the skeleton while the session loads after Telegram sign-in succeeded", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "signed-in";
+      setSignedIn(false);
+      sessionState.isPending = true;
+
+      render(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() =>
+        expect(fetchPublicRecipe).toHaveBeenCalledWith("bot-1"),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+      expect(pullOwnRecipe).not.toHaveBeenCalled();
+    });
+
+    it("pulls the owner's recipe once the session lands after Telegram sign-in", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(pullOwnRecipe).mockImplementation(() => new Promise(() => {}));
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "signed-in";
+      setSignedIn(false);
+      sessionState.isPending = true;
+      const view = render(<RecipeDetail recipeId="bot-1" locale="en" />);
+      await waitFor(() =>
+        expect(fetchPublicRecipe).toHaveBeenCalledWith("bot-1"),
+      );
+
+      setSignedIn(true);
+      view.rerender(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("recovers when the session lands after the view already settled as signed out", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(pullOwnRecipe).mockImplementation(() => new Promise(() => {}));
+      telegramState.isTelegramEnvironment = true;
+      telegramState.authStatus = "signed-in";
+      setSignedIn(false);
+      const view = render(<RecipeDetail recipeId="bot-1" locale="en" />);
+      await screen.findByText("This recipe is private");
+
+      setSignedIn(true);
+      view.rerender(<RecipeDetail recipeId="bot-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("waits for the session on the web too before calling a recipe private", async () => {
+      vi.mocked(recipesModule.getRecipe).mockResolvedValue(undefined);
+      vi.mocked(pullOwnRecipe).mockImplementation(() => new Promise(() => {}));
+      setSignedIn(false);
+      sessionState.isPending = true;
+      const view = render(<RecipeDetail recipeId="own-1" locale="en" />);
+      await waitFor(() =>
+        expect(fetchPublicRecipe).toHaveBeenCalledWith("own-1"),
+      );
+      expect(
+        screen.queryByText("This recipe is private"),
+      ).not.toBeInTheDocument();
+
+      setSignedIn(true);
+      view.rerender(<RecipeDetail recipeId="own-1" locale="en" />);
+
+      await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("own-1"));
     });
   });
 });

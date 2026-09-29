@@ -4,7 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef, useState } from "react";
 import { DeleteRecipeDialog } from "@/components/delete-recipe-dialog";
 import { useDeleteRecipe } from "@/hooks/use-delete-recipe";
-import { isSignedIn } from "@/lib/auth/session-state";
+import { authClient } from "@/lib/auth/auth-client";
 import { pullOwnRecipe } from "@/lib/db/pull-own-recipe";
 import { getRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
@@ -85,12 +85,18 @@ export function RecipeDetail({
   const [ownerPullDone, setOwnerPullDone] = useState(false);
   const ownerPullStartedRef = useRef(false);
 
-  // isSignedIn() is a plain module flag set from useSyncOnLogin's session
-  // effect — on a cold Telegram launch it reads false for the brief window
-  // before the silent Telegram auto sign-in resolves.
-  const awaitingTelegramAutoSignIn = useAwaitingTelegramAutoSignIn(
-    isSignedIn(),
-  );
+  // Read the session reactively. The isSignedIn() module flag it replaces
+  // lags a fresh sign-in by a network round trip (useSyncOnLogin sets it from
+  // an effect once /get-session resolves) and never re-renders anything when it
+  // flips. On a first Telegram launch, auto sign-in reports "signed-in" as soon
+  // as the account exists, while the session is still being fetched; reading
+  // the flag in that gap sent the user's own recipe to the private guard, where
+  // it stayed. `isPending` covers the gap: signInWithMiniApp's session refetch
+  // reports pending while there is no session yet.
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const hasSession = Boolean(session);
+  const awaitingTelegramAutoSignIn = useAwaitingTelegramAutoSignIn(hasSession);
+  const awaitingSession = sessionPending || awaitingTelegramAutoSignIn;
 
   useEffect(() => {
     if (recipe || effectivePublicRecipe) {
@@ -108,13 +114,16 @@ export function RecipeDetail({
 
   useEffect(() => {
     if (!publicCheckDone || recipe || effectivePublicRecipe) return;
-    if (awaitingTelegramAutoSignIn) return;
-    if (!isSignedIn()) {
+    if (awaitingSession) return;
+    if (!hasSession) {
       setOwnerPullDone(true);
       return;
     }
     if (liveRecipe !== null || ownerPullStartedRef.current) return;
     ownerPullStartedRef.current = true;
+    // A session can land after this view already settled as signed out (the
+    // guard showing); reopen the wait so the pull shows a skeleton, not the guard.
+    setOwnerPullDone(false);
     pullOwnRecipe(recipeId).finally(() => setOwnerPullDone(true));
   }, [
     publicCheckDone,
@@ -122,7 +131,8 @@ export function RecipeDetail({
     effectivePublicRecipe,
     liveRecipe,
     recipeId,
-    awaitingTelegramAutoSignIn,
+    awaitingSession,
+    hasSession,
   ]);
 
   useEffect(() => {
@@ -142,7 +152,7 @@ export function RecipeDetail({
       hasPublicRecipe: Boolean(effectivePublicRecipe),
       publicCheckDone,
       ownerPullDone,
-      awaitingTelegramAutoSignIn,
+      awaitingSession,
     }),
   );
 
@@ -176,7 +186,7 @@ export function RecipeDetail({
         />
       );
     if (!publicCheckDone) return <RecipeSkeleton />;
-    if (awaitingTelegramAutoSignIn || !ownerPullDone) return <RecipeSkeleton />;
+    if (awaitingSession || !ownerPullDone) return <RecipeSkeleton />;
     return <PrivateRecipeGuard locale={locale} />;
   }
 
