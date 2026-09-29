@@ -156,7 +156,7 @@ describe("createTelegramPlatform", () => {
     vi.unstubAllGlobals();
   });
 
-  it("no-ops haptics and share while the SDK hasn't loaded yet", async () => {
+  it("no-ops haptics while the SDK hasn't loaded yet", () => {
     const platform = createTelegramPlatform(undefined);
 
     expect(() => {
@@ -164,9 +164,14 @@ describe("createTelegramPlatform", () => {
       platform.haptics.notify("success");
       platform.haptics.selection();
     }).not.toThrow();
-    await expect(
-      platform.share.recipe({ id: "r1", title: "Soup", url: "u" }),
-    ).resolves.toBe("shared");
+  });
+
+  it("rejects a share without the SDK instead of reporting it shared", async () => {
+    const platform = createTelegramPlatform(undefined);
+
+    const share = platform.share.recipe({ id: "r1", title: "Soup", url: "u" });
+
+    await expect(share).rejects.toThrow("Telegram WebApp SDK unavailable");
   });
 });
 

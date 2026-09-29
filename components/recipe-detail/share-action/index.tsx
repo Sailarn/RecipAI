@@ -8,10 +8,10 @@ import { isMaintenanceError } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-import { usePlatform } from "@/lib/platform";
 import { setRecipeVisibility } from "@/lib/public-recipes/visibility-client";
 import { routes } from "@/lib/routes";
 import { ShareLinks } from "./share-links";
+import { usePlatformShare } from "./use-platform-share";
 import { useShareDismiss } from "./use-share-dismiss";
 import { VisibilityControl } from "./visibility-control";
 
@@ -26,7 +26,7 @@ const triggerClass =
 export function ShareAction({ locale, recipe }: ShareActionProps) {
   const t = useTranslations("recipes");
   const { data: session } = authClient.useSession();
-  const platform = usePlatform();
+  const shareViaPlatform = usePlatformShare();
   const rootRef = useRef<HTMLDivElement>(null);
   const recipePath = routes.recipes.detail(locale, recipe.id);
   const [shareUrl, setShareUrl] = useState(recipePath);
@@ -74,19 +74,13 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
     }
   }
 
-  async function shareMoreOptions() {
+  function shareMoreOptions() {
     setIsOpen(false);
-    try {
-      const result = await platform.share.recipe({
-        id: recipe.id,
-        title: recipe.title,
-        url: shareUrl,
-      });
-      if (result === "copied") toast.success(t("linkCopied"));
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      toast.error(t("shareRecipeFailed"));
-    }
+    void shareViaPlatform({
+      id: recipe.id,
+      title: recipe.title,
+      url: shareUrl,
+    });
   }
 
   return (

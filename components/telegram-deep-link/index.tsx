@@ -6,6 +6,7 @@ import { routes } from "@/lib/routes";
 import {
   getLaunchStartParam,
   isTelegramEnvironment,
+  loadTelegramSdk,
 } from "@/lib/telegram/webapp";
 import { useNavigate } from "@/lib/transitions";
 
@@ -46,8 +47,13 @@ function currentLocale(): string {
  * Navigates to the target of the Mini App's launch `start_param`, once. Renders
  * nothing. No-op outside Telegram or when the param is absent/unrecognized.
  *
- * Reads the param synchronously from the launch hash rather than waiting for the
- * SDK's `webApp` object, so it acts before the first paint. A `recipe_<id>` is
+ * Reads the param synchronously from the launch hash, but navigates only once
+ * the Telegram SDK script has executed. The SDK reads its launch parameters
+ * (`initData`, `version`, …) from the URL hash exactly once, when it runs; the
+ * navigation below rewrites the URL and drops that hash. Navigating first left
+ * the SDK with empty `initData` and version 6.0 for the whole session, so the
+ * provider never resolved a `webApp` and share, haptics and the BackButton all
+ * went dead on every deep-link launch. A `recipe_<id>` is
  * **pushed onto the navigation stack** over the recipes list (the launch page,
  * since the home route redirects there) — so closing it pops back to the list
  * with the stack's slide animation, instead of a bare URL replace that leaves
@@ -65,17 +71,27 @@ export function TelegramDeepLink() {
     const startParam = getLaunchStartParam();
     const locale = currentLocale();
     const recipeId = recipeIdFromStartParam(startParam);
-
-    if (recipeId) {
-      navigate.push(
-        routes.recipes.detail(locale, recipeId),
-        <RecipeDetail recipeId={recipeId} locale={locale} />,
-      );
-      return;
-    }
-
     const href = resolveStartParamHref(startParam, locale);
-    if (href) navigate.replace(href);
+    if (!href) return;
+
+    const openLaunchTarget = (): void => {
+      if (recipeId) {
+        navigate.push(
+          href,
+          <RecipeDetail recipeId={recipeId} locale={locale} />,
+        );
+        return;
+      }
+      navigate.replace(href);
+    };
+
+    // A failed SDK load still opens the deep link. The failure itself is
+    // reported by TelegramProvider's own loadTelegramSdk() call, which leaves
+    // the same script error unhandled for Sentry; rethrowing here would only
+    // report it twice.
+    loadTelegramSdk()
+      .catch(() => undefined)
+      .then(openLaunchTarget);
   }, [navigate]);
 
   return null;

@@ -42,8 +42,10 @@ function shareRecipeLink(
  * `webApp` is optional: `kind` must read "telegram" (so feature gating hides
  * web-only UI like "Connected accounts") from the moment `isTelegramEnvironment()`
  * knows we're in a Mini App, which is well before the SDK script itself finishes
- * loading and TelegramProvider gets a live `webApp` instance. Haptics/share are
- * no-ops until then — the same as they'd be moments earlier on web.
+ * loading and TelegramProvider gets a live `webApp` instance. Haptics are no-ops
+ * until then — the same as they'd be moments earlier on web — but share rejects,
+ * since a tap that silently does nothing is a failure the user and Sentry should
+ * both see.
  */
 export function createTelegramPlatform(
   webApp: TelegramWebApp | undefined,
@@ -58,7 +60,10 @@ export function createTelegramPlatform(
     },
     share: {
       async recipe(input: RecipeShareInput): Promise<ShareResult> {
-        if (!webApp) return "shared";
+        // Without the SDK there is no share sheet to open. Reporting "shared"
+        // here once hid a whole class of deep-link launches whose SDK never
+        // resolved: the tap did nothing and nothing reached Sentry.
+        if (!webApp) throw new Error("Telegram WebApp SDK unavailable");
         // Prefer the native card; degrade to a plain link share if the prepared
         // message can't be created (network, older client, backend error).
         const shared = await shareRecipeCard(webApp, input.id).catch(

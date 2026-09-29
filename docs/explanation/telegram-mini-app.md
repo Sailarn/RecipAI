@@ -64,7 +64,10 @@ OIDC).
   stack: shown when a view is pushed over the root, popping it via `navigate.back()`.
 - `components/telegram-deep-link` maps the launch `start_param` to a destination once —
   `pantry`, `parse`, `profile`, or `recipe_<id>`. It reads the param **synchronously** from the launch
-  hash via `getLaunchStartParam()` (not the async SDK `webApp`), so it acts before the first paint.
+  hash via `getLaunchStartParam()` (not the async SDK `webApp`), but **navigates only after the SDK
+  script has executed** (`loadTelegramSdk()`): the SDK reads its launch params from the URL hash once,
+  when it runs, and the navigation rewrites the URL and drops that hash — see
+  [gotchas](../reference/gotchas.md). A failed SDK load still navigates.
   A `recipe_<id>` is **pushed onto the navigation stack** over the recipes list (the launch page — the
   home route redirects there), so closing it pops back to the list with the slide animation; a bare
   `navigate.replace` left nothing underneath and lost the transition. Non-recipe params are tab roots,
