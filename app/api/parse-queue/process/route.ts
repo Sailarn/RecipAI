@@ -9,15 +9,8 @@ import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
-import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
-import {
-  type InlineKeyboardMarkup,
-  type RecipeCardData,
-  recipeCardButton,
-  recipeCardCaption,
-  telegramPhotoUrl,
-} from "@/lib/telegram/recipe-card";
-import { sendTelegramMessage, sendTelegramPhoto } from "@/lib/telegram-bot";
+import { saveAndSendRecipe } from "@/lib/telegram/save-and-send-recipe";
+import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
@@ -55,41 +48,6 @@ async function handlePushFailure(
     return;
   }
   logger.error("Push send failed", pushError);
-}
-
-interface SendRecipeCardOptions {
-  chatId: number | string;
-  imageUrl: string | null | undefined;
-  caption: string;
-  replyMarkup: InlineKeyboardMarkup;
-}
-
-// Delivers the saved-recipe card, degrading to text whenever the photo can't be
-// sent. A non-ImageKit URL means the mirror upload failed and this is the
-// (likely expired) source CDN URL, which Telegram usually can't fetch either —
-// so skip straight to text. Telegram can also reject an ImageKit URL it fails
-// to fetch with a 400; the recipe is already saved by this point, so falling
-// back to text delivers the notification instead of dropping it.
-async function sendRecipeCard({
-  chatId,
-  imageUrl,
-  caption,
-  replyMarkup,
-}: SendRecipeCardOptions): Promise<void> {
-  if (imageUrl && isImageKitUrl(imageUrl)) {
-    try {
-      await sendTelegramPhoto(
-        chatId,
-        telegramPhotoUrl(imageUrl),
-        caption,
-        replyMarkup,
-      );
-      return;
-    } catch (photoError) {
-      logger.warn("[parse-queue] telegram photo send failed", photoError);
-    }
-  }
-  await sendTelegramMessage(chatId, caption, replyMarkup);
 }
 
 // A job whose PROCESSING row is newer than this is treated as in-flight, so a
@@ -236,40 +194,13 @@ export async function POST(req: NextRequest) {
     // in-app review step, so the recipe is saved server-side here and the bot
     // message deep-links straight to it.
     if (job.telegramChatId && job.userId) {
-      const recipeId = await saveParsedRecipeForUser({
+      await saveAndSendRecipe({
         userId: job.userId,
+        chatId: job.telegramChatId,
         parsed: finalRecipe,
         sourceUrl: jobUrl,
+        req,
       });
-
-      const cardData: RecipeCardData = {
-        id: recipeId,
-        title: finalRecipe.title,
-        category: finalRecipe.category ?? null,
-        totalTime:
-          (finalRecipe.prepTime || 0) + (finalRecipe.cookTime || 0) || null,
-        servings: finalRecipe.servings ?? null,
-        ingredientCount: finalRecipe.ingredients?.length ?? 0,
-        imageUrl: finalRecipe.imageUrl ?? null,
-      };
-      const caption = recipeCardCaption(cardData, "✅ Saved to RecipAI");
-      const replyMarkup = recipeCardButton(recipeId);
-
-      // The recipe is already saved at this point, so a failure here is a
-      // notification-delivery problem, not a parse failure — it must not fall
-      // into the outer catch, which would mark the job FAILED and tell the
-      // user parsing failed when it didn't. Only a failed text send reaches
-      // this catch; sendRecipeCard absorbs the photo-specific failures.
-      try {
-        await sendRecipeCard({
-          chatId: job.telegramChatId,
-          imageUrl: cardData.imageUrl,
-          caption,
-          replyMarkup,
-        });
-      } catch (notifyError) {
-        ApiError.capture(notifyError, req);
-      }
     }
 
     return NextResponse.json({ ok: true });

@@ -24,8 +24,7 @@ export async function POST(request: Request) {
     return ApiError.badRequest("imageBase64 and mimeType are required");
   }
 
-  return runDirectParseJob({
-    request,
+  return runDirectParseJob(request, {
     jobId: body.jobId ?? crypto.randomUUID(),
     userId: session?.user.id ?? null,
     source: "photo",

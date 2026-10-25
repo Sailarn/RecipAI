@@ -1,13 +1,24 @@
 import { inArray } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import { after, type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { account } from "@/db/schema/auth";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
+import { MIN_RECIPE_TEXT_CHARS } from "@/lib/parse-recipe/text";
 import { api } from "@/lib/routes";
-import { extractUrl, sendTelegramMessage } from "@/lib/telegram-bot";
+import {
+  type BotTextMessage,
+  PARSE_TEXT_PROMPT,
+  parseTextRequest,
+} from "@/lib/telegram/parse-text-command";
+import {
+  extractUrl,
+  sendTelegramForceReply,
+  sendTelegramMessage,
+} from "@/lib/telegram-bot";
+import { parseRecipeTextForChat } from "./parse-text";
 
 type TelegramAccount = typeof account.$inferSelect;
 
@@ -80,10 +91,9 @@ export async function POST(req: NextRequest) {
   if (!isAuthenticTelegramRequest(req)) return ApiError.unauthorized();
 
   let body: {
-    message?: {
+    message?: BotTextMessage & {
       chat: { id: number };
       from: { id: number; first_name?: string };
-      text?: string;
     };
   };
   try {
@@ -112,7 +122,36 @@ export async function POST(req: NextRequest) {
     const firstName = message.from.first_name ?? "there";
     await sendTelegramMessage(
       chatId,
-      `👋 Hi ${firstName}! Send me any recipe URL or supported social post and I'll save it to your RecipAI account.`,
+      `👋 Hi ${firstName}! Send me any recipe URL or supported social post and I'll save it to your RecipAI account.\n\nGot a recipe as text (e.g. from an AI chat)? Use /parse_text.`,
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  const textRequest = parseTextRequest(message);
+  if (textRequest?.kind === "ask-for-text") {
+    await sendTelegramForceReply(chatId, PARSE_TEXT_PROMPT, "Recipe text…");
+    return NextResponse.json({ ok: true });
+  }
+  if (textRequest?.kind === "parse") {
+    if (textRequest.text.length < MIN_RECIPE_TEXT_CHARS) {
+      await sendTelegramMessage(
+        chatId,
+        "That's too short to be a recipe — send the ingredients and steps.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+    // Answer Telegram right away; the parse can take longer than its webhook
+    // timeout, and an unanswered update gets redelivered.
+    after(() =>
+      parseRecipeTextForChat({
+        text: textRequest.text,
+        userId: linkedAccount.userId,
+        chatId,
+      }),
+    );
+    await sendTelegramMessage(
+      chatId,
+      "⏳ Parsing your recipe text… I'll send it here when it's ready.",
     );
     return NextResponse.json({ ok: true });
   }

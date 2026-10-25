@@ -10,45 +10,47 @@ import {
 } from "@/lib/parse-recipe/recipe-result";
 import { log } from "@/lib/telemetry";
 
-interface DirectParseJob {
-  request: Request;
+export interface DirectParseJob {
   jobId: string;
   userId: string | null;
   source: "photo" | "text";
   extract: () => Promise<RecipeExtractionResult>;
+  /** Set for bot-originated parses, mirroring queued Telegram jobs. */
+  telegramChatId?: string;
 }
 
-// Photo and pasted-text parses run inline in the request rather than through
-// the parse queue (there is no URL to cache or re-fetch), but still leave a
-// parse_jobs row behind so the import shows up in history and anonymous jobs
-// can be claimed after sign-in.
-export async function runDirectParseJob({
-  request,
+/** The parse_jobs row couldn't be created — nothing was parsed. */
+export class ParseJobStartError extends Error {}
+
+// Photo and pasted-text parses run inline rather than through the parse queue
+// (there is no URL to cache or re-fetch), but still leave a parse_jobs row
+// behind so the import shows up in history and anonymous jobs can be claimed
+// after sign-in. Throws ParseJobStartError when the row can't be created, and
+// the parse error itself (after marking the row failed) when parsing fails.
+export async function executeDirectParseJob({
   jobId,
   userId,
   source,
   extract,
-}: DirectParseJob): Promise<Response> {
+  telegramChatId,
+}: DirectParseJob): Promise<ParsedRecipe> {
   try {
     await db.insert(parseJobs).values({
       id: jobId,
       userId,
       url: null,
+      telegramChatId: telegramChatId ?? null,
       status: PARSE_JOB_STATUS.PROCESSING,
     });
   } catch (error) {
-    return ApiError.internal(error, request, `Failed to start ${source} parse`);
+    throw new ParseJobStartError(`Failed to start ${source} parse`, {
+      cause: error,
+    });
   }
 
   const startedAt = Date.now();
   try {
-    const recipe: ParsedRecipe = requireCompleteRecipe(
-      await extract(),
-      source,
-      {
-        jobId,
-      },
-    );
+    const recipe = requireCompleteRecipe(await extract(), source, { jobId });
     await db
       .update(parseJobs)
       .set({
@@ -66,7 +68,7 @@ export async function runDirectParseJob({
       step_count: recipe.instructions?.length ?? 0,
       success: true,
     });
-    return Response.json(recipe);
+    return recipe;
   } catch (error) {
     await db
       .update(parseJobs)
@@ -76,7 +78,22 @@ export async function runDirectParseJob({
         updatedAt: new Date(),
       })
       .where(eq(parseJobs.id, jobId))
-      .catch((historyError) => ApiError.capture(historyError, request));
+      .catch((historyError) => ApiError.capture(historyError));
+    throw error;
+  }
+}
+
+/** executeDirectParseJob for an API route: the recipe as JSON, or an error. */
+export async function runDirectParseJob(
+  request: Request,
+  job: DirectParseJob,
+): Promise<Response> {
+  try {
+    return Response.json(await executeDirectParseJob(job));
+  } catch (error) {
+    if (error instanceof ParseJobStartError) {
+      return ApiError.internal(error.cause, request, error.message);
+    }
     // The client maps the raw Gemini message to friendly errors (503/429/
     // quota), so surface it here while still reporting to Sentry.
     ApiError.capture(error, request);

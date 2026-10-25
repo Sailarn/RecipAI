@@ -55,6 +55,21 @@ export function sendTelegramMessage(
   });
 }
 
+// Asks for input with Telegram's force_reply, which opens the reply box under
+// the prompt — the reply then carries `reply_to_message`, so the bot can tell
+// what it answers without storing any conversation state.
+export function sendTelegramForceReply(
+  chatId: number | string,
+  text: string,
+  placeholder: string,
+): Promise<boolean> {
+  return callTelegram("sendMessage", {
+    chat_id: chatId,
+    text,
+    reply_markup: { force_reply: true, input_field_placeholder: placeholder },
+  });
+}
+
 // Sends the recipe card as a native photo message (image + caption + button) so
 // the parse-completion notification matches the shared recipe card.
 export function sendTelegramPhoto(

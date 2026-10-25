@@ -18,11 +18,25 @@ vi.mock("@/db/schema/auth", () => ({ account: {} }));
 vi.mock("@/db/schema/parse-jobs", () => ({ parseJobs: {} }));
 vi.mock("@/lib/telegram-bot", () => ({
   sendTelegramMessage: vi.fn().mockResolvedValue(undefined),
+  sendTelegramForceReply: vi.fn().mockResolvedValue(undefined),
   extractUrl: vi.fn(),
+}));
+const { parseRecipeTextForChat } = vi.hoisted(() => ({
+  parseRecipeTextForChat: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("../parse-text", () => ({ parseRecipeTextForChat }));
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: (task: () => unknown) => task(),
 }));
 vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
-import { extractUrl, sendTelegramMessage } from "@/lib/telegram-bot";
+import { PARSE_TEXT_PROMPT } from "@/lib/telegram/parse-text-command";
+import {
+  extractUrl,
+  sendTelegramForceReply,
+  sendTelegramMessage,
+} from "@/lib/telegram-bot";
 import { POST } from "../route";
 
 /** Build an account row whose idToken JWT payload carries the given Telegram id. */
@@ -190,5 +204,75 @@ describe("POST /api/telegram-bot", () => {
     );
 
     vi.unstubAllGlobals();
+  });
+
+  describe("/parse_text", () => {
+    const recipeText = "Pancakes: 200 g flour, 2 eggs. Whisk and fry.";
+
+    it("asks for the text with a force-reply prompt when sent alone", async () => {
+      selectWhere.mockResolvedValue([accountWithTelegramId("42")]);
+
+      await POST(makeRequest(telegramMessage({ text: "/parse_text" })));
+
+      expect(sendTelegramForceReply).toHaveBeenCalledWith(
+        555,
+        PARSE_TEXT_PROMPT,
+        expect.any(String),
+      );
+      expect(parseRecipeTextForChat).not.toHaveBeenCalled();
+    });
+
+    it("parses the text sent with the command for the linked user", async () => {
+      selectWhere.mockResolvedValue([accountWithTelegramId("42", "user-9")]);
+
+      await POST(
+        makeRequest(telegramMessage({ text: `/parse_text ${recipeText}` })),
+      );
+
+      expect(parseRecipeTextForChat).toHaveBeenCalledWith({
+        text: recipeText,
+        userId: "user-9",
+        chatId: 555,
+      });
+      expect(sendTelegramMessage).toHaveBeenCalledWith(
+        555,
+        expect.stringContaining("Parsing your recipe text"),
+      );
+    });
+
+    it("parses a reply to the prompt even when it contains a link", async () => {
+      selectWhere.mockResolvedValue([accountWithTelegramId("42", "user-9")]);
+      vi.mocked(extractUrl).mockReturnValue("https://example.com");
+      const reply = `${recipeText} Source: https://example.com`;
+
+      await POST(
+        makeRequest(
+          telegramMessage({
+            text: reply,
+            reply_to_message: {
+              text: PARSE_TEXT_PROMPT,
+              from: { is_bot: true },
+            },
+          }),
+        ),
+      );
+
+      expect(parseRecipeTextForChat).toHaveBeenCalledWith(
+        expect.objectContaining({ text: reply }),
+      );
+      expect(insertValues).not.toHaveBeenCalled();
+    });
+
+    it("refuses text too short to be a recipe", async () => {
+      selectWhere.mockResolvedValue([accountWithTelegramId("42")]);
+
+      await POST(makeRequest(telegramMessage({ text: "/parse_text eggs" })));
+
+      expect(parseRecipeTextForChat).not.toHaveBeenCalled();
+      expect(sendTelegramMessage).toHaveBeenCalledWith(
+        555,
+        expect.stringContaining("too short"),
+      );
+    });
   });
 });

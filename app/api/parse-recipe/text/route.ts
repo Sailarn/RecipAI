@@ -28,8 +28,7 @@ export async function POST(request: Request) {
     return ApiError.badRequest("text is required");
   }
 
-  return runDirectParseJob({
-    request,
+  return runDirectParseJob(request, {
     jobId: body.jobId ?? crypto.randomUUID(),
     userId: session?.user.id ?? null,
     source: "text",

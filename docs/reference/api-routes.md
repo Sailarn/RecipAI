@@ -147,10 +147,19 @@ See [Auth & Sync](../explanation/auth-and-sync.md) for the full flows. Custom cl
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/telegram-bot` | Webhook secret (optional) | Receives Telegram messages. Extracts URLs and enqueues parse jobs linked to the user's Telegram account. |
+| `POST` | `/api/telegram-bot` | Webhook secret (optional) | Receives Telegram messages. Extracts URLs and enqueues parse jobs linked to the user's Telegram account; `/parse_text` parses pasted recipe text (see below). |
 | `POST` | `/api/telegram/share-recipe` | Session | Body `{ recipeId }`. For a **public** recipe, mints a prepared inline message (Bot API `savePreparedInlineMessage`) and returns `{ preparedMessageId }` for the Mini App's `WebApp.shareMessage`. See [Telegram Mini App](../explanation/telegram-mini-app.md). |
 
 The webhook secret (`TELEGRAM_WEBHOOK_SECRET`) is verified if set; if not set the route accepts all requests. Only one instance should own the webhook. On parse completion the bot sends the **unified recipe card** (`lib/telegram/recipe-card.ts`) — a native photo card (`sendTelegramPhoto`) with a `✅ Saved to RecipAI` header and a `🍳 Open recipe` button deep-linking (`startapp=recipe_<id>`) into the Mini App, the same card the share flow sends.
+
+**`/parse_text`** (underscore — Telegram command names allow only `[a-z0-9_]`). Text is never auto-detected; only the command routes to text parsing (`lib/telegram/parse-text-command.ts`):
+
+- `/parse_text <recipe>` — parses the text after the command (multi-line is fine).
+- bare `/parse_text` — the bot replies with a `force_reply` prompt; a reply **to that prompt** is parsed. Stateless: the reply's `reply_to_message` identifies it, no conversation state is stored. A reply wins over URL detection, so a recipe that cites its source link still parses as text.
+
+The webhook answers immediately and runs the parse in `after()`: `executeDirectParseJob` (a `parse_jobs` row with `url: null` and the chat id) → `saveAndSendRecipe` (`lib/telegram/save-and-send-recipe.ts`, the same save + recipe-card path queued Telegram jobs use) → or a `classifyParseError` message on failure. Telegram caps a message at 4096 chars, so a longer recipe must be trimmed by the user — the client splits it and only the first part is the reply.
+
+Register the command in the bot menu once with Bot API `setMyCommands` (or @BotFather → Edit Commands): `parse_text — Parse a recipe from text`.
 
 ---
 
