@@ -46,24 +46,24 @@ markdown_extensions:
 nav:
   - Overview: index.md
   - Reference:
-    - Data Model: reference/data-model.md
-    - API Routes: reference/api-routes.md
-    - Library Map: reference/lib-map.md
-    - Environment Variables: reference/env.md
-    - Gotchas: reference/gotchas.md
+      - Data Model: reference/data-model.md
+      - API Routes: reference/api-routes.md
+      - Library Map: reference/lib-map.md
+      - Environment Variables: reference/env.md
+      - Gotchas: reference/gotchas.md
   - Explanation:
-    - Parse Pipeline: explanation/parse-pipeline.md
-    - Ingredient Vocabulary: explanation/ingredient-vocabulary.md
-    - Observability: explanation/observability.md
-    - Auth & Sync: explanation/auth-and-sync.md
-    - Telegram Mini App: explanation/telegram-mini-app.md
-    - Local Storage & Sync: explanation/local-storage-and-sync.md
-    - Architecture Decisions: explanation/decisions.md
+      - Parse Pipeline: explanation/parse-pipeline.md
+      - Ingredient Vocabulary: explanation/ingredient-vocabulary.md
+      - Observability: explanation/observability.md
+      - Auth & Sync: explanation/auth-and-sync.md
+      - Telegram Mini App: explanation/telegram-mini-app.md
+      - Local Storage & Sync: explanation/local-storage-and-sync.md
+      - Architecture Decisions: explanation/decisions.md
   - How-To:
-    - Run Tests: how-to/run-tests.md
-    - Add an API Route: how-to/add-api-route.md
-    - Add a Dexie Migration: how-to/add-dexie-migration.md
-    - Deploy to Pi: how-to/deploy-pi.md
-    - Deploy to Vercel: how-to/deploy-vercel.md
+      - Run Tests: how-to/run-tests.md
+      - Add an API Route: how-to/add-api-route.md
+      - Add a Dexie Migration: how-to/add-dexie-migration.md
+      - Deploy to Pi: how-to/deploy-pi.md
+      - Deploy to Vercel: how-to/deploy-vercel.md
   - Tutorial:
-    - Getting Started: tutorial/getting-started.md
+      - Getting Started: tutorial/getting-started.md

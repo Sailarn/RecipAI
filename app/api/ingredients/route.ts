@@ -37,12 +37,12 @@ export async function GET(req: NextRequest) {
 
     const serverMaxUpdatedAt =
       rows.length > 0
-        ? rows
-            .reduce(
-              (max, row) => (row.updatedAt > max ? row.updatedAt : max),
-              rows[0].updatedAt,
-            )
-            .toISOString()
+        ? new Date(
+            rows.reduce(
+              (max, row) => Math.max(max, row.updatedAt.getTime()),
+              0,
+            ),
+          ).toISOString()
         : (since ?? "");
 
     const result = rows.map(({ updatedAt: _updatedAt, ...rest }) => rest);

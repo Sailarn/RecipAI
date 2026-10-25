@@ -17,6 +17,11 @@ function Boom(): never {
   throw new Error("render exploded");
 }
 
+function MaybeBoom({ trigger }: { trigger: { shouldThrow: boolean } }) {
+  if (trigger.shouldThrow) throw new Error("render exploded");
+  return <p>recovered</p>;
+}
+
 /** React logs caught render errors; silence that noise for these cases. */
 function withSilencedErrorLog(run: () => void) {
   const consoleError = vi
@@ -70,21 +75,17 @@ describe("PageErrorBoundary", () => {
   });
 
   it("re-renders the page when retry is used", () => {
-    let shouldThrow = true;
-    function MaybeBoom() {
-      if (shouldThrow) throw new Error("render exploded");
-      return <p>recovered</p>;
-    }
+    const trigger = { shouldThrow: true };
 
     withSilencedErrorLog(() => {
       render(
         <PageErrorBoundary>
-          <MaybeBoom />
+          <MaybeBoom trigger={trigger} />
         </PageErrorBoundary>,
       );
     });
 
-    shouldThrow = false;
+    trigger.shouldThrow = false;
     fireEvent.click(screen.getByRole("button", { name: "tryAgain" }));
 
     expect(screen.getByText("recovered")).toBeInTheDocument();
