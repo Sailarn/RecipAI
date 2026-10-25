@@ -63,63 +63,65 @@ export function CookingCarousel({
   // Portal to document.body so fixed positioning is relative to the viewport,
   // not the PageStack entry which has willChange:transform as a containing block.
   return createPortal(
-    <div className="fixed inset-0 z-[300] bg-[rgba(6,4,2,0.97)] flex flex-col">
-      {/* Header — absolute positioned above carousel */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-[14px] pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-2">
-        <span className="font-display text-[17px] font-bold text-[var(--fg-1)]">
-          {t("title")}
-        </span>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("closeMode")}
-          className="bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] border border-white/[0.15] rounded-full py-[7px] px-3 text-white/90 cursor-pointer text-xs font-medium flex items-center justify-center"
-        >
-          <XIcon className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* Carousel */}
-      <div className="flex-1 overflow-hidden pt-[calc(env(safe-area-inset-top)+55px)]">
-        <Carousel className="h-full" setApi={setApi}>
-          <CarouselContent
-            className="-ml-4"
-            style={{ height: "calc(100vh - 76px - 52px)" }}
+    <div className="fixed inset-0 z-[300] bg-[rgba(6,4,2,0.97)]">
+      <div className="relative mx-auto flex h-full w-full max-w-2xl flex-col">
+        {/* Header — absolute positioned above carousel */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-[14px] pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-2">
+          <span className="font-display text-[17px] font-bold text-[var(--fg-1)]">
+            {t("title")}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("closeMode")}
+            className="bg-[rgba(0,0,0,0.38)] backdrop-blur-[16px] border border-white/[0.15] rounded-full py-[7px] px-3 text-white/90 cursor-pointer text-xs font-medium flex items-center justify-center"
           >
-            <CarouselItem className="pl-4 h-full">
-              <OverviewSlide recipe={recipe} locale={locale} />
-            </CarouselItem>
+            <XIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
-            {recipe.instructions.map((step) => (
-              <CarouselItem key={step.id} className="pl-4 h-full">
-                <StepSlide
-                  step={step}
-                  totalSteps={recipe.instructions.length}
-                  sections={recipe.sections}
-                />
+        {/* Carousel */}
+        <div className="flex-1 overflow-hidden pt-[calc(env(safe-area-inset-top)+55px)]">
+          <Carousel className="h-full" setApi={setApi}>
+            <CarouselContent
+              className="-ml-4"
+              style={{ height: "calc(100vh - 76px - 52px)" }}
+            >
+              <CarouselItem className="pl-4 h-full">
+                <OverviewSlide recipe={recipe} locale={locale} />
               </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
 
-      <CookingNavBar
-        currentSlide={currentSlide}
-        dotKeys={dotKeys}
-        isLastStep={isLastStep}
-        onDotClick={(index) => api?.scrollTo(index)}
-        onPrev={() => api?.scrollTo(currentSlide - 1)}
-        onNext={handleNext}
-        onOpenIngredients={() => setIngredientsOpen(true)}
-      />
+              {recipe.instructions.map((step) => (
+                <CarouselItem key={step.id} className="pl-4 h-full">
+                  <StepSlide
+                    step={step}
+                    totalSteps={recipe.instructions.length}
+                    sections={recipe.sections}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </div>
 
-      {ingredientsOpen && (
-        <IngredientsSheet
-          recipe={recipe}
-          locale={locale}
-          onClose={() => setIngredientsOpen(false)}
+        <CookingNavBar
+          currentSlide={currentSlide}
+          dotKeys={dotKeys}
+          isLastStep={isLastStep}
+          onDotClick={(index) => api?.scrollTo(index)}
+          onPrev={() => api?.scrollTo(currentSlide - 1)}
+          onNext={handleNext}
+          onOpenIngredients={() => setIngredientsOpen(true)}
         />
-      )}
+
+        {ingredientsOpen && (
+          <IngredientsSheet
+            recipe={recipe}
+            locale={locale}
+            onClose={() => setIngredientsOpen(false)}
+          />
+        )}
+      </div>
     </div>,
     document.body,
   );

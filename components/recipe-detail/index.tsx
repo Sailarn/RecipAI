@@ -191,68 +191,70 @@ export function RecipeDetail({
   }
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg-base)]">
-      <div className="relative z-[20] shrink-0">
-        <RecipeHeader
-          locale={locale}
-          recipeId={recipeId}
-          recipe={recipe}
-          onDeleteClick={() => setShowDeleteConfirm(true)}
-        />
-      </div>
-
-      <div className="relative z-[1] flex-1 overflow-y-auto -mt-[72px] px-[14px] pb-[40px] select-text">
-        <RecipeHero recipe={recipe} />
-
-        <div className="flex items-start justify-between gap-2 mb-4">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight text-[var(--fg-1)] flex-1">
-            {recipe.title}
-          </h1>
-          {recipe.category && <CategoryBadge category={recipe.category} />}
+    <div className="h-full bg-[var(--bg-base)]">
+      <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+        <div className="relative z-[20] shrink-0">
+          <RecipeHeader
+            locale={locale}
+            recipeId={recipeId}
+            recipe={recipe}
+            onDeleteClick={() => setShowDeleteConfirm(true)}
+          />
         </div>
 
-        {recipe.description && (
-          <p className="mb-4 text-sm text-[var(--fg-2)]">
-            {recipe.description}
-          </p>
-        )}
+        <div className="relative z-[1] flex-1 overflow-y-auto -mt-[72px] px-[14px] pb-[40px] select-text">
+          <RecipeHero recipe={recipe} />
 
-        <RecipeMeta
-          prepTime={recipe.prepTime}
-          cookTime={recipe.cookTime}
-          totalTime={recipe.totalTime}
-        />
+          <div className="flex items-start justify-between gap-2 mb-4">
+            <h1 className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight text-[var(--fg-1)] flex-1">
+              {recipe.title}
+            </h1>
+            {recipe.category && <CategoryBadge category={recipe.category} />}
+          </div>
 
-        <RecipeActions
-          sourceUrl={recipe.sourceUrl}
-          onStartCooking={() => setCookingMode(true)}
-        />
+          {recipe.description && (
+            <p className="mb-4 text-sm text-[var(--fg-2)]">
+              {recipe.description}
+            </p>
+          )}
 
-        <ServingsCalculator
-          originalServings={recipe.servings}
-          ingredients={recipe.ingredients}
-          sections={recipe.sections}
-          canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
-          locale={locale}
-        />
-        <InstructionsList
-          instructions={recipe.instructions}
-          sections={recipe.sections}
-        />
-
-        {cookingMode && (
-          <CookingCarousel
-            recipe={recipe}
-            locale={locale}
-            onClose={() => setCookingMode(false)}
+          <RecipeMeta
+            prepTime={recipe.prepTime}
+            cookTime={recipe.cookTime}
+            totalTime={recipe.totalTime}
           />
-        )}
 
-        <DeleteRecipeDialog
-          open={showDeleteConfirm}
-          onOpenChange={setShowDeleteConfirm}
-          onConfirm={handleDelete}
-        />
+          <RecipeActions
+            sourceUrl={recipe.sourceUrl}
+            onStartCooking={() => setCookingMode(true)}
+          />
+
+          <ServingsCalculator
+            originalServings={recipe.servings}
+            ingredients={recipe.ingredients}
+            sections={recipe.sections}
+            canonicalIngredientIds={recipe.canonicalIngredientIds ?? undefined}
+            locale={locale}
+          />
+          <InstructionsList
+            instructions={recipe.instructions}
+            sections={recipe.sections}
+          />
+
+          {cookingMode && (
+            <CookingCarousel
+              recipe={recipe}
+              locale={locale}
+              onClose={() => setCookingMode(false)}
+            />
+          )}
+
+          <DeleteRecipeDialog
+            open={showDeleteConfirm}
+            onOpenChange={setShowDeleteConfirm}
+            onConfirm={handleDelete}
+          />
+        </div>
       </div>
     </div>
   );

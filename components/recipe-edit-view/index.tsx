@@ -39,7 +39,7 @@ export function RecipeEditView({ recipeId }: RecipeEditViewProps) {
   }
 
   return (
-    <div className="h-full">
+    <div className="relative mx-auto h-full w-full max-w-2xl">
       <RecipeForm key={recipe.id} recipe={recipe} />
     </div>
   );

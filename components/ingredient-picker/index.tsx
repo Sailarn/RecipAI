@@ -174,109 +174,111 @@ export function IngredientPicker({
       transition={SLIDE_TRANSITION}
       onAnimationComplete={() => setContentReady(true)}
     >
-      <div
-        data-testid={`${testId}-mesh`}
-        aria-hidden="true"
-        className="absolute inset-0 z-0 pointer-events-none [background:var(--app-mesh)]"
-      />
-
-      <div className="relative z-10 shrink-0 px-4 pb-3 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] flex items-center gap-3">
-        <h2 className="flex-1 font-display font-bold text-[21px] text-[var(--fg-1)] m-0 leading-[1.2]">
-          {title}
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={tCommon("close")}
-          className="w-8 h-8 rounded-full bg-[rgba(255,200,100,0.08)] border border-[rgba(255,200,100,0.15)] flex items-center justify-center text-[var(--fg-3)] cursor-pointer shrink-0"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className="relative z-10 shrink-0 px-4 pb-3">
-        <div className="flex items-center gap-2.5 px-3.5 rounded-[14px] bg-[rgba(255,255,255,0.04)] border border-[var(--border-subtle)]">
-          <Search size={17} className="shrink-0 text-[var(--fg-2)]" />
-          <input
-            type="search"
-            placeholder={tForm("searchIngredientsPlaceholder")}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            aria-label={tForm("searchIngredientsAria")}
-            className="w-full py-3 bg-transparent border-0 text-[var(--fg-1)] placeholder:text-[var(--fg-3)] font-sans text-base outline-none box-border"
-          />
-        </div>
-      </div>
-
-      <div className="relative z-10 flex-1 overflow-y-auto px-4 pb-5">
-        {!contentReady && <PickerSkeleton />}
-        {contentReady && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={CONTENT_FADE}
-          >
-            {filteredIngredients ? (
-              filteredIngredients.length === 0 ? (
-                <p className="text-center text-[var(--fg-3)] font-sans text-sm py-8 m-0">
-                  No ingredients match &ldquo;{search}&rdquo;
-                </p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  {filteredIngredients.map((ingredient) =>
-                    renderTile(
-                      ingredient,
-                      mapVocabCategory(ingredient.category) ?? "Other",
-                    ),
-                  )}
-                </div>
-              )
-            ) : (
-              CAT_OPTIONS.map((category) => {
-                const items = groupedIngredients[category];
-                if (items.length === 0) return null;
-                return (
-                  <div key={category} className="mb-[18px]">
-                    <h3 className="flex items-center gap-[7px] px-0.5 pt-2 pb-[11px] font-sans text-xs font-bold uppercase tracking-[0.07em] text-[var(--fg-2)] m-0">
-                      <span
-                        aria-hidden="true"
-                        className={`size-[7px] rounded-full shrink-0 ${CATEGORY_STYLES[category].dot}`}
-                      />
-                      <span>{category}</span>
-                    </h3>
-                    <div className="grid grid-cols-2 gap-[9px]">
-                      {items.map((ingredient) =>
-                        renderTile(ingredient, category),
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </motion.div>
-        )}
-      </div>
-
-      {commit && (
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-2xl flex-col">
         <div
-          data-testid={`${testId}-commit-bar`}
-          className="relative z-10 shrink-0 px-4 pb-[max(26px,calc(env(safe-area-inset-bottom)+16px))] pt-3 bg-[linear-gradient(to_top,rgba(8,8,8,0.97)_60%,transparent)]"
-        >
+          data-testid={`${testId}-mesh`}
+          aria-hidden="true"
+          className="absolute inset-0 z-0 pointer-events-none [background:var(--app-mesh)]"
+        />
+
+        <div className="relative z-10 shrink-0 px-4 pb-3 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] flex items-center gap-3">
+          <h2 className="flex-1 font-display font-bold text-[21px] text-[var(--fg-1)] m-0 leading-[1.2]">
+            {title}
+          </h2>
           <button
             type="button"
-            data-testid={`${testId}-commit`}
-            onClick={handleCommit}
-            disabled={selectedIngredientIds.size === 0}
-            className={`w-full p-4 rounded-[16px] font-sans text-base font-bold transition-opacity ${
-              selectedIngredientIds.size > 0
-                ? "bg-[linear-gradient(135deg,rgba(251,191,36,0.95),oklch(0.72_0.17_45))] text-[#1a1208] cursor-pointer opacity-100 shadow-[0_6px_22px_rgba(251,191,36,0.35)]"
-                : "bg-[rgba(255,200,100,0.12)] text-[var(--fg-3)] cursor-not-allowed opacity-60"
-            }`}
+            onClick={onClose}
+            aria-label={tCommon("close")}
+            className="w-8 h-8 rounded-full bg-[rgba(255,200,100,0.08)] border border-[rgba(255,200,100,0.15)] flex items-center justify-center text-[var(--fg-3)] cursor-pointer shrink-0"
           >
-            {commit.label(selectedIngredientIds.size)}
+            <X size={16} />
           </button>
         </div>
-      )}
+
+        <div className="relative z-10 shrink-0 px-4 pb-3">
+          <div className="flex items-center gap-2.5 px-3.5 rounded-[14px] bg-[rgba(255,255,255,0.04)] border border-[var(--border-subtle)]">
+            <Search size={17} className="shrink-0 text-[var(--fg-2)]" />
+            <input
+              type="search"
+              placeholder={tForm("searchIngredientsPlaceholder")}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              aria-label={tForm("searchIngredientsAria")}
+              className="w-full py-3 bg-transparent border-0 text-[var(--fg-1)] placeholder:text-[var(--fg-3)] font-sans text-base outline-none box-border"
+            />
+          </div>
+        </div>
+
+        <div className="relative z-10 flex-1 overflow-y-auto px-4 pb-5">
+          {!contentReady && <PickerSkeleton />}
+          {contentReady && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={CONTENT_FADE}
+            >
+              {filteredIngredients ? (
+                filteredIngredients.length === 0 ? (
+                  <p className="text-center text-[var(--fg-3)] font-sans text-sm py-8 m-0">
+                    No ingredients match &ldquo;{search}&rdquo;
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    {filteredIngredients.map((ingredient) =>
+                      renderTile(
+                        ingredient,
+                        mapVocabCategory(ingredient.category) ?? "Other",
+                      ),
+                    )}
+                  </div>
+                )
+              ) : (
+                CAT_OPTIONS.map((category) => {
+                  const items = groupedIngredients[category];
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={category} className="mb-[18px]">
+                      <h3 className="flex items-center gap-[7px] px-0.5 pt-2 pb-[11px] font-sans text-xs font-bold uppercase tracking-[0.07em] text-[var(--fg-2)] m-0">
+                        <span
+                          aria-hidden="true"
+                          className={`size-[7px] rounded-full shrink-0 ${CATEGORY_STYLES[category].dot}`}
+                        />
+                        <span>{category}</span>
+                      </h3>
+                      <div className="grid grid-cols-2 gap-[9px]">
+                        {items.map((ingredient) =>
+                          renderTile(ingredient, category),
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </motion.div>
+          )}
+        </div>
+
+        {commit && (
+          <div
+            data-testid={`${testId}-commit-bar`}
+            className="relative z-10 shrink-0 px-4 pb-[max(26px,calc(env(safe-area-inset-bottom)+16px))] pt-3 bg-[linear-gradient(to_top,rgba(8,8,8,0.97)_60%,transparent)]"
+          >
+            <button
+              type="button"
+              data-testid={`${testId}-commit`}
+              onClick={handleCommit}
+              disabled={selectedIngredientIds.size === 0}
+              className={`w-full p-4 rounded-[16px] font-sans text-base font-bold transition-opacity ${
+                selectedIngredientIds.size > 0
+                  ? "bg-[linear-gradient(135deg,rgba(251,191,36,0.95),oklch(0.72_0.17_45))] text-[#1a1208] cursor-pointer opacity-100 shadow-[0_6px_22px_rgba(251,191,36,0.35)]"
+                  : "bg-[rgba(255,200,100,0.12)] text-[var(--fg-3)] cursor-not-allowed opacity-60"
+              }`}
+            >
+              {commit.label(selectedIngredientIds.size)}
+            </button>
+          </div>
+        )}
+      </div>
     </motion.div>,
     document.body,
   );

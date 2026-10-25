@@ -58,7 +58,7 @@ export function PantryPage() {
     // position:relative so the FAB (position:absolute) anchors to this container,
     // not the viewport — necessary because PageStack's willChange:transform breaks
     // position:fixed inside it.
-    <div className="relative h-dvh flex flex-col bg-[var(--bg)]">
+    <div className="relative mx-auto h-dvh w-full max-w-2xl flex flex-col bg-[var(--bg)]">
       {/* Header — stays pinned at the top */}
       <div className="shrink-0 px-5 pb-4 pt-[max(20px,calc(env(safe-area-inset-top)+8px))]">
         <h1 className="font-display font-extrabold text-[28px] text-[var(--fg-1)] m-0 leading-[1.2]">

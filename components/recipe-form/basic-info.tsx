@@ -257,7 +257,6 @@ export function BasicInfo({
         <div>
           <label htmlFor="servings" className={`${labelClass} text-[11px]`}>
             {t("servings")}
-            <span className={requiredStarClass}> *</span>
           </label>
           <Input
             id="servings"

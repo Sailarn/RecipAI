@@ -36,7 +36,7 @@ export function AddToCollectionSheet({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[500] flex items-end touch-none">
+    <div className="fixed inset-0 z-[500] flex items-end justify-center touch-none">
       <button
         type="button"
         data-testid="sheet-backdrop"
@@ -50,7 +50,7 @@ export function AddToCollectionSheet({
         onAnimationEnd={() => {
           if (isClosing) onClose();
         }}
-        className="relative z-[1] w-full bg-[rgba(18,14,8,0.92)] backdrop-blur-[32px] backdrop-saturate-200 border border-[rgba(255,200,100,0.18)] rounded-t-[28px] pt-5 px-[18px] pb-9 shadow-[0_-8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,220,130,0.12)]"
+        className="relative z-[1] w-full max-w-2xl bg-[rgba(18,14,8,0.92)] backdrop-blur-[32px] backdrop-saturate-200 border border-[rgba(255,200,100,0.18)] rounded-t-[28px] pt-5 px-[18px] pb-9 shadow-[0_-8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,220,130,0.12)]"
         style={{
           animation: isClosing
             ? "sheetSlideDown 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards"
