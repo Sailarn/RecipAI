@@ -26,7 +26,7 @@ vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
 
 import { reconcileVocab } from "../reconcile-vocab";
 
-const RECONCILE_KEY = "vocabReconciled_v1";
+const RECONCILE_KEY = "vocabReconciled_v2";
 const WATERMARK_KEY = "ingredientsSyncedAt";
 
 beforeEach(() => {

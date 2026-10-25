@@ -7,8 +7,11 @@ import { pullVocab } from "./sync-vocab";
 // via the normal delta pull), resets the sync watermark so the next pullVocab
 // fetches the full clean vocab, then re-resolves every recipe's
 // canonicalIngredientIds against the surviving canonical ids.
-// Self-limiting via a localStorage guard — cheap no-op once done.
-const RECONCILE_KEY = "vocabReconciled_v1";
+// Self-limiting via a localStorage guard — cheap no-op once done. Bump the
+// version after every server-side vocab merge so devices drop the merged rows:
+// v1 — the dup-ingredient cleanup; v2 — the 2026-10 audit merges
+// (parmigiano reggiano → parmesan, sweetened → condensed milk).
+const RECONCILE_KEY = "vocabReconciled_v2";
 
 export async function reconcileVocab(): Promise<void> {
   if (localStorage.getItem(RECONCILE_KEY) === "1") return;

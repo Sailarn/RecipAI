@@ -20,8 +20,8 @@ function buildEnrichmentPrompt(
 Schema: { "en": string, "ua": string, "category": string, "aliasesEn": string[], "aliasesUa": string[] }
 
 Rules:
-- en: canonical English name, lowercase singular
-- ua: real Ukrainian word, nominative singular (NOT Russian, NOT transliterated)
+- en: canonical English name, lowercase singular — but keep acronyms upper-case ("MSG", "BBQ sauce")
+- ua: real Ukrainian word, nominative singular (NOT Russian, NOT transliterated). Do not confuse look-alike herbs and spices: chives = шніт-цибуля (NOT кріп, which is dill); cumin = зіра (NOT кмин, which is caraway); cilantro/fresh coriander = кінза, coriander seed = коріандр; flour = борошно (NOT мука)
 - category: one of fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other
 - aliasesUa: must include nominative plural, genitive singular, genitive plural, accusative singular
 - aliasesEn: common English synonyms and plural forms

@@ -86,3 +86,12 @@ Vocabulary embeddings live only in Postgres, in `ingredients.embedding` (`vector
 | AI enrichment + passage embedding | ✗ | ✓ (and stuck provisionals retry on login) |
 
 The vocab pull runs for everyone on startup (`useVocabSync` in `client-shell`), so anonymous users get local Fuse matching and can use the public server embed-match route. What they still miss is server-side persistence of the provisionals they create and AI enrichment of new entries — those stay login-gated. The full rationale is in [Local Storage & Sync](local-storage-and-sync.md#ingredient-vocabulary-stays-local-for-anonymous-users).
+
+## Fixing or merging vocabulary rows
+
+Vocabulary rows are shared by every user, and devices delta-sync them by `updated_at` — so a **fix** (a corrected `ua`, `en` casing) only needs an `UPDATE … SET updated_at = now()` and reaches devices on their next pull. A **merge** (folding a duplicate into its canonical row) does not: the delta pull never deletes, so devices keep the merged-away row and can keep matching against it. A merge therefore takes two steps, in order:
+
+1. The server-side merge (a reviewed `scripts/local/` script): carry the duplicate's `en`/aliases into the canonical row's aliases, repoint `recipes.canonical_ingredient_ids` and `pantry.ingredient_id` (dropping a user's duplicate pantry row when they already stock the canonical one — the `(user_id, ingredient_id)` index forbids both), then delete the duplicate.
+2. A release that bumps the `vocabReconciled_v<N>` key in `lib/db/reconcile-vocab.ts`, so every device clears its vocab, re-pulls it and re-resolves its recipes once.
+
+New rows come from `POST /api/ingredients/enrich`, whose prompt carries the known look-alike pairs (chives ≠ dill, cumin ≠ caraway) and keeps acronyms upper-case — extend that list when an audit finds a new confusion.

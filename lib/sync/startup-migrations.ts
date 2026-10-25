@@ -26,9 +26,9 @@ function reportFailure(source: string) {
  * - **reconcile-vocab** — clears stale duplicate vocab rows from the
  *   pre-merge-on-enrich era, resets the delta-sync watermark, re-pulls clean
  *   vocab and re-normalizes recipes against the surviving canonical ids.
- *   Guarded once-per-device by the "vocabReconciled_v1" key. Must ship *after*
- *   the server-side cleanup-dup-ingredients.sql script, or the re-pull
- *   restores the old duplicates.
+ *   Guarded once-per-device by the "vocabReconciled_v<N>" key, bumped after
+ *   each server-side vocab merge. Must ship *after* that merge has run, or the
+ *   re-pull restores the old duplicates.
  */
 export function runStartupMigrations(): void {
   import("@/lib/db/renormalize-recipes")
