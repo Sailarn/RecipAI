@@ -46,16 +46,20 @@ describe("toMeasurementUnit", () => {
       expect(toMeasurementUnit("Pincée")).toBe("pinch");
       expect(toMeasurementUnit("щіпка")).toBe("pinch");
       expect(toMeasurementUnit("щепотка")).toBe("pinch");
+      expect(toMeasurementUnit("дрібка")).toBe("pinch");
     });
 
     it("counts garlic cloves as pieces", () => {
       expect(toMeasurementUnit("cloves")).toBe("pcs");
       expect(toMeasurementUnit("зубчики")).toBe("pcs");
+      expect(toMeasurementUnit("зубки")).toBe("pcs");
     });
 
-    it("resolves the long Russian spoon abbreviations", () => {
+    it("resolves long spoon spellings and their inflections", () => {
       expect(toMeasurementUnit("ч.ложки")).toBe("tsp");
       expect(toMeasurementUnit("ст.ложки")).toBe("tbsp");
+      expect(toMeasurementUnit("столову ложку")).toBe("tbsp");
+      expect(toMeasurementUnit("столових ложки")).toBe("tbsp");
     });
   });
 

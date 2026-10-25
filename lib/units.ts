@@ -105,6 +105,8 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   чайныеложки: "tsp",
   чайныхложек: "tsp",
   чложки: "tsp",
+  чайнуложку: "tsp",
+  чайнихложки: "tsp",
 
   tbsp: "tbsp",
   tbsps: "tbsp",
@@ -121,6 +123,8 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   столовыеложки: "tbsp",
   столовыхложек: "tbsp",
   стложки: "tbsp",
+  столовуложку: "tbsp",
+  столовихложки: "tbsp",
 
   pcs: "pcs",
   pc: "pcs",
@@ -132,6 +136,7 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   штук: "pcs",
   штучка: "pcs",
   штучки: "pcs",
+  adet: "pcs",
   // A garlic clove is counted, not measured.
   clove: "pcs",
   cloves: "pcs",
@@ -140,6 +145,8 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   зубчики: "pcs",
   зубчиків: "pcs",
   зубок: "pcs",
+  зубки: "pcs",
+  зубків: "pcs",
 
   pinch: "pinch",
   pinches: "pinch",
@@ -155,6 +162,9 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   щепотки: "pinch",
   щепоток: "pinch",
   щепоть: "pinch",
+  дрібка: "pinch",
+  дрібки: "pinch",
+  дрібок: "pinch",
 };
 
 // Collapsing whitespace and periods lets one alias entry absorb every spacing
