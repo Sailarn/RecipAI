@@ -10,9 +10,8 @@ if (process.env.NODE_ENV === "production") {
   Sentry.init({
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-    // Enable sending user PII (Personally Identifiable Information)
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-    sendDefaultPii: true,
+    // User PII (IP, user info, cookies, headers, bodies) is collected by
+    // default since v11 — what v10 needed sendDefaultPii: true for.
 
     // A tag, deliberately not `release`. withSentryConfig detects its own
     // release name and uploads source maps under it; overriding `release` here
