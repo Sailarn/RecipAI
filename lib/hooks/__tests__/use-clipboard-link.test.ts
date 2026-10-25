@@ -30,21 +30,25 @@ function setupClipboard(options: ClipboardEnvOptions = {}) {
     value: supported ? { readText } : undefined,
   });
 
+  const permissionStatus = Object.assign(new EventTarget(), {
+    state: permission,
+  });
   const query =
     permission === "unsupported"
       ? vi.fn().mockRejectedValue(new TypeError("unknown permission"))
-      : vi.fn().mockResolvedValue({ state: permission });
+      : vi.fn().mockResolvedValue(permissionStatus);
 
   Object.defineProperty(navigator, "permissions", {
     configurable: true,
     value: { query },
   });
 
-  return { readText, query };
+  return { readText, query, permissionStatus };
 }
 
 beforeEach(() => {
   getTelegramWebApp.mockReturnValue(undefined);
+  vi.spyOn(document, "hasFocus").mockReturnValue(true);
 });
 
 describe("useClipboardLink", () => {
@@ -208,6 +212,81 @@ describe("useClipboardLink", () => {
 
       act(() => {
         document.dispatchEvent(new Event("visibilitychange"));
+      });
+
+      await waitFor(() => expect(result.current.suggestion).toBeNull());
+    });
+
+    it("re-checks when the window regains focus", async () => {
+      const { readText } = setupClipboard({ permission: "granted" });
+      const { result } = renderHook(() => useClipboardLink({ enabled: true }));
+      await waitFor(() => expect(readText).toHaveBeenCalledTimes(1));
+
+      readText.mockResolvedValue("https://silpo.ua/recipes/borscht");
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
+      });
+
+      await waitFor(() =>
+        expect(result.current.suggestion).toBe(
+          "https://silpo.ua/recipes/borscht",
+        ),
+      );
+    });
+
+    it("waits for focus instead of reading from an unfocused document", async () => {
+      vi.mocked(document.hasFocus).mockReturnValue(false);
+      const { readText, query } = setupClipboard({
+        text: "https://silpo.ua/recipes/borscht",
+        permission: "granted",
+      });
+      const { result } = renderHook(() => useClipboardLink({ enabled: true }));
+      await waitFor(() => expect(query).toHaveBeenCalled());
+      expect(readText).not.toHaveBeenCalled();
+
+      vi.mocked(document.hasFocus).mockReturnValue(true);
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
+      });
+
+      await waitFor(() =>
+        expect(result.current.suggestion).toBe(
+          "https://silpo.ua/recipes/borscht",
+        ),
+      );
+    });
+
+    it("suggests the link once the permission is granted mid-session", async () => {
+      const { readText, permissionStatus } = setupClipboard({
+        text: "https://silpo.ua/recipes/borscht",
+        permission: "prompt",
+      });
+      const { result } = renderHook(() => useClipboardLink({ enabled: true }));
+      await waitFor(() => expect(readText).not.toHaveBeenCalled());
+
+      act(() => {
+        permissionStatus.state = "granted";
+        permissionStatus.dispatchEvent(new Event("change"));
+      });
+
+      await waitFor(() =>
+        expect(result.current.suggestion).toBe(
+          "https://silpo.ua/recipes/borscht",
+        ),
+      );
+    });
+
+    it("drops the suggestion once the clipboard no longer holds a link", async () => {
+      const { readText } = setupClipboard({
+        text: "https://silpo.ua/recipes/borscht",
+        permission: "granted",
+      });
+      const { result } = renderHook(() => useClipboardLink({ enabled: true }));
+      await waitFor(() => expect(result.current.suggestion).not.toBeNull());
+
+      readText.mockResolvedValue("just some text");
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
       });
 
       await waitFor(() => expect(result.current.suggestion).toBeNull());

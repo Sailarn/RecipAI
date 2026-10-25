@@ -99,46 +99,58 @@ export function useClipboardLink({ enabled }: UseClipboardLinkOptions) {
     });
   }, []);
 
-  // Re-checked when the tab regains visibility, not just on mount: copying a
-  // link means leaving the app, so the interesting moment is coming back.
+  // Re-checked whenever the user comes back, not just on mount: copying a link
+  // means leaving the app. Chromium rejects readText() with "Document is not
+  // focused" until the window has focus, and visibilitychange fires before
+  // focus returns — so `focus` is the event that actually lands, and a read
+  // from an unfocused document is skipped rather than wasted. A permission
+  // granted mid-session (the Paste button's prompt) also triggers a check.
   useEffect(() => {
     if (!enabled) {
       setSuggestion(null);
       return;
     }
+    if (
+      !canReadBrowserClipboard() ||
+      typeof navigator.permissions?.query !== "function"
+    ) {
+      return;
+    }
     let cancelled = false;
+    let permissionStatus: PermissionStatus | null = null;
 
     const detect = async () => {
-      if (
-        !canReadBrowserClipboard() ||
-        typeof navigator.permissions?.query !== "function"
-      ) {
-        return;
-      }
-      try {
-        const status = await navigator.permissions.query({
-          name: CLIPBOARD_READ,
-        });
-        if (status.state !== "granted") return;
-      } catch {
-        // Unknown permission name (Safari, Firefox) — no silent read available.
+      if (permissionStatus?.state !== "granted" || !document.hasFocus()) {
         return;
       }
       const text = await readBrowserClipboard();
+      if (cancelled) return;
       const link = text ? extractFirstUrl(text) : null;
-      if (cancelled || !link || dismissedRef.current.has(link)) return;
-      setSuggestion(link);
+      setSuggestion(link && !dismissedRef.current.has(link) ? link : null);
     };
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") detect();
     };
 
-    detect();
+    navigator.permissions
+      .query({ name: CLIPBOARD_READ })
+      .then((status) => {
+        if (cancelled) return;
+        permissionStatus = status;
+        status.addEventListener("change", detect);
+        detect();
+      })
+      .catch(() => {
+        // Unknown permission name (Safari, Firefox) — no silent read available.
+      });
     document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", detect);
     return () => {
       cancelled = true;
+      permissionStatus?.removeEventListener("change", detect);
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", detect);
     };
   }, [enabled]);
 
