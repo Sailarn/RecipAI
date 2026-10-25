@@ -472,7 +472,7 @@ describe("POST /api/parse-queue/process", () => {
       expect(insertValues.imageFileId).toBeNull();
     });
 
-    it("keeps original CDN URL when upload fails", async () => {
+    it("saves the recipe without an image when the upload fails", async () => {
       setupDb(baseJob);
       vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
       vi.mocked(uploadImageServer).mockRejectedValue(
@@ -483,7 +483,7 @@ describe("POST /api/parse-queue/process", () => {
 
       const insertValues = vi.mocked(db.insert("" as any).values as any).mock
         .calls[0][0];
-      expect(insertValues.imageUrl).toBe(CDN_URL);
+      expect(insertValues.imageUrl).toBeNull();
       expect(insertValues.imageFileId).toBeNull();
       expect(captureError).toHaveBeenCalled();
     });
@@ -499,7 +499,7 @@ describe("POST /api/parse-queue/process", () => {
 
       const insertValues = vi.mocked(db.insert("" as any).values as any).mock
         .calls[0][0];
-      expect(insertValues.imageUrl).toBe(CDN_URL);
+      expect(insertValues.imageUrl).toBeNull();
       expect(captureError).not.toHaveBeenCalled();
     });
   });

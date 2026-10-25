@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getOptimizedUrl } from "@/lib/imagekit-url";
-import { isExpiredSourceUrl } from "@/lib/upload/expired-source-url";
+import { getOptimizedUrl, isImageKitUrl } from "@/lib/imagekit-url";
 
 const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL ?? "";
 
@@ -35,10 +34,11 @@ export const RecipeImage = ({
   imageCropHeight,
 }: RecipeImageProps) => {
   const [errored, setErrored] = useState(false);
-  // An expired signed CDN URL would hang rather than fail, so skip straight to
-  // the placeholder instead of waiting out the request.
-  const unusable = !imageUrl || isExpiredSourceUrl(imageUrl);
-  const src = errored || unusable ? PLACEHOLDER_URL : imageUrl;
+  // Only our own ImageKit copies are shown. Anything else is a source-site
+  // URL left behind by a failed mirror: social CDNs sign and expire those,
+  // and an expired Instagram URL hangs ~30s instead of failing — so never
+  // request one, go straight to the placeholder.
+  const src = !errored && isImageKitUrl(imageUrl) ? imageUrl : PLACEHOLDER_URL;
   const optimizedSrc = getOptimizedUrl(src, width);
   // Direct <img> (not next/image) so requests hit ImageKit's CDN and are cached
   // by the service worker. priority drives eager+high for the above-the-fold

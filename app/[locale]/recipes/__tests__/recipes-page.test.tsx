@@ -148,11 +148,14 @@ describe("RecipesPage", () => {
     expect(screen.getByText(/12 servings/i)).toBeInTheDocument();
   });
 
-  it("passes non-ImageKit image URLs through unchanged", async () => {
+  it("never requests a non-ImageKit image URL", async () => {
     render(<RecipesPage />);
 
     const cakeImage = await screen.findByAltText("Chocolate Cake");
-    expect(cakeImage).toHaveAttribute("src", "https://example.com/cake.jpg");
+    expect(cakeImage).not.toHaveAttribute(
+      "src",
+      "https://example.com/cake.jpg",
+    );
   });
 
   it("does not render create recipe button (moved to parse page)", async () => {

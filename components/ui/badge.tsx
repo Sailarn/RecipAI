@@ -16,8 +16,11 @@ interface BadgeProps {
  *   font: 9px / 700 / Inter
  *   padding: 2px 8px
  *   border-radius: 99px
- *   backdrop-filter: blur(8px)
  *   border: 1px solid {textColor}30
+ *
+ * No backdrop-filter: the badge sits on every recipe card, and a blur per
+ * card (nested inside the thumbnail's dark pill) re-composites on each scroll
+ * frame — the main source of list jank on phones.
  */
 export function Badge({ category, className = "", style }: BadgeProps) {
   const categoryLabel = useCategoryLabel();
@@ -34,8 +37,6 @@ export function Badge({ category, className = "", style }: BadgeProps) {
         borderRadius: 99,
         background: badge.bg,
         color: badge.color,
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
         border: `1px solid ${badge.color}30`,
         lineHeight: 1,
         display: "inline-block",

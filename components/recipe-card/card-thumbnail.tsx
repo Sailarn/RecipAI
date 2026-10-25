@@ -42,7 +42,7 @@ export function CardThumbnail({
       />
       {recipe.category && (
         <div className="absolute top-[7px] left-[7px]">
-          <div className="bg-[rgba(0,0,0,0.45)] rounded-full backdrop-blur-[8px] inline-flex">
+          <div className="bg-[rgba(0,0,0,0.6)] rounded-full inline-flex">
             <Badge category={recipe.category} />
           </div>
         </div>
@@ -51,7 +51,7 @@ export function CardThumbnail({
         <div
           key="tried-badge"
           data-testid="badge-tried"
-          className="absolute top-[7px] right-[7px] w-[22px] h-[22px] rounded-full bg-[rgba(34,197,94,0.90)] backdrop-blur-[8px] border-[1.5px] border-[rgba(134,239,172,0.60)] shadow-[0_2px_8px_rgba(0,0,0,0.35)] flex items-center justify-center animate-[tickIn_0.35s_cubic-bezier(0.34,1.56,0.64,1)_both]"
+          className="absolute top-[7px] right-[7px] w-[22px] h-[22px] rounded-full bg-[rgba(34,197,94,0.90)] border-[1.5px] border-[rgba(134,239,172,0.60)] shadow-[0_2px_8px_rgba(0,0,0,0.35)] flex items-center justify-center animate-[tickIn_0.35s_cubic-bezier(0.34,1.56,0.64,1)_both]"
         >
           <Check
             width={12}

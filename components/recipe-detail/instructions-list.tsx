@@ -8,6 +8,7 @@ import {
   shouldShowSections,
 } from "@/lib/db/recipe-sections";
 import type { RecipeSection, Step } from "@/lib/db/schema";
+import { isImageKitUrl } from "@/lib/imagekit-url";
 
 interface InstructionsListProps {
   instructions: Step[];
@@ -56,7 +57,7 @@ export function InstructionsList({
                     {step.order}
                   </div>
                   <div className="flex-1">
-                    {step.imageUrl && (
+                    {isImageKitUrl(step.imageUrl) && (
                       <div className="relative w-full overflow-hidden mb-2 h-[160px] rounded-[10px]">
                         <RecipeImage
                           imageUrl={step.imageUrl}

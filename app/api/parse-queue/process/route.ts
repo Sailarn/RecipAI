@@ -138,8 +138,9 @@ export async function POST(req: NextRequest) {
     // so the stored result — and therefore the result cache — holds a stable
     // URL. Source CDN URLs (Instagram's especially) expire within hours, which
     // is why a second, cached parse otherwise rendered a broken image. Runs
-    // server-side, so anonymous parses get a durable image too. Best-effort:
-    // keep the source URL if the upload fails.
+    // server-side, so anonymous parses get a durable image too. When the
+    // upload fails the recipe gets no image: the app only shows ImageKit
+    // copies, and a source CDN URL would expire anyway.
     let imageUrl = recipe.imageUrl;
     let imageFileId = recipe.imageFileId;
     if (imageUrl && !isImageKitUrl(imageUrl)) {
@@ -148,14 +149,12 @@ export async function POST(req: NextRequest) {
         imageUrl = uploaded.url;
         imageFileId = uploaded.fileId;
       } catch (uploadError) {
-        // Best-effort: keep the source URL so the parse still completes. A CDN
-        // that refuses or drops the fetch is an expected outcome of parsing
-        // third-party content — log it (the recipe still stores an *expiring*
-        // URL, so it needs a trace) but don't report it. Anything else is a
-        // real upload defect and stays captured.
+        // The parse still completes, just without an image. A CDN that
+        // refuses or drops the fetch is an expected outcome of parsing
+        // third-party content — log it (via log(), not logger, which is
+        // silent in production) but don't report it. Anything else is a real
+        // upload defect and stays captured.
         if (isSourceImageUnavailable(uploadError)) {
-          // Via log(), not logger: the recipe now holds an expiring URL, and
-          // logger is silent in production — this must reach Axiom.
           log("warn", "image_mirror_failed", {
             jobId,
             host: URL.canParse(imageUrl) ? new URL(imageUrl).host : null,
@@ -164,6 +163,8 @@ export async function POST(req: NextRequest) {
         } else {
           ApiError.capture(uploadError, req);
         }
+        imageUrl = undefined;
+        imageFileId = undefined;
       }
     }
     const finalRecipe: ParsedRecipe = { ...recipe, imageUrl, imageFileId };
