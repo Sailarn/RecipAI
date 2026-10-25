@@ -140,6 +140,10 @@ A parsed recipe's image lives on the origin site's CDN, which signs URLs, locks 
 **Use `getBoundingClientRect`, not `scrollHeight`.**
 `scrollHeight` is inflated under `overflow: hidden`. Compare `getBoundingClientRect` heights to detect actual overflow. See `components/recipe-form/use-scroll-overflow.ts`.
 
+**Don't lazy-load images inside the virtualized recipe list.** The virtualizer already mounts only rows near the viewport (`overscan: 3`) and unmounts the rest, so each time a row scrolls back in its `<img>` is new — and `loading="lazy"` defers it again even when the file is cached, leaving cards blank for a beat. `CardThumbnail` passes `loading="eager"` to `RecipeImage`; let the virtualizer decide what loads.
+
+**Expired social CDN image URLs hang instead of failing.** When the parse-time ImageKit mirror fails, the recipe keeps the source URL, and Instagram/TikTok sign those with an expiry (`oe` hex seconds on fbcdn/cdninstagram, `x-expires` on tiktokcdn). Past it Instagram's CDN doesn't 403 — the request hangs ~30s before `onError` swaps in the placeholder. `isExpiredSourceUrl()` (`lib/upload/expired-source-url.ts`) reads the expiry so `RecipeImage` goes straight to the placeholder. Mirror failures are logged to Axiom as `image_mirror_failed` (host + reason) — `logger.warn` is silent in production, which is why nobody saw these.
+
 **A child's layout effect can't read a ref its parent attaches.** React attaches refs and runs layout effects child-first in the same commit, so a parent's `ref={scrollRef}` is still `null` inside a child's `useLayoutEffect`. Passive `useEffect` runs after the whole commit and sees it. `useGridLayout` (`components/recipe-virtual-list/use-grid-layout.ts`) measures the recipes page's scroll container this way and seeds its first render from `window.innerWidth` so desktop doesn't flash the phone grid. Symptom: a measuring hook silently keeps its fallback value.
 
 ---

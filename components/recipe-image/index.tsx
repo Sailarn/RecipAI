@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getOptimizedUrl } from "@/lib/imagekit-url";
+import { isExpiredSourceUrl } from "@/lib/upload/expired-source-url";
 
 const PLACEHOLDER_URL = process.env.NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL ?? "";
 
@@ -10,6 +11,10 @@ interface RecipeImageProps {
   title: string;
   width?: number;
   priority?: boolean;
+  /** Overrides the priority-derived default. Virtualized lists pass "eager":
+   *  they only mount rows near the viewport, so native lazy-loading just
+   *  re-defers every image each time a row scrolls back into view. */
+  loading?: "lazy" | "eager";
   objectPosition?: string;
   imageCropX?: number;
   imageCropY?: number;
@@ -22,6 +27,7 @@ export const RecipeImage = ({
   title,
   width = 800,
   priority = false,
+  loading,
   objectPosition = "50% 50%",
   imageCropX,
   imageCropY,
@@ -29,12 +35,15 @@ export const RecipeImage = ({
   imageCropHeight,
 }: RecipeImageProps) => {
   const [errored, setErrored] = useState(false);
-  const src = errored || !imageUrl ? PLACEHOLDER_URL : imageUrl;
+  // An expired signed CDN URL would hang rather than fail, so skip straight to
+  // the placeholder instead of waiting out the request.
+  const unusable = !imageUrl || isExpiredSourceUrl(imageUrl);
+  const src = errored || unusable ? PLACEHOLDER_URL : imageUrl;
   const optimizedSrc = getOptimizedUrl(src, width);
   // Direct <img> (not next/image) so requests hit ImageKit's CDN and are cached
   // by the service worker. priority drives eager+high for the above-the-fold
   // hero; everything else lazy-loads.
-  const loading = priority ? "eager" : "lazy";
+  const loadingMode = loading ?? (priority ? "eager" : "lazy");
   const fetchPriority = priority ? "high" : "auto";
 
   const hasCrop =
@@ -78,7 +87,7 @@ export const RecipeImage = ({
             <img
               src={optimizedSrc}
               alt={title}
-              loading={loading}
+              loading={loadingMode}
               fetchPriority={fetchPriority}
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
@@ -99,7 +108,7 @@ export const RecipeImage = ({
       <img
         src={optimizedSrc}
         alt={title}
-        loading={loading}
+        loading={loadingMode}
         fetchPriority={fetchPriority}
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"

@@ -33,6 +33,7 @@ export function CardThumbnail({
         title={recipe.title}
         width={imageWidth}
         priority={priority}
+        loading="eager"
         objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
         imageCropX={recipe.imageCropX}
         imageCropY={recipe.imageCropY}

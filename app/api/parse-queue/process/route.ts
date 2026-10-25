@@ -11,6 +11,7 @@ import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { saveAndSendRecipe } from "@/lib/telegram/save-and-send-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
+import { log } from "@/lib/telemetry";
 import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
@@ -153,8 +154,11 @@ export async function POST(req: NextRequest) {
         // URL, so it needs a trace) but don't report it. Anything else is a
         // real upload defect and stays captured.
         if (isSourceImageUnavailable(uploadError)) {
-          logger.warn("[parse-queue] source image unavailable", {
+          // Via log(), not logger: the recipe now holds an expiring URL, and
+          // logger is silent in production — this must reach Axiom.
+          log("warn", "image_mirror_failed", {
             jobId,
+            host: URL.canParse(imageUrl) ? new URL(imageUrl).host : null,
             message: uploadError.message,
           });
         } else {
