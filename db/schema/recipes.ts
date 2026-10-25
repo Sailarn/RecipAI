@@ -27,7 +27,7 @@ export const recipes = pgTable("recipes", {
   prepTime: integer("prep_time"),
   cookTime: integer("cook_time"),
   totalTime: integer("total_time"),
-  servings: integer("servings").notNull(),
+  servings: integer("servings"),
   ingredients: jsonb("ingredients").notNull().default([]),
   instructions: jsonb("instructions").notNull().default([]),
   // Named groups referenced by ingredient/step `sectionId` (see lib/db/schema.ts

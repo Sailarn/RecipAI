@@ -44,6 +44,28 @@ describe("buildSavedRecipeShape", () => {
     });
   });
 
+  it("stores units as canonical codes and drops empty ones", () => {
+    const result = buildSavedRecipeShape(
+      {
+        ingredients: [
+          { item: "flour", amount: 250, unit: "г" },
+          { item: "salt", amount: 1, unit: "Pincée" },
+          { item: "pepper", unit: "" },
+          { item: "parsley", amount: 1, unit: "bunch" },
+        ],
+        instructions: [],
+      },
+      () => "row-id",
+    );
+
+    expect(result.ingredients.map((ingredient) => ingredient.unit)).toEqual([
+      "g",
+      "pinch",
+      undefined,
+      "bunch",
+    ]);
+  });
+
   it("filters invalid modifier keys from untrusted parsed data", () => {
     const result = buildSavedRecipeShape(
       {

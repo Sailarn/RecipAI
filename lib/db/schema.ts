@@ -113,7 +113,8 @@ export interface Recipe {
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;
-  servings: number;
+  /** null = the source never said; the UI hides servings rather than guess. */
+  servings: number | null;
   ingredients: RecipeIngredient[];
   instructions: Step[];
   /** Named groups referenced by ingredient/step `sectionId`. Empty/absent = flat recipe. */
@@ -158,7 +159,8 @@ export interface ParsedRecipe {
   description?: string;
   prepTime?: number;
   cookTime?: number;
-  servings: number;
+  /** null = the source never said; the UI hides servings rather than guess. */
+  servings: number | null;
   ingredients: ParsedIngredient[];
   instructions: Array<{
     order: number;
@@ -177,7 +179,8 @@ export interface ParsedRecipeEntry {
   description?: string;
   prepTime?: number;
   cookTime?: number;
-  servings: number;
+  /** null = the source never said; the UI hides servings rather than guess. */
+  servings: number | null;
   ingredients: ParsedIngredient[];
   instructions: Array<{
     order: number;

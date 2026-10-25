@@ -25,11 +25,11 @@ export function createRecipeSchema(t: (key: string) => string) {
     imageUrl: z.string().url(t("imageUrlInvalid")).or(z.literal("")).optional(),
     prepTime: z.number().positive().optional(),
     cookTime: z.number().positive().optional(),
+    // Left empty = servings unknown (stored as null, hidden in the UI).
     servings: z
       .string()
-      .min(1, t("servingsRequired"))
-      .transform((val) => parseInt(val, 10))
-      .refine((val) => !Number.isNaN(val) && val > 0 && Number.isInteger(val), {
+      .transform((val) => (val.trim() === "" ? null : Number(val)))
+      .refine((val) => val === null || (Number.isInteger(val) && val > 0), {
         message: t("servingsRequired"),
       }),
     ingredients: z

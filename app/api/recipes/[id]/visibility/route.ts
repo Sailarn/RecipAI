@@ -28,7 +28,7 @@ function isCompleteRecipe(
   return (
     typeof recipe?.id === "string" &&
     typeof recipe.title === "string" &&
-    typeof recipe.servings === "number" &&
+    (typeof recipe.servings === "number" || recipe.servings === null) &&
     Array.isArray(recipe.ingredients) &&
     Array.isArray(recipe.instructions) &&
     isValidDate(recipe.createdAt) &&

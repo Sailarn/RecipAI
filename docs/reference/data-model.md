@@ -39,7 +39,7 @@ interface Recipe {
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;
-  servings: number;
+  servings: number | null;             // null = source never said; UI hides it
   ingredients: RecipeIngredient[];
   instructions: Step[];
   sections?: RecipeSection[];
@@ -71,7 +71,7 @@ server deleted (`syncedAt` set → delete locally). See
 interface RecipeIngredient {
   id: string;
   amount?: number;
-  unit?: string;
+  unit?: string;                       // canonical code (g, kg, ml, l, tsp, tbsp, pcs, pinch) or raw text
   item: string;                        // cleaned display noun ("Mozzarella")
   modifiers?: PreparationModifier[];   // curated enum KEYs, display-only
   sectionId?: string | null;           // references Recipe.sections
@@ -205,7 +205,7 @@ To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-
 
 ### `recipes`
 
-Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), focal/crop percentages in `image_focus_*` and `image_crop_*`, and `ingredients` / `instructions` / `sections` / `collection_ids` / `canonical_ingredient_ids` / `unrecognized_ingredients` stored as jsonb. `sections` is added by migration `0023_clear_vanisher.sql`; apply that additive migration before deploying code that selects or writes the column. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
+Mirrors the Dexie `Recipe` shape. `id` (text PK), `user_id` (FK → `user`, cascade delete), focal/crop percentages in `image_focus_*` and `image_crop_*`, and `ingredients` / `instructions` / `sections` / `collection_ids` / `canonical_ingredient_ids` / `unrecognized_ingredients` stored as jsonb. `sections` is added by migration `0023_clear_vanisher.sql`; apply that additive migration before deploying code that selects or writes the column. `servings` is nullable since migration `0025_jittery_purifiers.sql` (null = the source never stated it; the UI hides servings and the calculator shows amounts unscaled) — apply it before deploying code that writes null. Ingredient `unit`s are canonicalized on save by `canonicalUnit()` (`lib/units.ts`): known spellings in any language become the code, blanks are dropped, anything unclassified is kept verbatim. `is_public` is `boolean NOT NULL DEFAULT false`; only the dedicated visibility boundary changes publication state.
 
 ### `collections`
 

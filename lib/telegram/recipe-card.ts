@@ -9,7 +9,7 @@ export interface RecipeCardData {
   title: string;
   category?: string | null;
   totalTime?: number | null;
-  servings: number;
+  servings: number | null;
   ingredientCount: number;
   imageUrl?: string | null;
 }
@@ -28,7 +28,9 @@ function escapeHtml(text: string): string {
 export function recipeCardStats(data: RecipeCardData): string {
   return [
     data.totalTime ? `⏱ ${data.totalTime} min` : null,
-    `🍽 ${data.servings} serving${data.servings === 1 ? "" : "s"}`,
+    data.servings
+      ? `🍽 ${data.servings} serving${data.servings === 1 ? "" : "s"}`
+      : null,
     `🧂 ${data.ingredientCount} ingredient${data.ingredientCount === 1 ? "" : "s"}`,
   ]
     .filter((part): part is string => part !== null)

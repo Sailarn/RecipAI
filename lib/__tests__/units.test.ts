@@ -40,11 +40,28 @@ describe("toMeasurementUnit", () => {
       expect(toMeasurementUnit("pieces")).toBe("pcs");
       expect(toMeasurementUnit("millilitres")).toBe("ml");
     });
+
+    it("resolves pinch in every language it has reached the field in", () => {
+      expect(toMeasurementUnit("pinch")).toBe("pinch");
+      expect(toMeasurementUnit("Pincée")).toBe("pinch");
+      expect(toMeasurementUnit("щіпка")).toBe("pinch");
+      expect(toMeasurementUnit("щепотка")).toBe("pinch");
+    });
+
+    it("counts garlic cloves as pieces", () => {
+      expect(toMeasurementUnit("cloves")).toBe("pcs");
+      expect(toMeasurementUnit("зубчики")).toBe("pcs");
+    });
+
+    it("resolves the long Russian spoon abbreviations", () => {
+      expect(toMeasurementUnit("ч.ложки")).toBe("tsp");
+      expect(toMeasurementUnit("ст.ложки")).toBe("tbsp");
+    });
   });
 
   describe("unknown values", () => {
     it("returns null so the caller can keep the raw text", () => {
-      expect(toMeasurementUnit("щіпка")).toBeNull();
+      expect(toMeasurementUnit("жменя")).toBeNull();
       expect(toMeasurementUnit("bunch")).toBeNull();
       expect(toMeasurementUnit("")).toBeNull();
     });
@@ -61,6 +78,7 @@ describe("unitLabel", () => {
       expect(unitLabel("tsp", "ua")).toBe("ч. л.");
       expect(unitLabel("tbsp", "ua")).toBe("ст. л.");
       expect(unitLabel("pcs", "ua")).toBe("шт");
+      expect(unitLabel("pinch", "ua")).toBe("щіпка");
     });
   });
 
@@ -78,8 +96,8 @@ describe("unitLabel", () => {
 
   describe("unrecognised units", () => {
     it("returns the stored text untouched in both locales", () => {
-      expect(unitLabel("щіпка", "ua")).toBe("щіпка");
-      expect(unitLabel("щіпка", "en")).toBe("щіпка");
+      expect(unitLabel("жменя", "ua")).toBe("жменя");
+      expect(unitLabel("жменя", "en")).toBe("жменя");
       expect(unitLabel("bunch", "ua")).toBe("bunch");
     });
   });

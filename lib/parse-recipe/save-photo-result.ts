@@ -29,7 +29,7 @@ export async function savePhotoParseResult(
     description: recipe.description,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
-    servings: recipe.servings ?? 1,
+    servings: recipe.servings ?? null,
     ingredients: recipe.ingredients,
     instructions: recipe.instructions,
     imageUrl: recipe.imageUrl,

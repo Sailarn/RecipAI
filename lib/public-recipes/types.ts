@@ -19,7 +19,7 @@ export interface PublicRecipe {
   prepTime?: number;
   cookTime?: number;
   totalTime?: number;
-  servings: number;
+  servings: number | null;
   ingredients: RecipeIngredient[];
   instructions: Step[];
   sections?: RecipeSection[];

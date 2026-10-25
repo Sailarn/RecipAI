@@ -4,6 +4,7 @@ import type {
   RecipeSection,
   Step,
 } from "@/lib/db/schema";
+import { canonicalUnit } from "@/lib/units";
 import { generateId } from "@/lib/utils";
 import { buildSectionsFromLabels, sectionIdForLabel } from "./build-sections";
 import { isPreparationModifier } from "./modifiers";
@@ -42,7 +43,7 @@ export function buildSavedRecipeShape(
       id: nextId(),
       item: ingredient.item,
       amount: ingredient.amount,
-      unit: ingredient.unit,
+      unit: canonicalUnit(ingredient.unit),
       modifiers: (ingredient.modifiers ?? []).filter(isPreparationModifier),
       sectionId: sectionIdForLabel(ingredient.section, sectionIdByLabel),
       ...(ingredient.original && ingredient.original !== ingredient.item

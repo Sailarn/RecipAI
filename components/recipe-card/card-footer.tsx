@@ -18,7 +18,7 @@ export function CardFooter({ title, servings, pantryMatch }: CardFooterProps) {
       <div className="flex items-center mt-auto">
         {servings && (
           <p className="text-[11px] text-[var(--fg-2)] group-data-[layout=tile]/card:text-white/80">
-            🍽️ {servings} {t("servings")}
+            🍽️ {t("servingsCount", { count: servings })}
           </p>
         )}
         {pantryMatch?.missing === 0 && (

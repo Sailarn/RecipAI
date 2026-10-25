@@ -176,6 +176,13 @@
       "when": 1784498622696,
       "tag": "0024_same_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792941539258,
+      "tag": "0025_jittery_purifiers",
+      "breakpoints": true
     }
   ]
 }

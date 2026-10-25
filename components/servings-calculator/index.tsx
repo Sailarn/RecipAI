@@ -32,7 +32,7 @@ function groupWithIndex(
 }
 
 interface ServingsCalculatorProps {
-  originalServings: number;
+  originalServings: number | null;
   ingredients: RecipeIngredient[];
   sections?: RecipeSection[];
   canonicalIngredientIds?: string[];
@@ -65,61 +65,75 @@ export function ServingsCalculator({
     canonicalIngredientIds,
     locale,
   });
+  // Unknown servings: nothing to scale from, so the counter is hidden and the
+  // amounts show as written.
+  const servingsKnown = originalServings !== null;
 
   return (
     <div className="glass-card mb-4" style={{ borderRadius: 20 }}>
-      <div className="px-[14px] py-3 border-b border-b-[var(--border-subtle)]">
-        <div className="flex items-center justify-between mb-[9px]">
-          <span className="text-[11px] font-semibold text-[var(--fg-2)] uppercase tracking-[0.06em]">
-            {t("servings")}
-          </span>
-          {hasCanonical && (
-            <div className="flex rounded-[8px] border border-[var(--border-subtle)] overflow-hidden">
-              {(["parsed", "original"] as const).map((mode) => {
-                const isActive = (mode === "parsed") === useCanonical;
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setUseCanonical(mode === "parsed")}
-                    className={cn(
-                      "py-[3px] px-[9px] text-[10px] font-semibold border-0 cursor-pointer transition-[background,color] duration-150",
-                      isActive
-                        ? "bg-[var(--food-accent)] text-white"
-                        : "bg-transparent text-[var(--fg-3)]",
-                    )}
-                  >
-                    {mode === "parsed"
-                      ? t("simplifiedMode")
-                      : t("originalMode")}
-                  </button>
-                );
-              })}
+      {(servingsKnown || hasCanonical) && (
+        <div className="px-[14px] py-3 border-b border-b-[var(--border-subtle)]">
+          <div
+            className={cn(
+              "flex items-center",
+              servingsKnown ? "justify-between mb-[9px]" : "justify-end",
+            )}
+          >
+            {servingsKnown && (
+              <span className="text-[11px] font-semibold text-[var(--fg-2)] uppercase tracking-[0.06em]">
+                {t("servings")}
+              </span>
+            )}
+            {hasCanonical && (
+              <div className="flex rounded-[8px] border border-[var(--border-subtle)] overflow-hidden">
+                {(["parsed", "original"] as const).map((mode) => {
+                  const isActive = (mode === "parsed") === useCanonical;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setUseCanonical(mode === "parsed")}
+                      className={cn(
+                        "py-[3px] px-[9px] text-[10px] font-semibold border-0 cursor-pointer transition-[background,color] duration-150",
+                        isActive
+                          ? "bg-[var(--food-accent)] text-white"
+                          : "bg-transparent text-[var(--fg-3)]",
+                      )}
+                    >
+                      {mode === "parsed"
+                        ? t("simplifiedMode")
+                        : t("originalMode")}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          {servingsKnown && (
+            <div className="flex items-center gap-[14px]">
+              <button
+                type="button"
+                aria-label={t("decreaseServings")}
+                onClick={() => setServings((prev) => Math.max(1, prev - 1))}
+                className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
+              >
+                <MinusIcon size={14} />
+              </button>
+              <span className="text-[18px] font-bold text-[var(--fg-1)] min-w-6 text-center">
+                {servings}
+              </span>
+              <button
+                type="button"
+                aria-label={t("increaseServings")}
+                onClick={() => setServings((prev) => prev + 1)}
+                className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
+              >
+                <PlusIcon size={14} />
+              </button>
             </div>
           )}
         </div>
-        <div className="flex items-center gap-[14px]">
-          <button
-            type="button"
-            aria-label={t("decreaseServings")}
-            onClick={() => setServings((prev) => Math.max(1, prev - 1))}
-            className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
-          >
-            <MinusIcon size={14} />
-          </button>
-          <span className="text-[18px] font-bold text-[var(--fg-1)] min-w-6 text-center">
-            {servings}
-          </span>
-          <button
-            type="button"
-            aria-label={t("increaseServings")}
-            onClick={() => setServings((prev) => prev + 1)}
-            className="w-8 h-8 rounded-[10px] bg-[var(--glass-card-bg)] border border-[var(--glass-card-border)] backdrop-blur-[12px] text-[var(--fg-1)] cursor-pointer flex items-center justify-center"
-          >
-            <PlusIcon size={14} />
-          </button>
-        </div>
-      </div>
+      )}
 
       {(() => {
         const groups = groupWithIndex(ingredients, sections);

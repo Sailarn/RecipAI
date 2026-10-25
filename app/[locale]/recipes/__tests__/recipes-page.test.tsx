@@ -13,7 +13,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string, values?: { count?: number }) =>
+    key === "servingsCount" ? `${values?.count} servings` : key,
 }));
 
 vi.mock("next/image", () => ({

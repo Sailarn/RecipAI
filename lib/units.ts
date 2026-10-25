@@ -17,6 +17,7 @@ export const MEASUREMENT_UNITS = {
   tsp: { en: "tsp", ua: "ч. л." },
   tbsp: { en: "tbsp", ua: "ст. л." },
   pcs: { en: "pcs", ua: "шт" },
+  pinch: { en: "pinch", ua: "щіпка" },
 } as const;
 
 export type MeasurementUnit = keyof typeof MEASUREMENT_UNITS;
@@ -103,6 +104,7 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   чайнаяложка: "tsp",
   чайныеложки: "tsp",
   чайныхложек: "tsp",
+  чложки: "tsp",
 
   tbsp: "tbsp",
   tbsps: "tbsp",
@@ -118,6 +120,7 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   столоваяложка: "tbsp",
   столовыеложки: "tbsp",
   столовыхложек: "tbsp",
+  стложки: "tbsp",
 
   pcs: "pcs",
   pc: "pcs",
@@ -129,6 +132,29 @@ const UNIT_ALIASES: Record<string, MeasurementUnit> = {
   штук: "pcs",
   штучка: "pcs",
   штучки: "pcs",
+  // A garlic clove is counted, not measured.
+  clove: "pcs",
+  cloves: "pcs",
+  зубчик: "pcs",
+  зубчика: "pcs",
+  зубчики: "pcs",
+  зубчиків: "pcs",
+  зубок: "pcs",
+
+  pinch: "pinch",
+  pinches: "pinch",
+  pincée: "pinch",
+  pincee: "pinch",
+  pizzico: "pinch",
+  prise: "pinch",
+  щіпка: "pinch",
+  щіпки: "pinch",
+  щіпок: "pinch",
+  щіпочка: "pinch",
+  щепотка: "pinch",
+  щепотки: "pinch",
+  щепоток: "pinch",
+  щепоть: "pinch",
 };
 
 // Collapsing whitespace and periods lets one alias entry absorb every spacing
@@ -143,8 +169,19 @@ export function toMeasurementUnit(unit: string): MeasurementUnit | null {
 }
 
 /**
+ * The unit to store for a parsed ingredient: the canonical code when the value
+ * is a known unit, nothing when it is blank, and otherwise the raw text — an
+ * unclassified unit ("bunch") still means something to the reader.
+ */
+export function canonicalUnit(unit: string | undefined): string | undefined {
+  const trimmed = unit?.trim();
+  if (!trimmed) return undefined;
+  return toMeasurementUnit(trimmed) ?? trimmed;
+}
+
+/**
  * Display label for a stored unit in the active locale. Unrecognised values are
- * returned untouched — a unit we can't classify (e.g. "щіпка", "bunch") is still
+ * returned untouched — a unit we can't classify (e.g. "жменя", "bunch") is still
  * meaningful to the reader, so it must never be dropped or mangled.
  */
 export function unitLabel(unit: string, locale: Locale): string {

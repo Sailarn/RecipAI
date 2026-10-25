@@ -44,6 +44,7 @@
     "createRecipe": "Створити рецепт",
     "updateRecipe": "Оновити рецепт",
     "servings": "порцій",
+    "servingsCount": "{count, plural, one {# порція} few {# порції} many {# порцій} other {# порції}}",
     "recipeNotFound": "Рецепт не знайдено",
     "backToRecipes": "Назад до рецептів",
     "ingredients": "Інгредієнти",

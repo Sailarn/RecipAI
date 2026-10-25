@@ -205,7 +205,7 @@ describe("useParseJobWatcher", () => {
       );
     });
 
-    it("defaults servings to 1 when result has no servings", async () => {
+    it("keeps servings unknown when result has no servings", async () => {
       vi.mocked(getJobIds).mockReturnValue(["job-1"]);
       mockFetch.mockResolvedValue(
         makeResponse({
@@ -218,7 +218,7 @@ describe("useParseJobWatcher", () => {
 
       await waitFor(() => expect(db.parsedRecipes.add).toHaveBeenCalled());
       const entry = vi.mocked(db.parsedRecipes.add).mock.calls[0][0];
-      expect(entry.servings).toBe(1);
+      expect(entry.servings).toBeNull();
     });
   });
 

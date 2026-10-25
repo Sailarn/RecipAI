@@ -31,7 +31,7 @@ export async function saveParsedRecipeForUser({
     prepTime: parsed.prepTime ?? null,
     cookTime: parsed.cookTime ?? null,
     totalTime: (parsed.prepTime || 0) + (parsed.cookTime || 0) || null,
-    servings: parsed.servings ?? 1,
+    servings: parsed.servings ?? null,
     ingredients: savedShape.ingredients,
     instructions: savedShape.instructions,
     sections: savedShape.sections,

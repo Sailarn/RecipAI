@@ -26,9 +26,10 @@ describe("createRecipeSchema", () => {
   });
 
   describe("servings", () => {
-    it("fails when servings is empty string", () => {
+    it("treats an empty servings field as unknown", () => {
       const result = schema.safeParse({ ...validBase, servings: "" });
-      expect(result.success).toBe(false);
+
+      expect(result.success && result.data.servings).toBeNull();
     });
 
     it("fails when servings is non-numeric", () => {

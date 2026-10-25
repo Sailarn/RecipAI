@@ -44,6 +44,7 @@
     "createRecipe": "Create Recipe",
     "updateRecipe": "Update Recipe",
     "servings": "servings",
+    "servingsCount": "{count, plural, one {# serving} other {# servings}}",
     "recipeNotFound": "Recipe not found",
     "backToRecipes": "Back to recipes",
     "ingredients": "Ingredients",

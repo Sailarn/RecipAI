@@ -10,7 +10,8 @@ import { trackEvent } from "@/lib/telemetry";
 export type StockStatus = "in" | "out" | "unknown";
 
 interface UseServingsCalculatorProps {
-  originalServings: number;
+  /** null when the source never stated servings — amounts stay unscaled. */
+  originalServings: number | null;
   canonicalIngredientIds?: string[];
   locale?: string;
 }
@@ -20,7 +21,7 @@ export function useServingsCalculator({
   canonicalIngredientIds,
   locale,
 }: UseServingsCalculatorProps) {
-  const [servings, setServings] = useState(originalServings);
+  const [servings, setServings] = useState(originalServings ?? 1);
   const [useCanonical, setUseCanonical] = useState(true);
   const isInitialMount = useRef(true);
   const [canonicalNames, setCanonicalNames] = useState<Map<string, string>>(
@@ -32,7 +33,7 @@ export function useServingsCalculator({
   const normalizationPending = canonicalIngredientIds === undefined;
   const canAddToPantry = (index: number): boolean =>
     Boolean(canonicalIngredientIds?.[index]);
-  const ratio = servings / originalServings;
+  const ratio = originalServings ? servings / originalServings : 1;
 
   const pantryItems = useLiveQuery(() => db.pantry.toArray(), []);
 

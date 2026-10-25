@@ -248,7 +248,7 @@ export async function POST(req: NextRequest) {
         category: finalRecipe.category ?? null,
         totalTime:
           (finalRecipe.prepTime || 0) + (finalRecipe.cookTime || 0) || null,
-        servings: finalRecipe.servings ?? 1,
+        servings: finalRecipe.servings ?? null,
         ingredientCount: finalRecipe.ingredients?.length ?? 0,
         imageUrl: finalRecipe.imageUrl ?? null,
       };

@@ -16,7 +16,7 @@ interface ParsedRecipeData {
   imageUrl?: string;
   prepTime?: number | null;
   cookTime?: number | null;
-  servings?: number;
+  servings?: number | null;
   ingredients?: Array<{
     item: string;
     amount?: number | null;
@@ -72,7 +72,7 @@ export function getDefaultValues(
       imageUrl: recipe.imageUrl || "",
       prepTime: recipe.prepTime,
       cookTime: recipe.cookTime,
-      servings: String(recipe.servings),
+      servings: recipe.servings != null ? String(recipe.servings) : "",
       ingredients: recipe.ingredients.map((ing) => ({
         rowId: ing.id,
         item: ing.item,
@@ -109,7 +109,7 @@ export function getDefaultValues(
       imageUrl: initialData.imageUrl || "",
       prepTime: initialData.prepTime ?? undefined,
       cookTime: initialData.cookTime ?? undefined,
-      servings: String(initialData.servings || 1),
+      servings: initialData.servings ? String(initialData.servings) : "",
       ingredients: initialData.ingredients?.length
         ? initialData.ingredients.map((ing) => ({
             rowId: generateId(),

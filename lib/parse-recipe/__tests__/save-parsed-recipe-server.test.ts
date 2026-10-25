@@ -45,7 +45,7 @@ describe("saveParsedRecipeForUser", () => {
     );
   });
 
-  it("defaults servings to 1 and totalTime to null when absent", async () => {
+  it("stores unknown servings and totalTime as null when absent", async () => {
     await saveParsedRecipeForUser({
       userId: "user-1",
       parsed: {
@@ -58,7 +58,7 @@ describe("saveParsedRecipeForUser", () => {
 
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
-        servings: 1,
+        servings: null,
         totalTime: null,
         sourceUrl: null,
       }),
