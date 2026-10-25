@@ -20,7 +20,11 @@ import { useNavigate } from "@/lib/transitions";
 import { cn } from "@/lib/utils";
 import { CardFooter } from "./card-footer";
 import { CardThumbnail } from "./card-thumbnail";
-import { clampMenuPos } from "./constants";
+import {
+  type CardLayout,
+  clampMenuPos,
+  THUMBNAIL_IMAGE_WIDTH,
+} from "./constants";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -32,6 +36,7 @@ interface RecipeCardProps {
    *  because `navigate.push` renders the detail view in the shell's navigation
    *  stack, outside this page's tree — no provider here would reach it. */
   via: RecipeViewSource;
+  layout?: CardLayout;
 }
 
 export const RecipeCard = memo(function RecipeCard({
@@ -40,6 +45,7 @@ export const RecipeCard = memo(function RecipeCard({
   priority = false,
   pantryMatch,
   via,
+  layout = "compact",
 }: RecipeCardProps) {
   const params = useParams();
   const locale = params.locale as string;
@@ -87,6 +93,7 @@ export const RecipeCard = memo(function RecipeCard({
     <>
       <button
         type="button"
+        data-layout={layout}
         onClick={() => {
           if (didLongPress.current) {
             didLongPress.current = false;
@@ -134,12 +141,16 @@ export const RecipeCard = memo(function RecipeCard({
           }
         }}
         className={cn(
-          "glass-card cursor-pointer h-full flex flex-col gap-0 overflow-hidden p-0 text-left rounded-[22px] select-none [-webkit-touch-callout:none] [transition:box-shadow_0.2s_ease,border-color_0.2s_ease,transform_0.15s_ease]",
+          "group/card glass-card cursor-pointer h-full data-[layout=tile]:aspect-square data-[layout=tile]:relative flex flex-col gap-0 overflow-hidden p-0 text-left rounded-[22px] select-none [-webkit-touch-callout:none] [transition:box-shadow_0.2s_ease,border-color_0.2s_ease,transform_0.15s_ease]",
           hovered &&
             "-translate-y-0.5 shadow-[0_8px_36px_rgba(0,0,0,0.60),inset_0_1px_0_rgba(255,220,130,0.18)] border-[rgba(255,210,130,0.28)]",
         )}
       >
-        <CardThumbnail recipe={recipe} priority={priority} />
+        <CardThumbnail
+          recipe={recipe}
+          priority={priority}
+          imageWidth={THUMBNAIL_IMAGE_WIDTH[layout]}
+        />
         <CardFooter
           title={recipe.title}
           servings={recipe.servings}

@@ -18,18 +18,20 @@ interface CardThumbnailProps {
     | "status"
   >;
   priority?: boolean;
+  imageWidth: number;
 }
 
 export function CardThumbnail({
   recipe,
   priority = false,
+  imageWidth,
 }: CardThumbnailProps) {
   return (
-    <div className="relative w-full h-24 overflow-hidden">
+    <div className="relative w-full h-24 overflow-hidden group-data-[layout=tile]/card:absolute group-data-[layout=tile]/card:inset-0 group-data-[layout=tile]/card:h-full">
       <RecipeImage
         imageUrl={recipe.imageUrl}
         title={recipe.title}
-        width={300}
+        width={imageWidth}
         priority={priority}
         objectPosition={`${recipe.imageFocusX ?? 50}% ${recipe.imageFocusY ?? 50}%`}
         imageCropX={recipe.imageCropX}

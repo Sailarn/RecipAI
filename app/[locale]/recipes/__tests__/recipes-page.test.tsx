@@ -65,6 +65,7 @@ vi.mock("@tanstack/react-virtual", () => ({
           lane: 0,
         })),
       measureElement: () => {},
+      measure: () => {},
     };
   },
 }));

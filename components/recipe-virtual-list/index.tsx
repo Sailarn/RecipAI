@@ -2,11 +2,16 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
-import { type RefObject, useMemo } from "react";
+import { type RefObject, useEffect, useMemo } from "react";
 import { RecipeCard } from "@/components/recipe-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import type { RecipeViewSource } from "@/lib/telemetry/events";
+import {
+  type GridLayout,
+  gridTemplateColumns,
+  useGridLayout,
+} from "./use-grid-layout";
 
 const skeletonCardIds = ["a", "b", "c", "d", "e", "f"];
 
@@ -21,15 +26,23 @@ interface RecipeVirtualListProps {
   via: RecipeViewSource;
 }
 
-function RecipeGridSkeleton() {
+function RecipeGridSkeleton({
+  layout,
+  columns,
+}: Pick<GridLayout, "layout" | "columns">) {
   return (
     <div
       data-testid="recipe-grid-skeleton"
-      className="mt-3 grid grid-cols-2 gap-2.5 px-3.5"
+      className="mt-3 grid gap-2.5 px-3.5"
+      style={{ gridTemplateColumns: gridTemplateColumns(columns) }}
     >
       {skeletonCardIds.map((id) => (
-        <div key={id} className="flex flex-col gap-2 rounded-xl bg-card p-2">
-          <Skeleton className="h-24 w-full rounded-lg" />
+        <div
+          key={id}
+          data-layout={layout}
+          className="flex flex-col gap-2 rounded-xl bg-card p-2 data-[layout=tile]:aspect-square"
+        >
+          <Skeleton className="h-24 w-full rounded-lg in-data-[layout=tile]:flex-1" />
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-3 w-1/2" />
         </div>
@@ -47,25 +60,25 @@ export function RecipeVirtualList({
   via,
 }: RecipeVirtualListProps) {
   const t = useTranslations("recipes");
+  const { layout, columns, estimatedRowHeight } = useGridLayout(scrollRef);
 
-  // Group filtered recipes into rows of 2 for the virtualizer.
+  // Group filtered recipes into rows of `columns` for the virtualizer.
   // All filtering/sorting runs on the full array; the virtualizer only renders
   // the visible slice.
   const rows = useMemo(() => {
     const result: Recipe[][] = [];
-    for (let index = 0; index < filtered.length; index += 2) {
-      result.push(filtered.slice(index, index + 2));
+    for (let index = 0; index < filtered.length; index += columns) {
+      result.push(filtered.slice(index, index + columns));
     }
     return result;
-  }, [filtered]);
+  }, [filtered, columns]);
 
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    // 170px: image (96) + content area (64: p-2 + 2-line title + servings) + row paddingBottom (10).
     // Keeping the estimate close to real height minimises the correction render
     // that measureElement fires after first paint.
-    estimateSize: () => 170,
+    estimateSize: () => estimatedRowHeight,
     // Keep overscan tight: only row 0 gets priority/eager image loading (see
     // RecipeCard), every other card lazy-loads, so a large overscan would
     // eagerly mount rows that aren't near the viewport.
@@ -79,6 +92,12 @@ export function RecipeVirtualList({
   });
   const virtualRows = virtualizer.getVirtualItems();
 
+  // A column change regroups every row, so cached row heights are stale.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: columns is the trigger, not an input
+  useEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, columns]);
+
   if (filtered.length === 0 && hasActiveSearch) {
     return (
       <p className="text-center py-10 text-[13px] text-[var(--fg-2)] leading-[1.8]">
@@ -88,7 +107,7 @@ export function RecipeVirtualList({
   }
 
   if (filtered.length > 0 && virtualRows.length === 0) {
-    return <RecipeGridSkeleton />;
+    return <RecipeGridSkeleton layout={layout} columns={columns} />;
   }
 
   return (
@@ -103,8 +122,11 @@ export function RecipeVirtualList({
             key={virtualRow.key}
             data-index={virtualRow.index}
             ref={virtualizer.measureElement}
-            className="absolute top-0 left-0 w-full box-border grid grid-cols-2 gap-2.5 px-3.5 pb-2.5"
-            style={{ transform: `translateY(${virtualRow.start}px)` }}
+            className="absolute top-0 left-0 w-full box-border grid gap-2.5 px-3.5 pb-2.5"
+            style={{
+              transform: `translateY(${virtualRow.start}px)`,
+              gridTemplateColumns: gridTemplateColumns(columns),
+            }}
           >
             {rowItems.map((recipe) => (
               <RecipeCard
@@ -114,10 +136,9 @@ export function RecipeVirtualList({
                 priority={virtualRow.index === 0}
                 pantryMatch={getMissing(recipe)}
                 via={via}
+                layout={layout}
               />
             ))}
-            {/* Keep grid balanced when the last row has one card */}
-            {rowItems.length === 1 && <div />}
           </div>
         );
       })}

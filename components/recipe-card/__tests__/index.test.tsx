@@ -191,6 +191,23 @@ describe("RecipeCard", () => {
     });
   });
 
+  describe("layout", () => {
+    it("renders the compact phone card by default", () => {
+      render(<RecipeCard {...baseProps} />);
+
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "data-layout",
+        "compact",
+      );
+    });
+
+    it("marks the card as a tile when layout is tile", () => {
+      render(<RecipeCard {...baseProps} layout="tile" />);
+
+      expect(screen.getByRole("button")).toHaveAttribute("data-layout", "tile");
+    });
+  });
+
   describe("pantry match badges", () => {
     it("renders cancook badge when all ingredients are available", () => {
       render(

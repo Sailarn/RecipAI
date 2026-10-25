@@ -140,6 +140,8 @@ A parsed recipe's image lives on the origin site's CDN, which signs URLs, locks 
 **Use `getBoundingClientRect`, not `scrollHeight`.**
 `scrollHeight` is inflated under `overflow: hidden`. Compare `getBoundingClientRect` heights to detect actual overflow. See `components/recipe-form/use-scroll-overflow.ts`.
 
+**A child's layout effect can't read a ref its parent attaches.** React attaches refs and runs layout effects child-first in the same commit, so a parent's `ref={scrollRef}` is still `null` inside a child's `useLayoutEffect`. Passive `useEffect` runs after the whole commit and sees it. `useGridLayout` (`components/recipe-virtual-list/use-grid-layout.ts`) measures the recipes page's scroll container this way and seeds its first render from `window.innerWidth` so desktop doesn't flash the phone grid. Symptom: a measuring hook silently keeps its fallback value.
+
 ---
 
 ## Auth (PWA external-browser sign-in & linking)
