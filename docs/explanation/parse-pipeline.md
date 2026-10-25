@@ -1,12 +1,12 @@
 # Parse Pipeline
 
-How RecipAI turns a URL or photo into a structured recipe.
+How RecipAI turns a URL, photo, or pasted text into a structured recipe.
 
 ---
 
 ## Overview
 
-There are three entry paths:
+There are four entry paths:
 
 ```mermaid
 graph TD
@@ -14,11 +14,13 @@ graph TD
     B -->|Yes - Instagram/TikTok/YouTube/X| C[Social pipeline]
     B -->|No| D[Web pipeline]
     E[User uploads photo] --> F[Photo pipeline]
+    T[User pastes recipe text] --> TP[Text pipeline]
 
     C --> G[Parse job in Supabase]
     D --> G
     G --> H[ParsedRecipe saved to Dexie]
     F --> H
+    TP --> H
 ```
 
 ---
@@ -93,7 +95,13 @@ graph LR
     H --> I[Saved to Dexie locally]
 ```
 
-The image is sent as a base64-encoded string alongside a text prompt. Both Gemini (via `inlineData`) and OpenAI (via `image_url` with a data URI) support this format. Photo history is recorded locally in Dexie and server-side in `parse_jobs` without a `url`; the image itself is not retained.
+The image is sent as a base64-encoded string alongside a text prompt. Both Gemini (via `inlineData`) and OpenAI (via `image_url` with a data URI) support this format. Photo history is recorded locally in Dexie and server-side in `parse_jobs` without a `url`; the image itself is not retained. One image per parse — the route takes a single `imageBase64`, and the client downscales it to 1024px JPEG first (multiple photos would also run into Vercel's 4.5 MB request body limit).
+
+---
+
+## Text pipeline (`app/api/parse-recipe/text/route.ts`)
+
+The "Text" tab takes a pasted recipe — usually an AI chat's answer or a copied message. Like photos it parses synchronously, through the same `runDirectParseJob` runner (`lib/parse-recipe/direct-parse-job.ts`) that records the `parse_jobs` row, validates completeness and logs `parse_pipeline`. `buildTextPrompt` tells the model to ignore conversational filler and markdown and to take only the first recipe when several are present. Text is capped at 25,000 chars (`MAX_RECIPE_TEXT_CHARS`, `lib/parse-recipe/text.ts`) — the same budget as a scraped page. On the client, photo and text share `useDirectParse` (`lib/hooks/use-direct-parse.ts`): history, telemetry, and the review-queue toast when the user has navigated away.
 
 ---
 

@@ -5,13 +5,16 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
+import { ParseText } from "@/components/parse-text";
 import { useTelegramNotify } from "@/lib/hooks/use-telegram-notify";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
 import { ParseResult } from "./components/parse-result";
 
-type Tab = "url" | "photo";
+type Tab = "url" | "photo" | "text";
+
+const TAB_ICONS: Record<Tab, string> = { url: "🔗", photo: "📷", text: "📝" };
 
 export default function ParseRecipePage() {
   const params = useParams();
@@ -42,7 +45,7 @@ export default function ParseRecipePage() {
 
       {/* Tab switcher */}
       <div className="glass-card flex p-[3px] mb-5 w-fit rounded-[14px]">
-        {(["url", "photo"] as const).map((tabKey) => (
+        {(["url", "photo", "text"] as const).map((tabKey) => (
           <button
             key={tabKey}
             type="button"
@@ -53,7 +56,7 @@ export default function ParseRecipePage() {
                 : "bg-transparent border border-transparent text-[var(--fg-2)]"
             }`}
           >
-            {tabKey === "url" ? `🔗 ${t("tabs.url")}` : `📷 ${t("tabs.photo")}`}
+            {`${TAB_ICONS[tabKey]} ${t(`tabs.${tabKey}`)}`}
           </button>
         ))}
       </div>
@@ -82,6 +85,8 @@ export default function ParseRecipePage() {
       )}
 
       {tab === "photo" && <ParsePhoto locale={locale} />}
+
+      {tab === "text" && <ParseText locale={locale} />}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
 import { friendlyParseError } from "./friendly-parse-error";
 
 const PHOTO_IMPORT_TITLE = "Photo import";
+const TEXT_IMPORT_TITLE = "Text import";
 
 // A readable heading for a failed job, which has no recipe title.
 function hostLabel(url: string): string {
@@ -58,17 +59,32 @@ export function donePhotoHistoryEntry(
   };
 }
 
-export function failedPhotoHistoryEntry(
+function failedImportHistoryEntry(
   id: string,
+  title: string,
   rawError: string,
 ): ParseHistoryEntry {
   return {
     id,
-    title: PHOTO_IMPORT_TITLE,
+    title,
     status: PARSE_HISTORY_STATUS.FAILED,
     reason: friendlyParseError(rawError),
     createdAt: new Date(),
   };
+}
+
+export function failedPhotoHistoryEntry(
+  id: string,
+  rawError: string,
+): ParseHistoryEntry {
+  return failedImportHistoryEntry(id, PHOTO_IMPORT_TITLE, rawError);
+}
+
+export function failedTextHistoryEntry(
+  id: string,
+  rawError: string,
+): ParseHistoryEntry {
+  return failedImportHistoryEntry(id, TEXT_IMPORT_TITLE, rawError);
 }
 
 interface ServerParseJob {

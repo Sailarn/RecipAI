@@ -3,22 +3,11 @@
 import { Camera } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { recordParseHistory } from "@/lib/db/parse-history";
 import type { ParsedRecipe } from "@/lib/db/schema";
-import { logger } from "@/lib/logger";
-import {
-  donePhotoHistoryEntry,
-  failedPhotoHistoryEntry,
-} from "@/lib/parse-recipe/parse-history-entry";
+import { useDirectParse } from "@/lib/hooks/use-direct-parse";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
-import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
-import { routes } from "@/lib/routes";
-import { trackEvent } from "@/lib/telemetry";
-import { useNavigate } from "@/lib/transitions";
-import { generateId } from "@/lib/utils";
 import { ParseBackgroundBanner } from "../parse-background-banner";
 
 interface ParsePhotoProps {
@@ -29,20 +18,15 @@ interface ParsePhotoProps {
 
 export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
   const t = useTranslations("parse");
-  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const mountedRef = useRef(true);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isParsing, setIsParsing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+  const { isParsing, error, startParse, stopWaiting, clearError } =
+    useDirectParse({
+      locale,
+      source: "photo",
+      onResult,
+    });
 
   useEffect(() => {
     return () => {
@@ -56,16 +40,12 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(selected);
     setPreviewUrl(URL.createObjectURL(selected));
-    setError(null);
+    clearError();
   };
 
   const handleSubmit = () => {
     if (!file) return;
-
     const photoFile = file;
-    const parseJobId = generateId();
-    const capturedLocale = locale;
-    const capturedOnResult = onResult;
 
     // Reset form immediately
     setFile(null);
@@ -73,73 +53,11 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
     setPreviewUrl(null);
     if (inputRef.current) inputRef.current.value = "";
 
-    setIsParsing(true);
-    setError(null);
-    trackEvent("parse_started", { source: "photo" });
-
-    parseRecipeFromPhoto(photoFile, parseJobId)
-      .then(async (recipe) => {
-        if (mountedRef.current) setIsParsing(false);
-        trackEvent("parse_succeeded", { source: "photo" });
-        recordParseHistory(
-          donePhotoHistoryEntry(parseJobId, recipe.title),
-        ).catch(() => {});
-
-        // Hand off only if still on-screen; otherwise fall through to DB+toast path.
-        if (capturedOnResult && mountedRef.current) {
-          capturedOnResult(recipe);
-          return;
-        }
-
-        // Default: queue to parsedRecipes and show toast
-        try {
-          await savePhotoParseResult(recipe, capturedLocale, {
-            fallbackTitle: t("fallbackTitle"),
-            description: t("parsedTapToReview"),
-            save: t("reviewSave"),
-            edit: t("reviewEdit"),
-            saved: t("savedShort"),
-          });
-        } catch (err) {
-          logger.error("[ParsePhoto] failed to save:", err);
-          toast.error(t("processFailed"), {
-            duration: 10000,
-            closeButton: true,
-          });
-        }
-      })
-      .catch((err) => {
-        const msg = err instanceof Error ? err.message : t("parseFailedShort");
-        trackEvent("parse_failed", {
-          source: "photo",
-          reason: err instanceof Error ? err.message : String(err),
-        });
-        recordParseHistory(failedPhotoHistoryEntry(parseJobId, msg)).catch(
-          () => {},
-        );
-        if (mountedRef.current) {
-          setIsParsing(false);
-          setError(msg);
-        } else {
-          toast.error(msg, {
-            duration: 10000,
-            closeButton: true,
-            action: {
-              label: t("details"),
-              onClick: () => navigate.push(routes.parseHistory(capturedLocale)),
-            },
-          });
-        }
-      });
+    startParse((jobId) => parseRecipeFromPhoto(photoFile, jobId));
   };
 
   if (isParsing) {
-    return (
-      <ParseBackgroundBanner
-        locale={locale}
-        onReset={() => setIsParsing(false)}
-      />
-    );
+    return <ParseBackgroundBanner locale={locale} onReset={stopWaiting} />;
   }
 
   return (

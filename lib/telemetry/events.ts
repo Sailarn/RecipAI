@@ -24,9 +24,9 @@ export type TelemetryEvents = {
   logout: undefined;
   account_linked: { provider: string };
   // parse funnel
-  parse_started: { source: "url" | "photo"; domain?: string };
-  parse_succeeded: { source: "url" | "photo" };
-  parse_failed: { source: "url" | "photo"; reason: string };
+  parse_started: { source: "url" | "photo" | "text"; domain?: string };
+  parse_succeeded: { source: "url" | "photo" | "text" };
+  parse_failed: { source: "url" | "photo" | "text"; reason: string };
   social_parse_started: {
     platform: "instagram" | "tiktok" | "youtube" | "x";
   };

@@ -13,7 +13,10 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-recipe/web.ts` | Web recipe parsing. Scrape → retain Recipe JSON-LD as reference context → `trimChrome` → AI. |
 | `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |
 | `lib/parse-recipe/photo.ts` | Client-side image compression and API call for photo parsing. |
-| `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildSocialPrompt`. |
+| `lib/parse-recipe/text.ts` | Pasted-text limits (`MAX_RECIPE_TEXT_CHARS` / `MIN_RECIPE_TEXT_CHARS`) and the client call for text parsing. |
+| `lib/parse-recipe/direct-parse-job.ts` | `runDirectParseJob()` — shared server runner for the synchronous photo/text routes: `parse_jobs` row, completeness check, `parse_pipeline` log, error capture. |
+| `lib/hooks/use-direct-parse.ts` | Client side of photo/text imports: runs the parse, records history + telemetry, queues the result for review (toast when off-screen). |
+| `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildTextPrompt`, `buildSocialPrompt`. |
 | `lib/parse-recipe/modifiers.ts` | `PREPARATION_MODIFIERS` curated enum (31 keys) + `modifierLabel`/`modifierPromptList`/`isPreparationModifier`. Source of truth for the additive picker and the parse prompt's key list. |
 | `lib/parse-recipe/build-sections.ts` | `buildSectionsFromLabels()` — turns free-form parsed section labels into a `RecipeSection[]` catalog + label→id map, first-appearance order. Shared by save and the legacy-shape migration. |
 | `lib/parse-recipe/parsed-recipe-shape.ts` | Shared parsed-label → saved `sections`/`sectionId`/`modifiers[]` mapping used by local and Telegram saves. |

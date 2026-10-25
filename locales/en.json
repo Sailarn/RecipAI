@@ -231,7 +231,8 @@
   "parse": {
     "tabs": {
       "url": "URL",
-      "photo": "Photo"
+      "photo": "Photo",
+      "text": "Text"
     },
     "photo": {
       "cta": "Take Photo or Upload",
@@ -239,6 +240,11 @@
       "submit": "Parse Recipe",
       "parsing": "Reading recipe...",
       "hint": "Works with handwritten and printed recipes in any language"
+    },
+    "text": {
+      "label": "Recipe text",
+      "placeholder": "Paste a recipe — from an AI chat, a message, a note…",
+      "hint": "Ingredients and steps in any language; extra chat text around the recipe is ignored"
     },
     "url": {
       "label": "Recipe URL",

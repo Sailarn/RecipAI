@@ -7,7 +7,7 @@ export interface NotRecipeResult {
 
 export type RecipeExtractionResult = ParsedRecipe | NotRecipeResult;
 
-type RecipeSource = "page" | "photo" | "social";
+type RecipeSource = "page" | "photo" | "social" | "text";
 
 type IncompleteReason = "not_recipe" | "no_ingredients" | "no_instructions";
 

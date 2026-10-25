@@ -10,8 +10,8 @@ const LANGUAGE_RULE =
 const METRIC_UNITS_RULE =
   "UNITS — metric only, mandatory: convert cup, oz, lb, fl oz, pint, quart, and gallon amounts to metric before output. Tablespoon/teaspoon amounts (tbsp, tsp) are NOT American cup measures and are already valid schema units — keep them as tbsp/tsp exactly as given in the source; do not convert them to grams, even for a solid ingredient. Weight: oz -> g (1 oz = 28.35g), lb -> g (1 lb = 453.6g). Liquid volume: fl oz -> ml (1 fl oz = 29.57ml), cups of a liquid -> ml (1 cup = 240ml). Dry/solid ingredients measured by CUPS -> convert to grams using standard ingredient-density conversions (e.g. 1 cup flour ≈ 125g, 1 cup granulated sugar ≈ 200g, 1 cup butter ≈ 227g, 1 cup rice ≈ 185g) — use your best estimate for the specific ingredient. Round to a sensible value. The unit field MUST be one of: g, kg, ml, l, tsp, tbsp, pcs, pinch, or null — NEVER cup, oz, lb, fl oz, pint, quart, or gallon. Write the unit as that English code even when the source is in another language ('щіпка'/'pincée' -> pinch, 'зубчик'/'clove' of garlic -> pcs, 'г' -> g).";
 
-// Shared across all three prompts so the unit constraint above only needs to
-// be enforced in one place, not three near-identical schema strings.
+// Shared across every prompt so the unit constraint above only needs to
+// be enforced in one place, not one near-identical schema string per prompt.
 function ingredientObjectSchema(): string {
   return `{ "amount": "number | null", "unit": "string | null — METRIC ONLY, see the UNITS rule above: one of g, kg, ml, l, tsp, tbsp, pcs, pinch; NEVER cup, oz, lb, fl oz, pint, quart, gallon", "item": "string — the ingredient NAME with any preparation/state words that map to modifiers below REMOVED; keep size and other descriptors ("2 small zucchini, sliced" → "small zucchini", "grated mozzarella" → "mozzarella"). Preparation words can come AFTER the noun too ("lamb mince" → "lamb", with MINCED in modifiers) — not just adjective-before-noun.", "modifiers": "array containing zero or one KEY from: ${modifierPromptList()}, e.g. ["GRATED"] or []. Pick a KEY from this list ONLY; never invent one.", "original": "string | null — the ingredient text EXACTLY as written in the source (name plus any modifier word); null if identical to item", "section": "string | null — short label grouping this ingredient with related steps (e.g. "For the base", "Sauce", "Marinade"); null if the recipe has no distinct parts. Use the SAME label text on the matching instructions.", "ua": "string | null — Ukrainian translation of the ingredient name", "en": "string — canonical English HEAD noun for matching only: ALWAYS singular, even when the source amount is plural or the source word itself is a plural noun ("2 eggs" / "2 яйця" → "egg", NEVER "eggs") — no quantity/size/prep/brand words ("shredded mozzarella"→"mozzarella", "2 small zucchini"→"zucchini", "розтоплене масло"→"butter"); use the generic head when nothing specific fits ("shredded cheese"→"cheese").", "category": "one of: fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other | null" }`;
 }
@@ -56,6 +56,47 @@ IMPORTANT: Ukrainian format — ingredients appear as "item — amount unit" (e.
 <webpage_content>
 ${textContent}
 </webpage_content>`;
+}
+
+// Pasted text is usually an AI-chat answer or a message copied from a chat —
+// markdown, emoji and conversational filler around the recipe itself.
+export function buildTextPrompt(pastedText: string): string {
+  return `You are a strict recipe data extraction expert. Extract structured recipe data from the <pasted_text>, which a user copied from somewhere — often an AI chat assistant's answer or a messenger post.
+
+${NOT_RECIPE_RULE}
+
+RULES:
+- If a field cannot be logically found, output null — never guess or fabricate.
+- Ignore conversational filler around the recipe ("Sure! Here's a recipe…", "Enjoy!", follow-up offers), markdown syntax, and emoji.
+- If the text holds several recipes, extract only the first complete one.
+- ${LANGUAGE_RULE}
+- Times (prepTime, cookTime) MUST be integers representing minutes (e.g., 1 hour 30 mins -> 90).
+- For ingredients: isolate amount, unit, and item name. Convert fractions to decimals (e.g., "1 1/2" -> 1.5, "¼" -> 0.25).
+- ${METRIC_UNITS_RULE}
+- For servings: if a range is given (e.g., "4-6"), extract the lower bound integer (4). null if not mentioned.
+- For instructions: extract in correct order, keep original wording.
+- If an ingredient appears without an amount, set amount to null and unit to null — do not invent "1".
+- If an ingredient string is not a food item (equipment, paper towels, etc.), omit it from the ingredients array entirely.
+- If an ingredient line names several distinct food items joined by a comma or "and", emit one ingredient object PER item. Do not split an either/or choice ("salt or pepper").
+- category: pick the single best fit: Breakfast, Lunch, Dinner, Soup, Salad, Snack, Dessert, Baking, Drink, Other. Never null.
+- modifiers: choose zero or one modifier per ingredient, only from the provided list. Move the closest matched preparation/state phrase out of item into modifiers, but keep the full original wording in original.
+- sections: assign a section only when the recipe clearly has distinct parts (dough vs filling, sauce vs main). Reuse the EXACT same label string on both the ingredients and the steps of that part. For a single flat list, set section to null everywhere.
+OUTPUT this exact JSON:
+{
+  "title": "string",
+  "description": "string | null",
+  "prepTime": "number | null",
+  "cookTime": "number | null",
+  "servings": "number | null",
+  "category": "Breakfast | Lunch | Dinner | Soup | Salad | Snack | Dessert | Baking | Drink | Other",
+  "ingredients": [${ingredientObjectSchema()}],
+  "instructions": [{ "order": "number", "instruction": "string", "section": "string | null — same label set used on ingredients; null if no distinct parts" }],
+  "imageUrl": null
+}
+
+<pasted_text>
+${pastedText}
+</pasted_text>`;
 }
 
 export function buildPhotoPrompt(): string {

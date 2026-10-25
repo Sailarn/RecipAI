@@ -34,6 +34,7 @@ export const api = {
     delete: "/api/images/delete",
   },
   parseRecipePhoto: "/api/parse-recipe/photo",
+  parseRecipeText: "/api/parse-recipe/text",
   parseQueue: "/api/parse-queue",
   parseQueueJob: (id: string) => `/api/parse-queue/${id}`,
   parseQueueProcess: "/api/parse-queue/process",

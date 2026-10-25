@@ -26,15 +26,16 @@ The client detects this via `maintenanceErrorFromResponse` (`lib/api/api-fetch.t
 | `POST` | `/api/parse-queue/process` | None (internal) | Process a queued job. Idempotent — skips if job is `done` or `processing` within 90 s. `maxDuration: 60`. |
 | `POST` | `/api/parse-queue/claim` | Session required | Adopt anonymous jobs (by id array) into the signed-in user's account. Used on login to link pre-login history. |
 
-**Rate limiting** is enforced on the `POST /api/parse-queue` and `POST /api/parse-recipe/photo` routes via `enforceParseRateLimit()` from `lib/rate-limit.ts`. The limit is shared across both endpoints per caller (IP for anonymous, user id for signed-in). Fails open if Redis is unreachable.
+**Rate limiting** is enforced on the `POST /api/parse-queue`, `POST /api/parse-recipe/photo` and `POST /api/parse-recipe/text` routes via `enforceParseRateLimit()` from `lib/rate-limit.ts`. The limit is shared across all three endpoints per caller (IP for anonymous, user id for signed-in). Fails open if Redis is unreachable.
 
 ---
 
-## Photo parse
+## Photo & text parse
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/parse-recipe/photo` | Rate-limited (session optional) | Parse a recipe from a base64-encoded image. Body: `{ imageBase64, mimeType, jobId? }`. The current client supplies `jobId` so the synchronous photo result is recorded in `parse_jobs` under the same ID as local history; omitted IDs are generated server-side for compatibility with older clients. |
+| `POST` | `/api/parse-recipe/photo` | Rate-limited (session optional) | Parse a recipe from a base64-encoded image. Body: `{ imageBase64, mimeType, jobId? }`. The current client supplies `jobId` so the synchronous photo result is recorded in `parse_jobs` under the same ID as local history; omitted IDs are generated server-side for compatibility with older clients. One image per request. |
+| `POST` | `/api/parse-recipe/text` | Rate-limited (session optional) | Parse a recipe from pasted text (typically an AI-chat answer). Body: `{ text, jobId? }`. `400` when the trimmed text is shorter than 20 chars; text past 25,000 chars is cut before the model sees it. Same synchronous `parse_jobs` recording as photo (`url: null`). |
 
 ---
 
