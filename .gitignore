@@ -66,8 +66,10 @@ scripts/local/
 # MkDocs build output
 /site/
 
-# graphify — commit graph.json/GRAPH_REPORT.md/graph.html so the map ships
-# with the repo; everything else is local build/intermediate state
+# graphify — commit graph.json/GRAPH_REPORT.md so the map ships with the
+# repo; graph.html is a viewer regenerated on demand (and ~5 MB per refresh
+# commit), everything else is local build/intermediate state
+graphify-out/graph.html
 graphify-out/manifest.json
 graphify-out/cache/
 graphify-out/.graphify_*
