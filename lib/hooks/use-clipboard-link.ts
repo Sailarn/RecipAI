@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { getTelegramWebApp } from "@/lib/telegram/webapp";
 import { extractFirstUrl } from "@/lib/url";
 
@@ -60,6 +66,16 @@ function readTelegramClipboard(): Promise<string | null> {
   });
 }
 
+function canPasteHere(): boolean {
+  return canReadBrowserClipboard() || Boolean(getTelegramWebApp());
+}
+
+// Clipboard support never changes while the page is open — nothing to
+// subscribe to.
+function subscribeToNothing(): () => void {
+  return () => {};
+}
+
 async function readClipboardText(): Promise<string | null> {
   return (await readTelegramClipboard()) ?? (await readBrowserClipboard());
 }
@@ -80,7 +96,13 @@ export function useClipboardLink({ enabled }: UseClipboardLinkOptions) {
   const [isReading, setIsReading] = useState(false);
   const dismissedRef = useRef<Set<string>>(new Set());
 
-  const canPaste = canReadBrowserClipboard() || Boolean(getTelegramWebApp());
+  // The server can't see navigator, so it renders without the Paste button;
+  // reading support during render would mismatch on hydration.
+  const canPaste = useSyncExternalStore(
+    subscribeToNothing,
+    canPasteHere,
+    () => false,
+  );
 
   const pasteLink = useCallback(async (): Promise<string | null> => {
     setIsReading(true);
