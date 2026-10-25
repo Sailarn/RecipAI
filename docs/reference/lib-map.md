@@ -58,7 +58,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/parse-history.ts` | `recordParseHistory`, `bulkPutParseHistory`, `getParseHistory`, `clearParseHistory`. |
 | `lib/db/ingredients.ts` | Resolve a raw ingredient against the local vocabulary or create a deduplicated provisional entry. |
 | `lib/db/sync-vocab.ts` | Pull confirmed vocabulary deltas into Dexie, with watermark overlap and version-based full refresh. |
-| `lib/db/reconcile-vocab.ts` | Guarded one-time cleanup that clears stale local vocabulary rows, re-pulls, and re-normalizes recipes. |
+| `lib/db/reconcile-vocab.ts` | Guarded one-time cleanup that clears stale local vocabulary rows, re-pulls, and re-normalizes only the recipes referencing a vanished ingredient id. |
 | `lib/db/renormalize-recipes.ts` | Repairs older recipes whose canonical ingredient id array is not index-aligned. |
 | `lib/db/normalize-pending-recipes.ts` | `normalizePendingRecipes()` — normalize any local recipe with ingredients but no `canonicalIngredientIds` (e.g. a pulled Telegram bot recipe). Runs on startup and after each sync. |
 | `lib/db/pull-own-recipe.ts` | `pullOwnRecipe(id)` — fetch the owner's own recipe from the server into Dexie (with `syncedAt`) when it isn't local yet; used by the recipe-detail deep-link path, then triggers normalization. |
