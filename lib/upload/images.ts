@@ -1,8 +1,8 @@
 import { api } from "../routes";
 
-const IMAGEKIT_URL = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "";
-
-export const isImageKitUrl = (url: string) => url.startsWith(IMAGEKIT_URL);
+// One implementation: the old local copy matched every URL when the endpoint
+// env var was unset (startsWith("")), so a recipe image was never mirrored.
+export { isImageKitUrl } from "@/lib/imagekit-url";
 
 interface ImageRequestOptions {
   uploadToken?: string;
