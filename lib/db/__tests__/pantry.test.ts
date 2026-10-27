@@ -33,16 +33,18 @@ vi.mock("../db", () => ({
     ingredients: {
       get: vi.fn(),
     },
+    transaction: vi.fn(
+      (_mode: string, _table: unknown, scope: () => Promise<void>) => scope(),
+    ),
   },
 }));
 
 import { db } from "../db";
 import {
   addPantryItem,
-  bulkPutPantry,
-  clearPantry,
   getPantryItems,
   removePantryItem,
+  replacePantry,
   togglePantryItem,
 } from "../pantry";
 
@@ -362,18 +364,8 @@ describe("togglePantryItem", () => {
   });
 });
 
-describe("clearPantry", () => {
-  it("clears the entire pantry table", async () => {
-    vi.mocked(db.pantry.clear).mockResolvedValue(undefined);
-
-    await clearPantry();
-
-    expect(db.pantry.clear).toHaveBeenCalledOnce();
-  });
-});
-
-describe("bulkPutPantry", () => {
-  it("bulk puts all items into dexie", async () => {
+describe("replacePantry", () => {
+  it("clears the table and writes every item in one transaction", async () => {
     const items = [
       {
         id: "a",
@@ -394,10 +386,13 @@ describe("bulkPutPantry", () => {
         addedAt: new Date(),
       },
     ];
+    vi.mocked(db.pantry.clear).mockResolvedValue(undefined);
     vi.mocked(db.pantry.bulkPut).mockResolvedValue(undefined as never);
 
-    await bulkPutPantry(items);
+    await replacePantry(items);
 
+    expect(db.transaction).toHaveBeenCalledOnce();
+    expect(db.pantry.clear).toHaveBeenCalledOnce();
     expect(db.pantry.bulkPut).toHaveBeenCalledWith(items);
   });
 });

@@ -82,10 +82,11 @@ export async function togglePantryItem(id: string): Promise<void> {
   await syncPantryUpsert(updated);
 }
 
-export async function clearPantry(): Promise<void> {
-  return db.pantry.clear();
-}
-
-export async function bulkPutPantry(items: PantryItem[]): Promise<void> {
-  await db.pantry.bulkPut(items);
+// One transaction, so a failed write rolls the clear back instead of leaving
+// the device with an empty pantry until the next sync.
+export async function replacePantry(items: PantryItem[]): Promise<void> {
+  await db.transaction("rw", db.pantry, async () => {
+    await db.pantry.clear();
+    await db.pantry.bulkPut(items);
+  });
 }

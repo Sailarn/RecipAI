@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/db";
-import { bulkPutPantry, clearPantry } from "@/lib/db/pantry";
+import { replacePantry } from "@/lib/db/pantry";
 import { bulkPutParseHistory } from "@/lib/db/parse-history";
 import { planReconcile, type ReconcileItem } from "@/lib/db/reconcile-plan";
 import {
@@ -56,8 +56,7 @@ export async function syncPantry(): Promise<void> {
       addedAt: new Date(rawItem.addedAt as string),
     }),
   );
-  await clearPantry();
-  await bulkPutPantry(parsed);
+  await replacePantry(parsed);
 }
 
 export async function syncIngredients(): Promise<void> {

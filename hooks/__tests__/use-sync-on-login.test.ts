@@ -55,8 +55,7 @@ vi.mock("@/lib/db/notifications", () => ({
 }));
 
 vi.mock("@/lib/db/pantry", () => ({
-  clearPantry: vi.fn().mockResolvedValue(undefined),
-  bulkPutPantry: vi.fn().mockResolvedValue(undefined),
+  replacePantry: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { toast } from "sonner";
