@@ -18,18 +18,18 @@ vi.mock("@/components/parse-background-banner", () => ({
   ParseBackgroundBanner: () => <div data-testid="parsing-banner" />,
 }));
 
-const { parseRecipeFromText, savePhotoParseResult, recordParseHistory } =
+const { parseRecipeFromText, saveDirectParseResult, recordParseHistory } =
   vi.hoisted(() => ({
     parseRecipeFromText: vi.fn(),
-    savePhotoParseResult: vi.fn(),
+    saveDirectParseResult: vi.fn(),
     recordParseHistory: vi.fn(),
   }));
 vi.mock("@/lib/parse-recipe/text", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/parse-recipe/text")>()),
   parseRecipeFromText,
 }));
-vi.mock("@/lib/parse-recipe/save-photo-result", () => ({
-  savePhotoParseResult,
+vi.mock("@/lib/parse-recipe/save-direct-parse-result", () => ({
+  saveDirectParseResult,
 }));
 vi.mock("@/lib/db/parse-history", () => ({ recordParseHistory }));
 
@@ -53,7 +53,7 @@ function typeRecipe(text: string) {
 
 beforeEach(() => {
   recordParseHistory.mockResolvedValue(undefined);
-  savePhotoParseResult.mockResolvedValue(undefined);
+  saveDirectParseResult.mockResolvedValue(undefined);
 });
 
 describe("ParseText", () => {
@@ -87,7 +87,7 @@ describe("ParseText", () => {
       fireEvent.click(screen.getByRole("button", { name: /analyzeWithAi/ }));
 
       await waitFor(() =>
-        expect(savePhotoParseResult).toHaveBeenCalledWith(
+        expect(saveDirectParseResult).toHaveBeenCalledWith(
           recipe,
           "en",
           expect.any(Object),

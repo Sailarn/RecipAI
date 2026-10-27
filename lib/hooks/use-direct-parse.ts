@@ -11,7 +11,7 @@ import {
   failedPhotoHistoryEntry,
   failedTextHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
-import { savePhotoParseResult } from "@/lib/parse-recipe/save-photo-result";
+import { saveDirectParseResult } from "@/lib/parse-recipe/save-direct-parse-result";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -78,7 +78,7 @@ export function useDirectParse({
           }
 
           try {
-            await savePhotoParseResult(recipe, locale, {
+            await saveDirectParseResult(recipe, locale, {
               fallbackTitle: t("fallbackTitle"),
               description: t("parsedTapToReview"),
               save: t("reviewSave"),

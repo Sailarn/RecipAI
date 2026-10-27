@@ -10,7 +10,7 @@ import { generateId } from "@/lib/utils";
  * Copy for the review toast. Passed in rather than translated here: this is a
  * plain async function, so it has no access to a next-intl hook.
  */
-export interface PhotoParseLabels {
+export interface DirectParseLabels {
   fallbackTitle: string;
   description: string;
   save: string;
@@ -18,10 +18,10 @@ export interface PhotoParseLabels {
   saved: string;
 }
 
-export async function savePhotoParseResult(
+export async function saveDirectParseResult(
   recipe: ParsedRecipe,
   locale: string,
-  labels: PhotoParseLabels,
+  labels: DirectParseLabels,
 ): Promise<void> {
   const entry = {
     id: generateId(),

@@ -30,7 +30,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/embed/local-provider.ts` | Lazy in-process e5-small provider used on the Pi. |
 | `lib/embed/http-provider.ts` | Remote `/api/embed` provider with shared-secret header and per-host timeout. |
 | `lib/db/vocab-vector-search.ts` | Exact pgvector top-two search plus similarity threshold and runner-up-gap decision. |
-| `lib/parse-recipe/save-photo-result.ts` | Saves a photo parse result: history entry, Dexie save, image upload. |
+| `lib/parse-recipe/save-direct-parse-result.ts` | Queues a photo or text parse result for review: mirrors a non-ImageKit image, adds it to `parsedRecipes`, and shows the Save/Edit toast. |
 | `lib/scrapers/phantomjs.ts` | Primary scraper — JS-rendered HTML via PhantomJsCloud. |
 | `lib/scrapers/scrape-do.ts` | Fallback scraper via scrape.do. |
 | `lib/scrapers/apify.ts` | Social-content scraper via Apify actors for Instagram, TikTok, YouTube, and X/Twitter. |
