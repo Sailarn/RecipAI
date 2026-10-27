@@ -2,7 +2,7 @@ import { apiFetch } from "@/lib/api/api-fetch";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 
-export async function compressImage(
+async function compressImage(
   file: File,
 ): Promise<{ base64: string; mimeType: string }> {
   const bitmap = await createImageBitmap(file);

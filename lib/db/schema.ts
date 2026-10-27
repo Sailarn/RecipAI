@@ -1,7 +1,7 @@
 import type { RecipeCategory } from "@/lib/categories";
 import type { PreparationModifier } from "@/lib/parse-recipe/modifiers";
 
-export const RECIPE_STATUSES = ["tried"] as const;
+const RECIPE_STATUSES = ["tried"] as const;
 export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
 
 export const INGREDIENT_STATUS = {
@@ -211,7 +211,7 @@ export interface ParseHistoryEntry {
 export const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
 export type SyncEntityType = (typeof SYNC_ENTITY_TYPES)[number];
 
-export const SYNC_NOTIFICATION_TYPES = [
+const SYNC_NOTIFICATION_TYPES = [
   "server_only",
   "local_only",
   "conflicted",

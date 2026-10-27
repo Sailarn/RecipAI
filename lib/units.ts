@@ -9,7 +9,7 @@ import type { Locale } from "@/i18n/config";
  * Mirrors the PREPARATION_MODIFIERS pattern — canonical key stored, en/ua for
  * the label.
  */
-export const MEASUREMENT_UNITS = {
+const MEASUREMENT_UNITS = {
   g: { en: "g", ua: "г" },
   kg: { en: "kg", ua: "кг" },
   ml: { en: "ml", ua: "мл" },

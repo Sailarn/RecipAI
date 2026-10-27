@@ -48,7 +48,7 @@ export async function maintenanceErrorFromResponse(
   }
 }
 
-export function announceMaintenance(message: string): void {
+function announceMaintenance(message: string): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(MAINTENANCE_EVENT, { detail: { message } }),

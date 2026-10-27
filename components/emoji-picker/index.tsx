@@ -1,4 +1,4 @@
-export const COLLECTION_EMOJIS = [
+const COLLECTION_EMOJIS = [
   "⭐",
   "🍳",
   "🥗",

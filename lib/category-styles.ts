@@ -12,7 +12,7 @@ export interface CategoryStyle {
   color: string;
 }
 
-export const CATEGORY_STYLES: Record<string, CategoryStyle> = {
+const CATEGORY_STYLES: Record<string, CategoryStyle> = {
   Breakfast: { bg: "rgba(232,89,12,0.22)", color: "#fdba74" },
   Lunch: { bg: "rgba(47,158,68,0.22)", color: "#86efac" },
   Dinner: { bg: "rgba(59,91,219,0.22)", color: "#93c5fd" },
@@ -25,7 +25,7 @@ export const CATEGORY_STYLES: Record<string, CategoryStyle> = {
   Other: { bg: "rgba(100,100,110,0.22)", color: "#d4d4d8" },
 };
 
-export const DEFAULT_CATEGORY_STYLE: CategoryStyle = CATEGORY_STYLES.Other;
+const DEFAULT_CATEGORY_STYLE: CategoryStyle = CATEGORY_STYLES.Other;
 
 /**
  * Get the badge style for a given category.

@@ -20,7 +20,7 @@ export interface DirectParseJob {
 }
 
 /** The parse_jobs row couldn't be created — nothing was parsed. */
-export class ParseJobStartError extends Error {}
+class ParseJobStartError extends Error {}
 
 // Photo and pasted-text parses run inline rather than through the parse queue
 // (there is no URL to cache or re-fetch), but still leave a parse_jobs row

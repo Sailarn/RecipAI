@@ -6,21 +6,6 @@ export interface ImageEntry {
   isStepImage: boolean;
 }
 
-export function extractStepImages($: CheerioAPI): string[] {
-  const images: string[] = [];
-  $("img").each((_, element) => {
-    const src =
-      $(element).attr("src") ||
-      $(element).attr("data-src") ||
-      $(element).attr("srcset")?.split(",")[0]?.trim()?.split(" ")[0] ||
-      "";
-    const classAttr = $(element).attr("class") || "";
-    if (!src.startsWith("http")) return;
-    if (classAttr.includes("step")) images.push(src);
-  });
-  return [...new Set(images)];
-}
-
 export function extractHeroImage($: CheerioAPI): string {
   let hero = "";
   $("img").each((_, element) => {

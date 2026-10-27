@@ -1,7 +1,7 @@
 import type { ParsedRecipe } from "@/lib/db/schema";
 
-export const PARSE_RETRY_ATTEMPTS = 2;
-export const PARSE_RETRY_DELAY_MS = 4000;
+const PARSE_RETRY_ATTEMPTS = 2;
+const PARSE_RETRY_DELAY_MS = 4000;
 
 export function isRetryable(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);

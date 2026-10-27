@@ -8,9 +8,9 @@ export const THUMBNAIL_IMAGE_WIDTH: Record<CardLayout, number> = {
   tile: 640,
 };
 
-export const CONTEXT_MENU_WIDTH = 200;
-export const CONTEXT_MENU_HEIGHT = 160;
-export const CONTEXT_MENU_MARGIN = 8;
+const CONTEXT_MENU_WIDTH = 200;
+const CONTEXT_MENU_HEIGHT = 160;
+const CONTEXT_MENU_MARGIN = 8;
 
 export function clampMenuPos(x: number, y: number) {
   return {

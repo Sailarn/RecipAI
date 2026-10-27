@@ -9,7 +9,7 @@ export const MAIN_NAV_W = 260;
 const NAV_H = 56;
 const ITEM_COUNT = 3; // Recipes · AI Import · Profile
 
-export const SPRING = {
+const SPRING = {
   type: "spring" as const,
   stiffness: 500,
   damping: 38,
@@ -41,7 +41,7 @@ const STATIC_MEASURE: Measure = {
  * Returns the pill's `left` position (nav-relative) for the given item index.
  * Computed analytically from layout constants — never reads the DOM.
  */
-export function pillLeft(index: number): number {
+function pillLeft(index: number): number {
   const center = ITEM_W * index + ITEM_W / 2;
   return center - PILL_W / 2;
 }

@@ -13,9 +13,7 @@ import { useNavigate } from "@/lib/transitions";
 const RECIPE_PREFIX = "recipe_";
 
 /** The recipe id in a `recipe_<id>` start param, or null for anything else. */
-export function recipeIdFromStartParam(
-  startParam: string | undefined,
-): string | null {
+function recipeIdFromStartParam(startParam: string | undefined): string | null {
   if (!startParam?.startsWith(RECIPE_PREFIX)) return null;
   return startParam.slice(RECIPE_PREFIX.length) || null;
 }

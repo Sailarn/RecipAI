@@ -1,5 +1,5 @@
 // `/parse_text` — Telegram command names allow only [a-z0-9_], so no hyphen.
-export const PARSE_TEXT_COMMAND = "parse_text";
+const PARSE_TEXT_COMMAND = "parse_text";
 
 // Sent with force_reply when /parse_text arrives without text. A reply to this
 // exact message is treated as the recipe text.

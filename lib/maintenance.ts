@@ -2,14 +2,9 @@ import { eq } from "drizzle-orm";
 import type { NextResponse } from "next/server";
 import { db } from "@/db";
 import { appConfig, GLOBAL_APP_CONFIG_ID } from "@/db/schema/app-config";
-import {
-  API_ERROR_MESSAGES,
-  ApiError,
-  MAINTENANCE_MODE_CODE,
-} from "@/lib/api-errors";
+import { API_ERROR_MESSAGES, ApiError } from "@/lib/api-errors";
 import { captureError } from "@/lib/telemetry";
 
-export { MAINTENANCE_MODE_CODE };
 export const DEFAULT_MAINTENANCE_MESSAGE = API_ERROR_MESSAGES.MAINTENANCE;
 
 type AppConfigRow = {
