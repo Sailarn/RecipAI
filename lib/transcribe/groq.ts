@@ -4,6 +4,8 @@ export async function transcribeWithGroq(
   audio: ArrayBuffer,
   isAudio = false,
 ): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY not configured");
   if (audio.byteLength > GROQ_MAX_BYTES) {
     throw new Error(
       "Audio file too large for transcription (>24MB). Video may be too long.",
@@ -23,7 +25,7 @@ export async function transcribeWithGroq(
     "https://api.groq.com/openai/v1/audio/transcriptions",
     {
       method: "POST",
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
     },
   );
