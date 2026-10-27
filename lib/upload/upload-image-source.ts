@@ -56,8 +56,12 @@ async function resolveFromUrl(
   url: string,
   fileName: string,
 ): Promise<ResolveResult> {
-  const response = await fetch(url, { headers: imageFetchHeaders(url) });
-  if (!response.ok)
+  // A DNS/TLS/connection failure is the same dead-source outcome as a 4xx —
+  // let it escape and the route answers an unexplained 500 instead.
+  const response = await fetch(url, { headers: imageFetchHeaders(url) }).catch(
+    () => null,
+  );
+  if (!response?.ok)
     return {
       ok: false,
       response: ApiError.badRequest(SOURCE_FETCH_FAILED),
