@@ -85,7 +85,7 @@ Both routes accept a valid session **or** a short-lived upload token (minted by 
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary names, aliases, categories, and statuses. Vectors are server-only and omitted. Supports `?since=<ISO>` for delta sync. |
+| `GET` | `/api/ingredients` | None (public) | Fetch confirmed vocabulary names, aliases, categories, and statuses. Vectors are server-only and omitted. Supports `?since=<ISO>` for delta sync. Returns `{ ingredients, serverMaxUpdatedAt }`; the watermark is the newest returned row's `updatedAt`, or `""` when nothing changed (the client then keeps its own). |
 | `POST` | `/api/ingredients` | Session required | Create a provisional vocabulary entry (`{ id, en, ua?, category? }`). Conflict-safe (`onConflictDoNothing`). |
 | `POST` | `/api/ingredients/embed-match` | Rate-limited public | Batch-match `{ items: [{ item, en?, ua? }] }` through the embedding provider chain and pgvector. Returns `{ matches, degraded }`; provider exhaustion is HTTP 200 with null matches and `degraded: true`. |
 | `POST` | `/api/ingredients/enrich` | Session required | Enrich and confirm a provisional ingredient via AI, then best-effort compute its server-side `passage:` vector. Embedding failure leaves a detectable null vector without blocking enrichment. |

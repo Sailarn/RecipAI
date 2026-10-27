@@ -35,6 +35,9 @@ export async function GET(req: NextRequest) {
       .from(ingredients)
       .where(and(...conditions));
 
+    // Empty when nothing changed: echoing `since` back would store the
+    // client's overlapped (watermark − 60s) value and walk the watermark
+    // backwards on every empty delta pull.
     const serverMaxUpdatedAt =
       rows.length > 0
         ? new Date(
@@ -43,7 +46,7 @@ export async function GET(req: NextRequest) {
               0,
             ),
           ).toISOString()
-        : (since ?? "");
+        : "";
 
     const result = rows.map(({ updatedAt: _updatedAt, ...rest }) => rest);
 
