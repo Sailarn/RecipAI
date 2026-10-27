@@ -1,0 +1,3 @@
+[install]
+# Pin new dependencies to the exact installed version.
+exact = true
