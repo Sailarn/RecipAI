@@ -101,7 +101,7 @@ The image is sent as a base64-encoded string alongside a text prompt. Both Gemin
 
 ## Text pipeline (`app/api/parse-recipe/text/route.ts`)
 
-The "Text" tab takes a pasted recipe — usually an AI chat's answer or a copied message. Like photos it parses synchronously, through the same `runDirectParseJob` runner (`lib/parse-recipe/direct-parse-job.ts`) that records the `parse_jobs` row, validates completeness and logs `parse_pipeline`. `buildTextPrompt` tells the model to ignore conversational filler and markdown and to take only the first recipe when several are present. Text is capped at 25,000 chars (`MAX_RECIPE_TEXT_CHARS`, `lib/parse-recipe/text.ts`) — the same budget as a scraped page. On the client, photo and text share `useDirectParse` (`lib/hooks/use-direct-parse.ts`): history, telemetry, and the review-queue toast when the user has navigated away.
+The "Text" tab takes a pasted recipe — usually an AI chat's answer or a copied message. Like photos it parses synchronously, through the same `runDirectParseJob` runner (`lib/parse-recipe/direct-parse-job.ts`) that records the `parse_jobs` row, validates completeness and logs `parse_pipeline`. If recording a successful parse in `parse_jobs` fails, the error goes to Sentry and the recipe is still returned. `buildTextPrompt` tells the model to ignore conversational filler and markdown and to take only the first recipe when several are present. Text is capped at 25,000 chars (`MAX_RECIPE_TEXT_CHARS`, `lib/parse-recipe/text.ts`) — the same budget as a scraped page. On the client, photo and text share `useDirectParse` (`lib/hooks/use-direct-parse.ts`): history, telemetry, and the review-queue toast when the user has navigated away.
 
 ---
 

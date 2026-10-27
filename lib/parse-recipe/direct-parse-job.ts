@@ -27,6 +27,7 @@ class ParseJobStartError extends Error {}
 // behind so the import shows up in history and anonymous jobs can be claimed
 // after sign-in. Throws ParseJobStartError when the row can't be created, and
 // the parse error itself (after marking the row failed) when parsing fails.
+// A failure to record a successful parse is reported but never thrown.
 export async function executeDirectParseJob({
   jobId,
   userId,
@@ -49,26 +50,9 @@ export async function executeDirectParseJob({
   }
 
   const startedAt = Date.now();
+  let recipe: ParsedRecipe;
   try {
-    const recipe = requireCompleteRecipe(await extract(), source, { jobId });
-    await db
-      .update(parseJobs)
-      .set({
-        status: PARSE_JOB_STATUS.DONE,
-        result: recipe as unknown as Record<string, unknown>,
-        parserVersion: PARSER_VERSION,
-        updatedAt: new Date(),
-      })
-      .where(eq(parseJobs.id, jobId));
-    log("info", "parse_pipeline", {
-      source,
-      path: "ai",
-      total_ms: Date.now() - startedAt,
-      ingredient_count: recipe.ingredients?.length ?? 0,
-      step_count: recipe.instructions?.length ?? 0,
-      success: true,
-    });
-    return recipe;
+    recipe = requireCompleteRecipe(await extract(), source, { jobId });
   } catch (error) {
     await db
       .update(parseJobs)
@@ -81,6 +65,28 @@ export async function executeDirectParseJob({
       .catch((historyError) => ApiError.capture(historyError));
     throw error;
   }
+
+  // The recipe is already paid for: a failed history write is reported, not
+  // turned into a parse failure the user would have to retry.
+  await db
+    .update(parseJobs)
+    .set({
+      status: PARSE_JOB_STATUS.DONE,
+      result: recipe as unknown as Record<string, unknown>,
+      parserVersion: PARSER_VERSION,
+      updatedAt: new Date(),
+    })
+    .where(eq(parseJobs.id, jobId))
+    .catch((historyError) => ApiError.capture(historyError));
+  log("info", "parse_pipeline", {
+    source,
+    path: "ai",
+    total_ms: Date.now() - startedAt,
+    ingredient_count: recipe.ingredients?.length ?? 0,
+    step_count: recipe.instructions?.length ?? 0,
+    success: true,
+  });
+  return recipe;
 }
 
 /** executeDirectParseJob for an API route: the recipe as JSON, or an error. */
