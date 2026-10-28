@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -194,17 +195,22 @@ export function NavigationStackProvider({
     [updateEntries],
   );
 
+  // Memoized so consumers (every useNavigate caller) re-render on a stack
+  // change, not on every render of the provider's parent.
+  const value = useMemo(
+    () => ({
+      entries,
+      push,
+      pop,
+      reset,
+      replaceTop,
+      canPop: entries.length > 1,
+    }),
+    [entries, push, pop, reset, replaceTop],
+  );
+
   return (
-    <NavigationStackContext.Provider
-      value={{
-        entries,
-        push,
-        pop,
-        reset,
-        replaceTop,
-        canPop: entries.length > 1,
-      }}
-    >
+    <NavigationStackContext.Provider value={value}>
       {children}
     </NavigationStackContext.Provider>
   );
