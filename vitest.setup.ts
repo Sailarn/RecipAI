@@ -1,7 +1,14 @@
-import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 import "fake-indexeddb/auto";
+
+// DOM-only helpers load only in happy-dom files; Node tests skip their cost.
+if (typeof window !== "undefined") {
+  await import("@testing-library/jest-dom/vitest");
+  const { cleanup } = await import("@testing-library/react");
+  afterEach(() => {
+    cleanup();
+  });
+}
 
 // Mock matchMedia — happy-dom simulates a desktop (pointer: fine = true), which causes
 // useLongPress to skip its timer entirely. Default to non-fine pointer so timer-based
@@ -50,7 +57,3 @@ vi.mock("@/lib/telemetry", () => ({
   captureError: vi.fn(),
   log: vi.fn(),
 }));
-
-afterEach(() => {
-  cleanup();
-});

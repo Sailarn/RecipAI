@@ -25,7 +25,7 @@ bun run test:coverage     # run with coverage report
      */
     ```
 
-    Node-only files skip the DOM setup, which cut the suite from about 15s to 12s. API route tests run in the same runtime as the routes.
+    Node-only files skip the DOM setup (`vitest.setup.ts` loads jest-dom and React Testing Library only when `window` exists), which cut the suite from about 15s to 10s. API route tests run in the same runtime as the routes.
 - **Component testing:** React Testing Library
 - **IndexedDB:** fake-indexeddb (auto-loaded in `vitest.setup.ts`)
 - **Config:** `vitest.config.mjs`
