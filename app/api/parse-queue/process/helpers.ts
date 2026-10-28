@@ -73,7 +73,7 @@ export async function parseWithRetry(
     } catch (err) {
       lastError = err;
       if (!isRetryable(err) || attempt === attempts) break;
-      await new Promise((r) => setTimeout(r, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
   throw lastError;

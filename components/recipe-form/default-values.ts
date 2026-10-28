@@ -73,20 +73,20 @@ export function getDefaultValues(
       prepTime: recipe.prepTime,
       cookTime: recipe.cookTime,
       servings: recipe.servings != null ? String(recipe.servings) : "",
-      ingredients: recipe.ingredients.map((ing) => ({
-        rowId: ing.id,
-        item: ing.item,
-        amount: ing.amount != null ? String(ing.amount) : "",
-        unit: ing.unit || "",
-        modifiers: ing.modifiers ?? [],
-        sectionId: ing.sectionId ?? null,
-        original: ing.original,
+      ingredients: recipe.ingredients.map((ingredient) => ({
+        rowId: ingredient.id,
+        item: ingredient.item,
+        amount: ingredient.amount != null ? String(ingredient.amount) : "",
+        unit: ingredient.unit || "",
+        modifiers: ingredient.modifiers ?? [],
+        sectionId: ingredient.sectionId ?? null,
+        original: ingredient.original,
       })),
-      instructions: recipe.instructions.map((inst) => ({
-        rowId: inst.id,
-        instruction: inst.instruction,
-        imageUrl: inst.imageUrl || "",
-        sectionId: inst.sectionId ?? null,
+      instructions: recipe.instructions.map((instruction) => ({
+        rowId: instruction.id,
+        instruction: instruction.instruction,
+        imageUrl: instruction.imageUrl || "",
+        sectionId: instruction.sectionId ?? null,
       })),
       sections: recipe.sections ?? [],
       sourceUrl: recipe.sourceUrl || "",
@@ -111,15 +111,16 @@ export function getDefaultValues(
       cookTime: initialData.cookTime ?? undefined,
       servings: initialData.servings ? String(initialData.servings) : "",
       ingredients: initialData.ingredients?.length
-        ? initialData.ingredients.map((ing) => ({
+        ? initialData.ingredients.map((ingredient) => ({
             rowId: generateId(),
-            item: ing.item || "",
-            amount: ing.amount != null ? String(ing.amount) : "",
-            unit: ing.unit || "",
-            modifiers: validModifiers(ing.modifiers),
+            item: ingredient.item || "",
+            amount: ingredient.amount != null ? String(ingredient.amount) : "",
+            unit: ingredient.unit || "",
+            modifiers: validModifiers(ingredient.modifiers),
             sectionId:
-              ing.sectionId ?? sectionIdForLabel(ing.section, sectionIdByLabel),
-            original: ing.original ?? undefined,
+              ingredient.sectionId ??
+              sectionIdForLabel(ingredient.section, sectionIdByLabel),
+            original: ingredient.original ?? undefined,
           }))
         : [
             {
@@ -132,13 +133,13 @@ export function getDefaultValues(
             },
           ],
       instructions: initialData.instructions?.length
-        ? initialData.instructions.map((inst) => ({
+        ? initialData.instructions.map((instruction) => ({
             rowId: generateId(),
-            instruction: inst.instruction || "",
-            imageUrl: inst.imageUrl || "",
+            instruction: instruction.instruction || "",
+            imageUrl: instruction.imageUrl || "",
             sectionId:
-              inst.sectionId ??
-              sectionIdForLabel(inst.section, sectionIdByLabel),
+              instruction.sectionId ??
+              sectionIdForLabel(instruction.section, sectionIdByLabel),
           }))
         : [
             {

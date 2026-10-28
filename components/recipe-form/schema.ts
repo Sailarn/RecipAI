@@ -28,10 +28,13 @@ export function createRecipeSchema(t: (key: string) => string) {
     // Left empty = servings unknown (stored as null, hidden in the UI).
     servings: z
       .string()
-      .transform((val) => (val.trim() === "" ? null : Number(val)))
-      .refine((val) => val === null || (Number.isInteger(val) && val > 0), {
-        message: t("servingsRequired"),
-      }),
+      .transform((value) => (value.trim() === "" ? null : Number(value)))
+      .refine(
+        (value) => value === null || (Number.isInteger(value) && value > 0),
+        {
+          message: t("servingsRequired"),
+        },
+      ),
     ingredients: z
       .array(
         z.object({
@@ -54,7 +57,8 @@ export function createRecipeSchema(t: (key: string) => string) {
       )
       .min(1)
       .refine(
-        (ingredients) => ingredients.some((ing) => ing.item.trim().length > 0),
+        (ingredients) =>
+          ingredients.some((ingredient) => ingredient.item.trim().length > 0),
         { message: t("ingredientsRequired") },
       ),
     instructions: z
