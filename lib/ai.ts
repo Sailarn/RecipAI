@@ -6,21 +6,35 @@ import { log, trackEvent } from "@/lib/telemetry";
 // parses only — DeepSeek's chat API has no image input, so photo parses skip
 // straight past it to OpenAI; only if ALL of those fail do we fall back to
 // the paid OpenAI model — keeping cost on the free tier whenever possible.
-// gemini-2.0-flash was retired (it failed every call within ~200ms); the
-// current Flash replaced it, so a gemini-2.5-flash outage still has a full-size
-// Gemini model behind it before the Lite one.
-const GEMINI_MODEL_CHAIN = [
+// Every model listed has its own free-tier bucket (AI Studio "Rate limits by
+// model"): the Flash models get 5 RPM / 20 RPD each and the 3.x Flash-Lite
+// models 15 RPM / 500 RPD, so a longer chain multiplies the daily capacity —
+// an exhausted model answers 429 in milliseconds and the next one takes over.
+// gemini-3.5-flash (no Lite) has no free quota at all; keep it out.
+// Recipe and photo extraction lead with the proven gemini-2.5-flash.
+const EXTRACTION_MODEL_CHAIN = [
   "gemini-2.5-flash",
-  "gemini-3.5-flash",
+  "gemini-3-flash-preview",
+  "gemini-3.6-flash",
+  "gemini-3.8-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
   "gemini-2.5-flash-lite",
+] as const;
+// Ingredient enrichment is a small translate-and-classify task that runs once
+// per new ingredient, so it leads with the 500-RPD Lite models and leaves the
+// 20-RPD Flash buckets to recipe parses.
+const INGREDIENT_MODEL_CHAIN = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
 ] as const;
 // The faster/cheaper tier — deepseek-v4-pro measured meaningfully slower in
 // side-by-side model testing (scripts/local/model-eval), too slow to be
 // worth it this late in an already-degraded fallback chain.
 const DEEPSEEK_MODEL = "deepseek-v4-flash";
 const OPENAI_MODEL = "gpt-4o-mini";
-const DEEPSEEK_FALLBACK_INDEX = GEMINI_MODEL_CHAIN.length;
-const OPENAI_FALLBACK_INDEX = GEMINI_MODEL_CHAIN.length + 1;
 // Neither DeepSeek nor OpenAI had an explicit timeout before — a hung
 // request would block a queued parse job indefinitely. 90s gives real
 // headroom (observed DeepSeek chat-tier latency: well under 60s) without
@@ -148,8 +162,12 @@ async function generateJson<T>(
   context: AiContext,
 ): Promise<T> {
   let lastError: unknown;
+  const geminiChain =
+    context === "ingredient" ? INGREDIENT_MODEL_CHAIN : EXTRACTION_MODEL_CHAIN;
+  const deepSeekFallbackIndex = geminiChain.length;
+  const openAiFallbackIndex = geminiChain.length + 1;
 
-  for (const [fallbackIndex, modelName] of GEMINI_MODEL_CHAIN.entries()) {
+  for (const [fallbackIndex, modelName] of geminiChain.entries()) {
     const startedAt = Date.now();
     try {
       const parsed = await callGeminiJson<T>(modelName, geminiContents);
@@ -183,7 +201,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: true,
-        fallback_index: DEEPSEEK_FALLBACK_INDEX,
+        fallback_index: deepSeekFallbackIndex,
       });
       return parsed;
     } catch (deepSeekError) {
@@ -193,7 +211,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: false,
-        fallback_index: DEEPSEEK_FALLBACK_INDEX,
+        fallback_index: deepSeekFallbackIndex,
       });
     }
   }
@@ -208,7 +226,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: true,
-        fallback_index: OPENAI_FALLBACK_INDEX,
+        fallback_index: openAiFallbackIndex,
       });
       return parsed;
     } catch (openAiError) {
@@ -218,7 +236,7 @@ async function generateJson<T>(
         context,
         duration_ms: Date.now() - startedAt,
         success: false,
-        fallback_index: OPENAI_FALLBACK_INDEX,
+        fallback_index: openAiFallbackIndex,
       });
     }
   }

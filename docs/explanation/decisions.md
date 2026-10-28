@@ -34,7 +34,7 @@ Chosen for its first-class Drizzle adapter and support for Passkey (WebAuthn) ou
 
 ## Multi-provider AI chain
 
-The app tries Gemini models in order (`gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-2.5-flash-lite`) before falling back to OpenAI `gpt-4o-mini`. Gemini is free-tier; OpenAI is only used when `OPENAI_API_KEY` is set, keeping cost on the free tier by default.
+The app tries the free Gemini models in order (each has its own free-tier bucket; see the parse pipeline page for the current chain) before falling back to OpenAI `gpt-4o-mini`. Gemini is free-tier; OpenAI is only used when `OPENAI_API_KEY` is set, keeping cost on the free tier by default.
 
 Photo parsing uses the same chain with multimodal input (Gemini `inlineData`, OpenAI `image_url` with data URI).
 

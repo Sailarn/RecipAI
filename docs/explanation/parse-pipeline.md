@@ -109,13 +109,13 @@ Pasted text is the cheapest input to abuse, so it has two guards beyond the shar
 
 ## AI model chain (`lib/ai.ts`)
 
-All three pipelines funnel through the same model chain in `lib/ai.ts` (via the `callAiForRecipe` / `callAiForRecipePhoto` wrappers):
+All three pipelines funnel through the same `generateJson` in `lib/ai.ts` (via the `callAiForRecipe` / `callAiForRecipePhoto` wrappers). Recipe and photo extraction walk `EXTRACTION_MODEL_CHAIN`: `gemini-2.5-flash` → `gemini-3-flash-preview` → `gemini-3.6-flash` → `gemini-3.8-flash` → `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite` → `gemini-2.5-flash-lite`. Ingredient enrichment (`callAiForIngredient`) walks the shorter `INGREDIENT_MODEL_CHAIN`, Lite models first: `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite` → `gemini-2.5-flash-lite` → `gemini-2.5-flash`.
 
 ```mermaid
 graph LR
     A[generateJson] --> B[gemini-2.5-flash]
-    B -->|fail| C[gemini-3.5-flash]
-    C -->|fail| D[gemini-2.5-flash-lite]
+    B -->|fail| C[… newer Flash models …]
+    C -->|fail| D[Flash-Lite models]
     D -->|fail| DS{context=recipe AND<br/>DEEPSEEK_API_KEY set?}
     DS -->|yes| DM[deepseek-v4-flash]
     DS -->|no| E{OPENAI_API_KEY set?}
@@ -132,9 +132,9 @@ graph LR
 
 All Gemini models are called through `@google/genai` with `responseMimeType: "application/json"` and a **45s per-attempt timeout** (`GEMINI_TIMEOUT_MS`) — successful calls peak just under 30s, so a hung attempt falls through to the next model instead of stalling the parse. A response with no text (a blocked prompt, no candidates) also counts as a failed attempt. DeepSeek and OpenAI both use `response_format: { type: "json_object" }` via a shared `callOpenAiCompatibleJson` helper (same request shape, different base URL/model/key), with a 90s timeout on each — neither had an explicit timeout before, and DeepSeek's heavier `deepseek-v4-pro` tier was observed hanging past 2 minutes in side-by-side model testing (`scripts/local/model-eval`), which is why production uses the faster `deepseek-v4-flash` specifically.
 
-**Free-tier limits.** All three Gemini models are on Google's free tier. Google no longer publishes per-model numbers; the active limits for the project are on the rate-limit page in Google AI Studio, applied per project and reset at midnight Pacific time. Actual use is far below them (about 60 calls in October 2026, per Axiom `ai_call`), so a Gemini failure here is almost always high demand (503) or a timeout, not quota. `gemini-2.0-flash` sat in the middle slot until it was retired; check `GET /v1beta/models` before adding a model to the chain.
+**Free-tier limits.** Google no longer publishes per-model numbers; the project's limits are on the "Rate limits by model" page in Google AI Studio, applied per project and reset at midnight Pacific time. As of October 2026 every Flash model in the chain gets **5 RPM / 20 RPD** and the 3.x Flash-Lite models **15 RPM / 500 RPD**, each in its own bucket — so 20 parses a day exhaust `gemini-2.5-flash`, and the chain's length is what keeps parses on the free tier. A quota-exhausted model answers 429 in milliseconds, so walking past it costs almost nothing. Enrichment leads with the Lite models because it runs once per new ingredient and used to burn the Flash RPM in bursts. Not every listed model is free: `gemini-3.5-flash` (no Lite), `gemini-3.7-flash` and the Pro models show 0 / 0 on the free tier, and `gemini-2.0-flash` was retired. Before adding a model, check both `GET /v1beta/models` and the AI Studio page.
 
-DeepSeek is skipped entirely for `context: "photo"` (its chat API has no image input) and whenever `DEEPSEEK_API_KEY` is unset — the chain falls straight through to the OpenAI check in either case. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without either optional key, the chain ends at `gemini-2.5-flash-lite`.
+DeepSeek is skipped entirely for `context: "photo"` (its chat API has no image input) and whenever `DEEPSEEK_API_KEY` is unset — the chain falls straight through to the OpenAI check in either case. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without either optional key, the chain ends at its last Gemini model.
 
 `parseWebRecipe`, `parseVideoRecipe`, and `parseRecipeFromUrl` all accept an optional second `aiCaller` parameter (defaults to `callAiForRecipe`). No production caller passes one — it exists solely so the local model-comparison harness (`scripts/local/model-eval/`, gitignored) can run the exact same scrape/trim/prompt/validate pipeline against a different provider without duplicating that logic.
 

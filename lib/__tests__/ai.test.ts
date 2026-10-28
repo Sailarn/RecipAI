@@ -9,7 +9,11 @@ vi.mock("@google/genai", () => ({
 }));
 
 import { log, trackEvent } from "@/lib/telemetry";
-import { callAiForRecipe, callAiForRecipePhoto } from "../ai";
+import {
+  callAiForIngredient,
+  callAiForRecipe,
+  callAiForRecipePhoto,
+} from "../ai";
 
 const mockRecipe = {
   title: "Pasta",
@@ -115,7 +119,7 @@ describe("DeepSeek fallback", () => {
     const result = await callAiForRecipe("parse this recipe");
 
     expect(result).toEqual(mockRecipe);
-    expect(mockGenerateContent).toHaveBeenCalledTimes(3);
+    expect(mockGenerateContent).toHaveBeenCalledTimes(7);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.deepseek.com/chat/completions",
       expect.anything(),
@@ -220,7 +224,7 @@ describe("OpenAI fallback", () => {
     const result = await callAiForRecipe("parse this recipe");
 
     expect(result).toEqual(mockRecipe);
-    expect(mockGenerateContent).toHaveBeenCalledTimes(3);
+    expect(mockGenerateContent).toHaveBeenCalledTimes(7);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 
@@ -267,7 +271,27 @@ describe("AI call logging", () => {
     expect(log).toHaveBeenCalledWith(
       "info",
       "ai_call",
-      expect.objectContaining({ model: "gemini-3.5-flash", success: true }),
+      expect.objectContaining({
+        model: "gemini-3-flash-preview",
+        success: true,
+      }),
+    );
+  });
+
+  it("leads ingredient enrichment with a high-quota Lite model", async () => {
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({ en: "salt" }),
+    });
+
+    await callAiForIngredient("enrich salt");
+
+    expect(mockGenerateContent).toHaveBeenCalledWith(
+      expect.objectContaining({ model: "gemini-3.5-flash-lite" }),
+    );
+    expect(log).toHaveBeenCalledWith(
+      "info",
+      "ai_call",
+      expect.objectContaining({ context: "ingredient", fallback_index: 0 }),
     );
   });
 
