@@ -22,7 +22,8 @@ The client detects this via `maintenanceErrorFromResponse` (`lib/api/api-fetch.t
 |---|---|---|---|
 | `POST` | `/api/parse-queue` | Rate-limited (anon: 15/hr, user: 60/hr) | Create a parse job. Body `{ url, pushEndpoint?, telegramNotify? }`. Returns `{ jobId, uploadToken }`. On a **cache hit** (same normalized URL already parsed by the current `PARSER_VERSION`) the job is inserted already `done` with the cloned result and the response also carries `{ cached: true, result }`. When `telegramNotify` is set and the signed-in user has a linked Telegram account, the job is stamped with their `telegramChatId` and the response echoes `{ telegramNotify: true }` — see the Telegram-notify hand-off below. |
 | `GET` | `/api/parse-queue` | Session required | List the signed-in user's parse jobs. |
-| `GET` | `/api/parse-queue/[id]` | None | Poll a job's status and result. |
+| `GET` | `/api/parse-queue/[id]` | None | Poll a job's status and result. A job still `pending`/`processing` 10 minutes after its last update is marked `failed` ("Parsing timed out — the job never finished.") and answered as such. |
+| `GET` | `/api/parse-queue/active` | Session required | The caller's unfinished jobs (`pending`/`processing`) from any device or the bot, as `{ jobs: [{ id }] }`. Marks the caller's stuck jobs failed first. |
 | `POST` | `/api/parse-queue/process` | None (internal) | Process a queued job. Idempotent — skips if job is `done` or `processing` within 90 s. `maxDuration: 60`. |
 | `POST` | `/api/parse-queue/claim` | Session required | Adopt anonymous jobs (by id array) into the signed-in user's account. Used on login to link pre-login history. |
 

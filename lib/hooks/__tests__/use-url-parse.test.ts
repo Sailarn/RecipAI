@@ -61,7 +61,7 @@ vi.mock("sonner", () => ({ toast: { success: toastSuccess } }));
 
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/db";
-import { addJobId, getJobIds } from "@/lib/parse-job-storage";
+import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
 
 const mockFetch = vi.fn();
 const parsedRecipeEntries = new Map<string, unknown>();
@@ -616,6 +616,48 @@ describe("useUrlParse", () => {
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(mockFetch).toHaveBeenCalledOnce();
+    });
+
+    it("lets go of a running job on Parse another but keeps it registered", async () => {
+      vi.useFakeTimers();
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(makeResponse({ status: "processing" }));
+      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+      await vi.advanceTimersByTimeAsync(0);
+
+      await act(() => result.current.handleReset());
+      mockFetch.mockClear();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(removeJobId).not.toHaveBeenCalled();
+      expect(result.current.jobId).toBeNull();
+    });
+
+    it("ignores the abandoned job's result when it lands after Parse another", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      let resolveFetch!: (res: Response) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+
+      await act(() => result.current.handleReset());
+      resolveFetch(
+        makeResponse({
+          status: "done",
+          result: { title: "Old Recipe", ingredients: [], instructions: [] },
+        }),
+      );
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(claimJobCompletion).not.toHaveBeenCalled();
+      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
     });
 
     it("does not claim completion when unmounted before the job finishes", async () => {

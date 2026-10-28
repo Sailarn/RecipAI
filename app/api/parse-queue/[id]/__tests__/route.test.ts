@@ -11,6 +11,16 @@ vi.mock("@/db/schema/parse-jobs", () => ({
   parseJobs: {},
 }));
 
+const failStaleParseJobs = vi.hoisted(() =>
+  vi.fn().mockResolvedValue(undefined),
+);
+vi.mock("@/lib/parse-recipe/stale-parse-jobs", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/lib/parse-recipe/stale-parse-jobs")
+  >()),
+  failStaleParseJobs,
+}));
+
 import { db } from "@/db";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { GET } from "../route";
@@ -94,6 +104,7 @@ describe("GET /api/parse-queue/[id]", () => {
       status: PARSE_JOB_STATUS.PENDING,
       result: null,
       error: null,
+      updatedAt: new Date(),
     };
     setupSelectChain([mockJob]);
     const { req, params } = makeRequest("job-3");
@@ -103,5 +114,45 @@ describe("GET /api/parse-queue/[id]", () => {
     const body = await res.json();
     expect(body.status).toBe(PARSE_JOB_STATUS.PENDING);
     expect(body.result).toBeNull();
+  });
+
+  describe("stuck jobs", () => {
+    it("fails a job that has been processing for over ten minutes", async () => {
+      setupSelectChain([
+        {
+          id: "job-1",
+          status: PARSE_JOB_STATUS.PROCESSING,
+          url: "https://example.com/r",
+          updatedAt: new Date(Date.now() - 11 * 60_000),
+        },
+      ]);
+      const { req, params } = makeRequest("job-1");
+
+      const body = await (await GET(req, params)).json();
+
+      expect(failStaleParseJobs).toHaveBeenCalledOnce();
+      expect(body).toMatchObject({
+        status: PARSE_JOB_STATUS.FAILED,
+        error: "Parsing timed out — the job never finished.",
+        url: "https://example.com/r",
+      });
+    });
+
+    it("leaves a recently updated job alone", async () => {
+      failStaleParseJobs.mockClear();
+      setupSelectChain([
+        {
+          id: "job-1",
+          status: PARSE_JOB_STATUS.PENDING,
+          updatedAt: new Date(Date.now() - 60_000),
+        },
+      ]);
+      const { req, params } = makeRequest("job-1");
+
+      const body = await (await GET(req, params)).json();
+
+      expect(failStaleParseJobs).not.toHaveBeenCalled();
+      expect(body.status).toBe(PARSE_JOB_STATUS.PENDING);
+    });
   });
 });

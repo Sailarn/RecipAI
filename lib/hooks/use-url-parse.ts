@@ -60,6 +60,10 @@ export function useUrlParse({
   tRef.current = t;
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
+  // The job this page is following. "Parse another" lets go of it, and a poll
+  // for any other job stops instead of rescheduling — the global watcher still
+  // follows the abandoned job to completion.
+  const followedJobRef = useRef<string | null>(null);
   const { subscription, subscribe, isSupported, permission } =
     usePushSubscription();
 
@@ -85,10 +89,12 @@ export function useUrlParse({
   // toast or the failure error — without building a durable review entry or
   // re-saving (which would duplicate the server's copy).
   const poll = useCallback((id: string, notifyMode = false) => {
+    followedJobRef.current = id;
     const run = async () => {
       try {
         const statusRes = await fetch(api.parseQueueJob(id));
         const { status, result, error, url: jobUrl } = await statusRes.json();
+        if (followedJobRef.current !== id) return;
 
         if (status === PARSE_JOB_STATUS.DONE) {
           // If we've navigated away, don't claim — let the global watcher show
@@ -141,11 +147,12 @@ export function useUrlParse({
           setLoading(false);
           setJobId(null);
           removeJobId(id);
-        } else if (isMountedRef.current) {
+        } else if (isMountedRef.current && followedJobRef.current === id) {
           // Unmounted mid-request: the global watcher owns the job now.
           pollRef.current = setTimeout(run, 3000);
         }
       } catch {
+        if (followedJobRef.current !== id) return;
         setError(tRef.current("statusCheckFailed"));
         setLoading(false);
       }
@@ -278,6 +285,7 @@ export function useUrlParse({
       }
 
       addJobId(newJobId, uploadToken);
+      followedJobRef.current = newJobId;
       setJobId(newJobId);
       setLoading(false);
 
@@ -323,7 +331,10 @@ export function useUrlParse({
     setActiveParsedRecipeId(null);
     setUrl("");
     setError(null);
-    if (jobId) removeJobId(jobId);
+    // Stop following the job here but keep it registered: the global watcher
+    // finishes it, and resumes it after a reload.
+    followedJobRef.current = null;
+    if (pollRef.current) clearTimeout(pollRef.current);
     setJobId(null);
   };
 
