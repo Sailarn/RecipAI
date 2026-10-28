@@ -80,7 +80,7 @@ export function useServingsCalculator({
       const map = new Map<string, string>();
       for (const entry of entries) {
         if (!entry) continue;
-        const isUk = locale === "ua";
+        const isUk = locale === "uk";
         const name = isUk ? (entry.ua ?? entry.en) : (entry.en ?? entry.ua);
         if (name) map.set(entry.id, name);
       }

@@ -7,7 +7,7 @@ export function getIngredientDisplayName(
   ingredient: VocabularyIngredient,
   locale: Locale,
 ): string {
-  return locale === "ua"
+  return locale === "uk"
     ? (ingredient.ua ?? ingredient.en)
     : (ingredient.en ?? ingredient.ua ?? "");
 }

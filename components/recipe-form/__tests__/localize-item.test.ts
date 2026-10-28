@@ -54,7 +54,7 @@ describe("buildVocabNameIndex", () => {
 
 describe("localizeIngredientItem", () => {
   it("localizes an english stored item to ukrainian", () => {
-    expect(localizeIngredientItem("Flour", index, "ua")).toBe(
+    expect(localizeIngredientItem("Flour", index, "uk")).toBe(
       "борошно універсальне",
     );
   });
@@ -67,24 +67,24 @@ describe("localizeIngredientItem", () => {
 
   it("leaves descriptive non-vocab text untouched", () => {
     expect(
-      localizeIngredientItem("all-purpose flour, sifted", index, "ua"),
+      localizeIngredientItem("all-purpose flour, sifted", index, "uk"),
     ).toBe("all-purpose flour, sifted");
   });
 
   it("returns the original text when no vocab matches", () => {
-    expect(localizeIngredientItem("dragonfruit", index, "ua")).toBe(
+    expect(localizeIngredientItem("dragonfruit", index, "uk")).toBe(
       "dragonfruit",
     );
   });
 
   it("prefers the canonical entry for a descriptive phrase the string-match misses", () => {
-    expect(localizeIngredientItem("lukewarm water", index, "ua", WATER)).toBe(
+    expect(localizeIngredientItem("lukewarm water", index, "uk", WATER)).toBe(
       "вода",
     );
   });
 
   it("falls back to the string match when no canonical entry is given", () => {
-    expect(localizeIngredientItem("flour", index, "ua")).toBe(
+    expect(localizeIngredientItem("flour", index, "uk")).toBe(
       "борошно універсальне",
     );
   });

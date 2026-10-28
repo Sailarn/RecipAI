@@ -30,8 +30,8 @@ const vocabById = new Map<string, VocabularyIngredient>([
 ]);
 
 describe("localizedPantryName", () => {
-  it("returns the Ukrainian name for the ua locale", () => {
-    expect(localizedPantryName(makeItem(), vocabById, "ua")).toBe("Помідор");
+  it("returns the Ukrainian name for the uk locale", () => {
+    expect(localizedPantryName(makeItem(), vocabById, "uk")).toBe("Помідор");
   });
 
   it("returns the English name for the en locale", () => {
@@ -47,7 +47,7 @@ describe("localizedPantryName", () => {
       localizedPantryName(
         makeItem({ ingredientId: "salt-id", name: "Salt" }),
         onlyEn,
-        "ua",
+        "uk",
       ),
     ).toBe("Salt");
   });
@@ -57,7 +57,7 @@ describe("localizedPantryName", () => {
       localizedPantryName(
         makeItem({ ingredientId: "unknown-id", name: "Tajín" }),
         vocabById,
-        "ua",
+        "uk",
       ),
     ).toBe("Tajín");
   });
@@ -67,7 +67,7 @@ describe("localizedPantryName", () => {
       localizedPantryName(
         makeItem({ ingredientId: undefined, name: "Mystery spice" }),
         vocabById,
-        "ua",
+        "uk",
       ),
     ).toBe("Mystery spice");
   });

@@ -30,14 +30,14 @@ function atPath(pathname: string): void {
 
 describe("useTelemetryIdentity", () => {
   it("identifies the user when a session is present", () => {
-    atPath("/ua/recipes");
+    atPath("/uk/recipes");
     mockSession({ data: { user: { id: "user-1" } }, isPending: false });
 
     renderHook(() => useTelemetryIdentity());
 
     expect(identifyUser).toHaveBeenCalledWith(
       "user-1",
-      expect.objectContaining({ locale: "ua" }),
+      expect.objectContaining({ locale: "uk" }),
     );
     expect(resetIdentity).not.toHaveBeenCalled();
   });

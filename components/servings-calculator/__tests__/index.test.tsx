@@ -488,7 +488,7 @@ describe("ServingsCalculator", () => {
       render(
         <ServingsCalculator
           originalServings={2}
-          locale="ua"
+          locale="uk"
           ingredients={[
             baseIngredient({ item: "Mozzarella", modifiers: ["GRATED"] }),
           ]}

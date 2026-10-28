@@ -47,7 +47,7 @@ describe("IngredientsList", () => {
     renderList(
       [{ id: "1", item: "Mozzarella", modifiers: ["GRATED"] }],
       [],
-      "ua",
+      "uk",
     );
 
     expect(screen.getByText("тертий")).toBeInTheDocument();
@@ -126,14 +126,14 @@ describe("IngredientsList", () => {
       return row.textContent ?? "";
     }
 
-    it("localizes the stored unit code in the ua locale", () => {
+    it("localizes the stored unit code in the uk locale", () => {
       renderList(
         [
           { id: "1", item: "борошно", amount: 300, unit: "g" },
           { id: "2", item: "розпушувач", amount: 1, unit: "tsp" },
         ],
         [],
-        "ua",
+        "uk",
       );
 
       expect(ingredientText("борошно")).toContain("300 г");
@@ -151,7 +151,7 @@ describe("IngredientsList", () => {
     });
 
     it("leaves a unit it cannot classify untouched", () => {
-      renderList([{ id: "1", item: "сіль", unit: "щіпка" }], [], "ua");
+      renderList([{ id: "1", item: "сіль", unit: "щіпка" }], [], "uk");
 
       expect(ingredientText("сіль")).toContain("щіпка");
     });

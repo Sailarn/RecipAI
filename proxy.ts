@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { ensureAppAvailable } from "@/lib/maintenance";
 import { routes } from "@/lib/routes";
-import { defaultLocale, locales } from "./i18n/config";
+import { defaultLocale, LEGACY_UKRAINIAN_LOCALE, locales } from "./i18n/config";
 
 const intlMiddleware = createMiddleware({
   locales,
@@ -19,11 +19,26 @@ function isExemptApiPath(pathname: string): boolean {
 }
 
 const LOCALE_ROOT_PATTERN = new RegExp(`^/(${locales.join("|")})/?$`);
+const LEGACY_UKRAINIAN_PREFIX = new RegExp(
+  `^/${LEGACY_UKRAINIAN_LOCALE}(?=/|$)`,
+);
 
 /**
- * The locale root (`/ua`) only ever redirects on to the recipes list, so
+ * Ukrainian pages moved from `/ua` to `/uk`. Installed apps launch, and shared
+ * links point, at the old paths, so they redirect permanently.
+ */
+function redirectLegacyUkrainian(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl;
+  if (!LEGACY_UKRAINIAN_PREFIX.test(pathname)) return null;
+  const target = request.nextUrl.clone();
+  target.pathname = pathname.replace(LEGACY_UKRAINIAN_PREFIX, "/uk");
+  return NextResponse.redirect(target, 308);
+}
+
+/**
+ * The locale root (`/uk`) only ever redirects on to the recipes list, so
  * landing there costs an extra server round-trip. Cold launches used to pay it
- * twice: `/` → `/ua` (next-intl) → `/ua/recipes` (the page's own redirect).
+ * twice: `/` → `/uk` (next-intl) → `/uk/recipes` (the page's own redirect).
  *
  * Extending the destination here collapses both hops into one. next-intl still
  * owns locale negotiation — we only lengthen the path it chose.
@@ -64,7 +79,9 @@ export default async function proxy(req: NextRequest) {
     return maintenance ?? NextResponse.next();
   }
 
-  return skipLocaleRoot(intlMiddleware(req), req);
+  return (
+    redirectLegacyUkrainian(req) ?? skipLocaleRoot(intlMiddleware(req), req)
+  );
 }
 
 export const config = {

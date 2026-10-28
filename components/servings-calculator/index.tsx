@@ -160,7 +160,7 @@ export function ServingsCalculator({
                     scaledAmount={formatAmount(ingredient.amount)}
                     status={stockStatus(ingredient, index)}
                     name={displayName(ingredient, index)}
-                    locale={(locale === "ua" ? "ua" : "en") as Locale}
+                    locale={(locale === "uk" ? "uk" : "en") as Locale}
                     showOriginal={!useCanonical}
                     pantryItem={pantryItemFor(ingredient, index)}
                     pending={normalizationPending}

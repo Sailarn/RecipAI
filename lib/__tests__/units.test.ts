@@ -73,16 +73,16 @@ describe("toMeasurementUnit", () => {
 });
 
 describe("unitLabel", () => {
-  describe("ua locale", () => {
+  describe("uk locale", () => {
     it("localizes the stored English code", () => {
-      expect(unitLabel("g", "ua")).toBe("г");
-      expect(unitLabel("kg", "ua")).toBe("кг");
-      expect(unitLabel("ml", "ua")).toBe("мл");
-      expect(unitLabel("l", "ua")).toBe("л");
-      expect(unitLabel("tsp", "ua")).toBe("ч. л.");
-      expect(unitLabel("tbsp", "ua")).toBe("ст. л.");
-      expect(unitLabel("pcs", "ua")).toBe("шт");
-      expect(unitLabel("pinch", "ua")).toBe("щіпка");
+      expect(unitLabel("g", "uk")).toBe("г");
+      expect(unitLabel("kg", "uk")).toBe("кг");
+      expect(unitLabel("ml", "uk")).toBe("мл");
+      expect(unitLabel("l", "uk")).toBe("л");
+      expect(unitLabel("tsp", "uk")).toBe("ч. л.");
+      expect(unitLabel("tbsp", "uk")).toBe("ст. л.");
+      expect(unitLabel("pcs", "uk")).toBe("шт");
+      expect(unitLabel("pinch", "uk")).toBe("щіпка");
     });
   });
 
@@ -100,9 +100,9 @@ describe("unitLabel", () => {
 
   describe("unrecognised units", () => {
     it("returns the stored text untouched in both locales", () => {
-      expect(unitLabel("жменя", "ua")).toBe("жменя");
+      expect(unitLabel("жменя", "uk")).toBe("жменя");
       expect(unitLabel("жменя", "en")).toBe("жменя");
-      expect(unitLabel("bunch", "ua")).toBe("bunch");
+      expect(unitLabel("bunch", "uk")).toBe("bunch");
     });
   });
 });

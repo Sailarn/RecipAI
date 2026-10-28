@@ -187,7 +187,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
 | `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
 | `lib/parse-job-events.ts` | Browser events that hand completed parse-job rows from the global watcher back to the parse page. |
-| `lib/units.ts` | `MEASUREMENT_UNITS` (canonical code → `en`/`ua` label: g, kg, ml, l, tsp, tbsp, pcs, pinch) + `unitLabel()` / `toMeasurementUnit()` / `canonicalUnit()`. Localizes the stored unit code for display, and `canonicalUnit()` normalizes a parsed unit on save (`buildSavedRecipeShape`), via an alias table covering en/ua/ru/fr spelling variants. Add a new unit here and to the prompt's `METRIC_UNITS_RULE`. |
+| `lib/units.ts` | `MEASUREMENT_UNITS` (canonical code → `en`/`uk` label: g, kg, ml, l, tsp, tbsp, pcs, pinch) + `unitLabel()` / `toMeasurementUnit()` / `canonicalUnit()`. Localizes the stored unit code for display, and `canonicalUnit()` normalizes a parsed unit on save (`buildSavedRecipeShape`), via an alias table covering en/ua/ru/fr spelling variants. Add a new unit here and to the prompt's `METRIC_UNITS_RULE`. |
 | `lib/categories.ts` | Recipe category constants. |
 | `lib/category-styles.ts` | Category badge colors (`getCategoryStyle()`) — single source of truth. |
 | `lib/url.ts` | `isValidUrl()` (absolute http/https, any host) and `extractFirstUrl()` (pulls the link out of pasted share-sheet text). Shared by the import field's paste action and `useUrlParse`'s submit guard. |

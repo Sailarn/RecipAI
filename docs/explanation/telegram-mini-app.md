@@ -122,8 +122,8 @@ CloudStorage** (`lib/telegram/cloud-storage.ts` — a promise wrapper over the S
   Telegram UI language) and redirects if the launch URL differs. It waits for the SDK (CloudStorage +
   `language_code` need it) and **defers to a deep link** — when a `start_param` is present, the deep
   link owns the destination and its locale, so the locale sync skips to avoid a competing navigation.
-- **Telegram-language seed** (`localeFromTelegramLanguage`): with no stored choice, `uk`→`ua`,
-  `en`→`en`, `ru`→`ua`, anything else→`en` (Telegram uses ISO `uk`; the app locale is `ua`). The seed
+- **Telegram-language seed** (`localeFromTelegramLanguage`): with no stored choice, `uk`→`uk`,
+  `en`→`en`, `ru`→`uk`, anything else→`en`. A choice stored as the old `ua` code still reads as `uk`. The seed
   is recomputed each launch and never stored, so it tracks the Telegram language until the user picks
   one — only an explicit choice is written to CloudStorage and it always wins.
 

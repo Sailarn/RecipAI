@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import en from "@/locales/en.json";
-import ua from "@/locales/ua.json";
+import uk from "@/locales/uk.json";
 import { PARSE_MESSAGES, parseMessageKey } from "../parse-message-key";
 
 describe("parseMessageKey", () => {
@@ -20,7 +20,7 @@ describe("parse.messages translations", () => {
   });
 
   it("exist in Ukrainian for every message", () => {
-    expect(Object.keys(ua.parse.messages).sort()).toEqual(
+    expect(Object.keys(uk.parse.messages).sort()).toEqual(
       Object.keys(PARSE_MESSAGES).sort(),
     );
   });

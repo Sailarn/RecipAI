@@ -6,18 +6,18 @@ import type { Locale } from "@/i18n/config";
  * scales against it. Localization is display-only: the stored value never
  * changes, so a recipe reads the same on every device regardless of language.
  *
- * Mirrors the PREPARATION_MODIFIERS pattern — canonical key stored, en/ua for
+ * Mirrors the PREPARATION_MODIFIERS pattern — canonical key stored, en/uk for
  * the label.
  */
 const MEASUREMENT_UNITS = {
-  g: { en: "g", ua: "г" },
-  kg: { en: "kg", ua: "кг" },
-  ml: { en: "ml", ua: "мл" },
-  l: { en: "l", ua: "л" },
-  tsp: { en: "tsp", ua: "ч. л." },
-  tbsp: { en: "tbsp", ua: "ст. л." },
-  pcs: { en: "pcs", ua: "шт" },
-  pinch: { en: "pinch", ua: "щіпка" },
+  g: { en: "g", uk: "г" },
+  kg: { en: "kg", uk: "кг" },
+  ml: { en: "ml", uk: "мл" },
+  l: { en: "l", uk: "л" },
+  tsp: { en: "tsp", uk: "ч. л." },
+  tbsp: { en: "tbsp", uk: "ст. л." },
+  pcs: { en: "pcs", uk: "шт" },
+  pinch: { en: "pinch", uk: "щіпка" },
 } as const;
 
 export type MeasurementUnit = keyof typeof MEASUREMENT_UNITS;

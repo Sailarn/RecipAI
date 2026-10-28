@@ -76,13 +76,13 @@ describe("proxy", () => {
 
   it("sends a next-intl locale-root redirect straight to the recipes list", async () => {
     intlMiddleware.mockReturnValue(
-      NextResponse.redirect("https://recipai.test/ua"),
+      NextResponse.redirect("https://recipai.test/uk"),
     );
 
     const response = await proxy(makeRequest("/"));
 
     expect(response.headers.get("location")).toBe(
-      "https://recipai.test/ua/recipes",
+      "https://recipai.test/uk/recipes",
     );
   });
 
@@ -97,14 +97,36 @@ describe("proxy", () => {
 
   it("leaves redirects to non-locale-root paths untouched", async () => {
     intlMiddleware.mockReturnValue(
-      NextResponse.redirect("https://recipai.test/ua/login"),
+      NextResponse.redirect("https://recipai.test/uk/login"),
     );
 
     const response = await proxy(makeRequest("/login"));
 
     expect(response.headers.get("location")).toBe(
-      "https://recipai.test/ua/login",
+      "https://recipai.test/uk/login",
     );
+  });
+
+  describe("old /ua links", () => {
+    it.each([
+      ["/ua", "https://recipai.test/uk"],
+      [
+        "/ua/recipes/abc?from=share",
+        "https://recipai.test/uk/recipes/abc?from=share",
+      ],
+    ])("permanently redirects %s to the uk locale", async (path, target) => {
+      const response = await proxy(makeRequest(path));
+
+      expect(response.status).toBe(308);
+      expect(response.headers.get("location")).toBe(target);
+      expect(intlMiddleware).not.toHaveBeenCalled();
+    });
+
+    it("leaves a path that only starts with the letters alone", async () => {
+      await proxy(makeRequest("/uaxyz"));
+
+      expect(intlMiddleware).toHaveBeenCalled();
+    });
   });
 
   it("matches API requests", () => {

@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
-import { defaultLocale, type Locale, locales } from "@/i18n/config";
+import { defaultLocale, type Locale, toLocale } from "@/i18n/config";
 
 /**
  * next-intl context for the `external-auth` tree.
@@ -16,9 +16,7 @@ export async function ExternalAuthIntlProvider({
   locale: string;
   children: React.ReactNode;
 }) {
-  const resolved: Locale = locales.includes(locale as Locale)
-    ? (locale as Locale)
-    : defaultLocale;
+  const resolved: Locale = toLocale(locale) ?? defaultLocale;
   const messages = (await import(`../../locales/${resolved}.json`)).default;
 
   return (

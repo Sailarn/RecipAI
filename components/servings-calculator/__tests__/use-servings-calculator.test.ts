@@ -35,7 +35,7 @@ describe("useServingsCalculator", () => {
         useServingsCalculator({
           originalServings: 2,
           canonicalIngredientIds: ["flour"],
-          locale: "ua",
+          locale: "uk",
         }),
       );
 
@@ -58,7 +58,7 @@ describe("useServingsCalculator", () => {
             canonicalIngredientIds: ids,
             locale,
           }),
-        { initialProps: { locale: "ua" } },
+        { initialProps: { locale: "uk" } },
       );
       rerender({ locale: "en" });
 

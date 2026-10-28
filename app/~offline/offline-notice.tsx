@@ -3,7 +3,7 @@
 import { WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { defaultLocale, type Locale, locales } from "@/i18n/config";
+import { defaultLocale, type Locale, toLocale } from "@/i18n/config";
 
 // This page is prerendered outside the [locale] tree and served by the service
 // worker for *any* failed navigation, so it can't use next-intl. The strings
@@ -15,7 +15,7 @@ const COPY: Record<Locale, { title: string; body: string; retry: string }> = {
     body: "Your saved recipes are still on this device — reconnect to load this page.",
     retry: "Try again",
   },
-  ua: {
+  uk: {
     title: "Немає з'єднання",
     body: "Збережені рецепти залишаються на цьому пристрої — підключіться, щоб завантажити цю сторінку.",
     retry: "Спробувати ще раз",
@@ -24,10 +24,7 @@ const COPY: Record<Locale, { title: string; body: string; retry: string }> = {
 
 function storedLocale(): Locale {
   const match = /NEXT_LOCALE=([^;]+)/.exec(document.cookie);
-  const cookieLocale = match?.[1];
-  return locales.includes(cookieLocale as Locale)
-    ? (cookieLocale as Locale)
-    : defaultLocale;
+  return toLocale(match?.[1]) ?? defaultLocale;
 }
 
 export function OfflineNotice() {

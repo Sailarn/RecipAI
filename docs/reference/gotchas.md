@@ -66,6 +66,10 @@ Theme is now resolved **client-side before first paint**, not server-side: the `
 
 ---
 
+### Ukrainian is `uk`, not `ua`
+
+The Ukrainian locale was `ua` until October 2026. `ua` is a country code, not a language code, so `Intl.PluralRules("ua")` fell back to English rules and every Ukrainian plural used the wrong form ("5 порції" instead of "5 порцій"). The locale is now `uk`. `proxy.ts` permanently redirects any `/ua/...` path to `/uk/...`, because installed apps, bookmarks and shared links still point there. `toLocale()` in `i18n/config.ts` reads a stored `ua` (cookie, Telegram CloudStorage, an external-auth `?locale=`) as `uk`. The vocabulary's `ua` column and the `ua` field in parse output are data, not locales, and keep their names.
+
 ## Styles
 
 **`border-none` suppresses single-side borders.**
@@ -189,7 +193,7 @@ Coming back from the system browser wipes in-memory state, so the pending device
 **`item` no longer contains the preparation word.**
 Since curated modifiers shipped, the parser strips the prep/state word out of `item` (`"Grated Mozzarella"` → `item: "Mozzarella"`) and stores a curated KEY in `modifiers[]`. The verbatim source is kept in `original` (present only when it differs from `item`). Do not assume `item` holds the full source phrase; read `original` for that.
 
-**Modifiers store KEYs, not labels.** Each member of `modifiers[]` is a `PREPARATION_MODIFIERS` key (`GRATED`), resolved to an `en`/`ua` chip label via `modifierLabel()`. The parser is restricted to zero or one key; the edit UI is intentionally multi-select.
+**Modifiers store KEYs, not labels.** Each member of `modifiers[]` is a `PREPARATION_MODIFIERS` key (`GRATED`), resolved to an `en`/`uk` chip label via `modifierLabel()`. The parser is restricted to zero or one key; the edit UI is intentionally multi-select.
 
 **Units store canonical English codes and are localized at display, like modifiers.** `unit` holds `g`/`kg`/`ml`/`l`/`tsp`/`tbsp`/`pcs` regardless of the recipe's language — that's what `METRIC_UNITS_RULE` pins and what the servings calculator scales against. Rendering it raw was a real bug: a Ukrainian recipe read "30 g м'ята", "1 tsp розпушувач", and a source that literally said `1 шт.` stored `pcs`. `unitLabel(unit, locale)` (`lib/units.ts`) resolves the label; it keys off the **app locale**, not the recipe's language, because `Recipe` carries no language field. Because `unit` is free text (the edit form is a plain `<Input>`, and pre-enum rows exist), `unitLabel` matches through an alias table of English/Ukrainian/Russian spellings — keys are stored *collapsed* (lowercased, whitespace and periods stripped), so one entry covers `ч. л.` / `ч.л.` / `чл`. A value it cannot classify (`щіпка`, `bunch`) is returned untouched — never drop or mangle it. Nothing is written back, so this is safe to change without a migration.
 

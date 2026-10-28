@@ -28,7 +28,7 @@
       let target = isSafePath ? raw : null;
       if (!target) {
         const match = /NEXT_LOCALE=([^;]+)/.exec(document.cookie);
-        const locale = match && (match[1] === 'en' || match[1] === 'ua') ? match[1] : 'ua';
+        const locale = match && match[1] === 'en' ? 'en' : 'uk';
         target = `/${locale}/recipes`;
       }
 

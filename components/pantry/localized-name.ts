@@ -13,6 +13,6 @@ export function localizedPantryName(
   const vocab = vocabById.get(item.ingredientId ?? "");
   if (!vocab) return item.name;
   const localized =
-    locale === "ua" ? (vocab.ua ?? vocab.en) : (vocab.en ?? vocab.ua);
+    locale === "uk" ? (vocab.ua ?? vocab.en) : (vocab.en ?? vocab.ua);
   return localized ?? item.name;
 }

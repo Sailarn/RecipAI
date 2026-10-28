@@ -95,7 +95,7 @@ describe("useDirectParse", () => {
 
     it("saves the recipe without the link the model echoed", async () => {
       const { result } = renderHook(() =>
-        useDirectParse({ locale: "ua", source: "text" }),
+        useDirectParse({ locale: "uk", source: "text" }),
       );
 
       act(() => result.current.startParse(() => Promise.resolve(RECIPE)));

@@ -27,7 +27,7 @@ vi.mock("@/lib/telegram/webapp", () => ({ getLaunchStartParam }));
 import { swapLocale, TelegramLocaleSync } from "../index";
 
 beforeEach(() => {
-  window.history.replaceState(null, "", "/ua/recipes");
+  window.history.replaceState(null, "", "/uk/recipes");
   getLaunchStartParam.mockReturnValue(undefined);
 });
 
@@ -37,8 +37,8 @@ afterEach(() => {
 
 describe("swapLocale", () => {
   it("swaps the leading locale segment", () => {
-    expect(swapLocale("/ua/recipes", "en")).toBe("/en/recipes");
-    expect(swapLocale("/ua", "en")).toBe("/en");
+    expect(swapLocale("/uk/recipes", "en")).toBe("/en/recipes");
+    expect(swapLocale("/uk", "en")).toBe("/en");
   });
 });
 
@@ -64,7 +64,7 @@ describe("TelegramLocaleSync", () => {
 
   it("does not redirect when the resolved locale already matches", async () => {
     tg.webApp = {};
-    resolveLaunchLocale.mockResolvedValue("ua");
+    resolveLaunchLocale.mockResolvedValue("uk");
 
     render(<TelegramLocaleSync />);
 

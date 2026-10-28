@@ -47,7 +47,7 @@ function allPagePaths(): string[] {
   const visit = (value: unknown) => {
     if (typeof value === "function") {
       const built: string =
-        value.length === 2 ? value("ua", "some-id") : value("ua");
+        value.length === 2 ? value("uk", "some-id") : value("uk");
       paths.push(built.split("?")[0]);
     } else if (value && typeof value === "object")
       Object.values(value).forEach(visit);
@@ -62,14 +62,14 @@ describe("routes", () => {
   });
 
   it("prefixes page routes with the locale", () => {
-    expect(routes.recipes.list("ua")).toBe("/ua/recipes");
+    expect(routes.recipes.list("uk")).toBe("/uk/recipes");
     expect(routes.recipes.edit("en", "r1")).toBe("/en/recipes/r1/edit");
-    expect(routes.pantry("ua")).toBe("/ua/pantry");
+    expect(routes.pantry("uk")).toBe("/uk/pantry");
   });
 
   it("encodes external-auth query values", () => {
-    expect(routes.externalAuth.device("AB CD&x", "ua")).toBe(
-      "/external-auth/device?user_code=AB%20CD%26x&locale=ua",
+    expect(routes.externalAuth.device("AB CD&x", "uk")).toBe(
+      "/external-auth/device?user_code=AB%20CD%26x&locale=uk",
     );
   });
 });

@@ -2,7 +2,7 @@ import type { Locale } from "@/i18n/config";
 
 /**
  * Curated preparation/state modifiers. The KEY is stored on the ingredient
- * (language-agnostic); en/ua are display labels for the chip. Display-only —
+ * (language-agnostic); en/uk are display labels for the chip. Display-only —
  * never used for search, pantry, or vocab matching. Keep in sync with the
  * admin backfill (RecipAI-Admin) which imports the same key set.
  */
@@ -14,42 +14,42 @@ export const PREPARATION_MODIFIERS = {
   // renderer cannot resolve a variant. Where English distinguishes but Ukrainian
   // has no clean universal word, we pick the least-wrong neutral term and accept
   // it — «фарш» is a noun, not a modifier, so MINCED uses «подрібнений».
-  SLICED: { en: "sliced", ua: "нарізаний" },
-  DICED: { en: "diced", ua: "кубиками" },
-  MINCED: { en: "minced", ua: "подрібнений" },
-  GRATED: { en: "grated", ua: "тертий" },
-  CHOPPED: { en: "chopped", ua: "рубаний" },
-  SHREDDED: { en: "shredded", ua: "подрібнений" },
-  CRUSHED: { en: "crushed", ua: "товчений" },
-  CRUMBLED: { en: "crumbled", ua: "розкришений" },
-  MASHED: { en: "mashed", ua: "розім'ятий" },
-  GROUND: { en: "ground", ua: "мелений" },
-  PEELED: { en: "peeled", ua: "очищений" },
-  DRAINED: { en: "drained", ua: "зціджений" },
-  BEATEN: { en: "beaten", ua: "збитий" },
-  WHIPPED: { en: "whipped", ua: "збитий" },
-  SIFTED: { en: "sifted", ua: "просіяний" },
-  FINELY_CHOPPED: { en: "finely chopped", ua: "дрібно посічений" },
-  FINELY_DICED: { en: "finely diced", ua: "дрібно нарізаний кубиками" },
-  IN_LARGE_PIECES: { en: "in large pieces", ua: "великими шматками" },
-  FRIED: { en: "fried", ua: "смажений" },
+  SLICED: { en: "sliced", uk: "нарізаний" },
+  DICED: { en: "diced", uk: "кубиками" },
+  MINCED: { en: "minced", uk: "подрібнений" },
+  GRATED: { en: "grated", uk: "тертий" },
+  CHOPPED: { en: "chopped", uk: "рубаний" },
+  SHREDDED: { en: "shredded", uk: "подрібнений" },
+  CRUSHED: { en: "crushed", uk: "товчений" },
+  CRUMBLED: { en: "crumbled", uk: "розкришений" },
+  MASHED: { en: "mashed", uk: "розім'ятий" },
+  GROUND: { en: "ground", uk: "мелений" },
+  PEELED: { en: "peeled", uk: "очищений" },
+  DRAINED: { en: "drained", uk: "зціджений" },
+  BEATEN: { en: "beaten", uk: "збитий" },
+  WHIPPED: { en: "whipped", uk: "збитий" },
+  SIFTED: { en: "sifted", uk: "просіяний" },
+  FINELY_CHOPPED: { en: "finely chopped", uk: "дрібно посічений" },
+  FINELY_DICED: { en: "finely diced", uk: "дрібно нарізаний кубиками" },
+  IN_LARGE_PIECES: { en: "in large pieces", uk: "великими шматками" },
+  FRIED: { en: "fried", uk: "смажений" },
   // State
-  WARM: { en: "warm", ua: "теплий" },
-  COLD: { en: "cold", ua: "холодний" },
-  CHILLED: { en: "chilled", ua: "охолоджений" },
+  WARM: { en: "warm", uk: "теплий" },
+  COLD: { en: "cold", uk: "холодний" },
+  CHILLED: { en: "chilled", uk: "охолоджений" },
   ROOM_TEMPERATURE: {
     en: "room temperature",
-    ua: "кімнатної температури",
+    uk: "кімнатної температури",
   },
-  MELTED: { en: "melted", ua: "розтоплений" },
-  SOFTENED: { en: "softened", ua: "розм'якшений" },
-  SOFT: { en: "soft", ua: "м'який" },
-  TOASTED: { en: "toasted", ua: "підсмажений" },
-  ROASTED: { en: "roasted", ua: "запечений" },
-  BOILED: { en: "boiled", ua: "відварений" },
-  DRIED: { en: "dried", ua: "сушений" },
-  FRESH: { en: "fresh", ua: "свіжий" },
-  FROZEN: { en: "frozen", ua: "заморожений" },
+  MELTED: { en: "melted", uk: "розтоплений" },
+  SOFTENED: { en: "softened", uk: "розм'якшений" },
+  SOFT: { en: "soft", uk: "м'який" },
+  TOASTED: { en: "toasted", uk: "підсмажений" },
+  ROASTED: { en: "roasted", uk: "запечений" },
+  BOILED: { en: "boiled", uk: "відварений" },
+  DRIED: { en: "dried", uk: "сушений" },
+  FRESH: { en: "fresh", uk: "свіжий" },
+  FROZEN: { en: "frozen", uk: "заморожений" },
 } as const;
 
 export type PreparationModifier = keyof typeof PREPARATION_MODIFIERS;

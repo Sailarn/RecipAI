@@ -296,7 +296,7 @@ describe("RecipeForm", () => {
     });
 
     it("renders applied modifier labels in the active locale", async () => {
-      activeLocale = "ua";
+      activeLocale = "uk";
       render(
         <RecipeForm
           recipe={recipeWith({

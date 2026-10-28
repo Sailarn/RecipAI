@@ -7,10 +7,10 @@ import {
 } from "../modifiers";
 
 describe("modifiers", () => {
-  it("every entry has en and ua labels", () => {
+  it("every entry has en and uk labels", () => {
     for (const entry of Object.values(PREPARATION_MODIFIERS)) {
       expect(entry.en.length).toBeGreaterThan(0);
-      expect(entry.ua.length).toBeGreaterThan(0);
+      expect(entry.uk.length).toBeGreaterThan(0);
     }
   });
 
@@ -23,7 +23,7 @@ describe("modifiers", () => {
 
   it("modifierLabel resolves by locale", () => {
     expect(modifierLabel("GRATED", "en")).toBe("grated");
-    expect(modifierLabel("GRATED", "ua")).toBe("тертий");
+    expect(modifierLabel("GRATED", "uk")).toBe("тертий");
   });
 
   it("modifierPromptList joins keys with pipes for the prompt", () => {

@@ -24,12 +24,12 @@ describe("localeFromTelegramLanguage", () => {
     expect(localeFromTelegramLanguage("en-US")).toBe("en");
   });
 
-  it("maps Ukrainian (uk) to the app's ua locale", () => {
-    expect(localeFromTelegramLanguage("uk")).toBe("ua");
+  it("maps Ukrainian to the uk locale", () => {
+    expect(localeFromTelegramLanguage("uk")).toBe("uk");
   });
 
   it("maps Russian to Ukrainian", () => {
-    expect(localeFromTelegramLanguage("ru")).toBe("ua");
+    expect(localeFromTelegramLanguage("ru")).toBe("uk");
   });
 
   it("falls back to English for any other or missing language", () => {
@@ -46,16 +46,22 @@ describe("resolveLaunchLocale", () => {
     await expect(resolveLaunchLocale(webApp("ru"))).resolves.toBe("en");
   });
 
+  it("reads a choice stored under the old ua code as Ukrainian", async () => {
+    getCloudItem.mockResolvedValue("ua");
+
+    await expect(resolveLaunchLocale(webApp("en"))).resolves.toBe("uk");
+  });
+
   it("ignores an invalid stored value and seeds from the Telegram language", async () => {
     getCloudItem.mockResolvedValue("zz");
 
-    await expect(resolveLaunchLocale(webApp("uk"))).resolves.toBe("ua");
+    await expect(resolveLaunchLocale(webApp("uk"))).resolves.toBe("uk");
   });
 
   it("seeds from the Telegram language when nothing is stored", async () => {
     getCloudItem.mockResolvedValue(null);
 
-    await expect(resolveLaunchLocale(webApp("ru"))).resolves.toBe("ua");
+    await expect(resolveLaunchLocale(webApp("ru"))).resolves.toBe("uk");
     await expect(resolveLaunchLocale(webApp("de"))).resolves.toBe("en");
   });
 });
