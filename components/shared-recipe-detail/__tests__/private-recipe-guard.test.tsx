@@ -3,6 +3,11 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrivateRecipeGuard } from "../private-recipe-guard";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string, values?: { seconds?: number }) =>
+    values?.seconds === undefined ? key : `${key} ${values.seconds}s`,
+}));
+
 const navigation = vi.hoisted(() => ({ back: vi.fn() }));
 vi.mock("@/lib/transitions", () => ({
   useNavigate: () => ({ back: navigation.back }),
@@ -37,7 +42,7 @@ describe("PrivateRecipeGuard", () => {
     // only changes the URL and leaves the overlay stuck on screen — this is
     // the pushed-recipe-detail case (Telegram deep link), so it must be back().
     render(<PrivateRecipeGuard locale="en" />);
-    fireEvent.click(screen.getByRole("button", { name: /back to recipes/i }));
+    fireEvent.click(screen.getByRole("button", { name: "backToRecipes" }));
     expect(navigation.back).toHaveBeenCalledWith("/en/recipes");
   });
 });

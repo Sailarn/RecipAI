@@ -108,7 +108,20 @@
     "source": "Source",
     "simplifiedMode": "Simplified",
     "originalMode": "Original",
-    "deleteCollection": "Delete collection"
+    "deleteCollection": "Delete collection",
+    "share": {
+      "title": "Share recipe",
+      "description": "Anyone with this link can save and cook your recipe.",
+      "public": "Public",
+      "signInToShare": "Sign in to share recipes.",
+      "copyLink": "Copy link",
+      "moreOptions": "More options"
+    },
+    "privateRecipe": {
+      "title": "This recipe is private",
+      "body": "The owner has not made this recipe public, or sharing was turned off.",
+      "returning": "Returning automatically in {seconds}s"
+    }
   },
   "recipeForm": {
     "createTitle": "Create Recipe",

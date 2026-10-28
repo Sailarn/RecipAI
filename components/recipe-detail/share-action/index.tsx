@@ -104,10 +104,10 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
         >
           <span className="absolute -top-[7px] right-[103px] h-3.5 w-3.5 rotate-45 border-l border-t border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)]" />
           <h2 className="font-[family-name:var(--font-display)] text-[22px] font-bold leading-tight">
-            Share recipe
+            {t("share.title")}
           </h2>
           <p className="mb-5 mt-1 text-[13px] leading-relaxed text-white/60">
-            Anyone with this link can save and cook your recipe.
+            {t("share.description")}
           </p>
 
           <VisibilityControl

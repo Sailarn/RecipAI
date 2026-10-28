@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
@@ -8,6 +9,7 @@ import { useNavigate } from "@/lib/transitions";
 const REDIRECT_SECONDS = 4;
 
 export function PrivateRecipeGuard({ locale }: { locale: string }) {
+  const t = useTranslations("recipes");
   const navigate = useNavigate();
   // useNavigate() is a new object every render, and the countdown re-renders
   // every second. Depending on it restarted the redirect timer each tick, so
@@ -38,10 +40,10 @@ export function PrivateRecipeGuard({ locale }: { locale: string }) {
         <Lock size={38} className="text-amber-400" />
       </div>
       <h1 className="font-[family-name:var(--font-display)] text-[26px] font-bold text-[var(--fg-1)] mb-3">
-        This recipe is private
+        {t("privateRecipe.title")}
       </h1>
       <p className="text-sm text-[var(--fg-2)] leading-relaxed mb-8 max-w-[280px]">
-        The owner has not made this recipe public, or sharing was turned off.
+        {t("privateRecipe.body")}
       </p>
       <button
         type="button"
@@ -49,10 +51,10 @@ export function PrivateRecipeGuard({ locale }: { locale: string }) {
         className="flex items-center gap-2 px-7 py-[15px] rounded-[18px] border-0 bg-[var(--action-primary)] text-white text-[15px] font-bold shadow-[0_6px_24px_color-mix(in_oklch,var(--action-primary)_45%,transparent)]"
       >
         <ArrowLeft size={18} />
-        Back to recipes
+        {t("backToRecipes")}
       </button>
       <p className="mt-[18px] text-xs text-[var(--fg-3)]">
-        Returning automatically in {seconds}s
+        {t("privateRecipe.returning", { seconds })}
       </p>
     </div>
   );

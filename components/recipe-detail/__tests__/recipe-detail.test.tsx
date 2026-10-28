@@ -278,9 +278,7 @@ describe("RecipeDetail", () => {
     );
 
     expect(screen.getByText("Chocolate Cake")).toBeInTheDocument();
-    expect(
-      screen.queryByText("This recipe is private"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
   });
 
   it("displays the private guard when recipe does not exist", async () => {
@@ -289,7 +287,7 @@ describe("RecipeDetail", () => {
     render(<RecipeDetail recipeId="recipe-1" locale="en" />);
 
     await waitFor(() => {
-      expect(screen.getByText("This recipe is private")).toBeInTheDocument();
+      expect(screen.getByText("privateRecipe.title")).toBeInTheDocument();
     });
   });
 
@@ -425,11 +423,9 @@ describe("RecipeDetail", () => {
       <RecipeDetail recipeId="private-1" locale="en" publicRecipe={null} />,
     );
 
+    expect(await screen.findByText("privateRecipe.title")).toBeInTheDocument();
     expect(
-      await screen.findByText("This recipe is private"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /back to recipes/i }),
+      screen.getByRole("button", { name: "backToRecipes" }),
     ).toBeInTheDocument();
   });
 
@@ -451,9 +447,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalled());
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
     });
 
     it("falls back to the private guard once the owner pull finds nothing", async () => {
@@ -464,7 +458,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       expect(
-        await screen.findByText("This recipe is private"),
+        await screen.findByText("privateRecipe.title"),
       ).toBeInTheDocument();
     });
 
@@ -475,7 +469,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       expect(
-        await screen.findByText("This recipe is private"),
+        await screen.findByText("privateRecipe.title"),
       ).toBeInTheDocument();
       expect(pullOwnRecipe).not.toHaveBeenCalled();
     });
@@ -519,7 +513,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="nobodys-1" locale="en" />);
 
       expect(
-        await screen.findByText("This recipe is private"),
+        await screen.findByText("privateRecipe.title"),
       ).toBeInTheDocument();
     });
 
@@ -552,9 +546,7 @@ describe("RecipeDetail", () => {
       await waitFor(() =>
         expect(recipesModule.getRecipe).toHaveBeenCalledWith("bot-1"),
       );
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
       expect(pullOwnRecipe).not.toHaveBeenCalled();
     });
 
@@ -567,7 +559,7 @@ describe("RecipeDetail", () => {
       render(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       expect(
-        await screen.findByText("This recipe is private"),
+        await screen.findByText("privateRecipe.title"),
       ).toBeInTheDocument();
     });
 
@@ -597,9 +589,7 @@ describe("RecipeDetail", () => {
         expect(fetchPublicRecipe).toHaveBeenCalledWith("bot-1"),
       );
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
       expect(pullOwnRecipe).not.toHaveBeenCalled();
     });
 
@@ -619,9 +609,7 @@ describe("RecipeDetail", () => {
       view.rerender(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
     });
 
     it("recovers when the session lands after the view already settled as signed out", async () => {
@@ -631,15 +619,13 @@ describe("RecipeDetail", () => {
       telegramState.authStatus = "signed-in";
       setSignedIn(false);
       const view = render(<RecipeDetail recipeId="bot-1" locale="en" />);
-      await screen.findByText("This recipe is private");
+      await screen.findByText("privateRecipe.title");
 
       setSignedIn(true);
       view.rerender(<RecipeDetail recipeId="bot-1" locale="en" />);
 
       await waitFor(() => expect(pullOwnRecipe).toHaveBeenCalledWith("bot-1"));
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
     });
 
     it("waits for the session on the web too before calling a recipe private", async () => {
@@ -651,9 +637,7 @@ describe("RecipeDetail", () => {
       await waitFor(() =>
         expect(fetchPublicRecipe).toHaveBeenCalledWith("own-1"),
       );
-      expect(
-        screen.queryByText("This recipe is private"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("privateRecipe.title")).not.toBeInTheDocument();
 
       setSignedIn(true);
       view.rerender(<RecipeDetail recipeId="own-1" locale="en" />);

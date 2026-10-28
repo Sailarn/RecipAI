@@ -81,10 +81,10 @@ describe("ShareAction", () => {
       screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).not.toBeChecked();
     expect(
-      screen.queryByRole("button", { name: "Copy link" }),
+      screen.queryByRole("button", { name: "copyLink" }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "More options" }),
+      screen.queryByRole("button", { name: "moreOptions" }),
     ).not.toBeInTheDocument();
   });
 
@@ -98,7 +98,7 @@ describe("ShareAction", () => {
     expect(setRecipeVisibility).toHaveBeenCalledWith(privateRecipe, true);
     expect(updateRecipe).toHaveBeenCalledWith("recipe-1", { isPublic: true });
     expect(
-      await screen.findByRole("button", { name: "Copy link" }),
+      await screen.findByRole("button", { name: "copyLink" }),
     ).toBeInTheDocument();
   });
 
@@ -118,7 +118,7 @@ describe("ShareAction", () => {
     ).not.toBeChecked();
     expect(updateRecipe).not.toHaveBeenCalled();
     expect(
-      screen.queryByRole("button", { name: "Copy link" }),
+      screen.queryByRole("button", { name: "copyLink" }),
     ).not.toBeInTheDocument();
   });
 
@@ -151,14 +151,14 @@ describe("ShareAction", () => {
     );
     expect(updateRecipe).toHaveBeenCalledWith("recipe-1", { isPublic: false });
     expect(
-      screen.queryByRole("button", { name: "Copy link" }),
+      screen.queryByRole("button", { name: "copyLink" }),
     ).not.toBeInTheDocument();
   });
 
   it("copies the normal recipe URL", async () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
-    await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    await userEvent.click(screen.getByRole("button", { name: "copyLink" }));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringMatching(/\/en\/recipes\/recipe-1$/),
@@ -171,7 +171,7 @@ describe("ShareAction", () => {
   it("shares the recipe via the platform from More options", async () => {
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
-    await userEvent.click(screen.getByRole("button", { name: "More options" }));
+    await userEvent.click(screen.getByRole("button", { name: "moreOptions" }));
 
     expect(shareRecipe).toHaveBeenCalledWith({
       id: "recipe-1",
@@ -188,7 +188,7 @@ describe("ShareAction", () => {
     shareRecipe.mockResolvedValue("copied");
     renderShareAction({ ...privateRecipe, isPublic: true });
     await openSharePopover();
-    await userEvent.click(screen.getByRole("button", { name: "More options" }));
+    await userEvent.click(screen.getByRole("button", { name: "moreOptions" }));
 
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith("linkCopied"),
@@ -229,6 +229,6 @@ describe("ShareAction", () => {
     expect(
       screen.getByRole("switch", { name: "publicRecipeAria" }),
     ).toBeDisabled();
-    expect(screen.getByText("Sign in to share recipes.")).toBeInTheDocument();
+    expect(screen.getByText("share.signInToShare")).toBeInTheDocument();
   });
 });

@@ -31,7 +31,7 @@ export function VisibilityControl({
           className={`shrink-0 ${isPublic ? "text-[var(--green-400)]" : "text-white/45"}`}
         />
         <span className="flex-1 text-[15px] font-semibold text-white">
-          Public
+          {tRecipes("share.public")}
         </span>
         <button
           type="button"
@@ -53,7 +53,7 @@ export function VisibilityControl({
       </div>
       {!isSignedIn && (
         <p className="mt-2 text-[11px] text-amber-300">
-          Sign in to share recipes.
+          {tRecipes("share.signInToShare")}
         </p>
       )}
     </>
