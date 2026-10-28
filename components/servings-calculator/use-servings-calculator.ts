@@ -73,7 +73,10 @@ export function useServingsCalculator({
     const ids = (canonicalIngredientIds ?? []).filter(Boolean);
     if (!ids.length) return;
 
+    // A lookup started before a locale switch can resolve after the new one.
+    let superseded = false;
     db.ingredients.bulkGet(ids).then((entries) => {
+      if (superseded) return;
       const map = new Map<string, string>();
       for (const entry of entries) {
         if (!entry) continue;
@@ -83,6 +86,9 @@ export function useServingsCalculator({
       }
       setCanonicalNames(map);
     });
+    return () => {
+      superseded = true;
+    };
   }, [canonicalIngredientIds, locale]);
 
   const formatAmount = (amount?: number): string | null => {
