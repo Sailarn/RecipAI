@@ -114,7 +114,7 @@ All three pipelines funnel through the same model chain in `lib/ai.ts` (via the 
 ```mermaid
 graph LR
     A[generateJson] --> B[gemini-2.5-flash]
-    B -->|fail| C[gemini-2.0-flash]
+    B -->|fail| C[gemini-3.5-flash]
     C -->|fail| D[gemini-2.5-flash-lite]
     D -->|fail| DS{context=recipe AND<br/>DEEPSEEK_API_KEY set?}
     DS -->|yes| DM[deepseek-v4-flash]
@@ -131,6 +131,8 @@ graph LR
 ```
 
 All Gemini models are called through `@google/genai` with `responseMimeType: "application/json"` and a **45s per-attempt timeout** (`GEMINI_TIMEOUT_MS`) — successful calls peak just under 30s, so a hung attempt falls through to the next model instead of stalling the parse. A response with no text (a blocked prompt, no candidates) also counts as a failed attempt. DeepSeek and OpenAI both use `response_format: { type: "json_object" }` via a shared `callOpenAiCompatibleJson` helper (same request shape, different base URL/model/key), with a 90s timeout on each — neither had an explicit timeout before, and DeepSeek's heavier `deepseek-v4-pro` tier was observed hanging past 2 minutes in side-by-side model testing (`scripts/local/model-eval`), which is why production uses the faster `deepseek-v4-flash` specifically.
+
+**Free-tier limits.** All three Gemini models are on Google's free tier. Google no longer publishes per-model numbers; the active limits for the project are on the rate-limit page in Google AI Studio, applied per project and reset at midnight Pacific time. Actual use is far below them (about 60 calls in October 2026, per Axiom `ai_call`), so a Gemini failure here is almost always high demand (503) or a timeout, not quota. `gemini-2.0-flash` sat in the middle slot until it was retired; check `GET /v1beta/models` before adding a model to the chain.
 
 DeepSeek is skipped entirely for `context: "photo"` (its chat API has no image input) and whenever `DEEPSEEK_API_KEY` is unset — the chain falls straight through to the OpenAI check in either case. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without either optional key, the chain ends at `gemini-2.5-flash-lite`.
 

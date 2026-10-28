@@ -267,7 +267,7 @@ describe("AI call logging", () => {
     expect(log).toHaveBeenCalledWith(
       "info",
       "ai_call",
-      expect.objectContaining({ model: "gemini-2.0-flash", success: true }),
+      expect.objectContaining({ model: "gemini-3.5-flash", success: true }),
     );
   });
 

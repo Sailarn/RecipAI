@@ -6,9 +6,12 @@ import { log, trackEvent } from "@/lib/telemetry";
 // parses only — DeepSeek's chat API has no image input, so photo parses skip
 // straight past it to OpenAI; only if ALL of those fail do we fall back to
 // the paid OpenAI model — keeping cost on the free tier whenever possible.
+// gemini-2.0-flash was retired (it failed every call within ~200ms); the
+// current Flash replaced it, so a gemini-2.5-flash outage still has a full-size
+// Gemini model behind it before the Lite one.
 const GEMINI_MODEL_CHAIN = [
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
+  "gemini-3.5-flash",
   "gemini-2.5-flash-lite",
 ] as const;
 // The faster/cheaper tier — deepseek-v4-pro measured meaningfully slower in
