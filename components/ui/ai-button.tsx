@@ -22,89 +22,33 @@ export function AiButton({
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        width: "100%",
-        borderRadius: 20,
-        padding: "14px 16px",
-        cursor: enabled ? "pointer" : "not-allowed",
-        border: `1px solid ${enabled ? "rgba(139,92,246,0.45)" : "rgba(139,92,246,0.20)"}`,
-        background:
-          "linear-gradient(135deg, rgba(24,20,60,0.97), rgba(42,12,90,0.93), rgba(24,20,60,0.97))",
-        backgroundSize: "200% 200%",
-        animation: enabled ? "aiGrad 4s ease infinite" : "none",
-        boxShadow: enabled
-          ? "0 0 28px rgba(139,92,246,0.3), 0 4px 16px rgba(0,0,0,0.5)"
-          : "none",
-        opacity: enabled ? 1 : 0.5,
-        transition: "opacity 0.2s ease, border-color 0.2s ease",
-      }}
+      data-active={enabled}
+      className={`relative overflow-hidden w-full rounded-[20px] py-[14px] px-4 border bg-[linear-gradient(135deg,rgba(24,20,60,0.97),rgba(42,12,90,0.93),rgba(24,20,60,0.97))] [background-size:200%_200%] [transition:opacity_0.2s_ease,border-color_0.2s_ease] ${
+        enabled
+          ? "cursor-pointer border-[rgba(139,92,246,0.45)] animate-[aiGrad_4s_ease_infinite] shadow-[0_0_28px_rgba(139,92,246,0.3),0_4px_16px_rgba(0,0,0,0.5)] opacity-100"
+          : "cursor-not-allowed border-[rgba(139,92,246,0.20)] opacity-50"
+      }`}
     >
       {/* Shimmer overlay */}
       {enabled && (
         <span
           aria-hidden
-          style={{
-            position: "absolute",
-            top: 0,
-            left: "-100%",
-            width: "55%",
-            height: "100%",
-            background:
-              "linear-gradient(90deg, transparent, rgba(167,139,250,0.2), transparent)",
-            animation: "aiShimmer 3s ease-in-out infinite",
-            pointerEvents: "none",
-            zIndex: 1,
-          }}
+          className="absolute top-0 left-[-100%] w-[55%] h-full bg-[linear-gradient(90deg,transparent,rgba(167,139,250,0.2),transparent)] animate-[aiShimmer_3s_ease-in-out_infinite] pointer-events-none z-[1]"
         />
       )}
 
-      <span
-        style={{
-          position: "relative",
-          zIndex: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 9,
-        }}
-      >
+      <span className="relative z-[2] flex items-center justify-center gap-[9px]">
         {loading ? (
           <>
-            <span
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: "50%",
-                border: "2px solid rgba(221,214,254,0.3)",
-                borderTopColor: "#ede9fe",
-                animation: "spin 0.7s linear infinite",
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                color: "#ede9fe",
-                fontSize: 14,
-                fontWeight: 600,
-                fontFamily: "var(--font-sans)",
-              }}
-            >
+            <span className="w-4 h-4 rounded-full border-2 border-[rgba(221,214,254,0.3)] border-t-[#ede9fe] animate-[spin_0.7s_linear_infinite] shrink-0" />
+            <span className="text-[#ede9fe] text-[14px] font-semibold [font-family:var(--font-sans)]">
               {loadingLabel}
             </span>
           </>
         ) : (
           <>
-            <span style={{ fontSize: 16 }}>✨</span>
-            <span
-              style={{
-                color: "#ede9fe",
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: "var(--font-sans)",
-              }}
-            >
+            <span className="text-[16px]">✨</span>
+            <span className="text-[#ede9fe] text-[14px] font-bold [font-family:var(--font-sans)]">
               {label}
             </span>
           </>
