@@ -11,6 +11,8 @@ export default defineConfig({
     // Tests that need a DOM opt in with a `@vitest-environment happy-dom`
     // pragma. Node is faster to set up and matches the API routes' runtime.
     environment: "node",
+    // Worker threads start faster than the default forked processes (~1s).
+    pool: "threads",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
   },
