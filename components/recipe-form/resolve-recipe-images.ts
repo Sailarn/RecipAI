@@ -3,10 +3,6 @@ import { captureError } from "@/lib/telemetry";
 import { deleteImage, isImageKitUrl, uploadImage } from "@/lib/upload/images";
 import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
 
-interface UploadOptions {
-  uploadToken?: string;
-}
-
 // The caller still flags the save as `uploadFailed` either way, so the user is
 // told. Only genuine upload defects are worth reporting — a source CDN that
 // refuses the fetch is expected and unfixable from here.
@@ -28,7 +24,6 @@ interface ResolveMainImageInput {
   pendingFile: File | null;
   currentImageUrl: string;
   previousImageFileId?: string;
-  uploadOptions?: UploadOptions;
 }
 
 // Uploads the new image (if any) and only deletes the previous one once that
@@ -40,7 +35,6 @@ export async function resolveMainImage({
   pendingFile,
   currentImageUrl,
   previousImageFileId,
-  uploadOptions,
 }: ResolveMainImageInput): Promise<ResolvedImage> {
   const source = pendingFile ?? currentImageUrl;
   const needsUpload =
@@ -56,9 +50,9 @@ export async function resolveMainImage({
   }
 
   try {
-    const uploaded = await uploadImage(source, uploadOptions);
+    const uploaded = await uploadImage(source);
     if (previousImageFileId) {
-      await deleteImage(previousImageFileId, uploadOptions).catch(() => {});
+      await deleteImage(previousImageFileId).catch(() => {});
     }
     return {
       imageUrl: uploaded.url,
@@ -86,7 +80,6 @@ interface ResolveInstructionImagesInput<T extends InstructionWithImage> {
   // (1-based) order - 1 — instructionRows is the pre-renumber array they came from.
   instructionRowIds: (string | undefined)[];
   pendingStepFiles: Record<string, File>;
-  uploadOptions?: UploadOptions;
 }
 
 interface ResolvedInstructions<T> {
@@ -99,7 +92,6 @@ export async function resolveInstructionImages<T extends InstructionWithImage>({
   instructions,
   instructionRowIds,
   pendingStepFiles,
-  uploadOptions,
 }: ResolveInstructionImagesInput<T>): Promise<ResolvedInstructions<T>> {
   const resolved: T[] = [];
   let uploadFailed = false;
@@ -118,7 +110,7 @@ export async function resolveInstructionImages<T extends InstructionWithImage>({
     }
 
     try {
-      const uploaded = await uploadImage(source, uploadOptions);
+      const uploaded = await uploadImage(source);
       resolved.push({ ...instruction, imageUrl: uploaded.url });
     } catch (caughtError) {
       reportUploadFailure(caughtError);

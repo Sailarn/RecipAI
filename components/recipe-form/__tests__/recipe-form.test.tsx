@@ -10,7 +10,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createRecipe, updateRecipe } from "@/lib/db/recipes";
+import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { uploadImage } from "@/lib/upload/images";
 import { RecipeForm } from "../index";
@@ -33,7 +33,6 @@ vi.mock("next-intl", () => ({
 }));
 
 vi.mock("@/lib/db/recipes", () => ({
-  createRecipe: vi.fn().mockResolvedValue("new-recipe-id"),
   updateRecipe: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -84,6 +83,58 @@ vi.mock("@/components/ingredient-picker", () => ({
 
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 
+type DraftRecipe = Omit<Partial<Recipe>, "ingredients" | "instructions"> & {
+  ingredients?: Omit<Recipe["ingredients"][number], "id">[];
+  instructions?: Omit<Recipe["instructions"][number], "id" | "order">[];
+};
+
+/** A saved recipe built from just the fields a test cares about. */
+function recipeWith({
+  ingredients = [],
+  instructions = [],
+  ...fields
+}: DraftRecipe): Recipe {
+  return {
+    id: "recipe-1",
+    title: "Test Recipe",
+    servings: 2,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...fields,
+    ingredients: ingredients.map((ingredient, index) => ({
+      id: `ing-${index}`,
+      ...ingredient,
+    })),
+    instructions: instructions.map((instruction, index) => ({
+      id: `step-${index}`,
+      order: index + 1,
+      ...instruction,
+    })),
+  };
+}
+
+/** The recipe whose single ingredient and step the editing tests change. */
+const simpleRecipe = recipeWith({
+  ingredients: [{ item: "flour", amount: 1 }],
+  instructions: [{ instruction: "Mix" }],
+});
+
+/** The arguments of the one recipe update the form made. */
+function savedRecipe() {
+  return vi.mocked(updateRecipe).mock.calls[0][1] as Recipe;
+}
+
+/** Clear the title on the info tab and try to move on. */
+async function submitWithoutTitle() {
+  fireEvent.change(screen.getByLabelText(/^title/i), {
+    target: { value: "" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText("next"));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  });
+}
+
 /** Open the picker for a row and choose an ingredient by name. */
 function pickIngredient(rowIndex: number, name: string) {
   fireEvent.click(screen.getByTestId(`ingredient-trigger-${rowIndex}`));
@@ -122,14 +173,11 @@ async function navigateToLastTab(title?: string) {
   await clickNext();
 }
 
-/** Find the primary action button (Create/Save) in the bottom bar, not the header back button */
+/** The Save button in the bottom bar, not the header's back button. */
 function getSubmitButton() {
-  // The bottom bar buttons are inside a div with position: absolute; bottom: 0
-  const allButtons = screen.getAllByRole("button");
-  // The submit button is the one with text "Create" or "Save" (not "createTitle" or "editTitle")
-  return allButtons.find(
-    (btn) => btn.textContent === "Create" || btn.textContent === "Save",
-  );
+  return screen
+    .getAllByRole("button")
+    .find((button) => button.textContent === "save");
 }
 
 describe("RecipeForm", () => {
@@ -137,62 +185,19 @@ describe("RecipeForm", () => {
     activeLocale = "en";
   });
 
-  describe("Create Mode", () => {
-    it("renders empty form for creating new recipe", async () => {
-      render(<RecipeForm />);
-
-      // Info tab is shown by default with servings input
-      const servingsInput = screen.getByLabelText(/servings/i);
-      expect(servingsInput).toHaveValue(1);
-
-      // Fill required fields on info tab
-      fillRequiredInfo();
-
-      // Navigate to ingredients tab via tab header click (skips validation)
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabIngredients"));
-        await new Promise((r) => setTimeout(r, 100));
-      });
-
-      // Fill in the default ingredient so we can navigate past this tab
-      pickIngredient(0, "test");
-      const qtyInput = screen.getByLabelText(/qty/i);
-      fireEvent.change(qtyInput, { target: { value: "1" } });
-
-      // Navigate to steps tab via "next" (triggers ingredients validation)
-      await act(async () => {
-        fireEvent.click(screen.getByText("next"));
-        await new Promise((r) => setTimeout(r, 100));
-      });
-
-      // Should now be on steps tab
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText(/instructionPlaceholder/i),
-        ).toBeInTheDocument();
-      });
-
-      // Now the submit button should be "Create"
-      expect(getSubmitButton()).toBeTruthy();
-      expect(getSubmitButton()?.textContent).toBe("Create");
-    });
-
+  describe("Editing rows", () => {
     it("navigates past AI ingredients whose unchanged original is null", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "AI recipe",
             servings: 2,
             ingredients: [
-              {
-                item: "salt",
-                amount: null,
-                unit: null,
-                original: null,
-              },
+              // Rows synced from Postgres carry null for unset columns.
+              { item: "salt", original: null } as never,
             ],
             instructions: [{ instruction: "Season." }],
-          }}
+          })}
         />,
       );
 
@@ -203,23 +208,16 @@ describe("RecipeForm", () => {
     });
 
     it("shows validation errors when trying to navigate with empty required fields", async () => {
-      render(<RecipeForm />);
+      render(<RecipeForm recipe={simpleRecipe} />);
 
-      // Try clicking "Next" without filling required fields
-      await act(async () => {
-        fireEvent.click(screen.getByText("next"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
+      await submitWithoutTitle();
 
-      // The info tab should show validation errors inline
       expect(screen.getByText("titleRequired")).toBeInTheDocument();
     });
 
     it("can add and remove ingredients", async () => {
-      render(<RecipeForm />);
+      render(<RecipeForm recipe={simpleRecipe} />);
 
-      // Fill required fields first, then navigate to ingredients tab
-      fillRequiredInfo();
       await act(async () => {
         fireEvent.click(screen.getByText("tabIngredients"));
         await new Promise((r) => setTimeout(r, 50));
@@ -236,23 +234,10 @@ describe("RecipeForm", () => {
         expect(screen.getAllByTestId(/^ingredient-trigger-/)).toHaveLength(2);
       });
 
-      // Remove ingredient — find the remove button (X icon inside a button, not a tab/next/add/back button)
-      const allButtons = screen.getAllByRole("button");
-      const removeBtn = allButtons.find((btn) => {
-        const text = btn.textContent || "";
-        return (
-          btn.querySelector("svg") &&
-          !text.includes("tab") &&
-          text !== "next" &&
-          text !== "addIngredient" &&
-          text !== "back" &&
-          text !== "Create" &&
-          text !== "createTitle"
-        );
-      });
-      if (removeBtn) {
-        fireEvent.click(removeBtn);
-      }
+      const removeButtons = screen
+        .getAllByRole("button")
+        .filter((button) => button.querySelector("svg.lucide-x"));
+      fireEvent.click(removeButtons[0]);
 
       // Back to 1 ingredient row
       await waitFor(() => {
@@ -261,8 +246,7 @@ describe("RecipeForm", () => {
     });
 
     it("shows an add-state ghost control when an ingredient has no modifiers", async () => {
-      render(<RecipeForm />);
-      fillRequiredInfo();
+      render(<RecipeForm recipe={simpleRecipe} />);
 
       await act(async () => {
         fireEvent.click(screen.getByText("tabIngredients"));
@@ -278,8 +262,7 @@ describe("RecipeForm", () => {
     });
 
     it("toggles a modifier from the additive picker", async () => {
-      render(<RecipeForm />);
-      fillRequiredInfo();
+      render(<RecipeForm recipe={simpleRecipe} />);
 
       await act(async () => {
         fireEvent.click(screen.getByText("tabIngredients"));
@@ -316,11 +299,11 @@ describe("RecipeForm", () => {
       activeLocale = "ua";
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Тест",
             servings: 2,
             ingredients: [{ item: "Сир", modifiers: ["GRATED"] }],
-          }}
+          })}
         />,
       );
 
@@ -335,10 +318,8 @@ describe("RecipeForm", () => {
     });
 
     it("can add and remove instruction steps", async () => {
-      render(<RecipeForm />);
+      render(<RecipeForm recipe={simpleRecipe} />);
 
-      // Fill required fields first, then navigate to steps tab
-      fillRequiredInfo();
       await act(async () => {
         fireEvent.click(screen.getByText("tabSteps"));
         await new Promise((r) => setTimeout(r, 50));
@@ -396,7 +377,7 @@ describe("RecipeForm", () => {
       // Navigate to last tab to find the Save button
       await navigateToLastTab();
       expect(getSubmitButton()).toBeTruthy();
-      expect(getSubmitButton()?.textContent).toBe("Save");
+      expect(getSubmitButton()?.textContent).toBe("save");
     });
 
     it("displays existing ingredients", async () => {
@@ -439,11 +420,11 @@ describe("RecipeForm", () => {
     it("keeps a recipe without sections as a flat step list", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Flat recipe",
             servings: 2,
             instructions: [{ instruction: "Whisk" }, { instruction: "Bake" }],
-          }}
+          })}
         />,
       );
 
@@ -459,11 +440,11 @@ describe("RecipeForm", () => {
     it("creates, renames, and deletes a section without deleting its steps", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Section recipe",
             servings: 2,
             instructions: [{ instruction: "Whisk" }],
-          }}
+          })}
         />,
       );
 
@@ -486,12 +467,12 @@ describe("RecipeForm", () => {
     it("flattens populated section steps and toggles the section body", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Populated section",
             servings: 2,
             instructions: [{ instruction: "Make sauce", sectionId: "sauce" }],
             sections: [{ id: "sauce", name: "Sauce", order: 0 }],
-          }}
+          })}
         />,
       );
 
@@ -516,7 +497,7 @@ describe("RecipeForm", () => {
     it("saves the live section membership and grouped step order", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Organized recipe",
             servings: 2,
             ingredients: [{ item: "Flour", amount: 1 }],
@@ -525,7 +506,7 @@ describe("RecipeForm", () => {
               { instruction: "Sauce step", sectionId: "sauce" },
             ],
             sections: [{ id: "sauce", name: "Sauce", order: 0 }],
-          }}
+          })}
         />,
       );
 
@@ -535,8 +516,8 @@ describe("RecipeForm", () => {
       });
       fireEvent.click(getSubmitButton()!);
 
-      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
-      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+      const saved = savedRecipe();
       expect(saved.sections).toEqual([
         { id: "sauce", name: "Sauce", order: 0 },
       ]);
@@ -552,7 +533,7 @@ describe("RecipeForm", () => {
     it("keeps step section identities when blank rows are removed at save", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Blank row recipe",
             servings: 2,
             ingredients: [{ item: "Flour", amount: 1 }],
@@ -565,7 +546,7 @@ describe("RecipeForm", () => {
               { id: "sauce", name: "Sauce", order: 0 },
               { id: "finish", name: "Finish", order: 1 },
             ],
-          }}
+          })}
         />,
       );
 
@@ -575,8 +556,8 @@ describe("RecipeForm", () => {
       });
       fireEvent.click(getSubmitButton()!);
 
-      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
-      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+      const saved = savedRecipe();
       expect(saved.instructions).toEqual([
         expect.objectContaining({
           instruction: "Make sauce",
@@ -594,13 +575,13 @@ describe("RecipeForm", () => {
     it("keeps section edits after switching away from the steps tab", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Persistent section",
             servings: 2,
             ingredients: [{ item: "Flour", amount: 1 }],
             instructions: [{ instruction: "Mix", sectionId: "dough" }],
             sections: [{ id: "dough", name: "Dough", order: 0 }],
-          }}
+          })}
         />,
       );
 
@@ -624,8 +605,8 @@ describe("RecipeForm", () => {
       expect(screen.getByText("Main dough")).toBeInTheDocument();
 
       fireEvent.click(getSubmitButton()!);
-      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
-      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+      const saved = savedRecipe();
       expect(saved.sections).toEqual([
         { id: "dough", name: "Main dough", order: 0 },
       ]);
@@ -634,13 +615,13 @@ describe("RecipeForm", () => {
     it("keeps an ingredient section catalog entry when its step group is deleted", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Shared section",
             servings: 2,
             ingredients: [{ item: "Flour", amount: 1, sectionId: "dough" }],
             instructions: [{ instruction: "Mix", sectionId: "dough" }],
             sections: [{ id: "dough", name: "Dough", order: 0 }],
-          }}
+          })}
         />,
       );
 
@@ -652,8 +633,8 @@ describe("RecipeForm", () => {
       expect(screen.queryByTestId("section-container")).not.toBeInTheDocument();
 
       fireEvent.click(getSubmitButton()!);
-      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
-      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+      const saved = savedRecipe();
       expect(saved.sections).toEqual([
         { id: "dough", name: "Dough", order: 0 },
       ]);
@@ -664,7 +645,7 @@ describe("RecipeForm", () => {
     it("prunes sections without ingredient or saved-step references", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Pruned sections",
             servings: 2,
             ingredients: [{ item: "Flour", sectionId: "ingredient-only" }],
@@ -674,7 +655,7 @@ describe("RecipeForm", () => {
               { id: "ingredient-only", name: "Dough", order: 1 },
               { id: "step-section", name: "Method", order: 2 },
             ],
-          }}
+          })}
         />,
       );
 
@@ -684,8 +665,8 @@ describe("RecipeForm", () => {
       });
       fireEvent.click(getSubmitButton()!);
 
-      await waitFor(() => expect(createRecipe).toHaveBeenCalledOnce());
-      const saved = (createRecipe as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+      const saved = savedRecipe();
       expect(saved.sections).toEqual([
         { id: "ingredient-only", name: "Dough", order: 0 },
         { id: "step-section", name: "Method", order: 1 },
@@ -694,58 +675,14 @@ describe("RecipeForm", () => {
   });
 
   describe("Form Submission", () => {
-    it("calls createRecipe when create form is submitted with valid data", async () => {
-      render(<RecipeForm />);
-
-      // Fill in required fields on info tab
-      fireEvent.change(screen.getByLabelText(/^title/i), {
-        target: { value: "My New Recipe" },
-      });
-      fireEvent.change(screen.getByLabelText(/servings/i), {
-        target: { value: "2" },
-      });
-
-      // Navigate to ingredients tab
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabIngredients"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      // Fill in ingredient
-      pickIngredient(0, "flour");
-      fireEvent.change(screen.getByLabelText(/qty/i), {
-        target: { value: "1" },
-      });
-
-      // Navigate to steps tab
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabSteps"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      // Click the Create button (bottom bar, not header)
-      const submitBtn = getSubmitButton();
-      expect(submitBtn).toBeTruthy();
-      fireEvent.click(submitBtn!);
-
-      await waitFor(() => {
-        expect(createRecipe).toHaveBeenCalledOnce();
-      });
-
-      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
-        .calls[0][0];
-      expect(callArg.title).toBe("My New Recipe");
-      expect(callArg.ingredients[0].item).toBe("flour");
-    });
-
     it("saves live additive edits as a modifiers array", async () => {
       render(
         <RecipeForm
-          initialData={{
+          recipe={recipeWith({
             title: "Modifier test",
             servings: 2,
             ingredients: [{ item: "Butter", modifiers: ["GRATED"] }],
-          }}
+          })}
         />,
       );
 
@@ -765,11 +702,10 @@ describe("RecipeForm", () => {
       fireEvent.click(getSubmitButton()!);
 
       await waitFor(() => {
-        expect(createRecipe).toHaveBeenCalledOnce();
+        expect(updateRecipe).toHaveBeenCalledOnce();
       });
 
-      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
-        .calls[0][0];
+      const callArg = savedRecipe();
       expect(callArg.ingredients[0].modifiers).toEqual(["COLD"]);
     });
 
@@ -940,7 +876,7 @@ describe("RecipeForm", () => {
         expect(updateRecipe).toHaveBeenCalledOnce();
       });
 
-      expect(uploadImage).toHaveBeenCalledWith(file, undefined);
+      expect(uploadImage).toHaveBeenCalledWith(file);
       const [, calledData] = (updateRecipe as ReturnType<typeof vi.fn>).mock
         .calls[0];
       expect(calledData.imageUrl).toBe(uploadedUrl);
@@ -1006,109 +942,18 @@ describe("RecipeForm", () => {
       ]);
     });
 
-    it("preserves parsed modifiers/sectionId/sections through review → save of a new recipe", async () => {
-      render(
-        <RecipeForm
-          initialData={{
-            title: "Rhubarb Pie",
-            servings: 4,
-            sections: [{ id: "sec-1", name: "For the base", order: 0 }],
-            ingredients: [
-              {
-                item: "Mozzarella",
-                modifiers: ["GRATED"],
-                sectionId: "sec-1",
-                original: "Grated Mozzarella",
-              },
-            ],
-            instructions: [{ instruction: "Mix", sectionId: "sec-1" }],
-          }}
-        />,
-      );
-
-      await act(async () => {
-        fireEvent.click(screen.getByText("next"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-      await act(async () => {
-        fireEvent.click(screen.getByText("next"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      fireEvent.click(getSubmitButton()!);
-
-      await waitFor(() => {
-        expect(createRecipe).toHaveBeenCalledOnce();
-      });
-
-      const callArg = (createRecipe as ReturnType<typeof vi.fn>).mock
-        .calls[0][0];
-      expect(callArg.ingredients[0]).toMatchObject({
-        item: "Mozzarella",
-        modifiers: ["GRATED"],
-        sectionId: "sec-1",
-        original: "Grated Mozzarella",
-      });
-      expect(callArg.instructions[0].sectionId).toBe("sec-1");
-      expect(callArg.sections).toEqual([
-        { id: "sec-1", name: "For the base", order: 0 },
-      ]);
-    });
-
     it("does not submit when required fields are missing", async () => {
-      render(<RecipeForm />);
+      render(<RecipeForm recipe={simpleRecipe} />);
 
-      // Try clicking next without filling required fields
-      await act(async () => {
-        fireEvent.click(screen.getByText("next"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
+      await submitWithoutTitle();
 
-      // Should show validation error on info tab
       expect(screen.getByText("titleRequired")).toBeInTheDocument();
 
-      expect(createRecipe).not.toHaveBeenCalled();
+      expect(updateRecipe).not.toHaveBeenCalled();
     });
   });
 
   describe("Normalization wiring", () => {
-    it("calls normalizeRecipeIngredients after create with the submitted ingredient items", async () => {
-      render(<RecipeForm />);
-
-      fireEvent.change(screen.getByLabelText(/^title/i), {
-        target: { value: "Normalization Test" },
-      });
-      fireEvent.change(screen.getByLabelText(/servings/i), {
-        target: { value: "2" },
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabIngredients"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      pickIngredient(0, "garlic");
-      fireEvent.change(screen.getByLabelText(/qty/i), {
-        target: { value: "3" },
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabSteps"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      fireEvent.click(getSubmitButton()!);
-
-      await waitFor(() => {
-        expect(normalizeRecipeIngredients).toHaveBeenCalledOnce();
-      });
-
-      const [id, ingredients] = vi.mocked(normalizeRecipeIngredients).mock
-        .calls[0];
-      expect(id).toBe("new-recipe-id");
-      expect(ingredients.map((i) => i.item)).toContain("garlic");
-    });
-
     it("calls normalizeRecipeIngredients after update with the submitted ingredient items", async () => {
       const mockRecipe: Recipe = {
         id: "update-test-id",
@@ -1153,24 +998,7 @@ describe("RecipeForm", () => {
         new Error("normalize failed"),
       );
 
-      render(<RecipeForm />);
-
-      fireEvent.change(screen.getByLabelText(/^title/i), {
-        target: { value: "Error Test" },
-      });
-      fireEvent.change(screen.getByLabelText(/servings/i), {
-        target: { value: "1" },
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByText("tabIngredients"));
-        await new Promise((r) => setTimeout(r, 50));
-      });
-
-      pickIngredient(0, "salt");
-      fireEvent.change(screen.getByLabelText(/qty/i), {
-        target: { value: "1" },
-      });
+      render(<RecipeForm recipe={simpleRecipe} />);
 
       await act(async () => {
         fireEvent.click(screen.getByText("tabSteps"));
@@ -1179,9 +1007,8 @@ describe("RecipeForm", () => {
 
       fireEvent.click(getSubmitButton()!);
 
-      // createRecipe must have been called (form submitted successfully)
       await waitFor(() => {
-        expect(createRecipe).toHaveBeenCalled();
+        expect(updateRecipe).toHaveBeenCalled();
       });
     });
   });

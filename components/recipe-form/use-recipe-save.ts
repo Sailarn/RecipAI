@@ -3,12 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { createRecipe, updateRecipe } from "@/lib/db/recipes";
+import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
-import {
-  clearPendingUploadToken,
-  getPendingUploadToken,
-} from "@/lib/parse-job-storage";
 import { normalizeRecipeIngredients } from "@/lib/parse-recipe/normalize-ingredients";
 import { useHaptics } from "@/lib/platform";
 import { captureError, trackEvent } from "@/lib/telemetry";
@@ -22,7 +18,7 @@ import type { RecipeOutput } from "./schema";
 
 export type SaveState = "idle" | "saving" | "saved";
 
-export function useRecipeSave(recipe?: Recipe) {
+export function useRecipeSave(recipe: Recipe) {
   const t = useTranslations("recipeForm");
   const navigate = useNavigate();
   const haptics = useHaptics();
@@ -70,15 +66,10 @@ export function useRecipeSave(recipe?: Recipe) {
     // stale/blank photo waiting on a background patch that used to happen
     // after navigation with no loading indicator. saveState stays "saving"
     // (button disabled, "Saving...") for this whole duration.
-    const uploadToken = getPendingUploadToken() ?? undefined;
-    clearPendingUploadToken();
-    const uploadOptions = uploadToken ? { uploadToken } : undefined;
-
     const mainImage = await resolveMainImage({
       pendingFile: pendingImageFile.current,
       currentImageUrl: data.imageUrl || "",
-      previousImageFileId: recipe?.imageFileId,
-      uploadOptions,
+      previousImageFileId: recipe.imageFileId,
     });
     const {
       instructions: resolvedInstructions,
@@ -87,7 +78,6 @@ export function useRecipeSave(recipe?: Recipe) {
       instructions,
       instructionRowIds: instructionRows.map((row) => row.stepId),
       pendingStepFiles: pendingStepFiles.current,
-      uploadOptions,
     });
 
     const recipeData = {
@@ -116,17 +106,11 @@ export function useRecipeSave(recipe?: Recipe) {
       imageCropHeight: data.imageCropHeight ?? undefined,
     };
 
-    let savedId: string;
     try {
-      if (recipe) {
-        await updateRecipe(recipe.id, recipeData);
-        savedId = recipe.id;
-      } else {
-        savedId = await createRecipe(recipeData);
-      }
-      trackEvent("recipe_saved", { source: recipe ? "edit" : "parse" });
+      await updateRecipe(recipe.id, recipeData);
+      trackEvent("recipe_saved", { source: "edit" });
       normalizeRecipeIngredients(
-        savedId,
+        recipe.id,
         recipeData.ingredients.map((ingredient) => ({ item: ingredient.item })),
       )
         .then((counts) => {
@@ -157,7 +141,7 @@ export function useRecipeSave(recipe?: Recipe) {
     // The toast is the confirmation now, so there is nothing left to linger
     // here for — the form used to hold a "Saved" button state for 600ms before
     // navigating, which just made every save feel slower than it was.
-    toast.success(t(recipe ? "updated" : "saved"));
+    toast.success(t("updated"));
     navigate.back();
   };
 

@@ -47,8 +47,8 @@ export type TelemetryEvents = {
       | "no_content"
       | "unexpected";
   };
-  // auto = a parse saved itself; parse = the /recipes/new review form.
-  recipe_saved: { source: "auto" | "parse" | "edit" };
+  // auto = a parse saved itself; edit = the recipe edit form.
+  recipe_saved: { source: "auto" | "edit" };
   ingredients_normalized: { matched: number; total: number };
   embed_match: {
     total: number;
@@ -78,7 +78,6 @@ export type TelemetryEvents = {
   pwa_installed: undefined;
   telegram_mini_app_launched: { hasStartParam: boolean };
   parse_history_viewed: undefined;
-  sync_review_resolved: { choice: string };
   // app delivery — is this device running the code we think it is?
   stale_document_detected: {
     document_build_id: string;

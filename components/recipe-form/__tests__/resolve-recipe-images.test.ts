@@ -59,8 +59,8 @@ describe("resolveMainImage", () => {
       previousImageFileId: "old-file",
     });
 
-    expect(uploadImage).toHaveBeenCalledWith(file, undefined);
-    expect(deleteImage).toHaveBeenCalledWith("old-file", undefined);
+    expect(uploadImage).toHaveBeenCalledWith(file);
+    expect(deleteImage).toHaveBeenCalledWith("old-file");
     expect(result).toEqual({
       imageUrl: IMAGEKIT_URL,
       imageFileId: "new-file",
@@ -80,7 +80,7 @@ describe("resolveMainImage", () => {
       previousImageFileId: undefined,
     });
 
-    expect(uploadImage).toHaveBeenCalledWith(CDN_URL, undefined);
+    expect(uploadImage).toHaveBeenCalledWith(CDN_URL);
     expect(deleteImage).not.toHaveBeenCalled();
     expect(result.imageUrl).toBe(IMAGEKIT_URL);
   });
@@ -135,7 +135,7 @@ describe("resolveInstructionImages", () => {
       pendingStepFiles: { "step-1": file },
     });
 
-    expect(uploadImage).toHaveBeenCalledWith(file, undefined);
+    expect(uploadImage).toHaveBeenCalledWith(file);
     expect(result.instructions[0].imageUrl).toBe(IMAGEKIT_URL);
     expect(result.uploadFailed).toBe(false);
   });
@@ -152,7 +152,7 @@ describe("resolveInstructionImages", () => {
       pendingStepFiles: {},
     });
 
-    expect(uploadImage).toHaveBeenCalledWith(CDN_URL, undefined);
+    expect(uploadImage).toHaveBeenCalledWith(CDN_URL);
     expect(result.instructions[0].imageUrl).toBe(IMAGEKIT_URL);
     expect(result.uploadFailed).toBe(false);
   });

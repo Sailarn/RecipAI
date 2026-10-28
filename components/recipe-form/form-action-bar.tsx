@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { SaveState } from "./use-recipe-save";
 import { TAB_KEYS } from "./use-tab-navigation";
@@ -8,7 +9,6 @@ import { TAB_KEYS } from "./use-tab-navigation";
 interface FormActionBarProps {
   activeTabIndex: number;
   saveState: SaveState;
-  isEditMode: boolean;
   backLabel: string;
   nextLabel: string;
   onBack: () => void;
@@ -19,13 +19,14 @@ interface FormActionBarProps {
 export function FormActionBar({
   activeTabIndex,
   saveState,
-  isEditMode,
   backLabel,
   nextLabel,
   onBack,
   onNext,
   onSave,
 }: FormActionBarProps) {
+  const t = useTranslations("recipeForm");
+  const tCommon = useTranslations("common");
   const isLastTab = activeTabIndex === TAB_KEYS.length - 1;
 
   return (
@@ -78,12 +79,10 @@ export function FormActionBar({
             )}
           >
             {saveState === "saved"
-              ? "✓ Saved!"
+              ? t("savedButton")
               : saveState === "saving"
-                ? "Saving..."
-                : isEditMode
-                  ? "Save"
-                  : "Create"}
+                ? tCommon("saving")
+                : tCommon("save")}
           </button>
         )}
       </div>

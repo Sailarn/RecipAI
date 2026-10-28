@@ -128,14 +128,13 @@
     "scrollToTop": "Scroll to top"
   },
   "recipeForm": {
-    "createTitle": "Create Recipe",
     "editTitle": "Edit Recipe",
     "tabInfo": "Info",
     "tabIngredients": "Ingredients",
     "tabSteps": "Steps",
     "next": "Next",
     "back": "Back",
-    "saved": "Recipe saved",
+    "savedButton": "✓ Saved",
     "title": "Title",
     "titleRequired": "Title is required",
     "description": "Description",

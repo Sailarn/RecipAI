@@ -11,7 +11,7 @@ import type { Recipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 import { BasicInfo } from "./basic-info";
-import { getDefaultValues, type ParsedRecipeData } from "./default-values";
+import { getDefaultValues } from "./default-values";
 import { FormActionBar } from "./form-action-bar";
 import { FormHeader } from "./form-header";
 import { IngredientsSection } from "./ingredients-section";
@@ -26,21 +26,17 @@ import { useScrollOverflow } from "./use-scroll-overflow";
 import { useTabNavigation } from "./use-tab-navigation";
 
 interface RecipeFormProps {
-  recipe?: Recipe;
-  initialData?: ParsedRecipeData;
+  recipe: Recipe;
 }
 
-export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
+export function RecipeForm({ recipe }: RecipeFormProps) {
   const t = useTranslations("recipeForm");
   const navigate = useNavigate();
   const { locale = "en" } = useParams<{ locale: Locale }>();
 
   const handleFormBack = () => navigate.back(routes.recipes.list(locale));
   const recipeSchema = createRecipeSchema(t);
-  const defaultValues = useMemo(
-    () => getDefaultValues(recipe, initialData),
-    [initialData, recipe],
-  );
+  const defaultValues = useMemo(() => getDefaultValues(recipe), [recipe]);
 
   const {
     register,
@@ -90,7 +86,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden">
       <FormHeader
-        backLabel={recipe ? t("editTitle") : t("createTitle")}
+        backLabel={t("editTitle")}
         onBack={handleFormBack}
         activeTab={activeTab}
         activeTabIndex={activeTabIndex}
@@ -147,7 +143,7 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
               errors={errors}
               setValue={setValue}
               locale={locale}
-              canonicalIngredientIds={recipe?.canonicalIngredientIds}
+              canonicalIngredientIds={recipe.canonicalIngredientIds}
             />
           </div>
 
@@ -175,7 +171,6 @@ export function RecipeForm({ recipe, initialData }: RecipeFormProps) {
       <FormActionBar
         activeTabIndex={activeTabIndex}
         saveState={saveState}
-        isEditMode={!!recipe}
         backLabel={t("back")}
         nextLabel={t("next")}
         onBack={handleBack}

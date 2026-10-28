@@ -50,11 +50,11 @@ function flushDynamicImports() {
 describe("telemetry facade", () => {
   describe("trackEvent", () => {
     it("routes to the client capturer in a browser environment", async () => {
-      trackEvent("recipe_saved", { source: "parse" });
+      trackEvent("recipe_saved", { source: "auto" });
       await flushDynamicImports();
 
       expect(captureClientEvent).toHaveBeenCalledWith("recipe_saved", {
-        source: "parse",
+        source: "auto",
       });
       expect(captureServerEvent).not.toHaveBeenCalled();
     });

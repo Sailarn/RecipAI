@@ -128,14 +128,13 @@
     "scrollToTop": "Прокрутити вгору"
   },
   "recipeForm": {
-    "createTitle": "Створити рецепт",
     "editTitle": "Редагувати рецепт",
     "tabInfo": "Інфо",
     "tabIngredients": "Інгредієнти",
     "tabSteps": "Кроки",
     "next": "Далі",
     "back": "Назад",
-    "saved": "Рецепт збережено",
+    "savedButton": "✓ Збережено",
     "title": "Назва",
     "titleRequired": "Назва обов'язкова",
     "description": "Опис",

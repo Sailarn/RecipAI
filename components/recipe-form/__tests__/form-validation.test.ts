@@ -241,14 +241,6 @@ describe("createRecipeSchema", () => {
 });
 
 describe("getDefaultValues", () => {
-  it("returns empty defaults with no arguments", () => {
-    const defaults = getDefaultValues();
-    expect(defaults.title).toBe("");
-    expect(defaults.servings).toBe("1");
-    expect(defaults.ingredients).toHaveLength(1);
-    expect(defaults.ingredients[0].item).toBe("");
-  });
-
   it("maps a Recipe to form values", () => {
     const recipe: Recipe = {
       id: "1",
@@ -280,36 +272,29 @@ describe("getDefaultValues", () => {
     expect(defaults.instructions![0].rowId).toBe("s1");
   });
 
-  it("maps initialData to form values", () => {
-    const defaults = getDefaultValues(undefined, {
-      title: "Pasta",
-      servings: 2,
-      ingredients: [{ item: "pasta", amount: 200, unit: "g" }],
-      instructions: [{ instruction: "Boil water", order: 1 }],
-    });
-
-    expect(defaults.title).toBe("Pasta");
-    expect(defaults.servings).toBe("2");
-    expect(defaults.ingredients[0].item).toBe("pasta");
-    expect(defaults.ingredients[0].amount).toBe("200");
-    expect(defaults.instructions![0].instruction).toBe("Boil water");
-  });
-
   it("maps existing additives and section references into form rows", () => {
-    const defaults = getDefaultValues(undefined, {
+    const recipe: Recipe = {
+      id: "1",
       title: "Dough",
       servings: 2,
       sections: [{ id: "dough", name: "Dough", order: 0 }],
       ingredients: [
         {
+          id: "i1",
           item: "butter",
           modifiers: ["COLD"],
           sectionId: "dough",
           original: "cold butter",
         },
       ],
-      instructions: [{ instruction: "Mix.", order: 1, sectionId: "dough" }],
-    });
+      instructions: [
+        { id: "s1", instruction: "Mix.", order: 1, sectionId: "dough" },
+      ],
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+    };
+
+    const defaults = getDefaultValues(recipe);
 
     expect(defaults.sections).toEqual([
       { id: "dough", name: "Dough", order: 0 },
@@ -320,57 +305,5 @@ describe("getDefaultValues", () => {
       original: "cold butter",
     });
     expect(defaults.instructions?.[0]).toMatchObject({ sectionId: "dough" });
-    expect(defaults.ingredients[0].rowId).toBeTruthy();
-    expect(defaults.instructions?.[0].rowId).toBeTruthy();
-  });
-
-  it("builds shared form sections from AI label fields", () => {
-    const parsedData = {
-      title: "Flatbread",
-      servings: 4,
-      ingredients: [{ item: "flour", section: "Dough" }],
-      instructions: [{ instruction: "Mix.", section: "Dough" }],
-    } as unknown as Parameters<typeof getDefaultValues>[1];
-
-    const defaults = getDefaultValues(undefined, parsedData);
-
-    expect(defaults.sections).toEqual([
-      expect.objectContaining({ name: "Dough", order: 0 }),
-    ]);
-    expect(defaults.ingredients[0].sectionId).toBe(defaults.sections?.[0].id);
-    expect(defaults.instructions?.[0].sectionId).toBe(
-      defaults.sections?.[0].id,
-    );
-  });
-
-  it("drops unknown AI modifier keys before form validation", () => {
-    const parsedData = {
-      title: "Butter",
-      servings: 2,
-      ingredients: [{ item: "butter", modifiers: ["COLD", "INVENTED"] }],
-    } as unknown as Parameters<typeof getDefaultValues>[1];
-
-    const defaults = getDefaultValues(undefined, parsedData);
-
-    expect(defaults.ingredients[0].modifiers).toEqual(["COLD"]);
-  });
-
-  it("keeps a missing parsed ingredient amount empty", () => {
-    const defaults = getDefaultValues(undefined, {
-      title: "Salt Water",
-      servings: 2,
-      ingredients: [{ item: "salt", amount: null, unit: null }],
-    });
-
-    expect(defaults.ingredients[0].amount).toBe("");
-  });
-
-  it("uses default ingredient placeholder when initialData has no ingredients", () => {
-    const defaults = getDefaultValues(undefined, {
-      title: "Pasta",
-      servings: 2,
-    });
-    expect(defaults.ingredients).toHaveLength(1);
-    expect(defaults.ingredients[0].item).toBe("");
   });
 });

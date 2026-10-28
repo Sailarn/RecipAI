@@ -6,13 +6,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db/recipes", () => ({
-  createRecipe: vi.fn(),
   updateRecipe: vi.fn(),
-}));
-
-vi.mock("@/lib/parse-job-storage", () => ({
-  getPendingUploadToken: vi.fn().mockReturnValue(null),
-  clearPendingUploadToken: vi.fn(),
 }));
 
 vi.mock("@/lib/parse-recipe/normalize-ingredients", () => ({
@@ -54,7 +48,7 @@ vi.mock("../resolve-recipe-images", () => ({
 }));
 
 import { toast } from "sonner";
-import { createRecipe, updateRecipe } from "@/lib/db/recipes";
+import { updateRecipe } from "@/lib/db/recipes";
 import { useHaptics } from "@/lib/platform";
 import { useNavigate } from "@/lib/transitions";
 import {
@@ -71,6 +65,7 @@ const baseData: RecipeOutput = {
   instructions: [],
   sections: [],
 };
+const recipe = { id: "recipe-1", imageFileId: "old-file" } as never;
 
 function mockSuccessfulImages() {
   vi.mocked(resolveMainImage).mockResolvedValue({
@@ -85,7 +80,6 @@ function mockSuccessfulImages() {
 }
 
 beforeEach(() => {
-  vi.mocked(createRecipe).mockResolvedValue("new-id");
   vi.mocked(updateRecipe).mockResolvedValue(undefined);
   mockSuccessfulImages();
 });
@@ -96,29 +90,18 @@ afterEach(() => {
 
 describe("useRecipeSave", () => {
   it("saves, confirms with a toast, and navigates back immediately when nothing fails", async () => {
-    const { result } = renderHook(() => useRecipeSave());
+    const { result } = renderHook(() => useRecipeSave(recipe));
 
     await act(async () => {
       await result.current.onSubmit(baseData);
     });
 
-    expect(createRecipe).toHaveBeenCalledOnce();
+    expect(updateRecipe).toHaveBeenCalledOnce();
     expect(result.current.saveState).toBe("saved");
     expect(result.current.imageError).toBeNull();
     expect(useHaptics().notify).toHaveBeenCalledWith("success");
-    expect(toast.success).toHaveBeenCalledWith("saved");
-    expect(useNavigate().back).toHaveBeenCalledOnce();
-  });
-
-  it("reports an edit as an update rather than a new save", async () => {
-    const existing = { id: "r1", title: "Existing" } as never;
-    const { result } = renderHook(() => useRecipeSave(existing));
-
-    await act(async () => {
-      await result.current.onSubmit(baseData);
-    });
-
     expect(toast.success).toHaveBeenCalledWith("updated");
+    expect(useNavigate().back).toHaveBeenCalledOnce();
   });
 
   it("keeps the user on the form with a visible error when the main image upload fails", async () => {
@@ -127,13 +110,13 @@ describe("useRecipeSave", () => {
       imageFileId: undefined,
       uploadFailed: true,
     });
-    const { result } = renderHook(() => useRecipeSave());
+    const { result } = renderHook(() => useRecipeSave(recipe));
 
     await act(async () => {
       await result.current.onSubmit(baseData);
     });
 
-    expect(createRecipe).toHaveBeenCalledOnce();
+    expect(updateRecipe).toHaveBeenCalledOnce();
     expect(result.current.saveState).toBe("idle");
     expect(result.current.imageError).toBe("photoUploadFailed");
     expect(useHaptics().notify).toHaveBeenCalledWith("error");
@@ -145,7 +128,7 @@ describe("useRecipeSave", () => {
       instructions: [],
       uploadFailed: true,
     });
-    const { result } = renderHook(() => useRecipeSave());
+    const { result } = renderHook(() => useRecipeSave(recipe));
 
     await act(async () => {
       await result.current.onSubmit(baseData);
@@ -156,8 +139,7 @@ describe("useRecipeSave", () => {
     expect(useNavigate().back).not.toHaveBeenCalled();
   });
 
-  it("updates an existing recipe by id when a recipe is passed", async () => {
-    const recipe = { id: "recipe-1", imageFileId: "old-file" } as never;
+  it("updates the recipe by id", async () => {
     const { result } = renderHook(() => useRecipeSave(recipe));
 
     await act(async () => {
@@ -168,12 +150,11 @@ describe("useRecipeSave", () => {
       "recipe-1",
       expect.objectContaining({ title: "Toast" }),
     );
-    expect(createRecipe).not.toHaveBeenCalled();
   });
 
   it("surfaces a save error and does not navigate when the DB write itself fails", async () => {
-    vi.mocked(createRecipe).mockRejectedValue(new Error("Dexie write failed"));
-    const { result } = renderHook(() => useRecipeSave());
+    vi.mocked(updateRecipe).mockRejectedValue(new Error("Dexie write failed"));
+    const { result } = renderHook(() => useRecipeSave(recipe));
 
     await act(async () => {
       await result.current.onSubmit(baseData);

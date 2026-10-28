@@ -2,7 +2,6 @@ export const routes = {
   recipes: {
     list: (locale: string) => `/${locale}/recipes`,
     detail: (locale: string, id: string) => `/${locale}/recipes/${id}`,
-    new: (locale: string) => `/${locale}/recipes/new`,
     edit: (locale: string, id: string) => `/${locale}/recipes/${id}/edit`,
     parse: (locale: string) => `/${locale}/recipes/parse`,
   },

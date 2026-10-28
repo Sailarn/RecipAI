@@ -1,6 +1,5 @@
 const PARSE_JOB_IDS_KEY = "parseJobIds";
 const UPLOAD_TOKENS_KEY = "parseUploadTokens";
-const PENDING_UPLOAD_TOKEN_KEY = "pendingUploadToken";
 
 export function getJobIds(): string[] {
   // migrate legacy single-item format
@@ -56,22 +55,4 @@ function getTokenMap(): Record<string, string> {
   } catch {
     return {};
   }
-}
-
-/**
- * Persists the upload token independently of the job lifecycle so the recipe
- * form can access it after the job entry has been cleaned up.
- */
-export function storePendingUploadToken(token: string) {
-  localStorage.setItem(PENDING_UPLOAD_TOKEN_KEY, token);
-}
-
-/** Returns the pending upload token, or null if none is stored. */
-export function getPendingUploadToken(): string | null {
-  return localStorage.getItem(PENDING_UPLOAD_TOKEN_KEY);
-}
-
-/** Clears the pending upload token after it has been consumed. */
-export function clearPendingUploadToken() {
-  localStorage.removeItem(PENDING_UPLOAD_TOKEN_KEY);
 }
