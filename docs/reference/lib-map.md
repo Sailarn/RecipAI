@@ -34,6 +34,8 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/scrapers/phantomjs.ts` | Primary scraper — JS-rendered HTML via PhantomJsCloud. |
 | `lib/scrapers/scrape-do.ts` | Fallback scraper via scrape.do. |
 | `lib/scrapers/apify.ts` | Social-content scraper via Apify actors for Instagram, TikTok, YouTube, and X/Twitter. |
+| `lib/scrapers/apify-item-content.ts` | What a post contributes from one actor item: caption, images, video URL, duration, transcript/subtitles. Edit here when an actor changes its output fields. |
+| `lib/scrapers/apify-item-fields.ts` | Typed readers over untyped actor JSON (first usable value among candidate keys). |
 | `lib/transcribe/groq.ts` | Groq Whisper transcription for social video/audio when actor transcripts are unavailable. |
 
 ---
