@@ -34,6 +34,9 @@ const BULK_PREWARM_CAP = 12;
 // call (e.g. returning to the tab after connectivity improves) can retry it,
 // rather than being silently blocked forever.
 const succeeded = new Set<string>();
+// Queued or loading. The recipes list re-emits on every sync, and each emit
+// used to start another queue that fetched the same still-loading urls again.
+const pending = new Set<string>();
 
 function isSlowConnection(): boolean {
   const connection = (
@@ -53,9 +56,13 @@ function warmOne(url: string, onSettled: () => void): void {
   const image = new Image();
   image.onload = () => {
     succeeded.add(url);
+    pending.delete(url);
     onSettled();
   };
-  image.onerror = () => onSettled();
+  image.onerror = () => {
+    pending.delete(url);
+    onSettled();
+  };
   image.src = url;
 }
 
@@ -85,10 +92,14 @@ function warmQueue(urls: string[]): void {
  */
 export function prewarmRecipeImages(recipes: Recipe[]): void {
   if (typeof window === "undefined" || isSlowConnection()) return;
+  // Cap before dropping pending urls, so a re-emit while the first batch is
+  // still loading doesn't reach past the cap into the next batch.
   const urls = selectPrewarmUrls(recipes)
     .filter((url) => !succeeded.has(url))
-    .slice(0, BULK_PREWARM_CAP);
+    .slice(0, BULK_PREWARM_CAP)
+    .filter((url) => !pending.has(url));
   if (urls.length === 0) return;
+  for (const url of urls) pending.add(url);
   warmQueue(urls);
 }
 

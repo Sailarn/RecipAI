@@ -212,6 +212,57 @@ describe("prewarmRecipeImages / prewarmRecipeImage", () => {
     expect(constructedSecondRound).toBe(1);
   });
 
+  it("does not queue a url again while an earlier batch is still warming it", async () => {
+    const recipes = [
+      mockRecipe("a", `${IMAGEKIT_ENDPOINT}/queued-a.jpg`),
+      mockRecipe("b", `${IMAGEKIT_ENDPOINT}/queued-b.jpg`),
+    ];
+    const srcs: string[] = [];
+    vi.stubGlobal(
+      "Image",
+      class extends FakeImage {
+        set src(value: string) {
+          srcs.push(value);
+          super.src = value;
+        }
+        get src() {
+          return super.src;
+        }
+      },
+    );
+
+    prewarmRecipeImages(recipes);
+    prewarmRecipeImages(recipes);
+    await flushMicrotasks(40);
+
+    expect(srcs).toHaveLength(2);
+  });
+
+  it("keeps a re-emit during warming within the cap", async () => {
+    const recipes = Array.from({ length: 20 }, (_, index) =>
+      mockRecipe(`c${index}`, `${IMAGEKIT_ENDPOINT}/cap-${index}.jpg`),
+    );
+    const srcs: string[] = [];
+    vi.stubGlobal(
+      "Image",
+      class extends FakeImage {
+        set src(value: string) {
+          srcs.push(value);
+          super.src = value;
+        }
+        get src() {
+          return super.src;
+        }
+      },
+    );
+
+    prewarmRecipeImages(recipes);
+    prewarmRecipeImages(recipes);
+    await flushMicrotasks(80);
+
+    expect(srcs).toHaveLength(12);
+  });
+
   it("does not retry a recipe that already succeeded", async () => {
     const recipe = mockRecipe("ok", `${IMAGEKIT_ENDPOINT}/ok.jpg`);
 
