@@ -48,12 +48,14 @@ describe("uploadImageServer", () => {
     );
   });
 
-  it("uploads to ImageKit and returns the stable url + fileId", async () => {
+  it("uploads to ImageKit as a parse-cache file and returns the stable url + fileId", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(imageResponse()));
 
     const result = await uploadImageServer("https://example.com/a.jpg");
 
-    expect(upload).toHaveBeenCalledOnce();
+    expect(upload).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ["owner-parse-cache"] }),
+    );
     expect(result).toEqual({
       url: "https://ik.imagekit.io/RecipAI/recipes/recipe-1.jpg",
       fileId: "file-1",
@@ -90,21 +92,22 @@ describe("uploadImageServer", () => {
 });
 
 describe("uploadToImageKit", () => {
-  it("uploads into the recipe image folder", async () => {
-    await uploadToImageKit("AQID", "a.jpg");
+  it("uploads into the recipe image folder, tagged with its owner", async () => {
+    await uploadToImageKit("AQID", "a.jpg", "owner-user-1");
 
     expect(upload).toHaveBeenCalledWith({
       file: "AQID",
       fileName: "a.jpg",
       folder: "/recipes",
+      tags: ["owner-user-1"],
     });
   });
 
   it("throws when ImageKit answers without a url or fileId", async () => {
     upload.mockResolvedValueOnce({ fileId: "file-1" });
 
-    await expect(uploadToImageKit("AQID", "a.jpg")).rejects.toThrow(
-      /no url or fileId/,
-    );
+    await expect(
+      uploadToImageKit("AQID", "a.jpg", "owner-user-1"),
+    ).rejects.toThrow(/no url or fileId/);
   });
 });

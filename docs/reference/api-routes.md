@@ -76,8 +76,8 @@ Both routes accept a valid session **or** a short-lived upload token (minted by 
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/images/upload` | Session or upload token, else IP rate-limited | Upload an image to ImageKit. Accepts multipart file data or JSON containing a remote `url` or base64 `file`; the 10 MB cap applies to every source. Multipart and fetched images must be JPEG, PNG, WebP, or GIF. Returns `{ url, fileId }`. Without a session/token the request still proceeds but is capped at `UPLOAD_RATE_LIMIT.ANON` (30/hour per IP, `lib/api-limits.ts`). |
-| `DELETE` | `/api/images/delete` | Session or upload token | Delete an image from ImageKit by `fileId`. Stays hard-gated (no rate-limit fallback) — deletion is already best-effort cleanup on every caller, so a rejected request just orphans a file rather than losing data. |
+| `POST` | `/api/images/upload` | Session or upload token, else IP rate-limited | Upload an image to ImageKit. Accepts multipart file data or JSON containing a remote `url` or base64 `file`; the 10 MB cap applies to every source. Multipart and fetched images must be JPEG, PNG, WebP, or GIF. Returns `{ url, fileId }`. Every upload is tagged with its owner (the session user, else a hash of the upload token, else anonymous) for the delete ownership check. Without a session/token the request still proceeds but is capped at `UPLOAD_RATE_LIMIT.ANON` (30/hour per IP, `lib/api-limits.ts`). |
+| `DELETE` | `/api/images/delete` | Session or upload token | Delete an image from ImageKit by `fileId`, **only if the caller owns it** — otherwise `403`. Ownership comes from the file's owner tag; parse-cache and anonymous uploads are never deletable on request; files uploaded before tags existed are deletable unless a cached parse or another user's recipe still uses them. A file that is already gone answers `{ success: true }`. Stays hard-gated (no rate-limit fallback) — deletion is already best-effort cleanup on every caller, so a rejected request just orphans a file rather than losing data. |
 
 ---
 

@@ -24,7 +24,7 @@ const request = new Request("http://localhost/api/images/upload", {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockAuth.mockResolvedValue(null);
+  mockAuth.mockResolvedValue({ caller: null });
   mockResolve.mockResolvedValue({
     ok: true,
     source: { fileData: "AQID", fileName: "a.jpg" },
@@ -35,7 +35,7 @@ beforeEach(() => {
 describe("POST /api/images/upload", () => {
   it("returns the auth/rate-limit response without reading the body", async () => {
     const denied = new Response(null, { status: 429 });
-    mockAuth.mockResolvedValue(denied);
+    mockAuth.mockResolvedValue({ response: denied });
 
     expect(await POST(request)).toBe(denied);
     expect(mockResolve).not.toHaveBeenCalled();
@@ -57,11 +57,27 @@ describe("POST /api/images/upload", () => {
 
     const response = await POST(request);
 
-    expect(mockUpload).toHaveBeenCalledWith("AQID", "a.jpg");
+    expect(mockUpload).toHaveBeenCalledWith("AQID", "a.jpg", "owner-anonymous");
     expect(await response.json()).toEqual({
       url: "https://ik.test/a.jpg",
       fileId: "f1",
     });
+  });
+
+  it("tags a signed-in upload with its user", async () => {
+    mockAuth.mockResolvedValue({ caller: { userId: "user-1" } });
+    mockUpload.mockResolvedValue({
+      url: "https://ik.test/a.jpg",
+      fileId: "f1",
+    });
+
+    await POST(request);
+
+    expect(mockUpload).toHaveBeenCalledWith(
+      "AQID",
+      "a.jpg",
+      "owner-user-user-1",
+    );
   });
 
   it("reports an ImageKit failure as a 500", async () => {

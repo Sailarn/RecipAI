@@ -5,41 +5,53 @@ import { auth } from "@/lib/auth/auth";
 import { enforceUploadRateLimit } from "@/lib/rate-limit";
 import { verifyUploadToken } from "@/lib/upload/upload-token";
 
-/** True if the request carries a session or a valid one-time upload token. */
-async function hasUploadCredential(request: Request): Promise<boolean> {
+/** Who is making an image request: a signed-in user, or a parse's upload token. */
+export type UploadCaller = { userId: string } | { uploadToken: string };
+
+type UploadCallerResult =
+  | { caller: UploadCaller; response?: undefined }
+  | { caller?: undefined; response: NextResponse };
+
+type OptionalUploadCallerResult =
+  | { caller: UploadCaller | null; response?: undefined }
+  | { caller?: undefined; response: NextResponse };
+
+/** The session's user, else a valid one-time upload token, else null. */
+async function resolveUploadCaller(
+  request: Request,
+): Promise<UploadCaller | null> {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (session) return true;
+  if (session) return { userId: session.user.id };
 
   const token = request.headers.get("x-upload-token");
-  if (!token) return false;
-
-  return verifyUploadToken(token);
+  if (token && (await verifyUploadToken(token))) return { uploadToken: token };
+  return null;
 }
 
 /**
- * Returns null if the request is authorised for image *deletion*
- * (a valid session OR a valid upload token is sufficient),
- * or a 401 response if neither is present. Deletion stays hard-gated —
- * it's already best-effort cleanup on every caller, so an unauthorised
- * request just orphans a file rather than losing user data.
+ * Gate image *deletion* on a session or a valid upload token: `{ caller }`
+ * when either is present, otherwise `{ response }` (a 401). Ownership of the
+ * file itself is checked separately — see `lib/upload/image-ownership.ts`.
  */
 export async function requireUploadAuth(
   request: Request,
-): Promise<NextResponse | null> {
-  const authorised = await hasUploadCredential(request);
-  return authorised ? null : ApiError.unauthorized();
+): Promise<UploadCallerResult> {
+  const caller = await resolveUploadCaller(request);
+  return caller ? { caller } : { response: ApiError.unauthorized() };
 }
 
 /**
- * Returns null if the request may proceed with an image *upload* — a valid
- * session or upload token bypasses limits entirely (parse flow, signed-in
- * edits); otherwise the request is allowed but IP-rate-limited, so editing a
- * recipe without being signed in can still add/replace photos. Returns a 429
- * only once that anonymous allowance is exhausted.
+ * Gate an image *upload*: a valid session or upload token bypasses limits
+ * entirely (parse flow, signed-in edits); otherwise the request is allowed but
+ * IP-rate-limited (`caller: null`), so editing a recipe without being signed in
+ * can still add/replace photos. Returns `{ response }` (a 429) only once that
+ * anonymous allowance is exhausted.
  */
 export async function requireUploadAuthOrRateLimit(
   request: Request,
-): Promise<NextResponse | null> {
-  if (await hasUploadCredential(request)) return null;
-  return enforceUploadRateLimit(request);
+): Promise<OptionalUploadCallerResult> {
+  const caller = await resolveUploadCaller(request);
+  if (caller) return { caller };
+  const limited = await enforceUploadRateLimit(request);
+  return limited ? { response: limited } : { caller: null };
 }

@@ -104,14 +104,16 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/upload/imagekit.ts` | The only `@imagekit/nodejs` client: `uploadToImageKit()` (base64 into `/recipes`), `deleteFromImageKit()`, and `uploadImageServer()` (fetches the source image with `imageFetchHeaders`, then uploads). |
+| `lib/upload/imagekit.ts` | The only `@imagekit/nodejs` client: `uploadToImageKit()` (base64 into `/recipes`, tagged with its owner), `getImageKitFileTags()`, `deleteFromImageKit()`, and `uploadImageServer()` (fetches the source image with `imageFetchHeaders`, then uploads). |
 | `lib/upload/image-fetch-headers.ts` | `imageFetchHeaders(url)` — browser-like `User-Agent`/`Accept` (+ `instagram.com` `Referer` for cdninstagram/fbcdn) so hotlink-guarded CDNs serve the image instead of a 403. |
 | `lib/upload/images.ts` | `isImageKitUrl()` helper (server-side upload path). |
 | `lib/imagekit-url.ts` | `getOptimizedUrl()` — builds the direct ImageKit CDN URL (`?tr=w-…`) that `RecipeImage` renders, bypassing `/_next/image`. Also `isImageKitUrl()` + `HERO_IMAGE_WIDTH`. |
 | `lib/prewarm-recipe-images.ts` | `prewarmRecipeImages()` — idle-time warms a capped batch of recipe hero images into the SW cache; `prewarmRecipeImage()` warms one on pointer intent. `selectPrewarmUrls()` is its pure core. |
 | `lib/schedule-idle.ts` | `scheduleIdle()` — shared `requestIdleCallback`/`setTimeout` fallback wrapper. Used by the image prewarm above and `BottomNav`'s tab-route prefetch. |
 | `components/recipe-image/index.tsx` | Renders a recipe image as a plain `<img>` on a direct ImageKit URL (not `next/image`), so the service worker caches it. |
-| `lib/upload/upload-auth.ts` | `requireUploadAuth()` — accepts session or upload token. |
+| `lib/upload/upload-auth.ts` | `requireUploadAuth()` / `requireUploadAuthOrRateLimit()` — resolve the caller (session user or upload token) as `{ caller } \| { response }`. |
+| `lib/upload/image-ownership.ts` | Owner tags written on every ImageKit upload (`ownerTagFor`) and read back before a delete (`ownershipFromTags`). Change who may delete an image here. |
+| `lib/upload/image-references.ts` | `isImageInUseByOthers()` — the fallback check for untagged (pre-tag) files: a cached parse result or another user's recipe still using the file. |
 | `lib/upload/upload-token.ts` | `mintUploadToken()` / `verifyUploadToken()` via Redis (30 min TTL). |
 | `lib/upload/upload-image-source.ts` | Resolves multipart, remote-URL, or base64 upload bodies into one validated source shape. |
 | `lib/upload/upload-limits.ts` | Upload size and type constraints. |

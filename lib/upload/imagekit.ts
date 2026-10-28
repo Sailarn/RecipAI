@@ -1,5 +1,6 @@
 import ImageKit from "@imagekit/nodejs";
 import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
+import { PARSE_CACHE_OWNER_TAG } from "@/lib/upload/image-ownership";
 import { sourceFetchFailedMessage } from "@/lib/upload/source-image-failure";
 import {
   isAllowedImageType,
@@ -21,15 +22,20 @@ export interface UploadedImage {
   fileId: string;
 }
 
-/** Uploads base64 image data into the recipe image folder. */
+/**
+ * Uploads base64 image data into the recipe image folder, tagged with its
+ * owner (see `lib/upload/image-ownership.ts`).
+ */
 export async function uploadToImageKit(
   base64File: string,
   fileName: string,
+  ownerTag: string,
 ): Promise<UploadedImage> {
   const result = await imagekit.files.upload({
     file: base64File,
     fileName,
     folder: RECIPE_IMAGE_FOLDER,
+    tags: [ownerTag],
   });
   // Both are typed optional, but a successful upload always returns them —
   // without either the image could never be shown or cleaned up.
@@ -39,10 +45,16 @@ export async function uploadToImageKit(
   return { url: result.url, fileId: result.fileId };
 }
 
+export async function getImageKitFileTags(fileId: string): Promise<string[]> {
+  const file = await imagekit.files.get(fileId);
+  return file.tags ?? [];
+}
+
 export async function deleteFromImageKit(fileId: string): Promise<void> {
   await imagekit.files.delete(fileId);
 }
 
+/** Mirrors a parse's source image; the file belongs to the parse cache. */
 export async function uploadImageServer(url: string): Promise<UploadedImage> {
   const response = await fetch(url, { headers: imageFetchHeaders(url) });
   if (!response.ok) {
@@ -61,5 +73,9 @@ export async function uploadImageServer(url: string): Promise<UploadedImage> {
     throw new Error(UPLOAD_ERRORS.FILE_TOO_LARGE);
 
   const base64 = Buffer.from(buffer).toString("base64");
-  return uploadToImageKit(base64, `recipe-${Date.now()}`);
+  return uploadToImageKit(
+    base64,
+    `recipe-${Date.now()}`,
+    PARSE_CACHE_OWNER_TAG,
+  );
 }

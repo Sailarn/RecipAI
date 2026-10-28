@@ -2,8 +2,10 @@ import { APIError } from "@imagekit/nodejs";
 import { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
 import { logger } from "@/lib/logger";
-import { deleteFromImageKit } from "@/lib/upload/imagekit";
-import { requireUploadAuth } from "@/lib/upload/upload-auth";
+import { ownershipFromTags } from "@/lib/upload/image-ownership";
+import { isImageInUseByOthers } from "@/lib/upload/image-references";
+import { deleteFromImageKit, getImageKitFileTags } from "@/lib/upload/imagekit";
+import { requireUploadAuth, type UploadCaller } from "@/lib/upload/upload-auth";
 
 // A connection failure carries no status; a 5xx is ImageKit's own trouble. The
 // SDK has already retried both, and deletion is best-effort cleanup.
@@ -11,9 +13,19 @@ function isTransientImageKitError(error: APIError): boolean {
   return error.status === undefined || error.status >= 500;
 }
 
+async function mayDelete(
+  fileId: string,
+  caller: UploadCaller,
+): Promise<boolean> {
+  const tags = await getImageKitFileTags(fileId);
+  const ownership = ownershipFromTags(tags, caller);
+  if (ownership !== "untagged") return ownership === "owned";
+  return !(await isImageInUseByOthers(fileId, caller));
+}
+
 export async function DELETE(request: Request) {
-  const authError = await requireUploadAuth(request);
-  if (authError) return authError;
+  const authed = await requireUploadAuth(request);
+  if (authed.response) return authed.response;
 
   let body: { fileId?: string };
   try {
@@ -26,6 +38,9 @@ export async function DELETE(request: Request) {
   if (!fileId) return ApiError.badRequest("fileId required");
 
   try {
+    if (!(await mayDelete(fileId, authed.caller))) {
+      return ApiError.forbidden();
+    }
     await deleteFromImageKit(fileId);
     return NextResponse.json({ success: true });
   } catch (error) {

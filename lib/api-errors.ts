@@ -7,6 +7,7 @@ import { captureError } from "@/lib/telemetry";
 
 export const API_ERROR_MESSAGES = {
   UNAUTHORIZED: "Unauthorized",
+  FORBIDDEN: "Forbidden",
   NOT_FOUND: "Not found",
   INTERNAL: "Internal server error",
   INVALID_BODY: "Invalid request body",
@@ -33,6 +34,8 @@ export const ApiError = {
       { error: API_ERROR_MESSAGES.UNAUTHORIZED },
       { status: 401 },
     ),
+  forbidden: () =>
+    NextResponse.json({ error: API_ERROR_MESSAGES.FORBIDDEN }, { status: 403 }),
   notFound: (message: string = API_ERROR_MESSAGES.NOT_FOUND) =>
     NextResponse.json({ error: message }, { status: 404 }),
   badRequest: (message: string) =>

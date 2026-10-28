@@ -32,21 +32,21 @@ beforeEach(() => {
 });
 
 describe("requireUploadAuth", () => {
-  it("returns null when a valid session exists", async () => {
+  it("returns the session's user as the caller", async () => {
     vi.mocked(auth.api.getSession).mockResolvedValue({
       user: { id: "user-1" },
     } as never);
 
     const result = await requireUploadAuth(makeRequest());
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ caller: { userId: "user-1" } });
     expect(verifyUploadToken).not.toHaveBeenCalled();
   });
 
   it("returns 401 when no session and no token", async () => {
     const result = await requireUploadAuth(makeRequest());
 
-    expect(result?.status).toBe(401);
+    expect(result.response?.status).toBe(401);
   });
 
   it("returns 401 when no session and token is invalid", async () => {
@@ -54,16 +54,16 @@ describe("requireUploadAuth", () => {
 
     const result = await requireUploadAuth(makeRequest("bad-token"));
 
-    expect(result?.status).toBe(401);
+    expect(result.response?.status).toBe(401);
     expect(verifyUploadToken).toHaveBeenCalledWith("bad-token");
   });
 
-  it("returns null when no session but token is valid", async () => {
+  it("returns the upload token as the caller when there is no session", async () => {
     vi.mocked(verifyUploadToken).mockResolvedValue(true);
 
     const result = await requireUploadAuth(makeRequest("valid-token"));
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ caller: { uploadToken: "valid-token" } });
   });
 
   it("skips token check entirely when session is present", async () => {
@@ -78,25 +78,25 @@ describe("requireUploadAuth", () => {
 });
 
 describe("requireUploadAuthOrRateLimit", () => {
-  it("returns null and skips the rate limit when a valid session exists", async () => {
+  it("returns the user and skips the rate limit when a valid session exists", async () => {
     vi.mocked(auth.api.getSession).mockResolvedValue({
       user: { id: "user-1" },
     } as never);
 
     const result = await requireUploadAuthOrRateLimit(makeRequest());
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ caller: { userId: "user-1" } });
     expect(enforceUploadRateLimit).not.toHaveBeenCalled();
   });
 
-  it("returns null and skips the rate limit when a valid upload token exists", async () => {
+  it("returns the token and skips the rate limit when a valid upload token exists", async () => {
     vi.mocked(verifyUploadToken).mockResolvedValue(true);
 
     const result = await requireUploadAuthOrRateLimit(
       makeRequest("valid-token"),
     );
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ caller: { uploadToken: "valid-token" } });
     expect(enforceUploadRateLimit).not.toHaveBeenCalled();
   });
 
@@ -106,7 +106,7 @@ describe("requireUploadAuthOrRateLimit", () => {
     const request = makeRequest();
     const result = await requireUploadAuthOrRateLimit(request);
 
-    expect(result).toBeNull();
+    expect(result).toEqual({ caller: null });
     expect(enforceUploadRateLimit).toHaveBeenCalledWith(request);
   });
 
@@ -119,6 +119,6 @@ describe("requireUploadAuthOrRateLimit", () => {
 
     const result = await requireUploadAuthOrRateLimit(makeRequest());
 
-    expect(result?.status).toBe(429);
+    expect(result.response?.status).toBe(429);
   });
 });

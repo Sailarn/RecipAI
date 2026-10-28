@@ -44,17 +44,19 @@ function makeFetchResponse(
 
 beforeEach(() => {
   // Default: authorised.
-  vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue(null);
+  vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue({
+    caller: { userId: "user-1" },
+  });
 });
 
 describe("POST /api/images/upload", () => {
   describe("authentication", () => {
     it("returns 401 when requireUploadAuthOrRateLimit rejects the request", async () => {
-      vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue(
-        new Response(JSON.stringify({ error: "Unauthorized" }), {
+      vi.mocked(requireUploadAuthOrRateLimit).mockResolvedValue({
+        response: new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
         }) as never,
-      );
+      });
 
       const res = await POST(makeJsonRequest({ file: "base64data==" }));
 
@@ -104,6 +106,7 @@ describe("POST /api/images/upload", () => {
       expect(uploadToImageKit).toHaveBeenCalledWith(
         "base64data==",
         "my-recipe.jpg",
+        "owner-user-user-1",
       );
     });
 
@@ -115,6 +118,7 @@ describe("POST /api/images/upload", () => {
       expect(uploadToImageKit).toHaveBeenCalledWith(
         "base64data==",
         expect.stringMatching(/^recipe-\d+$/),
+        "owner-user-user-1",
       );
     });
 
@@ -249,6 +253,7 @@ describe("POST /api/images/upload", () => {
       expect(uploadToImageKit).toHaveBeenCalledWith(
         expect.any(String),
         "photo.jpg",
+        "owner-user-user-1",
       );
     });
 
