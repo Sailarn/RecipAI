@@ -60,6 +60,7 @@ app/api/parse-queue/__tests__/route.test.ts
   ```
 - `vi.mock`, `vi.hoisted` and `vi.unmock` must sit at module top level — Vitest 5 throws when they are called inside a function, `describe` or `it`.
 - Mock call history is cleared before every test by default (`clearMocks`, on since Vitest 5), so a `beforeEach(() => vi.clearAllMocks())` is redundant. It only clears history: a `mockReturnValue`/`mockImplementation` set in one test still leaks into the next — use `mockReset()` or set it per test.
+- Tests must pass in any order. `bunx vitest --run --sequence.shuffle` runs them shuffled (it prints the seed; rerun one with `--sequence.seed=<seed>`). The usual culprits are an implementation or `vi.spyOn` left in place (restore spies in `afterEach`) and module-level caches a component writes during render.
 - Assertions returning a promise (`expect(…).resolves`/`.rejects`) must be awaited; Vitest 5 fails the test otherwise.
 
 ---
