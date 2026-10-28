@@ -29,6 +29,13 @@ function deltaSince(): string | undefined {
 // A new app release forces a full re-pull (the watermark is ignored): this
 // heals any vocab row that went stale under a previous build — e.g. a missed
 // translation left by a watermark skip — without needing a manual reset.
+// Startup can ask for the vocab from several places at once (the vocab-sync
+// hook, the login sync, the reconcile), and after a release each of those is a
+// full download. Calls for the same URL share one request. A different URL is
+// never joined: reconcile's full re-pull must not settle for a delta pull that
+// was already in flight when it cleared the table.
+const inFlightPulls = new Map<string, Promise<void>>();
+
 export async function pullVocab(): Promise<void> {
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? "";
   const isNewVersion = localStorage.getItem(VOCAB_VERSION_KEY) !== appVersion;
@@ -37,6 +44,17 @@ export async function pullVocab(): Promise<void> {
   const url = since
     ? `${api.ingredients}?since=${encodeURIComponent(since)}`
     : api.ingredients;
+
+  const existing = inFlightPulls.get(url);
+  if (existing) return existing;
+  const pull = fetchVocab(url, appVersion).finally(() => {
+    inFlightPulls.delete(url);
+  });
+  inFlightPulls.set(url, pull);
+  return pull;
+}
+
+async function fetchVocab(url: string, appVersion: string): Promise<void> {
   const res = await fetch(url);
   if (!res.ok) return;
   const { ingredients: data, serverMaxUpdatedAt } = await res.json();

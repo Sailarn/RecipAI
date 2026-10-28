@@ -89,4 +89,46 @@ describe("pullVocab", () => {
     expect(mockBulkPut).not.toHaveBeenCalled();
     expect(localStorage.getItem(VERSION_KEY)).toBe("0.0.1");
   });
+  describe("concurrent pulls", () => {
+    it("shares one request between calls for the same url", async () => {
+      const fetchMock = mockFetchOnce({
+        ingredients: [],
+        serverMaxUpdatedAt: "",
+      });
+
+      await Promise.all([pullVocab(), pullVocab(), pullVocab()]);
+
+      expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
+    it("never joins a pull for a different url", async () => {
+      localStorage.setItem(VERSION_KEY, APP_VERSION);
+      localStorage.setItem(WATERMARK_KEY, "2024-02-01T00:00:00.000Z");
+      const fetchMock = mockFetchOnce({
+        ingredients: [],
+        serverMaxUpdatedAt: "",
+      });
+
+      const delta = pullVocab();
+      localStorage.removeItem(WATERMARK_KEY);
+      const full = pullVocab();
+      await Promise.all([delta, full]);
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock.mock.calls[1][0]).toBe(api.ingredients);
+    });
+
+    it("issues a fresh request once the previous one settled", async () => {
+      const fetchMock = mockFetchOnce({
+        ingredients: [],
+        serverMaxUpdatedAt: "",
+      });
+
+      await pullVocab();
+      localStorage.removeItem(VERSION_KEY);
+      await pullVocab();
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
 });
