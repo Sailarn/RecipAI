@@ -17,7 +17,15 @@ bun run test:coverage     # run with coverage report
 ## Stack
 
 - **Runner:** Vitest
-- **DOM:** happy-dom
+- **Environment:** Node by default. A test that renders, uses `renderHook`, or touches `window`/`document`/`localStorage` opts into happy-dom with a pragma at the top of the file:
+
+    ```ts
+    /**
+     * @vitest-environment happy-dom
+     */
+    ```
+
+    Node-only files skip the DOM setup, which cut the suite from about 15s to 12s. API route tests run in the same runtime as the routes.
 - **Component testing:** React Testing Library
 - **IndexedDB:** fake-indexeddb (auto-loaded in `vitest.setup.ts`)
 - **Config:** `vitest.config.mjs`

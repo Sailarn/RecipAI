@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment happy-dom
+ */
+
 import { render } from "@testing-library/react";
 import { Bell, BellOff } from "lucide-react";
 import { describe, expect, it } from "vitest";
