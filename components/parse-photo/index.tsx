@@ -77,8 +77,7 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           <img
             src={previewUrl}
             alt={t("photoPreviewAlt")}
-            className="w-full max-h-64 object-contain rounded-2xl cursor-pointer"
-            style={{ border: "1px solid var(--glass-card-border)" }}
+            className="w-full max-h-64 object-contain rounded-2xl cursor-pointer border border-[var(--glass-card-border)]"
             onClick={() => inputRef.current?.click()}
           />
           <button
@@ -96,15 +95,14 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
           className="photo-drop-zone w-full h-40 rounded-2xl flex flex-col items-center justify-center gap-2"
         >
           <Camera
-            className="w-8 h-8"
-            style={{ color: "var(--food-accent)" }}
+            className="w-8 h-8 text-[var(--food-accent)]"
             strokeWidth={1.5}
             aria-label={t("cameraLabel")}
           />
-          <span style={{ font: "var(--type-button)", color: "inherit" }}>
+          <span className="[font:var(--type-button)] text-inherit">
             {t("photo.cta")}
           </span>
-          <span style={{ font: "var(--type-caption)", color: "inherit" }}>
+          <span className="[font:var(--type-caption)] text-inherit">
             {t("photo.hint")}
           </span>
         </button>

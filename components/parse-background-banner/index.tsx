@@ -16,19 +16,11 @@ export function ParseBackgroundBanner({
   const navigate = useNavigate();
 
   return (
-    <div
-      className="mt-4 p-4 rounded-2xl text-center space-y-3"
-      style={{
-        background: "var(--glass-subtle-bg)",
-        backdropFilter: "var(--glass-subtle-blur)",
-        WebkitBackdropFilter: "var(--glass-subtle-blur)",
-        border: "1px solid var(--glass-subtle-border)",
-      }}
-    >
-      <p style={{ font: "var(--type-body-sm)", color: "var(--fg-1)" }}>
+    <div className="mt-4 p-4 rounded-2xl text-center space-y-3 bg-[var(--glass-subtle-bg)] [backdrop-filter:var(--glass-subtle-blur)] [-webkit-backdrop-filter:var(--glass-subtle-blur)] border border-[var(--glass-subtle-border)]">
+      <p className="[font:var(--type-body-sm)] text-[var(--fg-1)]">
         ⏳ Parsing in background...
       </p>
-      <p style={{ font: "var(--type-caption)", color: "var(--fg-2)" }}>
+      <p className="[font:var(--type-caption)] text-[var(--fg-2)]">
         You'll get a notification when it's ready.
       </p>
       <div className="flex gap-2 justify-center">
