@@ -181,7 +181,7 @@ export function BasicInfo({
               onChange={onFocusChange}
             />
             <p className="text-[11px] text-[var(--fg-2)] mt-1 text-center">
-              Drag to set focus point
+              {t("photo.dragToSetFocus")}
             </p>
             {preview && (
               <button
@@ -198,7 +198,7 @@ export function BasicInfo({
               className="mt-2 w-full flex items-center justify-center gap-[6px] py-2 rounded-[10px] bg-[rgba(255,170,50,0.07)] border border-[rgba(255,200,100,0.16)] text-[var(--fg-2)] text-[12px] font-medium cursor-pointer"
             >
               <ScanSearch size={13} />
-              Preview in app
+              {t("photo.previewInApp")}
             </button>
           </div>
         )}

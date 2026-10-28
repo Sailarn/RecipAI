@@ -104,12 +104,12 @@ export function PhotoAdjustModal({
           </button>
         ) : (
           <p className="text-[16px] font-bold text-[var(--fg-1)] font-[family-name:var(--font-display)]">
-            Crop photo
+            {t("photo.cropTitle")}
           </p>
         )}
         {step === "focus" && (
           <p className="absolute left-1/2 -translate-x-1/2 text-[16px] font-bold text-[var(--fg-1)] font-[family-name:var(--font-display)] pointer-events-none">
-            Adjust focus
+            {t("photo.focusTitle")}
           </p>
         )}
         <button
@@ -127,7 +127,7 @@ export function PhotoAdjustModal({
           <div className="px-4 pb-0 shrink-0 touch-none">
             <div className="flex items-center justify-between mb-[6px]">
               <p className="text-[11px] text-[var(--fg-2)]">
-                Drag to crop (optional)
+                {t("photo.dragToCrop")}
               </p>
               {hasCrop && (
                 <button
@@ -135,7 +135,7 @@ export function PhotoAdjustModal({
                   onClick={() => handleCropChange(null)}
                   className="text-[11px] text-[var(--fg-2)] bg-transparent border-0 cursor-pointer p-0 underline"
                 >
-                  Clear
+                  {t("photo.clearCrop")}
                 </button>
               )}
             </div>
@@ -162,7 +162,7 @@ export function PhotoAdjustModal({
         <>
           <div className="px-4 pb-0 shrink-0">
             <p className="text-[11px] text-[var(--fg-2)] mb-[6px]">
-              Drag the dot to set focus point
+              {t("photo.dragFocusDot")}
             </p>
             <FocalPointPicker
               imageSrc={imageSrc}
@@ -178,7 +178,7 @@ export function PhotoAdjustModal({
 
           <div className="px-4 pt-5 pb-0">
             <p className="text-[11px] text-[var(--fg-2)] mb-3 uppercase tracking-[0.06em] font-semibold">
-              How it looks in the app
+              {t("photo.howItLooks")}
             </p>
             <div className="flex flex-col gap-[10px]">
               {PREVIEWS.map(({ label, aspectRatio }) => (
@@ -208,7 +208,7 @@ export function PhotoAdjustModal({
               onClick={onClose}
               className="w-full py-[14px] rounded-[14px] bg-[rgba(255,180,60,0.16)] border border-[rgba(255,200,100,0.28)] text-[var(--fg-1)] text-[15px] font-semibold cursor-pointer"
             >
-              Done
+              {t("photo.done")}
             </button>
           </div>
         </>

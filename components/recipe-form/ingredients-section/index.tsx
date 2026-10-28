@@ -147,7 +147,7 @@ export function IngredientsSection({
                     {...register(`ingredients.${index}.amount`)}
                     type="text"
                     inputMode="decimal"
-                    aria-label="qty"
+                    aria-label={t("qtyHeader")}
                     error={!!amountErr}
                   />
                   {amountErr && (

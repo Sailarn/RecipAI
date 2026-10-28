@@ -189,7 +189,18 @@
     "stepImagePlaceholder": "Image URL or paste",
     "uploadStepImage": "Upload step image",
     "searchIngredientsPlaceholder": "Search ingredients…",
-    "searchIngredientsAria": "Search ingredients"
+    "searchIngredientsAria": "Search ingredients",
+    "photo": {
+      "cropTitle": "Crop photo",
+      "focusTitle": "Adjust focus",
+      "dragToCrop": "Drag to crop (optional)",
+      "clearCrop": "Clear",
+      "dragFocusDot": "Drag the dot to set focus point",
+      "howItLooks": "How it looks in the app",
+      "done": "Done",
+      "dragToSetFocus": "Drag to set focus point",
+      "previewInApp": "Preview in app"
+    }
   },
   "theme": {
     "light": "Light",

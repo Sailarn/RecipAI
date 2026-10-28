@@ -189,7 +189,18 @@
     "stepImagePlaceholder": "Посилання на зображення або вставте",
     "uploadStepImage": "Завантажити зображення кроку",
     "searchIngredientsPlaceholder": "Пошук інгредієнтів…",
-    "searchIngredientsAria": "Пошук інгредієнтів"
+    "searchIngredientsAria": "Пошук інгредієнтів",
+    "photo": {
+      "cropTitle": "Обрізати фото",
+      "focusTitle": "Налаштувати фокус",
+      "dragToCrop": "Потягніть, щоб обрізати (необов’язково)",
+      "clearCrop": "Скинути",
+      "dragFocusDot": "Перетягніть точку, щоб задати фокус",
+      "howItLooks": "Як це виглядає в застосунку",
+      "done": "Готово",
+      "dragToSetFocus": "Потягніть, щоб задати фокус",
+      "previewInApp": "Переглянути в застосунку"
+    }
   },
   "theme": {
     "light": "Світла",
