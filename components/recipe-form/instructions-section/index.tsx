@@ -25,16 +25,16 @@ import {
   useWatch,
 } from "react-hook-form";
 import { generateId } from "@/lib/utils";
-import { SectionContainer } from "./instructions-section/section-container";
+import type { RecipeFormControl, RecipeFormData } from "../schema";
+import { SectionContainer } from "./section-container";
 import {
   moveStepToDropTarget,
   moveStepToStep,
   orderStepIds,
   removeStepSection,
-} from "./instructions-section/state";
-import { StepCard } from "./instructions-section/step-card";
-import type { InstructionSectionState } from "./instructions-section/types";
-import type { RecipeFormControl, RecipeFormData } from "./schema";
+} from "./state";
+import { StepCard } from "./step-card";
+import type { InstructionSectionState } from "./types";
 
 interface InstructionsSectionProps {
   register: UseFormRegister<RecipeFormData>;

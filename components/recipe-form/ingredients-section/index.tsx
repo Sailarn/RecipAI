@@ -23,13 +23,13 @@ import {
   type PreparationModifier,
 } from "@/lib/parse-recipe/modifiers";
 import { cn, generateId } from "@/lib/utils";
-import { AdditivePicker } from "./ingredients-section/additive-picker";
 import {
   buildVocabIdIndex,
   buildVocabNameIndex,
   localizeIngredientItem,
-} from "./localize-item";
-import type { RecipeFormControl, RecipeFormData } from "./schema";
+} from "../localize-item";
+import type { RecipeFormControl, RecipeFormData } from "../schema";
+import { AdditivePicker } from "./additive-picker";
 
 interface IngredientsSectionProps {
   register: UseFormRegister<RecipeFormData>;
