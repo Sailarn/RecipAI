@@ -45,7 +45,6 @@ BETTER_AUTH_SECRET=       # openssl rand -hex 32
 GEMINI_API_KEY=           # Google AI Studio
 PHANTOMJS_API_KEY=        # PhantomJsCloud (free tier available)
 REDIS_URL=                # Upstash Redis or local Redis
-IMAGEKIT_PUBLIC_KEY=
 IMAGEKIT_PRIVATE_KEY=
 NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=
 NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL=

@@ -104,7 +104,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/upload/imagekit.ts` | ImageKit SDK instance + `uploadImageServer()` (fetches the source image with `imageFetchHeaders`, then uploads). |
+| `lib/upload/imagekit.ts` | The only `@imagekit/nodejs` client: `uploadToImageKit()` (base64 into `/recipes`), `deleteFromImageKit()`, and `uploadImageServer()` (fetches the source image with `imageFetchHeaders`, then uploads). |
 | `lib/upload/image-fetch-headers.ts` | `imageFetchHeaders(url)` — browser-like `User-Agent`/`Accept` (+ `instagram.com` `Referer` for cdninstagram/fbcdn) so hotlink-guarded CDNs serve the image instead of a 403. |
 | `lib/upload/images.ts` | `isImageKitUrl()` helper (server-side upload path). |
 | `lib/imagekit-url.ts` | `getOptimizedUrl()` — builds the direct ImageKit CDN URL (`?tr=w-…`) that `RecipeImage` renders, bypassing `/_next/image`. Also `isImageKitUrl()` + `HERO_IMAGE_WIDTH`. |

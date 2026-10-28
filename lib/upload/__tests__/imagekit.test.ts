@@ -6,13 +6,13 @@ const upload = vi.hoisted(() =>
     fileId: "file-1",
   }),
 );
-vi.mock("imagekit", () => ({
+vi.mock("@imagekit/nodejs", () => ({
   default: class {
-    upload = upload;
+    files = { upload };
   },
 }));
 
-import { uploadImageServer } from "../imagekit";
+import { uploadImageServer, uploadToImageKit } from "../imagekit";
 
 function imageResponse(overrides?: Partial<Response>): Response {
   return {
@@ -86,5 +86,25 @@ describe("uploadImageServer", () => {
       uploadImageServer("https://scontent-lax7-1.cdninstagram.com/v/photo.jpg"),
     ).rejects.toThrow(/text\/html/);
     expect(upload).not.toHaveBeenCalled();
+  });
+});
+
+describe("uploadToImageKit", () => {
+  it("uploads into the recipe image folder", async () => {
+    await uploadToImageKit("AQID", "a.jpg");
+
+    expect(upload).toHaveBeenCalledWith({
+      file: "AQID",
+      fileName: "a.jpg",
+      folder: "/recipes",
+    });
+  });
+
+  it("throws when ImageKit answers without a url or fileId", async () => {
+    upload.mockResolvedValueOnce({ fileId: "file-1" });
+
+    await expect(uploadToImageKit("AQID", "a.jpg")).rejects.toThrow(
+      /no url or fileId/,
+    );
   });
 });

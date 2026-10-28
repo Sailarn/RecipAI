@@ -58,7 +58,6 @@ All image uploads go through [ImageKit](https://imagekit.io).
 
 | Variable | Required | Description |
 |---|---|---|
-| `IMAGEKIT_PUBLIC_KEY` | Yes | ImageKit public key supplied to the server-side ImageKit SDK alongside the private key. It is not read by browser code. |
 | `IMAGEKIT_PRIVATE_KEY` | Yes | ImageKit private key used by the server-side SDK to upload and delete images. |
 | `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` | Yes | ImageKit CDN endpoint URL (e.g. `https://ik.imagekit.io/yourname`). |
 | `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` | Yes | Fallback image URL shown when a recipe has no image. Should be an ImageKit URL. |

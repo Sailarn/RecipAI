@@ -1,3 +1,9 @@
+import {
+  APIConnectionError,
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from "@imagekit/nodejs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockDeleteFile, mockRequireUploadAuth, mockInternal } = vi.hoisted(
@@ -9,7 +15,7 @@ const { mockDeleteFile, mockRequireUploadAuth, mockInternal } = vi.hoisted(
 );
 
 vi.mock("@/lib/upload/imagekit", () => ({
-  imagekit: { deleteFile: mockDeleteFile },
+  deleteFromImageKit: mockDeleteFile,
 }));
 vi.mock("@/lib/upload/upload-auth", () => ({
   requireUploadAuth: mockRequireUploadAuth,
@@ -64,10 +70,14 @@ describe("DELETE /api/images/delete", () => {
     });
 
     it("treats an already-deleted file as success", async () => {
-      mockDeleteFile.mockRejectedValue({
-        message: "The requested file does not exist.",
-        help: "",
-      });
+      mockDeleteFile.mockRejectedValue(
+        new NotFoundError(
+          404,
+          undefined,
+          "The requested file does not exist.",
+          new Headers(),
+        ),
+      );
 
       const response = await DELETE(deleteRequest({ fileId: "f1" }));
 
@@ -76,9 +86,14 @@ describe("DELETE /api/images/delete", () => {
     });
 
     it("answers success: false without reporting on an ImageKit internal error", async () => {
-      mockDeleteFile.mockRejectedValue({
-        message: "We have encountered an internal error.",
-      });
+      mockDeleteFile.mockRejectedValue(
+        new InternalServerError(
+          500,
+          undefined,
+          "We have encountered an internal error.",
+          new Headers(),
+        ),
+      );
 
       const response = await DELETE(deleteRequest({ fileId: "f1" }));
 
@@ -86,8 +101,24 @@ describe("DELETE /api/images/delete", () => {
       expect(mockInternal).not.toHaveBeenCalled();
     });
 
-    it("reports any other failure as a 500", async () => {
-      const failure = new Error("Your request contains invalid fileId");
+    it("answers success: false without reporting when ImageKit is unreachable", async () => {
+      mockDeleteFile.mockRejectedValue(
+        new APIConnectionError({ message: "Connection error." }),
+      );
+
+      const response = await DELETE(deleteRequest({ fileId: "f1" }));
+
+      expect(await response.json()).toEqual({ success: false });
+      expect(mockInternal).not.toHaveBeenCalled();
+    });
+
+    it("reports a rejected request as a 500", async () => {
+      const failure = new BadRequestError(
+        400,
+        undefined,
+        "Your request contains invalid fileId",
+        new Headers(),
+      );
       mockDeleteFile.mockRejectedValue(failure);
 
       const response = await DELETE(deleteRequest({ fileId: "bad" }));

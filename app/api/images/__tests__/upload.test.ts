@@ -1,15 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/upload/imagekit", () => ({
-  imagekit: {
-    upload: vi.fn(),
-  },
+  uploadToImageKit: vi.fn(),
 }));
 vi.mock("@/lib/upload/upload-auth", () => ({
   requireUploadAuthOrRateLimit: vi.fn(),
 }));
 
-import { imagekit } from "@/lib/upload/imagekit";
+import { uploadToImageKit } from "@/lib/upload/imagekit";
 import { requireUploadAuthOrRateLimit } from "@/lib/upload/upload-auth";
 import { UPLOAD_ERRORS } from "@/lib/upload/upload-limits";
 import { POST } from "../upload/route";
@@ -64,7 +62,7 @@ describe("POST /api/images/upload", () => {
     });
 
     it("delegates auth decisions to requireUploadAuthOrRateLimit", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
 
       await POST(makeJsonRequest({ file: "base64data==" }));
 
@@ -82,7 +80,7 @@ describe("POST /api/images/upload", () => {
     });
 
     it("uploads base64 file and returns url and fileId", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
 
       const res = await POST(
         makeJsonRequest({ file: "base64data==", fileName: "my-recipe.jpg" }),
@@ -96,35 +94,32 @@ describe("POST /api/images/upload", () => {
       });
     });
 
-    it("calls imagekit.upload with correct folder and fileName", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+    it("passes the file data and fileName to ImageKit", async () => {
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
 
       await POST(
         makeJsonRequest({ file: "base64data==", fileName: "my-recipe.jpg" }),
       );
 
-      expect(imagekit.upload).toHaveBeenCalledWith({
-        file: "base64data==",
-        fileName: "my-recipe.jpg",
-        folder: "/recipes",
-      });
+      expect(uploadToImageKit).toHaveBeenCalledWith(
+        "base64data==",
+        "my-recipe.jpg",
+      );
     });
 
     it("uses default fileName when not provided", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
 
       await POST(makeJsonRequest({ file: "base64data==" }));
 
-      expect(imagekit.upload).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fileName: expect.stringMatching(/^recipe-\d+$/),
-          folder: "/recipes",
-        }),
+      expect(uploadToImageKit).toHaveBeenCalledWith(
+        "base64data==",
+        expect.stringMatching(/^recipe-\d+$/),
       );
     });
 
     it("fetches image from URL and uploads it", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
       vi.stubGlobal(
         "fetch",
         vi.fn().mockResolvedValue(makeFetchResponse(true)),
@@ -201,8 +196,10 @@ describe("POST /api/images/upload", () => {
       vi.unstubAllGlobals();
     });
 
-    it("returns 500 when imagekit.upload throws", async () => {
-      vi.mocked(imagekit.upload).mockRejectedValue(new Error("ImageKit error"));
+    it("returns 500 when the ImageKit upload throws", async () => {
+      vi.mocked(uploadToImageKit).mockRejectedValue(
+        new Error("ImageKit error"),
+      );
 
       const res = await POST(makeJsonRequest({ file: "base64data==" }));
 
@@ -228,7 +225,7 @@ describe("POST /api/images/upload", () => {
     });
 
     it("uploads file from form data", async () => {
-      vi.mocked(imagekit.upload).mockResolvedValue(mockUploadResult as never);
+      vi.mocked(uploadToImageKit).mockResolvedValue(mockUploadResult as never);
 
       const form = new FormData();
       const file = new File(["image data"], "photo.jpg", {
@@ -249,8 +246,9 @@ describe("POST /api/images/upload", () => {
         url: mockUploadResult.url,
         fileId: mockUploadResult.fileId,
       });
-      expect(imagekit.upload).toHaveBeenCalledWith(
-        expect.objectContaining({ fileName: "photo.jpg", folder: "/recipes" }),
+      expect(uploadToImageKit).toHaveBeenCalledWith(
+        expect.any(String),
+        "photo.jpg",
       );
     });
 

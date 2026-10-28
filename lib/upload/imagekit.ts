@@ -1,4 +1,4 @@
-import ImageKit from "imagekit";
+import ImageKit from "@imagekit/nodejs";
 import { imageFetchHeaders } from "@/lib/upload/image-fetch-headers";
 import { sourceFetchFailedMessage } from "@/lib/upload/source-image-failure";
 import {
@@ -7,15 +7,43 @@ import {
   UPLOAD_ERRORS,
 } from "@/lib/upload/upload-limits";
 
-export const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY ?? "",
+// The SDK reads IMAGEKIT_PRIVATE_KEY itself, but throws at construction when it
+// is unset — and this module is imported while `next build` collects routes,
+// where the key may be absent. An empty key defers the failure to the request.
+const imagekit = new ImageKit({
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY ?? "",
-  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT ?? "",
 });
 
-export async function uploadImageServer(
-  url: string,
-): Promise<{ url: string; fileId: string }> {
+const RECIPE_IMAGE_FOLDER = "/recipes";
+
+export interface UploadedImage {
+  url: string;
+  fileId: string;
+}
+
+/** Uploads base64 image data into the recipe image folder. */
+export async function uploadToImageKit(
+  base64File: string,
+  fileName: string,
+): Promise<UploadedImage> {
+  const result = await imagekit.files.upload({
+    file: base64File,
+    fileName,
+    folder: RECIPE_IMAGE_FOLDER,
+  });
+  // Both are typed optional, but a successful upload always returns them —
+  // without either the image could never be shown or cleaned up.
+  if (!result.url || !result.fileId) {
+    throw new Error("ImageKit upload returned no url or fileId");
+  }
+  return { url: result.url, fileId: result.fileId };
+}
+
+export async function deleteFromImageKit(fileId: string): Promise<void> {
+  await imagekit.files.delete(fileId);
+}
+
+export async function uploadImageServer(url: string): Promise<UploadedImage> {
   const response = await fetch(url, { headers: imageFetchHeaders(url) });
   if (!response.ok) {
     const host = URL.canParse(url) ? new URL(url).host : url;
@@ -33,10 +61,5 @@ export async function uploadImageServer(
     throw new Error(UPLOAD_ERRORS.FILE_TOO_LARGE);
 
   const base64 = Buffer.from(buffer).toString("base64");
-  const result = await imagekit.upload({
-    file: base64,
-    fileName: `recipe-${Date.now()}`,
-    folder: "/recipes",
-  });
-  return { url: result.url, fileId: result.fileId };
+  return uploadToImageKit(base64, `recipe-${Date.now()}`);
 }

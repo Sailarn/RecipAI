@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ApiError } from "@/lib/api-errors";
-import { imagekit } from "@/lib/upload/imagekit";
+import { uploadToImageKit } from "@/lib/upload/imagekit";
 import { requireUploadAuthOrRateLimit } from "@/lib/upload/upload-auth";
 import { resolveImageSource } from "@/lib/upload/upload-image-source";
 
@@ -12,12 +12,11 @@ export async function POST(request: Request) {
   if (!resolved.ok) return resolved.response;
 
   try {
-    const result = await imagekit.upload({
-      file: resolved.source.fileData,
-      fileName: resolved.source.fileName,
-      folder: "/recipes",
-    });
-    return NextResponse.json({ url: result.url, fileId: result.fileId });
+    const uploaded = await uploadToImageKit(
+      resolved.source.fileData,
+      resolved.source.fileName,
+    );
+    return NextResponse.json(uploaded);
   } catch (error) {
     return ApiError.internal(error, request);
   }

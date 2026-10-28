@@ -7,7 +7,7 @@ const { mockUpload, mockAuth, mockResolve, mockInternal } = vi.hoisted(() => ({
   mockInternal: vi.fn(),
 }));
 
-vi.mock("@/lib/upload/imagekit", () => ({ imagekit: { upload: mockUpload } }));
+vi.mock("@/lib/upload/imagekit", () => ({ uploadToImageKit: mockUpload }));
 vi.mock("@/lib/upload/upload-auth", () => ({
   requireUploadAuthOrRateLimit: mockAuth,
 }));
@@ -57,11 +57,7 @@ describe("POST /api/images/upload", () => {
 
     const response = await POST(request);
 
-    expect(mockUpload).toHaveBeenCalledWith({
-      file: "AQID",
-      fileName: "a.jpg",
-      folder: "/recipes",
-    });
+    expect(mockUpload).toHaveBeenCalledWith("AQID", "a.jpg");
     expect(await response.json()).toEqual({
       url: "https://ik.test/a.jpg",
       fileId: "f1",

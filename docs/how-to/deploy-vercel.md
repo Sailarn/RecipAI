@@ -48,7 +48,7 @@ Set the production values from `.env.example` in the Vercel project settings und
 | Core | `DATABASE_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `NEXT_PUBLIC_EXTERNAL_AUTH_URL`, `BETTER_AUTH_SECRET` |
 | AI and web parsing | `GEMINI_API_KEY`, `PHANTOMJS_API_KEY`, `REDIS_URL` |
 | Embeddings | `EMBED_PROVIDERS`, `EMBED_SHARED_SECRET` |
-| Images | `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`, `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` |
+| Images | `IMAGEKIT_PRIVATE_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`, `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` |
 
 Add the variables for each optional feature you enable: `OPENAI_API_KEY` and `SCRAPE_DO_TOKEN` for fallbacks; `APIFY_TOKEN` and `GROQ_API_KEY` for social imports; Google/Telegram credentials for those sign-in providers; VAPID keys for push; and Sentry, PostHog, or Axiom keys for observability.
 
