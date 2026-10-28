@@ -117,6 +117,23 @@ describe("service worker", () => {
     });
   });
 
+  describe("recipe image cache", () => {
+    it("purges itself on a quota error instead of filling the origin", async () => {
+      await loadServiceWorker("build-a");
+      const imageRoute = (
+        serwistOptions().runtimeCaching as {
+          handler?: {
+            options?: { cacheName?: string; plugins?: { options: unknown }[] };
+          };
+        }[]
+      ).find((route) => route.handler?.options?.cacheName === "recipe-images");
+
+      expect(imageRoute?.handler?.options?.plugins).toContainEqual({
+        options: expect.objectContaining({ purgeOnQuotaError: true }),
+      });
+    });
+  });
+
   describe("activation cleanup", () => {
     it("deletes page caches from previous builds", async () => {
       cacheNames = ["app-pages-old", "app-pages-current"];

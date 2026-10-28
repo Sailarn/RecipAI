@@ -57,6 +57,11 @@ const serwist = new Serwist({
           new ExpirationPlugin({
             maxEntries: 400,
             maxAgeSeconds: 30 * 24 * 60 * 60,
+            // These are opaque cross-origin responses, which Chrome pads
+            // heavily in quota accounting. If the origin runs out, drop this
+            // disposable cache rather than risk the browser evicting the
+            // origin's storage, Dexie and all.
+            purgeOnQuotaError: true,
           }),
         ],
       }),
