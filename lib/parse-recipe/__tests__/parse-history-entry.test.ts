@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  doneImportHistoryEntry,
   doneParseHistoryEntry,
-  donePhotoHistoryEntry,
   failedParseHistoryEntry,
   failedPhotoHistoryEntry,
   parseHistoryEntryFromServerJob,
@@ -56,7 +56,7 @@ describe("failedParseHistoryEntry", () => {
 
 describe("photo history entries", () => {
   it("builds a done photo entry with no url", () => {
-    const entry = donePhotoHistoryEntry("photo-job", "Grandma's Soup");
+    const entry = doneImportHistoryEntry("photo-job", "Grandma's Soup");
 
     expect(entry).toMatchObject({
       id: "photo-job",

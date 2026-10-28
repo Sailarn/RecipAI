@@ -46,8 +46,9 @@ export function failedParseHistoryEntry(
   };
 }
 
-// Reuse the server history id so anonymous photo imports can be claimed later.
-export function donePhotoHistoryEntry(
+// A photo or pasted-text import. Reuses the server history id so anonymous
+// imports can be claimed later.
+export function doneImportHistoryEntry(
   id: string,
   title: string,
 ): ParseHistoryEntry {

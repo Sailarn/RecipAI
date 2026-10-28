@@ -7,7 +7,7 @@ import { recordParseHistory } from "@/lib/db/parse-history";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
 import {
-  donePhotoHistoryEntry,
+  doneImportHistoryEntry,
   failedPhotoHistoryEntry,
   failedTextHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
@@ -67,7 +67,7 @@ export function useDirectParse({
           if (mountedRef.current) setIsParsing(false);
           trackEvent("parse_succeeded", { source });
           recordParseHistory(
-            donePhotoHistoryEntry(parseJobId, recipe.title),
+            doneImportHistoryEntry(parseJobId, recipe.title),
           ).catch(() => {});
 
           // Hand off only if still on-screen; otherwise fall through to the
