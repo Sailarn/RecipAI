@@ -226,8 +226,9 @@ describe("POST /api/parse-queue/process", () => {
         telegramChatId: null,
         pushEndpoint: "https://web.push.apple.com/abc",
       });
+      // Non-retryable, so the test doesn't wait out the retry delay.
       vi.mocked(parseRecipeFromUrl).mockRejectedValue(
-        new Error("Could not extract enough text from page"),
+        new Error("This post is private"),
       );
 
       await POST(makeRequest({ jobId: "job-1" }));
@@ -236,7 +237,7 @@ describe("POST /api/parse-queue/process", () => {
         expect.anything(),
         expect.objectContaining({
           title: "Recipe parse failed",
-          body: expect.stringContaining("Couldn't read the page"),
+          body: expect.stringContaining("This account is private"),
         }),
       );
     });
