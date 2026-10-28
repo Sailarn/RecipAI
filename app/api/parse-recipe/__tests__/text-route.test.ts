@@ -6,6 +6,7 @@ vi.mock("@/lib/auth/auth", () => ({
 vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
 vi.mock("@/lib/rate-limit", () => ({
   enforceParseRateLimit: vi.fn().mockResolvedValue(null),
+  enforceAnonTextParseRateLimit: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/ai", () => ({
   callAiForRecipe: vi.fn(),
@@ -24,9 +25,13 @@ vi.mock("@/db", () => ({
 }));
 
 import { callAiForRecipe } from "@/lib/ai";
+import { auth } from "@/lib/auth/auth";
 import { buildTextPrompt } from "@/lib/parse-recipe/prompts";
 import { MAX_RECIPE_TEXT_CHARS } from "@/lib/parse-recipe/text";
-import { enforceParseRateLimit } from "@/lib/rate-limit";
+import {
+  enforceAnonTextParseRateLimit,
+  enforceParseRateLimit,
+} from "@/lib/rate-limit";
 import { POST } from "../text/route";
 
 const recipeText =
@@ -48,7 +53,10 @@ function makeRequest(body: unknown): Request {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(auth.api.getSession).mockResolvedValue(null);
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
+  vi.mocked(enforceAnonTextParseRateLimit).mockResolvedValue(null);
 });
 
 describe("POST /api/parse-recipe/text", () => {
@@ -62,6 +70,33 @@ describe("POST /api/parse-recipe/text", () => {
 
       expect(res.status).toBe(429);
       expect(callAiForRecipe).not.toHaveBeenCalled();
+    });
+
+    it("applies the extra anonymous text limit to a signed-out caller", async () => {
+      const limited = new Response(null, { status: 429 });
+      vi.mocked(enforceAnonTextParseRateLimit).mockResolvedValue(
+        limited as never,
+      );
+
+      const res = await POST(makeRequest({ text: recipeText }));
+
+      expect(res.status).toBe(429);
+      expect(callAiForRecipe).not.toHaveBeenCalled();
+    });
+
+    it("skips the anonymous text limit for a signed-in caller", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        user: { id: "user-1" },
+      } as never);
+      vi.mocked(callAiForRecipe).mockResolvedValue(mockRecipe as never);
+
+      await POST(makeRequest({ text: recipeText }));
+
+      expect(enforceAnonTextParseRateLimit).not.toHaveBeenCalled();
+      expect(enforceParseRateLimit).toHaveBeenCalledWith(
+        expect.anything(),
+        "user-1",
+      );
     });
 
     it("returns 400 on invalid JSON body", async () => {
@@ -111,6 +146,18 @@ describe("POST /api/parse-recipe/text", () => {
       expect(buildTextPrompt).toHaveBeenCalledWith(
         longText.slice(0, MAX_RECIPE_TEXT_CHARS),
       );
+    });
+
+    it("rejects text that cannot be a recipe without calling the model", async () => {
+      const res = await POST(
+        makeRequest({ text: "https://example.com/some/recipe-page" }),
+      );
+
+      expect(res.status).toBe(500);
+      expect(await res.json()).toEqual({
+        error: "Couldn't extract a recipe from this text",
+      });
+      expect(callAiForRecipe).not.toHaveBeenCalled();
     });
 
     it("rejects text that holds no recipe", async () => {

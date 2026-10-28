@@ -1,19 +1,20 @@
 import { headers } from "next/headers";
-import { callAiForRecipe } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { runDirectParseJob } from "@/lib/parse-recipe/direct-parse-job";
-import { buildTextPrompt } from "@/lib/parse-recipe/prompts";
+import { MIN_RECIPE_TEXT_CHARS } from "@/lib/parse-recipe/text";
+import { extractRecipeFromText } from "@/lib/parse-recipe/text-extract";
 import {
-  MAX_RECIPE_TEXT_CHARS,
-  MIN_RECIPE_TEXT_CHARS,
-} from "@/lib/parse-recipe/text";
-import { enforceParseRateLimit } from "@/lib/rate-limit";
+  enforceAnonTextParseRateLimit,
+  enforceParseRateLimit,
+} from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  const limited = await enforceParseRateLimit(request, session?.user.id);
+  const limited =
+    (await enforceParseRateLimit(request, session?.user.id)) ??
+    (session ? null : await enforceAnonTextParseRateLimit(request));
   if (limited) return limited;
 
   let body: { text?: unknown; jobId?: string };
@@ -32,7 +33,6 @@ export async function POST(request: Request) {
     jobId: body.jobId ?? crypto.randomUUID(),
     userId: session?.user.id ?? null,
     source: "text",
-    extract: () =>
-      callAiForRecipe(buildTextPrompt(text.slice(0, MAX_RECIPE_TEXT_CHARS))),
+    extract: () => extractRecipeFromText(text),
   });
 }

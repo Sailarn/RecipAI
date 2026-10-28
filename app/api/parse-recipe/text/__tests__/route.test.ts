@@ -1,25 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_RECIPE_TEXT_CHARS } from "@/lib/parse-recipe/text";
 
-const { mockGetSession, mockRateLimit, mockRunJob, mockCallAi, mockPrompt } =
-  vi.hoisted(() => ({
+const { mockGetSession, mockRateLimit, mockRunJob, mockExtract } = vi.hoisted(
+  () => ({
     mockGetSession: vi.fn(),
     mockRateLimit: vi.fn(),
     mockRunJob: vi.fn(),
-    mockCallAi: vi.fn(),
-    mockPrompt: vi.fn((text: string) => `prompt:${text}`),
-  }));
+    mockExtract: vi.fn(),
+  }),
+);
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("@/lib/auth/auth", () => ({
   auth: { api: { getSession: mockGetSession } },
 }));
-vi.mock("@/lib/rate-limit", () => ({ enforceParseRateLimit: mockRateLimit }));
+vi.mock("@/lib/rate-limit", () => ({
+  enforceParseRateLimit: mockRateLimit,
+  enforceAnonTextParseRateLimit: vi.fn(),
+}));
 vi.mock("@/lib/parse-recipe/direct-parse-job", () => ({
   runDirectParseJob: mockRunJob,
 }));
-vi.mock("@/lib/ai", () => ({ callAiForRecipe: mockCallAi }));
-vi.mock("@/lib/parse-recipe/prompts", () => ({ buildTextPrompt: mockPrompt }));
+vi.mock("@/lib/parse-recipe/text-extract", () => ({
+  extractRecipeFromText: mockExtract,
+}));
 
 import { POST } from "../route";
 
@@ -73,17 +76,7 @@ describe("POST /api/parse-recipe/text", () => {
         source: "text",
       });
       await job.extract();
-      expect(mockCallAi).toHaveBeenCalledWith(`prompt:${RECIPE_TEXT}`);
-    });
-
-    it("caps the text sent to the model", async () => {
-      await POST(
-        textRequest({ text: "x".repeat(MAX_RECIPE_TEXT_CHARS + 500) }),
-      );
-
-      const [, job] = mockRunJob.mock.calls[0];
-      await job.extract();
-      expect(mockPrompt.mock.calls[0][0]).toHaveLength(MAX_RECIPE_TEXT_CHARS);
+      expect(mockExtract).toHaveBeenCalledWith(RECIPE_TEXT);
     });
   });
 });

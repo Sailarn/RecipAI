@@ -14,6 +14,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |
 | `lib/parse-recipe/photo.ts` | Client-side image compression and API call for photo parsing. |
 | `lib/parse-recipe/text.ts` | Pasted-text limits (`MAX_RECIPE_TEXT_CHARS` / `MIN_RECIPE_TEXT_CHARS`) and the client call for text parsing. |
+| `lib/parse-recipe/text-extract.ts` | Server side of text import: the `looksLikeRecipeText` pre-check and `extractRecipeFromText` (gate → capped prompt → model), shared by the web route and the bot. |
 | `lib/parse-recipe/direct-parse-job.ts` | `runDirectParseJob()` — shared server runner for the synchronous photo/text routes: `parse_jobs` row, completeness check, `parse_pipeline` log, error capture. |
 | `lib/hooks/use-direct-parse.ts` | Client side of photo/text imports: runs the parse, records history + telemetry, queues the result for review (toast when off-screen). |
 | `lib/parse-recipe/prompts.ts` | Prompt builders: `buildWebPrompt`, `buildPhotoPrompt`, `buildTextPrompt`, `buildSocialPrompt`. |

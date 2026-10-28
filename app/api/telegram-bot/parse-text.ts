@@ -1,8 +1,6 @@
-import { callAiForRecipe } from "@/lib/ai";
 import { ApiError } from "@/lib/api-errors";
 import { executeDirectParseJob } from "@/lib/parse-recipe/direct-parse-job";
-import { buildTextPrompt } from "@/lib/parse-recipe/prompts";
-import { MAX_RECIPE_TEXT_CHARS } from "@/lib/parse-recipe/text";
+import { extractRecipeFromText } from "@/lib/parse-recipe/text-extract";
 import { saveAndSendRecipe } from "@/lib/telegram/save-and-send-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { classifyParseError } from "../parse-queue/process/helpers";
@@ -26,8 +24,7 @@ export async function parseRecipeTextForChat({
       userId,
       source: "text",
       telegramChatId: String(chatId),
-      extract: () =>
-        callAiForRecipe(buildTextPrompt(text.slice(0, MAX_RECIPE_TEXT_CHARS))),
+      extract: () => extractRecipeFromText(text),
     });
     await saveAndSendRecipe({ userId, chatId, parsed, sourceUrl: null });
   } catch (error) {

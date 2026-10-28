@@ -3,6 +3,7 @@ import { ApiError } from "@/lib/api-errors";
 import {
   EMBED_RATE_LIMIT,
   PARSE_RATE_LIMIT,
+  TEXT_PARSE_RATE_LIMIT,
   UPLOAD_RATE_LIMIT,
 } from "@/lib/api-limits";
 import { redis } from "@/lib/redis";
@@ -77,6 +78,32 @@ export async function enforceParseRateLimit(
       const callerType = userId ? "user" : "anon";
       log("warn", "rate_limit_hit", { caller_type: callerType });
       trackEvent("rate_limit_hit", { caller_type: callerType });
+      return ApiError.rateLimited(result.resetSeconds);
+    }
+  } catch (error) {
+    ApiError.capture(error, req);
+  }
+  return null;
+}
+
+/**
+ * Enforce the extra pasted-text limit for anonymous callers (signed-in callers
+ * only face the shared parse limit). Returns a 429 response when over the
+ * limit, or null to proceed. Fails open when Redis is unavailable.
+ */
+export async function enforceAnonTextParseRateLimit(
+  req: Request,
+): Promise<NextResponse | null> {
+  const { limit, windowSeconds } = TEXT_PARSE_RATE_LIMIT.ANON;
+  try {
+    const result = await rateLimit(
+      `parse-text:${clientKey(req)}`,
+      limit,
+      windowSeconds,
+    );
+    if (!result.allowed) {
+      log("warn", "rate_limit_hit", { caller_type: "anon" });
+      trackEvent("rate_limit_hit", { caller_type: "anon" });
       return ApiError.rateLimited(result.resetSeconds);
     }
   } catch (error) {
