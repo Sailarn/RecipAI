@@ -41,7 +41,7 @@ import {
   resolveNotification,
 } from "@/lib/db/notifications";
 import { useNavigate } from "@/lib/transitions";
-import { useSyncActions } from "./use-sync-actions";
+import { useSyncActions } from "../use-sync-actions";
 
 const mockFetch = vi.fn();
 
