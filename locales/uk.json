@@ -161,7 +161,7 @@
     "ungrouped": "Без секції",
     "newSection": "Нова секція",
     "sectionNamePlaceholder": "Назва секції",
-    "stepCount": "{count} кроків",
+    "stepCount": "{count, plural, one {# крок} few {# кроки} many {# кроків} other {# кроку}}",
     "toggleSection": "Згорнути або розгорнути секцію",
     "renameSection": "Перейменувати секцію",
     "deleteSection": "Видалити секцію",

@@ -161,7 +161,7 @@
     "ungrouped": "Ungrouped",
     "newSection": "New section",
     "sectionNamePlaceholder": "Section name",
-    "stepCount": "{count} steps",
+    "stepCount": "{count, plural, one {# step} other {# steps}}",
     "toggleSection": "Toggle section",
     "renameSection": "Rename section",
     "deleteSection": "Delete section",

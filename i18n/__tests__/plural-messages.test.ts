@@ -36,4 +36,14 @@ describe("plural messages", () => {
   ] as const)("parse.savedCard.steps in %s for %i", (locale, count, text) => {
     expect(translate[locale]("parse.savedCard.steps", { count })).toBe(text);
   });
+
+  it.each([
+    ["en", 1, "1 step"],
+    ["en", 2, "2 steps"],
+    ["uk", 1, "1 крок"],
+    ["uk", 2, "2 кроки"],
+    ["uk", 5, "5 кроків"],
+  ] as const)("recipeForm.stepCount in %s for %i", (locale, count, text) => {
+    expect(translate[locale]("recipeForm.stepCount", { count })).toBe(text);
+  });
 });
