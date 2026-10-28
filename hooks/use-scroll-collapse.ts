@@ -2,6 +2,15 @@
 
 import { type RefObject, useEffect, useLayoutEffect, useState } from "react";
 
+function sentinelPastTop(
+  container: HTMLDivElement,
+  sentinel: HTMLDivElement,
+): boolean {
+  return (
+    sentinel.getBoundingClientRect().top < container.getBoundingClientRect().top
+  );
+}
+
 /**
  * True once `sentinelRef` has scrolled up past the top of `scrollRef` — the
  * signal for swapping a page header for its compact/sticky variant.
@@ -23,10 +32,7 @@ export function useScrollCollapse(
     const container = scrollRef.current;
     const sentinel = sentinelRef.current;
     if (!container || !sentinel) return;
-    setIsCollapsed(
-      sentinel.getBoundingClientRect().top <
-        container.getBoundingClientRect().top,
-    );
+    setIsCollapsed(sentinelPastTop(container, sentinel));
   }, [enabled, scrollRef, sentinelRef]);
 
   useEffect(() => {
@@ -35,11 +41,7 @@ export function useScrollCollapse(
     const sentinel = sentinelRef.current;
     if (!container || !sentinel) return;
 
-    const check = () =>
-      setIsCollapsed(
-        sentinel.getBoundingClientRect().top <
-          container.getBoundingClientRect().top,
-      );
+    const check = () => setIsCollapsed(sentinelPastTop(container, sentinel));
 
     container.addEventListener("scroll", check, { passive: true });
     return () => container.removeEventListener("scroll", check);
