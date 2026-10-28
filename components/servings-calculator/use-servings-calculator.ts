@@ -115,9 +115,9 @@ export function useServingsCalculator({
   };
 
   // Derive the stock dot from the same lookup as the add/toggle button so the
-  // two never disagree. canonicalIngredientIds is compacted (null-pattern
-  // ingredients get no slot), so a name fallback — not a raw [index] read — is
-  // what makes the dot show for newly added recipes.
+  // two never disagree. An ingredient with no canonical id (an "" slot, or a
+  // recipe not normalized yet) falls back to a name match, which is what makes
+  // the dot show for newly added recipes.
   const stockStatus = (
     ingredient: RecipeIngredient,
     index: number,
