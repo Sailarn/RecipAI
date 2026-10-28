@@ -6,12 +6,16 @@ import { PageErrorBoundary } from "@/components/page-error-boundary";
 import {
   clearNativePopPending,
   isNativePopPending,
-  type StackEntry,
   useNavigationStack,
 } from "@/lib/navigation-stack";
-
-type Status = "stable" | "entering" | "leaving";
-type DisplayEntry = StackEntry & { status: Status };
+import {
+  classifyStackChange,
+  type DisplayEntry,
+  stableEntries,
+  topIndex,
+  withPopped,
+  withPushed,
+} from "./display-entries";
 
 // iOS-style decelerate easing
 const TRANSITION: Transition = {
@@ -24,7 +28,7 @@ export function PageStack() {
   const { entries } = useNavigationStack();
 
   const [display, setDisplay] = useState<DisplayEntry[]>(() =>
-    entries.map((entry) => ({ ...entry, status: "stable" })),
+    stableEntries(entries),
   );
   const prevRef = useRef(entries);
 
@@ -35,54 +39,21 @@ export function PageStack() {
 
     if (curr === prev) return;
 
-    const isPush =
-      curr.length > prev.length &&
-      curr
-        .slice(0, prev.length)
-        .every((entry, index) => entry.id === prev[index].id);
-
-    const isPop =
-      curr.length < prev.length &&
-      curr.length > 0 &&
-      curr.every((entry, index) => entry.id === prev[index].id);
-
-    if (isPush) {
-      const incoming = curr[curr.length - 1];
-      setDisplay((current) => [
-        ...current.map((entry) => ({ ...entry, status: "stable" as Status })),
-        { ...incoming, status: "entering" as Status },
-      ]);
-    } else if (isPop) {
-      if (isNativePopPending()) {
-        // Native gesture already animated the transition — just swap instantly.
-        clearNativePopPending();
-        setDisplay(
-          curr.map((entry) => ({ ...entry, status: "stable" as Status })),
-        );
-      } else {
-        // Programmatic pop (back button click) — slide the leaving page out.
-        setDisplay((current) =>
-          current.map((entry, index) =>
-            index === current.length - 1
-              ? { ...entry, status: "leaving" as Status }
-              : { ...entry, status: "stable" as Status },
-          ),
-        );
-      }
+    const change = classifyStackChange(prev, curr);
+    if (change === "push") {
+      setDisplay((current) => withPushed(current, curr));
+    } else if (change === "pop" && !isNativePopPending()) {
+      // Programmatic pop (back button click) — slide the leaving page out.
+      setDisplay((current) => withPopped(current, curr));
     } else {
-      // Reset (tab switch, Next.js hard navigation) — no animation.
-      setDisplay(
-        curr.map((entry) => ({ ...entry, status: "stable" as Status })),
-      );
+      // Native back gesture (it already animated the transition) or a reset
+      // (tab switch, Next.js hard navigation) — swap instantly.
+      if (change === "pop") clearNativePopPending();
+      setDisplay(stableEntries(curr));
     }
   }, [entries]);
 
-  // Last non-leaving entry is the "active top" — visible beneath any leaving page.
-  const topIdx = display.reduce(
-    (topAccumulator, entry, index) =>
-      entry.status !== "leaving" ? index : topAccumulator,
-    -1,
-  );
+  const topIdx = topIndex(display);
 
   return (
     <>
@@ -113,7 +84,7 @@ export function PageStack() {
                 setDisplay((current) =>
                   current.map((item) =>
                     item.id === entry.id
-                      ? { ...item, status: "stable" as Status }
+                      ? { ...item, status: "stable" as const }
                       : item,
                   ),
                 );
