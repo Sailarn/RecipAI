@@ -141,7 +141,8 @@ export function useUrlParse({
           setLoading(false);
           setJobId(null);
           removeJobId(id);
-        } else {
+        } else if (isMountedRef.current) {
+          // Unmounted mid-request: the global watcher owns the job now.
           pollRef.current = setTimeout(run, 3000);
         }
       } catch {
@@ -161,6 +162,9 @@ export function useUrlParse({
   }, [poll]);
 
   useEffect(() => {
+    // Set on mount too: Strict Mode's dev remount would otherwise leave it
+    // false and every poll result would be ignored.
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       if (pollRef.current) clearTimeout(pollRef.current);

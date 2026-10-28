@@ -3,6 +3,7 @@
  */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "@/lib/telemetry";
 import { useUrlParse } from "../use-url-parse";
@@ -103,6 +104,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -141,6 +143,27 @@ describe("useUrlParse", () => {
   });
 
   describe("parse_succeeded tracking", () => {
+    it("still takes the result under Strict Mode's dev remount", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(
+        makeResponse({
+          status: "done",
+          result: { title: "Strict", ingredients: [], instructions: [] },
+          url: "https://example.com/recipe",
+        }),
+      );
+
+      renderHook(() => useUrlParse({ locale: "en" }), {
+        wrapper: StrictMode,
+      });
+
+      await waitFor(() =>
+        expect(db.parsedRecipes.add).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "Strict" }),
+        ),
+      );
+    });
+
     it("stores a durable parsed recipe entry when polling returns done", async () => {
       const mockRecipe = {
         title: "Test Recipe",
@@ -574,6 +597,25 @@ describe("useUrlParse", () => {
       expect(trackEvent).not.toHaveBeenCalledWith("parse_succeeded", {
         source: "url",
       });
+    });
+
+    it("stops polling when unmounted while a status check is in flight", async () => {
+      vi.useFakeTimers();
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      let resolveFetch: (res: Response) => void = () => {};
+      mockFetch.mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+      mockFetch.mockResolvedValue(makeResponse({ status: "pending" }));
+      const { unmount } = renderHook(() => useUrlParse({ locale: "en" }));
+
+      unmount();
+      resolveFetch(makeResponse({ status: "pending" }));
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(mockFetch).toHaveBeenCalledOnce();
     });
 
     it("does not claim completion when unmounted before the job finishes", async () => {
