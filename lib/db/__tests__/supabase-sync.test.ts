@@ -105,6 +105,25 @@ describe("create barrier (serialization)", () => {
     expect(mockFetch.mock.calls[1][1]?.method).toBe("PATCH");
   });
 
+  it("holds an undo's re-create until the delete has landed", async () => {
+    let resolveDelete: (value: Response) => void = () => {};
+    mockFetch.mockReturnValueOnce(
+      new Promise<Response>((resolve) => {
+        resolveDelete = resolve;
+      }),
+    );
+
+    syncDelete("recipe-1");
+    syncCreate(mockRecipe);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    resolveDelete(new Response());
+
+    await vi.waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+    expect(mockFetch.mock.calls[1][1]?.method).toBe("POST");
+  });
+
   it("sends a PATCH immediately when no create is pending", () => {
     syncUpdate("no-create-recipe", { title: "X" });
 
