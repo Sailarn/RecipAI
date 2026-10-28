@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import { saveParsedResult } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { useParseMessage } from "@/lib/hooks/use-parse-message";
 import { logger } from "@/lib/logger";
 import {
   announceFailedParse,
   announceSavedParse,
   type SavedParse,
 } from "@/lib/parse-recipe/announce-parse";
+import { friendlyParseError } from "@/lib/parse-recipe/friendly-parse-error";
 import {
   doneImportHistoryEntry,
   failedPhotoHistoryEntry,
@@ -42,6 +44,7 @@ interface UseDirectParseOptions {
  */
 export function useDirectParse({ locale, source }: UseDirectParseOptions) {
   const t = useTranslations("parse");
+  const translateMessage = useParseMessage();
   const navigate = useNavigate();
   const mountedRef = useRef(true);
   const [isParsing, setIsParsing] = useState(false);
@@ -116,11 +119,12 @@ export function useDirectParse({ locale, source }: UseDirectParseOptions) {
             title: historyEntry.title,
             reason: historyEntry.reason ?? message,
           });
+          const shownMessage = translateMessage(friendlyParseError(message));
           if (mountedRef.current) {
             setIsParsing(false);
-            setError(message);
+            setError(shownMessage);
           } else {
-            toast.error(message, {
+            toast.error(shownMessage, {
               duration: 10000,
               closeButton: true,
               action: {
@@ -131,7 +135,7 @@ export function useDirectParse({ locale, source }: UseDirectParseOptions) {
           }
         });
     },
-    [locale, source, navigate, t],
+    [locale, source, navigate, t, translateMessage],
   );
 
   const stopWaiting = useCallback(() => setIsParsing(false), []);

@@ -1,5 +1,7 @@
-// Centralized so isRetriableFailure can reference the exact strings.
-const PARSE_ERROR_MESSAGES = {
+// Centralized so isRetriableFailure can reference the exact strings, and so
+// the client can translate them where they are shown (parse-message-key.ts).
+// The English locale's parse.messages must match these word for word.
+export const PARSE_ERROR_MESSAGES = {
   highDemand:
     "Gemini is experiencing high demand right now. Please try again in a moment.",
   quota: "API quota exceeded. Please try again later.",
@@ -18,6 +20,7 @@ const PARSE_ERROR_MESSAGES = {
     "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source.",
   notRecipe:
     "No recipe found — the AI couldn't detect a recipe in this content. Try a link that goes directly to a recipe.",
+  timedOut: "Parsing timed out — the job never finished.",
 } as const;
 
 // Retry is hidden for these in the parse history — re-running the same URL cannot succeed.

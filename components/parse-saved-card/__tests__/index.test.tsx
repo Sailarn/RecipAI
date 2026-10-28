@@ -74,9 +74,7 @@ describe("ParseSavedCard", () => {
   it("returns to the form on Parse another", () => {
     const onReset = renderCard();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "savedCard.parseAnother" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "parseAnother" }));
 
     expect(onReset).toHaveBeenCalledOnce();
   });

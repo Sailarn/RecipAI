@@ -5,8 +5,9 @@ import {
 } from "@/lib/db/schema";
 import { friendlyParseError } from "./friendly-parse-error";
 
-const PHOTO_IMPORT_TITLE = "Photo import";
-const TEXT_IMPORT_TITLE = "Text import";
+// Stored as the title of a photo/text history entry; translated where shown.
+export const PHOTO_IMPORT_TITLE = "Photo import";
+export const TEXT_IMPORT_TITLE = "Text import";
 
 // A readable heading for a failed job, which has no recipe title.
 function hostLabel(url: string): string {

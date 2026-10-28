@@ -364,7 +364,7 @@ describe("useParseJobWatcher", () => {
         expect.objectContaining({
           id: "job-1",
           status: "failed",
-          reason: "timedOut",
+          reason: "Parsing timed out — the job never finished.",
         }),
       );
     });

@@ -116,7 +116,7 @@ export function ParseSavedCard({
           onClick={onReset}
           className="w-full py-2 px-[10px] bg-[rgba(255,170,50,0.08)] text-[var(--fg-2)] rounded-[13px] border border-[rgba(255,200,100,0.18)] font-sans text-[13px] font-medium cursor-pointer"
         >
-          {t("savedCard.parseAnother")}
+          {t("parseAnother")}
         </button>
       </div>
     </div>

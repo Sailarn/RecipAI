@@ -16,6 +16,7 @@ import {
 import { db } from "@/lib/db/db";
 import { dismissParseNotification } from "@/lib/db/parse-notifications";
 import { PARSE_HISTORY_STATUS, type ParseNotification } from "@/lib/db/schema";
+import { useParseMessage } from "@/lib/hooks/use-parse-message";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -30,6 +31,7 @@ const BELL_BUTTON_CLASS =
 export function ParseNotificationsSheet() {
   const t = useTranslations("recipes");
   const tParse = useTranslations("parse.notifications");
+  const translateMessage = useParseMessage();
   const [open, setOpen] = useState(false);
   const notifications = useLiveQuery(
     () => db.parseNotifications.orderBy("createdAt").reverse().toArray(),
@@ -119,10 +121,12 @@ export function ParseNotificationsSheet() {
                   )}
                   <span>
                     <span className="block font-medium text-sm">
-                      {notification.title}
+                      {translateMessage(notification.title)}
                     </span>
                     <span className="block text-xs text-muted-foreground">
-                      {isSaved ? tParse("saved") : notification.reason}
+                      {isSaved
+                        ? tParse("saved")
+                        : translateMessage(notification.reason ?? "")}
                     </span>
                   </span>
                 </button>

@@ -129,9 +129,7 @@ describe("ParseText", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /analyzeWithAi/ }));
 
-      expect(
-        await screen.findByText("Couldn't extract a recipe from this text"),
-      ).toBeInTheDocument();
+      expect(await screen.findByText("notRecipe")).toBeInTheDocument();
       expect(recordParseHistory).toHaveBeenCalledWith(
         expect.objectContaining({ title: "Text import", status: "failed" }),
       );

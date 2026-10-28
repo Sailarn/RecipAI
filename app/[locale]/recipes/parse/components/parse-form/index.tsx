@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useClipboardLink } from "@/lib/hooks/use-clipboard-link";
+import { useParseMessage } from "@/lib/hooks/use-parse-message";
 import { ClipboardSuggestion } from "./clipboard-suggestion";
 import { UrlField } from "./url-field";
 
@@ -27,6 +28,7 @@ export function ParseForm({
   onSubmit,
 }: ParseFormProps) {
   const t = useTranslations("parse.url");
+  const translateMessage = useParseMessage();
   const [pasteError, setPasteError] = useState<string | null>(null);
   const { canPaste, isReading, pasteLink, suggestion, dismissSuggestion } =
     useClipboardLink({ enabled: url.length === 0 && !loading });
@@ -92,7 +94,7 @@ export function ParseForm({
 
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{translateMessage(error)}</AlertDescription>
         </Alert>
       )}
 

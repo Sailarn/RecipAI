@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PARSE_HISTORY_STATUS, type ParseHistoryEntry } from "@/lib/db/schema";
+import { useParseMessage } from "@/lib/hooks/use-parse-message";
 import { isRetriableFailure } from "@/lib/parse-recipe/friendly-parse-error";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export function ParseHistoryRow({
   onRetry,
 }: ParseHistoryRowProps) {
   const t = useTranslations("parse");
+  const translateMessage = useParseMessage();
   const isDone = entry.status === PARSE_HISTORY_STATUS.DONE;
   const canRetry =
     !isDone && Boolean(entry.url) && isRetriableFailure(entry.reason);
@@ -32,7 +34,7 @@ export function ParseHistoryRow({
     <li className="glass-card rounded-2xl p-4 space-y-2">
       <div className="flex items-start justify-between gap-3">
         <p className="min-w-0 font-medium text-sm text-[var(--fg-1)] break-words">
-          {entry.title}
+          {translateMessage(entry.title)}
         </p>
         <span
           className={cn(
@@ -49,7 +51,7 @@ export function ParseHistoryRow({
 
       {entry.reason && (
         <p className="text-xs text-[var(--fg-2)] leading-relaxed break-words line-clamp-4">
-          {entry.reason}
+          {translateMessage(entry.reason)}
         </p>
       )}
 

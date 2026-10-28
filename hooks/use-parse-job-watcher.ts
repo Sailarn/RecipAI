@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { recordParseHistory } from "@/lib/db/parse-history";
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { useParseMessage } from "@/lib/hooks/use-parse-message";
 import { claimJobCompletion } from "@/lib/parse-job-completion";
 import {
   getJobIds,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/parse-job-storage";
 import { announceFailedParse } from "@/lib/parse-recipe/announce-parse";
 import { completeLinkParse } from "@/lib/parse-recipe/complete-link-parse";
+import { PARSE_ERROR_MESSAGES } from "@/lib/parse-recipe/friendly-parse-error";
 import { failedParseHistoryEntry } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
 import { useTriggerSync } from "@/lib/sync-context";
@@ -54,6 +56,9 @@ export function useParseJobWatcher() {
   const t = useTranslations("parse");
   const tRef = useRef(t);
   tRef.current = t;
+  const translateMessage = useParseMessage();
+  const translateMessageRef = useRef(translateMessage);
+  translateMessageRef.current = translateMessage;
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
@@ -122,9 +127,15 @@ export function useParseJobWatcher() {
           title: historyEntry.title,
           reason: historyEntry.reason ?? rawError,
         });
-        toast.error(historyEntry.reason ?? rawError, {
-          action: { label: tRef.current("details"), onClick: openParseHistory },
-        });
+        toast.error(
+          translateMessageRef.current(historyEntry.reason ?? rawError),
+          {
+            action: {
+              label: tRef.current("details"),
+              onClick: openParseHistory,
+            },
+          },
+        );
       };
 
       const run = async () => {
@@ -141,7 +152,7 @@ export function useParseJobWatcher() {
             handleFailed(job.url, job.error || tRef.current("failedGeneric"));
           } else if (Date.now() - startedAt >= MAX_WATCH_MS) {
             if (!claimJobCompletion(id)) return;
-            handleFailed(job.url, tRef.current("timedOut"));
+            handleFailed(job.url, PARSE_ERROR_MESSAGES.timedOut);
           } else {
             scheduleRetry(pollDelay, run);
             pollDelay = Math.min(pollDelay * POLL_BACKOFF, MAX_POLL_MS);

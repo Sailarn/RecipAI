@@ -2,13 +2,14 @@ import { and, inArray, lt, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
+import { PARSE_ERROR_MESSAGES } from "./friendly-parse-error";
 
 // A parse finishes within a couple of minutes (the process route itself is
 // capped at 60s on Vercel). A job still pending or processing after this long
 // was never kicked off, or its server died mid-parse — nothing will finish it.
 const STALE_JOB_MS = 10 * 60_000;
 
-export const STALE_JOB_ERROR = "Parsing timed out — the job never finished.";
+export const STALE_JOB_ERROR = PARSE_ERROR_MESSAGES.timedOut;
 
 export const ACTIVE_PARSE_JOB_STATUSES = [
   PARSE_JOB_STATUS.PENDING,

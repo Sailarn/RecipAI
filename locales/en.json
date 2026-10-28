@@ -246,7 +246,6 @@
     },
     "details": "Details",
     "failedGeneric": "Failed to parse recipe",
-    "timedOut": "Parsing timed out — the job never finished.",
     "noImports": "No imports yet",
     "noImportsHint": "Recipes you import — and any that fail — will show up here.",
     "processFailed": "Failed to process parsed recipe",
@@ -274,13 +273,33 @@
       "steps": "{count, plural, one {# step} other {# steps}}",
       "ingredients": "Ingredients ({count})",
       "moreIngredients": "+{count} more",
-      "open": "Open recipe",
-      "parseAnother": "Parse another"
+      "open": "Open recipe"
     },
     "notifications": {
       "saved": "Saved to your recipes",
       "dismiss": "Dismiss"
-    }
+    },
+    "messages": {
+      "highDemand": "Gemini is experiencing high demand right now. Please try again in a moment.",
+      "quota": "API quota exceeded. Please try again later.",
+      "private": "This account is private or the content is restricted — only public posts can be parsed.",
+      "unsupportedPlatform": "This social platform is not supported. Try an Instagram, TikTok, YouTube, or X link.",
+      "tooLong": "This video is too long to parse. Social videos must be 30 minutes or shorter.",
+      "tooLarge": "This video file is too large to transcribe. Try a shorter clip.",
+      "notFound": "This social post could not be found. It may have been deleted or the link is invalid.",
+      "noContent": "No recipe found — the post has no caption, transcript, images, or video to extract from.",
+      "scrapeBlocked": "Couldn't read this page — the site may block scrapers. Try pasting the URL again or use a different source.",
+      "notRecipe": "No recipe found — the AI couldn't detect a recipe in this content. Try a link that goes directly to a recipe.",
+      "timedOut": "Parsing timed out — the job never finished.",
+      "photoImport": "Photo import",
+      "textImport": "Text import"
+    },
+    "background": {
+      "title": "⏳ Parsing in background...",
+      "hint": "You'll get a notification when it's ready.",
+      "goToRecipes": "Go to recipes"
+    },
+    "parseAnother": "Parse another"
   },
   "pantry": {
     "title": "Pantry",
