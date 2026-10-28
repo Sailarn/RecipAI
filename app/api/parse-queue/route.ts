@@ -9,7 +9,10 @@ import { requireSession } from "@/lib/auth/require-session";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
-import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
+import {
+  type SavedRecipeRef,
+  saveParsedRecipeForUser,
+} from "@/lib/parse-recipe/save-parsed-recipe-server";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
 import { api } from "@/lib/routes";
 import { resolveTelegramChatId } from "@/lib/telegram/account";
@@ -131,20 +134,24 @@ export async function POST(req: NextRequest) {
         : { status: PARSE_JOB_STATUS.PENDING }),
     });
 
-    // A Telegram-notify parse skips the in-app review flow, so the recipe is
-    // saved server-side. A cache hit is already DONE (so /process no-ops) — save
-    // it right here. Otherwise kick /process off server-side so it saves and
-    // sends the bot message on completion, even if the client navigates away.
-    if (telegramChatId && session?.user.id) {
-      if (cachedResult) {
-        await saveParsedRecipeForUser({
-          userId: session.user.id,
-          parsed: cachedResult,
-          sourceUrl: url,
-        });
-      } else {
-        triggerParseProcess(id);
-      }
+    // A signed-in parse is saved server-side, straight into the user's library:
+    // a cache hit is already DONE (so /process no-ops), so save it right here;
+    // otherwise /process saves it on completion. Anonymous parses have no
+    // server library — the client saves the result on the device.
+    let savedRecipe: SavedRecipeRef | undefined;
+    if (session?.user.id && cachedResult) {
+      savedRecipe = await saveParsedRecipeForUser({
+        userId: session.user.id,
+        parsed: cachedResult,
+        sourceUrl: url,
+      });
+    }
+    // A Telegram-notify parse is kicked off here, so it completes and messages
+    // the user even if the Mini App closes right after enqueuing. Other parses
+    // are kicked off by the client, which reaches /process on the app's own
+    // host rather than through NEXT_PUBLIC_BETTER_AUTH_URL.
+    if (telegramChatId && session?.user.id && !cachedResult) {
+      triggerParseProcess(id);
     }
 
     return NextResponse.json({
@@ -152,7 +159,14 @@ export async function POST(req: NextRequest) {
       uploadToken,
       cached: Boolean(cachedResult),
       telegramNotify: Boolean(telegramChatId),
+      serverSaves: Boolean(session?.user.id),
       ...(cachedResult ? { result: cachedResult } : {}),
+      ...(savedRecipe
+        ? {
+            savedRecipeId: savedRecipe.recipeId,
+            alreadySaved: savedRecipe.alreadySaved,
+          }
+        : {}),
     });
   } catch (error) {
     return ApiError.internal(error, req);

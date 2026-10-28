@@ -34,7 +34,7 @@ vi.mock("@/lib/telegram/account", () => ({
   resolveTelegramChatId: vi.fn().mockResolvedValue(null),
 }));
 vi.mock("@/lib/parse-recipe/save-parsed-recipe-server", () => ({
-  saveParsedRecipeForUser: vi.fn().mockResolvedValue("recipe-1"),
+  saveParsedRecipeForUser: vi.fn(),
 }));
 
 import { auth } from "@/lib/auth/auth";
@@ -57,7 +57,10 @@ beforeEach(() => {
   vi.mocked(mintUploadToken).mockResolvedValue("mock-upload-token");
   vi.mocked(enforceParseRateLimit).mockResolvedValue(null);
   vi.mocked(resolveTelegramChatId).mockResolvedValue(null);
-  vi.mocked(saveParsedRecipeForUser).mockResolvedValue("recipe-1");
+  vi.mocked(saveParsedRecipeForUser).mockResolvedValue({
+    recipeId: "recipe-1",
+    alreadySaved: false,
+  });
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null)));
   // Default: cache miss (no prior parsed job for this URL).
   selectLimit.mockResolvedValue([]);
@@ -328,6 +331,58 @@ describe("POST /api/parse-queue", () => {
       // A cache hit is already DONE, so it must not re-trigger /process.
       expect(fetch).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("POST /api/parse-queue — saving signed-in parses", () => {
+  it("saves a signed-in cache hit right away and returns the recipe id", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue({
+      user: { id: "user-7" },
+    } as never);
+    selectLimit.mockResolvedValue([{ result: { title: "Cached Soup" } }]);
+
+    const body = await (
+      await POST(makeRequest({ url: "https://example.com/soup" }) as never)
+    ).json();
+
+    expect(saveParsedRecipeForUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-7",
+        parsed: { title: "Cached Soup" },
+      }),
+    );
+    expect(body).toMatchObject({
+      cached: true,
+      serverSaves: true,
+      savedRecipeId: "recipe-1",
+      alreadySaved: false,
+    });
+  });
+
+  it("leaves a signed-in cache miss to /process, which the client starts", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue({
+      user: { id: "user-7" },
+    } as never);
+
+    const body = await (
+      await POST(makeRequest({ url: "https://example.com/soup" }) as never)
+    ).json();
+
+    expect(saveParsedRecipeForUser).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(body).toMatchObject({ cached: false, serverSaves: true });
+    expect(body.savedRecipeId).toBeUndefined();
+  });
+
+  it("never saves server-side for an anonymous parse", async () => {
+    selectLimit.mockResolvedValue([{ result: { title: "Cached Soup" } }]);
+
+    const body = await (
+      await POST(makeRequest({ url: "https://example.com/soup" }) as never)
+    ).json();
+
+    expect(saveParsedRecipeForUser).not.toHaveBeenCalled();
+    expect(body.serverSaves).toBe(false);
   });
 });
 

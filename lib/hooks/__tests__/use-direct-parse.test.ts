@@ -13,11 +13,16 @@ const recordParseHistory = vi.hoisted(() =>
 );
 vi.mock("@/lib/db/parse-history", () => ({ recordParseHistory }));
 
-const saveDirectParseResult = vi.hoisted(() =>
-  vi.fn().mockResolvedValue(undefined),
-);
-vi.mock("@/lib/parse-recipe/save-direct-parse-result", () => ({
-  saveDirectParseResult,
+const saveParsedResult = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/db/save-parsed-recipe", () => ({ saveParsedResult }));
+
+const { announceSavedParse, announceFailedParse } = vi.hoisted(() => ({
+  announceSavedParse: vi.fn(),
+  announceFailedParse: vi.fn(),
+}));
+vi.mock("@/lib/parse-recipe/announce-parse", () => ({
+  announceSavedParse,
+  announceFailedParse,
 }));
 
 vi.mock("@/lib/utils", () => ({ generateId: () => "job-1" }));
@@ -25,7 +30,11 @@ vi.mock("@/lib/utils", () => ({ generateId: () => "job-1" }));
 const toastError = vi.hoisted(() => vi.fn());
 vi.mock("sonner", () => ({ toast: { error: toastError } }));
 
-const RECIPE = { title: "Borscht" } as ParsedRecipe;
+const RECIPE = {
+  title: "Borscht",
+  sourceUrl: "https://echoed.example.com",
+} as ParsedRecipe;
+const SAVED_RECIPE = { ...RECIPE, sourceUrl: "" };
 
 function deferred<T>() {
   let resolve: (value: T) => void = () => {};
@@ -40,7 +49,10 @@ function deferred<T>() {
 describe("useDirectParse", () => {
   beforeEach(() => {
     recordParseHistory.mockResolvedValue(undefined);
-    saveDirectParseResult.mockResolvedValue(undefined);
+    saveParsedResult.mockResolvedValue({
+      recipeId: "recipe-1",
+      alreadySaved: false,
+    });
   });
 
   describe("on success", () => {
@@ -81,51 +93,57 @@ describe("useDirectParse", () => {
       );
     });
 
-    it("hands the recipe to onResult instead of queueing it", async () => {
-      const onResult = vi.fn();
+    it("saves the recipe without the link the model echoed", async () => {
       const { result } = renderHook(() =>
-        useDirectParse({ locale: "en", source: "photo", onResult }),
-      );
-
-      act(() => result.current.startParse(() => Promise.resolve(RECIPE)));
-
-      await waitFor(() => expect(onResult).toHaveBeenCalledWith(RECIPE));
-      expect(saveDirectParseResult).not.toHaveBeenCalled();
-    });
-
-    it("queues the recipe for review when there is no onResult", async () => {
-      const { result } = renderHook(() =>
-        useDirectParse({ locale: "ua", source: "photo" }),
+        useDirectParse({ locale: "ua", source: "text" }),
       );
 
       act(() => result.current.startParse(() => Promise.resolve(RECIPE)));
 
       await waitFor(() =>
-        expect(saveDirectParseResult).toHaveBeenCalledWith(
-          RECIPE,
-          "ua",
-          expect.objectContaining({ fallbackTitle: "fallbackTitle" }),
-        ),
+        expect(saveParsedResult).toHaveBeenCalledWith(SAVED_RECIPE),
       );
     });
 
-    it("queues the recipe instead of calling onResult after unmount", async () => {
+    it("announces the saved recipe and shows it on the page", async () => {
+      const { result } = renderHook(() =>
+        useDirectParse({ locale: "en", source: "photo" }),
+      );
+
+      act(() => result.current.startParse(() => Promise.resolve(RECIPE)));
+
+      await waitFor(() =>
+        expect(result.current.saved).toEqual({
+          recipeId: "recipe-1",
+          alreadySaved: false,
+          recipe: SAVED_RECIPE,
+        }),
+      );
+      expect(announceSavedParse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          jobId: "job-1",
+          recipeId: "recipe-1",
+          recipe: SAVED_RECIPE,
+        }),
+      );
+    });
+
+    it("still saves and announces after unmount", async () => {
       const pending = deferred<ParsedRecipe>();
-      const onResult = vi.fn();
       const { result, unmount } = renderHook(() =>
-        useDirectParse({ locale: "en", source: "photo", onResult }),
+        useDirectParse({ locale: "en", source: "photo" }),
       );
       act(() => result.current.startParse(() => pending.promise));
 
       unmount();
       pending.resolve(RECIPE);
 
-      await waitFor(() => expect(saveDirectParseResult).toHaveBeenCalled());
-      expect(onResult).not.toHaveBeenCalled();
+      await waitFor(() => expect(announceSavedParse).toHaveBeenCalled());
+      expect(saveParsedResult).toHaveBeenCalledOnce();
     });
 
-    it("shows a toast when queueing the recipe fails", async () => {
-      saveDirectParseResult.mockRejectedValue(new Error("quota"));
+    it("shows a toast when saving the recipe fails", async () => {
+      saveParsedResult.mockRejectedValue(new Error("quota"));
       const { result } = renderHook(() =>
         useDirectParse({ locale: "en", source: "photo" }),
       );
@@ -138,19 +156,31 @@ describe("useDirectParse", () => {
           expect.anything(),
         ),
       );
+      expect(announceSavedParse).not.toHaveBeenCalled();
     });
 
-    it("still succeeds when recording history fails", async () => {
+    it("still saves when recording history fails", async () => {
       recordParseHistory.mockRejectedValue(new Error("dexie"));
-      const onResult = vi.fn();
       const { result } = renderHook(() =>
-        useDirectParse({ locale: "en", source: "photo", onResult }),
+        useDirectParse({ locale: "en", source: "photo" }),
       );
 
       act(() => result.current.startParse(() => Promise.resolve(RECIPE)));
 
-      await waitFor(() => expect(onResult).toHaveBeenCalledWith(RECIPE));
+      await waitFor(() => expect(result.current.saved).not.toBeNull());
       expect(result.current.error).toBeNull();
+    });
+
+    it("clearSaved returns to the form", async () => {
+      const { result } = renderHook(() =>
+        useDirectParse({ locale: "en", source: "photo" }),
+      );
+      act(() => result.current.startParse(() => Promise.resolve(RECIPE)));
+      await waitFor(() => expect(result.current.saved).not.toBeNull());
+
+      act(() => result.current.clearSaved());
+
+      expect(result.current.saved).toBeNull();
     });
   });
 
@@ -204,6 +234,24 @@ describe("useDirectParse", () => {
         expect(recordParseHistory).toHaveBeenCalledWith(
           expect.objectContaining({ id: "job-1", title, status: "failed" }),
         ),
+      );
+    });
+
+    it("puts the failure in the bell", async () => {
+      const { result } = renderHook(() =>
+        useDirectParse({ locale: "en", source: "photo" }),
+      );
+
+      act(() =>
+        result.current.startParse(() => Promise.reject(new Error("blurry"))),
+      );
+
+      await waitFor(() =>
+        expect(announceFailedParse).toHaveBeenCalledWith({
+          jobId: "job-1",
+          title: "Photo import",
+          reason: "blurry",
+        }),
       );
     });
 

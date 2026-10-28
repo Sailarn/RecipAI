@@ -231,21 +231,14 @@
       "dismissSuggestion": "Сховати підказку",
       "pasteEmpty": "У буфері обміну немає посилання"
     },
-    "parsedTapToReview": "Рецепт розпізнано — торкніться, щоб переглянути",
-    "savedShort": "Рецепт збережено!",
-    "reviewSave": "Зберегти",
-    "reviewEdit": "Редагувати",
     "details": "Деталі",
     "failedGeneric": "Не вдалося розпізнати рецепт",
     "timedOut": "Час розпізнавання вичерпано — завдання не завершилося.",
     "noImports": "Ще немає імпортів",
     "noImportsHint": "Рецепти, які ви імпортуєте — і ті, що не вдалися — з'являться тут.",
-    "fallbackTitle": "Рецепт розпізнано",
     "processFailed": "Не вдалося обробити розпізнаний рецепт",
     "retryFailed": "Не вдалося повторити імпорт",
-    "savedToApp": "Збережено в RecipAI",
     "addedToRecipes": "Додано до ваших рецептів.",
-    "statusCheckFailed": "Помилка мережі під час перевірки статусу",
     "invalidUrl": "Введіть коректне посилання, включно з https://",
     "jobCreateFailed": "Не вдалося створити завдання розпізнавання",
     "parseFailedShort": "Розпізнавання не вдалося",
@@ -261,7 +254,20 @@
     "retrying": "Повторюємо…",
     "pageTitle": "Імпорт рецепта",
     "infoWorks": "Працює з будь-яким сайтом рецептів — просто вставте посилання нижче.",
-    "infoExamples": "Приклади: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com"
+    "infoExamples": "Приклади: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com",
+    "alreadySaved": "Вже є у ваших рецептах.",
+    "networkError": "Помилка мережі. Спробуйте ще раз.",
+    "savedCard": {
+      "steps": "{count, plural, one {# крок} few {# кроки} many {# кроків} other {# кроку}}",
+      "ingredients": "Інгредієнти ({count})",
+      "moreIngredients": "+ще {count}",
+      "open": "Відкрити рецепт",
+      "parseAnother": "Імпортувати ще"
+    },
+    "notifications": {
+      "saved": "Збережено у ваших рецептах",
+      "dismiss": "Закрити"
+    }
   },
   "pantry": {
     "title": "Комора",

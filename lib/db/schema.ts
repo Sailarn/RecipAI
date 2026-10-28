@@ -208,6 +208,21 @@ export interface ParseHistoryEntry {
   createdAt: Date;
 }
 
+// One row per finished parse, shown in the notifications bell until dismissed
+// or opened. `id` is the parse job id, so a job announced twice (two devices,
+// a re-poll) stays one row.
+export interface ParseNotification {
+  id: string;
+  status: ParseHistoryStatus;
+  /** The recipe's title, or for a failure the source it came from. */
+  title: string;
+  /** The saved recipe to open — absent on failure. */
+  recipeId?: string;
+  /** Why it failed — absent on success. */
+  reason?: string;
+  createdAt: Date;
+}
+
 const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
 export type SyncEntityType = (typeof SYNC_ENTITY_TYPES)[number];
 

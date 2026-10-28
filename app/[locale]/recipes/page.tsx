@@ -38,11 +38,11 @@ function browseSource(
   return "list";
 }
 
-const ParsedRecipesSheet = dynamic(
+const ParseNotificationsSheet = dynamic(
   () =>
-    import("@/components/parsed-recipes-sheet").then(
-      (parsedRecipesSheetModule) => ({
-        default: parsedRecipesSheetModule.ParsedRecipesSheet,
+    import("@/components/parse-notifications-sheet").then(
+      (notificationsSheetModule) => ({
+        default: notificationsSheetModule.ParseNotificationsSheet,
       }),
     ),
   { ssr: false },
@@ -127,7 +127,7 @@ export default function RecipesPage() {
             </h1>
           </div>
 
-          <ParsedRecipesSheet />
+          <ParseNotificationsSheet />
         </div>
 
         {!isEmpty && (

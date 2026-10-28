@@ -12,6 +12,7 @@ import {
   parseRecipeFromText,
 } from "@/lib/parse-recipe/text";
 import { ParseBackgroundBanner } from "../parse-background-banner";
+import { ParseSavedCard } from "../parse-saved-card";
 
 interface ParseTextProps {
   locale: string;
@@ -21,8 +22,15 @@ interface ParseTextProps {
 export function ParseText({ locale }: ParseTextProps) {
   const t = useTranslations("parse");
   const [text, setText] = useState("");
-  const { isParsing, error, startParse, stopWaiting, clearError } =
-    useDirectParse({ locale, source: "text" });
+  const {
+    isParsing,
+    error,
+    saved,
+    startParse,
+    stopWaiting,
+    clearError,
+    clearSaved,
+  } = useDirectParse({ locale, source: "text" });
 
   const canSubmit = text.trim().length >= MIN_RECIPE_TEXT_CHARS;
 
@@ -35,6 +43,10 @@ export function ParseText({ locale }: ParseTextProps) {
 
   if (isParsing) {
     return <ParseBackgroundBanner locale={locale} onReset={stopWaiting} />;
+  }
+
+  if (saved) {
+    return <ParseSavedCard locale={locale} {...saved} onReset={clearSaved} />;
   }
 
   return (

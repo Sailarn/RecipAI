@@ -4,6 +4,7 @@ import type {
   PantryItem,
   ParsedRecipeEntry,
   ParseHistoryEntry,
+  ParseNotification,
   Recipe,
   SyncNotification,
   VocabularyIngredient,
@@ -17,6 +18,7 @@ class RecipeDatabase extends Dexie {
   ingredients!: EntityTable<VocabularyIngredient, "id">;
   pantry!: EntityTable<PantryItem, "id">;
   parseHistory!: EntityTable<ParseHistoryEntry, "id">;
+  parseNotifications!: EntityTable<ParseNotification, "id">;
 
   constructor() {
     super("RecipeAppDB");
@@ -132,6 +134,20 @@ class RecipeDatabase extends Dexie {
           await tx.table("pantry").bulkDelete(duplicateIds);
         }
       });
+
+    // v13: parse results are saved automatically, so the bell lists finished
+    // parses instead of unsaved drafts. `parsedRecipes` stays until every
+    // device has run the startup migration that saves its leftover drafts.
+    this.version(13).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: "id, entityId, entityType, type, createdAt",
+      ingredients: "id, category",
+      pantry: "id, ingredientId",
+      parseHistory: "id, createdAt, status",
+      parseNotifications: "id, createdAt",
+    });
   }
 }
 

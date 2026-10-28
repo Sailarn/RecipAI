@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
@@ -9,8 +9,10 @@ import {
   failStaleParseJobs,
 } from "@/lib/parse-recipe/stale-parse-jobs";
 
-// The signed-in user's unfinished parse jobs, from any device or the bot, so
+// The signed-in user's unfinished link imports, from any device or the bot, so
 // the background watcher can follow jobs this device never saw being started.
+// Photo and text jobs (no url) are left out: they complete inline on the device
+// that started them, which also saves the recipe.
 export async function GET(req: NextRequest) {
   const authed = await requireSession();
   if (authed.response) return authed.response;
@@ -24,6 +26,7 @@ export async function GET(req: NextRequest) {
       .where(
         and(
           eq(parseJobs.userId, userId),
+          isNotNull(parseJobs.url),
           inArray(parseJobs.status, ACTIVE_PARSE_JOB_STATUSES),
         ),
       );

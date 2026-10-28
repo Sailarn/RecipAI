@@ -3,36 +3,19 @@
  */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ParsedRecipe } from "@/lib/db/schema";
+import { dispatchParseJobSettled } from "@/lib/parse-job-events";
 import { trackEvent } from "@/lib/telemetry";
 import { useUrlParse } from "../use-url-parse";
 
-vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: vi.fn(),
-}));
-
-vi.mock("@/lib/db/db", () => ({
-  db: {
-    parsedRecipes: {
-      add: vi.fn().mockResolvedValue(undefined),
-      delete: vi.fn().mockResolvedValue(undefined),
-      get: vi.fn(),
-      orderBy: vi.fn(),
-    },
-  },
-}));
-
-vi.mock("@/lib/db/parse-history", () => ({
-  recordParseHistory: vi.fn().mockResolvedValue(undefined),
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
 }));
 
 vi.mock("@/lib/parse-job-storage", () => ({
   getJobIds: vi.fn().mockReturnValue([]),
-  getUploadToken: vi.fn().mockReturnValue(null),
-  removeJobId: vi.fn(),
   addJobId: vi.fn(),
-  storePendingUploadToken: vi.fn(),
 }));
 
 vi.mock("@/lib/hooks/use-push-subscription", () => ({
@@ -44,651 +27,275 @@ vi.mock("@/lib/hooks/use-push-subscription", () => ({
   }),
 }));
 
-vi.mock("@/lib/parse-recipe/friendly-parse-error", () => ({
-  friendlyParseError: vi.fn((msg: string) => msg),
+const { completeLinkParse, claimJobCompletion, triggerSync } = vi.hoisted(
+  () => ({
+    completeLinkParse: vi.fn(),
+    claimJobCompletion: vi.fn(),
+    triggerSync: vi.fn(),
+  }),
+);
+vi.mock("@/lib/parse-recipe/complete-link-parse", () => ({
+  completeLinkParse,
 }));
-
-vi.mock("@/lib/parse-recipe/parse-history-entry", () => ({
-  doneParseHistoryEntry: vi.fn(() => ({ status: "done" })),
-  failedParseHistoryEntry: vi.fn(() => ({ status: "failed" })),
-}));
-
-const claimJobCompletion = vi.hoisted(() => vi.fn().mockReturnValue(true));
 vi.mock("@/lib/parse-job-completion", () => ({ claimJobCompletion }));
+vi.mock("@/lib/sync-context", () => ({ useTriggerSync: () => triggerSync }));
 
-const toastSuccess = vi.hoisted(() => vi.fn());
-vi.mock("sonner", () => ({ toast: { success: toastSuccess } }));
+import { addJobId, getJobIds } from "@/lib/parse-job-storage";
 
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db/db";
-import { addJobId, getJobIds, removeJobId } from "@/lib/parse-job-storage";
+const RECIPE_URL = "https://example.com/recipe";
+const recipe = {
+  title: "Soup",
+  servings: 2,
+  ingredients: [],
+  instructions: [],
+  sourceUrl: RECIPE_URL,
+} as ParsedRecipe;
 
 const mockFetch = vi.fn();
-const parsedRecipeEntries = new Map<string, unknown>();
 
 function makeResponse(body: object) {
-  return {
-    ok: true,
-    json: () => Promise.resolve(body),
-  } as unknown as Response;
+  return { ok: true, json: () => Promise.resolve(body) } as unknown as Response;
 }
 
-function mockParsedRecipesLiveQuery() {
-  vi.mocked(useLiveQuery).mockImplementation((_, dependencies?: unknown[]) => {
-    const activeId = dependencies?.[0];
-    if (typeof activeId === "string") {
-      return parsedRecipeEntries.get(activeId) as never;
-    }
-    return [...parsedRecipeEntries.values()].at(-1) as never;
-  });
-  vi.mocked(db.parsedRecipes.add).mockImplementation(((entry: {
-    id: string;
-  }) => {
-    const entryId = (entry as { id: string }).id;
-    parsedRecipeEntries.set(entryId, entry);
-    return Promise.resolve(entryId);
-  }) as never);
-  vi.mocked(db.parsedRecipes.delete).mockImplementation(((id: string) => {
-    parsedRecipeEntries.delete(String(id));
-    return Promise.resolve();
-  }) as never);
+function enqueueResponds(body: object) {
+  mockFetch.mockImplementation((url: string) =>
+    Promise.resolve(
+      url === "/api/parse-queue"
+        ? makeResponse({ telegramNotify: false, serverSaves: false, ...body })
+        : makeResponse({}),
+    ),
+  );
+}
+
+async function startParse(options: { telegramNotify?: boolean } = {}) {
+  const hook = renderHook(() => useUrlParse(options));
+  act(() => hook.result.current.setUrl(RECIPE_URL));
+  await act(() => hook.result.current.handleParse());
+  return hook;
 }
 
 beforeEach(() => {
-  mockFetch.mockReset();
-  parsedRecipeEntries.clear();
-  mockParsedRecipesLiveQuery();
+  vi.clearAllMocks();
   vi.mocked(getJobIds).mockReturnValue([]);
-  claimJobCompletion.mockReturnValue(true);
+  completeLinkParse.mockResolvedValue({
+    recipeId: "recipe-1",
+    alreadySaved: false,
+  });
   vi.stubGlobal("fetch", mockFetch);
 });
 
 afterEach(() => {
-  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
 describe("useUrlParse", () => {
-  describe("parse_started tracking", () => {
-    it("tracks parse_started with the source domain on successful job creation", async () => {
-      mockFetch.mockImplementation((url: string) => {
-        if (url === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({ jobId: "job-1", uploadToken: null }),
-          );
-        }
-        if (url === "/api/parse-queue/process") {
-          return Promise.resolve(makeResponse({}));
-        }
-        return Promise.resolve(makeResponse({ status: "pending" }));
-      });
+  describe("starting a parse", () => {
+    it("rejects an invalid link without calling the server", async () => {
+      const { result } = renderHook(() => useUrlParse());
+      act(() => result.current.setUrl("not a url"));
 
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+      await act(() => result.current.handleParse());
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
+      expect(result.current.error).toBe("invalidUrl");
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
 
-      await act(async () => {
-        await result.current.handleParse();
-      });
+    it("tracks the start with the source domain", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false });
 
-      await waitFor(() => {
-        expect(trackEvent).toHaveBeenCalledWith("parse_started", {
-          source: "url",
-          domain: expect.any(String),
-        });
+      await startParse();
+
+      expect(trackEvent).toHaveBeenCalledWith("parse_started", {
+        source: "url",
+        domain: "example.com",
       });
     });
-  });
 
-  describe("parse_succeeded tracking", () => {
-    it("still takes the result under Strict Mode's dev remount", async () => {
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      mockFetch.mockResolvedValue(
-        makeResponse({
-          status: "done",
-          result: { title: "Strict", ingredients: [], instructions: [] },
-          url: "https://example.com/recipe",
-        }),
+    it("hands a slow parse to the watcher and starts /process", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false, uploadToken: "t1" });
+      const listener = vi.fn();
+      window.addEventListener("parse-job-created", listener);
+
+      const { result } = await startParse();
+
+      window.removeEventListener("parse-job-created", listener);
+      expect(addJobId).toHaveBeenCalledWith("job-1", "t1");
+      expect(listener.mock.calls[0][0].detail).toEqual({ jobId: "job-1" });
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/parse-queue/process",
+        expect.objectContaining({ method: "POST" }),
       );
+      expect(result.current.jobId).toBe("job-1");
+      expect(result.current.loading).toBe(false);
+    });
 
-      renderHook(() => useUrlParse({ locale: "en" }), {
-        wrapper: StrictMode,
-      });
+    it("leaves /process to the server for a Telegram-notify parse", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false, telegramNotify: true });
 
-      await waitFor(() =>
-        expect(db.parsedRecipes.add).toHaveBeenCalledWith(
-          expect.objectContaining({ title: "Strict" }),
-        ),
+      await startParse({ telegramNotify: true });
+
+      expect(mockFetch).not.toHaveBeenCalledWith(
+        "/api/parse-queue/process",
+        expect.anything(),
       );
     });
 
-    it("stores a durable parsed recipe entry when polling returns done", async () => {
-      const mockRecipe = {
-        title: "Test Recipe",
-        ingredients: [],
-        instructions: [],
-        servings: 2,
-        sourceUrl: "https://example.com/recipe",
-      };
+    it("shows a network error when the server can't be reached", async () => {
+      mockFetch.mockRejectedValue(new Error("offline"));
 
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      mockFetch.mockResolvedValue(
-        makeResponse({
-          status: "done",
-          result: mockRecipe,
-          url: "https://example.com/recipe",
-        }),
-      );
+      const { result } = await startParse();
 
-      renderHook(() => useUrlParse({ locale: "en" }));
-
-      await waitFor(() => {
-        expect(db.parsedRecipes.add).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: "Test Recipe",
-            sourceUrl: "https://example.com/recipe",
-          }),
-        );
-        expect(trackEvent).toHaveBeenCalledWith("parse_succeeded", {
-          source: "url",
-        });
-      });
-    });
-  });
-
-  describe("parse_failed tracking", () => {
-    it("tracks parse_failed when polling returns failed status", async () => {
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      mockFetch.mockResolvedValue(
-        makeResponse({
-          status: "failed",
-          error: "Could not parse page",
-          url: "https://example.com/recipe",
-        }),
-      );
-
-      renderHook(() => useUrlParse({ locale: "en" }));
-
-      await waitFor(() => {
-        expect(trackEvent).toHaveBeenCalledWith("parse_failed", {
-          source: "url",
-          reason: "Could not parse page",
-        });
-      });
+      expect(result.current.error).toBe("networkError");
+      expect(result.current.loading).toBe(false);
     });
   });
 
   describe("cache hit", () => {
-    it("stores the cached result and shows it inline without the background handoff", async () => {
-      const mockRecipe = {
-        title: "Cached Recipe",
-        ingredients: [],
-        instructions: [],
-        servings: 2,
-        sourceUrl: "https://example.com/recipe",
-      };
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              cached: true,
-              result: mockRecipe,
-            }),
-          );
-        }
-        return Promise.resolve(makeResponse({}));
+    it("completes the parse right away and shows the saved recipe", async () => {
+      enqueueResponds({
+        jobId: "job-1",
+        cached: true,
+        result: recipe,
+        uploadToken: "t1",
       });
 
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+      const { result } = await startParse();
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      expect(db.parsedRecipes.add).toHaveBeenCalledWith(
+      expect(claimJobCompletion).toHaveBeenCalledWith("job-1");
+      expect(completeLinkParse).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: "Cached Recipe",
-          sourceUrl: "https://example.com/recipe",
+          jobId: "job-1",
+          recipe,
+          jobUrl: RECIPE_URL,
+          uploadToken: "t1",
+          savedRecipeId: undefined,
         }),
       );
-      expect(result.current.result).toEqual(
-        expect.objectContaining({ title: "Cached Recipe" }),
+      expect(result.current.saved).toEqual({
+        recipeId: "recipe-1",
+        alreadySaved: false,
+        recipe,
+      });
+      expect(addJobId).not.toHaveBeenCalled();
+    });
+
+    it("passes on the recipe the server saved for a signed-in user", async () => {
+      enqueueResponds({
+        jobId: "job-1",
+        cached: true,
+        result: recipe,
+        serverSaves: true,
+        savedRecipeId: "server-1",
+        alreadySaved: true,
+      });
+
+      await startParse();
+
+      expect(completeLinkParse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedRecipeId: "server-1",
+          alreadySaved: true,
+          triggerSync,
+        }),
       );
+    });
+  });
+
+  describe("when the watcher settles the followed job", () => {
+    it("shows the saved recipe", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false });
+      const { result } = await startParse();
+
+      act(() =>
+        dispatchParseJobSettled({
+          jobId: "job-1",
+          status: "done",
+          recipeId: "recipe-1",
+          recipe,
+          alreadySaved: true,
+        }),
+      );
+
+      expect(result.current.saved).toEqual({
+        recipeId: "recipe-1",
+        recipe,
+        alreadySaved: true,
+      });
       expect(result.current.jobId).toBeNull();
-      expect(addJobId).not.toHaveBeenCalled();
-      expect(mockFetch).not.toHaveBeenCalledWith(
-        "/api/parse-queue/process",
-        expect.anything(),
+    });
+
+    it("shows the failure", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false });
+      const { result } = await startParse();
+
+      act(() =>
+        dispatchParseJobSettled({
+          jobId: "job-1",
+          status: "failed",
+          reason: "No recipe found",
+        }),
       );
-      expect(trackEvent).toHaveBeenCalledWith("parse_succeeded", {
-        source: "url",
-      });
+
+      expect(result.current.error).toBe("No recipe found");
+      expect(result.current.jobId).toBeNull();
     });
 
-    it("removes the durable entry when the inline result is saved", async () => {
-      const mockRecipe = {
-        title: "Cached Recipe",
-        ingredients: [],
-        instructions: [],
-        servings: 2,
-        sourceUrl: "https://example.com/recipe",
-      };
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              cached: true,
-              result: mockRecipe,
-            }),
-          );
-        }
-        return Promise.resolve(makeResponse({}));
-      });
+    it("ignores other jobs", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false });
+      const { result } = await startParse();
 
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+      act(() =>
+        dispatchParseJobSettled({
+          jobId: "other-job",
+          status: "failed",
+          reason: "nope",
+        }),
+      );
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-      await act(async () => {
-        result.current.handleSave();
-      });
-
-      const storedEntry = vi.mocked(db.parsedRecipes.add).mock.calls[0]?.[0] as
-        | { id: string }
-        | undefined;
-      expect(db.parsedRecipes.delete).toHaveBeenCalledWith(storedEntry?.id);
-    });
-
-    it("removes the durable entry when the inline result is reset", async () => {
-      const mockRecipe = {
-        title: "Cached Recipe",
-        ingredients: [],
-        instructions: [],
-        servings: 2,
-        sourceUrl: "https://example.com/recipe",
-      };
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              cached: true,
-              result: mockRecipe,
-            }),
-          );
-        }
-        return Promise.resolve(makeResponse({}));
-      });
-
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
-
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-      await act(async () => {
-        await result.current.handleReset();
-      });
-
-      const storedEntry = vi.mocked(db.parsedRecipes.add).mock.calls[0]?.[0] as
-        | { id: string }
-        | undefined;
-      expect(db.parsedRecipes.delete).toHaveBeenCalledWith(storedEntry?.id);
-      expect(result.current.url).toBe("");
+      expect(result.current.error).toBeNull();
+      expect(result.current.jobId).toBe("job-1");
     });
   });
 
-  describe("background completion handoff", () => {
-    it("shows the durable entry when the global watcher handles the active job", async () => {
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({ jobId: "job-1", uploadToken: null }),
-          );
-        }
-        if (requestUrl === "/api/parse-queue/process") {
-          return Promise.resolve(makeResponse({}));
-        }
-        return Promise.resolve(makeResponse({ status: "pending" }));
-      });
+  describe("resuming", () => {
+    it("follows the newest unfinished job after a reload", async () => {
+      vi.mocked(getJobIds).mockReturnValue(["old-job", "job-2"]);
 
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
+      const { result } = renderHook(() => useUrlParse());
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      parsedRecipeEntries.set("entry-1", {
-        id: "entry-1",
-        title: "Background Recipe",
-        servings: 1,
-        ingredients: [],
-        instructions: [],
-        sourceUrl: "https://example.com/recipe",
-        createdAt: new Date(),
-      });
-      act(() => {
-        window.dispatchEvent(
-          new CustomEvent("parsed-recipe-created", {
-            detail: { jobId: "job-1", entryId: "entry-1" },
-          }),
-        );
-      });
-
-      await waitFor(() => {
-        expect(result.current.result).toEqual(
-          expect.objectContaining({ title: "Background Recipe" }),
-        );
-        expect(result.current.jobId).toBeNull();
-      });
+      await waitFor(() => expect(result.current.jobId).toBe("job-2"));
     });
   });
 
-  describe("telegram notify hand-off", () => {
-    it("polls without review or re-save, then toasts success on a notify parse", async () => {
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              telegramNotify: true,
-            }),
-          );
-        }
-        return Promise.resolve(
-          makeResponse({
-            status: "done",
-            result: {
-              title: "Notify Recipe",
-              ingredients: [],
-              instructions: [],
-            },
-            url: "https://example.com/recipe",
-          }),
-        );
-      });
+  describe("Parse another", () => {
+    it("lets go of a running job so its outcome no longer lands here", async () => {
+      enqueueResponds({ jobId: "job-1", cached: false });
+      const { result } = await startParse();
 
-      const { result } = renderHook(() =>
-        useUrlParse({ locale: "en", telegramNotify: true }),
+      act(() => result.current.handleReset());
+      act(() =>
+        dispatchParseJobSettled({
+          jobId: "job-1",
+          status: "done",
+          recipeId: "recipe-1",
+          recipe,
+          alreadySaved: false,
+        }),
       );
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      await waitFor(() => {
-        expect(toastSuccess).toHaveBeenCalledWith(
-          "savedToApp",
-          expect.anything(),
-        );
-      });
-      // Server owns the save: no durable review entry, no watcher, no /process.
-      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
-      expect(addJobId).not.toHaveBeenCalled();
-      expect(mockFetch).not.toHaveBeenCalledWith(
-        "/api/parse-queue/process",
-        expect.anything(),
-      );
-      expect(trackEvent).toHaveBeenCalledWith("parse_succeeded", {
-        source: "url",
-      });
+      expect(result.current.saved).toBeNull();
       expect(result.current.jobId).toBeNull();
       expect(result.current.url).toBe("");
     });
 
-    it("surfaces the failure in-app when a notify parse fails", async () => {
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              telegramNotify: true,
-            }),
-          );
-        }
-        return Promise.resolve(
-          makeResponse({
-            status: "failed",
-            error: "Couldn't extract a recipe from this social post",
-            url: "https://example.com/recipe",
-          }),
-        );
-      });
+    it("clears the saved card", async () => {
+      enqueueResponds({ jobId: "job-1", cached: true, result: recipe });
+      const { result } = await startParse();
+      expect(result.current.saved).not.toBeNull();
 
-      const { result } = renderHook(() =>
-        useUrlParse({ locale: "en", telegramNotify: true }),
-      );
+      act(() => result.current.handleReset());
 
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      await waitFor(() => {
-        expect(trackEvent).toHaveBeenCalledWith("parse_failed", {
-          source: "url",
-          reason: "Couldn't extract a recipe from this social post",
-        });
-      });
-      expect(result.current.error).not.toBeNull();
-      expect(addJobId).not.toHaveBeenCalled();
-      expect(toastSuccess).not.toHaveBeenCalled();
-    });
-
-    it("toasts success immediately on a notify cache hit (saved server-side)", async () => {
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              cached: true,
-              result: {
-                title: "Cached Notify",
-                ingredients: [],
-                instructions: [],
-              },
-              telegramNotify: true,
-            }),
-          );
-        }
-        return Promise.resolve(makeResponse({}));
-      });
-
-      const { result } = renderHook(() =>
-        useUrlParse({ locale: "en", telegramNotify: true }),
-      );
-
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      expect(toastSuccess).toHaveBeenCalledWith(
-        "savedToApp",
-        expect.anything(),
-      );
-      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
-      expect(addJobId).not.toHaveBeenCalled();
-      expect(result.current.url).toBe("");
-    });
-
-    it("falls back to the review flow when the server does not confirm notify", async () => {
-      mockFetch.mockImplementation((requestUrl: string) => {
-        if (requestUrl === "/api/parse-queue") {
-          return Promise.resolve(
-            makeResponse({
-              jobId: "job-1",
-              uploadToken: null,
-              telegramNotify: false,
-            }),
-          );
-        }
-        if (requestUrl === "/api/parse-queue/process") {
-          return Promise.resolve(makeResponse({}));
-        }
-        return Promise.resolve(makeResponse({ status: "pending" }));
-      });
-
-      const { result } = renderHook(() =>
-        useUrlParse({ locale: "en", telegramNotify: true }),
-      );
-
-      act(() => {
-        result.current.setUrl("https://example.com/recipe");
-      });
-      await act(async () => {
-        await result.current.handleParse();
-      });
-
-      expect(addJobId).toHaveBeenCalledWith("job-1", null);
-      expect(toastSuccess).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("completion guard", () => {
-    it("does not re-run side effects when the watcher already handled the job", async () => {
-      claimJobCompletion.mockReturnValue(false);
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      mockFetch.mockResolvedValue(
-        makeResponse({
-          status: "done",
-          result: { title: "Test Recipe", ingredients: [], instructions: [] },
-          url: "https://example.com/recipe",
-        }),
-      );
-
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
-
-      await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-      await act(async () => {
-        await Promise.resolve();
-      });
-
-      expect(result.current.result).toBeNull();
-      expect(trackEvent).not.toHaveBeenCalledWith("parse_succeeded", {
-        source: "url",
-      });
-    });
-
-    it("stops polling when unmounted while a status check is in flight", async () => {
-      vi.useFakeTimers();
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      let resolveFetch: (res: Response) => void = () => {};
-      mockFetch.mockReturnValueOnce(
-        new Promise<Response>((resolve) => {
-          resolveFetch = resolve;
-        }),
-      );
-      mockFetch.mockResolvedValue(makeResponse({ status: "pending" }));
-      const { unmount } = renderHook(() => useUrlParse({ locale: "en" }));
-
-      unmount();
-      resolveFetch(makeResponse({ status: "pending" }));
-      await vi.advanceTimersByTimeAsync(10_000);
-
-      expect(mockFetch).toHaveBeenCalledOnce();
-    });
-
-    it("lets go of a running job on Parse another but keeps it registered", async () => {
-      vi.useFakeTimers();
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      mockFetch.mockResolvedValue(makeResponse({ status: "processing" }));
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
-      await vi.advanceTimersByTimeAsync(0);
-
-      await act(() => result.current.handleReset());
-      mockFetch.mockClear();
-      await vi.advanceTimersByTimeAsync(10_000);
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(removeJobId).not.toHaveBeenCalled();
-      expect(result.current.jobId).toBeNull();
-    });
-
-    it("ignores the abandoned job's result when it lands after Parse another", async () => {
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-      let resolveFetch!: (res: Response) => void;
-      mockFetch.mockReturnValueOnce(
-        new Promise<Response>((resolve) => {
-          resolveFetch = resolve;
-        }),
-      );
-      const { result } = renderHook(() => useUrlParse({ locale: "en" }));
-
-      await act(() => result.current.handleReset());
-      resolveFetch(
-        makeResponse({
-          status: "done",
-          result: { title: "Old Recipe", ingredients: [], instructions: [] },
-        }),
-      );
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(claimJobCompletion).not.toHaveBeenCalled();
-      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
-    });
-
-    it("does not claim completion when unmounted before the job finishes", async () => {
-      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
-
-      let resolveFetch!: (res: Response) => void;
-      mockFetch.mockReturnValueOnce(
-        new Promise<Response>((resolve) => {
-          resolveFetch = resolve;
-        }),
-      );
-
-      const { unmount } = renderHook(() => useUrlParse({ locale: "en" }));
-
-      unmount();
-
-      resolveFetch(
-        makeResponse({
-          status: "done",
-          result: { title: "Test Recipe", ingredients: [], instructions: [] },
-          url: "https://example.com/recipe",
-        }),
-      );
-
-      await act(async () => {
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-
-      expect(claimJobCompletion).not.toHaveBeenCalled();
-      expect(db.parsedRecipes.add).not.toHaveBeenCalled();
+      expect(result.current.saved).toBeNull();
     });
   });
 });

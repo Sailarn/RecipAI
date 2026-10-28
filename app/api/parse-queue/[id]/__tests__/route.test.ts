@@ -11,6 +11,11 @@ vi.mock("@/db/schema/parse-jobs", () => ({
   parseJobs: {},
 }));
 
+const findRecipeIdBySource = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/parse-recipe/find-recipe-by-source", () => ({
+  findRecipeIdBySource,
+}));
+
 const failStaleParseJobs = vi.hoisted(() =>
   vi.fn().mockResolvedValue(undefined),
 );
@@ -153,6 +158,50 @@ describe("GET /api/parse-queue/[id]", () => {
 
       expect(failStaleParseJobs).not.toHaveBeenCalled();
       expect(body.status).toBe(PARSE_JOB_STATUS.PENDING);
+    });
+  });
+
+  describe("saved recipe", () => {
+    it("points a finished signed-in link import at the saved recipe", async () => {
+      findRecipeIdBySource.mockResolvedValue("recipe-9");
+      setupSelectChain([
+        {
+          id: "job-1",
+          userId: "user-1",
+          url: "https://example.com/r",
+          status: PARSE_JOB_STATUS.DONE,
+          result: { title: "Soup" },
+          updatedAt: new Date(),
+        },
+      ]);
+      const { req, params } = makeRequest("job-1");
+
+      const body = await (await GET(req, params)).json();
+
+      expect(findRecipeIdBySource).toHaveBeenCalledWith(
+        "user-1",
+        "https://example.com/r",
+      );
+      expect(body.savedRecipeId).toBe("recipe-9");
+    });
+
+    it("has no saved recipe for an anonymous job", async () => {
+      findRecipeIdBySource.mockClear();
+      setupSelectChain([
+        {
+          id: "job-1",
+          userId: null,
+          url: "https://example.com/r",
+          status: PARSE_JOB_STATUS.DONE,
+          updatedAt: new Date(),
+        },
+      ]);
+      const { req, params } = makeRequest("job-1");
+
+      const body = await (await GET(req, params)).json();
+
+      expect(findRecipeIdBySource).not.toHaveBeenCalled();
+      expect(body.savedRecipeId).toBeUndefined();
     });
   });
 });

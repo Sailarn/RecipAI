@@ -15,6 +15,9 @@ vi.mock("@/db/schema/recipes", () => ({ recipes: {} }));
 vi.mock("@/db/schema/push-subscriptions", () => ({ pushSubscriptions: {} }));
 vi.mock("drizzle-orm", () => ({ eq: vi.fn(), relations: vi.fn() }));
 vi.mock("@/lib/web-push", () => ({ sendPushNotification: vi.fn() }));
+vi.mock("@/lib/parse-recipe/find-recipe-by-source", () => ({
+  findRecipeIdBySource: vi.fn().mockResolvedValue(null),
+}));
 
 vi.mock("@/lib/upload/imagekit", () => ({
   uploadImageServer: vi.fn(),
@@ -313,6 +316,49 @@ describe("POST /api/parse-queue/process", () => {
 
       expect(captureError).toHaveBeenCalled();
       expect(db.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("saving to the library", () => {
+    it("saves a signed-in in-app parse before marking the job done", async () => {
+      const { updateChain, insertChain } = setupDb({
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: null,
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(insertChain.values).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "user-1",
+          title: "Pasta",
+          sourceUrl: "https://instagram.com/reel/abc",
+        }),
+      );
+      const doneCallIndex = updateChain.set.mock.calls.findIndex(
+        (call) => (call[0] as { status?: string }).status === "done",
+      );
+      expect(insertChain.values.mock.invocationCallOrder[0]).toBeLessThan(
+        updateChain.set.mock.invocationCallOrder[doneCallIndex],
+      );
+      expect(sendTelegramPhoto).not.toHaveBeenCalled();
+      expect(sendTelegramMessage).not.toHaveBeenCalled();
+    });
+
+    it("does not save an anonymous parse server-side", async () => {
+      const { insertChain } = setupDb({
+        ...baseJob,
+        userId: null,
+        telegramChatId: null,
+        pushEndpoint: null,
+      });
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(insertChain.values).not.toHaveBeenCalled();
     });
   });
 

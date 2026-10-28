@@ -1,10 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const values = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/db", () => ({
   db: { insert: vi.fn(() => ({ values })) },
 }));
 vi.mock("@/db/schema/recipes", () => ({ recipes: {} }));
+const findRecipeIdBySource = vi.hoisted(() => vi.fn());
+vi.mock("../find-recipe-by-source", () => ({ findRecipeIdBySource }));
 
 import { db } from "@/db";
 import type { ParsedRecipe } from "@/lib/db/schema";
@@ -23,15 +25,21 @@ const parsed = {
   category: "dinner",
 } as unknown as ParsedRecipe;
 
+beforeEach(() => {
+  vi.clearAllMocks();
+  findRecipeIdBySource.mockResolvedValue(null);
+});
+
 describe("saveParsedRecipeForUser", () => {
   it("inserts a recipe row for the user and returns its id", async () => {
-    const recipeId = await saveParsedRecipeForUser({
+    const { recipeId, alreadySaved } = await saveParsedRecipeForUser({
       userId: "user-1",
       parsed,
       sourceUrl: "https://example.com/recipe",
     });
 
     expect(typeof recipeId).toBe("string");
+    expect(alreadySaved).toBe(false);
     expect(db.insert).toHaveBeenCalledOnce();
     expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -63,5 +71,33 @@ describe("saveParsedRecipeForUser", () => {
         sourceUrl: null,
       }),
     );
+  });
+
+  it("returns the user's existing recipe for a link already imported", async () => {
+    findRecipeIdBySource.mockResolvedValue("existing-recipe");
+
+    const saved = await saveParsedRecipeForUser({
+      userId: "user-1",
+      parsed,
+      sourceUrl: "https://example.com/recipe?utm_source=x",
+    });
+
+    expect(findRecipeIdBySource).toHaveBeenCalledWith(
+      "user-1",
+      "https://example.com/recipe?utm_source=x",
+    );
+    expect(saved).toEqual({ recipeId: "existing-recipe", alreadySaved: true });
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("never de-duplicates an import without a link", async () => {
+    await saveParsedRecipeForUser({
+      userId: "user-1",
+      parsed,
+      sourceUrl: null,
+    });
+
+    expect(findRecipeIdBySource).not.toHaveBeenCalled();
+    expect(db.insert).toHaveBeenCalledOnce();
   });
 });

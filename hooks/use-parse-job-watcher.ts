@@ -3,28 +3,22 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { db } from "@/lib/db/db";
+import { authClient } from "@/lib/auth/auth-client";
 import { recordParseHistory } from "@/lib/db/parse-history";
-import { createParsedRecipeEntry } from "@/lib/db/parsed-recipes";
-import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { claimJobCompletion } from "@/lib/parse-job-completion";
-import { dispatchParsedRecipeCreated } from "@/lib/parse-job-events";
 import {
   getJobIds,
-  getPendingUploadToken,
   getUploadToken,
   removeJobId,
-  storePendingUploadToken,
 } from "@/lib/parse-job-storage";
-import {
-  doneParseHistoryEntry,
-  failedParseHistoryEntry,
-} from "@/lib/parse-recipe/parse-history-entry";
+import { announceFailedParse } from "@/lib/parse-recipe/announce-parse";
+import { completeLinkParse } from "@/lib/parse-recipe/complete-link-parse";
+import { failedParseHistoryEntry } from "@/lib/parse-recipe/parse-history-entry";
 import { api, routes } from "@/lib/routes";
+import { useTriggerSync } from "@/lib/sync-context";
 import { captureError, trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
-import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
 
 // Most parses finish within the first few polls, so start tight and back off
 // from there — a job that is still running after a minute is not going to
@@ -40,79 +34,55 @@ const NETWORK_RETRY_MS = 5_000;
 
 // A job the server still calls "processing" after this long is stuck. Give up
 // rather than polling for the lifetime of the tab, and leave a history entry so
-// the parse doesn't just vanish.
+// the parse doesn't just vanish. The server also fails such jobs on read.
 const MAX_WATCH_MS = 15 * 60_000;
 
+interface JobStatus {
+  status: string;
+  result: ParsedRecipe | null;
+  error: string | null;
+  url: string | null;
+  /** Set when the server already saved the recipe (signed-in imports). */
+  savedRecipeId?: string;
+}
+
 export function useParseJobWatcher() {
-  // useNavigate() returns a fresh object on every render, and the watcher
-  // re-renders on every navigation-stack change. Read both through refs so
-  // `poll` stays stable and the mount effect runs once. Re-running it used to
-  // clear every pending poll timer and then skip the already-watched jobs, so
-  // a navigation mid-parse silently stopped polling until the next app load.
+  // `t`, `navigate` and `triggerSync` are read through refs so `poll` stays
+  // stable and the mount effect runs once. Re-running it would clear every
+  // pending poll timer and then skip the already-watched jobs, so a navigation
+  // mid-parse would silently stop polling until the next app load.
   const t = useTranslations("parse");
   const tRef = useRef(t);
   tRef.current = t;
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
+  const triggerSync = useTriggerSync();
+  const triggerSyncRef = useRef(triggerSync);
+  triggerSyncRef.current = triggerSync;
+  const { data: session } = authClient.useSession();
+  const isSignedIn = Boolean(session);
   // Jobs that are already being polled (or have reached a terminal state), so
-  // a job announced twice (saved id + parse-job-created event) gets one poll
-  // loop, not two that both fire handleDone. Job IDs are unique per parse, so
-  // once seen here a job is never polled again for the lifetime of the watcher.
+  // a job announced twice (saved id + parse-job-created event + the server's
+  // active list) gets one poll loop, not several that all complete it. Job IDs
+  // are unique per parse, so once seen here a job is never polled again for
+  // the lifetime of the watcher.
   const watchedJobs = useRef<Set<string>>(new Set());
   const timeouts = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
-  const handleDone = useCallback(async (id: string, result: ParsedRecipe) => {
-    // Read and preserve the token before removeJobId wipes it.
+  const handleDone = useCallback(async (id: string, job: JobStatus) => {
     const uploadToken = getUploadToken(id) ?? undefined;
-    if (uploadToken) storePendingUploadToken(uploadToken);
     removeJobId(id);
-
-    const entry = createParsedRecipeEntry(result);
-
-    let imageUrl = entry.imageUrl;
-    // The image is uploaded to ImageKit at parse time, so the result usually
-    // already carries a stable URL + fileId; only re-upload if it doesn't.
-    let imageFileId = result.imageFileId;
-
-    if (imageUrl && !isImageKitUrl(imageUrl)) {
-      try {
-        const uploaded = await uploadImage(imageUrl, { uploadToken });
-        imageUrl = uploaded.url;
-        imageFileId = uploaded.fileId;
-      } catch {
-        // continue without image upload
-      }
-    }
-
-    const updatedEntry = { ...entry, imageUrl, imageFileId };
-    await db.parsedRecipes.add(updatedEntry);
-    dispatchParsedRecipeCreated({ jobId: id, entryId: updatedEntry.id });
-
-    toast(result.title, {
-      description: tRef.current("parsedTapToReview"),
-      duration: 10000,
-      closeButton: true,
-      action: {
-        label: tRef.current("reviewSave"),
-        onClick: async () => {
-          await saveParsedRecipe(
-            updatedEntry,
-            getPendingUploadToken() ?? undefined,
-          );
-          await db.parsedRecipes.delete(updatedEntry.id);
-          toast.success(tRef.current("savedShort"));
-        },
-      },
-      cancel: {
-        label: tRef.current("reviewEdit"),
-        onClick: () => {
-          trackEvent("parse_reviewed", undefined);
-          localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
-          db.parsedRecipes.delete(updatedEntry.id).catch(() => {});
-          const locale = window.location.pathname.split("/")[1];
-          navigateRef.current.push(routes.recipes.new(locale));
-        },
+    await completeLinkParse({
+      jobId: id,
+      recipe: job.result as ParsedRecipe,
+      jobUrl: job.url ?? "",
+      savedRecipeId: job.savedRecipeId,
+      uploadToken,
+      triggerSync: () => triggerSyncRef.current(),
+      labels: {
+        added: tRef.current("addedToRecipes"),
+        alreadySaved: tRef.current("alreadySaved"),
       },
     });
   }, []);
@@ -138,15 +108,21 @@ export function useParseJobWatcher() {
         navigateRef.current.push(routes.parseHistory(locale));
       };
 
-      const abandonStuckJob = (jobUrl: string | undefined) => {
-        if (!claimJobCompletion(id)) return;
+      const handleFailed = (jobUrl: string | null, rawError: string) => {
         removeJobId(id);
-        const timeoutReason = tRef.current("timedOut");
-        trackEvent("parse_failed", { source: "url", reason: timeoutReason });
-        recordParseHistory(
-          failedParseHistoryEntry(id, jobUrl ?? "", timeoutReason),
-        ).catch(() => {});
-        toast.error(timeoutReason, {
+        trackEvent("parse_failed", { source: "url", reason: rawError });
+        const historyEntry = failedParseHistoryEntry(
+          id,
+          jobUrl ?? "",
+          rawError,
+        );
+        recordParseHistory(historyEntry).catch(() => {});
+        announceFailedParse({
+          jobId: id,
+          title: historyEntry.title,
+          reason: historyEntry.reason ?? rawError,
+        });
+        toast.error(historyEntry.reason ?? rawError, {
           action: { label: tRef.current("details"), onClick: openParseHistory },
         });
       };
@@ -154,47 +130,28 @@ export function useParseJobWatcher() {
       const run = async () => {
         try {
           const res = await fetch(api.parseQueueJob(id));
-          const { status, result, error, url: jobUrl } = await res.json();
+          const job = (await res.json()) as JobStatus;
 
-          if (status === "done") {
-            // The inline parse page may have already handled this job.
+          if (job.status === "done") {
+            // The parse page may have already handled this job.
             if (!claimJobCompletion(id)) return;
-            const parsed = result as ParsedRecipe;
-            await handleDone(id, parsed);
-            trackEvent("parse_succeeded", { source: "url" });
-            recordParseHistory(
-              doneParseHistoryEntry(
-                id,
-                parsed.title,
-                parsed.sourceUrl ?? jobUrl,
-              ),
-            ).catch(() => {});
-          } else if (status === "failed") {
+            await handleDone(id, job);
+          } else if (job.status === "failed") {
             if (!claimJobCompletion(id)) return;
-            const rawError: string = error || tRef.current("failedGeneric");
-            removeJobId(id);
-            trackEvent("parse_failed", { source: "url", reason: rawError });
-            recordParseHistory(
-              failedParseHistoryEntry(id, jobUrl, rawError),
-            ).catch(() => {});
-            toast.error(rawError, {
-              action: {
-                label: tRef.current("details"),
-                onClick: openParseHistory,
-              },
-            });
+            handleFailed(job.url, job.error || tRef.current("failedGeneric"));
           } else if (Date.now() - startedAt >= MAX_WATCH_MS) {
-            abandonStuckJob(jobUrl);
+            if (!claimJobCompletion(id)) return;
+            handleFailed(job.url, tRef.current("timedOut"));
           } else {
             scheduleRetry(pollDelay, run);
             pollDelay = Math.min(pollDelay * POLL_BACKOFF, MAX_POLL_MS);
           }
         } catch (error) {
           // A network drop is expected — retry quietly. But a failure while
-          // online (the parse-status endpoint erroring, or a bug turning the
-          // completed parse into a local recipe in handleDone) would lose the
-          // parse with no signal, so surface it. The claimJobCompletion guard
-          // means a handleDone failure reports once, not on every retry.
+          // online (the parse-status endpoint erroring, or a bug saving the
+          // completed parse in handleDone) would lose the parse with no
+          // signal, so surface it. The claimJobCompletion guard means a
+          // handleDone failure reports once, not on every retry.
           if (typeof navigator !== "undefined" && navigator.onLine) {
             captureError(error, { tags: { source: "parse-job-watcher" } });
           }
@@ -226,6 +183,28 @@ export function useParseJobWatcher() {
       timeouts.current.clear();
     };
   }, [poll]);
+
+  // A signed-in user's parses can start anywhere — another device, the bot —
+  // so also follow every unfinished job the server knows about, on launch and
+  // whenever the app comes back to the foreground.
+  useEffect(() => {
+    if (!isSignedIn) return;
+    const followActiveJobs = () => {
+      fetch(api.parseQueueActive)
+        .then((res) => (res.ok ? res.json() : { jobs: [] }))
+        .then(({ jobs }: { jobs: Array<{ id: string }> }) => {
+          for (const job of jobs) poll(job.id);
+        })
+        // Offline is a normal state; the next foreground tries again.
+        .catch(() => {});
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") followActiveJobs();
+    };
+    followActiveJobs();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [isSignedIn, poll]);
 
   return { poll };
 }

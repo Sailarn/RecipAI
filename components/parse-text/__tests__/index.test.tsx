@@ -2,7 +2,7 @@
  * @vitest-environment happy-dom
  */
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ParseText } from "../index";
 
@@ -18,18 +18,36 @@ vi.mock("@/components/parse-background-banner", () => ({
   ParseBackgroundBanner: () => <div data-testid="parsing-banner" />,
 }));
 
-const { parseRecipeFromText, saveDirectParseResult, recordParseHistory } =
+const { parseRecipeFromText, saveParsedResult, recordParseHistory } =
   vi.hoisted(() => ({
     parseRecipeFromText: vi.fn(),
-    saveDirectParseResult: vi.fn(),
+    saveParsedResult: vi.fn(),
     recordParseHistory: vi.fn(),
   }));
 vi.mock("@/lib/parse-recipe/text", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/parse-recipe/text")>()),
   parseRecipeFromText,
 }));
-vi.mock("@/lib/parse-recipe/save-direct-parse-result", () => ({
-  saveDirectParseResult,
+vi.mock("@/lib/db/save-parsed-recipe", () => ({ saveParsedResult }));
+vi.mock("@/lib/parse-recipe/announce-parse", () => ({
+  announceSavedParse: vi.fn(),
+  announceFailedParse: vi.fn(),
+}));
+vi.mock("@/components/parse-saved-card", () => ({
+  ParseSavedCard: ({
+    recipe,
+    onReset,
+  }: {
+    recipe: { title: string };
+    onReset: () => void;
+  }) => (
+    <div data-testid="saved-card">
+      {recipe.title}
+      <button type="button" onClick={onReset}>
+        parse another
+      </button>
+    </div>
+  ),
 }));
 vi.mock("@/lib/db/parse-history", () => ({ recordParseHistory }));
 
@@ -53,7 +71,10 @@ function typeRecipe(text: string) {
 
 beforeEach(() => {
   recordParseHistory.mockResolvedValue(undefined);
-  saveDirectParseResult.mockResolvedValue(undefined);
+  saveParsedResult.mockResolvedValue({
+    recipeId: "recipe-1",
+    alreadySaved: false,
+  });
 });
 
 describe("ParseText", () => {
@@ -79,19 +100,16 @@ describe("ParseText", () => {
   });
 
   describe("parsing", () => {
-    it("sends the pasted text and queues the result for review", async () => {
+    it("sends the pasted text, saves it and shows the saved card", async () => {
       parseRecipeFromText.mockResolvedValue(recipe);
       render(<ParseText locale="en" />);
       typeRecipe(recipeText);
 
       fireEvent.click(screen.getByRole("button", { name: /analyzeWithAi/ }));
 
-      await waitFor(() =>
-        expect(saveDirectParseResult).toHaveBeenCalledWith(
-          recipe,
-          "en",
-          expect.any(Object),
-        ),
+      expect(await screen.findByTestId("saved-card")).toBeInTheDocument();
+      expect(saveParsedResult).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceUrl: "" }),
       );
       expect(parseRecipeFromText).toHaveBeenCalledWith(
         recipeText,

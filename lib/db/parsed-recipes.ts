@@ -1,5 +1,4 @@
 import { generateId } from "../utils";
-import { db } from "./db";
 import type { ParsedRecipe, ParsedRecipeEntry } from "./schema";
 
 export function createParsedRecipeEntry(
@@ -16,16 +15,9 @@ export function createParsedRecipeEntry(
     instructions: recipe.instructions,
     imageUrl: recipe.imageUrl,
     imageFileId: recipe.imageFileId,
-    sourceUrl: recipe.sourceUrl,
+    // An import with no link (photo, text) carries an empty sourceUrl.
+    sourceUrl: recipe.sourceUrl || undefined,
     category: recipe.category,
     createdAt: new Date(),
   };
-}
-
-export async function addParsedRecipeResult(
-  recipe: ParsedRecipe,
-): Promise<ParsedRecipeEntry> {
-  const entry = createParsedRecipeEntry(recipe);
-  await db.parsedRecipes.add(entry);
-  return entry;
 }

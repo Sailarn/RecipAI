@@ -29,6 +29,8 @@ function reportFailure(source: string) {
  *   Guarded once-per-device by the "vocabReconciled_v<N>" key, bumped after
  *   each server-side vocab merge. Must ship *after* that merge has run, or the
  *   re-pull restores the old duplicates.
+ * - **save-leftover-drafts** — parses now save themselves; saves any drafts
+ *   still waiting in `parsedRecipes` from the old review flow.
  */
 export function runStartupMigrations(): void {
   import("@/lib/db/renormalize-recipes")
@@ -42,6 +44,10 @@ export function runStartupMigrations(): void {
   import("@/lib/db/reconcile-vocab")
     .then((module) => module.reconcileVocab())
     .catch(reportFailure("reconcile-vocab"));
+
+  import("@/lib/db/save-leftover-drafts")
+    .then((module) => module.saveLeftoverParseDrafts())
+    .catch(reportFailure("save-leftover-drafts"));
 }
 
 /**

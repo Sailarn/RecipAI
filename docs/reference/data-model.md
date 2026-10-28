@@ -13,12 +13,13 @@ RecipAI keeps two stores in sync: **Dexie.js** (IndexedDB, local working store �
 | Table | Primary key | Indexed fields | Type |
 |---|---|---|---|
 | `recipes` | `id` | `title`, `createdAt`, `updatedAt`, `status` | `Recipe` |
-| `parsedRecipes` | `id` | `createdAt` | `ParsedRecipeEntry` |
+| `parsedRecipes` | `id` | `createdAt` | `ParsedRecipeEntry` — legacy review drafts; emptied by the `save-leftover-drafts` startup migration, no longer written |
 | `collections` | `id` | `name`, `createdAt` | `Collection` |
 | `notifications` | `id` | `entityId`, `entityType`, `type`, `createdAt` | `SyncNotification` |
 | `ingredients` | `id` | `category` | `VocabularyIngredient` |
 | `pantry` | `id` | `ingredientId` | `PantryItem` |
 | `parseHistory` | `id` | `createdAt`, `status` | `ParseHistoryEntry` |
+| `parseNotifications` | `id` (the parse job id) | `createdAt` | `ParseNotification` — the bell's finished-parse entries |
 
 ### Key types (`lib/db/schema.ts`)
 
@@ -191,6 +192,7 @@ interface SyncNotification {
 | 10 | Recreate `pantry` with `id` as primary key |
 | 11 | + `parseHistory` |
 | 12 | Dedup pantry rows by `ingredientId` (upgrade callback; schema unchanged) |
+| 13 | + `parseNotifications` |
 
 To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-migration.md).
 

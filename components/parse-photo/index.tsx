@@ -5,28 +5,29 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { AiButton } from "@/components/ui/ai-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { ParsedRecipe } from "@/lib/db/schema";
 import { useDirectParse } from "@/lib/hooks/use-direct-parse";
 import { parseRecipeFromPhoto } from "@/lib/parse-recipe/photo";
 import { ParseBackgroundBanner } from "../parse-background-banner";
+import { ParseSavedCard } from "../parse-saved-card";
 
 interface ParsePhotoProps {
   locale: string;
-  /** Optional override — when provided, called directly instead of saving to DB + toast */
-  onResult?: (recipe: ParsedRecipe) => void;
 }
 
-export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
+export function ParsePhoto({ locale }: ParsePhotoProps) {
   const t = useTranslations("parse");
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const { isParsing, error, startParse, stopWaiting, clearError } =
-    useDirectParse({
-      locale,
-      source: "photo",
-      onResult,
-    });
+  const {
+    isParsing,
+    error,
+    saved,
+    startParse,
+    stopWaiting,
+    clearError,
+    clearSaved,
+  } = useDirectParse({ locale, source: "photo" });
 
   useEffect(() => {
     return () => {
@@ -58,6 +59,10 @@ export function ParsePhoto({ locale, onResult }: ParsePhotoProps) {
 
   if (isParsing) {
     return <ParseBackgroundBanner locale={locale} onReset={stopWaiting} />;
+  }
+
+  if (saved) {
+    return <ParseSavedCard locale={locale} {...saved} onReset={clearSaved} />;
   }
 
   return (

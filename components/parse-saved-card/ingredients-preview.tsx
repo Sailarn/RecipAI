@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/config";
 import type { ParsedIngredient } from "@/lib/db/schema";
 import { unitLabel } from "@/lib/units";
@@ -13,6 +13,7 @@ interface IngredientsPreviewProps {
 
 export function IngredientsPreview({ ingredients }: IngredientsPreviewProps) {
   const locale = useLocale() as Locale;
+  const t = useTranslations("parse.savedCard");
 
   if (ingredients.length === 0) return null;
 
@@ -22,7 +23,7 @@ export function IngredientsPreview({ ingredients }: IngredientsPreviewProps) {
   return (
     <div className="mb-3">
       <p className="text-[10px] font-semibold text-[var(--fg-3)] uppercase tracking-[0.06em] mb-[6px]">
-        Ingredients ({ingredients.length})
+        {t("ingredients", { count: ingredients.length })}
       </p>
       <ul className="flex flex-col gap-[2px]">
         {visible.map((ingredient) => (
@@ -41,7 +42,9 @@ export function IngredientsPreview({ ingredients }: IngredientsPreviewProps) {
           </li>
         ))}
         {remaining > 0 && (
-          <li className="text-[11px] text-[var(--fg-3)]">+{remaining} more</li>
+          <li className="text-[11px] text-[var(--fg-3)]">
+            {t("moreIngredients", { count: remaining })}
+          </li>
         )}
       </ul>
     </div>

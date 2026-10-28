@@ -56,11 +56,11 @@ interface SaveAndSendRecipeOptions {
 }
 
 /**
- * Saves a parse result straight into the user's library and messages them the
- * recipe card — the completion path for every Telegram-originated parse, which
- * skips the in-app review step. A failed save throws; a failed message does
- * not, since the recipe is saved by then and reporting the parse as failed
- * would be wrong.
+ * Saves a parse result straight into the user's library (or finds the recipe
+ * already imported from that link) and messages them the recipe card — the
+ * completion path for every Telegram-originated parse. A failed save throws; a
+ * failed message does not, since the recipe is saved by then and reporting the
+ * parse as failed would be wrong.
  */
 export async function saveAndSendRecipe({
   userId,
@@ -69,7 +69,7 @@ export async function saveAndSendRecipe({
   sourceUrl,
   req,
 }: SaveAndSendRecipeOptions): Promise<void> {
-  const recipeId = await saveParsedRecipeForUser({
+  const { recipeId, alreadySaved } = await saveParsedRecipeForUser({
     userId,
     parsed,
     sourceUrl,
@@ -89,7 +89,10 @@ export async function saveAndSendRecipe({
     await sendRecipeCard({
       chatId,
       imageUrl: cardData.imageUrl,
-      caption: recipeCardCaption(cardData, "✅ Saved to RecipAI"),
+      caption: recipeCardCaption(
+        cardData,
+        alreadySaved ? "📚 Already in RecipAI" : "✅ Saved to RecipAI",
+      ),
       replyMarkup: recipeCardButton(recipeId),
     });
   } catch (notifyError) {

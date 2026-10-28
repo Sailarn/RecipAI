@@ -231,21 +231,14 @@
       "dismissSuggestion": "Dismiss suggestion",
       "pasteEmpty": "No link found in your clipboard"
     },
-    "parsedTapToReview": "Recipe parsed — tap to review",
-    "savedShort": "Recipe saved!",
-    "reviewSave": "Save",
-    "reviewEdit": "Edit",
     "details": "Details",
     "failedGeneric": "Failed to parse recipe",
     "timedOut": "Parsing timed out — the job never finished.",
     "noImports": "No imports yet",
     "noImportsHint": "Recipes you import — and any that fail — will show up here.",
-    "fallbackTitle": "Recipe parsed",
     "processFailed": "Failed to process parsed recipe",
     "retryFailed": "Failed to retry import",
-    "savedToApp": "Saved to RecipAI",
     "addedToRecipes": "Added to your recipes.",
-    "statusCheckFailed": "Network error while checking status",
     "invalidUrl": "Please enter a valid URL including https://",
     "jobCreateFailed": "Failed to create parse job",
     "parseFailedShort": "Parse failed",
@@ -261,7 +254,20 @@
     "retrying": "Retrying…",
     "pageTitle": "Import Recipe",
     "infoWorks": "Works with any recipe website — just paste the URL below.",
-    "infoExamples": "Examples: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com"
+    "infoExamples": "Examples: silpo.ua, allrecipes.com, bbcgoodfood.com, cooking.nytimes.com",
+    "alreadySaved": "Already in your recipes.",
+    "networkError": "Network error. Please try again.",
+    "savedCard": {
+      "steps": "{count, plural, one {# step} other {# steps}}",
+      "ingredients": "Ingredients ({count})",
+      "moreIngredients": "+{count} more",
+      "open": "Open recipe",
+      "parseAnother": "Parse another"
+    },
+    "notifications": {
+      "saved": "Saved to your recipes",
+      "dismiss": "Dismiss"
+    }
   },
   "pantry": {
     "title": "Pantry",

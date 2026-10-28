@@ -31,7 +31,9 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/embed/local-provider.ts` | Lazy in-process e5-small provider used on the Pi. |
 | `lib/embed/http-provider.ts` | Remote `/api/embed` provider with shared-secret header and per-host timeout. |
 | `lib/db/vocab-vector-search.ts` | Exact pgvector top-two search plus similarity threshold and runner-up-gap decision. |
-| `lib/parse-recipe/save-direct-parse-result.ts` | Queues a photo or text parse result for review: mirrors a non-ImageKit image, adds it to `parsedRecipes`, and shows the Save/Edit toast. |
+| `lib/parse-recipe/complete-link-parse.ts` | Everything after a finished link import: pull a server-saved recipe via sync or save on the device, record history, announce. Used by the watcher and the parse page's cache hit. |
+| `lib/parse-recipe/announce-parse.ts` | `announceSavedParse` / `announceFailedParse` — the bell entry, the plain toast, and the `parse-job-settled` event. |
+| `lib/parse-recipe/find-recipe-by-source.ts` | Server-side "has this user already imported this link?" lookup (normalized URL), behind the no-duplicate save. |
 | `lib/scrapers/phantomjs.ts` | Primary scraper — JS-rendered HTML via PhantomJsCloud. |
 | `lib/scrapers/scrape-do.ts` | Fallback scraper via scrape.do. |
 | `lib/scrapers/apify.ts` | Social-content scraper via Apify actors for Instagram, TikTok, YouTube, and X/Twitter. |
@@ -57,7 +59,9 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/migrate-recipe-shape.ts` | `migrateLegacyRecipeShapes()` — one-time-per-recipe upgrade from legacy single-`modifier`/string-`section` to `modifiers[]` + structured `sections`/`sectionId`. Run from `use-sync-on-login.ts`. |
 | `lib/db/collections.ts` | CRUD for collections. |
 | `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
-| `lib/db/parsed-recipes.ts` | Builds and stores durable parsed-recipe notification rows shared by the parse page and bell sheet. |
+| `lib/db/parsed-recipes.ts` | `createParsedRecipeEntry()` — the save-ready shape of a parse result. |
+| `lib/db/parse-notifications.ts` | Writes and dismisses the bell's finished-parse entries (`parseNotifications`). |
+| `lib/db/save-leftover-drafts.ts` | Startup migration: saves drafts left in `parsedRecipes` from the old review flow. |
 | `lib/db/parse-history.ts` | `recordParseHistory`, `bulkPutParseHistory`, `getParseHistory`, `clearParseHistory`. |
 | `lib/db/ingredients.ts` | Resolve a raw ingredient against the local vocabulary or create a deduplicated provisional entry. |
 | `lib/db/sync-vocab.ts` | Pull confirmed vocabulary deltas into Dexie, with watermark overlap and version-based full refresh. |
@@ -71,7 +75,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/sync-queue.ts` | Sends each id's sync requests in call order (recipes, collections, pantry). |
 | `lib/db/sync-diff.ts` | Generic diff engine: `computeDiff<T>(local, server)` → server-only / local-only / conflicted / identical buckets. |
 | `lib/db/reconcile-plan.ts` | `planReconcile<T>(local, server, opts)` — server-wins planner built on `computeDiff`; returns `{ applyFromServer, pushToServer, deleteLocalIds }` keyed on the `syncedAt` marker. Drives the silent reconciliation in `use-sync-on-login.ts`. |
-| `lib/db/save-parsed-recipe.ts` | Maps `ParsedRecipe` → Dexie recipe + triggers background image upload. |
+| `lib/db/save-parsed-recipe.ts` | On-device parse saves: `saveParsedResult()` (skips a link already in the library) and `saveParsedRecipe()` (maps a parse → Dexie recipe + background image upload). |
 
 ---
 
@@ -201,7 +205,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 |---|---|
 | `hooks/use-sync-on-login.ts` | Owns single-flight reconciliation on sign-in, foreground return, and manual refresh: diffs recipes/collections and syncs ingredients, pantry, and parse history. Mounted app-lifetime via `lib/sync-context.tsx`, not per-page. |
 | `lib/sync-context.tsx` | `SyncProvider` (mounts `useSyncOnLogin` once in `ClientShell`) + `useTriggerSync()` (pull-to-refresh consumes this, not the hook directly). |
-| `hooks/use-parse-job-watcher.ts` | Polls a parse job until done/failed, records history, and creates parsed-recipe bell entries for background completions. |
+| `hooks/use-parse-job-watcher.ts` | Polls every parse job this device started (and, signed in, the server's unfinished link imports) until done/failed, then completes it via `completeLinkParse`. |
 | `hooks/` (rest) | UI hooks: long press, pull to refresh, recipe filter/matcher, recipes page state, live-query transition. |
 | `lib/hooks/use-clipboard-link.ts` | Clipboard support for the import field: `pasteLink()` (gesture-driven, Telegram SDK then browser API) and an opportunistic `suggestion` of a copied link, read silently only where `clipboard-read` is already granted. |
 | `lib/hooks/` | PWA install/push, telemetry identity, public vocabulary sync, startup normalization, clipboard link, and URL-parse hooks. |

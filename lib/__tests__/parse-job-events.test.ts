@@ -3,41 +3,47 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+import type { ParsedRecipe } from "@/lib/db/schema";
 import {
-  dispatchParsedRecipeCreated,
-  PARSED_RECIPE_CREATED_EVENT,
-  parseParsedRecipeCreatedEvent,
+  dispatchParseJobSettled,
+  PARSE_JOB_SETTLED_EVENT,
+  parseJobSettledDetail,
 } from "../parse-job-events";
 
-describe("parsed-recipe-created event", () => {
-  it("round-trips the job and entry ids through window", () => {
+const recipe = { title: "Soup" } as ParsedRecipe;
+
+describe("parse-job-settled event", () => {
+  it("round-trips a saved outcome through window", () => {
     const listener = vi.fn();
-    window.addEventListener(PARSED_RECIPE_CREATED_EVENT, listener);
+    window.addEventListener(PARSE_JOB_SETTLED_EVENT, listener);
 
-    dispatchParsedRecipeCreated({ jobId: "job-1", entryId: "entry-1" });
-
-    window.removeEventListener(PARSED_RECIPE_CREATED_EVENT, listener);
-    expect(parseParsedRecipeCreatedEvent(listener.mock.calls[0][0])).toEqual({
+    dispatchParseJobSettled({
       jobId: "job-1",
-      entryId: "entry-1",
+      status: "done",
+      recipeId: "recipe-1",
+      recipe,
+      alreadySaved: false,
+    });
+
+    window.removeEventListener(PARSE_JOB_SETTLED_EVENT, listener);
+    expect(parseJobSettledDetail(listener.mock.calls[0][0])).toEqual({
+      jobId: "job-1",
+      status: "done",
+      recipeId: "recipe-1",
+      recipe,
+      alreadySaved: false,
     });
   });
 
   it.each([
-    ["no detail", new Event(PARSED_RECIPE_CREATED_EVENT)],
-    [
-      "a missing entry id",
-      new CustomEvent(PARSED_RECIPE_CREATED_EVENT, {
-        detail: { jobId: "job-1" },
-      }),
-    ],
+    ["no detail", new Event(PARSE_JOB_SETTLED_EVENT)],
     [
       "a non-string job id",
-      new CustomEvent(PARSED_RECIPE_CREATED_EVENT, {
-        detail: { jobId: 1, entryId: "entry-1" },
+      new CustomEvent(PARSE_JOB_SETTLED_EVENT, {
+        detail: { jobId: 1, status: "failed", reason: "x" },
       }),
     ],
   ])("rejects an event with %s", (_label, event) => {
-    expect(parseParsedRecipeCreatedEvent(event)).toBeNull();
+    expect(parseJobSettledDetail(event)).toBeNull();
   });
 });

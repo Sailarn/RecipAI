@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ParseBackgroundBanner } from "@/components/parse-background-banner";
 import { ParsePhoto } from "@/components/parse-photo";
+import { ParseSavedCard } from "@/components/parse-saved-card";
 import { ParseText } from "@/components/parse-text";
 import { useTelegramNotify } from "@/lib/hooks/use-telegram-notify";
 import { useUrlParse } from "@/lib/hooks/use-url-parse";
 import { ParseForm } from "./components/parse-form";
 import { ParseInfoBanner } from "./components/parse-info-banner";
-import { ParseResult } from "./components/parse-result";
 
 type Tab = "url" | "photo" | "text";
 
@@ -28,12 +28,11 @@ export default function ParseRecipePage() {
     setUrl,
     loading,
     error,
-    result,
+    saved,
     jobId,
     handleParse,
-    handleSave,
     handleReset,
-  } = useUrlParse({ locale, telegramNotify: shouldNotify });
+  } = useUrlParse({ telegramNotify: shouldNotify });
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-[100px]">
@@ -71,14 +70,16 @@ export default function ParseRecipePage() {
             error={error}
             onSubmit={handleParse}
           />
-          {result && (
-            <ParseResult
-              result={result}
-              onSave={handleSave}
+          {saved && (
+            <ParseSavedCard
+              locale={locale}
+              recipeId={saved.recipeId}
+              recipe={saved.recipe}
+              alreadySaved={saved.alreadySaved}
               onReset={handleReset}
             />
           )}
-          {jobId && !result && (
+          {jobId && !saved && (
             <ParseBackgroundBanner locale={locale} onReset={handleReset} />
           )}
         </>

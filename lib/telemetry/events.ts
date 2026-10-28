@@ -13,7 +13,8 @@ export type RecipeViewSource =
   | "search"
   | "collection"
   | "deep_link"
-  | "shared_save";
+  | "shared_save"
+  | "import";
 
 /** Every analytics event in the app. Adding an event = adding an entry here.
  *  Inline event-name strings at call sites are forbidden. */
@@ -46,8 +47,8 @@ export type TelemetryEvents = {
       | "no_content"
       | "unexpected";
   };
-  parse_reviewed: undefined;
-  recipe_saved: { source: "parse" | "edit" };
+  // auto = a parse saved itself; parse = the /recipes/new review form.
+  recipe_saved: { source: "auto" | "parse" | "edit" };
   ingredients_normalized: { matched: number; total: number };
   embed_match: {
     total: number;

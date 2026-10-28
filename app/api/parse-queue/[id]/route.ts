@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
+import { findRecipeIdBySource } from "@/lib/parse-recipe/find-recipe-by-source";
 import {
   failStaleParseJobs,
   isStaleParseJob,
@@ -31,11 +32,19 @@ export async function GET(
       });
     }
 
+    // A finished signed-in link import was saved server-side; point the client
+    // at that recipe so it can open it.
+    const savedRecipeId =
+      job.status === PARSE_JOB_STATUS.DONE && job.userId && job.url
+        ? await findRecipeIdBySource(job.userId, job.url)
+        : null;
+
     return NextResponse.json({
       status: job.status,
       result: job.result,
       error: job.error,
       url: job.url,
+      ...(savedRecipeId ? { savedRecipeId } : {}),
     });
   } catch (error) {
     return ApiError.internal(error, req);

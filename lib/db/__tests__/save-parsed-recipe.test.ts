@@ -1,7 +1,8 @@
 import "./test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { saveParsedRecipe } from "../save-parsed-recipe";
-import type { ParsedRecipeEntry } from "../schema";
+import { db } from "../db";
+import { saveParsedRecipe, saveParsedResult } from "../save-parsed-recipe";
+import type { ParsedRecipe, ParsedRecipeEntry, Recipe } from "../schema";
 
 vi.mock("../recipes", () => ({
   createRecipe: vi.fn().mockResolvedValue("new-recipe-id"),
@@ -66,12 +67,16 @@ describe("saveParsedRecipe", () => {
       expect(arg.category).toBe("main");
     });
 
-    it("tracks recipe_saved with source parse", async () => {
+    it("tracks recipe_saved as an automatic save", async () => {
       await saveParsedRecipe(baseEntry);
 
       expect(trackEvent).toHaveBeenCalledWith("recipe_saved", {
-        source: "parse",
+        source: "auto",
       });
+    });
+
+    it("returns the new recipe's id", async () => {
+      expect(await saveParsedRecipe(baseEntry)).toBe("new-recipe-id");
     });
 
     it("computes totalTime as prepTime + cookTime", async () => {
@@ -271,5 +276,55 @@ describe("saveParsedRecipe", () => {
       // Unblock it so the test doesn't leave a dangling promise
       resolveNormalize({ matched: 0, total: 0 });
     });
+  });
+});
+
+describe("saveParsedResult", () => {
+  const parsed: ParsedRecipe = {
+    title: "Soup",
+    servings: 2,
+    ingredients: [{ item: "water" }],
+    instructions: [{ order: 1, instruction: "Boil" }],
+    sourceUrl: "https://www.instagram.com/p/ABC/?igsh=1",
+  };
+
+  beforeEach(async () => {
+    await db.recipes.clear();
+    vi.mocked(createRecipe).mockClear();
+  });
+
+  it("saves a new link into the library", async () => {
+    const saved = await saveParsedResult(parsed);
+
+    expect(saved).toEqual({ recipeId: "new-recipe-id", alreadySaved: false });
+    expect(createRecipe).toHaveBeenCalledOnce();
+  });
+
+  it("returns the existing recipe for a link already in the library", async () => {
+    await db.recipes.add({
+      id: "existing",
+      title: "Soup",
+      sourceUrl: "https://instagram.com/reel/ABC",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Recipe);
+
+    const saved = await saveParsedResult(parsed);
+
+    expect(saved).toEqual({ recipeId: "existing", alreadySaved: true });
+    expect(createRecipe).not.toHaveBeenCalled();
+  });
+
+  it("never de-duplicates an import without a link", async () => {
+    await db.recipes.add({
+      id: "existing",
+      title: "Soup",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Recipe);
+
+    await saveParsedResult({ ...parsed, sourceUrl: "" });
+
+    expect(createRecipe).toHaveBeenCalledOnce();
   });
 });

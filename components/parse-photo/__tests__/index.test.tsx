@@ -2,7 +2,7 @@
  * @vitest-environment happy-dom
  */
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ParsePhoto } from "../index";
 
@@ -18,15 +18,33 @@ vi.mock("@/components/parse-background-banner", () => ({
   ParseBackgroundBanner: () => <div data-testid="parsing-banner" />,
 }));
 
-const { parseRecipeFromPhoto, saveDirectParseResult, recordParseHistory } =
+const { parseRecipeFromPhoto, saveParsedResult, recordParseHistory } =
   vi.hoisted(() => ({
     parseRecipeFromPhoto: vi.fn(),
-    saveDirectParseResult: vi.fn(),
+    saveParsedResult: vi.fn(),
     recordParseHistory: vi.fn(),
   }));
 vi.mock("@/lib/parse-recipe/photo", () => ({ parseRecipeFromPhoto }));
-vi.mock("@/lib/parse-recipe/save-direct-parse-result", () => ({
-  saveDirectParseResult,
+vi.mock("@/lib/db/save-parsed-recipe", () => ({ saveParsedResult }));
+vi.mock("@/lib/parse-recipe/announce-parse", () => ({
+  announceSavedParse: vi.fn(),
+  announceFailedParse: vi.fn(),
+}));
+vi.mock("@/components/parse-saved-card", () => ({
+  ParseSavedCard: ({
+    recipe,
+    onReset,
+  }: {
+    recipe: { title: string };
+    onReset: () => void;
+  }) => (
+    <div data-testid="saved-card">
+      {recipe.title}
+      <button type="button" onClick={onReset}>
+        parse another
+      </button>
+    </div>
+  ),
 }));
 vi.mock("@/lib/db/parse-history", () => ({ recordParseHistory }));
 
@@ -52,7 +70,10 @@ beforeEach(() => {
   URL.createObjectURL = vi.fn(() => "blob:preview");
   URL.revokeObjectURL = vi.fn();
   recordParseHistory.mockResolvedValue(undefined);
-  saveDirectParseResult.mockResolvedValue(undefined);
+  saveParsedResult.mockResolvedValue({
+    recipeId: "recipe-1",
+    alreadySaved: false,
+  });
 });
 
 describe("ParsePhoto", () => {
@@ -67,20 +88,20 @@ describe("ParsePhoto", () => {
   });
 
   describe("on a successful parse", () => {
-    it("parses the chosen photo and queues the result for review", async () => {
+    it("parses the chosen photo, saves it and shows the saved card", async () => {
       parseRecipeFromPhoto.mockResolvedValue(recipe);
       const { container } = render(<ParsePhoto locale="en" />);
       const file = choosePhoto(container);
 
       fireEvent.click(screen.getByRole("button", { name: /analyzeWithAi/ }));
 
-      await waitFor(() =>
-        expect(saveDirectParseResult).toHaveBeenCalledWith(
-          recipe,
-          "en",
-          expect.objectContaining({ fallbackTitle: "fallbackTitle" }),
-        ),
+      expect(await screen.findByTestId("saved-card")).toHaveTextContent(
+        "Pasta",
       );
+      expect(saveParsedResult).toHaveBeenCalledWith({
+        ...recipe,
+        sourceUrl: "",
+      });
       expect(parseRecipeFromPhoto).toHaveBeenCalledWith(
         file,
         expect.any(String),
@@ -96,18 +117,19 @@ describe("ParsePhoto", () => {
       );
     });
 
-    it("hands the recipe to onResult instead of queuing when provided", async () => {
+    it("returns to the form on Parse another", async () => {
       parseRecipeFromPhoto.mockResolvedValue(recipe);
-      const onResult = vi.fn();
-      const { container } = render(
-        <ParsePhoto locale="en" onResult={onResult} />,
-      );
+      const { container } = render(<ParsePhoto locale="en" />);
       choosePhoto(container);
-
       fireEvent.click(screen.getByRole("button", { name: /analyzeWithAi/ }));
+      await screen.findByTestId("saved-card");
 
-      await waitFor(() => expect(onResult).toHaveBeenCalledWith(recipe));
-      expect(saveDirectParseResult).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "parse another" }));
+
+      expect(screen.queryByTestId("saved-card")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /analyzeWithAi/ }),
+      ).toBeInTheDocument();
     });
   });
 

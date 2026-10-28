@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
+import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
 import { saveAndSendRecipe } from "@/lib/telegram/save-and-send-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { log } from "@/lib/telemetry";
@@ -178,6 +179,28 @@ export async function POST(req: NextRequest) {
     }
     const finalRecipe: ParsedRecipe = { ...recipe, imageUrl, imageFileId };
 
+    // A signed-in parse goes straight into the user's library — before the job
+    // is marked DONE, because a client that sees DONE looks the saved recipe
+    // up. A Telegram-originated job (the bot, or a Mini-App parse with
+    // "Telegram notifications" on) also gets the recipe card in the chat.
+    if (job.userId) {
+      if (job.telegramChatId) {
+        await saveAndSendRecipe({
+          userId: job.userId,
+          chatId: job.telegramChatId,
+          parsed: finalRecipe,
+          sourceUrl: jobUrl,
+          req,
+        });
+      } else {
+        await saveParsedRecipeForUser({
+          userId: job.userId,
+          parsed: finalRecipe,
+          sourceUrl: jobUrl,
+        });
+      }
+    }
+
     await db
       .update(parseJobs)
       .set({
@@ -198,24 +221,12 @@ export async function POST(req: NextRequest) {
       req,
       payload: {
         title: finalRecipe.title,
-        body: "Your recipe is ready — tap to review",
+        body: job.userId
+          ? "Saved to your recipes — tap to open"
+          : "Your recipe is ready — tap to open",
         url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
       },
     });
-
-    // Notify via Telegram when the job carries a chat id — both the bot flow and
-    // an in-app Mini-App parse with "Telegram notifications" on. Both skip the
-    // in-app review step, so the recipe is saved server-side here and the bot
-    // message deep-links straight to it.
-    if (job.telegramChatId && job.userId) {
-      await saveAndSendRecipe({
-        userId: job.userId,
-        chatId: job.telegramChatId,
-        parsed: finalRecipe,
-        sourceUrl: jobUrl,
-        req,
-      });
-    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

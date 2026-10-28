@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { findRecipeIdBySource } from "./find-recipe-by-source";
 import { buildSavedRecipeShape } from "./parsed-recipe-shape";
 
 interface SaveParsedRecipeForUserParams {
@@ -9,15 +10,26 @@ interface SaveParsedRecipeForUserParams {
   sourceUrl: string | null;
 }
 
-// Persist a parsed recipe straight into a user's library, server-side — used by
-// the flows that skip the in-app review step: the Telegram bot and Mini-App
-// "Telegram notifications" parses both save on the user's behalf. Returns the
-// new recipe id so the caller can deep-link the Telegram completion message.
+export interface SavedRecipeRef {
+  recipeId: string;
+  /** The link was already in the user's library — nothing new was written. */
+  alreadySaved: boolean;
+}
+
+// Persist a parsed recipe straight into a user's library, server-side — the
+// completion path for every signed-in parse (in-app link imports and the
+// Telegram bot alike). A link the user already imported is not saved twice:
+// the existing recipe is returned instead.
 export async function saveParsedRecipeForUser({
   userId,
   parsed,
   sourceUrl,
-}: SaveParsedRecipeForUserParams): Promise<string> {
+}: SaveParsedRecipeForUserParams): Promise<SavedRecipeRef> {
+  if (sourceUrl) {
+    const existingId = await findRecipeIdBySource(userId, sourceUrl);
+    if (existingId) return { recipeId: existingId, alreadySaved: true };
+  }
+
   const savedShape = buildSavedRecipeShape(parsed);
   const recipeId = crypto.randomUUID();
 
@@ -41,5 +53,5 @@ export async function saveParsedRecipeForUser({
     updatedAt: new Date(),
   });
 
-  return recipeId;
+  return { recipeId, alreadySaved: false };
 }

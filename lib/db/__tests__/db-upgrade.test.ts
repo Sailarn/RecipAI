@@ -32,9 +32,10 @@ describe("Dexie upgrade to v12", () => {
     const { db } = await import("../db");
     const pantryIds = (await db.pantry.toArray()).map((row) => row.id).sort();
 
-    expect(db.verno).toBe(12);
+    expect(db.verno).toBe(13);
     expect(pantryIds).toEqual(["p1", "p3", "p4", "p5"]);
     expect(await db.recipes.get("recipe-1")).toMatchObject({ title: "Kept" });
+    expect(await db.parseNotifications.count()).toBe(0);
     db.close();
   });
 });

@@ -4,14 +4,19 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { recordParseHistory } from "@/lib/db/parse-history";
+import { saveParsedResult } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { logger } from "@/lib/logger";
+import {
+  announceFailedParse,
+  announceSavedParse,
+  type SavedParse,
+} from "@/lib/parse-recipe/announce-parse";
 import {
   doneImportHistoryEntry,
   failedPhotoHistoryEntry,
   failedTextHistoryEntry,
 } from "@/lib/parse-recipe/parse-history-entry";
-import { saveDirectParseResult } from "@/lib/parse-recipe/save-direct-parse-result";
 import { routes } from "@/lib/routes";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
@@ -27,26 +32,21 @@ const FAILED_HISTORY_ENTRY = {
 interface UseDirectParseOptions {
   locale: string;
   source: DirectParseSource;
-  /** When provided (and still mounted), receives the recipe instead of the
-   *  default queue-for-review + toast. */
-  onResult?: (recipe: ParsedRecipe) => void;
 }
 
 /**
- * The client half of a photo / pasted-text import: runs the parse, records
- * history and telemetry, and hands the result to the review queue. The parse
- * keeps going if the user navigates away — the result then arrives as a toast.
+ * The client half of a photo / pasted-text import: runs the parse, saves the
+ * recipe into the library, records history and telemetry, and announces it.
+ * The parse keeps going if the user navigates away — the result then arrives
+ * as a toast and a bell entry.
  */
-export function useDirectParse({
-  locale,
-  source,
-  onResult,
-}: UseDirectParseOptions) {
+export function useDirectParse({ locale, source }: UseDirectParseOptions) {
   const t = useTranslations("parse");
   const navigate = useNavigate();
   const mountedRef = useRef(true);
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedParse | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -60,31 +60,32 @@ export function useDirectParse({
       const parseJobId = generateId();
       setIsParsing(true);
       setError(null);
+      setSaved(null);
       trackEvent("parse_started", { source });
 
       parse(parseJobId)
-        .then(async (recipe) => {
+        .then(async (parsed) => {
           if (mountedRef.current) setIsParsing(false);
           trackEvent("parse_succeeded", { source });
           recordParseHistory(
-            doneImportHistoryEntry(parseJobId, recipe.title),
+            doneImportHistoryEntry(parseJobId, parsed.title),
           ).catch(() => {});
 
-          // Hand off only if still on-screen; otherwise fall through to the
-          // queue + toast path.
-          if (onResult && mountedRef.current) {
-            onResult(recipe);
-            return;
-          }
-
+          // A photo or pasted text has no page to link back to, even if the
+          // model echoed a URL it saw in the text.
+          const recipe: ParsedRecipe = { ...parsed, sourceUrl: "" };
           try {
-            await saveDirectParseResult(recipe, locale, {
-              fallbackTitle: t("fallbackTitle"),
-              description: t("parsedTapToReview"),
-              save: t("reviewSave"),
-              edit: t("reviewEdit"),
-              saved: t("savedShort"),
+            const savedRef = await saveParsedResult(recipe);
+            announceSavedParse({
+              jobId: parseJobId,
+              recipe,
+              ...savedRef,
+              labels: {
+                added: t("addedToRecipes"),
+                alreadySaved: t("alreadySaved"),
+              },
             });
+            if (mountedRef.current) setSaved({ ...savedRef, recipe });
           } catch (saveError) {
             logger.error(`[${source} parse] failed to save:`, saveError);
             toast.error(t("processFailed"), {
@@ -105,9 +106,16 @@ export function useDirectParse({
                 ? parseError.message
                 : String(parseError),
           });
-          recordParseHistory(
-            FAILED_HISTORY_ENTRY[source](parseJobId, message),
-          ).catch(() => {});
+          const historyEntry = FAILED_HISTORY_ENTRY[source](
+            parseJobId,
+            message,
+          );
+          recordParseHistory(historyEntry).catch(() => {});
+          announceFailedParse({
+            jobId: parseJobId,
+            title: historyEntry.title,
+            reason: historyEntry.reason ?? message,
+          });
           if (mountedRef.current) {
             setIsParsing(false);
             setError(message);
@@ -123,11 +131,20 @@ export function useDirectParse({
           }
         });
     },
-    [locale, source, onResult, navigate, t],
+    [locale, source, navigate, t],
   );
 
   const stopWaiting = useCallback(() => setIsParsing(false), []);
   const clearError = useCallback(() => setError(null), []);
+  const clearSaved = useCallback(() => setSaved(null), []);
 
-  return { isParsing, error, startParse, stopWaiting, clearError };
+  return {
+    isParsing,
+    error,
+    saved,
+    startParse,
+    stopWaiting,
+    clearError,
+    clearSaved,
+  };
 }
