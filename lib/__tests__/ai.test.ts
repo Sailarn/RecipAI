@@ -2,11 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGenerateContent = vi.hoisted(() => vi.fn());
 
-vi.mock("@google/generative-ai", () => ({
-  GoogleGenerativeAI: class {
-    getGenerativeModel() {
-      return { generateContent: mockGenerateContent };
-    }
+vi.mock("@google/genai", () => ({
+  GoogleGenAI: class {
+    models = { generateContent: mockGenerateContent };
   },
 }));
 
@@ -46,9 +44,7 @@ describe("callAiForRecipe", () => {
   });
 
   it("returns parsed recipe on success", async () => {
-    mockGenerateContent.mockResolvedValue({
-      response: { text: () => JSON.stringify(mockRecipe) },
-    });
+    mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockRecipe) });
 
     const result = await callAiForRecipe("parse this recipe");
 
@@ -56,19 +52,46 @@ describe("callAiForRecipe", () => {
   });
 
   it("passes the prompt to generateContent", async () => {
-    mockGenerateContent.mockResolvedValue({
-      response: { text: () => JSON.stringify(mockRecipe) },
-    });
+    mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockRecipe) });
 
     await callAiForRecipe("my prompt text");
 
-    expect(mockGenerateContent).toHaveBeenCalledWith("my prompt text");
+    expect(mockGenerateContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: "gemini-2.5-flash",
+        contents: "my prompt text",
+      }),
+    );
+  });
+
+  it("asks for JSON with a per-attempt timeout", async () => {
+    mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockRecipe) });
+
+    await callAiForRecipe("my prompt text");
+
+    expect(mockGenerateContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: {
+          responseMimeType: "application/json",
+          httpOptions: { timeout: 45_000 },
+        },
+      }),
+    );
+  });
+
+  it("moves to the next model when a response has no text", async () => {
+    mockGenerateContent
+      .mockResolvedValueOnce({ text: undefined })
+      .mockResolvedValueOnce({ text: JSON.stringify(mockRecipe) });
+
+    const result = await callAiForRecipe("parse this");
+
+    expect(result).toEqual(mockRecipe);
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2);
   });
 
   it("throws when Gemini returns invalid JSON", async () => {
-    mockGenerateContent.mockResolvedValue({
-      response: { text: () => "not valid json {{" },
-    });
+    mockGenerateContent.mockResolvedValue({ text: "not valid json {{" });
 
     await expect(callAiForRecipe("parse this")).rejects.toThrow(
       "Gemini returned invalid JSON",
@@ -213,9 +236,7 @@ describe("OpenAI fallback", () => {
 
 describe("AI call logging", () => {
   it("logs info ai_call on Gemini success", async () => {
-    mockGenerateContent.mockResolvedValue({
-      response: { text: () => JSON.stringify(mockRecipe) },
-    });
+    mockGenerateContent.mockResolvedValue({ text: JSON.stringify(mockRecipe) });
 
     await callAiForRecipe("parse this recipe");
 
@@ -234,9 +255,7 @@ describe("AI call logging", () => {
   it("logs warn ai_call on Gemini failure then info on success", async () => {
     mockGenerateContent
       .mockRejectedValueOnce(new Error("model overloaded"))
-      .mockResolvedValue({
-        response: { text: () => JSON.stringify(mockRecipe) },
-      });
+      .mockResolvedValue({ text: JSON.stringify(mockRecipe) });
 
     await callAiForRecipe("parse this");
 

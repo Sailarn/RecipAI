@@ -8,7 +8,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 
 | File | Purpose |
 |---|---|
-| `lib/ai.ts` | Multi-provider AI client. Tries the Gemini model chain, then OpenAI as last resort. Model names are defined here — this is the source of truth. Exports `callAiForRecipe`, `callAiForRecipePhoto`, `callAiForIngredient`. |
+| `lib/ai.ts` | Multi-provider AI client (`@google/genai` for Gemini). Tries the Gemini model chain, then DeepSeek (recipe context only), then OpenAI as last resort. Per-attempt timeouts live here. Model names are defined here — this is the source of truth. Exports `callAiForRecipe`, `callAiForRecipePhoto`, `callAiForIngredient`. |
 | `lib/parse-recipe/index.ts` | Entry point — routes to `web.ts` or `video.ts` based on URL type. |
 | `lib/parse-recipe/web.ts` | Web recipe parsing. Scrape → retain Recipe JSON-LD as reference context → `trimChrome` → AI. |
 | `lib/parse-recipe/video.ts` | Social recipe parsing for Instagram, TikTok, YouTube, and X/Twitter. Apify → transcript/media/caption/image context → AI. |

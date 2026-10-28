@@ -128,7 +128,7 @@ graph LR
     F -->|ok| H
 ```
 
-All Gemini models use `responseMimeType: "application/json"`. DeepSeek and OpenAI both use `response_format: { type: "json_object" }` via a shared `callOpenAiCompatibleJson` helper (same request shape, different base URL/model/key), with a 90s timeout on each — neither had an explicit timeout before, and DeepSeek's heavier `deepseek-v4-pro` tier was observed hanging past 2 minutes in side-by-side model testing (`scripts/local/model-eval`), which is why production uses the faster `deepseek-v4-flash` specifically.
+All Gemini models are called through `@google/genai` with `responseMimeType: "application/json"` and a **45s per-attempt timeout** (`GEMINI_TIMEOUT_MS`) — successful calls peak just under 30s, so a hung attempt falls through to the next model instead of stalling the parse. A response with no text (a blocked prompt, no candidates) also counts as a failed attempt. DeepSeek and OpenAI both use `response_format: { type: "json_object" }` via a shared `callOpenAiCompatibleJson` helper (same request shape, different base URL/model/key), with a 90s timeout on each — neither had an explicit timeout before, and DeepSeek's heavier `deepseek-v4-pro` tier was observed hanging past 2 minutes in side-by-side model testing (`scripts/local/model-eval`), which is why production uses the faster `deepseek-v4-flash` specifically.
 
 DeepSeek is skipped entirely for `context: "photo"` (its chat API has no image input) and whenever `DEEPSEEK_API_KEY` is unset — the chain falls straight through to the OpenAI check in either case. The OpenAI fallback is only active when `OPENAI_API_KEY` is set — without either optional key, the chain ends at `gemini-2.5-flash-lite`.
 

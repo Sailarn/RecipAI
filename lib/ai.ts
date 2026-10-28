@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import type { RecipeExtractionResult } from "@/lib/parse-recipe/recipe-result";
 import { log, trackEvent } from "@/lib/telemetry";
 
@@ -23,6 +23,10 @@ const OPENAI_FALLBACK_INDEX = GEMINI_MODEL_CHAIN.length + 1;
 // headroom (observed DeepSeek chat-tier latency: well under 60s) without
 // blocking a background job forever.
 const HTTP_PROVIDER_TIMEOUT_MS = 90_000;
+// Per Gemini model attempt. Successful calls peak just under 30s (Axiom
+// `ai_call`, recipe and photo contexts), so 45s leaves headroom while a hung
+// call still falls through to the next model instead of stalling the parse.
+const GEMINI_TIMEOUT_MS = 45_000;
 
 type AiContext = "recipe" | "ingredient" | "photo";
 
@@ -45,22 +49,29 @@ function parseJson<T>(text: string, provider: string): T {
   }
 }
 
-function getModel(modelName: string) {
+function getGeminiClient(): GoogleGenAI {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("Gemini API key not configured");
   }
-  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({
-    model: modelName,
-    generationConfig: { responseMimeType: "application/json" },
-  });
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 }
 
 async function callGeminiJson<T>(
   modelName: string,
   contents: GeminiContents,
 ): Promise<T> {
-  const result = await getModel(modelName).generateContent(contents);
-  return parseJson<T>(result.response.text(), "Gemini");
+  const response = await getGeminiClient().models.generateContent({
+    model: modelName,
+    contents,
+    config: {
+      responseMimeType: "application/json",
+      httpOptions: { timeout: GEMINI_TIMEOUT_MS },
+    },
+  });
+  // `text` is undefined when the response has no candidates — e.g. the prompt
+  // was blocked — which is a failed attempt, not an empty recipe.
+  if (response.text === undefined) throw new Error("Gemini returned no text");
+  return parseJson<T>(response.text, "Gemini");
 }
 
 async function callOpenAiCompatibleJson<T>(
