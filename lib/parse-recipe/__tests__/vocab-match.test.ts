@@ -193,4 +193,22 @@ describe("matchVocabId", () => {
       expect(result).toBe("mozzarella");
     });
   });
+  describe("index cache", () => {
+    it("rebuilds when an entry changes in place with the same vocab size", async () => {
+      mockToArray.mockResolvedValue([
+        makeEntry("rename-probe", "zzz-old-name"),
+        makeEntry("rename-filler", "qqq-filler"),
+        makeEntry("rename-filler-2", "www-filler"),
+      ]);
+      expect(await matchVocabId("zzz-new-name")).not.toBe("rename-probe");
+
+      mockToArray.mockResolvedValue([
+        makeEntry("rename-probe", "zzz-new-name"),
+        makeEntry("rename-filler", "qqq-filler"),
+        makeEntry("rename-filler-2", "www-filler"),
+      ]);
+
+      expect(await matchVocabId("zzz-new-name")).toBe("rename-probe");
+    });
+  });
 });

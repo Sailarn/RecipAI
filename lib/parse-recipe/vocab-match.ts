@@ -1,15 +1,33 @@
 import Fuse from "fuse.js";
 import { db } from "@/lib/db/db";
-import { INGREDIENT_STATUS } from "@/lib/db/schema";
+import { INGREDIENT_STATUS, type VocabularyIngredient } from "@/lib/db/schema";
 
 const FUSE_THRESHOLD = 0.2;
 
+type ExactName = { id: string; length: number; pattern: RegExp };
+
 type VocabIndex = {
   index: Fuse<{ id: string; text: string }>;
-  items: Array<{ id: string; text: string }>;
+  exactNames: ExactName[];
 };
 
-let fuseCache: (VocabIndex & { size: number }) | null = null;
+let fuseCache: (VocabIndex & { signature: string }) | null = null;
+
+// Keyed on content, not row count: a vocab pull that fixes a translation in
+// place keeps the count, and a count key served the stale index all session.
+function vocabSignature(vocab: VocabularyIngredient[]): string {
+  return vocab
+    .map((entry) =>
+      [
+        entry.id,
+        entry.en,
+        entry.ua,
+        ...entry.aliasesEn,
+        ...entry.aliasesUa,
+      ].join("\u0001"),
+    )
+    .join("\u0002");
+}
 
 async function getFuseIndex(): Promise<VocabIndex> {
   const vocab = await db.ingredients
@@ -18,7 +36,8 @@ async function getFuseIndex(): Promise<VocabIndex> {
         !ingredient.status || ingredient.status === INGREDIENT_STATUS.CONFIRMED,
     )
     .toArray();
-  if (fuseCache && fuseCache.size === vocab.length) return fuseCache;
+  const signature = vocabSignature(vocab);
+  if (fuseCache?.signature === signature) return fuseCache;
   const items = vocab.flatMap((vocabEntry) => [
     { id: vocabEntry.id, text: vocabEntry.en },
     ...(vocabEntry.ua ? [{ id: vocabEntry.id, text: vocabEntry.ua }] : []),
@@ -36,7 +55,7 @@ async function getFuseIndex(): Promise<VocabIndex> {
     threshold: FUSE_THRESHOLD,
     includeScore: true,
   });
-  fuseCache = { index, items, size: vocab.length };
+  fuseCache = { index, exactNames: compileExactNames(items), signature };
   return fuseCache;
 }
 
@@ -75,21 +94,30 @@ function escapeRegExpChars(value: string): string {
 // Prefers the LONGEST matching name so a short generic alias ("cream") can't
 // shadow a more specific one that also matches ("heavy cream"); on a tie,
 // prefers the slug id over a uuid provisional, same as pickBestId.
-function exactNameMatch(
-  text: string,
+// Compiled once per index build: lookups run per ingredient, up to three
+// times each, against every name and alias in the vocab.
+function compileExactNames(
   items: Array<{ id: string; text: string }>,
-): string | null {
-  const lower = text.toLowerCase();
-  const matches: Array<{ id: string; length: number }> = [];
-  for (const item of items) {
+): ExactName[] {
+  return items.flatMap((item) => {
     const name = item.text.trim().toLowerCase();
-    if (!name) continue;
-    const pattern = new RegExp(
-      `(?<![\\p{L}\\p{N}])${escapeRegExpChars(name)}(?![\\p{L}\\p{N}])`,
-      "u",
-    );
-    if (pattern.test(lower)) matches.push({ id: item.id, length: name.length });
-  }
+    if (!name) return [];
+    return [
+      {
+        id: item.id,
+        length: name.length,
+        pattern: new RegExp(
+          `(?<![\\p{L}\\p{N}])${escapeRegExpChars(name)}(?![\\p{L}\\p{N}])`,
+          "u",
+        ),
+      },
+    ];
+  });
+}
+
+function exactNameMatch(text: string, names: ExactName[]): string | null {
+  const lower = text.toLowerCase();
+  const matches = names.filter((name) => name.pattern.test(lower));
   if (matches.length === 0) return null;
   const maxLength = Math.max(...matches.map((match) => match.length));
   const longest = matches.filter((match) => match.length === maxLength);
@@ -100,7 +128,7 @@ function exactNameMatch(
 function fuseHit(vocabIndex: VocabIndex, text: string): string | null {
   const preprocessed = preprocessIngredient(text);
 
-  const exactMatch = exactNameMatch(preprocessed, vocabIndex.items);
+  const exactMatch = exactNameMatch(preprocessed, vocabIndex.exactNames);
   if (exactMatch) return exactMatch;
 
   // Try the full preprocessed text first
