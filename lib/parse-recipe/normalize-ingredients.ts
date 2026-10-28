@@ -57,6 +57,16 @@ async function createProvisional(
   }
 }
 
+function sameStrings(
+  stored: readonly string[] | null | undefined,
+  next: readonly string[],
+): boolean {
+  return (
+    stored?.length === next.length &&
+    stored.every((value, index) => value === next[index])
+  );
+}
+
 // The embed-match route rejects the whole batch when any one text exceeds its
 // per-item limit, so one long ingredient line would degrade every item.
 function clipForEmbed(text: string): string {
@@ -226,6 +236,18 @@ async function runNormalize(
     provisionalCreated,
     degraded,
   });
+
+  // Re-normalizing an unchanged recipe (startup migrations, reconcile, an edit
+  // that didn't touch ingredients) would otherwise bump updatedAt, re-render
+  // every live recipe query and push an identical sync update.
+  const stored = await db.recipes.get(recipeId);
+  if (
+    stored &&
+    sameStrings(stored.canonicalIngredientIds, canonicalIngredientIds) &&
+    sameStrings(stored.unrecognizedIngredients, unrecognizedIngredients)
+  ) {
+    return { matched: matchedCount, total: ingredients.length };
+  }
 
   await db.recipes.update(recipeId, {
     canonicalIngredientIds,

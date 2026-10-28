@@ -8,6 +8,7 @@ const {
   mockDbIngredientsFilter,
   mockDbIngredientsPut,
   mockDbRecipesUpdate,
+  mockDbRecipesGet,
   mockSyncUpdate,
   mockEnrichIngredient,
   mockTrackEvent,
@@ -18,6 +19,7 @@ const {
     mockDbIngredientsFilter: vi.fn(() => filterResult),
     mockDbIngredientsPut: vi.fn(),
     mockDbRecipesUpdate: vi.fn(),
+    mockDbRecipesGet: vi.fn(),
     mockSyncUpdate: vi.fn(),
     mockEnrichIngredient: vi.fn(),
     mockTrackEvent: vi.fn(),
@@ -32,6 +34,7 @@ vi.mock("@/lib/db/db", () => ({
     },
     recipes: {
       update: mockDbRecipesUpdate,
+      get: mockDbRecipesGet,
     },
   },
 }));
@@ -76,6 +79,8 @@ beforeEach(() => {
   // Dexie writes succeed
   mockDbIngredientsPut.mockResolvedValue(undefined);
   mockDbRecipesUpdate.mockResolvedValue(undefined);
+  // The recipe has no resolved ids yet, so every normalize writes.
+  mockDbRecipesGet.mockResolvedValue(undefined);
 
   // Default fetch: non-ok response so pending items fall through to provisional
   globalThis.fetch = vi.fn().mockResolvedValue({ ok: false });
@@ -306,6 +311,39 @@ describe("normalizeRecipeIngredients", () => {
         (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
       );
       expect(body.items).toHaveLength(2);
+    });
+  });
+
+  describe("unchanged result", () => {
+    it("skips the Dexie write and sync when the ids are already stored", async () => {
+      mockDbRecipesGet.mockResolvedValue({
+        canonicalIngredientIds: ["garlic", "onion"],
+        unrecognizedIngredients: [],
+      });
+
+      const result = await normalizeRecipeIngredients("recipe-1", [
+        { item: "garlic" },
+        { item: "onion" },
+      ]);
+
+      expect(result).toEqual({ matched: 2, total: 2 });
+      expect(mockDbRecipesUpdate).not.toHaveBeenCalled();
+      expect(mockSyncUpdate).not.toHaveBeenCalled();
+    });
+
+    it("writes when a stored id differs", async () => {
+      mockDbRecipesGet.mockResolvedValue({
+        canonicalIngredientIds: ["garlic", "merged-away"],
+        unrecognizedIngredients: [],
+      });
+
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: "garlic" },
+        { item: "onion" },
+      ]);
+
+      expect(mockDbRecipesUpdate).toHaveBeenCalledOnce();
+      expect(mockSyncUpdate).toHaveBeenCalledOnce();
     });
   });
 
