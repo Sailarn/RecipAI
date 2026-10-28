@@ -1,13 +1,12 @@
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
-import { createBarrier } from "./create-barrier";
 import type { Recipe } from "./schema";
+import { createSyncQueue } from "./sync-queue";
 
-const barrier = createBarrier();
+const sendInOrder = createSyncQueue();
 
 export function syncCreate(recipe: Recipe): void {
-  barrier.trackCreate(
-    recipe.id,
+  sendInOrder(recipe.id, () =>
     syncFetch(api.recipes, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -17,7 +16,7 @@ export function syncCreate(recipe: Recipe): void {
 }
 
 export function syncUpdate(id: string, updates: Partial<Recipe>): void {
-  barrier.afterCreate(id, () =>
+  sendInOrder(id, () =>
     syncFetch(api.recipe(id), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -27,7 +26,5 @@ export function syncUpdate(id: string, updates: Partial<Recipe>): void {
 }
 
 export function syncDelete(id: string): void {
-  barrier.afterCreate(id, () =>
-    syncFetch(api.recipe(id), { method: "DELETE" }),
-  );
+  sendInOrder(id, () => syncFetch(api.recipe(id), { method: "DELETE" }));
 }

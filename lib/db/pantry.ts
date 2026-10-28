@@ -3,6 +3,9 @@ import { syncFetch } from "@/lib/sync-fetch";
 import { generateId } from "@/lib/utils";
 import { db } from "./db";
 import type { PantryItem, VocabularyIngredient } from "./schema";
+import { createSyncQueue } from "./sync-queue";
+
+const sendInOrder = createSyncQueue();
 
 export async function getPantryItems(): Promise<PantryItem[]> {
   return db.pantry.toArray();
@@ -18,14 +21,16 @@ async function syncPantryUpsert(item: PantryItem): Promise<void> {
     ingredientData = await db.ingredients.get(item.ingredientId);
   }
 
-  syncFetch(api.pantry, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...item,
-      ingredientData: ingredientData ?? null,
+  sendInOrder(item.id, () =>
+    syncFetch(api.pantry, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...item,
+        ingredientData: ingredientData ?? null,
+      }),
     }),
-  });
+  );
 }
 
 export async function addPantryItem(
@@ -67,11 +72,13 @@ export async function addPantryItem(
 
 export async function removePantryItem(id: string): Promise<void> {
   await db.pantry.delete(id);
-  syncFetch(api.pantry, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id }),
-  });
+  sendInOrder(id, () =>
+    syncFetch(api.pantry, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }),
+  );
 }
 
 export async function togglePantryItem(id: string): Promise<void> {

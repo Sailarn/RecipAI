@@ -1,15 +1,14 @@
 import { api } from "@/lib/routes";
 import { syncFetch } from "@/lib/sync-fetch";
-import { createBarrier } from "./create-barrier";
 import type { Collection } from "./schema";
+import { createSyncQueue } from "./sync-queue";
 
-const barrier = createBarrier();
+const sendInOrder = createSyncQueue();
 
 export function syncCreateCollection(
   collection: Collection & { userId?: string },
 ): void {
-  barrier.trackCreate(
-    collection.id,
+  sendInOrder(collection.id, () =>
     syncFetch(api.collections, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26,7 +25,7 @@ export function syncUpdateCollection(
   id: string,
   data: { name: string; emoji: string },
 ): void {
-  barrier.afterCreate(id, () =>
+  sendInOrder(id, () =>
     syncFetch(api.collection(id), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -36,7 +35,5 @@ export function syncUpdateCollection(
 }
 
 export function syncDeleteCollection(id: string): void {
-  barrier.afterCreate(id, () =>
-    syncFetch(api.collection(id), { method: "DELETE" }),
-  );
+  sendInOrder(id, () => syncFetch(api.collection(id), { method: "DELETE" }));
 }

@@ -396,3 +396,71 @@ describe("replacePantry", () => {
     expect(db.pantry.bulkPut).toHaveBeenCalledWith(items);
   });
 });
+
+describe("request ordering", () => {
+  function deferredResponse() {
+    let resolve: (value: Response) => void = () => {};
+    const promise = new Promise<Response>((onResolve) => {
+      resolve = onResolve;
+    });
+    return { promise, resolve };
+  }
+
+  function sentBodies() {
+    return fetchMock.mock.calls.map(([, init]) => JSON.parse(init.body));
+  }
+
+  beforeEach(() => {
+    fetchMock.mockClear();
+  });
+
+  it("sends a second toggle only after the first has landed", async () => {
+    const first = deferredResponse();
+    fetchMock.mockReturnValueOnce(first.promise);
+    vi.mocked(db.pantry.get)
+      .mockResolvedValueOnce({ id: "p1", name: "Salt", on: true } as never)
+      .mockResolvedValueOnce({ id: "p1", name: "Salt", on: false } as never);
+
+    await togglePantryItem("p1");
+    await togglePantryItem("p1");
+
+    expect(sentBodies()).toEqual([expect.objectContaining({ on: false })]);
+
+    first.resolve(new Response());
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(sentBodies()[1]).toEqual(expect.objectContaining({ on: true }));
+  });
+
+  it("holds a removal until the item's add has landed", async () => {
+    const add = deferredResponse();
+    fetchMock.mockReturnValueOnce(add.promise);
+    vi.mocked(db.pantry.add).mockResolvedValue("ignored" as never);
+    vi.mocked(db.pantry.delete).mockResolvedValue(undefined);
+
+    const id = await addPantryItem({ name: "Salt", on: true });
+    await removePantryItem(id);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    add.resolve(new Response());
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(fetchMock.mock.calls[1][1].method).toBe("DELETE");
+  });
+
+  it("does not hold requests for a different item", async () => {
+    fetchMock.mockReturnValueOnce(deferredResponse().promise);
+    vi.mocked(db.pantry.get).mockResolvedValue({
+      id: "p1",
+      name: "Salt",
+      on: true,
+    } as never);
+    vi.mocked(db.pantry.delete).mockResolvedValue(undefined);
+
+    await togglePantryItem("p1");
+    await removePantryItem("p2");
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
