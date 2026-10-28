@@ -104,7 +104,7 @@ export function CompactFilterBar({
         <div className="ml-auto shrink-0 w-[30px] h-[30px] rounded-full bg-[rgba(255,200,100,0.1)] border border-[rgba(255,200,100,0.18)] flex items-center justify-center">
           <ChevronUp
             size={14}
-            aria-label="scroll to top"
+            aria-label={t("scrollToTop")}
             className="text-[var(--fg-2)]"
           />
         </div>

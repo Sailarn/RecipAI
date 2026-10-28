@@ -10,15 +10,13 @@ describe("RecipeListError", () => {
   it("renders the error message", () => {
     render(<RecipeListError />);
 
-    expect(
-      screen.getByText("Something went wrong loading your recipes."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("loadFailed")).toBeInTheDocument();
   });
 
   it("renders a reload button", () => {
     render(<RecipeListError />);
 
-    expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "reload" })).toBeInTheDocument();
   });
 
   it("calls window.location.reload when reload button is clicked", () => {
@@ -29,7 +27,7 @@ describe("RecipeListError", () => {
     });
 
     render(<RecipeListError />);
-    fireEvent.click(screen.getByRole("button", { name: "Reload" }));
+    fireEvent.click(screen.getByRole("button", { name: "reload" }));
 
     expect(reloadMock).toHaveBeenCalledOnce();
   });

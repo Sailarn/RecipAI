@@ -284,9 +284,7 @@ describe("ProfileAuth", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
 
-      expect(
-        await screen.findByText(/wait a minute and try again/i),
-      ).toBeVisible();
+      expect(await screen.findByText("tooManyAttempts")).toBeVisible();
       expect(screen.queryByText("waitingForGoogle")).not.toBeInTheDocument();
     });
 
@@ -300,7 +298,9 @@ describe("ProfileAuth", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Link Google test" }));
 
-      expect(await screen.findByText(/error 401/i)).toBeVisible();
+      expect(
+        await screen.findByText("linkStartFailedWithStatus"),
+      ).toBeVisible();
     });
 
     it("calls signOut and router.refresh on sign-out click", async () => {

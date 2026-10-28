@@ -12,11 +12,6 @@ import { addPantryItem } from "@/lib/db/pantry";
 import type { VocabularyIngredient } from "@/lib/db/schema";
 import { trackEvent } from "@/lib/telemetry";
 
-function commitLabel(count: number): string {
-  if (count === 0) return "Add items to Pantry";
-  return `Add ${count} item${count === 1 ? "" : "s"} to Pantry`;
-}
-
 export function AddPantryPicker({ onClose }: { onClose: () => void }) {
   const t = useTranslations("pantry");
   const { locale = "en" } = useParams<{ locale: Locale }>();
@@ -52,7 +47,10 @@ export function AddPantryPicker({ onClose }: { onClose: () => void }) {
       title={t("addTitle")}
       onClose={onClose}
       disabledIngredientIds={addedIngredientIds}
-      commit={{ label: commitLabel, onCommit: handleCommit }}
+      commit={{
+        label: (count) => t("addItemsCommit", { count }),
+        onCommit: handleCommit,
+      }}
     />
   );
 }

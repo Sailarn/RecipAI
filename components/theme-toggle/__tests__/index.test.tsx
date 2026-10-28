@@ -48,18 +48,18 @@ afterEach(() => {
 
 describe("ThemeToggle", () => {
   describe("aria-label reflects active theme", () => {
-    it("shows 'Switch to dark mode' when light mode is active", () => {
+    it("offers dark mode while light mode is active", () => {
       render(<ThemeToggle />);
       expect(
-        screen.getByRole("button", { name: "Switch to dark mode" }),
+        screen.getByRole("button", { name: "switchToDark" }),
       ).toBeInTheDocument();
     });
 
-    it("shows 'Switch to light mode' when dark mode is active", () => {
+    it("offers light mode while dark mode is active", () => {
       document.documentElement.classList.add("dark");
       render(<ThemeToggle />);
       expect(
-        screen.getByRole("button", { name: "Switch to light mode" }),
+        screen.getByRole("button", { name: "switchToLight" }),
       ).toBeInTheDocument();
     });
   });

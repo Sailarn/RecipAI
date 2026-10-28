@@ -68,13 +68,13 @@ export function LoginView({ locale }: { locale: string }) {
           clearPendingDeviceAuth();
           setExternalUrl(undefined);
           setExternalError(
-            `Authentication ${result.status}. Please try again.`,
+            result.status === "denied" ? t("signInDenied") : t("signInExpired"),
           );
         }
       } catch {
         clearPendingDeviceAuth();
         setExternalUrl(undefined);
-        setExternalError("Could not start Google authentication.");
+        setExternalError(t("googleStartFailed"));
       } finally {
         if (abortController.current === controller) {
           abortController.current = undefined;
@@ -108,7 +108,7 @@ export function LoginView({ locale }: { locale: string }) {
         savePendingDeviceAuth(authorization);
         void runDevicePolling(authorization);
       } catch {
-        setExternalError("Could not start Google authentication.");
+        setExternalError(t("googleStartFailed"));
       }
       return;
     }

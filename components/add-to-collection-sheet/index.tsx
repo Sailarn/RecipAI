@@ -21,6 +21,7 @@ export function AddToCollectionSheet({
   onClose,
 }: AddToCollectionSheetProps) {
   const tCommon = useTranslations("common");
+  const t = useTranslations("recipes");
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -60,7 +61,7 @@ export function AddToCollectionSheet({
         <div className="w-9 h-1 rounded-[2px] bg-[rgba(255,200,100,0.25)] mx-auto mb-[18px]" />
 
         <div className="text-[15px] font-bold text-[var(--fg-1)] font-heading mb-3.5">
-          Add to collection
+          {t("addToCollectionTitle")}
         </div>
 
         {collections.map((collection) => (
@@ -77,7 +78,7 @@ export function AddToCollectionSheet({
 
         {collections.length === 0 && (
           <p className="text-[var(--fg-3)] text-[13px] text-center">
-            No collections yet. Create one from the recipe list.
+            {t("noCollectionsYet")}
           </p>
         )}
       </div>

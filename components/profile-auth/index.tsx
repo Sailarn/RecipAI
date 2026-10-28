@@ -96,8 +96,10 @@ export function ProfileAuth() {
           const status = response.error?.status;
           setExternalLinkError(
             status === 429
-              ? "Too many attempts. Wait a minute and try again."
-              : `Could not start Google linking (error ${status ?? "unknown"}). Please try again.`,
+              ? tAuth("tooManyAttempts")
+              : tAuth("linkStartFailedWithStatus", {
+                  status: status ?? "unknown",
+                }),
           );
           return;
         }
@@ -113,12 +115,12 @@ export function ProfileAuth() {
         linkTimeout.current = window.setTimeout(() => {
           stopLinkPolling();
           setExternalLinkUrl(undefined);
-          setExternalLinkError("Account linking expired. Please try again.");
+          setExternalLinkError(tAuth("linkExpired"));
         }, EXTERNAL_AUTH_TTL_MS);
       } catch {
         stopLinkPolling();
         setExternalLinkUrl(undefined);
-        setExternalLinkError("Could not start Google account linking.");
+        setExternalLinkError(tAuth("linkStartFailed"));
       }
       return;
     }

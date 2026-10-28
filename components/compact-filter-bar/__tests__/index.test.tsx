@@ -31,7 +31,7 @@ const defaultProps = {
 describe("CompactFilterBar", () => {
   it("always renders the up arrow", () => {
     render(<CompactFilterBar {...defaultProps} />);
-    expect(screen.getByLabelText("scroll to top")).toBeInTheDocument();
+    expect(screen.getByLabelText("scrollToTop")).toBeInTheDocument();
   });
 
   it("renders All amber chip when no collection is active", () => {

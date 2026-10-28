@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { TogglePill } from "@/components/toggle-pill";
 import { isStandalonePwa } from "@/lib/pwa";
@@ -12,6 +13,7 @@ import { THEME } from "@/lib/theme";
 const COOKIE_MAX_AGE_SECONDS = 31_536_000; // 1 year
 
 export function ThemeToggle() {
+  const t = useTranslations("theme");
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? t("switchToLight") : t("switchToDark")}
       className="bg-transparent border-0 p-0 shrink-0 cursor-pointer"
     >
       <TogglePill checked={isDark} offIcon={Sun} onIcon={Moon} />

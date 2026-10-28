@@ -121,7 +121,11 @@
       "title": "This recipe is private",
       "body": "The owner has not made this recipe public, or sharing was turned off.",
       "returning": "Returning automatically in {seconds}s"
-    }
+    },
+    "addToCollectionTitle": "Add to collection",
+    "noCollectionsYet": "No collections yet. Create one from the recipe list.",
+    "loadFailed": "Something went wrong loading your recipes.",
+    "scrollToTop": "Scroll to top"
   },
   "recipeForm": {
     "createTitle": "Create Recipe",
@@ -204,7 +208,9 @@
   },
   "theme": {
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   },
   "language": {
     "switch": "Switch language"
@@ -326,7 +332,8 @@
     "outOfStock": "Out of stock",
     "noResults": "No ingredients match \"{search}\"",
     "markOutOfStock": "Mark as out of stock",
-    "markInStock": "Mark as in stock"
+    "markInStock": "Mark as in stock",
+    "addItemsCommit": "{count, plural, =0 {Add items to Pantry} one {Add # item to Pantry} other {Add # items to Pantry}}"
   },
   "auth": {
     "tagline": "Save and discover your favourite recipes with AI",
@@ -364,7 +371,13 @@
     "cleanupFailed": "Browser cleanup failed. Return to RecipAI and try again.",
     "linkFailedExisting": "Couldn't link Google — it may already be a separate RecipAI account. Sign in with it directly instead. Return to RecipAI.",
     "linked": "Google account linked. Return to RecipAI.",
-    "termsNotice": "By continuing, you agree to our terms of service and privacy policy"
+    "termsNotice": "By continuing, you agree to our terms of service and privacy policy",
+    "googleStartFailed": "Could not start Google authentication.",
+    "signInDenied": "Sign-in was denied. Please try again.",
+    "signInExpired": "The sign-in request expired. Please try again.",
+    "tooManyAttempts": "Too many attempts. Wait a minute and try again.",
+    "linkStartFailedWithStatus": "Could not start Google linking (error {status}). Please try again.",
+    "linkExpired": "Account linking expired. Please try again."
   },
   "categories": {
     "Breakfast": "Breakfast",

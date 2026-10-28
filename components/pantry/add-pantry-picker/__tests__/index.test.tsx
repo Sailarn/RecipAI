@@ -94,9 +94,7 @@ describe("AddPantryPicker", () => {
     render(<AddPantryPicker onClose={onClose} />);
 
     const { commit } = pickerProps();
-    expect(commit?.label(0)).toBe("Add items to Pantry");
-    expect(commit?.label(1)).toBe("Add 1 item to Pantry");
-    expect(commit?.label(3)).toBe("Add 3 items to Pantry");
+    expect(commit?.label(3)).toBe("addItemsCommit");
   });
 
   it("commit adds each selected ingredient to the pantry then closes", async () => {
