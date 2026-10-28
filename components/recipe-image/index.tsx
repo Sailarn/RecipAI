@@ -33,7 +33,10 @@ export const RecipeImage = ({
   imageCropWidth,
   imageCropHeight,
 }: RecipeImageProps) => {
-  const [errored, setErrored] = useState(false);
+  // The url that failed, not a flag: a flag outlived a new imageUrl on the same
+  // instance (e.g. a replaced photo in the edit form) and kept the placeholder.
+  const [failedUrl, setFailedUrl] = useState<string>();
+  const errored = imageUrl !== undefined && failedUrl === imageUrl;
   // Only our own ImageKit copies are shown. Anything else is a source-site
   // URL left behind by a failed mirror: social CDNs sign and expire those,
   // and an expired Instagram URL hangs ~30s instead of failing — so never
@@ -91,7 +94,7 @@ export const RecipeImage = ({
               fetchPriority={fetchPriority}
               decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
-              onError={() => setErrored(true)}
+              onError={() => setFailedUrl(imageUrl)}
               style={{
                 objectPosition: `${relativeFocalX}% ${relativeFocalY}%`,
               }}
@@ -112,7 +115,7 @@ export const RecipeImage = ({
         fetchPriority={fetchPriority}
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
-        onError={() => setErrored(true)}
+        onError={() => setFailedUrl(imageUrl)}
         style={{ objectPosition }}
       />
     </div>
