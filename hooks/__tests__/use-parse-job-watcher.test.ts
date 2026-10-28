@@ -3,6 +3,7 @@
  */
 
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useParseJobWatcher } from "../use-parse-job-watcher";
 
@@ -483,6 +484,53 @@ describe("useParseJobWatcher", () => {
       });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("re-renders", () => {
+    it("keeps polling when the component re-renders between polls", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch
+        .mockResolvedValueOnce(pendingResponse())
+        .mockResolvedValueOnce(doneResponse());
+      const { rerender } = renderHook(() => useParseJobWatcher());
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      // e.g. a navigation-stack change re-renders the watcher mid-parse.
+      rerender();
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+        await Promise.resolve();
+      });
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(db.parsedRecipes.add).toHaveBeenCalled());
+    });
+  });
+
+  describe("Strict Mode", () => {
+    it("keeps exactly one poll loop through the dev remount", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.mocked(getJobIds).mockReturnValue(["job-1"]);
+      mockFetch.mockResolvedValue(pendingResponse());
+      renderHook(() => useParseJobWatcher(), { wrapper: StrictMode });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      const callsAfterMount = mockFetch.mock.calls.length;
+
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+        await Promise.resolve();
+      });
+
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledTimes(callsAfterMount + 1),
+      );
     });
   });
 

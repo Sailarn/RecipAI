@@ -44,75 +44,78 @@ const NETWORK_RETRY_MS = 5_000;
 const MAX_WATCH_MS = 15 * 60_000;
 
 export function useParseJobWatcher() {
+  // useNavigate() returns a fresh object on every render, and the watcher
+  // re-renders on every navigation-stack change. Read both through refs so
+  // `poll` stays stable and the mount effect runs once. Re-running it used to
+  // clear every pending poll timer and then skip the already-watched jobs, so
+  // a navigation mid-parse silently stopped polling until the next app load.
   const t = useTranslations("parse");
+  const tRef = useRef(t);
+  tRef.current = t;
   const navigate = useNavigate();
-  // Jobs that are already being polled (or have reached a terminal state).
-  // useNavigate() returns a fresh object every render, so this hook's effect
-  // re-runs on every re-render and re-polls all saved job IDs. Without this
-  // guard, a re-render mid-parse spawns a second concurrent poll loop for the
-  // same job — both reach "done" and fire handleDone twice (two toasts + two
-  // parsedRecipes rows). Job IDs are unique per parse, so once seen here a job
-  // is never polled again for the lifetime of the watcher.
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+  // Jobs that are already being polled (or have reached a terminal state), so
+  // a job announced twice (saved id + parse-job-created event) gets one poll
+  // loop, not two that both fire handleDone. Job IDs are unique per parse, so
+  // once seen here a job is never polled again for the lifetime of the watcher.
   const watchedJobs = useRef<Set<string>>(new Set());
   const timeouts = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
-  const handleDone = useCallback(
-    async (id: string, result: ParsedRecipe) => {
-      // Read and preserve the token before removeJobId wipes it.
-      const uploadToken = getUploadToken(id) ?? undefined;
-      if (uploadToken) storePendingUploadToken(uploadToken);
-      removeJobId(id);
+  const handleDone = useCallback(async (id: string, result: ParsedRecipe) => {
+    // Read and preserve the token before removeJobId wipes it.
+    const uploadToken = getUploadToken(id) ?? undefined;
+    if (uploadToken) storePendingUploadToken(uploadToken);
+    removeJobId(id);
 
-      const entry = createParsedRecipeEntry(result);
+    const entry = createParsedRecipeEntry(result);
 
-      let imageUrl = entry.imageUrl;
-      // The image is uploaded to ImageKit at parse time, so the result usually
-      // already carries a stable URL + fileId; only re-upload if it doesn't.
-      let imageFileId = result.imageFileId;
+    let imageUrl = entry.imageUrl;
+    // The image is uploaded to ImageKit at parse time, so the result usually
+    // already carries a stable URL + fileId; only re-upload if it doesn't.
+    let imageFileId = result.imageFileId;
 
-      if (imageUrl && !isImageKitUrl(imageUrl)) {
-        try {
-          const uploaded = await uploadImage(imageUrl, { uploadToken });
-          imageUrl = uploaded.url;
-          imageFileId = uploaded.fileId;
-        } catch {
-          // continue without image upload
-        }
+    if (imageUrl && !isImageKitUrl(imageUrl)) {
+      try {
+        const uploaded = await uploadImage(imageUrl, { uploadToken });
+        imageUrl = uploaded.url;
+        imageFileId = uploaded.fileId;
+      } catch {
+        // continue without image upload
       }
+    }
 
-      const updatedEntry = { ...entry, imageUrl, imageFileId };
-      await db.parsedRecipes.add(updatedEntry);
-      dispatchParsedRecipeCreated({ jobId: id, entryId: updatedEntry.id });
+    const updatedEntry = { ...entry, imageUrl, imageFileId };
+    await db.parsedRecipes.add(updatedEntry);
+    dispatchParsedRecipeCreated({ jobId: id, entryId: updatedEntry.id });
 
-      toast(result.title, {
-        description: t("parsedTapToReview"),
-        duration: 10000,
-        closeButton: true,
-        action: {
-          label: t("reviewSave"),
-          onClick: async () => {
-            await saveParsedRecipe(
-              updatedEntry,
-              getPendingUploadToken() ?? undefined,
-            );
-            await db.parsedRecipes.delete(updatedEntry.id);
-            toast.success(t("savedShort"));
-          },
+    toast(result.title, {
+      description: tRef.current("parsedTapToReview"),
+      duration: 10000,
+      closeButton: true,
+      action: {
+        label: tRef.current("reviewSave"),
+        onClick: async () => {
+          await saveParsedRecipe(
+            updatedEntry,
+            getPendingUploadToken() ?? undefined,
+          );
+          await db.parsedRecipes.delete(updatedEntry.id);
+          toast.success(tRef.current("savedShort"));
         },
-        cancel: {
-          label: t("reviewEdit"),
-          onClick: () => {
-            trackEvent("parse_reviewed", undefined);
-            localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
-            db.parsedRecipes.delete(updatedEntry.id).catch(() => {});
-            const locale = window.location.pathname.split("/")[1];
-            navigate.push(routes.recipes.new(locale));
-          },
+      },
+      cancel: {
+        label: tRef.current("reviewEdit"),
+        onClick: () => {
+          trackEvent("parse_reviewed", undefined);
+          localStorage.setItem("parsedRecipe", JSON.stringify(updatedEntry));
+          db.parsedRecipes.delete(updatedEntry.id).catch(() => {});
+          const locale = window.location.pathname.split("/")[1];
+          navigateRef.current.push(routes.recipes.new(locale));
         },
-      });
-    },
-    [navigate, t],
-  );
+      },
+    });
+  }, []);
 
   const poll = useCallback(
     (id: string) => {
@@ -132,19 +135,19 @@ export function useParseJobWatcher() {
 
       const openParseHistory = () => {
         const locale = window.location.pathname.split("/")[1];
-        navigate.push(routes.parseHistory(locale));
+        navigateRef.current.push(routes.parseHistory(locale));
       };
 
       const abandonStuckJob = (jobUrl: string | undefined) => {
         if (!claimJobCompletion(id)) return;
         removeJobId(id);
-        const timeoutReason = t("timedOut");
+        const timeoutReason = tRef.current("timedOut");
         trackEvent("parse_failed", { source: "url", reason: timeoutReason });
         recordParseHistory(
           failedParseHistoryEntry(id, jobUrl ?? "", timeoutReason),
         ).catch(() => {});
         toast.error(timeoutReason, {
-          action: { label: t("details"), onClick: openParseHistory },
+          action: { label: tRef.current("details"), onClick: openParseHistory },
         });
       };
 
@@ -168,14 +171,17 @@ export function useParseJobWatcher() {
             ).catch(() => {});
           } else if (status === "failed") {
             if (!claimJobCompletion(id)) return;
-            const rawError: string = error || t("failedGeneric");
+            const rawError: string = error || tRef.current("failedGeneric");
             removeJobId(id);
             trackEvent("parse_failed", { source: "url", reason: rawError });
             recordParseHistory(
               failedParseHistoryEntry(id, jobUrl, rawError),
             ).catch(() => {});
             toast.error(rawError, {
-              action: { label: t("details"), onClick: openParseHistory },
+              action: {
+                label: tRef.current("details"),
+                onClick: openParseHistory,
+              },
             });
           } else if (Date.now() - startedAt >= MAX_WATCH_MS) {
             abandonStuckJob(jobUrl);
@@ -197,7 +203,7 @@ export function useParseJobWatcher() {
       };
       run();
     },
-    [handleDone, navigate, t],
+    [handleDone],
   );
 
   useEffect(() => {
