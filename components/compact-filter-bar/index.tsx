@@ -105,7 +105,7 @@ export function CompactFilterBar({
           <ChevronUp
             size={14}
             aria-label="scroll to top"
-            style={{ color: "var(--fg-2)" }}
+            className="text-[var(--fg-2)]"
           />
         </div>
       </button>

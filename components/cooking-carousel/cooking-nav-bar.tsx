@@ -45,13 +45,12 @@ export function CookingNavBar({
             key={key}
             aria-label={`Go to slide ${index + 1}`}
             onClick={() => onDotClick(index)}
-            className="w-1.5 h-1.5 rounded-[3px] border-none cursor-pointer p-0"
-            style={{
-              background:
-                index === currentSlide
-                  ? "var(--food-accent)"
-                  : "rgba(255,255,255,0.15)",
-            }}
+            data-active={index === currentSlide}
+            className={`w-1.5 h-1.5 rounded-[3px] border-none cursor-pointer p-0 ${
+              index === currentSlide
+                ? "bg-[var(--food-accent)]"
+                : "bg-[rgba(255,255,255,0.15)]"
+            }`}
           />
         ))}
       </div>
@@ -71,12 +70,11 @@ export function CookingNavBar({
         <button
           type="button"
           onClick={onNext}
-          className="h-9 rounded-full border-none cursor-pointer px-4 text-[13px] font-semibold flex items-center gap-1.5 text-white"
-          style={{
-            background: isLastStep
-              ? "var(--food-accent)"
-              : "var(--action-primary)",
-          }}
+          className={`h-9 rounded-full border-none cursor-pointer px-4 text-[13px] font-semibold flex items-center gap-1.5 text-white ${
+            isLastStep
+              ? "bg-[var(--food-accent)]"
+              : "bg-[var(--action-primary)]"
+          }`}
         >
           {isLastStep ? t("done") : t("next")}
           {!isLastStep && <ChevronRight className="w-3.5 h-3.5" />}

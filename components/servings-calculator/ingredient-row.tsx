@@ -10,10 +10,10 @@ import { unitLabel } from "@/lib/units";
 import { cn } from "@/lib/utils";
 import type { StockStatus } from "./use-servings-calculator";
 
-const BULLET_COLOR: Record<StockStatus, string> = {
-  in: "rgba(34,197,94,0.9)",
-  out: "rgba(239,68,68,0.7)",
-  unknown: "var(--food-accent)",
+const BULLET_COLOR_CLASS: Record<StockStatus, string> = {
+  in: "bg-[rgba(34,197,94,0.9)]",
+  out: "bg-[rgba(239,68,68,0.7)]",
+  unknown: "bg-[var(--food-accent)]",
 };
 
 interface IngredientRowProps {
@@ -55,12 +55,16 @@ export function IngredientRow({
     >
       <div
         data-status={status}
-        className="w-1.5 h-1.5 rounded-full shrink-0"
-        style={{ background: BULLET_COLOR[status] }}
+        className={cn(
+          "w-1.5 h-1.5 rounded-full shrink-0",
+          BULLET_COLOR_CLASS[status],
+        )}
       />
       <span
-        className="flex-1 flex flex-col gap-0.5 text-[13px] text-[var(--fg-1)] transition-[opacity] duration-200"
-        style={{ opacity: status === "out" ? 0.45 : 1 }}
+        className={cn(
+          "flex-1 flex flex-col gap-0.5 text-[13px] text-[var(--fg-1)] transition-[opacity] duration-200",
+          status === "out" ? "opacity-45" : "opacity-100",
+        )}
       >
         <span>
           {scaledAmount && (
