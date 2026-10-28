@@ -184,6 +184,7 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/pwa.ts` | Installed-PWA and iOS environment detection. |
 | `lib/telegram-bot.ts` | `sendTelegramMessage()`, `sendTelegramPhoto()`, `miniAppDeepLink()`, `savePreparedInlineMessage()`, `extractUrl()`. |
 | `lib/web-push.ts` | `sendPushNotification()` via VAPID (`web-push`). No-op when VAPID env vars are missing. |
+| `lib/push/parse-push.ts` | Translated push copy for a finished or failed parse (`parseDonePush`, `parseFailedPush`) and `requestLocale()`, which reads the caller's `NEXT_LOCALE` cookie. |
 | `lib/parse-job-storage.ts` | localStorage tracking of in-flight parse job ids and their upload tokens. |
 | `lib/parse-job-completion.ts` | Race-free guard so only one poller (inline page vs global watcher) runs a parse job's completion side effects. |
 | `lib/parse-job-events.ts` | Browser events that hand completed parse-job rows from the global watcher back to the parse page. |

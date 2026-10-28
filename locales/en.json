@@ -410,5 +410,11 @@
     "step3": "Tap \"Add\" in the top-right corner",
     "iosNote": "Push notifications only work when installed — Safari browser tabs don't support them on iOS.",
     "fallback": "Open RecipAI in <b>Chrome on Android</b> or <b>Safari on iPhone</b> to install it as an app."
+  },
+  "push": {
+    "savedBody": "Saved to your recipes — tap to open",
+    "readyBody": "Your recipe is ready — tap to open",
+    "failedTitle": "Recipe parse failed",
+    "failedBody": "Couldn't get a recipe from that link. Try again."
   }
 }

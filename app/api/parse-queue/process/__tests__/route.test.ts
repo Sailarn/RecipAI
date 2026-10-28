@@ -72,11 +72,11 @@ const baseRecipe = {
   category: "dinner",
 };
 
-function makeRequest(body: object) {
+function makeRequest(body: object, cookie = "") {
   return new Request("http://localhost/api/parse-queue/process", {
     method: "POST",
     body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", cookie },
   }) as unknown as NextRequest;
 }
 
@@ -223,7 +223,7 @@ describe("POST /api/parse-queue/process", () => {
       expect(sendPushNotification).not.toHaveBeenCalled();
     });
 
-    it("sends a failure push when parsing fails and the job has a subscribed endpoint", async () => {
+    it("sends a failure push in the device's language when parsing fails", async () => {
       setupDb({
         ...baseJob,
         telegramChatId: null,
@@ -234,7 +234,7 @@ describe("POST /api/parse-queue/process", () => {
         new Error("This post is private"),
       );
 
-      await POST(makeRequest({ jobId: "job-1" }));
+      await POST(makeRequest({ jobId: "job-1" }, "NEXT_LOCALE=en"));
 
       expect(sendPushNotification).toHaveBeenCalledWith(
         expect.anything(),

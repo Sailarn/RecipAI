@@ -33,7 +33,10 @@ if (typeof window !== "undefined")
 // tests don't render. Returning the key keeps assertions on stable identifiers
 // instead of English copy that changes whenever wording does. A test that cares
 // about real translations can still override this with a local vi.mock.
-vi.mock("next-intl", () => ({
+// Server code formats with the real createTranslator, so it is kept.
+vi.mock("next-intl", async (importOriginal) => ({
+  createTranslator: (await importOriginal<typeof import("next-intl")>())
+    .createTranslator,
   useTranslations: () => (key: string) => key,
   useLocale: () => "en",
   NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>

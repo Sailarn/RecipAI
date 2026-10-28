@@ -10,6 +10,11 @@ import { parseRecipeFromUrl } from "@/lib/parse-recipe";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { requireCompleteRecipe } from "@/lib/parse-recipe/recipe-result";
 import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
+import {
+  parseDonePush,
+  parseFailedPush,
+  requestLocale,
+} from "@/lib/push/parse-push";
 import { saveAndSendRecipe } from "@/lib/telegram/save-and-send-recipe";
 import { sendTelegramMessage } from "@/lib/telegram-bot";
 import { log } from "@/lib/telemetry";
@@ -132,6 +137,10 @@ export async function POST(req: NextRequest) {
   const jobUrl = job.url;
   if (!jobUrl) return ApiError.badRequest("URL job required");
 
+  // Pushes go out in the language of the device that started the parse.
+  const locale = requestLocale(req);
+  const appUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/";
+
   await db
     .update(parseJobs)
     .set({ status: PARSE_JOB_STATUS.PROCESSING, updatedAt: new Date() })
@@ -219,13 +228,12 @@ export async function POST(req: NextRequest) {
     await notifyParseJobSubscribers({
       job,
       req,
-      payload: {
+      payload: parseDonePush({
+        locale,
         title: finalRecipe.title,
-        body: job.userId
-          ? "Saved to your recipes — tap to open"
-          : "Your recipe is ready — tap to open",
-        url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
-      },
+        savedToLibrary: job.userId !== null,
+        url: appUrl,
+      }),
     });
 
     return NextResponse.json({ ok: true });
@@ -246,11 +254,7 @@ export async function POST(req: NextRequest) {
     await notifyParseJobSubscribers({
       job,
       req,
-      payload: {
-        title: "Recipe parse failed",
-        body: classifyParseError(error),
-        url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "/",
-      },
+      payload: parseFailedPush({ locale, error, url: appUrl }),
     });
 
     return NextResponse.json({ ok: false });
