@@ -86,7 +86,9 @@ beforeEach(() => {
   mockInsertOnConflict.mockResolvedValue(undefined);
   mockUpdateWhere.mockResolvedValue(undefined);
   mockDeleteWhere.mockResolvedValue(undefined);
-  mockExecute.mockResolvedValue(undefined);
+  mockExecute.mockReset();
+  // No other confirmed entry already owns any of the enriched aliases.
+  mockExecute.mockResolvedValue([]);
   vi.mocked(callAiForIngredient).mockResolvedValue(enrichedIngredient as never);
   vi.mocked(embed).mockResolvedValue([[...Array(384).fill(0.1)]]);
 });
@@ -154,6 +156,35 @@ describe("POST /api/ingredients/enrich", () => {
       expect(mockTransaction).not.toHaveBeenCalled();
       // Confirm update, then the best-effort passage-vector update.
       expect(mockUpdateWhere).toHaveBeenCalledTimes(2);
+    });
+
+    it("drops aliases another confirmed entry already owns", async () => {
+      mockSelectWhere
+        .mockResolvedValueOnce([provisionalEntry])
+        .mockReturnValueOnce({
+          orderBy: vi.fn().mockReturnValue({ limit: mockSelectLimit }),
+        });
+      mockSelectLimit.mockResolvedValue([]);
+      vi.mocked(callAiForIngredient).mockResolvedValue({
+        en: "elbow macaroni",
+        ua: "ріжок",
+        category: "grain",
+        aliasesEn: ["Pasta", "elbow pasta"],
+        aliasesUa: ["паста", "ріжки"],
+      } as never);
+      mockExecute
+        .mockResolvedValueOnce([{ name: "pasta" }])
+        .mockResolvedValueOnce([{ name: "паста" }]);
+
+      const res = await POST(
+        makeReq({ id: "uuid-provisional", rawText: "ріжки" }),
+      );
+      const body = await res.json();
+
+      expect(body.ingredient).toMatchObject({
+        aliasesEn: ["elbow pasta"],
+        aliasesUa: ["ріжки"],
+      });
     });
 
     it("confirms with a null vector when the embedding provider fails", async () => {

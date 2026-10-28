@@ -25,11 +25,39 @@ Rules:
 - category: one of fruit|vegetable|meat|seafood|dairy|egg|grain|legume|nut|seed|oil|spice|herb|sauce|sweetener|alcohol|other
 - aliasesUa: must include nominative plural, genitive singular, genitive plural, accusative singular
 - aliasesEn: common English synonyms and plural forms
+- aliases name only this exact ingredient — never a broader category or a different product (elbow macaroni must not list "pasta" or "macaroni"; "паста" also means a paste, so never use it alone as an alias)
 - If not a food ingredient, return: {"skip": true}
 
 Ingredient string: "${rawText}"
 ${ua ? `Suggested Ukrainian translation (verify and correct if needed): "${ua}"` : ""}
 ${category ? `Suggested category: "${category}"` : ""}`;
+}
+
+// An alias that is already another confirmed entry's name or alias makes text
+// matching ambiguous: a generic "pasta"/"паста" on "elbow macaroni" pulled
+// every pasta — and, since "паста" also means paste, Tom Yum paste — onto it.
+async function dropTakenAliases(
+  id: string,
+  aliases: string[],
+): Promise<string[]> {
+  const candidates = [
+    ...new Set(aliases.map((alias) => alias.trim().toLowerCase())),
+  ].filter(Boolean);
+  if (candidates.length === 0) return [];
+  const rows = await db.execute<{ name: string }>(sql`
+    SELECT DISTINCT lower(trim(names.name)) AS name
+    FROM ingredients,
+      LATERAL (
+        SELECT en
+        UNION ALL SELECT ua
+        UNION ALL SELECT jsonb_array_elements_text(aliases_en)
+        UNION ALL SELECT jsonb_array_elements_text(aliases_ua)
+      ) AS names(name)
+    WHERE status = 'confirmed' AND id <> ${id}
+      AND lower(trim(names.name)) IN ${candidates}
+  `);
+  const taken = new Set(Array.from(rows).map((row) => row.name));
+  return aliases.filter((alias) => !taken.has(alias.trim().toLowerCase()));
 }
 
 export async function POST(req: NextRequest) {
@@ -149,6 +177,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, mergedInto: canonicalId });
     }
 
+    const aliasesEn = await dropTakenAliases(id, enriched.aliasesEn);
+    const aliasesUa = await dropTakenAliases(id, enriched.aliasesUa);
+
     // Confirm the enriched row first, without the vector, so a malformed vector
     // or a vector-column write failure can never reject the confirm or bump
     // enrichment retry state.
@@ -156,6 +187,8 @@ export async function POST(req: NextRequest) {
       .update(ingredients)
       .set({
         ...enriched,
+        aliasesEn,
+        aliasesUa,
         status: INGREDIENT_STATUS.CONFIRMED,
         retryCount: 0,
         lastAttemptAt: new Date(),
@@ -188,7 +221,10 @@ export async function POST(req: NextRequest) {
       ingredientId: id,
       userId: authed.session.user.id,
     });
-    return NextResponse.json({ success: true, ingredient: enriched });
+    return NextResponse.json({
+      success: true,
+      ingredient: { ...enriched, aliasesEn, aliasesUa },
+    });
   } catch (error) {
     const newRetryCount = (entry.retryCount ?? 0) + 1;
 
