@@ -17,7 +17,7 @@ import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
 import { generateId } from "@/lib/utils";
 
-export type DirectParseSource = "photo" | "text";
+type DirectParseSource = "photo" | "text";
 
 const FAILED_HISTORY_ENTRY = {
   photo: failedPhotoHistoryEntry,

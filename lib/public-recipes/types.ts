@@ -1,6 +1,6 @@
 import type { RecipeIngredient, RecipeSection, Step } from "@/lib/db/schema";
 
-export interface PublicRecipeOwner {
+interface PublicRecipeOwner {
   name: string;
   image?: string;
 }

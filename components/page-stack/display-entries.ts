@@ -1,6 +1,6 @@
 import type { StackEntry } from "@/lib/navigation-stack";
 
-export type DisplayStatus = "stable" | "entering" | "leaving";
+type DisplayStatus = "stable" | "entering" | "leaving";
 export type DisplayEntry = StackEntry & { status: DisplayStatus };
 export type StackChange = "push" | "pop" | "reset";
 

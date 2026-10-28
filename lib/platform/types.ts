@@ -7,8 +7,8 @@
 
 export type PlatformKind = "web" | "telegram";
 
-export type HapticStyle = "light" | "medium" | "heavy" | "rigid" | "soft";
-export type HapticNotify = "success" | "error" | "warning";
+type HapticStyle = "light" | "medium" | "heavy" | "rigid" | "soft";
+type HapticNotify = "success" | "error" | "warning";
 
 export type RecipeShareInput = {
   /** Recipe id — used by the Telegram native share to mint a prepared card. */

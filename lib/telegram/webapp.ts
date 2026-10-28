@@ -8,7 +8,7 @@
  * See `specs/telegram-mini-app.md` and `docs/explanation/telegram-mini-app.md`.
  */
 
-export type TelegramThemeParams = {
+type TelegramThemeParams = {
   bg_color?: string;
   secondary_bg_color?: string;
   text_color?: string;
@@ -22,14 +22,14 @@ export type TelegramUser = {
   language_code?: string;
 };
 
-export type TelegramBackButton = {
+type TelegramBackButton = {
   show: () => void;
   hide: () => void;
   onClick: (handler: () => void) => void;
   offClick: (handler: () => void) => void;
 };
 
-export type TelegramMainButton = {
+type TelegramMainButton = {
   setText: (text: string) => void;
   show: () => void;
   hide: () => void;
@@ -41,31 +41,22 @@ export type TelegramMainButton = {
   offClick: (handler: () => void) => void;
 };
 
-export type TelegramHapticStyle =
-  | "light"
-  | "medium"
-  | "heavy"
-  | "rigid"
-  | "soft";
-export type TelegramHapticNotification = "error" | "success" | "warning";
+type TelegramHapticStyle = "light" | "medium" | "heavy" | "rigid" | "soft";
+type TelegramHapticNotification = "error" | "success" | "warning";
 
-export type TelegramHapticFeedback = {
+type TelegramHapticFeedback = {
   impactOccurred: (style: TelegramHapticStyle) => void;
   notificationOccurred: (type: TelegramHapticNotification) => void;
   selectionChanged: () => void;
 };
 
-export type TelegramHomeScreenStatus =
-  | "unsupported"
-  | "unknown"
-  | "added"
-  | "missed";
+type TelegramHomeScreenStatus = "unsupported" | "unknown" | "added" | "missed";
 
 // Per-user key/value store that persists across app reopens and devices —
 // unlike localStorage/cookies, which the WebView drops between sessions. The
 // callbacks are error-first. Present from Bot API 6.9; optional so older
 // clients degrade gracefully.
-export type TelegramCloudStorage = {
+type TelegramCloudStorage = {
   setItem: (
     key: string,
     value: string,

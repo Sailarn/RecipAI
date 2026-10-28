@@ -1,7 +1,7 @@
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { log } from "@/lib/telemetry";
 
-export interface NotRecipeResult {
+interface NotRecipeResult {
   notRecipe: true;
 }
 

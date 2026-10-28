@@ -16,7 +16,7 @@ const SPRING = {
   mass: 0.7,
 };
 
-export type Measure = {
+type Measure = {
   itemWidths: number[];
   itemLefts: number[];
   innerHeight: number;

@@ -2,7 +2,7 @@ import type { RecipeCategory } from "@/lib/categories";
 import type { PreparationModifier } from "@/lib/parse-recipe/modifiers";
 
 const RECIPE_STATUSES = ["tried"] as const;
-export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
+type RecipeStatus = (typeof RECIPE_STATUSES)[number];
 
 export const INGREDIENT_STATUS = {
   PROVISIONAL: "provisional",
@@ -26,7 +26,7 @@ export const PARSE_HISTORY_STATUS = {
   DONE: "done",
   FAILED: "failed",
 } as const;
-export type ParseHistoryStatus =
+type ParseHistoryStatus =
   (typeof PARSE_HISTORY_STATUS)[keyof typeof PARSE_HISTORY_STATUS];
 
 export interface Collection {
@@ -208,7 +208,7 @@ export interface ParseHistoryEntry {
   createdAt: Date;
 }
 
-export const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
+const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
 export type SyncEntityType = (typeof SYNC_ENTITY_TYPES)[number];
 
 const SYNC_NOTIFICATION_TYPES = [
@@ -216,7 +216,7 @@ const SYNC_NOTIFICATION_TYPES = [
   "local_only",
   "conflicted",
 ] as const;
-export type SyncNotificationType = (typeof SYNC_NOTIFICATION_TYPES)[number];
+type SyncNotificationType = (typeof SYNC_NOTIFICATION_TYPES)[number];
 
 export interface SyncNotification {
   id: string;

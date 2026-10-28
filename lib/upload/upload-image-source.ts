@@ -8,7 +8,7 @@ import {
   UPLOAD_ERRORS,
 } from "@/lib/upload/upload-limits";
 
-export type ImageSource = { fileData: string; fileName: string };
+type ImageSource = { fileData: string; fileName: string };
 
 export type ResolveResult =
   | { ok: true; source: ImageSource }

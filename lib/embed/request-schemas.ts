@@ -24,6 +24,3 @@ export const embedMatchRequestSchema = z.object({
     .min(1)
     .max(EMBED_MAX_ITEMS),
 });
-
-export type EmbedRequest = z.infer<typeof embedRequestSchema>;
-export type EmbedMatchRequest = z.infer<typeof embedMatchRequestSchema>;
