@@ -81,7 +81,7 @@ export function LoginView({ locale }: { locale: string }) {
         }
       }
     },
-    [locale],
+    [locale, t],
   );
 
   // Resume a device sign-in left pending by a PWA reload (e.g. returning from
