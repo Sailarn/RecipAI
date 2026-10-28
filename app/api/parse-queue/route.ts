@@ -6,7 +6,7 @@ import { parseJobs } from "@/db/schema/parse-jobs";
 import { ApiError } from "@/lib/api-errors";
 import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
-import { PARSE_JOB_STATUS, type ParsedRecipe } from "@/lib/db/schema";
+import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import { saveParsedRecipeForUser } from "@/lib/parse-recipe/save-parsed-recipe-server";
@@ -112,6 +112,8 @@ export async function POST(req: NextRequest) {
       )
       .orderBy(desc(parseJobs.createdAt))
       .limit(1);
+    // The query filters on a non-null result; this narrows the type to match.
+    const cachedResult = cached?.result ?? null;
 
     await db.insert(parseJobs).values({
       id,
@@ -120,10 +122,10 @@ export async function POST(req: NextRequest) {
       normalizedUrl,
       pushEndpoint: pushEndpoint ?? null,
       telegramChatId,
-      ...(cached
+      ...(cachedResult
         ? {
             status: PARSE_JOB_STATUS.DONE,
-            result: cached.result,
+            result: cachedResult,
             parserVersion: PARSER_VERSION,
           }
         : { status: PARSE_JOB_STATUS.PENDING }),
@@ -134,10 +136,10 @@ export async function POST(req: NextRequest) {
     // it right here. Otherwise kick /process off server-side so it saves and
     // sends the bot message on completion, even if the client navigates away.
     if (telegramChatId && session?.user.id) {
-      if (cached) {
+      if (cachedResult) {
         await saveParsedRecipeForUser({
           userId: session.user.id,
-          parsed: cached.result as unknown as ParsedRecipe,
+          parsed: cachedResult,
           sourceUrl: url,
         });
       } else {
@@ -148,9 +150,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       jobId: id,
       uploadToken,
-      cached: Boolean(cached),
+      cached: Boolean(cachedResult),
       telegramNotify: Boolean(telegramChatId),
-      ...(cached ? { result: cached.result } : {}),
+      ...(cachedResult ? { result: cachedResult } : {}),
     });
   } catch (error) {
     return ApiError.internal(error, req);

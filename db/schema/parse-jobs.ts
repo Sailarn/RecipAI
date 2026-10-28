@@ -1,6 +1,10 @@
 import { relations } from "drizzle-orm";
 import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { PARSE_JOB_STATUS, type ParseJobStatus } from "@/lib/db/schema";
+import {
+  PARSE_JOB_STATUS,
+  type ParsedRecipe,
+  type ParseJobStatus,
+} from "@/lib/db/schema";
 import { user } from "./auth";
 
 export const parseJobs = pgTable(
@@ -20,7 +24,7 @@ export const parseJobs = pgTable(
       .$type<ParseJobStatus>()
       .notNull()
       .default(PARSE_JOB_STATUS.PENDING),
-    result: jsonb("result"),
+    result: jsonb("result").$type<ParsedRecipe>(),
     error: text("error"),
     pushEndpoint: text("push_endpoint"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
       .update(parseJobs)
       .set({
         status: PARSE_JOB_STATUS.DONE,
-        result: finalRecipe as unknown as Record<string, unknown>,
+        result: finalRecipe,
         parserVersion: PARSER_VERSION,
         updatedAt: new Date(),
       })

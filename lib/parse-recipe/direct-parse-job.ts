@@ -72,7 +72,7 @@ export async function executeDirectParseJob({
     .update(parseJobs)
     .set({
       status: PARSE_JOB_STATUS.DONE,
-      result: recipe as unknown as Record<string, unknown>,
+      result: recipe,
       parserVersion: PARSER_VERSION,
       updatedAt: new Date(),
     })
