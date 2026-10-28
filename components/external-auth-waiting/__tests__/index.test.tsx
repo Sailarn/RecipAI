@@ -5,7 +5,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const openExternalAuth = vi.hoisted(() => vi.fn());
 const copyExternalAuthUrl = vi.hoisted(() => vi.fn());
 const copyAndOpenExternalAuthUrl = vi.hoisted(() => vi.fn());
 const canShareExternalAuthUrl = vi.hoisted(() => vi.fn(() => false));
@@ -13,7 +12,6 @@ const shareExternalAuthUrl = vi.hoisted(() => vi.fn());
 const isIos = vi.hoisted(() => vi.fn(() => false));
 
 vi.mock("@/lib/auth/external-browser", () => ({
-  openExternalAuth,
   copyExternalAuthUrl,
   copyAndOpenExternalAuthUrl,
   canShareExternalAuthUrl,

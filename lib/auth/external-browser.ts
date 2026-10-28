@@ -4,7 +4,7 @@
 // sign-in with a full reload. Kept separate from the device-authorization
 // protocol in external-auth-flow.ts.
 
-export function openExternalAuth(url: string): boolean {
+function openExternalAuth(url: string): boolean {
   return window.open(url, "_blank", "noopener,noreferrer") !== null;
 }
 

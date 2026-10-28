@@ -5,8 +5,6 @@ import {
 } from "@/lib/maintenance-constants";
 import { captureError } from "@/lib/telemetry";
 
-export { MAINTENANCE_MODE_CODE };
-
 export const API_ERROR_MESSAGES = {
   UNAUTHORIZED: "Unauthorized",
   NOT_FOUND: "Not found",
