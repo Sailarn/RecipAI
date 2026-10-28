@@ -1,10 +1,10 @@
 import { toast } from "sonner";
 import { db } from "@/lib/db/db";
+import { createParsedRecipeEntry } from "@/lib/db/parsed-recipes";
 import { saveParsedRecipe } from "@/lib/db/save-parsed-recipe";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { routes } from "@/lib/routes";
 import { isImageKitUrl, uploadImage } from "@/lib/upload/images";
-import { generateId } from "@/lib/utils";
 
 /**
  * Copy for the review toast. Passed in rather than translated here: this is a
@@ -23,20 +23,9 @@ export async function saveDirectParseResult(
   locale: string,
   labels: DirectParseLabels,
 ): Promise<void> {
-  const entry = {
-    id: generateId(),
-    title: recipe.title,
-    description: recipe.description,
-    prepTime: recipe.prepTime,
-    cookTime: recipe.cookTime,
-    servings: recipe.servings ?? null,
-    ingredients: recipe.ingredients,
-    instructions: recipe.instructions,
-    imageUrl: recipe.imageUrl,
-    sourceUrl: undefined as string | undefined,
-    category: recipe.category,
-    createdAt: new Date(),
-  };
+  // A photo or pasted text has no page to link back to, even if the model
+  // echoed a URL it saw in the text.
+  const entry = { ...createParsedRecipeEntry(recipe), sourceUrl: undefined };
 
   let imageUrl = entry.imageUrl;
   let imageFileId: string | undefined;
