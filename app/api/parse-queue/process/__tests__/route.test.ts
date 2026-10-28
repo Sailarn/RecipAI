@@ -275,6 +275,28 @@ describe("POST /api/parse-queue/process", () => {
       expect(captureError).not.toHaveBeenCalled();
     });
 
+    it("keeps a parsed job done when the subscription lookup fails", async () => {
+      const job = {
+        ...baseJob,
+        telegramChatId: null,
+        pushEndpoint: "https://web.push.apple.com/abc",
+      };
+      const { updateChain, selectChain } = setupDb(job);
+      const lookupError = new Error("connection pool exhausted");
+      selectChain.where
+        .mockResolvedValueOnce([job])
+        .mockRejectedValueOnce(lookupError);
+      vi.mocked(parseRecipeFromUrl).mockResolvedValue(baseRecipe as any);
+
+      const res = await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(await res.json()).toEqual({ ok: true });
+      expect(updateChain.set).not.toHaveBeenCalledWith(
+        expect.objectContaining({ status: "failed" }),
+      );
+      expect(captureError).toHaveBeenCalledWith(lookupError, expect.anything());
+    });
+
     it("captures auth/VAPID failures instead of swallowing them", async () => {
       setupDb({
         ...baseJob,

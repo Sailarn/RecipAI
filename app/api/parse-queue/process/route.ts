@@ -73,15 +73,24 @@ async function notifyParseJobSubscribers({
 }: NotifyParseJobSubscribersOptions): Promise<void> {
   if (!job.pushEndpoint) return;
 
-  const targets = job.userId
-    ? await db
-        .select()
-        .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.userId, job.userId))
-    : await db
-        .select()
-        .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
+  // A push is a courtesy on top of the stored result. If the lookup throws on
+  // the success path, the outer catch would flip a finished job to FAILED and
+  // push "parse failed" for a recipe that parsed fine.
+  let targets: (typeof pushSubscriptions.$inferSelect)[];
+  try {
+    targets = job.userId
+      ? await db
+          .select()
+          .from(pushSubscriptions)
+          .where(eq(pushSubscriptions.userId, job.userId))
+      : await db
+          .select()
+          .from(pushSubscriptions)
+          .where(eq(pushSubscriptions.endpoint, job.pushEndpoint));
+  } catch (lookupError) {
+    ApiError.capture(lookupError, req);
+    return;
+  }
 
   for (const target of targets) {
     sendPushNotification(target, payload).catch((pushError: unknown) =>
