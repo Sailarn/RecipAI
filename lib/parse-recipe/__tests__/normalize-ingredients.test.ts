@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EMBED_MAX_TEXT_LENGTH } from "@/lib/api-limits";
 import { normalizeRecipeIngredients } from "../normalize-ingredients";
 
 // Stable mock references — vi.hoisted runs before vi.mock factories
@@ -305,6 +306,38 @@ describe("normalizeRecipeIngredients", () => {
         (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
       );
       expect(body.items).toHaveLength(2);
+    });
+  });
+
+  describe("embed-match payload bounds", () => {
+    it("keeps a blank ingredient row out of embed-match and provisionals", async () => {
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: "garlic" },
+        { item: "   " },
+      ]);
+
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+      expect(mockDbIngredientsPut).not.toHaveBeenCalled();
+      const [, updates] = mockDbRecipesUpdate.mock.calls[0];
+      expect(updates.canonicalIngredientIds).toEqual(["garlic", ""]);
+      expect(updates.unrecognizedIngredients).toEqual([]);
+    });
+
+    it("clips over-long text to the route's per-item limit", async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ matches: [null], degraded: false }),
+      });
+
+      await normalizeRecipeIngredients("recipe-1", [
+        { item: `sumac ${"x".repeat(400)}`, en: "y".repeat(400) },
+      ]);
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body,
+      );
+      expect(body.items[0].item).toHaveLength(EMBED_MAX_TEXT_LENGTH);
+      expect(body.items[0].en).toHaveLength(EMBED_MAX_TEXT_LENGTH);
     });
   });
 

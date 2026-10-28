@@ -1,3 +1,4 @@
+import { EMBED_MAX_TEXT_LENGTH } from "@/lib/api-limits";
 import { db } from "@/lib/db/db";
 import { INGREDIENT_STATUS } from "@/lib/db/schema";
 import { syncUpdate } from "@/lib/db/supabase-sync";
@@ -56,6 +57,12 @@ async function createProvisional(
   }
 }
 
+// The embed-match route rejects the whole batch when any one text exceeds its
+// per-item limit, so one long ingredient line would degrade every item.
+function clipForEmbed(text: string): string {
+  return text.trim().slice(0, EMBED_MAX_TEXT_LENGTH);
+}
+
 // Guards against two overlapping normalize passes for the same recipe — e.g.
 // the deep-link owner-pull and the post-sync sweep both catching a freshly
 // pulled bot recipe. A concurrent second run could create duplicate provisional
@@ -105,6 +112,12 @@ async function runNormalize(
   let textMatched = 0;
 
   for (const ingredient of ingredients) {
+    // A blank row (e.g. an emptied field in the edit form) has nothing to
+    // resolve — sent on, it fails the embed-match schema for the whole batch.
+    if (ingredient.item.trim() === "") {
+      canonicalIngredientIds.push("");
+      continue;
+    }
     if (NULL_PATTERNS.some((pattern) => pattern.test(ingredient.item.trim()))) {
       unrecognizedIngredients.push(ingredient.item);
       // Keep a slot so canonicalIngredientIds stays index-aligned with
@@ -141,9 +154,9 @@ async function runNormalize(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: pending.map((pendingItem) => ({
-            item: pendingItem.item,
-            ua: pendingItem.ua ?? null,
-            en: pendingItem.en ?? null,
+            item: clipForEmbed(pendingItem.item),
+            ua: pendingItem.ua ? clipForEmbed(pendingItem.ua) : null,
+            en: pendingItem.en ? clipForEmbed(pendingItem.en) : null,
           })),
         }),
       });
