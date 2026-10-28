@@ -101,12 +101,16 @@ describe("create barrier", () => {
     await vi.waitFor(() => expect(methods()).toEqual(["POST", method]));
   });
 
-  it("does not hold requests for another collection", () => {
-    mockFetch.mockReturnValueOnce(deferredResponse().promise);
+  it("does not hold requests for another collection", async () => {
+    const create = deferredResponse();
+    mockFetch.mockReturnValueOnce(create.promise);
 
     syncCreateCollection(COLLECTION);
     syncDeleteCollection("col-2");
 
     expect(methods()).toEqual(["POST", "DELETE"]);
+    // Settle the create so col-1's queue is empty for the next test.
+    create.resolve(new Response());
+    await create.promise;
   });
 });

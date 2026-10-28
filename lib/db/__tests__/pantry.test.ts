@@ -450,7 +450,8 @@ describe("request ordering", () => {
   });
 
   it("does not hold requests for a different item", async () => {
-    fetchMock.mockReturnValueOnce(deferredResponse().promise);
+    const toggle = deferredResponse();
+    fetchMock.mockReturnValueOnce(toggle.promise);
     vi.mocked(db.pantry.get).mockResolvedValue({
       id: "p1",
       name: "Salt",
@@ -462,5 +463,8 @@ describe("request ordering", () => {
     await removePantryItem("p2");
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    // Settle the toggle so p1's queue is empty for the next test.
+    toggle.resolve(new Response());
+    await toggle.promise;
   });
 });
