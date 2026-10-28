@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth/auth";
 import { runDirectParseJob } from "@/lib/parse-recipe/direct-parse-job";
 import { buildPhotoPrompt } from "@/lib/parse-recipe/prompts";
 import { enforceParseRateLimit } from "@/lib/rate-limit";
+import { isAllowedImageType, UPLOAD_ERRORS } from "@/lib/upload/upload-limits";
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -22,6 +23,11 @@ export async function POST(request: Request) {
   const { imageBase64, mimeType } = body;
   if (!imageBase64 || !mimeType) {
     return ApiError.badRequest("imageBase64 and mimeType are required");
+  }
+  // Reject before the model call: an unsupported type is a billed request
+  // that can only fail.
+  if (!isAllowedImageType(mimeType)) {
+    return ApiError.badRequest(UPLOAD_ERRORS.UNSUPPORTED_TYPE);
   }
 
   return runDirectParseJob(request, {
