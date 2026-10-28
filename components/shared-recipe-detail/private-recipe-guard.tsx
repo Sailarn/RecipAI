@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, Lock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { routes } from "@/lib/routes";
 import { useNavigate } from "@/lib/transitions";
 
@@ -9,12 +9,17 @@ const REDIRECT_SECONDS = 4;
 
 export function PrivateRecipeGuard({ locale }: { locale: string }) {
   const navigate = useNavigate();
+  // useNavigate() is a new object every render, and the countdown re-renders
+  // every second. Depending on it restarted the redirect timer each tick, so
+  // the countdown reached 0 and the redirect never fired.
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
   const [seconds, setSeconds] = useState(REDIRECT_SECONDS);
   const recipesUrl = routes.recipes.list(locale);
 
   useEffect(() => {
     const redirect = window.setTimeout(
-      () => navigate.back(recipesUrl),
+      () => navigateRef.current.back(recipesUrl),
       REDIRECT_SECONDS * 1000,
     );
     const countdown = window.setInterval(
@@ -25,7 +30,7 @@ export function PrivateRecipeGuard({ locale }: { locale: string }) {
       window.clearTimeout(redirect);
       window.clearInterval(countdown);
     };
-  }, [navigate, recipesUrl]);
+  }, [recipesUrl]);
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-9 text-center bg-[var(--bg-base)]">

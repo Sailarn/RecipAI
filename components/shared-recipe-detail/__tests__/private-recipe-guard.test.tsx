@@ -21,6 +21,17 @@ describe("PrivateRecipeGuard", () => {
     expect(navigation.back).toHaveBeenCalledWith("/en/recipes");
   });
 
+  it("still redirects when the countdown re-renders every second", async () => {
+    render(<PrivateRecipeGuard locale="en" />);
+
+    for (let second = 0; second < 4; second++) {
+      await act(() => vi.advanceTimersByTimeAsync(1_000));
+    }
+
+    expect(navigation.back).toHaveBeenCalledWith("/en/recipes");
+    expect(screen.getByText(/0s/)).toBeTruthy();
+  });
+
   it("pops the navigation stack (not a bare URL replace) when the button is clicked", () => {
     // navigate.back(fallback) pops a pushed stack overlay; navigate.replace()
     // only changes the URL and leaves the overlay stuck on screen — this is
