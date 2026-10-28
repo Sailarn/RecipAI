@@ -16,8 +16,14 @@ async function compressImage(
 
   const canvas = new OffscreenCanvas(width, height);
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("Could not get canvas 2d context");
-  context.drawImage(bitmap, 0, 0, width, height);
+  try {
+    if (!context) throw new Error("Could not get canvas 2d context");
+    context.drawImage(bitmap, 0, 0, width, height);
+  } finally {
+    // A decoded camera photo holds tens of MB until released; on iOS that
+    // pressure can evict the tab before GC gets to it.
+    bitmap.close();
+  }
   const blob = await canvas.convertToBlob({
     type: "image/jpeg",
     quality: 0.85,
