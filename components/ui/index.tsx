@@ -13,16 +13,6 @@ export {
   AlertDialogTrigger,
 } from "./alert-dialog";
 export { Button, buttonVariants } from "./button";
-// Card
-export {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./card";
 export {
   Carousel,
   CarouselContent,
@@ -32,17 +22,7 @@ export {
 } from "./carousel";
 // Input
 export { Input } from "./input";
-// Label
-export { Label } from "./label";
 // Shadcn additions
-export {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
-export { Separator } from "./separator";
 export {
   Sheet,
   SheetClose,
