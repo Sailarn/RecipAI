@@ -143,6 +143,9 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  // The offline case spies on navigator.onLine; left in place, every later
+  // test would run "offline" and never show the failure toast.
+  vi.restoreAllMocks();
 });
 
 describe("useSyncOnLogin", () => {

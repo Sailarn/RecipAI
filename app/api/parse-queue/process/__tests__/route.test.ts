@@ -105,6 +105,9 @@ function flushMicrotasks() {
 }
 
 beforeEach(() => {
+  // Some tests make Telegram reject; reset so that never leaks into the next.
+  vi.mocked(sendTelegramMessage).mockReset();
+  vi.mocked(sendTelegramPhoto).mockReset();
   vi.mocked(isImageKitUrl).mockImplementation((url) => url === IMAGEKIT_URL);
   vi.mocked(sendPushNotification).mockResolvedValue(undefined);
   // Default: image upload succeeds. Individual tests override to reject. Without

@@ -96,6 +96,7 @@ beforeEach(() => {
   claimJobCompletion.mockReturnValue(true);
   vi.stubGlobal("fetch", mockFetch);
   vi.mocked(getJobIds).mockReturnValue([]);
+  vi.mocked(getUploadToken).mockReturnValue(null);
   vi.mocked(db.parsedRecipes.add).mockResolvedValue(undefined as any);
   vi.mocked(db.parsedRecipes.delete).mockResolvedValue(undefined);
   vi.mocked(isImageKitUrl).mockReturnValue(false);
