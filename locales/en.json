@@ -1,6 +1,5 @@
 {
   "common": {
-    "appName": "RecipAI",
     "loading": "Loading...",
     "error": "Something went wrong",
     "save": "Save",
@@ -8,10 +7,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "confirm": "Confirm",
     "saving": "Saving...",
     "recipeNotFound": "Recipe not found",
-    "closeModal": "Close modal",
     "minutes": "min",
     "errorBody": "This part of the app hit a problem. Your saved recipes are untouched.",
     "tryAgain": "Try again",
@@ -28,9 +25,7 @@
     "tagline": "Your personal recipe management app"
   },
   "navigation": {
-    "home": "Home",
     "recipes": "Recipes",
-    "settings": "Settings",
     "profile": "Profile",
     "openPantry": "Open Pantry",
     "backToRecipes": "Back to Recipes",
@@ -40,9 +35,6 @@
     "loading": "Loading...",
     "title": "Recipes",
     "noRecipes": "No recipes yet",
-    "createFirst": "Create your first recipe",
-    "createRecipe": "Create Recipe",
-    "updateRecipe": "Update Recipe",
     "servings": "servings",
     "servingsCount": "{count, plural, one {# serving} other {# servings}}",
     "recipeNotFound": "Recipe not found",
@@ -89,7 +81,6 @@
     "newCollection": "New Collection",
     "editCollection": "Edit Collection",
     "collectionNamePlaceholder": "Collection name…",
-    "addToCollectionTitle": "Add to Collection",
     "savedShared": "Saved — now it is yours to edit",
     "saveSharedFailed": "Could not save this recipe. Try again.",
     "sharedBy": "Shared by {name}",
@@ -128,7 +119,6 @@
     "next": "Next",
     "back": "Back",
     "saved": "Recipe saved",
-    "basicInfo": "Basic Information",
     "title": "Title",
     "titleRequired": "Title is required",
     "description": "Description",
@@ -149,9 +139,6 @@
     "editIngredientStates": "Edit ingredient states",
     "closeIngredientStatePicker": "Close ingredient state picker",
     "instructions": "Instructions",
-    "instructionsRequired": "At least one instruction required",
-    "instructionStep": "Instruction step",
-    "instructionRequired": "Instruction required",
     "addStep": "Add Step",
     "addStepHere": "Add step here",
     "splitIntoSections": "Split into sections",
@@ -164,13 +151,10 @@
     "deleteSection": "Delete section",
     "editStep": "Edit step",
     "collapseStep": "Collapse step",
-    "remove": "Remove",
     "instructionPlaceholder": "Enter step instructions...",
     "amountRequired": "Required",
     "servingsRequired": "Servings must be at least 1",
-    "imageUploadFailed": "Image upload failed. Please try again or remove the image.",
     "category": "Category",
-    "categoryPlaceholder": "Select category",
     "hintText": "Enter each ingredient with its amount and unit",
     "hintExample": "e.g. 2 cups flour, 1 tbsp olive oil",
     "stepHintText": "Describe each step clearly",
@@ -194,19 +178,11 @@
     "searchIngredientsPlaceholder": "Search ingredients…",
     "searchIngredientsAria": "Search ingredients"
   },
-  "form": {
-    "required": "This field is required"
-  },
   "theme": {
     "light": "Light",
-    "dark": "Dark",
-    "toggle": "Toggle theme",
-    "lightMode": "Light mode",
-    "darkMode": "Dark mode"
+    "dark": "Dark"
   },
   "language": {
-    "english": "English",
-    "ukrainian": "Українська",
     "switch": "Switch language"
   },
   "profile": {
@@ -238,7 +214,6 @@
       "cta": "Take Photo or Upload",
       "change": "Change Photo",
       "submit": "Parse Recipe",
-      "parsing": "Reading recipe...",
       "hint": "Works with handwritten and printed recipes in any language"
     },
     "text": {

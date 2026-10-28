@@ -1,6 +1,5 @@
 {
   "common": {
-    "appName": "RecipAI",
     "loading": "Завантаження...",
     "error": "Щось пішло не так",
     "save": "Зберегти",
@@ -8,10 +7,8 @@
     "delete": "Видалити",
     "edit": "Редагувати",
     "create": "Створити",
-    "confirm": "Підтвердити",
     "saving": "Збереження...",
     "recipeNotFound": "Рецепт не знайдено",
-    "closeModal": "Закрити модальне вікно",
     "minutes": "хв",
     "errorBody": "Ця частина застосунку зіткнулася з проблемою. Збережені рецепти не постраждали.",
     "tryAgain": "Спробувати ще раз",
@@ -28,9 +25,7 @@
     "tagline": "Ваш персональний додаток для керування рецептами"
   },
   "navigation": {
-    "home": "Головна",
     "recipes": "Рецепти",
-    "settings": "Налаштування",
     "profile": "Профіль",
     "openPantry": "Відкрити комору",
     "backToRecipes": "Назад до рецептів",
@@ -40,9 +35,6 @@
     "loading": "Завантаження...",
     "title": "Рецепти",
     "noRecipes": "Рецептів ще немає",
-    "createFirst": "Створіть свій перший рецепт",
-    "createRecipe": "Створити рецепт",
-    "updateRecipe": "Оновити рецепт",
     "servings": "порцій",
     "servingsCount": "{count, plural, one {# порція} few {# порції} many {# порцій} other {# порції}}",
     "recipeNotFound": "Рецепт не знайдено",
@@ -89,7 +81,6 @@
     "newCollection": "Нова колекція",
     "editCollection": "Редагувати колекцію",
     "collectionNamePlaceholder": "Назва колекції…",
-    "addToCollectionTitle": "Додати до колекції",
     "savedShared": "Збережено — тепер ви можете його редагувати",
     "saveSharedFailed": "Не вдалося зберегти цей рецепт. Спробуйте ще раз.",
     "sharedBy": "Поділився {name}",
@@ -128,7 +119,6 @@
     "next": "Далі",
     "back": "Назад",
     "saved": "Рецепт збережено",
-    "basicInfo": "Основна інформація",
     "title": "Назва",
     "titleRequired": "Назва обов'язкова",
     "description": "Опис",
@@ -149,9 +139,6 @@
     "editIngredientStates": "Редагувати стани інгредієнта",
     "closeIngredientStatePicker": "Закрити вибір стану інгредієнта",
     "instructions": "Інструкції",
-    "instructionsRequired": "Потрібна принаймні одна інструкція",
-    "instructionStep": "Крок інструкції",
-    "instructionRequired": "Інструкція обов'язкова",
     "addStep": "Додати крок",
     "addStepHere": "Додати крок сюди",
     "splitIntoSections": "Розділити на секції",
@@ -164,13 +151,10 @@
     "deleteSection": "Видалити секцію",
     "editStep": "Редагувати крок",
     "collapseStep": "Згорнути крок",
-    "remove": "Видалити",
     "instructionPlaceholder": "Введіть інструкції кроку...",
     "amountRequired": "Обов'язково",
     "servingsRequired": "Порцій має бути принаймні 1",
-    "imageUploadFailed": "Не вдалося завантажити зображення. Спробуйте ще раз або видаліть зображення.",
     "category": "Категорія",
-    "categoryPlaceholder": "Виберіть категорію",
     "hintText": "Введіть кожен інгредієнт із кількістю та одиницею",
     "hintExample": "напр. 2 склянки борошна, 1 ст. л. оливкової олії",
     "stepHintText": "Опишіть кожен крок чітко",
@@ -194,19 +178,11 @@
     "searchIngredientsPlaceholder": "Пошук інгредієнтів…",
     "searchIngredientsAria": "Пошук інгредієнтів"
   },
-  "form": {
-    "required": "Це поле обов'язкове"
-  },
   "theme": {
     "light": "Світла",
-    "dark": "Темна",
-    "toggle": "Змінити тему",
-    "lightMode": "Світла тема",
-    "darkMode": "Темна тема"
+    "dark": "Темна"
   },
   "language": {
-    "english": "English",
-    "ukrainian": "Українська",
     "switch": "Змінити мову"
   },
   "profile": {
@@ -238,7 +214,6 @@
       "cta": "Сфотографувати або завантажити",
       "change": "Змінити фото",
       "submit": "Розпізнати рецепт",
-      "parsing": "Читаємо рецепт...",
       "hint": "Розпізнає рукописні та друковані рецепти будь-якою мовою"
     },
     "text": {
