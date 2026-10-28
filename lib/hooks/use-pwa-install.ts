@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { isStandalonePwa } from "@/lib/pwa";
 import { trackEvent } from "@/lib/telemetry";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,13 +9,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-// Non-standard properties the platform checks below rely on: `standalone` is
-// WebKit-only (how iOS reports an installed home-screen app) and `MSStream`
-// exists solely to exclude old IE from the iPad/iPhone user-agent test.
-interface WebKitNavigator extends Navigator {
-  standalone?: boolean;
-}
-
+// `MSStream` exists solely to exclude old IE from the iPad/iPhone user-agent
+// test.
 interface LegacyIEWindow extends Window {
   MSStream?: unknown;
 }
@@ -26,10 +22,7 @@ export function usePwaInstall() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as WebKitNavigator).standalone === true;
-    setIsInstalled(standalone);
+    setIsInstalled(isStandalonePwa());
 
     setIsIOS(
       /iPad|iPhone|iPod/.test(navigator.userAgent) &&
