@@ -6,6 +6,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as recipesModule from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
+import { recipesPageCache } from "@/lib/recipes-prefetch";
 import RecipesPage from "../page";
 
 vi.mock("next/navigation", () => ({
@@ -106,6 +107,10 @@ const mockRecipes: Recipe[] = [
 describe("RecipesPage", () => {
   beforeEach(() => {
     vi.mocked(recipesModule.getAllRecipes).mockResolvedValue(mockRecipes);
+    // The page writes this module-level cache during render, so a previous
+    // test's recipes would otherwise render on frame 1 of the next.
+    recipesPageCache.recipes = undefined;
+    recipesPageCache.collections = undefined;
   });
 
   it("shows loading state while fetching recipes", async () => {

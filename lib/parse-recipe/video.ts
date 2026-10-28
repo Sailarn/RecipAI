@@ -217,11 +217,11 @@ async function parseSocialContent(
     url,
   });
 
-  if (!recipe.imageUrl) {
-    recipe.imageUrl = content.thumbnailUrl ?? content.imageUrls[0];
-  }
-
-  const parsedRecipe = { ...recipe, sourceUrl: url };
+  const parsedRecipe = {
+    ...recipe,
+    imageUrl: recipe.imageUrl || (content.thumbnailUrl ?? content.imageUrls[0]),
+    sourceUrl: url,
+  };
   logSuccess({
     content,
     path: socialParsePath(content, transcript),
