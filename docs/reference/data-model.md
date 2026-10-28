@@ -15,7 +15,6 @@ RecipAI keeps two stores in sync: **Dexie.js** (IndexedDB, local working store â
 | `recipes` | `id` | `title`, `createdAt`, `updatedAt`, `status` | `Recipe` |
 | `parsedRecipes` | `id` | `createdAt` | `ParsedRecipeEntry` â€” legacy review drafts; emptied by the `save-leftover-drafts` startup migration, no longer written |
 | `collections` | `id` | `name`, `createdAt` | `Collection` |
-| `notifications` | `id` | `entityId`, `entityType`, `type`, `createdAt` | `SyncNotification` |
 | `ingredients` | `id` | `category` | `VocabularyIngredient` |
 | `pantry` | `id` | `ingredientId` | `PantryItem` |
 | `parseHistory` | `id` | `createdAt`, `status` | `ParseHistoryEntry` |
@@ -164,19 +163,6 @@ Photo imports use the same ID for their local history entry and server-side
 history to be claimed on login and pulled onto another device without retaining
 the uploaded image.
 
-#### SyncNotification
-```ts
-interface SyncNotification {
-  id: string;
-  entityId: string;
-  entityType: "recipe" | "collection";
-  type: "server_only" | "local_only" | "conflicted";
-  serverSnapshot: string | null;
-  localSnapshot: string | null;
-  createdAt: Date;
-}
-```
-
 ### Migration history
 
 | Version | Change |
@@ -193,6 +179,7 @@ interface SyncNotification {
 | 11 | + `parseHistory` |
 | 12 | Dedup pantry rows by `ingredientId` (upgrade callback; schema unchanged) |
 | 13 | + `parseNotifications` |
+| 14 | Drop `notifications` (the removed sync-review page's conflict list) |
 
 To add a new migration, see [How-to: Add a Dexie Migration](../how-to/add-dexie-migration.md).
 

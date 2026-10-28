@@ -222,23 +222,3 @@ export interface ParseNotification {
   reason?: string;
   createdAt: Date;
 }
-
-const SYNC_ENTITY_TYPES = ["recipe", "collection"] as const;
-export type SyncEntityType = (typeof SYNC_ENTITY_TYPES)[number];
-
-const SYNC_NOTIFICATION_TYPES = [
-  "server_only",
-  "local_only",
-  "conflicted",
-] as const;
-type SyncNotificationType = (typeof SYNC_NOTIFICATION_TYPES)[number];
-
-export interface SyncNotification {
-  id: string;
-  entityId: string;
-  entityType: SyncEntityType;
-  type: SyncNotificationType;
-  serverSnapshot: string | null;
-  localSnapshot: string | null;
-  createdAt: Date;
-}

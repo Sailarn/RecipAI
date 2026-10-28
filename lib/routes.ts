@@ -10,7 +10,6 @@ export const routes = {
   pantry: (locale: string) => `/${locale}/pantry`,
   profile: (locale: string) => `/${locale}/profile`,
   login: (locale: string) => `/${locale}/login`,
-  syncReview: (locale: string) => `/${locale}/sync-review`,
   parseHistory: (locale: string) => `/${locale}/parse-history`,
   externalAuth: {
     device: (userCode: string, locale: string) =>

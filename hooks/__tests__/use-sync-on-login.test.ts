@@ -50,8 +50,9 @@ vi.mock("@/lib/db/db", () => ({
   },
 }));
 
-vi.mock("@/lib/db/notifications", () => ({
-  clearSyncNotifications: vi.fn().mockResolvedValue(undefined),
+vi.mock("@/lib/sync/startup-migrations", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/sync/startup-migrations")>()),
+  normalizePulledRecipes: vi.fn(),
 }));
 
 vi.mock("@/lib/db/pantry", () => ({
@@ -61,7 +62,7 @@ vi.mock("@/lib/db/pantry", () => ({
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { db } from "@/lib/db/db";
-import { clearSyncNotifications } from "@/lib/db/notifications";
+import { normalizePulledRecipes } from "@/lib/sync/startup-migrations";
 import { useSyncOnLogin } from "../use-sync-on-login";
 
 const mockFetch = vi.fn();
@@ -235,7 +236,7 @@ describe("useSyncOnLogin", () => {
 
       renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(clearSyncNotifications).toHaveBeenCalled());
+      await waitFor(() => expect(normalizePulledRecipes).toHaveBeenCalled());
       expect(db.recipes.bulkPut).not.toHaveBeenCalled();
       expect(db.recipes.bulkDelete).not.toHaveBeenCalled();
     });
@@ -279,17 +280,6 @@ describe("useSyncOnLogin", () => {
       expect(db.recipes.bulkDelete).not.toHaveBeenCalled();
     });
 
-    it("clears leftover review notifications on a successful sync", async () => {
-      vi.mocked(authClient.useSession).mockReturnValue({
-        data: mockSession,
-      } as never);
-      setupFetch();
-
-      renderHook(() => useSyncOnLogin());
-
-      await waitFor(() => expect(clearSyncNotifications).toHaveBeenCalled());
-    });
-
     it("shows a retryable error toast and writes nothing on fetch failure", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
@@ -307,7 +297,7 @@ describe("useSyncOnLogin", () => {
         ),
       );
       expect(db.recipes.bulkPut).not.toHaveBeenCalled();
-      expect(clearSyncNotifications).not.toHaveBeenCalled();
+      expect(normalizePulledRecipes).not.toHaveBeenCalled();
     });
 
     it("stays quiet about a sync failure while offline", async () => {

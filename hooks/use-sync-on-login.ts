@@ -7,7 +7,6 @@ import { maintenanceErrorFromResponse } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
 import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
-import { clearSyncNotifications } from "@/lib/db/notifications";
 import type { Collection, Recipe } from "@/lib/db/schema";
 import { api } from "@/lib/routes";
 import {
@@ -116,10 +115,6 @@ export function useSyncOnLogin() {
       });
 
       normalizePulledRecipes();
-
-      // Drop any leftover review notifications from before the server-wins
-      // rework so the bell's stale "needs review" badge clears.
-      await clearSyncNotifications();
     } catch (error) {
       hasSynced.current = false;
       // Offline drops are expected in this local-first app, but a failure while

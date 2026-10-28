@@ -4,18 +4,18 @@ Dexie uses versioned migrations. Any schema change — new table, new index, dro
 
 ## 1. Add the new version in `lib/db/db.ts`
 
-Always add after the existing versions (currently v12 — check `lib/db/db.ts` for the actual latest before picking a number). Never modify a past version:
+Always add after the existing versions (currently v14 — check `lib/db/db.ts` for the actual latest before picking a number). Never modify a past version:
 
 ```ts
-// v13: add bookmarks table
-this.version(13).stores({
+// v15: add bookmarks table
+this.version(15).stores({
   recipes: "id, title, createdAt, updatedAt, status",
   parsedRecipes: "id, createdAt",
   collections: "id, name, createdAt",
-  notifications: "id, entityId, entityType, type, createdAt",
   ingredients: "id, category",
   pantry: "id, ingredientId",
   parseHistory: "id, createdAt, status",
+  parseNotifications: "id, createdAt",
   bookmarks: "id, createdAt",           // new table
 });
 ```

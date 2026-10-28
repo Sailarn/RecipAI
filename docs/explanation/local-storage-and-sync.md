@@ -50,7 +50,7 @@ The `syncedAt` marker is what disambiguates the two device-only cases — withou
 
 **Grace window.** A local item edited within `GRACE_WINDOW_MS` (90 s) is left untouched, so a still-in-flight local write is not overwritten by the server's pre-edit snapshot.
 
-**Known tradeoff (accepted):** an offline edit to an *existing* recipe is overwritten when the device reconnects (server wins). Preserving offline changes — and reintroducing a review/merge decision only for the genuine device-changed-AND-server-changed case — is deferred future work. The `sync-review/` route and components are kept in the codebase (unreferenced) for that.
+**Known tradeoff (accepted):** an offline edit to an *existing* recipe is overwritten when the device reconnects (server wins). Preserving offline changes — and reintroducing a review/merge decision only for the genuine device-changed-AND-server-changed case — is deferred future work.
 
 The same applies to **deletes made while signed out or offline**. `syncFetch` no-ops when there is no session, so the server never hears about the delete; on the next reconcile the recipe is "server only" and gets pulled straight back. There is no local tombstone to distinguish "I deleted this" from "this is new to me". Undoing that needs a deletion log, which is part of the same deferred offline-changes work — worth knowing before treating a resurrected recipe as a sync bug.
 

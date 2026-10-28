@@ -135,7 +135,7 @@ planReconcile<T extends { id: string; updatedAt: Date; syncedAt?: Date | null }>
 
 `syncedAt` is a device-local marker set whenever an item round-trips the server; it is **never** written to Postgres (stripped by the recipe/collection write-field whitelist). It is what tells a brand-new local recipe apart from one the server deleted — the whole reason server-wins doesn't resurrect deleted recipes.
 
-Conflict resolution strategy: **server wins, applied automatically.** The old per-conflict Sync Review page (`app/[locale]/sync-review/`) is retained in the codebase but no longer routed to; preserving offline edits + a review/merge decision for the genuine both-changed case is deferred future work.
+Conflict resolution strategy: **server wins, applied automatically.** There is no review page; preserving offline edits + a review/merge decision for the genuine both-changed case is deferred future work.
 
 ---
 

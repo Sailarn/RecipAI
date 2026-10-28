@@ -57,7 +57,7 @@ export async function PATCH(
       .update(recipes)
       .set({
         ...pickRecipeContent(updates),
-        // Snapshots from the client (e.g. sync-review "keep mine") carry
+        // Snapshots from the client carry
         // createdAt/updatedAt as ISO strings; Drizzle's timestamp columns call
         // .toISOString() on the value, so a string crashes the write. Revive
         // both to Date — mirroring the recipes-sync upsert. createdAt stays

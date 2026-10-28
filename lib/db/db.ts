@@ -6,7 +6,6 @@ import type {
   ParseHistoryEntry,
   ParseNotification,
   Recipe,
-  SyncNotification,
   VocabularyIngredient,
 } from "./schema";
 
@@ -14,7 +13,6 @@ class RecipeDatabase extends Dexie {
   recipes!: EntityTable<Recipe, "id">;
   parsedRecipes!: EntityTable<ParsedRecipeEntry, "id">;
   collections!: EntityTable<Collection, "id">;
-  notifications!: EntityTable<SyncNotification, "id">;
   ingredients!: EntityTable<VocabularyIngredient, "id">;
   pantry!: EntityTable<PantryItem, "id">;
   parseHistory!: EntityTable<ParseHistoryEntry, "id">;
@@ -143,6 +141,19 @@ class RecipeDatabase extends Dexie {
       parsedRecipes: "id, createdAt",
       collections: "id, name, createdAt",
       notifications: "id, entityId, entityType, type, createdAt",
+      ingredients: "id, category",
+      pantry: "id, ingredientId",
+      parseHistory: "id, createdAt, status",
+      parseNotifications: "id, createdAt",
+    });
+
+    // v14: drop the sync-review notifications — conflicts resolve server-wins
+    // automatically, so nothing writes or reads them any more.
+    this.version(14).stores({
+      recipes: "id, title, createdAt, updatedAt, status",
+      parsedRecipes: "id, createdAt",
+      collections: "id, name, createdAt",
+      notifications: null,
       ingredients: "id, category",
       pantry: "id, ingredientId",
       parseHistory: "id, createdAt, status",

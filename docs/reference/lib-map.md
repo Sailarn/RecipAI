@@ -58,7 +58,6 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `lib/db/recipe-sections.ts` | `groupBySectionId` (ingredients — catalog order, coalesced), `groupBySectionRuns` (steps — consecutive runs, order preserved), `sectionName`, `shouldShowSections`. Display-side grouping helpers; see [gotchas](../reference/gotchas.md). |
 | `lib/db/migrate-recipe-shape.ts` | `migrateLegacyRecipeShapes()` — one-time-per-recipe upgrade from legacy single-`modifier`/string-`section` to `modifiers[]` + structured `sections`/`sectionId`. Run from `use-sync-on-login.ts`. |
 | `lib/db/collections.ts` | CRUD for collections. |
-| `lib/db/notifications.ts` | CRUD for sync notifications (`replaceSyncNotifications`, `resolveNotification`). |
 | `lib/db/parsed-recipes.ts` | `createParsedRecipeEntry()` — the save-ready shape of a parse result. |
 | `lib/db/parse-notifications.ts` | Writes and dismisses the bell's finished-parse entries (`parseNotifications`). |
 | `lib/db/save-leftover-drafts.ts` | Startup migration: saves drafts left in `parsedRecipes` from the old review flow. |
