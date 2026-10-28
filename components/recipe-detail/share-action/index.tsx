@@ -10,6 +10,7 @@ import { updateRecipe } from "@/lib/db/recipes";
 import type { Recipe } from "@/lib/db/schema";
 import { setRecipeVisibility } from "@/lib/public-recipes/visibility-client";
 import { routes } from "@/lib/routes";
+import { type PopoverPosition, sharePopoverPosition } from "./popover-position";
 import { ShareLinks } from "./share-links";
 import { usePlatformShare } from "./use-platform-share";
 import { useShareDismiss } from "./use-share-dismiss";
@@ -28,6 +29,8 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
   const { data: session } = authClient.useSession();
   const shareViaPlatform = usePlatformShare();
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [position, setPosition] = useState<PopoverPosition | null>(null);
   const recipePath = routes.recipes.detail(locale, recipe.id);
   const [shareUrl, setShareUrl] = useState(recipePath);
   const [isOpen, setIsOpen] = useState(false);
@@ -47,6 +50,28 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
   }, [recipe.isPublic]);
 
   useShareDismiss(isOpen, rootRef, closePopover);
+
+  // Placed from the button's on-screen rect while open, and again on resize.
+  useEffect(() => {
+    if (!isOpen) return;
+    const placePopover = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      setPosition(
+        sharePopoverPosition(
+          trigger.getBoundingClientRect(),
+          window.innerWidth,
+        ),
+      );
+    };
+    placePopover();
+    window.addEventListener("resize", placePopover);
+    return () => {
+      window.removeEventListener("resize", placePopover);
+      // A later open may find the button elsewhere; never show a stale spot.
+      setPosition(null);
+    };
+  }, [isOpen]);
 
   async function toggleVisibility() {
     const nextVisibility = !confirmedIsPublic;
@@ -86,6 +111,7 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
   return (
     <div ref={rootRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         aria-label={t("shareAria")}
         aria-haspopup="dialog"
@@ -96,13 +122,21 @@ export function ShareAction({ locale, recipe }: ShareActionProps) {
         <Share2 size={14} />
       </button>
 
-      {isOpen && (
+      {isOpen && position && (
         <div
           role="dialog"
           aria-label={t("shareRecipeAria")}
-          className="fixed right-[14px] top-[max(64px,calc(env(safe-area-inset-top)+52px))] z-50 w-[min(380px,calc(100vw-28px))] rounded-[26px] border border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)] p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.62)] backdrop-blur-2xl"
+          style={{
+            top: position.top,
+            right: position.right,
+            width: position.width,
+          }}
+          className="fixed z-50 rounded-[26px] border border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)] p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.62)] backdrop-blur-2xl"
         >
-          <span className="absolute -top-[7px] right-[103px] h-3.5 w-3.5 rotate-45 border-l border-t border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)]" />
+          <span
+            style={{ right: position.arrowRight }}
+            className="absolute -top-[7px] h-3.5 w-3.5 rotate-45 border-l border-t border-[rgba(255,198,88,0.32)] bg-[rgba(10,10,8,0.97)]"
+          />
           <h2 className="font-[family-name:var(--font-display)] text-[22px] font-bold leading-tight">
             {t("share.title")}
           </h2>
