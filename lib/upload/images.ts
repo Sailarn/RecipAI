@@ -42,7 +42,8 @@ export async function uploadImage(
   }
 
   if (!response.ok) {
-    const data = await response.json();
+    // A proxy or platform error (e.g. a 413 page) has no JSON body.
+    const data = await response.json().catch(() => ({}));
     throw new Error(data.error || "Image upload failed");
   }
 
