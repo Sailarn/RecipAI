@@ -143,6 +143,8 @@ Conflict resolution strategy: **server wins, applied automatically.** The old pe
 
 Every local recipe write calls `syncCreate`, `syncUpdate`, or `syncDelete` via `syncFetch`. These are non-blocking — they fire and the UI doesn't wait.
 
+Because nothing waits, an edit or delete made right after a create could reach the server before the create's POST. The update was then dropped on a row that didn't exist yet, and a lost delete let the create resurrect the row. `createBarrier()` (`lib/db/create-barrier.ts`) holds an entity's PATCH/DELETE until its own in-flight POST settles. Recipes (`supabase-sync.ts`) and collections (`supabase-sync-collections.ts`) each keep one barrier.
+
 `syncFetch` (`lib/sync-fetch.ts`) gates the call on `isSignedIn()`. If the user is not signed in, the call is skipped entirely. Network errors are silently swallowed (expected when offline). Maintenance 503s and transient upstream blips (502/503/504 — deploys, Pi restarts, cold starts) are swallowed too; only other non-ok HTTP statuses are captured by Sentry, since those indicate a real server or payload bug.
 
 ---
