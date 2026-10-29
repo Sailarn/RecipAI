@@ -1,11 +1,15 @@
 import { type AiRecipeCaller, callAiForRecipe } from "@/lib/ai";
 import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchSocialContent, type SocialContent } from "@/lib/scrapers/apify";
-import { captureError, log, trackEvent } from "@/lib/telemetry";
+import { log, trackEvent } from "@/lib/telemetry";
 import { GROQ_MAX_BYTES, transcribeWithGroq } from "@/lib/transcribe/groq";
 import { getSocialPlatform, type SocialPlatform } from "@/lib/video-url";
 import { buildSocialPrompt } from "./prompts";
 import { requireCompleteRecipe } from "./recipe-result";
+import {
+  SocialParseError,
+  type SocialParseFailureReason,
+} from "./social-parse-error";
 
 const MIN_TRANSCRIPT_LENGTH = 30;
 const MAX_SOCIAL_VIDEO_SECONDS = 30 * 60;
@@ -15,20 +19,12 @@ type SocialParsePath =
   | "media_transcription"
   | "caption_image";
 
-type SocialParseFailureReason =
-  | "duration_limit"
-  | "media_too_large"
-  | "unsupported_platform"
-  | "restricted"
-  | "not_found"
-  | "no_content"
-  | "unexpected";
-
 interface SocialParseFailureContext {
   platform: SocialPlatform | null;
   url: string;
   startedAt: number;
   error: unknown;
+  reason: SocialParseFailureReason;
   content?: SocialContent;
 }
 
@@ -118,18 +114,14 @@ function failureReason(error: unknown): SocialParseFailureReason {
   return "unexpected";
 }
 
-function shouldCaptureFailure(reason: SocialParseFailureReason): boolean {
-  return reason === "unexpected";
-}
-
 function logFailure({
   platform,
   url,
   startedAt,
   error,
+  reason,
   content,
 }: SocialParseFailureContext): void {
-  const reason = failureReason(error);
   const message = error instanceof Error ? error.message : String(error);
   trackEvent("social_parse_failed", {
     platform: platform ?? "unknown",
@@ -147,19 +139,6 @@ function logFailure({
     total_ms: Date.now() - startedAt,
     error_message: message,
   });
-  if (shouldCaptureFailure(reason)) {
-    captureError(error, {
-      tags: {
-        parser: "social",
-        platform: platform ?? "unknown",
-      },
-      extra: {
-        url,
-        reason,
-        duration_seconds: content?.durationSeconds,
-      },
-    });
-  }
 }
 
 function logSuccess({
@@ -241,7 +220,13 @@ export async function parseVideoRecipe(
     const error = new Error(
       "Unsupported social platform. Use an Instagram, TikTok, YouTube, or X link.",
     );
-    logFailure({ platform, url, startedAt, error });
+    logFailure({
+      platform,
+      url,
+      startedAt,
+      error,
+      reason: "unsupported_platform",
+    });
     throw error;
   }
 
@@ -252,13 +237,19 @@ export async function parseVideoRecipe(
     content = await fetchSocialContent(url);
     return await parseSocialContent(url, content, startedAt, aiCaller);
   } catch (error) {
-    logFailure({
+    const failure = {
       platform: content?.platform ?? platform,
+      reason: failureReason(error),
+      durationSeconds: content?.durationSeconds,
+    };
+    logFailure({
+      platform: failure.platform,
       url,
       startedAt,
       error,
+      reason: failure.reason,
       content,
     });
-    throw error;
+    throw new SocialParseError(error, failure);
   }
 }

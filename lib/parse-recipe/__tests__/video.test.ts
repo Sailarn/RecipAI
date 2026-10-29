@@ -18,6 +18,7 @@ import type { ParsedRecipe } from "@/lib/db/schema";
 import { fetchSocialContent } from "@/lib/scrapers/apify";
 import { captureError, log, trackEvent } from "@/lib/telemetry";
 import { transcribeWithGroq } from "@/lib/transcribe/groq";
+import { SocialParseError } from "../social-parse-error";
 import { parseVideoRecipe } from "../video";
 
 const parsedRecipe: ParsedRecipe = {
@@ -232,13 +233,14 @@ describe("parseVideoRecipe", () => {
     expect(captureError).not.toHaveBeenCalled();
   });
 
-  it("captures unexpected social parse failures in Sentry with context", async () => {
+  it("throws a SocialParseError carrying the failure context, without reporting it", async () => {
     const url = "https://www.tiktok.com/@cook/video/123";
     vi.mocked(fetchSocialContent).mockResolvedValue({
       platform: "tiktok",
       url,
       caption: "Crispy potato recipe",
       videoUrl: "https://cdn/video.mp4",
+      durationSeconds: 42,
       imageUrls: ["https://cdn/thumb.jpg"],
     });
     vi.stubGlobal(
@@ -249,18 +251,16 @@ describe("parseVideoRecipe", () => {
       }),
     );
 
-    await expect(parseVideoRecipe(url)).rejects.toThrow("Video fetch failed");
+    const error = await parseVideoRecipe(url).catch((caught) => caught);
 
-    expect(captureError).toHaveBeenCalledWith(expect.any(Error), {
-      tags: {
-        parser: "social",
-        platform: "tiktok",
-      },
-      extra: expect.objectContaining({
-        url,
-        reason: "unexpected",
-      }),
+    expect(error).toBeInstanceOf(SocialParseError);
+    expect(error.message).toBe("Video fetch failed: 502");
+    expect(error.details).toEqual({
+      platform: "tiktok",
+      reason: "unexpected",
+      durationSeconds: 42,
     });
+    expect(captureError).not.toHaveBeenCalled();
   });
 
   it("throws when social content has no caption, transcript, images, or video media", async () => {

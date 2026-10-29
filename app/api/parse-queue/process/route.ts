@@ -22,7 +22,11 @@ import { uploadImageServer } from "@/lib/upload/imagekit";
 import { isImageKitUrl } from "@/lib/upload/images";
 import { isSourceImageUnavailable } from "@/lib/upload/source-image-failure";
 import { type PushPayload, sendPushNotification } from "@/lib/web-push";
-import { classifyParseError, parseWithRetry } from "./helpers";
+import {
+  classifyParseError,
+  parseWithRetry,
+  reportParseFailure,
+} from "./helpers";
 
 export const maxDuration = 60;
 
@@ -238,6 +242,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    reportParseFailure(error, job);
     await db
       .update(parseJobs)
       .set({

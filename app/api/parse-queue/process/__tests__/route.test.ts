@@ -319,6 +319,43 @@ describe("POST /api/parse-queue/process", () => {
     });
   });
 
+  describe("failure reporting", () => {
+    beforeEach(() => {
+      vi.mocked(captureError).mockClear();
+    });
+
+    it("reports an unexplained failure with the job's user and url", async () => {
+      setupDb({ ...baseJob, telegramChatId: null });
+      // Non-retryable, so the test doesn't wait out the retry delay.
+      const error = new Error("GEMINI_API_KEY not configured");
+      vi.mocked(parseRecipeFromUrl).mockRejectedValue(error);
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(captureError).toHaveBeenCalledWith(
+        error,
+        expect.objectContaining({
+          user: { id: "user-1" },
+          extra: expect.objectContaining({
+            jobId: "job-1",
+            url: "https://instagram.com/reel/abc",
+          }),
+        }),
+      );
+    });
+
+    it("does not report a failure the user is told about", async () => {
+      setupDb({ ...baseJob, telegramChatId: null });
+      vi.mocked(parseRecipeFromUrl).mockRejectedValue(
+        new Error("This post is private"),
+      );
+
+      await POST(makeRequest({ jobId: "job-1" }));
+
+      expect(captureError).not.toHaveBeenCalled();
+    });
+  });
+
   describe("saving to the library", () => {
     it("saves a signed-in in-app parse before marking the job done", async () => {
       const { updateChain, insertChain } = setupDb({

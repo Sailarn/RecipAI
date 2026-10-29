@@ -1,7 +1,18 @@
 import type { ParsedRecipe } from "@/lib/db/schema";
+import { SocialParseError } from "@/lib/parse-recipe/social-parse-error";
+import { captureError } from "@/lib/telemetry";
 
 const PARSE_RETRY_ATTEMPTS = 2;
 const PARSE_RETRY_DELAY_MS = 4000;
+const GENERIC_PARSE_ERROR_MESSAGE =
+  "❌ Failed to parse recipe from that link.\n\nTry again or open RecipAI to parse manually.";
+
+interface ParseFailureJob {
+  id: string;
+  url: string | null;
+  userId: string | null;
+  telegramChatId: string | null;
+}
 
 export function isRetryable(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
@@ -57,7 +68,42 @@ export function classifyParseError(error: unknown): string {
   if (msg.includes("Couldn't extract a recipe from this")) {
     return "🔍 No recipe found — the AI couldn't detect a recipe in this content. Try a link that goes directly to a recipe.";
   }
-  return "❌ Failed to parse recipe from that link.\n\nTry again or open RecipAI to parse manually.";
+  return GENERIC_PARSE_ERROR_MESSAGE;
+}
+
+// Known outcomes (private post, no recipe, too long, …) are told to the user and
+// logged, not reported; only a failure nothing explains is a Sentry error.
+function isUnexplainedParseFailure(error: unknown): boolean {
+  if (error instanceof SocialParseError) {
+    return error.details.reason === "unexpected";
+  }
+  return classifyParseError(error) === GENERIC_PARSE_ERROR_MESSAGE;
+}
+
+// Called once retries are exhausted, so a failure a retry recovered from never
+// reaches Sentry. Runs here rather than inside the parsers because only the job
+// knows who asked and from where.
+export function reportParseFailure(error: unknown, job: ParseFailureJob): void {
+  if (!isUnexplainedParseFailure(error)) return;
+
+  const social = error instanceof SocialParseError ? error.details : undefined;
+  captureError(error, {
+    tags: {
+      source: job.telegramChatId ? "telegram" : "app",
+      ...(social && {
+        parser: "social",
+        platform: social.platform ?? "unknown",
+      }),
+    },
+    user: job.userId ? { id: job.userId } : undefined,
+    extra: {
+      jobId: job.id,
+      url: job.url,
+      retried: isRetryable(error),
+      reason: social?.reason,
+      duration_seconds: social?.durationSeconds,
+    },
+  });
 }
 
 export async function parseWithRetry(

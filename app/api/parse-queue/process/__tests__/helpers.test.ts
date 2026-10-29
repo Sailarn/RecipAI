@@ -1,5 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
-import { classifyParseError, isRetryable, parseWithRetry } from "../helpers";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SocialParseError } from "@/lib/parse-recipe/social-parse-error";
+import { captureError } from "@/lib/telemetry";
+import {
+  classifyParseError,
+  isRetryable,
+  parseWithRetry,
+  reportParseFailure,
+} from "../helpers";
 
 describe("classifyParseError", () => {
   it("returns private account message for restricted_page errors", () => {
@@ -175,5 +182,80 @@ describe("parseWithRetry", () => {
     await parseWithRetry(parseFn, "https://example.com/reel", 2, 0);
 
     expect(parseFn).toHaveBeenCalledWith("https://example.com/reel");
+  });
+});
+
+describe("reportParseFailure", () => {
+  const job = {
+    id: "job-1",
+    url: "https://www.instagram.com/reel/abc/",
+    userId: "user-1",
+    telegramChatId: null,
+  };
+
+  beforeEach(() => {
+    vi.mocked(captureError).mockClear();
+  });
+
+  describe("social failures", () => {
+    it("reports an unexpected failure with the job, user, and social context", () => {
+      const error = new SocialParseError(new TypeError("fetch failed"), {
+        platform: "instagram",
+        reason: "unexpected",
+        durationSeconds: 42,
+      });
+
+      reportParseFailure(error, job);
+
+      expect(captureError).toHaveBeenCalledWith(error, {
+        tags: { source: "app", parser: "social", platform: "instagram" },
+        user: { id: "user-1" },
+        extra: {
+          jobId: "job-1",
+          url: "https://www.instagram.com/reel/abc/",
+          retried: true,
+          reason: "unexpected",
+          duration_seconds: 42,
+        },
+      });
+    });
+
+    it("does not report a known outcome", () => {
+      const error = new SocialParseError(new Error("This post is private"), {
+        platform: "instagram",
+        reason: "restricted",
+      });
+
+      reportParseFailure(error, job);
+
+      expect(captureError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("other failures", () => {
+    it("reports an unexplained failure tagged with its source", () => {
+      const error = new Error("GEMINI_API_KEY not configured");
+
+      reportParseFailure(error, {
+        ...job,
+        userId: null,
+        telegramChatId: "chat-1",
+      });
+
+      expect(captureError).toHaveBeenCalledWith(error, {
+        tags: { source: "telegram" },
+        user: undefined,
+        extra: expect.objectContaining({ jobId: "job-1", retried: false }),
+      });
+    });
+
+    it("does not report a failure the user is told about", () => {
+      reportParseFailure(
+        new Error("Couldn't extract a recipe from this page"),
+        job,
+      );
+
+      expect(captureError).not.toHaveBeenCalled();
+    });
   });
 });

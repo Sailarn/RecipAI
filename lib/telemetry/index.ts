@@ -58,12 +58,14 @@ export function captureError(
   context?: {
     tags?: Record<string, string>;
     extra?: Record<string, unknown>;
+    user?: { id: string };
   },
 ): void {
   safely(() => {
     Sentry.captureException(error, {
       tags: context?.tags,
       extra: context?.extra,
+      user: context?.user,
     });
   });
 }
