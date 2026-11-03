@@ -50,7 +50,11 @@ describe("AiAssistants", () => {
   it("offers setup for an app that isn't connected", () => {
     state(false);
     render(<AiAssistants />);
-    fireEvent.click(screen.getByRole("button", { name: "connect" }));
+    const [claude, chatgpt] = screen.getAllByRole("button", {
+      name: "connect",
+    });
+    expect(chatgpt).toBeInTheDocument();
+    fireEvent.click(claude);
     expect(
       screen.getByRole("dialog", { name: "setup claude" }),
     ).toBeInTheDocument();

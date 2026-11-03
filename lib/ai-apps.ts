@@ -31,7 +31,7 @@ export const AI_APPS: Record<AiAppId, AiApp> = {
 };
 
 /** Apps offered in the UI, in menu order. */
-export const ENABLED_AI_APPS: AiAppId[] = ["claude"];
+export const ENABLED_AI_APPS: AiAppId[] = ["claude", "chatgpt"];
 
 /**
  * Which app an OAuth client is, from the name it registered with during

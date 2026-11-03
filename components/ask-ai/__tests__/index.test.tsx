@@ -104,4 +104,19 @@ describe("AskAiButton", () => {
 
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
+
+  it("lists ChatGPT next to Claude, each by its own status", () => {
+    connections("ready", ["chatgpt"]);
+    render(<AskAiButton recipeId="r1" title="Borscht" />);
+    fireEvent.click(screen.getByRole("button", { name: "button" }));
+
+    const chatgpt = screen.getByRole("menuitem", { name: "ChatGPT" });
+    expect(chatgpt).toHaveAttribute(
+      "href",
+      `https://chatgpt.com/?q=${encodeURIComponent("prompt")}`,
+    );
+    expect(screen.getByRole("menuitem", { name: /Claude/ }).tagName).toBe(
+      "BUTTON",
+    );
+  });
 });
