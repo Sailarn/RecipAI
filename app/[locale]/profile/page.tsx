@@ -23,6 +23,7 @@ import { routes } from "@/lib/routes";
 import { CLOUD_PREF_KEYS, setCloudItem } from "@/lib/telegram/cloud-storage";
 import { trackEvent } from "@/lib/telemetry";
 import { useNavigate } from "@/lib/transitions";
+import { AiAssistants } from "./components/ai-assistants";
 import { PushNotificationToggle } from "./components/push-notification-toggle";
 import { RowDivider } from "./components/row-divider";
 import { TelegramNotifyToggle } from "./components/telegram-notify-toggle";
@@ -78,6 +79,8 @@ export default function ProfilePage() {
 
         {/* Auth cards — ProfileAuth renders its own glass cards */}
         <ProfileAuth />
+
+        <AiAssistants />
 
         {/* Settings card */}
         <div className="glass-card rounded-3xl overflow-hidden">
