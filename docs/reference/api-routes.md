@@ -168,10 +168,10 @@ A remote [MCP](https://modelcontextprotocol.io) server that AI chat apps (Claude
 |---|---|---|
 | `list_recipes` | read | Words match title, description and ingredient names; filters `category`, `collectionId`; paging `limit`/`offset`. |
 | `get_recipe` | read | Full recipe; sections inlined as names, steps numbered. |
-| `create_recipe` | write | Structured ingredients/steps with optional sections. Dedupes by `sourceUrl`. Optional `imageUrl` copied to ImageKit (public https hosts only). |
-| `update_recipe` | write | Partial; `null` clears; lists are replaced whole. Replacing ingredients resets vocabulary ids (device re-normalizes). |
+| `create_recipe` | write | The main way recipes arrive: the chat parses text, photos or pages itself. Structured ingredients and steps with optional sections and step images. `sourceUrl` is stored without tracking parameters and dedupes. Optional `imageUrl` is copied to ImageKit (public https hosts only); returns `warnings` if it couldn't be. |
+| `update_recipe` | write | Partial; `null` clears; lists are replaced whole. Replacing ingredients resets vocabulary ids (device re-normalizes). `imageUrl` sets or (with `null`) removes the main photo and resets its crop. Returns `{ recipe, warnings? }`. |
 | `delete_recipe` | write, destructive | Image left in ImageKit (may be shared via the parse cache). |
-| `import_recipe` | write | Through the parse queue; shares the hourly AI parse budget. |
+| `import_recipe` | write | For social posts (Instagram, TikTok, YouTube, X) and pages the chat can't open. Through the parse queue with the link cleaned of tracking parameters; shares the hourly AI parse budget. Failures return a hint to fall back to `create_recipe`. |
 | `get_import_status` | read | Returns the saved recipe once done. |
 | `list_collections`, `create_collection`, `add_to_collection`, `remove_from_collection` | read / write | Owner checks on both recipe and collection. |
 | `search`, `fetch` | read | ChatGPT's fixed shapes over the same queries. |

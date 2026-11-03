@@ -1,6 +1,6 @@
 # Spec: RecipAI connector for Claude & ChatGPT
 
-**Status:** done. Merged into `main`; the owner tests after release.
+**Status:** v1 released (v2.31.0). Round 2 (below) on the branch. Directory listings postponed.
 **Branch:** `claude/vigilant-babbage-c7ja2l` (feature branch, never `main`)
 
 This spec is written so that any agent or developer can pick the work up from
@@ -368,6 +368,89 @@ sign-in, returning to the app, and pull-to-refresh.
 
 ---
 
+### Round 2: after the owner's first test (v2.31.0)
+19. `fix(layout): keep top bars clear of the iOS status bar`. A shared
+    `--top-gap` (inset + 12px) for every top bar and the sync pill. The
+    pull-to-refresh label sits at the bottom of a 44px strip.
+20. `fix(ask-ai): open Claude's connector setup in the native app`. The link
+    is `claude.ai/customize/connectors?modal=add-custom-connector`, which is
+    in claude.ai's universal links. The old `/settings/connectors` link
+    opened an in-app browser with no accounts.
+21. `feat(mcp): let the chat parse recipes, with our import for social posts`.
+
+| Source in the chat | How it's saved |
+|---|---|
+| Pasted text, photo or screenshot | The chat parses it and calls `create_recipe` |
+| Web page | The chat reads it and calls `create_recipe`. `import_recipe` only if it can't open the page |
+| Instagram, TikTok, YouTube, X | `import_recipe` (RecipAI transcribes the video) |
+| Failed import | The result carries a hint to fall back to `create_recipe` |
+
+Source links are stored without tracking parameters. Steps accept image
+URLs. `update_recipe` can set or remove the main photo, and photo problems
+come back as `warnings`.
+
+Found while testing: the Sally's Baking link fails in the app's own import
+too ("no recipe found"). That's the app's parser and site blocking, not the
+connector; left as is.
+
+### Later: directory listings (postponed by the owner)
+What listing gets you: one-tap connect from inside Claude and ChatGPT, on
+mobile too. ChatGPT drops the web/desktop developer-mode step. You also
+get a directory page you can link from the app.
+
+**Both platforms: code and pages still missing**
+- [ ] Public privacy policy page (for example `/privacy`): what's
+      collected, how it's used and kept, and how to delete it. A missing
+      one means immediate rejection on Claude.
+- [ ] Public docs page: setup, usage, and three working example prompts.
+- [ ] Support contact (email).
+- [ ] Reviewer test account with sample recipes and no MFA. RecipAI has
+      only Google, passkey and Telegram sign-in, so either a dedicated
+      Google test account or a hidden email-and-password login for one
+      review account.
+- [ ] Refresh-token rotation: delete the old token row on refresh. The
+      plugin leaves it valid.
+- [ ] Annotations: Claude wants `destructiveHint: true` on every tool that
+      modifies data (today only delete). Claude will then likely confirm
+      writes with the user.
+
+**Claude (Connectors Directory)**
+- Plan: Pro, Max, Ultra, Team or Enterprise. Portal:
+  `claude.ai/directory/manage` → Submit new → MCP connector.
+- Listing: name, one-liner, description, categories, icon, docs URL,
+  privacy URL, support contact, use cases, slug (permanent), company
+  details, test credentials and instructions, seven policy
+  acknowledgments.
+- Review: automatic scan → listed as **Community**. Possibly escalated to
+  **Verified** (a reviewer runs every tool). Timing isn't fixed.
+- Afterwards: keep it working, report material changes (tool changes need
+  a reviewed listing edit). Share `claude.ai/directory/connectors/<slug>`
+  from a "Connect to Claude" button in the app.
+
+**ChatGPT (Apps directory)**
+- OpenAI Platform organization verification (identity), Owner role, a
+  project with global data residency. Submitted in the Platform dashboard.
+- Domain verification token at `/.well-known/openai-apps-challenge`, and
+  a CSP declared on the MCP server.
+- Metadata, country availability, privacy policy, usage policies, content
+  suitable for all audiences.
+- Test account, test cases and at least 3 screenshots. The counts are from
+  third-party write-ups, so check the dashboard.
+- Manual review, one version at a time. Unconfirmed: whether a tools-only
+  app with no custom UI is accepted.
+
+### In-app chat: not possible on a subscription
+The owner wants chats on their own Claude or ChatGPT plan, not an API key.
+- Claude: Anthropic's policy forbids third-party apps from using claude.ai
+  login or plan limits unless Anthropic approved them.
+- ChatGPT: "Sign in with ChatGPT" (plan allowance in other apps) is a
+  limited preview for invited partners.
+
+The connector stays the way to use the subscriptions. Revisit if OpenAI
+opens Sign in with ChatGPT.
+
+---
+
 ## 6. Decisions (answered by the owner)
 
 1. **Both apps.** Claude first, ChatGPT in phase 4. The UI is built for both from the start.
@@ -389,6 +472,8 @@ sign-in, returning to the app, and pull-to-refresh.
 - [x] Phase 4: ChatGPT
 - [x] Phase 5: periodic pull (dropped)
 - [x] Phase 6: sync message
+- [x] Round 2: status-bar spacing, native-app setup link, chat-first parsing
+- [ ] Later: directory listings (checklist above)
 
 ## Notes for a handoff agent
 
