@@ -67,3 +67,5 @@ nav:
       - Deploy to Vercel: how-to/deploy-vercel.md
   - Tutorial:
       - Getting Started: tutorial/getting-started.md
+  - Specs:
+      - AI Connector: specs/ai-connector.md
