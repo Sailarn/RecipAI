@@ -56,6 +56,8 @@ The same applies to **deletes made while signed out or offline**. `syncFetch` no
 
 This is event-triggered pull reconciliation, not real-time sync. Changes made on another device appear after sign-in, a foreground refresh, or a manual pull-to-refresh; they do not stream between those triggers.
 
+**Visible feedback.** `useSyncOnLogin` exposes a status (`syncing`, `newRecipes`, `finishedAt`) through `useSyncStatus()` in `lib/sync-context.tsx`. `SyncStatusPill` (`components/sync-status-pill`) shows it on the recipe list: "Updating recipes…" while a sync runs past 300 ms (the pull indicator covers pull-to-refresh), then "N new recipes" for a few seconds when the sync brought in recipes the device didn't have — from the Telegram bot, another device or the [AI connector](../specs/ai-connector.md).
+
 ---
 
 ## Anonymous use

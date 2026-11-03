@@ -1,6 +1,6 @@
 # Spec: RecipAI connector for Claude & ChatGPT
 
-**Status:** phases 1–4 done. ⏸ Paused for owner testing; phases 5–6 start after the owner confirms.
+**Status:** done. Merged into `main`; the owner tests after release.
 **Branch:** `claude/vigilant-babbage-c7ja2l` (feature branch, never `main`)
 
 This spec is written so that any agent or developer can pick the work up from
@@ -354,25 +354,17 @@ checks), including isolation between users and revoke. **Not** verified:
 connecting from the real Claude and ChatGPT apps. That needs a public URL
 (see `docs/how-to/test-ai-connector.md`).
 
-**⏸ Work pauses here for owner testing.** Phases 5 and 6 start only after the
-owner confirms.
+### Phase 5: periodic pull — dropped
+The owner decided against a timer-based re-pull. The existing triggers stay:
+sign-in, returning to the app, and pull-to-refresh.
 
-### Phase 5: periodic pull (after phase 4)
-- `feat(sync): re-pull every 2 minutes while the recipes list is visible`,
-  so recipes added from Telegram or a connector appear without switching apps.
-  Pause when the tab is hidden, and reuse the single-flight `triggerSync`.
-
-### Phase 6: sync visibility (separate scope, after the above)
-17. `feat(sync): show an "Updating recipes…" pill while reconciling`:
-    `useSyncOnLogin` exposes `isSyncing` through `SyncContext`. A small,
-    **non-white**, tinted glass pill (design tokens, works in light and dark)
-    near the top of the recipes list. It appears only if the sync runs longer
-    than ~300 ms, so instant syncs don't flash. Optionally show "+N new" when
-    it finishes and something was applied.
-18. `feat(recipes): fade in recipes that arrive from sync`: `applyReconcile`
-    returns the ids it applied, and the list (`components/recipe-virtual-list`)
-    fades and slides those cards in with `motion` (opacity 0→1, y 6→0, ~250 ms).
-    Respect `prefers-reduced-motion`.
+### Phase 6: sync message ✅ (simplified)
+15. `chore: remove the recipai.pp.ua domain and the Pi deploy step`
+16. `feat(recipes): show a message while recipes sync in the background`.
+    A tinted pill says "Updating recipes…" while a sync runs past 300 ms,
+    then "N new recipes" when it brought in recipes the device didn't have.
+    No new sync logic, and no card fade-in (the owner asked for a message
+    only).
 
 ---
 
@@ -382,9 +374,9 @@ owner confirms.
 2. **Icons:** a wand icon plus a popover with text options. No official logos.
 3. **Host:** Vercel only, at `https://recip-ai-wine.vercel.app`. The Pi is abandoned (the docs are updated).
 4. **Refresh token lifetime:** 30 days.
-5. **Periodic pull:** added as phase 5, after ChatGPT.
+5. **Periodic pull:** dropped; a visible sync message instead.
 6. **Full access:** connector tools cover search, read, create, update and delete of the user's own recipes.
-7. **Testing:** no owner check-in during phase 1. Phases 1–4 are built and self-tested, then work pauses.
+7. **Testing:** self-tested end to end; the owner tests on production after release. The migration was applied by the owner before the merge.
 
 ---
 
@@ -394,9 +386,9 @@ owner confirms.
 - [x] Phase 1: OAuth + read-only MCP (Claude testable)
 - [x] Phase 2: write tools
 - [x] Phase 3: in-app entry point
-- [x] Phase 4: ChatGPT ⏸ paused for owner testing
-- [ ] Phase 5: periodic pull
-- [ ] Phase 6: sync indicator + fade-in
+- [x] Phase 4: ChatGPT
+- [x] Phase 5: periodic pull (dropped)
+- [x] Phase 6: sync message
 
 ## Notes for a handoff agent
 
