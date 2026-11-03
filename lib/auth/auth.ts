@@ -18,6 +18,7 @@ import { miniAppDataToUser } from "@/lib/auth/telegram-user";
 import {
   MCP_ACCESS_TOKEN_TTL_SECONDS,
   MCP_CONSENT_PATH,
+  MCP_DEFAULT_SCOPE,
   MCP_LOGIN_PATH,
   MCP_REFRESH_TOKEN_TTL_SECONDS,
   mcpResourceUrl,
@@ -105,6 +106,9 @@ export const auth = betterAuth({
         loginPage: MCP_LOGIN_PATH,
         consentPage: MCP_CONSENT_PATH,
         requirePKCE: true,
+        // Clients that request no scope still get a refresh token, so the
+        // connection survives the 1 h access-token lifetime.
+        defaultScope: MCP_DEFAULT_SCOPE,
         accessTokenExpiresIn: MCP_ACCESS_TOKEN_TTL_SECONDS,
         refreshTokenExpiresIn: MCP_REFRESH_TOKEN_TTL_SECONDS,
       },

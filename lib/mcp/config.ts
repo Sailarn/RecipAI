@@ -22,6 +22,12 @@ export const MCP_ACCESS_TOKEN_TTL_SECONDS = 60 * 60;
 /** A connected chat app stays connected for 30 days without use. */
 export const MCP_REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
+/** Scopes the mcp plugin understands; `offline_access` yields a refresh token. */
+export const MCP_SCOPES = ["openid", "profile", "email", "offline_access"];
+
+/** Granted when a client asks for no scope at all. */
+export const MCP_DEFAULT_SCOPE = "openid offline_access";
+
 const LOCAL_ORIGIN = "http://localhost:3000";
 
 /**
