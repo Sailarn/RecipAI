@@ -1,6 +1,6 @@
 # Spec: RecipAI connector for Claude & ChatGPT
 
-**Status:** planned, not yet implemented
+**Status:** in progress (phases 1–4). Work pauses after phase 4 for owner testing.
 **Branch:** `claude/vigilant-babbage-c7ja2l` (feature branch, never `main`)
 
 This spec is written so that any agent or developer can pick the work up from
@@ -12,9 +12,10 @@ as commits land.
 ## 1. Goal
 
 Signed-in RecipAI users can connect RecipAI to **Claude** (first) and **ChatGPT**
-(second) as a connector. Inside those chat apps they can then read, search,
-create and update **their own** recipes. The app gets an entry point on the
-recipe detail page ("Ask Claude about this recipe").
+(second) as a connector. Inside those chat apps they then have the same access
+to **their own** recipes as in the app: search, read, create, update and
+delete. The app gets an entry point on the recipe detail page ("Ask AI" →
+Claude / ChatGPT).
 
 A separate, smaller item in the same branch: recipes that arrive from the server
 (Telegram bot, another device, the connector) should no longer appear silently.
@@ -26,7 +27,6 @@ Show a small "Updating recipes…" indicator and fade new cards in.
 - Real-time push to open devices. The existing pull triggers stay (login,
   foreground, pull-to-refresh). Connector writes show up on the next pull.
 - Uploading image binaries through the connector. An optional `imageUrl` is fine.
-- Deleting recipes through the connector. Leave it out of v1.
 - Directory listing in the ChatGPT or Claude stores. v1 is a custom connector
   added by URL.
 
@@ -49,7 +49,7 @@ sequenceDiagram
     participant U as User
     participant C as Claude (web/app)
     participant R as RecipAI (/api/auth, /api/mcp)
-    U->>C: Settings → Connectors → Add custom connector<br/>URL: https://recipai.pp.ua/api/mcp
+    U->>C: Settings → Connectors → Add custom connector<br/>URL: https://recip-ai-wine.vercel.app/api/mcp
     C->>R: GET /api/mcp (no token) → 401 + WWW-Authenticate
     C->>R: GET /.well-known/oauth-protected-resource[/api/mcp]
     C->>R: GET /.well-known/oauth-authorization-server
@@ -65,17 +65,18 @@ sequenceDiagram
 The connector is then available in every Claude chat, on web and in the mobile
 apps (connectors added on the web carry over to the apps).
 
-### 2.2 Per-recipe "Ask Claude" (entry point in the RecipAI app)
+### 2.2 Per-recipe "Ask AI" (entry point in the RecipAI app)
 
-1. The user taps **Ask Claude** on a recipe detail page.
-2. If the user **has connected** RecipAI to Claude (the server knows, see
+1. The user taps **Ask AI** on a recipe detail page and picks **Claude** (or
+   **ChatGPT**, phase 4) from the popover.
+2. If the user **has connected** RecipAI to that app (the server knows, see
    §5.3), RecipAI opens
    `https://claude.ai/new?q=<url-encoded prompt>`, where the prompt is something like
    *"Use RecipAI to open my recipe "Borscht" (id `abc123`) and help me with it."*
    Claude calls `get_recipe` and the conversation starts with the recipe in context.
 3. If the user **has not connected** yet, a bottom sheet explains the one-time
    setup (§2.1). It has a "Copy connector URL" button and an "Open Claude
-   settings" link. After connecting, the user taps **Ask Claude** again.
+   settings" link. After connecting, the user taps **Ask AI** again.
 
 > ⚠️ **To verify:** the `?q=` prefill on `claude.ai/new` is not officially
 > documented and has reportedly changed behaviour before. Fallback: copy the
@@ -83,26 +84,23 @@ apps (connectors added on the web carry over to the apps).
 > saying "Prompt copied, paste it in Claude". Check the same for ChatGPT
 > (`https://chatgpt.com/?q=`).
 
-### 2.3 Recipe detail buttons
+### 2.3 Recipe detail buttons (decided)
 
-The page currently has **Start cooking** (full-width, primary) and **Open post /
-Source** (full-width, secondary). A third full-width button is too much.
-Proposed layout:
+The page has **Start cooking** (full-width, primary) and **Open post / Source**
+(full-width, secondary). Layout:
 
 ```
 [            Start cooking             ]   ← unchanged
-[  Open post  ] [ ✦ Ask Claude  ▾ ]         ← two half-width buttons
+[  Open post  ] [ 🪄 Ask AI ]               ← two half-width buttons
 ```
 
-- When there is no `sourceUrl`, **Ask Claude** takes the full row.
-- Once ChatGPT is supported, the button becomes **Ask AI ▾** with a small menu
-  (Claude / ChatGPT), and it remembers the last choice per device in localStorage.
-- Icons: use the official Claude and ChatGPT marks from each company's
-  brand or press kit, following their brand guidelines. The marks may show
-  compatibility, but must not suggest endorsement, and must not be recoloured
-  or distorted. Check before shipping. If in doubt, ship a generic sparkle icon
-  with the text label.
-- Show the button only for signed-in users.
+- **Ask AI** uses a magic-wand icon (lucide `WandSparkles`), not the official
+  Claude or ChatGPT logos. Using those logos would need a review of each
+  company's brand guidelines, so v1 avoids them.
+- Tapping it opens a small tooltip-style popover with two text options:
+  **Claude** and **ChatGPT**. Until phase 4 lands, only Claude is listed.
+- When there is no `sourceUrl`, **Ask AI** takes the full row.
+- Shown only for signed-in users.
 
 ---
 
@@ -129,7 +127,8 @@ Verified against the published `better-auth@1.6.33` package:
 - `import { mcp } from "better-auth/plugins"`, with options
   `{ loginPage: string; resource?: string; oidcConfig?: OIDCOptions }`.
   Inside `oidcConfig`: `consentPage`, `scopes`, `requirePKCE`,
-  `accessTokenExpiresIn` (default 3600 s), `refreshTokenExpiresIn` (default 604800 s),
+  `accessTokenExpiresIn` (default 3600 s), `refreshTokenExpiresIn` (default
+  604800 s; **RecipAI uses 30 days**),
   `allowPlainCodeChallengeMethod` (default false, S256 only).
 - Endpoints (under `/api/auth`): `/.well-known/oauth-authorization-server`,
   `/.well-known/oauth-protected-resource`, `/mcp/authorize`, `/mcp/token`,
@@ -207,13 +206,21 @@ known, otherwise English.
 | `list_recipes` | 1 | `{ query?, category?, collectionId?, limit≤50, cursor? }` | Title / description / ingredient-text match. Returns `id, title, category, servings, totalTime, updatedAt` |
 | `get_recipe` | 1 | `{ id }` | Full recipe: ingredients (with sections), steps, times, source URL, collections, public share URL if public |
 | `create_recipe` | 2 | `{ title, description?, servings?, prepTime?, cookTime?, category?, ingredients[{item, amount?, unit?, section?}], instructions[{instruction, section?}], sourceUrl?, imageUrl? }` | Uses `buildSavedRecipeShape`. `id = crypto.randomUUID()`, `isPublic=false`. Normalisation happens on the device after pull |
+| `delete_recipe` | 2 | `{ id }` | Owner-scoped hard delete, same as the app's delete. `destructiveHint: true`, so clients ask the user to confirm. Devices drop it on the next pull (the `syncedAt` marker rule) |
 | `update_recipe` | 2 | `{ id, …partial of the create fields }` | Owner-scoped. Replacing `ingredients` or `instructions` rebuilds the shape. Bumps `updatedAt`, clears `canonicalIngredientIds` when ingredients change (so the device re-normalises). Returns `not_found` when no row matched |
 | `import_recipe` | 2 | `{ url }` | Enqueues a parse job for the user (same path as an in-app link import, including dedupe by source). Returns the job id and status. A `get_import_status` tool or polling via `get_recipe` follows |
 | `list_collections` | 2 | `{}` | `id, name, emoji, count` |
 | `add_to_collection` | 2 | `{ recipeId, collectionId }` | Updates `collectionIds` |
 
-Tool annotations: read tools `readOnlyHint: true`; write tools
-`destructiveHint: false`, `idempotentHint` where true.
+ChatGPT compatibility (phase 4): ChatGPT's connector and deep-research modes
+look for two read-only tools with fixed shapes. `search({ query })` returns
+`{ results: [{ id, title, url }] }`, and `fetch({ id })` returns
+`{ id, title, text, url, metadata }`. Both are thin wrappers over
+`list_recipes` and `get_recipe`. `url` is the recipe's page in the app.
+
+Tool annotations: read tools `readOnlyHint: true`. Write tools
+`destructiveHint: false`, except `delete_recipe`, which is `destructiveHint: true`.
+`idempotentHint` where true.
 
 ### 3.6 Security
 
@@ -226,6 +233,11 @@ Tool annotations: read tools `readOnlyHint: true`; write tools
   steps, and max string lengths.
 - Revoke: phase 3 adds "Connected AI apps → Disconnect" in Profile, which deletes
   that client's `oauthAccessToken` rows for the user.
+- **Consent is always shown.** The plugin skips consent unless the client sends
+  `prompt=consent`. Because dynamic client registration is open to anyone, a
+  silent grant would let any registered client obtain a token for a signed-in
+  user who opened a crafted link. A `hooks.before` on `/mcp/authorize` forces
+  `prompt=consent`.
 - Telemetry: a `mcp_tool_called` event (tool name, client name, success). Never
   log recipe content or tokens. Report errors to Sentry as the other routes do.
 - Recipe text returned to the model is the user's own data. Imported pages could
@@ -277,11 +289,14 @@ Then:
 Alternative to the tunnel: a Vercel preview deployment (`*.vercel.app` is
 already an allowed dev host). Same Google redirect-URI caveat.
 
+Production connector URL: `https://recip-ai-wine.vercel.app/api/mcp`. Vercel
+is the only host; the Pi is abandoned.
+
 ### 4.3 Database
 
 The migration only **adds** tables. `local dev → shared Supabase` is safe, but apply
 it once with `DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate` before
-running the branch, as `docs/how-to/deploy-pi.md` describes.
+running the branch, as `docs/how-to/deploy-vercel.md` describes.
 
 ### 4.4 Automated
 
@@ -321,41 +336,47 @@ Each phase ends in a state the owner can pull and test.
 
 ### Phase 3: in-app entry point
 11. `feat(mcp): connections endpoint (status + revoke)`
-12. `feat(recipe-detail): Ask Claude button with setup sheet`: half-width
-    layout (§2.3), prefill URL with clipboard fallback
+12. `feat(recipe-detail): Ask AI button with setup sheet`: half-width
+    layout and wand popover (§2.3), prefill URL with clipboard fallback
 13. `feat(profile): connected AI apps section with disconnect`
 
 ### Phase 4: ChatGPT
 14. Verify the same server in ChatGPT (developer mode / custom connector). Fix
     anything specific to it, such as metadata, scopes or callback quirks.
-15. `feat(recipe-detail): Ask AI menu with Claude and ChatGPT`
+15. `feat(mcp): ChatGPT-compatible search and fetch tools`
+16. `feat(recipe-detail): add ChatGPT to the Ask AI popover`
 
-### Phase 5: sync visibility (separate scope, after the above)
-16. `feat(sync): show an "Updating recipes…" pill while reconciling`:
+**⏸ Work pauses here for owner testing.** Phases 5 and 6 start only after the
+owner confirms.
+
+### Phase 5: periodic pull (after phase 4)
+- `feat(sync): re-pull every 2 minutes while the recipes list is visible`,
+  so recipes added from Telegram or a connector appear without switching apps.
+  Pause when the tab is hidden, and reuse the single-flight `triggerSync`.
+
+### Phase 6: sync visibility (separate scope, after the above)
+17. `feat(sync): show an "Updating recipes…" pill while reconciling`:
     `useSyncOnLogin` exposes `isSyncing` through `SyncContext`. A small,
     **non-white**, tinted glass pill (design tokens, works in light and dark)
     near the top of the recipes list. It appears only if the sync runs longer
     than ~300 ms, so instant syncs don't flash. Optionally show "+N new" when
     it finishes and something was applied.
-17. `feat(recipes): fade in recipes that arrive from sync`: `applyReconcile`
+18. `feat(recipes): fade in recipes that arrive from sync`: `applyReconcile`
     returns the ids it applied, and the list (`components/recipe-virtual-list`)
     fades and slides those cards in with `motion` (opacity 0→1, y 6→0, ~250 ms).
     Respect `prefers-reduced-motion`.
 
 ---
 
-## 6. Open questions (defaults used if unanswered)
+## 6. Decisions (answered by the owner)
 
-1. **Button layout:** half-width row (Open post | Ask Claude). *Default: yes.*
-2. **Official logos vs a generic sparkle icon:** *Default: official marks, if
-   their brand guidelines allow it on review. Otherwise a sparkle icon plus text.*
-3. **Production domain for the connector URL:** `https://recipai.pp.ua/api/mcp`?
-   The Pi and Vercel share the DB, so either works. Pick one canonical URL.
-4. **Token lifetime:** access 1 h, refresh 7 days (plugin defaults). A longer
-   refresh token (30 days) means fewer reconnects. *Default: 30 days.*
-5. **Optional periodic pull** while the recipes list is visible (for example every
-   2 minutes), so connector or Telegram additions appear without switching apps.
-   *Default: not in this branch.*
+1. **Both apps.** Claude first, ChatGPT in phase 4. The UI is built for both from the start.
+2. **Icons:** a wand icon plus a popover with text options. No official logos.
+3. **Host:** Vercel only, at `https://recip-ai-wine.vercel.app`. The Pi is abandoned (the docs are updated).
+4. **Refresh token lifetime:** 30 days.
+5. **Periodic pull:** added as phase 5, after ChatGPT.
+6. **Full access:** connector tools cover search, read, create, update and delete of the user's own recipes.
+7. **Testing:** no owner check-in during phase 1. Phases 1–4 are built and self-tested, then work pauses.
 
 ---
 
@@ -365,8 +386,9 @@ Each phase ends in a state the owner can pull and test.
 - [ ] Phase 1: OAuth + read-only MCP (Claude testable)
 - [ ] Phase 2: write tools
 - [ ] Phase 3: in-app entry point
-- [ ] Phase 4: ChatGPT
-- [ ] Phase 5: sync indicator + fade-in
+- [ ] Phase 4: ChatGPT ⏸ pause for owner testing
+- [ ] Phase 5: periodic pull
+- [ ] Phase 6: sync indicator + fade-in
 
 ## Notes for a handoff agent
 

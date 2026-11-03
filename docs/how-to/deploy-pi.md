@@ -1,4 +1,7 @@
-# Deploy to Raspberry Pi
+# Deploy to Raspberry Pi (abandoned)
+
+!!! warning "Abandoned — kept for history"
+    The Pi is no longer used. Production runs on Vercel only, at `https://recip-ai-wine.vercel.app`. See [Deploy to Vercel](deploy-vercel.md). Nothing on this page is part of the current release process.
 
 The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel. Both the Pi and Vercel share the same Supabase Postgres database.
 

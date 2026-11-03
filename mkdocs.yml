@@ -63,7 +63,7 @@ nav:
       - Run Tests: how-to/run-tests.md
       - Add an API Route: how-to/add-api-route.md
       - Add a Dexie Migration: how-to/add-dexie-migration.md
-      - Deploy to Pi: how-to/deploy-pi.md
+      - Deploy to Pi (abandoned): how-to/deploy-pi.md
       - Deploy to Vercel: how-to/deploy-vercel.md
   - Tutorial:
       - Getting Started: tutorial/getting-started.md

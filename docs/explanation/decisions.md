@@ -81,9 +81,12 @@ Upstash Redis provides the rate-limit counters (fixed-window INCR) and short-liv
 
 ---
 
-## Raspberry Pi as secondary host
+## Raspberry Pi as secondary host (abandoned)
 
-The app runs on a Raspberry Pi 4 behind a Cloudflare Tunnel at `recipai.pp.ua` alongside the Vercel deployment. Both share the same Postgres database. The Pi is managed with PM2. Deployment is manual via SSH. The Telegram webhook can only point to one host — the Pi or Vercel, not both simultaneously.
+!!! warning "Abandoned — Vercel is the only host"
+    The Pi is no longer used. Production runs on Vercel only, at `https://recip-ai-wine.vercel.app`. This section and [Deploy to Pi](../how-to/deploy-pi.md) are kept as history.
+
+The app used to run on a Raspberry Pi 4 behind a Cloudflare Tunnel at `recipai.pp.ua` alongside the Vercel deployment. Both shared the same Postgres database. The Pi was managed with PM2. Deployment was manual via SSH. The Telegram webhook can only point to one host, the Pi or Vercel, not both simultaneously.
 
 ---
 

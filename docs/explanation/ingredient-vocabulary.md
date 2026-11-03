@@ -60,8 +60,8 @@ The result is written to the recipe (`canonicalIngredientIds`, `unrecognizedIngr
 
 The browser no longer downloads or runs an embedding model. `lib/embed/` owns an ordered provider chain configured through `EMBED_PROVIDERS`:
 
-- `local` loads `Xenova/multilingual-e5-small` in-process through `@huggingface/transformers`. The Pi uses this provider.
-- `http:<base-url>` calls `<base-url>/api/embed` with `EMBED_SHARED_SECRET`. Vercel points to the Pi through the Cloudflare Tunnel.
+- `local` loads `Xenova/multilingual-e5-small` in-process through `@huggingface/transformers`. The abandoned Pi host used this provider.
+- `http:<base-url>` calls `<base-url>/api/embed` with `EMBED_SHARED_SECRET`. Vercel used to point to the Pi through the Cloudflare Tunnel. With the Pi abandoned, Vercel's chain must not depend on it.
 - Providers are tried in order. Each HTTP provider has a 10-second timeout; failures are logged before the chain advances.
 - If the chain is exhausted, `EmbedUnavailable` produces the explicit degraded normalization path described above.
 
