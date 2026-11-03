@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { maintenanceErrorFromResponse } from "@/lib/api/api-fetch";
 import { authClient } from "@/lib/auth/auth-client";
@@ -20,24 +20,8 @@ import {
   syncPantry,
   syncParseHistory,
 } from "@/lib/sync/sync-entities";
+import { getSyncStatus, setSyncStatus } from "@/lib/sync/sync-status-store";
 import { captureError } from "@/lib/telemetry";
-
-/**
- * What the UI shows about background syncs: whether one is running, and how
- * many recipes the last finished one brought in that this device didn't have.
- */
-export interface SyncStatus {
-  syncing: boolean;
-  newRecipes: number;
-  /** When the last sync finished (ms); 0 before the first. */
-  finishedAt: number;
-}
-
-const IDLE_STATUS: SyncStatus = {
-  syncing: false,
-  newRecipes: 0,
-  finishedAt: 0,
-};
 
 // Stable id so repeat failures replace the toast rather than stack.
 const SYNC_FAILURE_TOAST_ID = "sync-failure";
@@ -64,7 +48,6 @@ export function useSyncOnLogin() {
     runStartupMigrations();
   }, []);
 
-  const [status, setStatus] = useState<SyncStatus>(IDLE_STATUS);
   const newRecipesRef = useRef(0);
   const inFlightRef = useRef<Promise<void> | null>(null);
   const syncRef = useRef<(() => Promise<void>) | null>(null);
@@ -117,6 +100,7 @@ export function useSyncOnLogin() {
         db.collections.toArray(),
       ]);
 
+      // How many recipes this sync brings to the device, for the sync message.
       const localRecipeIds = new Set(localRecipes.map((recipe) => recipe.id));
       newRecipesRef.current = serverRecipes.filter(
         (recipe) => !localRecipeIds.has(recipe.id),
@@ -169,10 +153,10 @@ export function useSyncOnLogin() {
   const sync = useCallback(() => {
     if (inFlightRef.current) return inFlightRef.current;
     newRecipesRef.current = 0;
-    setStatus((current) => ({ ...current, syncing: true }));
+    setSyncStatus({ ...getSyncStatus(), syncing: true });
     const promise = runSync().finally(() => {
       inFlightRef.current = null;
-      setStatus({
+      setSyncStatus({
         syncing: false,
         newRecipes: newRecipesRef.current,
         finishedAt: Date.now(),
@@ -219,5 +203,5 @@ export function useSyncOnLogin() {
     hasSynced.current = true;
   }, [sync]);
 
-  return { triggerSync, status };
+  return { triggerSync };
 }

@@ -63,6 +63,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { db } from "@/lib/db/db";
 import { normalizePulledRecipes } from "@/lib/sync/startup-migrations";
+import { getSyncStatus, resetSyncStatus } from "@/lib/sync/sync-status-store";
 import { useSyncOnLogin } from "../use-sync-on-login";
 
 const mockFetch = vi.fn();
@@ -136,6 +137,7 @@ const localRecipe = (id: string, updatedAt: Date, syncedAt?: Date) => ({
 });
 
 beforeEach(() => {
+  resetSyncStatus();
   vi.stubGlobal("fetch", mockFetch);
   vi.mocked(authClient.useSession).mockReturnValue({ data: null } as never);
   vi.mocked(db.recipes.toArray).mockResolvedValue([]);
@@ -353,25 +355,12 @@ describe("useSyncOnLogin", () => {
         data: mockSession,
       } as never);
       setupFetch();
-      // Count recipe pulls, not every fetch: the ingredient and pantry syncs
-      // have module-level guards, so their calls depend on earlier tests.
-      const recipePulls = () =>
-        mockFetch.mock.calls.filter(
-          ([url, options]) =>
-            String(url) === "/api/recipes/sync" &&
-            (options as RequestInit | undefined)?.method !== "POST",
-        ).length;
-      const { result } = renderHook(() => useSyncOnLogin());
-      // A visibility change during the first sync joins it (single-flight), so
-      // wait for that sync to finish before coming back to the app.
-      await waitFor(() =>
-        expect(result.current.status.finishedAt).toBeGreaterThan(0),
-      );
-      expect(recipePulls()).toBe(1);
+      renderHook(() => useSyncOnLogin());
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
 
       document.dispatchEvent(new Event("visibilitychange"));
 
-      await waitFor(() => expect(recipePulls()).toBe(2));
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
     });
   });
 
@@ -432,15 +421,6 @@ describe("useSyncOnLogin", () => {
   });
 
   describe("sync status", () => {
-    it("starts idle", () => {
-      const { result } = renderHook(() => useSyncOnLogin());
-      expect(result.current.status).toEqual({
-        syncing: false,
-        newRecipes: 0,
-        finishedAt: 0,
-      });
-    });
-
     it("reports a running sync, then how many recipes are new to this device", async () => {
       vi.mocked(authClient.useSession).mockReturnValue({
         data: mockSession,
@@ -456,12 +436,13 @@ describe("useSyncOnLogin", () => {
         ],
       });
 
-      const { result } = renderHook(() => useSyncOnLogin());
+      renderHook(() => useSyncOnLogin());
 
-      await waitFor(() => expect(result.current.status.syncing).toBe(true));
-      await waitFor(() => expect(result.current.status.syncing).toBe(false));
-      expect(result.current.status.newRecipes).toBe(2);
-      expect(result.current.status.finishedAt).toBeGreaterThan(0);
+      expect(getSyncStatus().syncing).toBe(true);
+      await waitFor(() =>
+        expect(getSyncStatus().finishedAt).toBeGreaterThan(0),
+      );
+      expect(getSyncStatus()).toMatchObject({ syncing: false, newRecipes: 2 });
     });
 
     it("clears syncing when the sync fails", async () => {
@@ -470,15 +451,13 @@ describe("useSyncOnLogin", () => {
       } as never);
       setupFetch({ rejectSync: true });
 
-      const { result } = renderHook(() => useSyncOnLogin());
+      renderHook(() => useSyncOnLogin());
 
+      await waitFor(() => expect(toast.error).toHaveBeenCalled());
       await waitFor(() =>
-        expect(result.current.status.finishedAt).toBeGreaterThan(0),
+        expect(getSyncStatus().finishedAt).toBeGreaterThan(0),
       );
-      expect(result.current.status).toMatchObject({
-        syncing: false,
-        newRecipes: 0,
-      });
+      expect(getSyncStatus()).toMatchObject({ syncing: false, newRecipes: 0 });
     });
   });
 });
