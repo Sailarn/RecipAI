@@ -39,6 +39,7 @@
     "@hookform/resolvers": "6.0.1",
     "@huggingface/transformers": "4.3.2",
     "@imagekit/nodejs": "7.12.1",
+    "@modelcontextprotocol/sdk": "1.32.1",
     "@serwist/next": "9.5.13",
     "@tailwindcss/postcss": "4.3.3",
     "@tanstack/react-virtual": "3.14.23",
