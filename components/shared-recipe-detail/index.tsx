@@ -31,7 +31,7 @@ export function SharedRecipeDetail({
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-base)]">
-      <div className="relative z-20 shrink-0 pt-[max(16px,calc(env(safe-area-inset-top)+4px))] px-[14px] pb-2">
+      <div className="relative z-20 shrink-0 pt-[max(16px,var(--top-gap))] px-[14px] pb-2">
         <button
           type="button"
           onClick={() => navigate.back(routes.recipes.list(locale))}

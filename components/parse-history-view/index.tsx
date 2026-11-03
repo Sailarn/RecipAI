@@ -64,7 +64,7 @@ export function ParseHistoryView() {
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-base)] overflow-hidden">
-      <header className="shrink-0 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] px-4 pb-3 flex items-center gap-2">
+      <header className="shrink-0 pt-[max(20px,var(--top-gap))] px-4 pb-3 flex items-center gap-2">
         <button
           type="button"
           onClick={() => navigate.back()}

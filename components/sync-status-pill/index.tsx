@@ -57,7 +57,7 @@ export function SyncStatusPill({ suppressSyncing = false }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+10px)] z-40 flex justify-center"
+      className="pointer-events-none fixed inset-x-0 top-[var(--top-gap)] z-40 flex justify-center"
     >
       <AnimatePresence>
         {message && (

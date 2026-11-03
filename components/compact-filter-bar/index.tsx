@@ -68,7 +68,7 @@ export function CompactFilterBar({
     : "🍴 All";
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] px-[14px] pb-2.5 pt-[calc(env(safe-area-inset-top)+10px)] bg-[rgba(8,6,3,0.45)] backdrop-blur-[8px]">
+    <div className="fixed top-0 left-0 right-0 z-[100] px-[14px] pb-2.5 pt-[var(--top-gap)] bg-[rgba(8,6,3,0.45)] backdrop-blur-[8px]">
       <button
         type="button"
         onClick={onScrollTop}

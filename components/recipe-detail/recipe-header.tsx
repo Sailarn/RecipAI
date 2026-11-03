@@ -30,7 +30,7 @@ export function RecipeHeader({
   const navigate = useNavigate();
 
   return (
-    <div className="relative z-[20] shrink-0 pt-[max(16px,calc(env(safe-area-inset-top)+4px))] px-[14px] pb-2 flex justify-between items-center">
+    <div className="relative z-[20] shrink-0 pt-[max(16px,var(--top-gap))] px-[14px] pb-2 flex justify-between items-center">
       <button
         type="button"
         onClick={() => navigate.back(routes.recipes.list(locale))}

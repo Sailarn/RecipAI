@@ -60,7 +60,7 @@ export function PantryPage() {
     // position:fixed inside it.
     <div className="relative mx-auto h-dvh w-full max-w-2xl flex flex-col bg-[var(--bg)]">
       {/* Header — stays pinned at the top */}
-      <div className="shrink-0 px-5 pb-4 pt-[max(20px,calc(env(safe-area-inset-top)+8px))]">
+      <div className="shrink-0 px-5 pb-4 pt-[max(20px,var(--top-gap))]">
         <h1 className="font-display font-extrabold text-[28px] text-[var(--fg-1)] m-0 leading-[1.2]">
           {tPantry("title")}
         </h1>

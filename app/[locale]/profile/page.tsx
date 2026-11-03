@@ -72,7 +72,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <div className="px-4 max-w-md mx-auto pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-[100px]">
+      <div className="px-4 max-w-md mx-auto pt-[max(20px,var(--top-gap))] pb-[100px]">
         <h1 className="mb-5 font-heading text-[26px] font-extrabold leading-tight tracking-tight text-[var(--fg-1)]">
           {t("title")}
         </h1>

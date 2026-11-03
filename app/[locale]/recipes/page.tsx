@@ -107,7 +107,7 @@ export default function RecipesPage() {
       {/* Pull-to-refresh indicator — height driven directly via DOM ref, no React re-renders during drag */}
       <div
         ref={indicatorRef}
-        className="flex box-border h-[calc(var(--pull-height)+env(safe-area-inset-top))] justify-center items-center pt-[env(safe-area-inset-top)] text-sm overflow-hidden text-[var(--fg-3)]"
+        className="flex box-border h-[calc(var(--pull-height)+env(safe-area-inset-top))] justify-center items-end pb-2 pt-[env(safe-area-inset-top)] text-sm overflow-hidden text-[var(--fg-2)]"
         style={
           {
             "--pull-height": "0px",

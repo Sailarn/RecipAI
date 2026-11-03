@@ -66,7 +66,7 @@ export function CookingCarousel({
     <div className="fixed inset-0 z-[300] bg-[rgba(6,4,2,0.97)]">
       <div className="relative mx-auto flex h-full w-full max-w-2xl flex-col">
         {/* Header — absolute positioned above carousel */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-[14px] pt-[max(20px,calc(env(safe-area-inset-top)+8px))] pb-2">
+        <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-[14px] pt-[max(20px,var(--top-gap))] pb-2">
           <span className="font-display text-[17px] font-bold text-[var(--fg-1)]">
             {t("title")}
           </span>
@@ -81,7 +81,7 @@ export function CookingCarousel({
         </div>
 
         {/* Carousel */}
-        <div className="flex-1 overflow-hidden pt-[calc(env(safe-area-inset-top)+55px)]">
+        <div className="flex-1 overflow-hidden pt-[calc(var(--top-gap)+47px)]">
           <Carousel className="h-full" setApi={setApi}>
             <CarouselContent
               className="-ml-4"

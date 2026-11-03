@@ -28,7 +28,7 @@ export function FormHeader({
   const progressPercent = ((activeTabIndex + 1) / TAB_KEYS.length) * 100;
 
   return (
-    <div className="relative z-[2] shrink-0 pt-[max(16px,env(safe-area-inset-top,16px))] px-4 pb-0">
+    <div className="relative z-[2] shrink-0 pt-[max(16px,var(--top-gap))] px-4 pb-0">
       <div className="flex items-center justify-between mb-4">
         <button
           type="button"

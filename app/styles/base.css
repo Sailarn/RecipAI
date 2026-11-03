@@ -228,6 +228,13 @@
   }
 }
 
+/* Space between the status bar (safe area) and top-of-screen UI. Every top
+   bar uses it, so nothing sits right against the standalone status-bar
+   scrim, where it would look clipped. */
+:root {
+  --top-gap: calc(env(safe-area-inset-top) + 12px);
+}
+
 .app-full-bleed-background {
   top: calc(0px - env(safe-area-inset-top));
   right: calc(0px - env(safe-area-inset-right));

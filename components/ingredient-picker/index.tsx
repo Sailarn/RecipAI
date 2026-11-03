@@ -181,7 +181,7 @@ export function IngredientPicker({
           className="absolute inset-0 z-0 pointer-events-none [background:var(--app-mesh)]"
         />
 
-        <div className="relative z-10 shrink-0 px-4 pb-3 pt-[max(20px,calc(env(safe-area-inset-top)+8px))] flex items-center gap-3">
+        <div className="relative z-10 shrink-0 px-4 pb-3 pt-[max(20px,var(--top-gap))] flex items-center gap-3">
           <h2 className="flex-1 font-display font-bold text-[21px] text-[var(--fg-1)] m-0 leading-[1.2]">
             {title}
           </h2>

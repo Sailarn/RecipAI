@@ -13,6 +13,9 @@ const PULL_RESISTANCE = 0.4;
 const PULL_LABEL_REVEAL_START = 12;
 const PULL_LABEL_REVEAL_DISTANCE = 8;
 const MINIMUM_REFRESH_FEEDBACK_MS = 350;
+// Strip height held while refreshing. The label sits at its bottom edge, so
+// it stays clear of the status bar instead of hugging it.
+const REFRESHING_HEIGHT = 44;
 
 function waitForRefreshFeedback() {
   return new Promise<void>((resolve) => {
@@ -81,7 +84,7 @@ export function usePullToRefresh({
       isPulling.current = false;
 
       if (pullDistanceRef.current >= threshold) {
-        setHeight(32);
+        setHeight(REFRESHING_HEIGHT);
         pullDistanceRef.current = 0;
         isRefreshingRef.current = true;
         setIsRefreshing(true);
