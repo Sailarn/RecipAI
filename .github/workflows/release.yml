@@ -76,9 +76,18 @@ jobs:
         run: bun add -g vercel
 
       - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        # Sensitive Vercel variables can't be pulled; vercel pull writes a
+        # "[SENSITIVE]" placeholder instead. Drop the Sentry one so the real
+        # token from the GitHub secret below is the one the build sees.
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          sed -i '/^SENTRY_AUTH_TOKEN=/d' .vercel/.env.production.local
 
       - name: Build
+        # The Sentry plugin uploads source maps and creates the release during
+        # the build; without this token it silently skips both.
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy

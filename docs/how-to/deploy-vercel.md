@@ -37,7 +37,7 @@ Use the direct Supabase URL (port 5432) for `SUPABASE_MIGRATION_URL`, or the Sup
 
 ## GitHub Actions secrets
 
-The repository must define `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as GitHub Actions secrets. `GITHUB_TOKEN` is provided by GitHub and is used for the release commit and tag.
+The repository must define `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` and `SENTRY_AUTH_TOKEN` as GitHub Actions secrets. The build runs in GitHub Actions (`vercel pull` → `vercel build`), not on Vercel, and `vercel pull` cannot read sensitive Vercel variables (it writes `[SENSITIVE]` placeholders). So the Sentry token set in Vercel never reached the build, and source maps silently weren't uploaded ("No auth token provided" in the build log). The workflow passes the GitHub secret to the Build step and removes the placeholder line first. `GITHUB_TOKEN` is provided by GitHub and is used for the release commit and tag.
 
 ---
 
