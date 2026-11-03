@@ -9,7 +9,11 @@ export interface AiApp {
   label: string;
   /** A new chat with the prompt prefilled (best effort; see askAboutRecipe). */
   newChatUrl: (prompt: string) => string;
-  /** Where the user adds a custom connector. */
+  /**
+   * Where the user adds a custom connector. Chosen to be a universal link on
+   * iOS where one exists, so it opens the native app (signed in) instead of
+   * an in-app browser that knows none of the user's accounts.
+   */
   connectorSettingsUrl: string;
 }
 
@@ -19,7 +23,11 @@ export const AI_APPS: Record<AiAppId, AiApp> = {
     label: "Claude",
     newChatUrl: (prompt) =>
       `https://claude.ai/new?q=${encodeURIComponent(prompt)}`,
-    connectorSettingsUrl: "https://claude.ai/settings/connectors",
+    // Listed in claude.ai's apple-app-site-association: opens the Claude app
+    // straight on "Add custom connector". (/settings/connectors is not, and
+    // opened a browser.)
+    connectorSettingsUrl:
+      "https://claude.ai/customize/connectors?modal=add-custom-connector",
   },
   chatgpt: {
     id: "chatgpt",

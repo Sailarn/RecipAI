@@ -56,7 +56,7 @@ describe("ConnectAiSheet", () => {
 
     expect(screen.getByRole("link", { name: "openSettings" })).toHaveAttribute(
       "href",
-      "https://claude.ai/settings/connectors",
+      "https://claude.ai/customize/connectors?modal=add-custom-connector",
     );
     expect(screen.getByRole("link", { name: "askNow" })).toHaveAttribute(
       "href",
