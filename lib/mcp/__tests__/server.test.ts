@@ -430,4 +430,56 @@ describe("RecipAI MCP server", () => {
     expect(document.text).toContain("# Borscht");
     expect(document.text).toContain("- 2 beet");
   });
+
+  it("returns update_recipe's result with any warnings", async () => {
+    updateRecipe.mockResolvedValue({
+      recipe: { id: "r1" },
+      warnings: ["The photo could not be copied"],
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "update_recipe",
+      arguments: { id: "r1", imageUrl: "https://img.example.com/a.jpg" },
+    });
+
+    expect(updateRecipe).toHaveBeenCalledWith(
+      "user-1",
+      "r1",
+      { imageUrl: "https://img.example.com/a.jpg" },
+      "https://app.example",
+    );
+    expect(resultJson(result)).toEqual({
+      recipe: { id: "r1" },
+      warnings: ["The photo could not be copied"],
+    });
+  });
+
+  it("points the model to create_recipe when an import fails", async () => {
+    getImportStatus.mockResolvedValue({
+      status: "failed",
+      url: "https://example.com/x",
+      error: "Couldn't extract a recipe from this page",
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = resultJson(
+      await client.callTool({
+        name: "get_import_status",
+        arguments: { jobId: "j9" },
+      }),
+    ) as { status: string; next: string };
+
+    expect(result.status).toBe("failed");
+    expect(result.next).toContain("create_recipe");
+  });
+
+  it("tells the model to parse links itself and import only social posts", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const { tools } = await client.listTools();
+    const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.import_recipe.description).toMatch(
+      /Instagram, TikTok, YouTube or X/,
+    );
+    expect(byName.create_recipe.description).toMatch(/photo or screenshot/);
+  });
 });

@@ -150,4 +150,17 @@ describe("getImportStatus", () => {
     expect(status?.status).toBe("failed");
     expect(failStaleParseJobs).toHaveBeenCalled();
   });
+
+  it("imports and dedupes the link without tracking parameters", async () => {
+    findRecipeIdBySource.mockResolvedValue(null);
+    findCachedParseResult.mockResolvedValue(null);
+    rateLimit.mockResolvedValue({ allowed: true, resetSeconds: 3600 });
+
+    await importRecipeForUser("u1", `${URL_}?utm_source=chatgpt.com`);
+
+    expect(findRecipeIdBySource).toHaveBeenCalledWith("u1", URL_);
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ url: URL_ }),
+    );
+  });
 });

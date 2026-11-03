@@ -71,3 +71,22 @@ export function normalizeSourceUrl(rawUrl: string): string {
 
   return `https://${host}${path}${query ? `?${query}` : ""}`;
 }
+
+/**
+ * The link as the user would share it, minus tracking parameters (utm_*,
+ * fbclid, …): what RecipAI stores as a recipe's source. Unlike
+ * normalizeSourceUrl (a cache key), host and path are left exactly as given.
+ * AI chats append ?utm_source=chatgpt.com and similar to links they pass on.
+ */
+export function stripTrackingParams(rawUrl: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl.trim());
+  } catch {
+    return rawUrl.trim();
+  }
+  for (const key of [...parsed.searchParams.keys()]) {
+    if (isTrackingParam(key)) parsed.searchParams.delete(key);
+  }
+  return parsed.toString();
+}

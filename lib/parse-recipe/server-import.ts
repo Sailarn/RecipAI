@@ -9,7 +9,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { api } from "@/lib/routes";
 import { captureError } from "@/lib/telemetry";
 import { findRecipeIdBySource } from "./find-recipe-by-source";
-import { normalizeSourceUrl } from "./normalize-url";
+import { normalizeSourceUrl, stripTrackingParams } from "./normalize-url";
 import { findCachedParseResult } from "./parse-cache";
 import { PARSER_VERSION } from "./parser-version";
 import { saveParsedRecipeForUser } from "./save-parsed-recipe-server";
@@ -71,8 +71,10 @@ function triggerParseProcess(jobId: string): void {
 
 export async function importRecipeForUser(
   userId: string,
-  url: string,
+  rawUrl: string,
 ): Promise<ImportOutcome> {
+  // AI chats append tracking parameters (?utm_source=chatgpt.com) to links.
+  const url = stripTrackingParams(rawUrl);
   const existingId = await findRecipeIdBySource(userId, url);
   if (existingId) return { status: "already_saved", recipeId: existingId };
 

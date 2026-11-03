@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/db", () => ({ db: {} }));
 vi.mock("@/lib/upload/imagekit", () => ({ uploadImageServer: vi.fn() }));
 
+import { createRecipeInputSchema, updateRecipeInputSchema } from "../input";
 import {
   buildRecipeUpdate,
+  buildShape,
   draftsFromRow,
   isFetchableImageUrl,
 } from "../mutations";
@@ -173,5 +175,59 @@ describe("isFetchableImageUrl", () => {
     "not a url",
   ])("rejects %s", (url) => {
     expect(isFetchableImageUrl(url)).toBe(false);
+  });
+});
+
+describe("source links", () => {
+  it("are stored without tracking parameters on update", () => {
+    expect(
+      buildRecipeUpdate(
+        row(),
+        { sourceUrl: "https://example.com/pie/?utm_source=chatgpt.com" },
+        NOW,
+      ).sourceUrl,
+    ).toBe("https://example.com/pie/");
+    expect(
+      buildRecipeUpdate(row(), { sourceUrl: null }, NOW).sourceUrl,
+    ).toBeNull();
+  });
+});
+
+describe("step images", () => {
+  it("are kept on the saved steps", () => {
+    const shape = buildShape(
+      [{ item: "flour" }],
+      [{ instruction: "Knead", imageUrl: "https://img.example.com/1.jpg" }],
+    );
+    expect(shape.instructions[0].imageUrl).toBe(
+      "https://img.example.com/1.jpg",
+    );
+  });
+
+  it("must be https URLs", () => {
+    const base = {
+      title: "T",
+      ingredients: [{ item: "a" }],
+      instructions: [
+        { instruction: "b", imageUrl: "http://img.example.com/1.jpg" },
+      ],
+    };
+    expect(createRecipeInputSchema.safeParse(base).success).toBe(false);
+  });
+});
+
+describe("update image input", () => {
+  it("accepts a link or null", () => {
+    expect(
+      updateRecipeInputSchema.safeParse({
+        imageUrl: "https://img.example.com/a.jpg",
+      }).success,
+    ).toBe(true);
+    expect(updateRecipeInputSchema.safeParse({ imageUrl: null }).success).toBe(
+      true,
+    );
+    expect(
+      updateRecipeInputSchema.safeParse({ imageUrl: "ftp://x" }).success,
+    ).toBe(false);
   });
 });

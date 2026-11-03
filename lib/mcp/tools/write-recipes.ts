@@ -27,10 +27,13 @@ export function registerWriteRecipeTools(
     {
       title: "Save a new recipe",
       description:
-        "Save a new recipe to the user's RecipAI library. Give ingredients as " +
-        "separate items with numeric amounts and units, and steps in order. " +
-        "Use `section` to group items (e.g. a sauce). If `sourceUrl` is " +
-        "already in the library, the existing recipe is returned instead. " +
+        "Save a new recipe to the user's RecipAI library from any source: " +
+        "text the user pasted, a photo or screenshot, or a web page you read. " +
+        "Give ingredients as separate items with numeric amounts and units, " +
+        "and steps in order; use `section` to group items (e.g. a sauce). " +
+        "Set `sourceUrl` to the original link if there is one (a link already " +
+        "in the library returns that recipe instead) and `imageUrl` to a public " +
+        "photo of the dish if you have one; steps may carry images too. " +
         SYNC_NOTE,
       inputSchema: createRecipeInputShape,
       annotations: {
@@ -68,8 +71,8 @@ export function registerWriteRecipeTools(
       "write",
       context,
       async ({ id, ...patch }) => {
-        const recipe = await updateRecipe(caller.userId, id, patch, origin);
-        return recipe ? jsonResult(recipe) : errorResult(NOT_FOUND_MESSAGE);
+        const result = await updateRecipe(caller.userId, id, patch, origin);
+        return result ? jsonResult(result) : errorResult(NOT_FOUND_MESSAGE);
       },
     ),
   );

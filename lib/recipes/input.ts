@@ -66,6 +66,15 @@ export const ingredientInputSchema = z.object({
 export const stepInputSchema = z.object({
   instruction: z.string().trim().min(1).max(L.INSTRUCTION),
   section: sectionSchema,
+  imageUrl: z
+    .string()
+    .trim()
+    .max(L.URL)
+    .refine((value) => /^https:\/\//i.test(value) && URL.canParse(value), {
+      message: "must be an https URL",
+    })
+    .optional()
+    .describe("Optional photo for this step (public https image URL)."),
 });
 
 const httpUrl = z
@@ -110,6 +119,12 @@ export const updateRecipeInputShape = {
   cookTimeMinutes: minutes.nullable().optional(),
   category: z.enum(RECIPE_CATEGORIES).nullable().optional(),
   sourceUrl: httpUrl.nullable().optional(),
+  imageUrl: httpUrl
+    .nullable()
+    .optional()
+    .describe(
+      "New main photo (public image URL, copied into RecipAI), or null to remove it.",
+    ),
   tried: z
     .boolean()
     .optional()

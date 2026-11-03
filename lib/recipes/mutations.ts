@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { recipes } from "@/db/schema/recipes";
 import type { RecipeIngredient, RecipeSection, Step } from "@/lib/db/schema";
 import { findRecipeIdBySource } from "@/lib/parse-recipe/find-recipe-by-source";
+import { stripTrackingParams } from "@/lib/parse-recipe/normalize-url";
 import {
   buildSavedRecipeShape,
   type SavedRecipeShape,
@@ -131,6 +132,25 @@ export interface CreateRecipeResult {
   recipe: RecipeView;
   /** The source URL was already in the library; nothing new was written. */
   alreadySaved: boolean;
+  /** Things the caller asked for that didn't happen, for the model to relay. */
+  warnings?: string[];
+}
+
+export const IMAGE_NOT_SAVED_WARNING =
+  "The photo could not be copied (the link must be a public https image), so the recipe has no photo. Try another image link with update_recipe.";
+
+/** Column values that reset the hero image and its crop/focus settings. */
+function imageColumns(image: { imageUrl?: string; imageFileId?: string }) {
+  return {
+    imageUrl: image.imageUrl ?? null,
+    imageFileId: image.imageFileId ?? null,
+    imageFocusX: null,
+    imageFocusY: null,
+    imageCropX: null,
+    imageCropY: null,
+    imageCropWidth: null,
+    imageCropHeight: null,
+  };
 }
 
 export async function createRecipe(
@@ -138,8 +158,11 @@ export async function createRecipe(
   input: CreateRecipeInput,
   origin: string,
 ): Promise<CreateRecipeResult> {
-  if (input.sourceUrl) {
-    const existingId = await findRecipeIdBySource(userId, input.sourceUrl);
+  const sourceUrl = input.sourceUrl
+    ? stripTrackingParams(input.sourceUrl)
+    : undefined;
+  if (sourceUrl) {
+    const existingId = await findRecipeIdBySource(userId, sourceUrl);
     const existing =
       existingId && (await getRecipe(userId, existingId, origin));
     if (existing) return { recipe: existing, alreadySaved: true };
@@ -164,7 +187,7 @@ export async function createRecipe(
     ingredients: shape.ingredients,
     instructions: shape.instructions,
     sections: shape.sections,
-    sourceUrl: input.sourceUrl ?? null,
+    sourceUrl: sourceUrl ?? null,
     category: input.category ?? null,
     isPublic: false,
     createdAt: now,
@@ -173,7 +196,13 @@ export async function createRecipe(
 
   const recipe = await getRecipe(userId, id, origin);
   if (!recipe) throw new Error("created recipe could not be read back");
-  return { recipe, alreadySaved: false };
+  return {
+    recipe,
+    alreadySaved: false,
+    ...(input.imageUrl && !image.imageUrl
+      ? { warnings: [IMAGE_NOT_SAVED_WARNING] }
+      : {}),
+  };
 }
 
 /** The column updates for a patch against the existing row. Pure. */
@@ -188,7 +217,9 @@ export function buildRecipeUpdate(
   if (patch.description !== undefined) set.description = patch.description;
   if (patch.servings !== undefined) set.servings = patch.servings;
   if (patch.category !== undefined) set.category = patch.category;
-  if (patch.sourceUrl !== undefined) set.sourceUrl = patch.sourceUrl;
+  if (patch.sourceUrl !== undefined) {
+    set.sourceUrl = patch.sourceUrl && stripTrackingParams(patch.sourceUrl);
+  }
   if (patch.tried !== undefined) set.status = patch.tried ? "tried" : null;
 
   if (
@@ -239,21 +270,44 @@ async function findOwnRow(
   return row;
 }
 
+export interface UpdateRecipeResult {
+  recipe: RecipeView;
+  warnings?: string[];
+}
+
 export async function updateRecipe(
   userId: string,
   id: string,
   patch: UpdateRecipeInput,
   origin: string,
-): Promise<RecipeView | null> {
+): Promise<UpdateRecipeResult | null> {
   const existing = await findOwnRow(userId, id);
   if (!existing) return null;
 
+  const set = buildRecipeUpdate(existing, patch);
+  const warnings: string[] = [];
+  if (patch.imageUrl === null) {
+    Object.assign(set, imageColumns({}));
+  } else if (patch.imageUrl !== undefined) {
+    const image = await storeImage(patch.imageUrl);
+    if (image.imageUrl) Object.assign(set, imageColumns(image));
+    else
+      warnings.push(
+        IMAGE_NOT_SAVED_WARNING.replace(
+          "so the recipe has no photo",
+          "so the old photo was kept",
+        ),
+      );
+  }
+
   await db
     .update(recipes)
-    .set(buildRecipeUpdate(existing, patch))
+    .set(set)
     .where(and(eq(recipes.id, id), eq(recipes.userId, userId)));
 
-  return getRecipe(userId, id, origin);
+  const recipe = await getRecipe(userId, id, origin);
+  if (!recipe) return null;
+  return { recipe, ...(warnings.length ? { warnings } : {}) };
 }
 
 /**

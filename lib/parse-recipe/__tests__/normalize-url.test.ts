@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeSourceUrl } from "../normalize-url";
+import { normalizeSourceUrl, stripTrackingParams } from "../normalize-url";
 
 describe("normalizeSourceUrl", () => {
   it("strips Instagram share tracking so the same reel collapses to one key", () => {
@@ -92,5 +92,35 @@ describe("normalizeSourceUrl", () => {
 
   it("returns the trimmed input unchanged when it is not a valid URL", () => {
     expect(normalizeSourceUrl("  not a url  ")).toBe("not a url");
+  });
+});
+
+describe("stripTrackingParams", () => {
+  it("drops the tracking parameters AI chats and social apps add", () => {
+    expect(
+      stripTrackingParams(
+        "https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/?utm_source=chatgpt.com",
+      ),
+    ).toBe("https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/");
+    expect(
+      stripTrackingParams(
+        "https://www.instagram.com/reel/abc/?igsh=xyz&utm_medium=copy_link",
+      ),
+    ).toBe("https://www.instagram.com/reel/abc/");
+  });
+
+  it("keeps the host, path and content-bearing parameters as given", () => {
+    expect(
+      stripTrackingParams(
+        "https://www.youtube.com/watch?v=abc123&utm_source=chatgpt.com",
+      ),
+    ).toBe("https://www.youtube.com/watch?v=abc123");
+    expect(stripTrackingParams("https://m.example.com/Recipe?page=2")).toBe(
+      "https://m.example.com/Recipe?page=2",
+    );
+  });
+
+  it("returns unparsable input trimmed", () => {
+    expect(stripTrackingParams("  not a url ")).toBe("not a url");
   });
 });
