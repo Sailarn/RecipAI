@@ -24,7 +24,7 @@ for arg in "$@"; do
       echo "  --mode=cloud   (default) push to main; GitHub Actions runs CI, bumps"
       echo "                 the version, and deploys to Vercel."
       echo "  --mode=local   run the same pipeline locally: CI checks, version bump,"
-      echo "                 deploy to Vercel, deploy to the Pi. Use this only when"
+      echo "                 deploy to Vercel. Use this only when"
       echo "                 GitHub Actions is unavailable."
       echo "  --skip-migration-check   bypass the pending-migration guard in local"
       echo "                 mode, e.g. if you already applied the migration by hand."
@@ -112,7 +112,7 @@ check_pending_migrations() {
   echo -e "${YELLOW}${WARN}${BOLD} New migration(s) since $lastTag:${RESET}"
   echo "$newMigrations" | sed 's/^/  /'
   echo ""
-  echo "Apply it once, then re-run this script (Pi and Vercel share one database):"
+  echo "Apply it once, then re-run this script:"
   echo ""
   echo '  DATABASE_URL="$SUPABASE_MIGRATION_URL" bun run db:migrate'
   echo ""
@@ -147,12 +147,6 @@ deploy_vercel() {
   echo -e "${GREEN}${PASS}${RESET} Deployed to Vercel"
 }
 
-deploy_pi() {
-  step_header "Deploy: Pi"
-  ssh recipai@recipai.local '~/deploy.sh' || fail "${FAIL} Pi deploy failed"
-  echo -e "${GREEN}${PASS}${RESET} Deployed to Pi"
-}
-
 cloud_push() {
   step_header "Cloud mode"
 
@@ -181,7 +175,6 @@ else
   check_pending_migrations
   version_bump
   deploy_vercel
-  deploy_pi
   echo ""
   echo -e "${GREEN}${BOLD}Release complete${RESET} 🚀"
 fi

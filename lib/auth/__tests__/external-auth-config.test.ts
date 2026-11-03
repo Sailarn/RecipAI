@@ -16,8 +16,8 @@ describe("getExternalAuthUrl", () => {
 
   it("removes the trailing slash from the configured URL", () => {
     expect(
-      getExternalAuthUrl({ configuredUrl: "https://auth.recipai.pp.ua/" }),
-    ).toBe("https://auth.recipai.pp.ua");
+      getExternalAuthUrl({ configuredUrl: "https://auth.example.app/" }),
+    ).toBe("https://auth.example.app");
   });
 });
 
@@ -39,8 +39,8 @@ describe("assertSeparateAuthOrigins", () => {
   it("throws when the app and external auth use the same origin", () => {
     expect(() =>
       assertSeparateAuthOrigins(
-        "https://recipai.pp.ua",
-        "https://recipai.pp.ua",
+        "https://recip-ai-wine.vercel.app",
+        "https://recip-ai-wine.vercel.app",
       ),
     ).toThrow(/separate origin/i);
   });
@@ -48,26 +48,46 @@ describe("assertSeparateAuthOrigins", () => {
   it("allows distinct app and external auth origins", () => {
     expect(() =>
       assertSeparateAuthOrigins(
-        "https://recipai.pp.ua",
-        "https://auth.recipai.pp.ua",
+        "https://recip-ai-wine.vercel.app",
+        "https://auth.example.app",
       ),
     ).not.toThrow();
   });
 });
 
 describe("getAllowedAuthHosts", () => {
-  it("returns only the two exact production hosts", () => {
+  it("allows only the Vercel app host in production by default", () => {
     expect(getAllowedAuthHosts("production")).toEqual([
-      "recipai.pp.ua",
-      "auth.recipai.pp.ua",
+      "recip-ai-wine.vercel.app",
+    ]);
+  });
+
+  it("adds the exact hosts of the configured app and external-auth URLs", () => {
+    expect(
+      getAllowedAuthHosts("production", [
+        "https://recip-ai-wine.vercel.app",
+        "https://auth.example.app/",
+        undefined,
+      ]),
+    ).toEqual(["recip-ai-wine.vercel.app", "auth.example.app"]);
+  });
+
+  it("never allows loopback hosts in production", () => {
+    expect(
+      getAllowedAuthHosts("production", ["http://localhost:3000"]),
+    ).toEqual(["recip-ai-wine.vercel.app"]);
+  });
+
+  it("ignores unparsable URLs", () => {
+    expect(getAllowedAuthHosts("production", ["not a url"])).toEqual([
+      "recip-ai-wine.vercel.app",
     ]);
   });
 
   it("includes the configured LAN host without a broad hostname wildcard", () => {
-    const hosts = getAllowedAuthHosts(
-      "development",
+    const hosts = getAllowedAuthHosts("development", [
       "http://192.168.50.18:3000",
-    );
+    ]);
 
     expect(hosts).toEqual(
       expect.arrayContaining([

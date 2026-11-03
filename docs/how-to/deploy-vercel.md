@@ -85,6 +85,6 @@ bun run release:pipeline                       # --mode=cloud (default) — same
 bun run release:pipeline -- --mode=local        # run CI checks, version bump, and Vercel deploy locally
 ```
 
-`--mode=local` runs, in order: `tsc --noEmit` / `biome ci .` / tests (same commands as `ci.yml`), a check for unreleased files under `db/migrations/` (stops with the migration command above if found — pass `--skip-migration-check` if you already applied it by hand), `release-it --ci`, then the same `vercel pull` / `vercel build --prod` / `vercel deploy --prebuilt --prod` sequence as `release.yml`. The script still ends with an `ssh recipai@recipai.local '~/deploy.sh'` step for the abandoned Pi, which fails now and can be removed. Set `VERCEL_TOKEN` in the environment to run non-interactively; otherwise it uses your local `vercel login` session.
+`--mode=local` runs, in order: `tsc --noEmit` / `biome ci .` / tests (same commands as `ci.yml`), a check for unreleased files under `db/migrations/` (stops with the migration command above if found — pass `--skip-migration-check` if you already applied it by hand), `release-it --ci`, then the same `vercel pull` / `vercel build --prod` / `vercel deploy --prebuilt --prod` sequence as `release.yml`. Set `VERCEL_TOKEN` in the environment to run non-interactively; otherwise it uses your local `vercel login` session.
 
 Use `--mode=local` only when Actions can't run the pipeline itself — it's the fallback, not the default.

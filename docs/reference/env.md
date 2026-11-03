@@ -10,7 +10,7 @@ Developer-supplied variables live in `.env.local` (never committed). Copy `.env.
 |---|---|---|
 | `DATABASE_URL` | Yes | Runtime Supabase Postgres connection string. Use the transaction pooler (port 6543) on Vercel. For `bun run db:migrate`, override this variable with the direct connection (port 5432), or the Supavisor session pooler (port 5432) from an IPv4-only migration host. |
 | `NEXT_PUBLIC_BETTER_AUTH_URL` | Yes | Full base URL of the app (`https://recip-ai-wine.vercel.app` in production). Used by better-auth for redirect and cookie domain. |
-| `NEXT_PUBLIC_EXTERNAL_AUTH_URL` | Production | Public external-auth base URL. `http://localhost:3000` is sufficient for ordinary local development, but account linking requires a different origin in every environment. Production uses `https://auth.recipai.pp.ua`; its Google callback is `https://auth.recipai.pp.ua/api/auth/callback/google`. |
+| `NEXT_PUBLIC_EXTERNAL_AUTH_URL` | Production | Public external-auth base URL. `http://localhost:3000` is sufficient for ordinary local development, but account linking requires a different origin in every environment. In production it must be a different origin from `NEXT_PUBLIC_BETTER_AUTH_URL` (for example a second Vercel domain), and its `/api/auth/callback/google` must be an authorized Google redirect URI. Its host is added to the allowed auth hosts automatically. |
 | `BETTER_AUTH_SECRET` | Yes | Random secret for signing sessions. Generate with `openssl rand -hex 32`. Read directly by the `better-auth` library from the environment — not referenced in app code, but required. Without it, sessions are re-keyed on every server restart. |
 
 ---
@@ -31,7 +31,7 @@ The e5-small model runs on server infrastructure, never in the browser. Every de
 
 | Variable | Required | Description |
 |---|---|---|
-| `EMBED_PROVIDERS` | Yes* | Ordered comma-separated provider chain. `local` loads `Xenova/multilingual-e5-small` in-process; `http:<base-url>` calls `<base-url>/api/embed`, with a 10-second timeout before trying the next entry. The abandoned Pi used `local`, and Vercel used `http:https://recipai.pp.ua` to reach the Pi. Now that Vercel is the only host, its chain must not depend on the Pi. |
+| `EMBED_PROVIDERS` | Yes* | Ordered comma-separated provider chain. `local` loads `Xenova/multilingual-e5-small` in-process; `http:<base-url>` calls `<base-url>/api/embed`, with a 10-second timeout before trying the next entry. The abandoned Pi used `local`; Vercel must not point an `http:` entry at the Pi, which is gone. |
 | `EMBED_SHARED_SECRET` | HTTP only** | Shared secret sent as `x-embed-secret` between HTTP providers and `/api/embed`. Use the same strong value on the caller and embedding host. A local-only chain that does not expose `/api/embed` can omit it. |
 | `EMBED_MODEL_CACHE_DIR` | No | Only relevant with a `local` provider. Caches the downloaded model outside `node_modules`, so a redeploy's `bun install` doesn't wipe it and force a ~50s re-download on the next cold load. Defaults to the package's in-package cache when unset. |
 

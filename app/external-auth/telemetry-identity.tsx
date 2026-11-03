@@ -5,7 +5,7 @@ import { useTelemetryIdentity } from "@/lib/hooks/use-telemetry-identity";
 /**
  * Attaches this origin's anonymous PostHog identity to the signed-in user.
  *
- * These pages are served from the auth host (`auth.recipai.pp.ua`), a different
+ * These pages are served from the external-auth host (NEXT_PUBLIC_EXTERNAL_AUTH_URL), a different
  * origin from the app, and PostHog persistence is per-origin — so they start
  * with their own anonymous distinct id. Without an `identify` call it never
  * merges, and every visit to the account-linking or device sign-in flow shows

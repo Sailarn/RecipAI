@@ -33,10 +33,10 @@ const externalAuthUrl = getExternalAuthUrl({
 
 export const auth = betterAuth({
   baseURL: {
-    allowedHosts: getAllowedAuthHosts(
-      authEnvironment,
+    allowedHosts: getAllowedAuthHosts(authEnvironment, [
       process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
-    ),
+      process.env.NEXT_PUBLIC_EXTERNAL_AUTH_URL,
+    ]),
     fallback: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
     protocol: "auto",
   },

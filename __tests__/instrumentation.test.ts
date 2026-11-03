@@ -14,7 +14,7 @@ describe("shouldPrewarmLocalEmbed", () => {
 
   it("does not pre-warm when only http providers are configured (Vercel)", () => {
     expect(
-      shouldPrewarmLocalEmbed("http:https://recipai.pp.ua", "nodejs"),
+      shouldPrewarmLocalEmbed("http:https://embed.example.com", "nodejs"),
     ).toBe(false);
   });
 
