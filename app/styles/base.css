@@ -229,10 +229,14 @@
 }
 
 /* Space between the status bar (safe area) and top-of-screen UI. Every top
-   bar uses it, so nothing sits right against the standalone status-bar
-   scrim, where it would look clipped. */
+   bar uses --top-gap, so nothing sits right against the status bar.
+   In the installed app (standalone, black-translucent status bar) iOS 26
+   draws its own Liquid Glass blur over the status bar and ~40pt below it,
+   which a page cannot turn off: --top-extra keeps content below that blur.
+   Tune --top-extra here only. */
 :root {
-  --top-gap: calc(env(safe-area-inset-top) + 12px);
+  --top-extra: 12px;
+  --top-gap: calc(env(safe-area-inset-top) + var(--top-extra));
 }
 
 .app-full-bleed-background {
@@ -250,7 +254,8 @@
 
 @media (display-mode: standalone) {
   :root {
-    --mobile-toast-offset: calc(env(safe-area-inset-top) + 16px);
+    --top-extra: 40px;
+    --mobile-toast-offset: var(--top-gap);
   }
 
   .status-bar-scrim {

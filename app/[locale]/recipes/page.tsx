@@ -119,7 +119,7 @@ export default function RecipesPage() {
       </div>
 
       {/* Greeting, title, notifications bell — always visible so parsed recipes are always reachable */}
-      <div className="pt-5 px-3.5">
+      <div className="pt-[calc(var(--top-extra)+8px)] px-3.5">
         <div className="flex justify-between items-end mb-4">
           <div>
             <p className="text-[11px] font-semibold text-[var(--fg-3)] uppercase tracking-[0.1em] mb-[3px] font-sans">

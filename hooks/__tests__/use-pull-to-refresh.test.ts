@@ -4,7 +4,7 @@
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { usePullToRefresh } from "../use-pull-to-refresh";
+import { topExtraPx, usePullToRefresh } from "../use-pull-to-refresh";
 
 function createTouchEvent(type: string, clientY: number) {
   const event = new Event(type, { bubbles: false, cancelable: true });
@@ -145,5 +145,17 @@ describe("usePullToRefresh", () => {
     });
 
     await waitFor(() => expect(onRefresh).toHaveBeenCalledOnce());
+  });
+});
+
+describe("topExtraPx", () => {
+  it("reads --top-extra from the root element", () => {
+    document.documentElement.style.setProperty("--top-extra", "40px");
+    expect(topExtraPx()).toBe(40);
+    document.documentElement.style.removeProperty("--top-extra");
+  });
+
+  it("falls back to 12px when the variable is missing", () => {
+    expect(topExtraPx()).toBe(12);
   });
 });

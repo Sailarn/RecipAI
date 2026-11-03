@@ -13,9 +13,19 @@ const PULL_RESISTANCE = 0.4;
 const PULL_LABEL_REVEAL_START = 12;
 const PULL_LABEL_REVEAL_DISTANCE = 8;
 const MINIMUM_REFRESH_FEEDBACK_MS = 350;
-// Strip height held while refreshing. The label sits at its bottom edge, so
-// it stays clear of the status bar instead of hugging it.
-const REFRESHING_HEIGHT = 44;
+// Strip height held while refreshing: the label sits at its bottom edge, below
+// the status bar plus --top-extra (the iOS 26 status-bar blur in the
+// installed app), so it is never drawn inside that blur.
+const REFRESHING_LABEL_HEIGHT = 32;
+
+/** --top-extra in px (12 in a browser tab, more in the installed app). */
+export function topExtraPx(): number {
+  if (typeof document === "undefined") return 12;
+  const value = Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--top-extra"),
+  );
+  return Number.isFinite(value) ? value : 12;
+}
 
 function waitForRefreshFeedback() {
   return new Promise<void>((resolve) => {
@@ -84,7 +94,7 @@ export function usePullToRefresh({
       isPulling.current = false;
 
       if (pullDistanceRef.current >= threshold) {
-        setHeight(REFRESHING_HEIGHT);
+        setHeight(topExtraPx() + REFRESHING_LABEL_HEIGHT);
         pullDistanceRef.current = 0;
         isRefreshingRef.current = true;
         setIsRefreshing(true);
