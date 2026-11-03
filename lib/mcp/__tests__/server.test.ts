@@ -15,6 +15,9 @@ const createRecipe = vi.hoisted(() => vi.fn());
 const updateRecipe = vi.hoisted(() => vi.fn());
 const deleteRecipe = vi.hoisted(() => vi.fn());
 const importRecipeForUser = vi.hoisted(() => vi.fn());
+const listCollections = vi.hoisted(() => vi.fn());
+const createCollection = vi.hoisted(() => vi.fn());
+const setCollectionMembership = vi.hoisted(() => vi.fn());
 const getImportStatus = vi.hoisted(() => vi.fn());
 const rateLimit = vi.hoisted(() =>
   vi.fn().mockResolvedValue({ allowed: true, remaining: 1, resetSeconds: 60 }),
@@ -24,6 +27,11 @@ vi.mock("@/lib/telemetry", () => ({ captureError, trackEvent, log: vi.fn() }));
 vi.mock("@/lib/parse-recipe/server-import", () => ({
   importRecipeForUser,
   getImportStatus,
+}));
+vi.mock("@/lib/recipes/collections", () => ({
+  listCollections,
+  createCollection,
+  setCollectionMembership,
 }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit }));
 vi.mock("@/lib/recipes/mutations", () => ({
@@ -309,5 +317,62 @@ describe("RecipAI MCP server", () => {
       status: "done",
       recipe: { id: "r7" },
     });
+  });
+
+  it("lists the caller's collections", async () => {
+    listCollections.mockResolvedValue([
+      { id: "c1", name: "Soups", emoji: "🍲", recipeCount: 2 },
+    ]);
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "list_collections",
+      arguments: {},
+    });
+
+    expect(listCollections).toHaveBeenCalledWith("user-1");
+    expect(resultJson(result)).toEqual({
+      collections: [{ id: "c1", name: "Soups", emoji: "🍲", recipeCount: 2 }],
+    });
+  });
+
+  it.each([
+    ["add_to_collection", true],
+    ["remove_from_collection", false],
+  ] as const)("%s sets membership for the caller", async (name, member) => {
+    setCollectionMembership.mockResolvedValue({
+      ok: true,
+      collectionIds: ["c1"],
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name,
+      arguments: { recipeId: "r1", collectionId: "c1" },
+    });
+
+    expect(setCollectionMembership).toHaveBeenCalledWith(
+      "user-1",
+      "r1",
+      "c1",
+      member,
+    );
+    expect(resultJson(result)).toEqual({
+      recipeId: "r1",
+      collectionIds: ["c1"],
+    });
+  });
+
+  it("names what is missing when membership can't be set", async () => {
+    setCollectionMembership.mockResolvedValue({
+      ok: false,
+      missing: "collection",
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "add_to_collection",
+      arguments: { recipeId: "r1", collectionId: "nope" },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result)).toContain("Collection not found");
   });
 });

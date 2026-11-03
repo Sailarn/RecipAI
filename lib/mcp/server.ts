@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import packageJson from "@/package.json";
 import type { McpToolContext } from "./context";
+import { registerCollectionTools } from "./tools/collections";
 import { registerImportTools } from "./tools/import-recipes";
 import { registerReadRecipeTools } from "./tools/read-recipes";
 import { registerWriteRecipeTools } from "./tools/write-recipes";
@@ -27,5 +28,6 @@ export function createRecipaiMcpServer(context: McpToolContext): McpServer {
   registerReadRecipeTools(server, context);
   registerWriteRecipeTools(server, context);
   registerImportTools(server, context);
+  registerCollectionTools(server, context);
   return server;
 }

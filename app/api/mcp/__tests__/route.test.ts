@@ -13,6 +13,7 @@ vi.mock("@/lib/recipes/queries", () => ({
   getRecipe: vi.fn(),
 }));
 vi.mock("@/lib/parse-recipe/server-import", () => ({}));
+vi.mock("@/lib/recipes/collections", () => ({}));
 vi.mock("@/lib/rate-limit", () => ({
   rateLimit: vi.fn().mockResolvedValue({ allowed: true }),
 }));
