@@ -13,7 +13,7 @@ import {
   validatePwaClient,
 } from "@/lib/auth/external-auth-config";
 import { externalLink } from "@/lib/auth/external-link-plugin";
-import { forceMcpConsent } from "@/lib/auth/mcp-consent";
+import { forceMcpConsent, rejectUnconsentedCode } from "@/lib/auth/mcp-consent";
 import { miniAppDataToUser } from "@/lib/auth/telegram-user";
 import {
   MCP_ACCESS_TOKEN_TTL_SECONDS,
@@ -57,7 +57,10 @@ export const auth = betterAuth({
     },
   },
   hooks: {
-    before: createAuthMiddleware(async (ctx) => forceMcpConsent(ctx)),
+    before: createAuthMiddleware(async (ctx) => {
+      await rejectUnconsentedCode(ctx);
+      return forceMcpConsent(ctx);
+    }),
   },
   account: {
     accountLinking: {

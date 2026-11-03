@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { forceMcpConsent } from "../mcp-consent";
+import { describe, expect, it, vi } from "vitest";
+import {
+  forceMcpConsent,
+  isAwaitingConsent,
+  rejectUnconsentedCode,
+} from "../mcp-consent";
 
 describe("forceMcpConsent", () => {
   it("forces prompt=consent on the mcp authorize endpoint", () => {
@@ -27,5 +31,82 @@ describe("forceMcpConsent", () => {
       forceMcpConsent({ path: "/sign-in/social", query: { prompt: "none" } }),
     ).toBeUndefined();
     expect(forceMcpConsent({ path: "/mcp/token" })).toBeUndefined();
+  });
+});
+
+describe("rejectUnconsentedCode", () => {
+  function context(path: string, body: unknown, stored: string | null) {
+    const findVerificationValue = vi
+      .fn()
+      .mockResolvedValue(stored === null ? null : { value: stored });
+    return {
+      ctx: {
+        path,
+        body,
+        context: { internalAdapter: { findVerificationValue } },
+      },
+      findVerificationValue,
+    };
+  }
+
+  it("refuses a code that is still waiting for consent", async () => {
+    const { ctx } = context(
+      "/mcp/token",
+      { grant_type: "authorization_code", code: "C1" },
+      JSON.stringify({ requireConsent: true }),
+    );
+    await expect(rejectUnconsentedCode(ctx)).rejects.toMatchObject({
+      status: "UNAUTHORIZED",
+    });
+  });
+
+  it("reads form-encoded bodies too", async () => {
+    const form = new FormData();
+    form.set("grant_type", "authorization_code");
+    form.set("code", "C1");
+    const { ctx } = context(
+      "/mcp/token",
+      form,
+      JSON.stringify({ requireConsent: true }),
+    );
+    await expect(rejectUnconsentedCode(ctx)).rejects.toBeDefined();
+  });
+
+  it("lets consented codes through", async () => {
+    const { ctx } = context(
+      "/mcp/token",
+      { grant_type: "authorization_code", code: "C2" },
+      JSON.stringify({ requireConsent: false }),
+    );
+    await expect(rejectUnconsentedCode(ctx)).resolves.toBeUndefined();
+  });
+
+  it("ignores refresh grants, unknown codes and other endpoints", async () => {
+    const refresh = context(
+      "/mcp/token",
+      { grant_type: "refresh_token", refresh_token: "R" },
+      null,
+    );
+    await rejectUnconsentedCode(refresh.ctx);
+    expect(refresh.findVerificationValue).not.toHaveBeenCalled();
+
+    const unknown = context(
+      "/mcp/token",
+      { grant_type: "authorization_code", code: "nope" },
+      null,
+    );
+    await expect(rejectUnconsentedCode(unknown.ctx)).resolves.toBeUndefined();
+
+    const other = context("/sign-in/social", { code: "C1" }, null);
+    await rejectUnconsentedCode(other.ctx);
+    expect(other.findVerificationValue).not.toHaveBeenCalled();
+  });
+});
+
+describe("isAwaitingConsent", () => {
+  it("parses the stored authorization request", () => {
+    expect(isAwaitingConsent('{"requireConsent":true}')).toBe(true);
+    expect(isAwaitingConsent('{"requireConsent":false}')).toBe(false);
+    expect(isAwaitingConsent("not json")).toBe(false);
   });
 });
