@@ -417,4 +417,55 @@ describe("useSyncOnLogin", () => {
       expect(recipesSyncCalls).toHaveLength(1);
     });
   });
+
+  describe("sync status", () => {
+    it("starts idle", () => {
+      const { result } = renderHook(() => useSyncOnLogin());
+      expect(result.current.status).toEqual({
+        syncing: false,
+        newRecipes: 0,
+        finishedAt: 0,
+      });
+    });
+
+    it("reports a running sync, then how many recipes are new to this device", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      vi.mocked(db.recipes.toArray).mockResolvedValue([
+        localRecipe("known", new Date("2024-01-01"), new Date("2024-01-01")),
+      ] as never);
+      setupFetch({
+        recipes: [
+          serverRecipe("known"),
+          serverRecipe("new-1"),
+          serverRecipe("new-2"),
+        ],
+      });
+
+      const { result } = renderHook(() => useSyncOnLogin());
+
+      await waitFor(() => expect(result.current.status.syncing).toBe(true));
+      await waitFor(() => expect(result.current.status.syncing).toBe(false));
+      expect(result.current.status.newRecipes).toBe(2);
+      expect(result.current.status.finishedAt).toBeGreaterThan(0);
+    });
+
+    it("clears syncing when the sync fails", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch({ rejectSync: true });
+
+      const { result } = renderHook(() => useSyncOnLogin());
+
+      await waitFor(() =>
+        expect(result.current.status.finishedAt).toBeGreaterThan(0),
+      );
+      expect(result.current.status).toMatchObject({
+        syncing: false,
+        newRecipes: 0,
+      });
+    });
+  });
 });

@@ -1,10 +1,11 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { useSyncOnLogin } from "@/hooks/use-sync-on-login";
+import { type SyncStatus, useSyncOnLogin } from "@/hooks/use-sync-on-login";
 
 type SyncContextValue = {
   triggerSync: () => Promise<void>;
+  status: SyncStatus;
 };
 
 const SyncContext = createContext<SyncContextValue | null>(null);
@@ -17,10 +18,10 @@ const SyncContext = createContext<SyncContextValue | null>(null);
  * showing, re-running on every tab switch instead of once per session.
  */
 export function SyncProvider({ children }: { children: React.ReactNode }) {
-  const { triggerSync } = useSyncOnLogin();
+  const { triggerSync, status } = useSyncOnLogin();
 
   return (
-    <SyncContext.Provider value={{ triggerSync }}>
+    <SyncContext.Provider value={{ triggerSync, status }}>
       {children}
     </SyncContext.Provider>
   );
@@ -31,4 +32,11 @@ export function useTriggerSync() {
   const context = useContext(SyncContext);
   if (!context) throw new Error("useTriggerSync outside SyncProvider");
   return context.triggerSync;
+}
+
+const NO_SYNC: SyncStatus = { syncing: false, newRecipes: 0, finishedAt: 0 };
+
+/** Background sync status, for the "Updating recipes…" message. */
+export function useSyncStatus(): SyncStatus {
+  return useContext(SyncContext)?.status ?? NO_SYNC;
 }

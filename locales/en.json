@@ -125,7 +125,9 @@
     "addToCollectionTitle": "Add to collection",
     "noCollectionsYet": "No collections yet. Create one from the recipe list.",
     "loadFailed": "Something went wrong loading your recipes.",
-    "scrollToTop": "Scroll to top"
+    "scrollToTop": "Scroll to top",
+    "syncing": "Updating recipes…",
+    "syncNewRecipes": "{count, plural, one {# new recipe} other {# new recipes}}"
   },
   "recipeForm": {
     "editTitle": "Edit Recipe",

@@ -50,7 +50,10 @@ vi.mock("@/lib/hooks/use-vocab-sync", () => ({
 }));
 
 vi.mock("@/hooks/use-sync-on-login", () => ({
-  useSyncOnLogin: () => ({ triggerSync: vi.fn() }),
+  useSyncOnLogin: () => ({
+    triggerSync: vi.fn(),
+    status: { syncing: false, newRecipes: 0, finishedAt: 0 },
+  }),
 }));
 
 vi.mock("@/lib/navigation-stack", () => ({

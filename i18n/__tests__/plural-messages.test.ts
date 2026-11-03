@@ -46,4 +46,14 @@ describe("plural messages", () => {
   ] as const)("recipeForm.stepCount in %s for %i", (locale, count, text) => {
     expect(translate[locale]("recipeForm.stepCount", { count })).toBe(text);
   });
+
+  it.each([
+    ["en", 1, "1 new recipe"],
+    ["en", 3, "3 new recipes"],
+    ["uk", 1, "1 новий рецепт"],
+    ["uk", 3, "3 нові рецепти"],
+    ["uk", 5, "5 нових рецептів"],
+  ] as const)("recipes.syncNewRecipes in %s for %i", (locale, count, text) => {
+    expect(translate[locale]("recipes.syncNewRecipes", { count })).toBe(text);
+  });
 });

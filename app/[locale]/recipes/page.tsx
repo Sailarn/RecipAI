@@ -9,6 +9,7 @@ import { RecipeListError } from "@/components/recipe-list-error";
 import { RecipeListSkeleton } from "@/components/recipe-list-skeleton";
 import { RecipeVirtualList } from "@/components/recipe-virtual-list";
 import { RecipesPageOverlays } from "@/components/recipes-page-overlays";
+import { SyncStatusPill } from "@/components/sync-status-pill";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { useRecipesPageState } from "@/hooks/use-recipes-page-state";
 import { useScrollCollapse } from "@/hooks/use-scroll-collapse";
@@ -101,6 +102,8 @@ export default function RecipesPage() {
       className="h-full overflow-y-auto"
       style={{ WebkitOverflowScrolling: "touch" as never }}
     >
+      <SyncStatusPill suppressSyncing={isRefreshing} />
+
       {/* Pull-to-refresh indicator — height driven directly via DOM ref, no React re-renders during drag */}
       <div
         ref={indicatorRef}

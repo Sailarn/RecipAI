@@ -125,7 +125,9 @@
     "addToCollectionTitle": "Додати до колекції",
     "noCollectionsYet": "Колекцій ще немає. Створіть першу зі списку рецептів.",
     "loadFailed": "Не вдалося завантажити ваші рецепти.",
-    "scrollToTop": "Прокрутити вгору"
+    "scrollToTop": "Прокрутити вгору",
+    "syncing": "Оновлюємо рецепти…",
+    "syncNewRecipes": "{count, plural, one {# новий рецепт} few {# нові рецепти} many {# нових рецептів} other {# нового рецепта}}"
   },
   "recipeForm": {
     "editTitle": "Редагувати рецепт",
