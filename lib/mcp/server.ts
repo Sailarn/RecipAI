@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import packageJson from "@/package.json";
 import type { McpToolContext } from "./context";
+import { registerChatGptCompatTools } from "./tools/chatgpt-compat";
 import { registerCollectionTools } from "./tools/collections";
 import { registerImportTools } from "./tools/import-recipes";
 import { registerReadRecipeTools } from "./tools/read-recipes";
@@ -29,5 +30,6 @@ export function createRecipaiMcpServer(context: McpToolContext): McpServer {
   registerWriteRecipeTools(server, context);
   registerImportTools(server, context);
   registerCollectionTools(server, context);
+  registerChatGptCompatTools(server, context);
   return server;
 }

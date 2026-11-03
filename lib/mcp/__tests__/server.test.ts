@@ -375,4 +375,59 @@ describe("RecipAI MCP server", () => {
     expect(result.isError).toBe(true);
     expect(JSON.stringify(result)).toContain("Collection not found");
   });
+
+  it("serves ChatGPT's search shape", async () => {
+    listRecipes.mockResolvedValue({
+      recipes: [
+        { id: "r1", title: "Borscht", url: "https://app.example/recipes/r1" },
+      ],
+      nextOffset: null,
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "search",
+      arguments: { query: "beet" },
+    });
+
+    expect(listRecipes).toHaveBeenCalledWith("user-1", "https://app.example", {
+      query: "beet",
+      limit: 20,
+    });
+    expect(resultJson(result)).toEqual({
+      results: [
+        { id: "r1", title: "Borscht", url: "https://app.example/recipes/r1" },
+      ],
+    });
+  });
+
+  it("serves ChatGPT's fetch shape as a text document", async () => {
+    getRecipe.mockResolvedValue({
+      id: "r1",
+      title: "Borscht",
+      url: "https://app.example/recipes/r1",
+      description: null,
+      category: "Soup",
+      servings: 4,
+      prepTimeMinutes: null,
+      cookTimeMinutes: null,
+      totalTimeMinutes: 60,
+      sourceUrl: null,
+      updatedAt: "2026-11-01T00:00:00.000Z",
+      ingredients: [{ item: "beet", amount: 2 }],
+      instructions: [{ step: 1, instruction: "Boil" }],
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const document = resultJson(
+      await client.callTool({ name: "fetch", arguments: { id: "r1" } }),
+    ) as Record<string, unknown>;
+
+    expect(document).toMatchObject({
+      id: "r1",
+      title: "Borscht",
+      url: "https://app.example/recipes/r1",
+      metadata: { category: "Soup", servings: 4 },
+    });
+    expect(document.text).toContain("# Borscht");
+    expect(document.text).toContain("- 2 beet");
+  });
 });
