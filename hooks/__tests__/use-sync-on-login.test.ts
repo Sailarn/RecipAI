@@ -353,12 +353,25 @@ describe("useSyncOnLogin", () => {
         data: mockSession,
       } as never);
       setupFetch();
-      renderHook(() => useSyncOnLogin());
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
+      // Count recipe pulls, not every fetch: the ingredient and pantry syncs
+      // have module-level guards, so their calls depend on earlier tests.
+      const recipePulls = () =>
+        mockFetch.mock.calls.filter(
+          ([url, options]) =>
+            String(url) === "/api/recipes/sync" &&
+            (options as RequestInit | undefined)?.method !== "POST",
+        ).length;
+      const { result } = renderHook(() => useSyncOnLogin());
+      // A visibility change during the first sync joins it (single-flight), so
+      // wait for that sync to finish before coming back to the app.
+      await waitFor(() =>
+        expect(result.current.status.finishedAt).toBeGreaterThan(0),
+      );
+      expect(recipePulls()).toBe(1);
 
       document.dispatchEvent(new Event("visibilitychange"));
 
-      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+      await waitFor(() => expect(recipePulls()).toBe(2));
     });
   });
 
