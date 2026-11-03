@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth/auth";
 import { requireSession } from "@/lib/auth/require-session";
 import { PARSE_JOB_STATUS } from "@/lib/db/schema";
 import { normalizeSourceUrl } from "@/lib/parse-recipe/normalize-url";
+import { findCachedParseResult } from "@/lib/parse-recipe/parse-cache";
 import { PARSER_VERSION } from "@/lib/parse-recipe/parser-version";
 import {
   type SavedRecipeRef,
@@ -97,26 +98,7 @@ export async function POST(req: NextRequest) {
     // clone the stored result into a DONE job instead of re-running Gemini.
     // The client flow is unchanged — its poll sees DONE immediately, and the
     // fire-and-forget /process call no-ops on an already-done job.
-    const [cached] = await db
-      .select({ result: parseJobs.result })
-      .from(parseJobs)
-      .where(
-        and(
-          eq(parseJobs.normalizedUrl, normalizedUrl),
-          eq(parseJobs.status, PARSE_JOB_STATUS.DONE),
-          eq(parseJobs.parserVersion, PARSER_VERSION),
-          isNotNull(parseJobs.result),
-          // A complete recipe needs both ingredients and instructions.
-          sql`(
-            jsonb_array_length(coalesce(${parseJobs.result} -> 'ingredients', '[]'::jsonb)) > 0
-            AND jsonb_array_length(coalesce(${parseJobs.result} -> 'instructions', '[]'::jsonb)) > 0
-          )`,
-        ),
-      )
-      .orderBy(desc(parseJobs.createdAt))
-      .limit(1);
-    // The query filters on a non-null result; this narrows the type to match.
-    const cachedResult = cached?.result ?? null;
+    const cachedResult = await findCachedParseResult(normalizedUrl);
 
     await db.insert(parseJobs).values({
       id,

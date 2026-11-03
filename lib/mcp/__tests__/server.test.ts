@@ -14,11 +14,17 @@ vi.mock("@/lib/recipes/queries", () => ({
 const createRecipe = vi.hoisted(() => vi.fn());
 const updateRecipe = vi.hoisted(() => vi.fn());
 const deleteRecipe = vi.hoisted(() => vi.fn());
+const importRecipeForUser = vi.hoisted(() => vi.fn());
+const getImportStatus = vi.hoisted(() => vi.fn());
 const rateLimit = vi.hoisted(() =>
   vi.fn().mockResolvedValue({ allowed: true, remaining: 1, resetSeconds: 60 }),
 );
 
 vi.mock("@/lib/telemetry", () => ({ captureError, trackEvent, log: vi.fn() }));
+vi.mock("@/lib/parse-recipe/server-import", () => ({
+  importRecipeForUser,
+  getImportStatus,
+}));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit }));
 vi.mock("@/lib/recipes/mutations", () => ({
   createRecipe,
@@ -224,5 +230,84 @@ describe("RecipAI MCP server", () => {
 
     expect(result.isError).toBeFalsy();
     expect(captureError).toHaveBeenCalled();
+  });
+
+  it("imports a link and returns the saved recipe", async () => {
+    importRecipeForUser.mockResolvedValue({
+      status: "saved",
+      recipeId: "r5",
+      jobId: "j1",
+    });
+    getRecipe.mockResolvedValue({ id: "r5", title: "Borscht" });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "import_recipe",
+      arguments: { url: "https://example.com/borscht" },
+    });
+
+    expect(importRecipeForUser).toHaveBeenCalledWith(
+      "user-1",
+      "https://example.com/borscht",
+    );
+    expect(resultJson(result)).toEqual({
+      status: "saved",
+      recipe: { id: "r5", title: "Borscht" },
+    });
+  });
+
+  it("tells the model to poll a pending import", async () => {
+    importRecipeForUser.mockResolvedValue({ status: "pending", jobId: "j2" });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "import_recipe",
+      arguments: { url: "https://example.com/new" },
+    });
+    expect(resultJson(result)).toMatchObject({
+      status: "pending",
+      jobId: "j2",
+    });
+  });
+
+  it("rejects non-http import links", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "import_recipe",
+      arguments: { url: "file:///etc/passwd" },
+    });
+    expect(result.isError).toBe(true);
+    expect(importRecipeForUser).not.toHaveBeenCalled();
+  });
+
+  it("reports the parse budget as a tool error", async () => {
+    importRecipeForUser.mockResolvedValue({
+      status: "rate_limited",
+      retryAfterSeconds: 600,
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "import_recipe",
+      arguments: { url: "https://example.com/x" },
+    });
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result)).toContain("10 minutes");
+  });
+
+  it("returns the recipe once an import is done", async () => {
+    getImportStatus.mockResolvedValue({
+      status: "done",
+      url: "u",
+      recipeId: "r7",
+    });
+    getRecipe.mockResolvedValue({ id: "r7" });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "get_import_status",
+      arguments: { jobId: "j3" },
+    });
+    expect(getImportStatus).toHaveBeenCalledWith("user-1", "j3");
+    expect(resultJson(result)).toEqual({
+      status: "done",
+      recipe: { id: "r7" },
+    });
   });
 });

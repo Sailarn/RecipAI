@@ -12,7 +12,13 @@ vi.mock("@/lib/recipes/queries", () => ({
   listRecipes: vi.fn(),
   getRecipe: vi.fn(),
 }));
+vi.mock("@/lib/parse-recipe/server-import", () => ({}));
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn().mockResolvedValue({ allowed: true }),
+}));
+vi.mock("@/lib/recipes/mutations", () => ({}));
 vi.mock("@/lib/telemetry", () => ({
+  log: vi.fn(),
   captureError: vi.fn(),
   trackEvent: vi.fn(),
 }));
