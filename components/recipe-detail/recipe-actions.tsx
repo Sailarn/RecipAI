@@ -1,18 +1,23 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { AskAiButton } from "@/components/ask-ai";
 import { isSocialUrl } from "@/lib/video-url";
 
 interface RecipeActionsProps {
   sourceUrl?: string;
   onStartCooking: () => void;
+  /** Shown only to signed-in users: AI apps reach recipes through the account. */
+  askAi?: { recipeId: string; title: string };
 }
 
 export function RecipeActions({
   sourceUrl,
   onStartCooking,
+  askAi,
 }: RecipeActionsProps) {
   const t = useTranslations("recipes");
+  const hasSecondaryRow = Boolean(sourceUrl || askAi);
   return (
     <>
       <button
@@ -23,15 +28,22 @@ export function RecipeActions({
         {t("startCooking")}
       </button>
 
-      {sourceUrl && (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full mb-6 p-[13px] rounded-[14px] bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)] backdrop-blur-[12px] text-[var(--fg-1)] font-sans text-sm font-medium text-center"
-        >
-          {isSocialUrl(sourceUrl) ? t("openPost") : t("source")}
-        </a>
+      {hasSecondaryRow && (
+        <div className="mb-6 flex gap-2">
+          {sourceUrl && (
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block flex-1 min-w-0 truncate p-[13px] rounded-[14px] bg-[rgba(255,170,50,0.08)] border border-[rgba(255,200,100,0.18)] backdrop-blur-[12px] text-[var(--fg-1)] font-sans text-sm font-medium text-center"
+            >
+              {isSocialUrl(sourceUrl) ? t("openPost") : t("source")}
+            </a>
+          )}
+          {askAi && (
+            <AskAiButton recipeId={askAi.recipeId} title={askAi.title} />
+          )}
+        </div>
       )}
     </>
   );

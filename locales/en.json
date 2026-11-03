@@ -434,5 +434,26 @@
     "consentFailedTitle": "Couldn't connect",
     "signedOutTitle": "Signed out",
     "startAgain": "Start the connection again from the AI app."
+  },
+  "askAi": {
+    "button": "Ask AI",
+    "menuLabel": "Ask an AI app about this recipe",
+    "connect": "Connect",
+    "prompt": "Use RecipAI to open my recipe “{title}” (id: {id}) and help me with it.",
+    "promptCopied": "Question copied. If the {app} chat is empty, paste it there.",
+    "connectTitle": "Connect RecipAI to {app}",
+    "connectIntro": "A one-time setup. After it, {app} can find, read and edit your RecipAI recipes in any chat.",
+    "stepOpenClaude": "In Claude, open Settings → Connectors and choose “Add custom connector”.",
+    "stepOpenChatgpt": "In ChatGPT, open Settings → Connectors and create a custom connector (developer mode may need to be on).",
+    "stepPasteUrl": "Paste this URL and tap Connect:",
+    "stepAllow": "Sign in to RecipAI and tap Allow.",
+    "copyUrl": "Copy connector URL",
+    "openSettings": "Open {app}",
+    "askNow": "Already connected? Ask {app}",
+    "sectionTitle": "AI assistants",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "disconnected": "{app} disconnected",
+    "disconnectFailed": "Couldn't disconnect {app}. Try again."
   }
 }

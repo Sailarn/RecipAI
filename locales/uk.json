@@ -434,5 +434,26 @@
     "consentFailedTitle": "Не вдалося підключити",
     "signedOutTitle": "Ви вийшли",
     "startAgain": "Почніть підключення знову в AI-застосунку."
+  },
+  "askAi": {
+    "button": "Запитати ШІ",
+    "menuLabel": "Запитати AI-застосунок про цей рецепт",
+    "connect": "Підключити",
+    "prompt": "Відкрий через RecipAI мій рецепт «{title}» (id: {id}) і допоможи мені з ним.",
+    "promptCopied": "Запит скопійовано. Якщо чат {app} порожній, вставте його туди.",
+    "connectTitle": "Підключити RecipAI до {app}",
+    "connectIntro": "Налаштування один раз. Після нього {app} зможе знаходити, читати й редагувати ваші рецепти з RecipAI у будь-якому чаті.",
+    "stepOpenClaude": "У Claude відкрийте Settings → Connectors і виберіть «Add custom connector».",
+    "stepOpenChatgpt": "У ChatGPT відкрийте Settings → Connectors і створіть власний конектор (може знадобитися режим розробника).",
+    "stepPasteUrl": "Вставте цю адресу й натисніть Connect:",
+    "stepAllow": "Увійдіть у RecipAI і натисніть «Дозволити».",
+    "copyUrl": "Скопіювати адресу конектора",
+    "openSettings": "Відкрити {app}",
+    "askNow": "Вже підключено? Запитати {app}",
+    "sectionTitle": "AI-асистенти",
+    "connected": "Підключено",
+    "disconnect": "Відключити",
+    "disconnected": "{app} відключено",
+    "disconnectFailed": "Не вдалося відключити {app}. Спробуйте ще раз."
   }
 }

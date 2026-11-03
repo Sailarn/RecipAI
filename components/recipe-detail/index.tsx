@@ -227,6 +227,11 @@ export function RecipeDetail({
           <RecipeActions
             sourceUrl={recipe.sourceUrl}
             onStartCooking={() => setCookingMode(true)}
+            askAi={
+              hasSession
+                ? { recipeId: recipe.id, title: recipe.title }
+                : undefined
+            }
           />
 
           <ServingsCalculator
