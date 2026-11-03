@@ -48,4 +48,5 @@ export const api = {
   pantry: "/api/pantry",
   pushSubscribe: "/api/push/subscribe",
   telegramShareRecipe: "/api/telegram/share-recipe",
+  mcpConnections: "/api/mcp/connections",
 } as const;
