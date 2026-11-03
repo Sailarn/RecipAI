@@ -110,3 +110,18 @@ The picker (`IngredientPicker`) is a portal-mounted slide-up grouped by category
 **Why.** Leading with a browsable grid kills the keyboard-squeeze that plagued the old autocomplete-in-a-bottom-sheet, and curated-only selection dissolves three problems at once: no provisional-id fragmentation, no junk/non-food input, and consistent bilingual names.
 
 **What it deliberately does _not_ change.** Recipe ingredients still store `item` as free text, so parsed descriptive strings ("all-purpose flour, sifted") survive untouched; the picker only sets that string. Canonical linkage is unchanged — `canonicalIngredientIds` is still computed by `normalizeRecipeIngredients` **after save** (see [Ingredient Vocabulary](ingredient-vocabulary.md)), never in the form. The form **displays** each row localized to the active locale by resolving the stored text back through the vocabulary (`components/recipe-form/localize-item.ts`), matching the cooking view, while the stored value stays as-is until re-picked. Pantry `qty`/`unit`/`cat` became [dormant columns](../reference/data-model.md#pantry) written as defaults.
+
+---
+
+## AI connector: better-auth `mcp` plugin as the OAuth server
+
+Claude and ChatGPT connect to RecipAI as a remote MCP server (`/api/mcp`) that needs OAuth 2.1 with dynamic client registration. The `mcp` plugin that ships in the installed better-auth (1.6) provides registration, authorize, token and consent endpoints on top of the existing sessions, so the connector's sign-in reuses Google, passkey and Telegram unchanged. Upstream is deprecating the plugin in favour of `@better-auth/oauth-provider`. It was kept for v1 because it needs no new dependency and matches the pinned version. Migrating is a follow-up.
+
+Three gaps in the plugin are covered locally:
+
+- **Consent is always forced** (`forceMcpConsent`). Without `prompt=consent` the plugin grants silently, and registration is open to anyone.
+- **Codes awaiting consent are refused at the token endpoint** (`rejectUnconsentedCode`). The plugin redeems them otherwise.
+- **Discovery metadata is served from our own routes** (`lib/mcp/metadata.ts`). The plugin's helper needs a string `baseURL`, and ours is a dynamic allowed-hosts config.
+
+The MCP server itself is the official SDK's Web-standard Streamable HTTP transport in stateless JSON mode, so it behaves the same on Vercel functions. Tools take no user id: the caller is always the token's user. The connector's queries live in `lib/recipes/`. The REST recipe routes were left untouched, because changing their behaviour would add Sentry noise from device sync.
+

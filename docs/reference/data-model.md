@@ -261,3 +261,15 @@ Toggled directly via the Supabase dashboard — no admin UI.
 ### Auth tables
 
 Managed by better-auth. Schema in `db/schema/auth.ts` — includes `user`, `session`, `account`, `verification`, `passkey`, and `device_code` (the PWA device-authorization grant — see [Auth & Sync](../explanation/auth-and-sync.md)). Do not edit manually.
+
+### AI connector OAuth tables
+
+Migration `0026_oauth_provider`. Written by the better-auth `mcp` plugin, which makes RecipAI the OAuth server for the [AI connector](../specs/ai-connector.md). Column names follow the plugin's schema (`db/schema/__tests__/oauth.test.ts` pins them).
+
+| Table | Holds |
+|---|---|
+| `oauth_application` | One row per AI app client from dynamic client registration (`name` is how the app named itself, e.g. "Claude"). |
+| `oauth_access_token` | Access token (1 h) and refresh token (30 days) per authorization. A refresh adds a row, and the old row stays until it expires. `/api/mcp/connections` reads these and deletes them to disconnect. |
+| `oauth_consent` | One row per approved consent. |
+
+Pending authorization and consent codes live in `verification`, like other better-auth one-time values.

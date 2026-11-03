@@ -1,6 +1,6 @@
 # Spec: RecipAI connector for Claude & ChatGPT
 
-**Status:** in progress (phases 1–4). Work pauses after phase 4 for owner testing.
+**Status:** phases 1–4 done. ⏸ Paused for owner testing; phases 5–6 start after the owner confirms.
 **Branch:** `claude/vigilant-babbage-c7ja2l` (feature branch, never `main`)
 
 This spec is written so that any agent or developer can pick the work up from
@@ -150,17 +150,19 @@ Verified against the published `better-auth@1.6.33` package:
 ### 3.3 New routes and files
 
 ```
-app/.well-known/oauth-authorization-server/[[...path]]/route.ts  → oAuthDiscoveryMetadata(auth)
-app/.well-known/oauth-protected-resource/[[...path]]/route.ts    → oAuthProtectedResourceMetadata(auth)
-app/api/mcp/route.ts                     → MCP Streamable HTTP endpoint (GET/POST/DELETE), wrapped in withMcpAuth
-app/api/mcp/connections/route.ts         → (phase 3) GET: which AI clients the session user has connected; DELETE: revoke
+app/.well-known/oauth-authorization-server/[[...path]]/route.ts  → RFC 8414 metadata (lib/mcp/metadata.ts)
+app/.well-known/oauth-protected-resource/[[...path]]/route.ts    → RFC 9728 metadata
+app/api/mcp/route.ts                     → MCP Streamable HTTP endpoint (stateless, JSON), bearer auth in lib/mcp/auth.ts
+app/api/mcp/connections/route.ts         → GET connected AI apps / DELETE { clientIds } to revoke
 app/external-auth/oauth/login/page.tsx   → loginPage for the mcp plugin
 app/external-auth/oauth/consent/page.tsx → consentPage
-lib/recipes/service.ts                   → listRecipes / searchRecipes / getRecipe / createRecipe / updateRecipe (owner-scoped)
-lib/recipes/schemas.ts                   → zod input schemas shared by REST and MCP
-lib/mcp/server.ts                        → builds the McpServer and registers tools for a given userId
-lib/mcp/tools/*.ts                       → one file per tool
-db/schema/auth.ts (+ migration)          → oauthApplication, oauthAccessToken, oauthConsent
+lib/auth/mcp-consent.ts                  → forceMcpConsent + rejectUnconsentedCode (hooks.before)
+lib/mcp/{config,metadata,auth,context,server,clients,connections}.ts
+lib/mcp/tools/*.ts                       → read-recipes, write-recipes, import-recipes, collections, chatgpt-compat
+lib/recipes/{queries,mutations,collections,input,view}.ts → owner-scoped data access for the tools
+lib/parse-recipe/{parse-cache,server-import}.ts → import_recipe through the parse queue
+lib/ai-apps.ts, lib/hooks/use-ai-connections.ts, components/ask-ai/*, profile ai-assistants card
+db/schema/auth.ts (+ migration 0026)     → oauth_application, oauth_access_token, oauth_consent
 ```
 
 Notes:
@@ -330,23 +332,27 @@ Each phase ends in a state the owner can pull and test.
    has its own `lib/recipes/` module instead.
 6. `docs(mcp): how to connect and test the connector`
 
-### Phase 2: write tools
-7. `feat(mcp): create_recipe and update_recipe`
-8. `feat(mcp): import_recipe via parse queue`
-9. `feat(mcp): list_collections and add_to_collection`
-10. `feat(mcp): per-user rate limits and telemetry for tools`
+### Phase 2: write tools ✅
+7. `feat(mcp): create, update and delete recipe tools`, with per-user rate
+   limits (120 reads, 30 writes per minute) and telemetry in
+   `instrumentTool`
+8. `feat(mcp): import_recipe via the parse queue`, plus `get_import_status`
+9. `feat(mcp): collection tools`: list, create, add and remove
 
-### Phase 3: in-app entry point
-11. `feat(mcp): connections endpoint (status + revoke)`
-12. `feat(recipe-detail): Ask AI button with setup sheet`: half-width
-    layout and wand popover (§2.3), prefill URL with clipboard fallback
-13. `feat(profile): connected AI apps section with disconnect`
+### Phase 3: in-app entry point ✅
+10. `feat(mcp): connections endpoint for status and revoke`
+11. `feat(recipe-detail): add an Ask AI button with connector setup sheet`
+12. `feat(profile): add an AI assistants card with connect and disconnect`
 
-### Phase 4: ChatGPT
-14. Verify the same server in ChatGPT (developer mode / custom connector). Fix
-    anything specific to it, such as metadata, scopes or callback quirks.
-15. `feat(mcp): ChatGPT-compatible search and fetch tools`
-16. `feat(recipe-detail): add ChatGPT to the Ask AI popover`
+### Phase 4: ChatGPT ✅
+13. `feat(mcp): add ChatGPT-compatible search and fetch tools`
+14. `feat(recipe-detail): add ChatGPT to the Ask AI menu`
+
+Verified locally: an end-to-end script ran the whole OAuth flow and every
+tool against Postgres, on both the dev server and a production build (47
+checks), including isolation between users and revoke. **Not** verified:
+connecting from the real Claude and ChatGPT apps. That needs a public URL
+(see `docs/how-to/test-ai-connector.md`).
 
 **⏸ Work pauses here for owner testing.** Phases 5 and 6 start only after the
 owner confirms.
@@ -386,9 +392,9 @@ owner confirms.
 
 - [x] Phase 0: spec
 - [x] Phase 1: OAuth + read-only MCP (Claude testable)
-- [ ] Phase 2: write tools
-- [ ] Phase 3: in-app entry point
-- [ ] Phase 4: ChatGPT ⏸ pause for owner testing
+- [x] Phase 2: write tools
+- [x] Phase 3: in-app entry point
+- [x] Phase 4: ChatGPT ⏸ paused for owner testing
 - [ ] Phase 5: periodic pull
 - [ ] Phase 6: sync indicator + fade-in
 

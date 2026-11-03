@@ -58,6 +58,8 @@ ngrok http --url=<your-domain>.ngrok-free.app 3000
 3. **Claude:** Settings → Connectors → **Add custom connector** → URL `https://<your-domain>.ngrok-free.app/api/mcp` → **Connect**. Sign in, allow, then ask in a new chat: "List my RecipAI recipes".
 4. **ChatGPT:** custom connectors need ChatGPT's developer mode, which is turned on in its connector settings. Menu names change often, so check OpenAI's current docs. Create a connector with the same URL and OAuth authentication.
 
+In the RecipAI app, **Ask AI** on a recipe and **Profile → AI assistants** show each app's connection status (from `/api/mcp/connections`). Disconnect revokes the app's access at once.
+
 A Vercel preview deployment works instead of a tunnel (`*.vercel.app` is an allowed dev host). The same Google redirect-URI caveat applies.
 
 ---
@@ -68,5 +70,6 @@ A Vercel preview deployment works instead of a tunnel (`*.vercel.app` is an allo
 |---|---|
 | The AI app says it can't find the authorization server | `NEXT_PUBLIC_BETTER_AUTH_URL` doesn't match the URL the app was given. Discovery documents use it as the issuer and resource. |
 | Consent page says the request expired | Consent codes live 10 minutes. Start again from the AI app. |
+| Changes from the AI app don't show in RecipAI | Expected until the next sync: devices pull on sign-in, when the app returns to the foreground, and on pull-to-refresh. |
 | Tools return "Recipe not found" | Tools only see recipes synced to the account. Local-only recipes (created while signed out and never synced) are invisible. |
 | The connection drops after an hour | The client didn't request `offline_access`. The server grants it by default (`MCP_DEFAULT_SCOPE`); check the client's requested scopes. |

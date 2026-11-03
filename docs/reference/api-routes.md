@@ -160,7 +160,23 @@ A remote [MCP](https://modelcontextprotocol.io) server that AI chat apps (Claude
 | `POST` | `/api/auth/oauth2/consent` | Session | Consent page decision `{ accept, consent_code }` → `{ redirectURI }`. |
 | `POST` | `/api/auth/mcp/token` | Client (PKCE for public clients) | Code and refresh grants. Codes still awaiting consent are refused (`rejectUnconsentedCode`). Access tokens last 1 h, refresh tokens 30 days. |
 
-**Tools:** `list_recipes`, `get_recipe`.
+| `GET`, `DELETE` | `/api/mcp/connections` | Session required | The user's connected AI app clients (`{ connections: [{ clientId, name, app, connectedAt, lastActiveAt }] }`), and disconnect with body `{ clientIds }` (deletes their tokens and consents). |
+
+**Tools** (all scoped to the token's user):
+
+| Tool | Kind | Notes |
+|---|---|---|
+| `list_recipes` | read | Words match title, description and ingredient names; filters `category`, `collectionId`; paging `limit`/`offset`. |
+| `get_recipe` | read | Full recipe; sections inlined as names, steps numbered. |
+| `create_recipe` | write | Structured ingredients/steps with optional sections. Dedupes by `sourceUrl`. Optional `imageUrl` copied to ImageKit (public https hosts only). |
+| `update_recipe` | write | Partial; `null` clears; lists are replaced whole. Replacing ingredients resets vocabulary ids (device re-normalizes). |
+| `delete_recipe` | write, destructive | Image left in ImageKit (may be shared via the parse cache). |
+| `import_recipe` | write | Through the parse queue; shares the hourly AI parse budget. |
+| `get_import_status` | read | Returns the saved recipe once done. |
+| `list_collections`, `create_collection`, `add_to_collection`, `remove_from_collection` | read / write | Owner checks on both recipe and collection. |
+| `search`, `fetch` | read | ChatGPT's fixed shapes over the same queries. |
+
+Rate limits: 120 reads and 30 writes per minute per user (`MCP_RATE_LIMIT`), failing open without Redis.
 
 ---
 
