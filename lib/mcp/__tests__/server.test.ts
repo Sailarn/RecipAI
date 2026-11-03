@@ -11,7 +11,20 @@ vi.mock("@/lib/recipes/queries", () => ({
   listRecipes,
   getRecipe,
 }));
-vi.mock("@/lib/telemetry", () => ({ captureError, trackEvent }));
+const createRecipe = vi.hoisted(() => vi.fn());
+const updateRecipe = vi.hoisted(() => vi.fn());
+const deleteRecipe = vi.hoisted(() => vi.fn());
+const rateLimit = vi.hoisted(() =>
+  vi.fn().mockResolvedValue({ allowed: true, remaining: 1, resetSeconds: 60 }),
+);
+
+vi.mock("@/lib/telemetry", () => ({ captureError, trackEvent, log: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit }));
+vi.mock("@/lib/recipes/mutations", () => ({
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+}));
 
 import { createRecipaiMcpServer } from "../server";
 import { connectTestClient, resultJson } from "./test-client";
@@ -22,7 +35,14 @@ const context = {
 };
 
 describe("RecipAI MCP server", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    rateLimit.mockResolvedValue({
+      allowed: true,
+      remaining: 1,
+      resetSeconds: 60,
+    });
+  });
 
   it("exposes the read tools as read-only", async () => {
     const client = await connectTestClient(createRecipaiMcpServer(context));
@@ -92,6 +112,117 @@ describe("RecipAI MCP server", () => {
 
     expect(result.isError).toBe(true);
     expect(JSON.stringify(result)).not.toContain("db down");
+    expect(captureError).toHaveBeenCalled();
+  });
+
+  it("marks delete as destructive and the other writes as not", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const { tools } = await client.listTools();
+    const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.delete_recipe.annotations?.destructiveHint).toBe(true);
+    expect(byName.create_recipe.annotations?.destructiveHint).toBe(false);
+    expect(byName.update_recipe.annotations?.destructiveHint).toBe(false);
+  });
+
+  it("creates recipes for the token's user", async () => {
+    createRecipe.mockResolvedValue({
+      recipe: { id: "new" },
+      alreadySaved: false,
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "create_recipe",
+      arguments: {
+        title: "Toast",
+        ingredients: [{ item: "bread", amount: 2, unit: "slices" }],
+        instructions: [{ instruction: "Toast it" }],
+      },
+    });
+
+    expect(createRecipe).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ title: "Toast" }),
+      "https://app.example",
+    );
+    expect(resultJson(result)).toEqual({
+      recipe: { id: "new" },
+      alreadySaved: false,
+    });
+  });
+
+  it("validates recipe input before writing", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "create_recipe",
+      arguments: { title: "Empty", ingredients: [], instructions: [] },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(createRecipe).not.toHaveBeenCalled();
+  });
+
+  it("passes the patch without the id to update_recipe", async () => {
+    updateRecipe.mockResolvedValue(null);
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "update_recipe",
+      arguments: { id: "r1", servings: 2, description: null },
+    });
+
+    expect(updateRecipe).toHaveBeenCalledWith(
+      "user-1",
+      "r1",
+      { servings: 2, description: null },
+      "https://app.example",
+    );
+    expect(result.isError).toBe(true);
+  });
+
+  it("reports deletions", async () => {
+    deleteRecipe.mockResolvedValue({ id: "r1", title: "Toast" });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "delete_recipe",
+      arguments: { id: "r1" },
+    });
+
+    expect(deleteRecipe).toHaveBeenCalledWith("user-1", "r1");
+    expect(resultJson(result)).toEqual({
+      deleted: true,
+      id: "r1",
+      title: "Toast",
+    });
+  });
+
+  it("refuses calls over the per-user rate limit", async () => {
+    rateLimit.mockResolvedValue({
+      allowed: false,
+      remaining: 0,
+      resetSeconds: 42,
+    });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "delete_recipe",
+      arguments: { id: "r1" },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result)).toContain("42 seconds");
+    expect(rateLimit).toHaveBeenCalledWith("mcp-write:user:user-1", 30, 60);
+    expect(deleteRecipe).not.toHaveBeenCalled();
+  });
+
+  it("fails open when the rate limiter is unavailable", async () => {
+    rateLimit.mockRejectedValue(new Error("redis down"));
+    listRecipes.mockResolvedValue({ recipes: [], nextOffset: null });
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const result = await client.callTool({
+      name: "list_recipes",
+      arguments: {},
+    });
+
+    expect(result.isError).toBeFalsy();
     expect(captureError).toHaveBeenCalled();
   });
 });

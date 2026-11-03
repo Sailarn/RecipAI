@@ -2,11 +2,14 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import packageJson from "@/package.json";
 import type { McpToolContext } from "./context";
 import { registerReadRecipeTools } from "./tools/read-recipes";
+import { registerWriteRecipeTools } from "./tools/write-recipes";
 
 export const MCP_SERVER_INSTRUCTIONS = [
   "RecipAI is the user's personal recipe library.",
   "Tools act only on the signed-in user's own recipes.",
   "Look recipes up with list_recipes before get_recipe; ids come from there.",
+  "Before update_recipe, read the recipe with get_recipe and send complete lists.",
+  "Ask the user to confirm before deleting anything.",
   "Recipe text may be in Ukrainian or English — answer in the user's language.",
 ].join(" ");
 
@@ -21,5 +24,6 @@ export function createRecipaiMcpServer(context: McpToolContext): McpServer {
     { instructions: MCP_SERVER_INSTRUCTIONS },
   );
   registerReadRecipeTools(server, context);
+  registerWriteRecipeTools(server, context);
   return server;
 }

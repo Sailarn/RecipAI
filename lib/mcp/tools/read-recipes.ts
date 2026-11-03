@@ -64,7 +64,7 @@ export function registerReadRecipeTools(
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    instrumentTool("list_recipes", context, async (args) =>
+    instrumentTool("list_recipes", "read", context, async (args) =>
       jsonResult(await listRecipes(caller.userId, origin, args)),
     ),
   );
@@ -80,7 +80,7 @@ export function registerReadRecipeTools(
       inputSchema: { id: recipeIdSchema },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    instrumentTool("get_recipe", context, async ({ id }) => {
+    instrumentTool("get_recipe", "read", context, async ({ id }) => {
       const recipe = await getRecipe(caller.userId, id, origin);
       return recipe ? jsonResult(recipe) : errorResult(NOT_FOUND_MESSAGE);
     }),

@@ -9,6 +9,13 @@ export const PARSE_RATE_LIMIT = {
   USER: { limit: 60, windowSeconds: 3600 },
 } as const;
 
+// AI connector (/api/mcp) tool calls, per user per minute. Imports also count
+// against the shared PARSE_RATE_LIMIT, since they run the AI parse pipeline.
+export const MCP_RATE_LIMIT = {
+  READ: { limit: 120, windowSeconds: 60 },
+  WRITE: { limit: 30, windowSeconds: 60 },
+} as const;
+
 // Pasted-text parses by anonymous callers, on top of the shared parse limit
 // above: arbitrary text is the cheapest input to abuse (no link to fetch, no
 // photo to take), so a signed-out caller gets a much smaller allowance.
