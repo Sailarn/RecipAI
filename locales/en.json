@@ -416,5 +416,23 @@
     "readyBody": "Your recipe is ready — tap to open",
     "failedTitle": "Recipe parse failed",
     "failedBody": "Couldn't get a recipe from that link. Try again."
+  },
+  "connector": {
+    "signInTitle": "Connect RecipAI",
+    "signInBody": "{client} wants to use your RecipAI recipes. Sign in to continue.",
+    "accountOnlyHint": "Only recipes saved to your RecipAI account are available to AI apps.",
+    "signInFailed": "Couldn't sign in. Try another method.",
+    "consentTitle": "Allow {client} to access RecipAI?",
+    "consentBody": "{client} will be able to search, read, create, edit and delete your recipes and collections. You can disconnect it anytime in your RecipAI profile.",
+    "signedInAs": "Signed in as {account}.",
+    "notYou": "Not you?",
+    "allow": "Allow",
+    "deny": "Deny",
+    "connecting": "Connecting…",
+    "unknownClient": "An AI app",
+    "invalidTitle": "This request has expired",
+    "consentFailedTitle": "Couldn't connect",
+    "signedOutTitle": "Signed out",
+    "startAgain": "Start the connection again from the AI app."
   }
 }

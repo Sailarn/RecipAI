@@ -112,6 +112,11 @@ export type TelemetryEvents = {
   ai_fallback_to_deepseek: { context: "recipe" | "ingredient" | "photo" };
   ai_fallback_to_openai: { context: "recipe" | "ingredient" | "photo" };
   rate_limit_hit: { caller_type: "user" | "anon" };
+  // AI connector (remote MCP server for Claude / ChatGPT)
+  connector_login: { method: "google" | "passkey" | "telegram" };
+  connector_consent: { client: string; accept: boolean };
+  mcp_tool_called: { tool: string; client: string; ok: boolean };
+  ask_ai_opened: { app: "claude" | "chatgpt"; connected: boolean };
 };
 
 export type EventName = keyof TelemetryEvents;
