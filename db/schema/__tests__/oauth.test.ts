@@ -1,7 +1,9 @@
 import { mcp } from "better-auth/plugins";
 import { getTableColumns, getTableName } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-import * as authSchema from "../auth";
+import { oauthAccessToken, oauthApplication, oauthConsent } from "../auth";
+
+const tables = { oauthApplication, oauthAccessToken, oauthConsent };
 
 // The Drizzle adapter resolves plugin models by export name and fields by
 // column property name, so a missing or misspelled column only fails at
@@ -13,12 +15,10 @@ describe("oauth provider schema", () => {
   it.each(Object.entries(pluginSchema))(
     "%s has a column for every field the mcp plugin writes",
     (modelName, model) => {
-      const table = authSchema[modelName as keyof typeof authSchema];
+      const table = tables[modelName as keyof typeof tables];
       expect(table, `missing table export ${modelName}`).toBeDefined();
 
-      const columns = Object.keys(
-        getTableColumns(table as typeof authSchema.oauthApplication),
-      );
+      const columns = Object.keys(getTableColumns(table));
       expect(columns).toEqual(
         expect.arrayContaining(["id", ...Object.keys(model.fields)]),
       );
@@ -26,10 +26,8 @@ describe("oauth provider schema", () => {
   );
 
   it("uses snake_case table names", () => {
-    expect(getTableName(authSchema.oauthApplication)).toBe("oauth_application");
-    expect(getTableName(authSchema.oauthAccessToken)).toBe(
-      "oauth_access_token",
-    );
-    expect(getTableName(authSchema.oauthConsent)).toBe("oauth_consent");
+    expect(getTableName(oauthApplication)).toBe("oauth_application");
+    expect(getTableName(oauthAccessToken)).toBe("oauth_access_token");
+    expect(getTableName(oauthConsent)).toBe("oauth_consent");
   });
 });
