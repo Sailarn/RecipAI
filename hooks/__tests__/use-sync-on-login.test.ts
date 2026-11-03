@@ -59,11 +59,17 @@ vi.mock("@/lib/db/pantry", () => ({
   replacePantry: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@/lib/telemetry", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/telemetry")>()),
+  captureError: vi.fn(),
+}));
+
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { db } from "@/lib/db/db";
 import { normalizePulledRecipes } from "@/lib/sync/startup-migrations";
 import { getSyncStatus, resetSyncStatus } from "@/lib/sync/sync-status-store";
+import { captureError } from "@/lib/telemetry";
 import { useSyncOnLogin } from "../use-sync-on-login";
 
 const mockFetch = vi.fn();
@@ -300,6 +306,30 @@ describe("useSyncOnLogin", () => {
       );
       expect(db.recipes.bulkPut).not.toHaveBeenCalled();
       expect(normalizePulledRecipes).not.toHaveBeenCalled();
+    });
+
+    it("stays quiet about a dropped connection while online", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch();
+      mockFetch.mockImplementation((url: string) =>
+        String(url) === "/api/recipes/sync"
+          ? Promise.reject(new TypeError("Load failed"))
+          : Promise.resolve(makeJsonResponse({ collections: [] })),
+      );
+
+      renderHook(() => useSyncOnLogin());
+
+      await waitFor(() =>
+        expect(getSyncStatus().finishedAt).toBeGreaterThan(0),
+      );
+      expect(toast.error).not.toHaveBeenCalled();
+      // (Startup migrations may report against this file's partial db mock;
+      // only the sync's own report matters here.)
+      expect(captureError).not.toHaveBeenCalledWith(expect.anything(), {
+        tags: { source: "sync-on-login" },
+      });
     });
 
     it("stays quiet about a sync failure while offline", async () => {

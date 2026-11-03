@@ -8,6 +8,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import { setIsSignedIn } from "@/lib/auth/session-state";
 import { db } from "@/lib/db/db";
 import type { Collection, Recipe } from "@/lib/db/schema";
+import { isNetworkFailure } from "@/lib/network-error";
 import { api } from "@/lib/routes";
 import {
   normalizePulledRecipes,
@@ -129,8 +130,13 @@ export function useSyncOnLogin() {
       // we're online is a genuine problem — a server error or a reconcile bug —
       // and must not be invisible. Report and surface only those: being offline
       // is a normal state here, not something to nag about, and this runs again
-      // on every foreground so an unconditional toast repeats endlessly.
-      if (typeof navigator === "undefined" || navigator.onLine) {
+      // on every foreground so an unconditional toast repeats endlessly. A
+      // request that dies at the network level while "online" (Safari's
+      // "Load failed" when the app wakes or reloads mid-sync) counts as a drop
+      // too: these are same-origin calls, so it can't be a CORS problem.
+      const offline =
+        typeof navigator !== "undefined" && navigator.onLine === false;
+      if (!offline && !isNetworkFailure(error)) {
         captureError(error, { tags: { source: "sync-on-login" } });
         toast.error(t("syncFailed"), {
           // A stable id collapses repeats (mount racing a focus re-pull) into
