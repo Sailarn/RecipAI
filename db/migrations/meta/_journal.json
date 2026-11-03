@@ -183,6 +183,13 @@
       "when": 1792941539258,
       "tag": "0025_jittery_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793718726169,
+      "tag": "0026_oauth_provider",
+      "breakpoints": true
     }
   ]
 }

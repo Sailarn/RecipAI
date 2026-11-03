@@ -1,7 +1,8 @@
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { deviceAuthorization } from "better-auth/plugins";
+import { createAuthMiddleware } from "better-auth/api";
+import { deviceAuthorization, mcp } from "better-auth/plugins";
 import { telegram } from "better-auth-telegram";
 import { db } from "@/db";
 import * as schema from "@/db/schema/auth";
@@ -12,7 +13,15 @@ import {
   validatePwaClient,
 } from "@/lib/auth/external-auth-config";
 import { externalLink } from "@/lib/auth/external-link-plugin";
+import { forceMcpConsent } from "@/lib/auth/mcp-consent";
 import { miniAppDataToUser } from "@/lib/auth/telegram-user";
+import {
+  MCP_ACCESS_TOKEN_TTL_SECONDS,
+  MCP_CONSENT_PATH,
+  MCP_LOGIN_PATH,
+  MCP_REFRESH_TOKEN_TTL_SECONDS,
+  mcpResourceUrl,
+} from "@/lib/mcp/config";
 import { captureError } from "@/lib/telemetry";
 
 const authEnvironment =
@@ -45,6 +54,9 @@ export const auth = betterAuth({
         captureError(error, { tags: { source: "better-auth" } });
       }
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => forceMcpConsent(ctx)),
   },
   account: {
     accountLinking: {
@@ -83,6 +95,20 @@ export const auth = betterAuth({
       validateClient: validatePwaClient,
     }),
     externalLink(),
+    // OAuth provider for the RecipAI connector (/api/mcp): AI chat apps
+    // register via dynamic client registration and users approve them on the
+    // consent page. See docs/specs/ai-connector.md.
+    mcp({
+      loginPage: MCP_LOGIN_PATH,
+      resource: mcpResourceUrl(),
+      oidcConfig: {
+        loginPage: MCP_LOGIN_PATH,
+        consentPage: MCP_CONSENT_PATH,
+        requirePKCE: true,
+        accessTokenExpiresIn: MCP_ACCESS_TOKEN_TTL_SECONDS,
+        refreshTokenExpiresIn: MCP_REFRESH_TOKEN_TTL_SECONDS,
+      },
+    }),
     passkey(),
     telegram({
       miniApp: {
