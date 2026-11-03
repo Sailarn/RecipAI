@@ -65,6 +65,7 @@ nav:
       - Add a Dexie Migration: how-to/add-dexie-migration.md
       - Deploy to Pi (abandoned): how-to/deploy-pi.md
       - Deploy to Vercel: how-to/deploy-vercel.md
+      - Test the AI Connector: how-to/test-ai-connector.md
   - Tutorial:
       - Getting Started: tutorial/getting-started.md
   - Specs:

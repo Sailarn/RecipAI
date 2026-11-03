@@ -146,6 +146,24 @@ See [Auth & Sync](../explanation/auth-and-sync.md) for the full flows. Custom cl
 
 ---
 
+## AI connector (MCP)
+
+A remote [MCP](https://modelcontextprotocol.io) server that AI chat apps (Claude, ChatGPT) connect to as a connector. See the [spec](../specs/ai-connector.md) and [how to test it](../how-to/test-ai-connector.md).
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET`, `POST`, `DELETE` | `/api/mcp` | OAuth bearer token (mcp plugin) | Stateless Streamable HTTP MCP endpoint with JSON responses. No or bad token → `401` with `WWW-Authenticate: Bearer resource_metadata="…/.well-known/oauth-protected-resource/api/mcp"`. Tools act only on the token's user. |
+| `GET` | `/.well-known/oauth-protected-resource[/…]` | None | RFC 9728 metadata: resource `<origin>/api/mcp`, authorization server `<origin>`. |
+| `GET` | `/.well-known/oauth-authorization-server[/…]` | None | RFC 8414 metadata pointing at the mcp plugin's endpoints. Built in `lib/mcp/metadata.ts` because the plugin's own helper needs a string `baseURL`. |
+| `POST` | `/api/auth/mcp/register` | None | Dynamic client registration (better-auth `mcp` plugin). |
+| `GET` | `/api/auth/mcp/authorize` | Session (else → sign-in page) | Always goes to the consent page (`forceMcpConsent`). |
+| `POST` | `/api/auth/oauth2/consent` | Session | Consent page decision `{ accept, consent_code }` → `{ redirectURI }`. |
+| `POST` | `/api/auth/mcp/token` | Client (PKCE for public clients) | Code and refresh grants. Codes still awaiting consent are refused (`rejectUnconsentedCode`). Access tokens last 1 h, refresh tokens 30 days. |
+
+**Tools:** `list_recipes`, `get_recipe`.
+
+---
+
 ## Telegram bot
 
 | Method | Route | Auth | Description |

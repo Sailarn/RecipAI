@@ -315,18 +315,20 @@ Each phase ends in a state the owner can pull and test.
 ### Phase 0: spec
 - `docs(spec): plan RecipAI AI connector` (this file plus mkdocs nav)
 
-### Phase 1: Claude, read-only, testable end to end ← **owner tests here**
-1. `feat(auth): add better-auth mcp plugin and oauth tables`: plugin config,
-   Drizzle schema plus generated migration, env docs (`docs/reference/env.md`)
-2. `feat(auth): oauth login and consent pages for connectors`:
-   `app/external-auth/oauth/{login,consent}`, uk + en strings
-3. `feat(auth): serve oauth discovery metadata under /.well-known`
-4. `refactor(recipes): extract owner-scoped recipe service`: REST routes use
-   `lib/recipes/service.ts`, zod schemas, tests. No behaviour change apart from a
-   correct 404 on PATCH of a missing recipe
-5. `feat(mcp): add /api/mcp with list_recipes and get_recipe`, plus tests
-6. `docs(mcp): how to connect and test the connector`: move §4 into
-   `docs/how-to/test-ai-connector.md`, and `docs/reference/api-routes.md`
+### Phase 1: Claude, read-only, testable end to end ✅
+1. `feat(auth): add better-auth mcp plugin and oauth tables`
+2. `feat(auth): oauth sign-in and consent pages for connectors`
+3. `feat(auth): serve oauth discovery metadata under /.well-known`. Built
+   in `lib/mcp/metadata.ts`, because the plugin's helper fails with a
+   dynamic `baseURL`.
+4. `fix(auth): refuse to exchange connector codes before consent`. Found
+   by the end-to-end run: the plugin's token endpoint redeemed the
+   pending consent code.
+5. `feat(mcp): add /api/mcp with list_recipes and get_recipe`. The REST
+   routes were **not** refactored: changing their behaviour (for example
+   a 404 on PATCH) would add Sentry noise from device sync. The connector
+   has its own `lib/recipes/` module instead.
+6. `docs(mcp): how to connect and test the connector`
 
 ### Phase 2: write tools
 7. `feat(mcp): create_recipe and update_recipe`
@@ -383,7 +385,7 @@ owner confirms.
 ## Checklist
 
 - [x] Phase 0: spec
-- [ ] Phase 1: OAuth + read-only MCP (Claude testable)
+- [x] Phase 1: OAuth + read-only MCP (Claude testable)
 - [ ] Phase 2: write tools
 - [ ] Phase 3: in-app entry point
 - [ ] Phase 4: ChatGPT ⏸ pause for owner testing

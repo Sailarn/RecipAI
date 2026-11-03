@@ -224,3 +224,20 @@ Task-oriented guide to `lib/` and related source dirs. Answers "which file do I 
 | `db/schema/auth.ts` | better-auth tables (do not edit manually). |
 | `db/migrations/` | Drizzle migration files. |
 | `drizzle.config.ts` | Drizzle config. |
+
+---
+
+## AI connector
+
+| File | Purpose |
+|---|---|
+| `lib/mcp/config.ts` | Connector constants (paths, token lifetimes, scopes) and `appOrigin()` / `mcpResourceUrl()`. |
+| `lib/mcp/metadata.ts` | OAuth discovery documents and the `resource_metadata` URL. |
+| `lib/mcp/auth.ts` | `authenticateMcpRequest()` (bearer token → `McpCaller`) and the 401 challenge. |
+| `lib/mcp/server.ts` | `createRecipaiMcpServer()`: a per-request MCP server bound to the caller. |
+| `lib/mcp/context.ts` | `McpCaller` / `McpToolContext`, plus `instrumentTool()` (telemetry and error capture). |
+| `lib/mcp/tools/` | Tool definitions, one file per area. |
+| `lib/mcp/clients.ts` | `findOAuthClientName()`: the registered AI app's display name. |
+| `lib/auth/mcp-consent.ts` | Consent hardening hooks for the better-auth `mcp` plugin. |
+| `lib/recipes/queries.ts` | Owner-scoped recipe reads and search for the connector. |
+| `lib/recipes/view.ts` | The recipe shape AI clients see (`toRecipeView`, `recipeAsText`). |
