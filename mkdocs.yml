@@ -70,3 +70,4 @@ nav:
       - Getting Started: tutorial/getting-started.md
   - Specs:
       - AI Connector: specs/ai-connector.md
+      - Claude Directory Listing: specs/claude-directory-listing.md
