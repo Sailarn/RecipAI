@@ -54,7 +54,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - each tool in plain words
   - **three example prompts**: save a recipe from pasted text, import an Instagram reel, find and edit a recipe
   - disconnecting, and the support email
-- [ ] **6. Review account.**
+- [x] **6. Review account.**
   - Enable better-auth `emailAndPassword` with `disableSignUp: true`.
   - Hidden page `app/external-auth/review/page.tsx` with an email-and-password form. On success, it shows "Signed in. Go back to Claude and click Connect".
   - The connector login page (`components/connector-auth/connector-login.tsx`) re-checks the session on focus or visibility change, and continues to the authorize URL once a session exists. That way a reviewer who signs in on the review page in another tab gets back to consent.

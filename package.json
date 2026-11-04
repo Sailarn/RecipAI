@@ -27,7 +27,8 @@
     "release:pipeline": "./scripts/release.sh",
     "docs": "python3 -m mkdocs serve",
     "docs:build": "python3 -m mkdocs build --strict",
-    "tunnel": "ngrok http 3000"
+    "tunnel": "ngrok http 3000",
+    "seed:review-account": "bun run scripts/seed-review-account.ts"
   },
   "dependencies": {
     "@axiomhq/js": "2.0.0",

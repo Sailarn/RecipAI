@@ -69,6 +69,15 @@ export const auth = betterAuth({
       await rotateRefreshToken(ctx);
     }),
   },
+  // Email and password exist only for the AI-connector directory reviewers'
+  // account (created by scripts/seed-review-account.ts and signed into from the
+  // unlinked /external-auth/review page). Sign-up is disabled, so no one else
+  // can create a password account; regular users sign in with Google, passkey
+  // or Telegram, and no app screen offers email sign-in.
+  emailAndPassword: {
+    enabled: true,
+    disableSignUp: true,
+  },
   account: {
     accountLinking: {
       enabled: true,
@@ -96,6 +105,7 @@ export const auth = betterAuth({
       "/external-link/redeem": { window: 60, max: 10 },
       "/external-link/device-session": { window: 60, max: 20 },
       "/telegram/miniapp/signin": { window: 60, max: 10 },
+      "/sign-in/email": { window: 60, max: 5 },
     },
   },
   plugins: [

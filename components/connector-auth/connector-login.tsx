@@ -2,7 +2,7 @@
 
 import { KeyRound, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GoogleLogo } from "@/components/google-logo";
 import { authClient } from "@/lib/auth/auth-client";
 import { trackEvent } from "@/lib/telemetry";
@@ -30,6 +30,25 @@ export function ConnectorLogin({
   const tAuth = useTranslations("auth");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+
+  // If the user signs in elsewhere in this browser (another tab, or the
+  // reviewers' sign-in page) and comes back, continue the authorization
+  // instead of leaving them on a sign-in screen they no longer need.
+  useEffect(() => {
+    let cancelled = false;
+    const continueIfSignedIn = async () => {
+      if (document.visibilityState !== "visible") return;
+      const session = await authClient.getSession().catch(() => null);
+      if (!cancelled && session?.data) navigateTo(authorizeUrl);
+    };
+    document.addEventListener("visibilitychange", continueIfSignedIn);
+    window.addEventListener("focus", continueIfSignedIn);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", continueIfSignedIn);
+      window.removeEventListener("focus", continueIfSignedIn);
+    };
+  }, [authorizeUrl]);
 
   const signInGoogle = async () => {
     trackEvent("connector_login", { method: "google" });

@@ -70,4 +70,23 @@ describe("ConnectorLogin", () => {
     expect(await screen.findByText("signInFailed")).toBeInTheDocument();
     expect(assign).not.toHaveBeenCalled();
   });
+
+  it("continues the authorization when the user comes back signed in", async () => {
+    getSession.mockResolvedValue({ data: { user: { id: "u1" } } });
+    render(<ConnectorLogin authorizeUrl={AUTHORIZE_URL} clientName="Claude" />);
+
+    window.dispatchEvent(new Event("focus"));
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith(AUTHORIZE_URL));
+  });
+
+  it("stays put when the user comes back still signed out", async () => {
+    getSession.mockResolvedValue({ data: null });
+    render(<ConnectorLogin authorizeUrl={AUTHORIZE_URL} clientName="Claude" />);
+
+    window.dispatchEvent(new Event("focus"));
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(assign).not.toHaveBeenCalled();
+  });
 });
