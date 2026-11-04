@@ -13,7 +13,9 @@ type Status = "idle" | "working" | "done" | "failed";
  * Sign-in for the AI-connector directory reviewers' account. Reached only by
  * the link in the submission's reviewer instructions; nothing in the app links
  * here. After signing in, the reviewer returns to Claude: the connector sign-in
- * page notices the session and continues to the consent step.
+ * page notices the session and continues to the consent step. The app's own
+ * sign-in screen has no email option, so the signed-in card also links into
+ * the app, where the reviewer can see the changes Claude made.
  */
 export function ReviewSignIn() {
   const [email, setEmail] = useState("");
@@ -39,6 +41,12 @@ export function ReviewSignIn() {
           and connect RecipAI (or reload the RecipAI sign-in tab if one is
           open): it will continue straight to the Allow step.
         </p>
+        <a
+          href="/"
+          className="mt-5 block w-full rounded-[16px] bg-[var(--action-primary)] p-[13px] text-center font-sans text-[14px] font-bold text-white"
+        >
+          Open RecipAI
+        </a>
       </ConnectorAuthCard>
     );
   }

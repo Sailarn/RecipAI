@@ -73,7 +73,7 @@ These sync automatically. You should see 11 tools: 4 read-only (`search`, `fetch
   >    - "Create a RecipAI collection called Soups and add the borscht to it." (create_collection + add_to_collection)
   >    - "Delete the pancakes recipe I just saved." (delete_recipe; Claude asks for confirmation)
   >
-  > Changes are visible in the RecipAI web app at https://recip-ai-wine.vercel.app after signing in with the same account.
+  > To see the changes in the RecipAI web app, click **Open RecipAI** on the "Signed in" page from step 1.
 - **Confirm you've run every tool yourself:** yes. All 11 have been run end to end against the server (custom connector in Claude and automated MCP client tests).
 
 ## 9. Compliance

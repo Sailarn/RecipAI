@@ -10,7 +10,14 @@ export default function PublicLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#0a0a0a] text-white">{children}</body>
+      <body className="min-h-screen bg-[#0a0a0a] text-white">
+        {/* The app's base styles clip html and body (app screens scroll in
+            their own fixed containers), so these documents need their own
+            scroll container. Text selection is re-enabled for copying. */}
+        <div className="fixed inset-0 overflow-y-auto overscroll-contain select-text">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

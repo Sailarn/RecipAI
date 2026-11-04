@@ -31,6 +31,10 @@ describe("ReviewSignIn", () => {
     fill("review@example.com", "secret");
 
     expect(await screen.findByText("Signed in")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open RecipAI" })).toHaveAttribute(
+      "href",
+      "/",
+    );
     expect(signInEmail).toHaveBeenCalledWith({
       email: "review@example.com",
       password: "secret",
