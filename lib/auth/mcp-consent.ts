@@ -84,3 +84,44 @@ export async function rejectUnconsentedCode(
     });
   }
 }
+
+interface RefreshHookContext {
+  path?: string;
+  body?: unknown;
+  context: {
+    returned?: unknown;
+    adapter: {
+      delete: (args: {
+        model: string;
+        where: Array<{ field: string; value: string }>;
+      }) => Promise<unknown>;
+    };
+  };
+}
+
+/**
+ * 3. `rotateRefreshToken` — after a successful refresh grant, the plugin
+ *    issues a new access/refresh pair but leaves the old row, so the used
+ *    refresh token stays valid until it expires. Claude's directory expects
+ *    rotation for public clients: delete the row the old refresh token belongs
+ *    to, so it can't be replayed. Runs as a better-auth `hooks.after` handler.
+ */
+export async function rotateRefreshToken(
+  ctx: RefreshHookContext,
+): Promise<void> {
+  if (ctx.path !== MCP_TOKEN_ENDPOINT) return;
+  if (bodyField(ctx.body, "grant_type") !== "refresh_token") return;
+  const refreshToken = bodyField(ctx.body, "refresh_token");
+  const returned = ctx.context.returned;
+  const issued =
+    returned &&
+    typeof returned === "object" &&
+    !(returned instanceof APIError) &&
+    typeof (returned as { access_token?: unknown }).access_token === "string";
+  if (!refreshToken || !issued) return;
+
+  await ctx.context.adapter.delete({
+    model: "oauthAccessToken",
+    where: [{ field: "refreshToken", value: refreshToken }],
+  });
+}

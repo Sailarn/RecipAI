@@ -1,8 +1,10 @@
+import { APIError } from "better-auth/api";
 import { describe, expect, it, vi } from "vitest";
 import {
   forceMcpConsent,
   isAwaitingConsent,
   rejectUnconsentedCode,
+  rotateRefreshToken,
 } from "../mcp-consent";
 
 describe("forceMcpConsent", () => {
@@ -108,5 +110,54 @@ describe("isAwaitingConsent", () => {
     expect(isAwaitingConsent('{"requireConsent":true}')).toBe(true);
     expect(isAwaitingConsent('{"requireConsent":false}')).toBe(false);
     expect(isAwaitingConsent("not json")).toBe(false);
+  });
+});
+
+describe("rotateRefreshToken", () => {
+  function context(path: string, body: unknown, returned: unknown) {
+    const remove = vi.fn().mockResolvedValue(undefined);
+    return {
+      ctx: { path, body, context: { returned, adapter: { delete: remove } } },
+      remove,
+    };
+  }
+  const refreshBody = { grant_type: "refresh_token", refresh_token: "OLD" };
+
+  it("deletes the used refresh token once a new pair is issued", async () => {
+    const { ctx, remove } = context("/mcp/token", refreshBody, {
+      access_token: "new",
+      refresh_token: "NEW",
+    });
+    await rotateRefreshToken(ctx);
+    expect(remove).toHaveBeenCalledWith({
+      model: "oauthAccessToken",
+      where: [{ field: "refreshToken", value: "OLD" }],
+    });
+  });
+
+  it("keeps the token when the refresh failed", async () => {
+    const { ctx, remove } = context(
+      "/mcp/token",
+      refreshBody,
+      new APIError("UNAUTHORIZED", { error: "invalid_grant" }),
+    );
+    await rotateRefreshToken(ctx);
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it("ignores code exchanges and other endpoints", async () => {
+    const code = context(
+      "/mcp/token",
+      { grant_type: "authorization_code", code: "C" },
+      { access_token: "a" },
+    );
+    await rotateRefreshToken(code.ctx);
+    expect(code.remove).not.toHaveBeenCalled();
+
+    const other = context("/sign-in/social", refreshBody, {
+      access_token: "a",
+    });
+    await rotateRefreshToken(other.ctx);
+    expect(other.remove).not.toHaveBeenCalled();
   });
 });

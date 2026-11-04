@@ -35,7 +35,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - `create_recipe`, `update_recipe`, `import_recipe`, `create_collection`, `add_to_collection`, `remove_from_collection` → `destructiveHint: true`.
   - Every tool keeps a `title`, and read tools keep `readOnlyHint: true`.
   - Add a test that every tool has `title` plus `readOnlyHint: true` or `destructiveHint: true`.
-- [ ] **3. Refresh-token rotation.** When the refresh grant on `/api/auth/mcp/token` succeeds, delete the old `oauth_access_token` row, so a used refresh token stops working. Implement it as a better-auth hook next to `lib/auth/mcp-consent.ts`. Test that the old refresh token returns 401 `invalid_grant`.
+- [x] **3. Refresh-token rotation.** When the refresh grant on `/api/auth/mcp/token` succeeds, delete the old `oauth_access_token` row, so a used refresh token stops working. Implement it as a better-auth hook next to `lib/auth/mcp-consent.ts`. Test that the old refresh token returns 401 `invalid_grant`.
 - [ ] **4. Privacy page.**
   - `app/privacy/page.tsx`, outside the `[locale]` tree, with no locale prefix (add `privacy` to the `proxy.ts` matcher exclusions).
   - Covers:
