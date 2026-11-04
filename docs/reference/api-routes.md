@@ -166,15 +166,26 @@ A remote [MCP](https://modelcontextprotocol.io) server that AI chat apps (Claude
 
 | Tool | Kind | Notes |
 |---|---|---|
-| `list_recipes` | read | Words match title, description and ingredient names; filters `category`, `collectionId`; paging `limit`/`offset`. |
-| `get_recipe` | read | Full recipe; sections inlined as names, steps numbered. |
+| `search` | read | `{ query }`, ChatGPT's shape plus extra fields. Every word must match the title, description, an ingredient name or a collection name; an empty query lists the newest. Up to 50 results: `{ results: [{ id, title, url, category, servings, totalTimeMinutes, tried }] }`. |
+| `fetch` | read | `{ id }` → `{ id, title, text, url, metadata }`: `text` is the readable recipe, `metadata` the full structured recipe (sections inlined as names, numbered steps, collections). |
 | `create_recipe` | write | The main way recipes arrive: the chat parses text, photos or pages itself. Structured ingredients and steps with optional sections and step images. `sourceUrl` is stored without tracking parameters and dedupes. Optional `imageUrl` is copied to ImageKit (public https hosts only); returns `warnings` if it couldn't be. |
 | `update_recipe` | write | Partial; `null` clears; lists are replaced whole. Replacing ingredients resets vocabulary ids (device re-normalizes). `imageUrl` sets or (with `null`) removes the main photo and resets its crop. Returns `{ recipe, warnings? }`. |
 | `delete_recipe` | write, destructive | Image left in ImageKit (may be shared via the parse cache). |
 | `import_recipe` | write | For social posts (Instagram, TikTok, YouTube, X) and pages the chat can't open. Through the parse queue with the link cleaned of tracking parameters; shares the hourly AI parse budget. Failures return a hint to fall back to `create_recipe`. |
 | `get_import_status` | read | Returns the saved recipe once done. |
 | `list_collections`, `create_collection`, `add_to_collection`, `remove_from_collection` | read / write | Owner checks on both recipe and collection. |
-| `search`, `fetch` | read | ChatGPT's fixed shapes over the same queries. |
+
+Every tool has a `title` and either `readOnlyHint: true` (search, fetch, get_import_status, list_collections) or `destructiveHint: true` (all writes), as Claude's directory requires; a test enforces it.
+
+**Public pages and review access** (outside the locale tree, excluded from the locale middleware):
+
+| Route | Purpose |
+|---|---|
+| `/privacy` | Privacy policy (linked from Profile and the directory listing). |
+| `/connector` | Connector docs: setup, tools, three example prompts. |
+| `/external-auth/review` | Hidden, unlinked, unindexed reviewer sign-in (email + password; sign-up disabled). Account seeded by `bun run seed:review-account`. |
+
+Refresh tokens rotate: after a successful refresh grant the used refresh token's row is deleted (`rotateRefreshToken`), so it can't be replayed.
 
 Rate limits: 120 reads and 30 writes per minute per user (`MCP_RATE_LIMIT`), failing open without Redis.
 

@@ -60,7 +60,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - The connector login page (`components/connector-auth/connector-login.tsx`) re-checks the session on focus or visibility change, and continues to the authorize URL once a session exists. That way a reviewer who signs in on the review page in another tab gets back to consent.
   - Seed script `scripts/seed-review-account.ts`: creates the user and a credential account with a hashed password (password from env `REVIEW_ACCOUNT_PASSWORD`, never committed), plus around 6 made-up sample recipes (sections, amounts, steps, one with a photo URL) and 2 collections. It must be idempotent. Run it against production once, or seed through the Supabase connector.
   - Tests for the page and the auto-continue.
-- [ ] **7. Docs.** Update `docs/reference/api-routes.md` (tools, `/privacy`, `/connector`, the review page), `docs/specs/ai-connector.md`, and this checklist.
+- [x] **7. Docs.** Update `docs/reference/api-routes.md` (tools, `/privacy`, `/connector`, the review page), `docs/specs/ai-connector.md`, and this checklist.
 - [ ] **8. Submission text**, drafted in `docs/specs/claude-directory-submission.md`:
   - name, one-liner (200 characters max) and description (2,000 max)
   - categories, URLs and support

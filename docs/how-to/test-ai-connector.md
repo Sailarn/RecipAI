@@ -38,7 +38,7 @@ bun run dev
 npx @modelcontextprotocol/inspector
 ```
 
-In the Inspector, pick **Streamable HTTP** and enter `http://localhost:3000/api/mcp`. Then use **Open Auth Settings → Quick OAuth Flow**. The browser opens the RecipAI sign-in (if you're signed out) and then the consent page. After **Allow**, connect and call `list_recipes`.
+In the Inspector, pick **Streamable HTTP** and enter `http://localhost:3000/api/mcp`. Then use **Open Auth Settings → Quick OAuth Flow**. The browser opens the RecipAI sign-in (if you're signed out) and then the consent page. After **Allow**, connect and call `search` with an empty query.
 
 !!! note
     The OAuth token endpoint (`/api/auth/mcp/token`) is served by better-auth and sends no CORS headers. If the Inspector's token step fails in the browser with a CORS error, switch it to the proxy connection type. Real AI apps call the token endpoint server-to-server and are unaffected.

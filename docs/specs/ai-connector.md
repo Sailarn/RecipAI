@@ -73,7 +73,7 @@ apps (connectors added on the web carry over to the apps).
    §5.3), RecipAI opens
    `https://claude.ai/new?q=<url-encoded prompt>`, where the prompt is something like
    *"Use RecipAI to open my recipe "Borscht" (id `abc123`) and help me with it."*
-   Claude calls `get_recipe` and the conversation starts with the recipe in context.
+   Claude calls `fetch` and the conversation starts with the recipe in context.
 3. If the user **has not connected** yet, a bottom sheet explains the one-time
    setup (§2.1). It has a "Copy connector URL" button and an "Open Claude
    settings" link. After connecting, the user taps **Ask AI** again.
@@ -205,8 +205,8 @@ known, otherwise English.
 
 | Tool | Phase | Input | Behaviour |
 |---|---|---|---|
-| `list_recipes` | 1 | `{ query?, category?, collectionId?, limit≤50, cursor? }` | Title / description / ingredient-text match. Returns `id, title, category, servings, totalTime, updatedAt` |
-| `get_recipe` | 1 | `{ id }` | Full recipe: ingredients (with sections), steps, times, source URL, collections, public share URL if public |
+| `list_recipes` (merged into `search` in the directory-listing round) | 1 | `{ query?, category?, collectionId?, limit≤50, cursor? }` | Title / description / ingredient-text match. Returns `id, title, category, servings, totalTime, updatedAt` |
+| `get_recipe` (merged into `fetch`) | 1 | `{ id }` | Full recipe: ingredients (with sections), steps, times, source URL, collections, public share URL if public |
 | `create_recipe` | 2 | `{ title, description?, servings?, prepTime?, cookTime?, category?, ingredients[{item, amount?, unit?, section?}], instructions[{instruction, section?}], sourceUrl?, imageUrl? }` | Uses `buildSavedRecipeShape`. `id = crypto.randomUUID()`, `isPublic=false`. Normalisation happens on the device after pull |
 | `delete_recipe` | 2 | `{ id }` | Owner-scoped hard delete, same as the app's delete. `destructiveHint: true`, so clients ask the user to confirm. Devices drop it on the next pull (the `syncedAt` marker rule) |
 | `update_recipe` | 2 | `{ id, …partial of the create fields }` | Owner-scoped. Replacing `ingredients` or `instructions` rebuilds the shape. Bumps `updatedAt`, clears `canonicalIngredientIds` when ingredients change (so the device re-normalises). Returns `not_found` when no row matched |
