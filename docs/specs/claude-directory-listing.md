@@ -68,7 +68,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - data handling
   - reviewer steps
   - answers to the compliance checklist
-- [ ] **9. Verify and hand over.**
+- [x] **9. Verify and hand over.**
   - full tests, `bun run typecheck`, `bun run check:ci` and `bun run build`
   - end-to-end check against a local Postgres (see `docs/how-to/test-ai-connector.md`)
   - push the branch and ask the owner to merge
