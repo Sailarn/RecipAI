@@ -12,7 +12,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
 
 ## Decisions (owner)
 - Slug: **`recipai`** (permanent).
-- Category: **Food & cooking**.
+- Category: **Productivity** and **Other** (the portal has no food category).
 - Icon: the app icon, `public/icon-512x512.png`.
 - Support contact: **denis9524@gmail.com**.
 - Reviewer account: **`denis9524+recipai-review@gmail.com`**, email and password, created by us, with sign-up disabled.

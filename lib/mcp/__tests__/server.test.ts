@@ -40,7 +40,7 @@ vi.mock("@/lib/recipes/mutations", () => ({
   deleteRecipe,
 }));
 
-import { createRecipaiMcpServer } from "../server";
+import { createRecipaiMcpServer, MCP_SERVER_INSTRUCTIONS } from "../server";
 import { connectTestClient, resultJson } from "./test-client";
 
 const context = {
@@ -517,6 +517,25 @@ describe("RecipAI MCP server", () => {
     expect(byName.import_recipe.description).toMatch(
       /Instagram, TikTok, YouTube or X/,
     );
-    expect(byName.create_recipe.description).toMatch(/photo or screenshot/);
+    expect(MCP_SERVER_INSTRUCTIONS).toMatch(/photo or screenshot/);
+  });
+
+  it("keeps workflow advice out of tool descriptions (Claude directory rule)", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const { tools } = await client.listTools();
+    const names = tools.map((tool) => tool.name);
+
+    for (const tool of tools) {
+      const text = JSON.stringify({
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+      });
+      for (const other of names) {
+        if (other === tool.name) continue;
+        expect(text, `${tool.name} mentions ${other}`).not.toMatch(
+          new RegExp(`\\b${other}\\b`),
+        );
+      }
+    }
   });
 });

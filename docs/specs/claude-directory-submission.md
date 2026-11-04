@@ -25,7 +25,7 @@ These sync automatically. You should see 11 tools: 4 read-only (`search`, `fetch
   > • Organise recipes into collections, or delete them (Claude asks first).
   >
   > Everything acts only on your own RecipAI account, and changes appear in the RecipAI app on its next sync. You can disconnect Claude at any time in RecipAI under Profile → AI assistants, which revokes access immediately.
-- **Categories:** Food & cooking.
+- **Categories:** Productivity, Other. (The portal has no food category; avoid the health ones, since we answer "no personal health data".)
 - **Documentation URL:** `https://recip-ai-wine.vercel.app/connector`
 - **Privacy policy URL:** `https://recip-ai-wine.vercel.app/privacy`
 - **Support contact:** `denis9524@gmail.com`
@@ -82,7 +82,7 @@ Check all seven. Notes for your own sanity:
 - **First-party API:** OK. The connector only calls RecipAI's own backend.
 - **Financial transactions:** none.
 - **AI media generation:** none. No image, audio or video generation.
-- **Prompt injection:** OK. Tool descriptions describe only behavior and contain no hidden instructions. Recipe text from imported pages is returned as data.
+- **Prompt injection:** OK. Tool descriptions describe only what each tool does: they never name another tool or tell the model what to do (a server test enforces this). Workflow advice lives in the server instructions. Recipe text from imported pages is returned as data.
 - **Conversation data collection:** OK. The connector never reads Claude's chats, memory or files.
 - **Public documentation:** `https://recip-ai-wine.vercel.app/connector`.
 

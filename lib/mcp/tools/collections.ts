@@ -18,7 +18,7 @@ const collectionIdSchema = z
   .trim()
   .min(1)
   .max(128)
-  .describe("Collection id, as returned by list_collections.");
+  .describe("The collection's id.");
 
 const COLLECTION_NOT_FOUND =
   "Collection not found. Use list_collections to look up its id.";

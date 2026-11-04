@@ -27,13 +27,12 @@ export function registerWriteRecipeTools(
     {
       title: "Save a new recipe",
       description:
-        "Save a new recipe to the user's RecipAI library from any source: " +
-        "text the user pasted, a photo or screenshot, or a web page you read. " +
-        "Give ingredients as separate items with numeric amounts and units, " +
-        "and steps in order; use `section` to group items (e.g. a sauce). " +
-        "Set `sourceUrl` to the original link if there is one (a link already " +
-        "in the library returns that recipe instead) and `imageUrl` to a public " +
-        "photo of the dish if you have one; steps may carry images too. " +
+        "Saves a new recipe to the user's RecipAI library. Takes ingredients " +
+        "as separate items with numeric amounts and units, and steps in " +
+        "order; `section` groups items (e.g. a sauce). `sourceUrl` is the " +
+        "original link, if any: a link already in the library returns that " +
+        "recipe instead of a duplicate. `imageUrl` is a public photo of the " +
+        "dish; steps may carry images too. " +
         SYNC_NOTE,
       inputSchema: createRecipeInputShape,
       annotations: {
@@ -55,10 +54,9 @@ export function registerWriteRecipeTools(
     {
       title: "Edit a recipe",
       description:
-        "Change one of the user's recipes. Only the fields you pass change; " +
+        "Changes one of the user's recipes. Only the fields passed change; " +
         "`null` clears a field. `ingredients` and `instructions` replace the " +
-        "whole list, so call fetch first and send the complete edited " +
-        `list. ${SYNC_NOTE}`,
+        `whole list. ${SYNC_NOTE}`,
       inputSchema: { id: recipeIdSchema, ...updateRecipeInputShape },
       annotations: {
         title: "Edit a recipe",
@@ -84,8 +82,8 @@ export function registerWriteRecipeTools(
     {
       title: "Delete a recipe",
       description:
-        "Permanently delete one of the user's recipes. Confirm with the user " +
-        `first; this cannot be undone. ${SYNC_NOTE}`,
+        "Permanently deletes one of the user's recipes. This cannot be " +
+        `undone. ${SYNC_NOTE}`,
       inputSchema: { id: recipeIdSchema },
       annotations: {
         title: "Delete a recipe",

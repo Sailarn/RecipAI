@@ -10,7 +10,7 @@ export const recipeIdSchema = z
   .trim()
   .min(1)
   .max(128)
-  .describe("Recipe id, as returned by search.");
+  .describe("The recipe's id.");
 
 /**
  * The two read tools, in the shapes ChatGPT's connectors and deep research
@@ -29,10 +29,10 @@ export function registerReadRecipeTools(
     {
       title: "Search recipes",
       description:
-        "Search the user's RecipAI recipes. Words match the title, " +
+        "Searches the user's RecipAI recipes. Words match the title, " +
         "description, ingredient names and collection names (every word must " +
         `match); an empty query lists the newest recipes. Up to ${MAX_LIST_LIMIT} ` +
-        "results, each with an id for fetch.",
+        "results, each with its recipe id.",
       inputSchema: {
         query: z
           .string()
@@ -70,10 +70,10 @@ export function registerReadRecipeTools(
     {
       title: "Get a recipe",
       description:
-        "Get one of the user's recipes by id: `text` is the readable recipe, " +
+        "Returns one of the user's recipes by id: `text` is the readable recipe, " +
         "`metadata` the full structured recipe (ingredients with amounts, units " +
         "and sections, numbered steps, times, servings, source, collections, " +
-        "photo). Read it before update_recipe.",
+        "photo).",
       inputSchema: { id: recipeIdSchema },
       annotations: {
         title: "Get a recipe",

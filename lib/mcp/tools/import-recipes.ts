@@ -35,12 +35,11 @@ export function registerImportTools(
     {
       title: "Import a recipe from a link",
       description:
-        "Import a recipe from an Instagram, TikTok, YouTube or X post using " +
-        "RecipAI's parser, which transcribes the video. Also works for recipe " +
-        "web pages you cannot open yourself; for a page you can read, saving " +
-        "it with create_recipe is faster and more reliable. Usually finishes " +
-        'within a minute: if the result is "pending", check it with ' +
-        "get_import_status. Links already in the library are not imported twice. " +
+        "Imports a recipe from an Instagram, TikTok, YouTube or X post using " +
+        "RecipAI's parser, which transcribes the video; also accepts recipe " +
+        "web pages. Usually finishes within a minute; until then the result " +
+        'is "pending" with a job id. A link already in the library returns ' +
+        "that recipe instead of importing it twice. " +
         "Docs: https://recip-ai-wine.vercel.app/connector",
       inputSchema: { url: importUrlSchema },
       annotations: {
@@ -78,14 +77,15 @@ export function registerImportTools(
     {
       title: "Check a link import",
       description:
-        "Check a pending import_recipe job. When done, returns the saved recipe.",
+        "Returns the status of a pending link import. When it is done, the " +
+        "result includes the saved recipe.",
       inputSchema: {
         jobId: z
           .string()
           .trim()
           .min(1)
           .max(128)
-          .describe("From import_recipe."),
+          .describe("The job id of a pending import."),
       },
       annotations: {
         title: "Check a link import",
