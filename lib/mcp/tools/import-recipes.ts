@@ -40,9 +40,11 @@ export function registerImportTools(
         "web pages you cannot open yourself; for a page you can read, saving " +
         "it with create_recipe is faster and more reliable. Usually finishes " +
         'within a minute: if the result is "pending", check it with ' +
-        "get_import_status. Links already in the library are not imported twice.",
+        "get_import_status. Links already in the library are not imported twice. " +
+        "Docs: https://recip-ai-wine.vercel.app/connector",
       inputSchema: { url: importUrlSchema },
       annotations: {
+        title: "Import a recipe from a link",
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: true,
@@ -85,7 +87,11 @@ export function registerImportTools(
           .max(128)
           .describe("From import_recipe."),
       },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: {
+        title: "Check a link import",
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
     },
     instrumentTool("get_import_status", "read", context, async ({ jobId }) => {
       const status = await getImportStatus(caller.userId, jobId);

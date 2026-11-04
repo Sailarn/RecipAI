@@ -37,6 +37,7 @@ export function registerWriteRecipeTools(
         SYNC_NOTE,
       inputSchema: createRecipeInputShape,
       annotations: {
+        title: "Save a new recipe",
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: false,
@@ -60,6 +61,7 @@ export function registerWriteRecipeTools(
         `list. ${SYNC_NOTE}`,
       inputSchema: { id: recipeIdSchema, ...updateRecipeInputShape },
       annotations: {
+        title: "Edit a recipe",
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: true,
@@ -86,6 +88,7 @@ export function registerWriteRecipeTools(
         `first; this cannot be undone. ${SYNC_NOTE}`,
       inputSchema: { id: recipeIdSchema },
       annotations: {
+        title: "Delete a recipe",
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: true,

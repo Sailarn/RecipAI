@@ -41,7 +41,11 @@ export function registerCollectionTools(
       title: "List collections",
       description:
         "List the user's recipe collections (named groups) with recipe counts.",
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: {
+        title: "List collections",
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
     },
     instrumentTool("list_collections", "read", context, async () =>
       jsonResult({ collections: await listCollections(caller.userId) }),
@@ -61,7 +65,7 @@ export function registerCollectionTools(
           .optional()
           .describe("One emoji shown with the collection, e.g. 🍰."),
       },
-      annotations: writeAnnotations,
+      annotations: { ...writeAnnotations, title: "Create a collection" },
     },
     instrumentTool(
       "create_collection",
@@ -76,12 +80,13 @@ export function registerCollectionTools(
     ["add_to_collection", true],
     ["remove_from_collection", false],
   ] as const) {
+    const title = member
+      ? "Add a recipe to a collection"
+      : "Remove a recipe from a collection";
     server.registerTool(
       name,
       {
-        title: member
-          ? "Add a recipe to a collection"
-          : "Remove a recipe from a collection",
+        title,
         description: member
           ? "Add one of the user's recipes to one of their collections."
           : "Remove a recipe from a collection. The recipe itself is kept.",
@@ -89,7 +94,7 @@ export function registerCollectionTools(
           recipeId: recipeIdSchema,
           collectionId: collectionIdSchema,
         },
-        annotations: writeAnnotations,
+        annotations: { ...writeAnnotations, title },
       },
       instrumentTool(
         name,

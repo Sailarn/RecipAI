@@ -75,6 +75,8 @@ describe("RecipAI MCP server", () => {
 
     for (const tool of tools) {
       expect(tool.title, tool.name).toBeTruthy();
+      // The directory portal reads the title from the annotations.
+      expect(tool.annotations?.title, tool.name).toBe(tool.title);
       const hints = tool.annotations ?? {};
       expect(
         hints.readOnlyHint === true || hints.destructiveHint === true,
