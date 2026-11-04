@@ -6,6 +6,7 @@ import {
   History,
   Info,
   Moon,
+  Shield,
   Smartphone,
 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -169,6 +170,25 @@ export default function ProfilePage() {
               <RowDivider />
             </>
           )}
+
+          <a
+            href="/privacy"
+            className={`${ROW_CLASSES} cursor-pointer [-webkit-tap-highlight-color:transparent]`}
+          >
+            <Shield
+              size={ROW_ICON_SIZE}
+              strokeWidth={ROW_ICON_STROKE_WIDTH}
+              className={ROW_ICON_CLASSES}
+            />
+            <span className={ROW_LABEL_CLASSES}>{t("privacyPolicy")}</span>
+            <ChevronRight
+              size={CHEVRON_ICON_SIZE}
+              strokeWidth={CHEVRON_STROKE_WIDTH}
+              className="shrink-0 text-[var(--fg-3)]"
+            />
+          </a>
+
+          <RowDivider />
 
           <div className={`${ROW_CLASSES} cursor-default`}>
             <Info

@@ -233,7 +233,8 @@
     "signOut": "Вийти",
     "connectedAccounts": "Підключені акаунти",
     "connected": "Підключено",
-    "connect": "Підключити"
+    "connect": "Підключити",
+    "privacyPolicy": "Політика конфіденційності"
   },
   "parse": {
     "tabs": {

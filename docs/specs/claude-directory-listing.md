@@ -36,7 +36,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - Every tool keeps a `title`, and read tools keep `readOnlyHint: true`.
   - Add a test that every tool has `title` plus `readOnlyHint: true` or `destructiveHint: true`.
 - [x] **3. Refresh-token rotation.** When the refresh grant on `/api/auth/mcp/token` succeeds, delete the old `oauth_access_token` row, so a used refresh token stops working. Implement it as a better-auth hook next to `lib/auth/mcp-consent.ts`. Test that the old refresh token returns 401 `invalid_grant`.
-- [ ] **4. Privacy page.**
+- [x] **4. Privacy page.**
   - `app/privacy/page.tsx`, outside the `[locale]` tree, with no locale prefix (add `privacy` to the `proxy.ts` matcher exclusions).
   - Covers:
     - **what's collected:** account data (Google, Telegram, passkeys), recipes and collections, pantry, imported links and photos, parse history, usage analytics (PostHog with masked session recordings, Vercel Analytics), error reports (Sentry), server logs (Axiom)

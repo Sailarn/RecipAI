@@ -233,7 +233,8 @@
     "signOut": "Sign out",
     "connectedAccounts": "Connected accounts",
     "connected": "Connected",
-    "connect": "Connect"
+    "connect": "Connect",
+    "privacyPolicy": "Privacy policy"
   },
   "parse": {
     "tabs": {

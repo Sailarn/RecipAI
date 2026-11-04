@@ -85,11 +85,13 @@ export default async function proxy(req: NextRequest) {
 }
 
 export const config = {
+  // `privacy` and `connector` are public documents outside the [locale] tree
+  // (stable URLs for the AI connector directory listing).
   // `external-auth` is excluded: those pages live outside the [locale] tree
   // (no locale prefix), so the i18n middleware must not redirect them to
   // /<locale>/external-auth, which 404s.
   matcher: [
-    "/((?!api|ingest|_next|_vercel|external-auth|.*\\..*).*)",
+    "/((?!api|ingest|_next|_vercel|external-auth|privacy|connector|.*\\..*).*)",
     "/api/:path*",
   ],
 };
