@@ -47,7 +47,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
     - **deletion** by emailing denis9524@gmail.com (there's no in-app delete yet)
     - **contact**
   - Add a "Privacy policy" row in Profile.
-- [ ] **5. Connector docs page.** `app/connector/page.tsx` (public, English):
+- [x] **5. Connector docs page.** `app/connector/page.tsx` (public, English):
   - what RecipAI is
   - how to connect (directory listing, or custom connector URL `https://recip-ai-wine.vercel.app/api/mcp`)
   - sign-in and consent
