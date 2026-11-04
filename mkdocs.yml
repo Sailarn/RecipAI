@@ -71,3 +71,4 @@ nav:
   - Specs:
       - AI Connector: specs/ai-connector.md
       - Claude Directory Listing: specs/claude-directory-listing.md
+      - Claude Directory Submission: specs/claude-directory-submission.md
