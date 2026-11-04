@@ -47,15 +47,22 @@ export function searchTerms(query: string | undefined): string[] {
 }
 
 /**
- * Every term must appear in the title, the description, or an ingredient
- * name ("chicken soup" finds recipes mentioning both words).
+ * Every term must appear in the title, the description, an ingredient name or
+ * the name of a collection the recipe is in ("chicken soup" finds recipes
+ * mentioning both words; "desserts" finds the Desserts collection).
  */
-function termCondition(term: string): SQL | undefined {
+function termCondition(term: string, userId: string): SQL | undefined {
   const pattern = `%${escapeLike(term)}%`;
   return or(
     ilike(recipes.title, pattern),
     ilike(recipes.description, pattern),
     sql`jsonb_path_query_array(${recipes.ingredients}, '$[*].item')::text ILIKE ${pattern}`,
+    sql`exists (
+      select 1 from "collections" as "c"
+      where "c"."user_id" = ${userId}
+        and "c"."name" ILIKE ${pattern}
+        and "recipes"."collection_ids" @> jsonb_build_array("c"."id")
+    )`,
   );
 }
 
@@ -72,7 +79,7 @@ export async function listRecipes(
 
   const conditions: Array<SQL | undefined> = [eq(recipes.userId, userId)];
   for (const term of searchTerms(options.query)) {
-    conditions.push(termCondition(term));
+    conditions.push(termCondition(term, userId));
   }
   if (options.category) {
     conditions.push(ilike(recipes.category, escapeLike(options.category)));

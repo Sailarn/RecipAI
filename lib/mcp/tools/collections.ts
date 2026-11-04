@@ -30,7 +30,7 @@ export function registerCollectionTools(
   const { caller } = context;
   const writeAnnotations = {
     readOnlyHint: false,
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: true,
     openWorldHint: false,
   };

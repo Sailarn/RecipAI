@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import packageJson from "@/package.json";
 import type { McpToolContext } from "./context";
-import { registerChatGptCompatTools } from "./tools/chatgpt-compat";
 import { registerCollectionTools } from "./tools/collections";
 import { registerImportTools } from "./tools/import-recipes";
 import { registerReadRecipeTools } from "./tools/read-recipes";
@@ -10,8 +9,8 @@ import { registerWriteRecipeTools } from "./tools/write-recipes";
 export const MCP_SERVER_INSTRUCTIONS = [
   "RecipAI is the user's personal recipe library.",
   "Tools act only on the signed-in user's own recipes.",
-  "Look recipes up with list_recipes before get_recipe; ids come from there.",
-  "Before update_recipe, read the recipe with get_recipe and send complete lists.",
+  "Look recipes up with search and read one with fetch; ids come from search.",
+  "Before update_recipe, read the recipe with fetch and send complete lists.",
   "Ask the user to confirm before deleting anything.",
   "To save a recipe, extract it yourself and call create_recipe: from text the user pasted, a photo or screenshot, or a web page you can open (set sourceUrl to its link).",
   "For Instagram, TikTok, YouTube or X links use import_recipe: RecipAI transcribes the video, which you cannot watch.",
@@ -33,6 +32,5 @@ export function createRecipaiMcpServer(context: McpToolContext): McpServer {
   registerWriteRecipeTools(server, context);
   registerImportTools(server, context);
   registerCollectionTools(server, context);
-  registerChatGptCompatTools(server, context);
   return server;
 }

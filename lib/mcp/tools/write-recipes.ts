@@ -38,7 +38,7 @@ export function registerWriteRecipeTools(
       inputSchema: createRecipeInputShape,
       annotations: {
         readOnlyHint: false,
-        destructiveHint: false,
+        destructiveHint: true,
         idempotentHint: false,
         openWorldHint: false,
       },
@@ -56,12 +56,12 @@ export function registerWriteRecipeTools(
       description:
         "Change one of the user's recipes. Only the fields you pass change; " +
         "`null` clears a field. `ingredients` and `instructions` replace the " +
-        "whole list, so call get_recipe first and send the complete edited " +
+        "whole list, so call fetch first and send the complete edited " +
         `list. ${SYNC_NOTE}`,
       inputSchema: { id: recipeIdSchema, ...updateRecipeInputShape },
       annotations: {
         readOnlyHint: false,
-        destructiveHint: false,
+        destructiveHint: true,
         idempotentHint: true,
         openWorldHint: false,
       },

@@ -63,16 +63,32 @@ describe("RecipAI MCP server", () => {
     const { tools } = await client.listTools();
     const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
 
-    expect(byName.list_recipes.annotations?.readOnlyHint).toBe(true);
-    expect(byName.get_recipe.annotations?.readOnlyHint).toBe(true);
+    expect(byName.search.annotations?.readOnlyHint).toBe(true);
+    expect(byName.fetch.annotations?.readOnlyHint).toBe(true);
+    expect(byName).not.toHaveProperty("list_recipes");
+    expect(byName).not.toHaveProperty("get_recipe");
   });
 
-  it("scopes list_recipes to the token's user, never to tool input", async () => {
+  it("gives every tool a title and a read-only or destructive hint (Claude directory rule)", async () => {
+    const client = await connectTestClient(createRecipaiMcpServer(context));
+    const { tools } = await client.listTools();
+
+    for (const tool of tools) {
+      expect(tool.title, tool.name).toBeTruthy();
+      const hints = tool.annotations ?? {};
+      expect(
+        hints.readOnlyHint === true || hints.destructiveHint === true,
+        `${tool.name} needs readOnlyHint or destructiveHint`,
+      ).toBe(true);
+    }
+  });
+
+  it("scopes search to the token's user, never to tool input", async () => {
     listRecipes.mockResolvedValue({ recipes: [], nextOffset: null });
     const client = await connectTestClient(createRecipaiMcpServer(context));
 
     const result = await client.callTool({
-      name: "list_recipes",
+      name: "search",
       arguments: { query: "soup", userId: "someone-else" },
     });
 
@@ -81,9 +97,9 @@ describe("RecipAI MCP server", () => {
       "https://app.example",
       expect.objectContaining({ query: "soup" }),
     );
-    expect(resultJson(result)).toEqual({ recipes: [], nextOffset: null });
+    expect(resultJson(result)).toEqual({ results: [] });
     expect(trackEvent).toHaveBeenCalledWith("mcp_tool_called", {
-      tool: "list_recipes",
+      tool: "search",
       client: "Claude",
       ok: true,
     });
@@ -92,8 +108,8 @@ describe("RecipAI MCP server", () => {
   it("rejects invalid input before reaching the database", async () => {
     const client = await connectTestClient(createRecipaiMcpServer(context));
     const result = await client.callTool({
-      name: "list_recipes",
-      arguments: { limit: 500 },
+      name: "search",
+      arguments: { query: "x".repeat(500) },
     });
 
     expect(result.isError).toBe(true);
@@ -104,7 +120,7 @@ describe("RecipAI MCP server", () => {
     getRecipe.mockResolvedValue(null);
     const client = await connectTestClient(createRecipaiMcpServer(context));
     const result = await client.callTool({
-      name: "get_recipe",
+      name: "fetch",
       arguments: { id: "nope" },
     });
 
@@ -120,7 +136,7 @@ describe("RecipAI MCP server", () => {
     getRecipe.mockRejectedValue(new Error("db down"));
     const client = await connectTestClient(createRecipaiMcpServer(context));
     const result = await client.callTool({
-      name: "get_recipe",
+      name: "fetch",
       arguments: { id: "r1" },
     });
 
@@ -129,14 +145,16 @@ describe("RecipAI MCP server", () => {
     expect(captureError).toHaveBeenCalled();
   });
 
-  it("marks delete as destructive and the other writes as not", async () => {
+  it("marks every write as destructive", async () => {
     const client = await connectTestClient(createRecipaiMcpServer(context));
     const { tools } = await client.listTools();
     const byName = Object.fromEntries(tools.map((tool) => [tool.name, tool]));
 
     expect(byName.delete_recipe.annotations?.destructiveHint).toBe(true);
-    expect(byName.create_recipe.annotations?.destructiveHint).toBe(false);
-    expect(byName.update_recipe.annotations?.destructiveHint).toBe(false);
+    expect(byName.create_recipe.annotations?.destructiveHint).toBe(true);
+    expect(byName.update_recipe.annotations?.destructiveHint).toBe(true);
+    expect(byName.import_recipe.annotations?.destructiveHint).toBe(true);
+    expect(byName.add_to_collection.annotations?.destructiveHint).toBe(true);
   });
 
   it("creates recipes for the token's user", async () => {
@@ -232,8 +250,8 @@ describe("RecipAI MCP server", () => {
     listRecipes.mockResolvedValue({ recipes: [], nextOffset: null });
     const client = await connectTestClient(createRecipaiMcpServer(context));
     const result = await client.callTool({
-      name: "list_recipes",
-      arguments: {},
+      name: "search",
+      arguments: { query: "" },
     });
 
     expect(result.isError).toBeFalsy();
@@ -376,10 +394,19 @@ describe("RecipAI MCP server", () => {
     expect(JSON.stringify(result)).toContain("Collection not found");
   });
 
-  it("serves ChatGPT's search shape", async () => {
+  it("serves ChatGPT's search shape with extra recipe fields", async () => {
     listRecipes.mockResolvedValue({
       recipes: [
-        { id: "r1", title: "Borscht", url: "https://app.example/recipes/r1" },
+        {
+          id: "r1",
+          title: "Borscht",
+          url: "https://app.example/recipes/r1",
+          category: "Soup",
+          servings: 4,
+          totalTimeMinutes: 60,
+          tried: true,
+          updatedAt: "2026-11-01T00:00:00.000Z",
+        },
       ],
       nextOffset: null,
     });
@@ -391,16 +418,24 @@ describe("RecipAI MCP server", () => {
 
     expect(listRecipes).toHaveBeenCalledWith("user-1", "https://app.example", {
       query: "beet",
-      limit: 20,
+      limit: 50,
     });
     expect(resultJson(result)).toEqual({
       results: [
-        { id: "r1", title: "Borscht", url: "https://app.example/recipes/r1" },
+        {
+          id: "r1",
+          title: "Borscht",
+          url: "https://app.example/recipes/r1",
+          category: "Soup",
+          servings: 4,
+          totalTimeMinutes: 60,
+          tried: true,
+        },
       ],
     });
   });
 
-  it("serves ChatGPT's fetch shape as a text document", async () => {
+  it("serves ChatGPT's fetch shape with the full recipe as metadata", async () => {
     getRecipe.mockResolvedValue({
       id: "r1",
       title: "Borscht",

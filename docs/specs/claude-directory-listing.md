@@ -23,7 +23,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
 
 ## Steps
 - [x] **0. This plan** (docs only).
-- [ ] **1. Tool merge.**
+- [x] **1. Tool merge.**
   - `search(query)`:
     - empty query → newest recipes
     - words match the title, description, ingredient names **and collection names**
@@ -31,7 +31,7 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - `fetch(id)` → `{ id, title, text, url, metadata }`, where `metadata` holds the full structured recipe from `toRecipeView`.
   - Remove `list_recipes` and `get_recipe`. Update the server instructions ("look recipes up with search, read one with fetch") and the tool descriptions, plus any that mention list_recipes or get_recipe (NOT_FOUND message, update_recipe, collections).
   - Tests: `lib/mcp/__tests__/server.test.ts`, `lib/recipes/__tests__/*`.
-- [ ] **2. Annotations.**
+- [x] **2. Annotations.**
   - `create_recipe`, `update_recipe`, `import_recipe`, `create_collection`, `add_to_collection`, `remove_from_collection` → `destructiveHint: true`.
   - Every tool keeps a `title`, and read tools keep `readOnlyHint: true`.
   - Add a test that every tool has `title` plus `readOnlyHint: true` or `destructiveHint: true`.

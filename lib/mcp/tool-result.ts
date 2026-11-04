@@ -14,4 +14,4 @@ export function errorResult(message: string): CallToolResult {
 }
 
 export const NOT_FOUND_MESSAGE =
-  "Recipe not found. Use list_recipes to look up the recipe's id.";
+  "Recipe not found. Use search to look up the recipe's id.";

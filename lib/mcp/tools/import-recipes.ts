@@ -44,7 +44,7 @@ export function registerImportTools(
       inputSchema: { url: importUrlSchema },
       annotations: {
         readOnlyHint: false,
-        destructiveHint: false,
+        destructiveHint: true,
         idempotentHint: true,
         openWorldHint: true,
       },

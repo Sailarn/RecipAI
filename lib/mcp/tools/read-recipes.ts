@@ -1,12 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod";
-import { RECIPE_CATEGORIES } from "@/lib/categories";
-import {
-  DEFAULT_LIST_LIMIT,
-  getRecipe,
-  listRecipes,
-  MAX_LIST_LIMIT,
-} from "@/lib/recipes/queries";
+import { getRecipe, listRecipes, MAX_LIST_LIMIT } from "@/lib/recipes/queries";
+import { recipeAsText } from "@/lib/recipes/view";
 import { instrumentTool, type McpToolContext } from "../context";
 import { errorResult, jsonResult, NOT_FOUND_MESSAGE } from "../tool-result";
 
@@ -15,8 +10,14 @@ export const recipeIdSchema = z
   .trim()
   .min(1)
   .max(128)
-  .describe("Recipe id, as returned by list_recipes.");
+  .describe("Recipe id, as returned by search.");
 
+/**
+ * The two read tools, in the shapes ChatGPT's connectors and deep research
+ * require (`search` → `{ results: [{ id, title, url }] }`, `fetch` →
+ * `{ id, title, text, url, metadata }`), with extra fields so Claude and other
+ * clients get everything from the same pair: no duplicate read tools.
+ */
 export function registerReadRecipeTools(
   server: McpServer,
   context: McpToolContext,
@@ -24,65 +25,72 @@ export function registerReadRecipeTools(
   const { caller, origin } = context;
 
   server.registerTool(
-    "list_recipes",
+    "search",
     {
-      title: "List or search recipes",
+      title: "Search recipes",
       description:
-        "List the user's saved RecipAI recipes, newest first, or search them. " +
-        "`query` matches words in the title, description and ingredient names " +
-        "(every word must match). Returns ids for get_recipe.",
+        "Search the user's RecipAI recipes. Words match the title, " +
+        "description, ingredient names and collection names (every word must " +
+        `match); an empty query lists the newest recipes. Up to ${MAX_LIST_LIMIT} ` +
+        "results, each with an id for fetch.",
       inputSchema: {
         query: z
           .string()
           .trim()
           .max(200)
-          .optional()
-          .describe('Search words, e.g. "chicken soup" or "борщ".'),
-        category: z
-          .enum(RECIPE_CATEGORIES)
-          .optional()
-          .describe("Only recipes in this category."),
-        collectionId: z
-          .string()
-          .trim()
-          .max(128)
-          .optional()
-          .describe("Only recipes in this collection (see list_collections)."),
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(MAX_LIST_LIMIT)
-          .optional()
-          .describe(`Page size, default ${DEFAULT_LIST_LIMIT}.`),
-        offset: z
-          .number()
-          .int()
-          .min(0)
-          .optional()
-          .describe("Pagination offset; pass the previous nextOffset."),
+          .describe('Search words, e.g. "chicken soup", "desserts" or "борщ".'),
       },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: {
+        title: "Search recipes",
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
     },
-    instrumentTool("list_recipes", "read", context, async (args) =>
-      jsonResult(await listRecipes(caller.userId, origin, args)),
-    ),
+    instrumentTool("search", "read", context, async ({ query }) => {
+      const page = await listRecipes(caller.userId, origin, {
+        query,
+        limit: MAX_LIST_LIMIT,
+      });
+      return jsonResult({
+        results: page.recipes.map((recipe) => ({
+          id: recipe.id,
+          title: recipe.title,
+          url: recipe.url,
+          category: recipe.category,
+          servings: recipe.servings,
+          totalTimeMinutes: recipe.totalTimeMinutes,
+          tried: recipe.tried,
+        })),
+      });
+    }),
   );
 
   server.registerTool(
-    "get_recipe",
+    "fetch",
     {
       title: "Get a recipe",
       description:
-        "Get one of the user's recipes in full: ingredients (with amounts, " +
-        "units and section names), numbered steps, times, servings, source " +
-        "and collections.",
+        "Get one of the user's recipes by id: `text` is the readable recipe, " +
+        "`metadata` the full structured recipe (ingredients with amounts, units " +
+        "and sections, numbered steps, times, servings, source, collections, " +
+        "photo). Read it before update_recipe.",
       inputSchema: { id: recipeIdSchema },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: {
+        title: "Get a recipe",
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
     },
-    instrumentTool("get_recipe", "read", context, async ({ id }) => {
+    instrumentTool("fetch", "read", context, async ({ id }) => {
       const recipe = await getRecipe(caller.userId, id, origin);
-      return recipe ? jsonResult(recipe) : errorResult(NOT_FOUND_MESSAGE);
+      if (!recipe) return errorResult(NOT_FOUND_MESSAGE);
+      return jsonResult({
+        id: recipe.id,
+        title: recipe.title,
+        text: recipeAsText(recipe),
+        url: recipe.url,
+        metadata: recipe,
+      });
     }),
   );
 }
