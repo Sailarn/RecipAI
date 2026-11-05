@@ -74,10 +74,13 @@ Background: [AI Connector spec](ai-connector.md), "Later: directory listings". A
   - push the branch and ask the owner to merge
   - after release: run the seed for production and check `/privacy`, `/connector` and the review page live
 
-## After the merge (owner)
-1. Set `REVIEW_ACCOUNT_PASSWORD` in your local env, then run the seed script against production. Or ask Claude to seed it through the Supabase connector.
-2. Submit at `claude.ai/directory/manage` → Submit new → MCP connector, using `claude-directory-submission.md`.
-3. After the listing is live: switch the app's "Connect Claude" button to `https://claude.ai/directory/connectors/recipai` (a follow-up).
+## After the merge (done)
+1. [x] Seeded the review account in production (and reset it after the owner's test run).
+2. [x] Submitted at `claude.ai/directory/manage`, using `claude-directory-submission.md`. The portal asked for two server fixes first: tool titles in `annotations.title`, and tool descriptions that describe only behavior. **Approved and published** (Nov 2026) at `https://claude.ai/directory/connectors/recipai`.
+3. [x] The app's Claude connect sheet opens the directory listing (Connect → Allow) instead of the custom-connector steps. `/directory` is not one of claude.ai's universal links, so on iPhone it opens in the browser; the sheet also says how to find RecipAI from the Claude app. ChatGPT keeps the custom-connector steps.
+4. [x] The app re-pulls when its window regains focus and, quietly, every minute while visible, so changes made in a chat beside it show up without switching tabs.
+
+Next: the ChatGPT directory listing.
 
 ## Notes for whoever continues
 - Run `bun install` first. `graphify` isn't installed in the cloud; ignore the hook's request.

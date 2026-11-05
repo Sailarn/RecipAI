@@ -482,3 +482,12 @@ opens Sign in with ChatGPT.
   normal search.
 - `node_modules` is not installed in a fresh container. Run `bun install` first.
 - Never push to `main`. Work only on the branch named at the top.
+
+### Claude directory listing (v2.34)
+RecipAI is listed in Claude's Connectors Directory at
+`https://claude.ai/directory/connectors/recipai`. The Ask AI connect sheet
+sends Claude users there (tap Connect, then Allow) instead of the
+custom-connector URL; ChatGPT still uses the URL. See
+[the listing plan](claude-directory-listing.md) and
+[the submission text](claude-directory-submission.md).
+

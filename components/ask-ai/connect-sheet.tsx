@@ -13,7 +13,9 @@ const LINK_BUTTON_CLASS =
 /**
  * One-time setup instructions for connecting RecipAI to an AI app. The app
  * can't install a connector by itself; the user adds it in the AI app, which
- * then sends them through RecipAI's sign-in and consent pages.
+ * then sends them through RecipAI's sign-in and consent pages. Where the AI
+ * app lists RecipAI in its directory, that's one tap on Connect; otherwise
+ * the user adds a custom connector with the URL.
  */
 export function ConnectAiSheet({
   app,
@@ -27,7 +29,7 @@ export function ConnectAiSheet({
 }) {
   const t = useTranslations("askAi");
   const [copied, setCopied] = useState(false);
-  const { label, connectorSettingsUrl } = AI_APPS[app];
+  const { label, connectorSettingsUrl, directoryUrl } = AI_APPS[app];
   const connectorUrl = mcpResourceUrl();
 
   const copyUrl = async () => {
@@ -48,31 +50,46 @@ export function ConnectAiSheet({
       {() => (
         <div className="flex flex-col gap-4 font-sans text-sm text-[var(--fg-2)]">
           <p>{t("connectIntro", { app: label })}</p>
-          <ol className="list-decimal pl-5 flex flex-col gap-2 text-[var(--fg-1)]">
-            <li>
-              {t(app === "claude" ? "stepOpenClaude" : "stepOpenChatgpt")}
-            </li>
-            <li>{t("stepPasteUrl")}</li>
-          </ol>
-          <div className="flex items-center gap-2 rounded-[14px] border border-[rgba(255,200,100,0.18)] bg-[rgba(255,170,50,0.08)] px-3 py-2">
-            <code className="flex-1 truncate text-[13px] text-[var(--fg-1)]">
-              {connectorUrl}
-            </code>
-            <button
-              type="button"
-              onClick={copyUrl}
-              aria-label={t("copyUrl")}
-              className="shrink-0 rounded-lg p-1.5 text-[var(--fg-2)]"
-            >
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-            </button>
-          </div>
-          <ol start={3} className="list-decimal pl-5 text-[var(--fg-1)]">
-            <li>{t("stepAllow")}</li>
-          </ol>
+          {directoryUrl ? (
+            <>
+              <ol className="list-decimal pl-5 flex flex-col gap-2 text-[var(--fg-1)]">
+                <li>{t("stepOpenDirectory", { app: label })}</li>
+                <li>{t("stepTapConnect")}</li>
+                <li>{t("stepAllow")}</li>
+              </ol>
+              <p className="text-[13px]">
+                {t("directoryInApp", { app: label })}
+              </p>
+            </>
+          ) : (
+            <>
+              <ol className="list-decimal pl-5 flex flex-col gap-2 text-[var(--fg-1)]">
+                <li>
+                  {t(app === "claude" ? "stepOpenClaude" : "stepOpenChatgpt")}
+                </li>
+                <li>{t("stepPasteUrl")}</li>
+              </ol>
+              <div className="flex items-center gap-2 rounded-[14px] border border-[rgba(255,200,100,0.18)] bg-[rgba(255,170,50,0.08)] px-3 py-2">
+                <code className="flex-1 truncate text-[13px] text-[var(--fg-1)]">
+                  {connectorUrl}
+                </code>
+                <button
+                  type="button"
+                  onClick={copyUrl}
+                  aria-label={t("copyUrl")}
+                  className="shrink-0 rounded-lg p-1.5 text-[var(--fg-2)]"
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+              <ol start={3} className="list-decimal pl-5 text-[var(--fg-1)]">
+                <li>{t("stepAllow")}</li>
+              </ol>
+            </>
+          )}
           <div className="flex flex-col gap-2 pt-1">
             <a
-              href={connectorSettingsUrl}
+              href={directoryUrl ?? connectorSettingsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={`${LINK_BUTTON_CLASS} bg-[var(--action-primary)] text-white`}

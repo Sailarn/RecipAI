@@ -31,8 +31,8 @@ describe("ConnectAiSheet", () => {
     });
   });
 
-  it("shows the connector URL and copies it", async () => {
-    render(<ConnectAiSheet app="claude" onClose={vi.fn()} />);
+  it("shows the connector URL and copies it for a custom connector", async () => {
+    render(<ConnectAiSheet app="chatgpt" onClose={vi.fn()} />);
 
     expect(
       screen.getByText("https://recip-ai-wine.vercel.app/api/mcp"),
@@ -45,7 +45,7 @@ describe("ConnectAiSheet", () => {
     );
   });
 
-  it("links to the app's connector settings and, optionally, a chat", () => {
+  it("sends Claude users to the directory listing instead of a URL to paste", () => {
     render(
       <ConnectAiSheet
         app="claude"
@@ -56,8 +56,14 @@ describe("ConnectAiSheet", () => {
 
     expect(screen.getByRole("link", { name: "openSettings" })).toHaveAttribute(
       "href",
-      "https://claude.ai/customize/connectors?modal=add-custom-connector",
+      "https://claude.ai/directory/connectors/recipai",
     );
+    expect(screen.getByText("stepOpenDirectory")).toBeInTheDocument();
+    expect(screen.getByText("stepTapConnect")).toBeInTheDocument();
+    expect(screen.queryByText("stepPasteUrl")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "copyUrl" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "askNow" })).toHaveAttribute(
       "href",
       "https://claude.ai/new?q=x",
@@ -67,6 +73,10 @@ describe("ConnectAiSheet", () => {
   it("uses the ChatGPT steps for ChatGPT", () => {
     render(<ConnectAiSheet app="chatgpt" onClose={vi.fn()} />);
     expect(screen.getByText("stepOpenChatgpt")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "openSettings" })).toHaveAttribute(
+      "href",
+      "https://chatgpt.com/",
+    );
     expect(
       screen.queryByRole("link", { name: "askNow" }),
     ).not.toBeInTheDocument();

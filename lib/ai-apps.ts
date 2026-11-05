@@ -15,6 +15,11 @@ export interface AiApp {
    * an in-app browser that knows none of the user's accounts.
    */
   connectorSettingsUrl: string;
+  /**
+   * The app's own directory listing for RecipAI, when it has one: the user
+   * taps Connect there instead of adding a custom connector by URL.
+   */
+  directoryUrl?: string;
 }
 
 export const AI_APPS: Record<AiAppId, AiApp> = {
@@ -28,6 +33,10 @@ export const AI_APPS: Record<AiAppId, AiApp> = {
     // opened a browser.)
     connectorSettingsUrl:
       "https://claude.ai/customize/connectors?modal=add-custom-connector",
+    // Listed in Claude's Connectors Directory. Not a universal link (claude.ai's
+    // apple-app-site-association doesn't cover /directory), so on iPhone it
+    // opens in the browser; the sheet also says how to find it in the app.
+    directoryUrl: "https://claude.ai/directory/connectors/recipai",
   },
   chatgpt: {
     id: "chatgpt",
