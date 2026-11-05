@@ -125,6 +125,20 @@ function exactNameMatch(text: string, names: ExactName[]): string | null {
   return (slugMatch ?? longest[0]).id;
 }
 
+// Fuzzy hits must start with the same letter as the query. Fuse scores a
+// one-letter swap at the start as cheaply as one at the end, so short words
+// matched a different food: "сливки" (cream) hit "оливки" (olives), "nuts" hit
+// "peanut". Inflection and typos change endings, not the first letter.
+function sameInitial(
+  query: string,
+  results: Array<{ item: { id: string; text: string }; score?: number }>,
+) {
+  const initial = query.trim().toLowerCase().charAt(0);
+  return results.filter(
+    (result) => result.item.text.trim().toLowerCase().charAt(0) === initial,
+  );
+}
+
 function fuseHit(vocabIndex: VocabIndex, text: string): string | null {
   const preprocessed = preprocessIngredient(text);
 
@@ -132,22 +146,30 @@ function fuseHit(vocabIndex: VocabIndex, text: string): string | null {
   if (exactMatch) return exactMatch;
 
   // Try the full preprocessed text first
-  const full = vocabIndex.index.search(preprocessed);
+  // A fuzzy hit may not be a longer name than the text: "філе" alone is a
+  // prefix of "філе індички" but says nothing about which meat it is.
+  const wordCount = (value: string) => value.trim().split(/\s+/).length;
+  const full = sameInitial(
+    preprocessed,
+    vocabIndex.index.search(preprocessed),
+  ).filter((result) => wordCount(result.item.text) <= wordCount(preprocessed));
   if (full.length > 0) return pickBestId(full);
 
   // Fall back to individual token search — handles multi-word phrases like
   // "кетчупу Торчин для дітей" → token "кетчупу" → ketchup.
-  // Guard: only accept when the matched alias is ≤ 2 words, so a common word
-  // like "власному" doesn't hit a long alias phrase.
+  // Guard: only accept a single-word name or alias. A word on its own says
+  // nothing about the rest of a longer name: "соус" (sauce) from "соус
+  // наршараб" picked "соус Альфредо", "філе" picked "філе індички", and a
+  // common word like "власному" could hit any phrase containing it.
   const tokens = preprocessed
     .split(/\s+/)
     .map((token) => token.replace(/[.,]/g, ""))
     .filter((token) => token.length > 3);
   for (const token of tokens) {
-    const fuseResults = vocabIndex.index.search(token);
+    const fuseResults = sameInitial(token, vocabIndex.index.search(token));
     if (
       fuseResults.length > 0 &&
-      fuseResults[0].item.text.trim().split(/\s+/).length <= 2
+      fuseResults[0].item.text.trim().split(/\s+/).length === 1
     ) {
       return pickBestId(fuseResults);
     }

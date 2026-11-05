@@ -211,4 +211,35 @@ describe("matchVocabId", () => {
       expect(await matchVocabId("zzz-new-name")).toBe("rename-probe");
     });
   });
+
+  describe("no false matches from a shared first word or a look-alike word", () => {
+    const vocab = [
+      makeEntry("alfredo-sauce", "alfredo sauce", "соус Альфредо", {
+        ua: ["соусу альфредо"],
+      }),
+      makeEntry("turkey-breast", "turkey breast", "філе індички"),
+      makeEntry("chili-oil", "chili oil", "чилі олія"),
+      makeEntry("olives", "olives", "оливки", { ua: ["оливок"] }),
+      makeEntry("peanut", "peanut", "арахіс", { en: ["peanuts"] }),
+      makeEntry("ketchup", "ketchup", "кетчуп", { ua: ["кетчупу"] }),
+      makeEntry("butter", "butter", "вершкове масло", { ua: ["масло"] }),
+    ];
+
+    it.each([
+      ["соус наршараб"],
+      ["філе"],
+      ["чилі пластівці"],
+      ["сливки 20%"],
+      ["nuts"],
+    ])("leaves %s unmatched", async (text) => {
+      mockToArray.mockResolvedValue(vocab);
+      expect(await matchVocabId(text)).toBeNull();
+    });
+
+    it("still matches an inflected single word inside a longer line", async () => {
+      mockToArray.mockResolvedValue(vocab);
+      expect(await matchVocabId("кетчупу Торчин для дітей")).toBe("ketchup");
+      expect(await matchVocabId("оливок")).toBe("olives");
+    });
+  });
 });
