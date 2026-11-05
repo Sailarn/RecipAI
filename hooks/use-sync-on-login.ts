@@ -24,6 +24,11 @@ import {
 import { getSyncStatus, setSyncStatus } from "@/lib/sync/sync-status-store";
 import { captureError } from "@/lib/telemetry";
 
+// While the app is open and visible it re-pulls this often, so changes made
+// elsewhere (an AI chat in another window, the Telegram bot, another device)
+// show up without switching tabs. These runs are quiet: no "updating" message.
+export const BACKGROUND_SYNC_INTERVAL_MS = 60_000;
+
 // Stable id so repeat failures replace the toast rather than stack.
 const SYNC_FAILURE_TOAST_ID = "sync-failure";
 
@@ -156,21 +161,28 @@ export function useSyncOnLogin() {
   // either) gets back the same in-flight promise instead of starting a second,
   // overlapping run — the fire-and-forget branches above would otherwise fire
   // twice (e.g. duplicate ingredients-enrich POSTs).
-  const sync = useCallback(() => {
-    if (inFlightRef.current) return inFlightRef.current;
-    newRecipesRef.current = 0;
-    setSyncStatus({ ...getSyncStatus(), syncing: true });
-    const promise = runSync().finally(() => {
-      inFlightRef.current = null;
-      setSyncStatus({
-        syncing: false,
-        newRecipes: newRecipesRef.current,
-        finishedAt: Date.now(),
+  //
+  // A quiet sync (the background timer) doesn't report itself as running, so
+  // the "updating" message doesn't flash every minute; recipes it brings in
+  // are still announced when it finishes.
+  const sync = useCallback(
+    (options: { quiet?: boolean } = {}) => {
+      if (inFlightRef.current) return inFlightRef.current;
+      newRecipesRef.current = 0;
+      if (!options.quiet) setSyncStatus({ ...getSyncStatus(), syncing: true });
+      const promise = runSync().finally(() => {
+        inFlightRef.current = null;
+        setSyncStatus({
+          syncing: false,
+          newRecipes: newRecipesRef.current,
+          finishedAt: Date.now(),
+        });
       });
-    });
-    inFlightRef.current = promise;
-    return promise;
-  }, [runSync]);
+      inFlightRef.current = promise;
+      return promise;
+    },
+    [runSync],
+  );
 
   // The failure toast's Retry needs `sync`, which is defined in terms of
   // runSync — so runSync reaches it through this ref rather than a cycle.
@@ -184,23 +196,37 @@ export function useSyncOnLogin() {
     sync();
   }, [session, sync]);
 
-  // Re-pull when the app regains focus so recipes parsed elsewhere (e.g. the
-  // Telegram bot) surface without a manual reload. The in-flight guard avoids
-  // overlapping pulls; reconciliation is silent, so a repeat focus is quiet.
+  // Re-pull when the app comes back into view (tab switch, app resume) or its
+  // window regains focus, so recipes changed elsewhere (the Telegram bot, an
+  // AI chat) surface without a manual reload. Focus matters on desktop: with
+  // the AI chat in a window beside the app, the app's tab never becomes
+  // hidden, so clicking back into it is the only signal. While the app stays
+  // visible, a quiet timer re-pulls every minute as well. The in-flight guard
+  // avoids overlapping pulls; reconciliation is silent.
   useEffect(() => {
     if (!session) return;
     let running = false;
-    const onVisibility = async () => {
+    const pull = async (quiet: boolean) => {
       if (document.visibilityState !== "visible" || running) return;
       running = true;
       try {
-        await sync();
+        await sync({ quiet });
       } finally {
         running = false;
       }
     };
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => document.removeEventListener("visibilitychange", onVisibility);
+    const onVisible = () => void pull(false);
+    const timer = setInterval(
+      () => void pull(true),
+      BACKGROUND_SYNC_INTERVAL_MS,
+    );
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
   }, [session, sync]);
 
   const triggerSync = useCallback(async () => {

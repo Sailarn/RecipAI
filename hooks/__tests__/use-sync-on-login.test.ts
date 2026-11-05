@@ -70,7 +70,10 @@ import { db } from "@/lib/db/db";
 import { normalizePulledRecipes } from "@/lib/sync/startup-migrations";
 import { getSyncStatus, resetSyncStatus } from "@/lib/sync/sync-status-store";
 import { captureError } from "@/lib/telemetry";
-import { useSyncOnLogin } from "../use-sync-on-login";
+import {
+  BACKGROUND_SYNC_INTERVAL_MS,
+  useSyncOnLogin,
+} from "../use-sync-on-login";
 
 const mockFetch = vi.fn();
 
@@ -391,6 +394,46 @@ describe("useSyncOnLogin", () => {
       document.dispatchEvent(new Event("visibilitychange"));
 
       await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+    });
+
+    it("re-pulls when the window regains focus (app beside another window)", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch();
+      renderHook(() => useSyncOnLogin());
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
+
+      window.dispatchEvent(new Event("focus"));
+
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+    });
+
+    it("re-pulls quietly every minute while visible, and not while hidden", async () => {
+      vi.mocked(authClient.useSession).mockReturnValue({
+        data: mockSession,
+      } as never);
+      setupFetch();
+      const setInterval = vi.spyOn(window, "setInterval");
+      renderHook(() => useSyncOnLogin());
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(4));
+
+      const call = setInterval.mock.calls.find(
+        ([, ms]) => ms === BACKGROUND_SYNC_INTERVAL_MS,
+      );
+      expect(call).toBeDefined();
+      const tick = call?.[0] as () => void;
+
+      tick();
+      // Quiet: a sync marks itself running synchronously, so if the timer's
+      // pull reported itself, it would show here already.
+      expect(getSyncStatus().syncing).toBe(false);
+      await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(8));
+
+      vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+      tick();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(mockFetch).toHaveBeenCalledTimes(8);
     });
   });
 
